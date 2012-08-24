@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: Model_1.java,v 1.56 2012/01/05 23:20:21 hburger Exp $
  * Description: MOF repository accessor
- * Revision:    $Revision: 1.56 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2012/01/05 23:20:21 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -235,12 +232,7 @@ public class Model_1 implements Model_1_0 {
             Layer_1 interceptionPlugin = Classes.<Layer_1>getApplicationClass(
                 org.openmdx.application.dataprovider.layer.interception.Standard_1.class.getName()
             ).newInstance();
-            Configuration interceptionConfiguration = new Configuration(configuration);
-            interceptionConfiguration.values("propagateSet").put(
-                0,
-                Boolean.TRUE
-            );
-            interceptionPlugin.activate((short)4, interceptionConfiguration, typePlugin);
+            interceptionPlugin.activate((short)4, configuration, typePlugin);
             return new Model_1Provider(interceptionPlugin);
         }
         catch(ServiceException e) {

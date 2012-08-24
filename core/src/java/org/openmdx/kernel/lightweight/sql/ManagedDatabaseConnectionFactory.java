@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: ManagedDatabaseConnectionFactory.java,v 1.3 2011/03/30 07:13:06 hburger Exp $
  * Description: Managed Database Connection Factory
- * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/03/30 07:13:06 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

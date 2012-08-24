@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: DateTimeMarshaller.java,v 1.3 2010/01/03 15:01:06 wfro Exp $
  * Description: Date/Time Marshaller 
- * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/01/03 15:01:06 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

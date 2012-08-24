@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Security, http://www.openmdx.org/
- * Name:        $Id: RadiusException.java,v 1.13 2010/03/11 18:50:58 hburger Exp $
  * Description: Radius Exception 
- * Revision:    $Revision: 1.13 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/03/11 18:50:58 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

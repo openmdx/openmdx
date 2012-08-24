@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: ImmutableDatatype.java,v 1.1 2009/12/31 14:10:17 wfro Exp $
  * Description: Immutable Datatype 
- * Revision:    $Revision: 1.1 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/12/31 14:10:17 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

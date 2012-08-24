@@ -4,6 +4,56 @@
                     =====================================
 
 ==============================================================================
+Version 2.10.0                                                      2012-08-24
+==============================================================================
+
+1.    NEW FEATURES
+      
+      CR10010707
+      JSP tag library. Portal offers the following tags:
+      * portal:showobject
+      * portal:query
+      The tags can be used in wizards and make it easy to render objects and grids. 
+      Example:      
+      
+        <%@ taglib uri="http://www.openmdx.org/tags/openmdx-portal" prefix="portal" %>
+         ...
+         <div id="content-wrap">
+      	   <div id="content" style="padding:10px 0.5em 0px 0.5em;">
+	         <portal:showobject id="AAA" object="<%= userHome %>" showAttributes="true" grids="alert,assignedActivity" navigationTarget="_none">
+	           <portal:query name="assignedActivity" query="<%= activityQuery %>" />
+	         </portal:showobject>
+	         <portal:showobject id="BBB" object="<%= userHome.getContact() %>" showAttributes="true" grids="address" navigationTarget="_none" />
+           </div> <!-- content -->
+        </div>      
+                                    
+2.    CHANGES  
+     
+2.0.  CHANGED FEATURES
+      
+      CR10010930
+      Unify Texts and Codes. The class Texts now delegates to Codes, i.e. texts
+      are now stored as codes in the CodeValueContainer with name 'TextsBundle'.
+      In case Codes are not defined, Texts falls back to resource bundles. 
+
+      CR10010942
+      Refactoring data bindings. Replace DataBinding_1_0 and DataBinding_2_0 
+      interfaces by DataBinding interface.
+            
+      CR20020010
+      Improve grid search for code columns. Use short and long texts for filter 
+      value to code mapping.
+            
+2.1.  FIXED BUGS
+      none      
+      
+2.2.  DEPRECATED FEATURES
+      none
+            
+2.3   REMOVED FEATURES
+      none
+
+==============================================================================
 Version 2.9.0                                                       2012-01-08
 ==============================================================================
 

@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: MapTarget.java,v 1.7 2009/12/17 14:40:29 wfro Exp $
  * Description: Map Target
- * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/12/17 14:40:29 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: FeatureMapper.java,v 1.22 2012/01/03 17:07:20 hburger Exp $
  * Description: FeatureMapper
- * Revision:    $Revision: 1.22 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2012/01/03 17:07:20 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -76,16 +73,18 @@ import org.openmdx.kernel.exception.BasicException;
  */
 public class FeatureMapper implements Serializable {
 
-    //------------------------------------------------------------------------
-    enum MethodSignature {
+    static enum MethodSignature {
         DEFAULT, RETURN_IS_VOID, PREDICATE
     }
 
-    //------------------------------------------------------------------------
-    enum Type {
+    static enum Type {
         TEMRINAL, NON_TERMINAL, QUERY
     }
 
+    static enum Kind {
+        METHOD, QUERY_OPERATION, NON_QUERY_OPERATION
+    }
+    
     /**
      * Constructor 
      *
@@ -469,11 +468,10 @@ public class FeatureMapper implements Serializable {
         }
         return feature;
     }
-
+    
     //-----------------------------------------------------------------------        
-    Multiplicity getMultiplicity(
-        Object feature
-    ) throws ServiceException {
+    private ModelElement_1_0 getFeatureDef(Object feature)
+        throws ServiceException {
         ModelElement_1_0 featureDef = feature instanceof String ? this.classDef.getModel().getFeatureDef(
             this.classDef,
             getSimpleName((String)feature),
@@ -488,7 +486,25 @@ public class FeatureMapper implements Serializable {
                 new BasicException.Parameter("class.name", this.classDef)
             );                
         }
+        return featureDef;
+    }
+    
+    //-----------------------------------------------------------------------        
+    Multiplicity getMultiplicity(
+        Object feature
+    ) throws ServiceException {
+        ModelElement_1_0 featureDef = getFeatureDef(feature);
         return ModelHelper.getMultiplicity(featureDef);
+    }
+
+    //-----------------------------------------------------------------------        
+    Kind getKind(
+        Object feature
+    ) throws ServiceException {
+        Boolean query = (Boolean) getFeatureDef(feature).objGetValue("isQuery");
+        return 
+            query == null ? Kind.METHOD : 
+            query.booleanValue() ? Kind.QUERY_OPERATION : Kind.NON_QUERY_OPERATION;
     }
     
     //------------------------------------------------------------------------

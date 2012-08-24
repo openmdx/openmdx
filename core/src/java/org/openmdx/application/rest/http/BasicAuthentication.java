@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: BasicAuthentication.java,v 1.1 2010/10/28 15:24:05 hburger Exp $
  * Description: Basic Authentication 
- * Revision:    $Revision: 1.1 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/10/28 15:24:05 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

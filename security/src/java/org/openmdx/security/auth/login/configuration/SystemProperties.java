@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: SystemProperties.java,v 1.1 2009/09/07 14:59:11 hburger Exp $
  * Description: System Properties 
- * Revision:    $Revision: 1.1 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/09/07 14:59:11 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

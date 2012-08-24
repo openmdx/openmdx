@@ -1,16 +1,13 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: InvolvedMembers.java,v 1.4 2010/07/08 16:58:59 hburger Exp $
  * Description: Involved Members
- * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/07/08 16:58:59 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2008-2010, OMEX AG, Switzerland
+ * Copyright (c) 2008-2012, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -54,6 +51,7 @@ import java.util.Iterator;
 
 import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;
+import org.openmdx.kernel.exception.BasicException.Parameter;
 
 /**
  * To access the delegates
@@ -96,6 +94,14 @@ abstract class InvolvedMembers<O,M> implements Involved<M> {
      */
     private final Iterable<M> accessorForUpdates;
     
+    /* (non-Javadoc)
+     * @see org.openmdx.state2.aop1.Involved#getIdParameter()
+     */
+//  @Override
+    public Parameter getIdParameter() {
+        return this.involvedStates.getIdParameter();
+    }
+
     /* (non-Javadoc)
      * @see org.openmdx.state2.aop1.Involved#getQueryAccess()
      */

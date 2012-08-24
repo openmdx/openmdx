@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: ViewKind.java,v 1.1 2008/09/23 16:01:47 hburger Exp $
  * Description: ViewKind 
- * Revision:    $Revision: 1.1 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/09/23 16:01:47 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

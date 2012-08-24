@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Order.java,v 1.7 2010/12/01 09:36:04 hburger Exp $
  * Description: ValidTimes 
- * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/12/01 09:36:04 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

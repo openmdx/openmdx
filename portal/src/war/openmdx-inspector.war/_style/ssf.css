@@ -25,9 +25,10 @@
   list-style: none;
   margin:0;
   padding:4px 0 0 1px;
+  white-space:nowrap;
 }
 #navigation li {
-  float: left;
+  display:inline-block;
   padding:0;
   list-style: none;
   background-color: white; /* to cater for users without images */
@@ -79,6 +80,10 @@
   border-bottom:1px solid black;
   border-left:1px solid black;
 }
+#navigation li ul li {
+	display:block;
+	float:left;
+}
 #navigation li ul a, #navigation li ul a:link {
   background-image: none;
   background-color: white;
@@ -127,7 +132,7 @@ select.hide { visibility: hidden; }
 }
 
 #nav li { /* all list items */
-  float: left;
+  display:inline-block;
 	width: auto; /* width needed or else Opera goes nuts */
 	margin-left: 1px;
 	/*
@@ -196,6 +201,7 @@ select.hide { visibility: hidden; }
 }
 
 #nav li ul li { /* second-level entries */
+	display:block;
   float: none;
 	padding: 3px 8px 3px 2px;
 	background-color: #FFFFFF;

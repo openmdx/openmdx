@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: JavaBeans.java,v 1.18 2010/12/23 17:37:08 hburger Exp $
  * Description: Java Beans 
- * Revision:    $Revision: 1.18 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/12/23 17:37:08 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -436,16 +433,33 @@ public class JavaBeans {
     public static Object fromXML(
         CharSequence xmlEncodedJavaBean
     ){
-        if(xmlEncodedJavaBean == null) return null;
-        XMLDecoder decoder = new XMLDecoder(
-        	new StringInputStream(
-        		xmlEncodedJavaBean.toString(),
-        		"UTF-8"
-        	)
-        );
-        decoder.setExceptionListener(
+        return fromXML(
+            xmlEncodedJavaBean,            
             new JavaBeanExceptionListener(xmlEncodedJavaBean)
         );
+    }
+
+    /**
+     * Decode a graph of java beans
+     * 
+     * @param xmlEncodedJavaBean an XML document 
+     * @param exceptionListener handler is called when the stream catches recoverable exceptions
+     * 
+     * @return a graph of java beans; or <code>null</code> if
+     * the <code>xmlEncodedJavaBean</code> was <code>null</code>
+     */
+    public static Object fromXML(
+        CharSequence xmlEncodedJavaBean,
+        ExceptionListener exceptionListener
+    ){
+        if(xmlEncodedJavaBean == null) return null;
+        XMLDecoder decoder = new XMLDecoder(
+            new StringInputStream(
+                xmlEncodedJavaBean.toString(),
+                "UTF-8"
+            )
+        );
+        decoder.setExceptionListener(exceptionListener);
         return decoder.readObject();
     }
 

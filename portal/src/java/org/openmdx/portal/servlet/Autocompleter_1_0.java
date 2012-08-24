@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: Autocompleter_1_0.java,v 1.15 2009/09/25 12:02:38 wfro Exp $
  * Description: Autocompleter_1_0
- * Revision:    $Revision: 1.15 $
  * Owner:       CRIXP AG, Switzerland, http://www.crixp.com
- * Date:        $Date: 2009/09/25 12:02:38 $
  * ====================================================================
  *
  * This software is published under the BSD license

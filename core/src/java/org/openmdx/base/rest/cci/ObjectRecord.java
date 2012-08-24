@@ -1,16 +1,13 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: ObjectRecord.java,v 1.1 2010/03/19 12:32:54 hburger Exp $
  * Description: Object Record
- * Revision:    $Revision: 1.1 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/03/19 12:32:54 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2009-2010, OMEX AG, Switzerland
+ * Copyright (c) 2009-2012, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -99,10 +96,24 @@ public interface ObjectRecord extends MappedRecord {
     Object getVersion();
     
     /**
-     * Set the object's version
+     * Set the object's lock
      * 
-     * @param version the object's version
+     * @param lock the object's version
      */
-    void setVersion(Object version);
+    void setVersion(Object lock);
     
+    /**
+     * Retrieve the object's lock
+     * 
+     * @return the object's lock
+     */
+    Object getLock();
+    
+    /**
+     * Set the object's lock
+     * 
+     * @param lock the object's lock
+     */
+    void setLock(Object lock);
+
 }

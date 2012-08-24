@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: BeanFactory.java,v 1.3 2010/04/16 09:57:22 hburger Exp $
  * Description: Bean Factory 
- * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/04/16 09:57:22 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app 
+	id="restWebApp"
+	xmlns="http://java.sun.com/xml/ns/javaee"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
+	version="3.0"	
+> 
+   <display-name>Test-App1-REST</display-name>
+   <description>Test openMDX HTTP REST Access for App1</description>
+   <servlet id="restServlet">
+		<servlet-name>restServlet</servlet-name>      
+		<description>REST Servlet</description>      
+		<servlet-class>org.openmdx.application.rest.http.RestServlet_2</servlet-class>
+		<init-param>
+			<param-name>entity-manager-factory-name</param-name>
+			<param-value>jdo:test-Main-EntityManagerFactory</param-value>
+		</init-param>      
+   	</servlet>
+	<servlet-mapping id="restServletMapping">
+		<servlet-name>restServlet</servlet-name>
+		<url-pattern>/</url-pattern>
+	</servlet-mapping>
+	<resource-ref>      
+	    <description>openMDX Test Datasource</description>
+	    <res-ref-name>jdbc/DataSource</res-ref-name>
+	    <res-type>javax.sql.DataSource</res-type>
+	    <res-auth>Container</res-auth>
+	    <res-sharing-scope>Shareable</res-sharing-scope>
+	    <mapped-name>jdbc/openmdxTest </mapped-name>      
+	</resource-ref>
+	<security-constraint>
+		<display-name>Authenticated</display-name>
+		<web-resource-collection>
+			<web-resource-name>restCollection</web-resource-name>
+			<url-pattern>/</url-pattern>
+			<url-pattern>/*</url-pattern>
+		</web-resource-collection>
+		<auth-constraint>
+			<description>restConstraint</description>
+			<role-name>APP1</role-name>
+		</auth-constraint>
+	</security-constraint>
+</web-app>

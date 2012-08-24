@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: ViewsCache.java,v 1.15 2010/04/17 17:07:30 wfro Exp $
  * Description: ViewsCache 
- * Revision:    $Revision: 1.15 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/04/17 17:07:30 $
  * ====================================================================
  *
  * This software is published under the BSD license

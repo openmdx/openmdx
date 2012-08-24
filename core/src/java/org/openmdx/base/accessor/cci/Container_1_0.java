@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Container_1_0.java,v 1.13 2010/12/18 18:37:38 hburger Exp $
  * Description: Container_1_0 
- * Revision:    $Revision: 1.13 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/12/18 18:37:38 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

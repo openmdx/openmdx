@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: InteractionSpecs.java,v 1.11 2010/12/13 15:48:23 hburger Exp $
  * Description: InteractionSpecs 
- * Revision:    $Revision: 1.11 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/12/13 15:48:23 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

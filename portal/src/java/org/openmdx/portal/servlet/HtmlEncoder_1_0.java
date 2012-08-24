@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: HtmlEncoder_1_0.java,v 1.6 2008/08/12 16:38:05 wfro Exp $
  * Description: HttpEncoder_1_0 interface 
- * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/08/12 16:38:05 $
  * ====================================================================
  *
  * This software is published under the BSD license

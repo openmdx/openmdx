@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: DelegatingIndexedRecord.java,v 1.9 2011/04/12 15:44:02 hburger Exp $
  * Description: Delegating Indexed Record
- * Revision:    $Revision: 1.9 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/04/12 15:44:02 $
  * ====================================================================
  *
  * This software is published under the BSD license

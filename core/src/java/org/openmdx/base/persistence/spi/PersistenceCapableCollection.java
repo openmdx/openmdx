@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: PersistenceCapableCollection.java,v 1.4 2011/04/12 15:44:01 hburger Exp $
  * Description: Persistence Capable Collection
- * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/04/12 15:44:01 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

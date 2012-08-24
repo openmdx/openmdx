@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX http://www.openmdx.org/
- * Name:        $Id: RequestedList.java,v 1.10 2010/10/21 17:16:54 wfro Exp $
  * Description: RequestedList class
- * Revision:    $Revision: 1.10 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/10/21 17:16:54 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

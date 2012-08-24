@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: CompositeObjectDataBinding.java,v 1.20 2010/04/16 13:16:16 hburger Exp $
  * Description: CompositeObjectDataBinding 
- * Revision:    $Revision: 1.20 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/04/16 13:16:16 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -80,23 +77,26 @@ import org.openmdx.base.text.conversion.UUIDConversion;
 import org.openmdx.kernel.id.UUIDs;
 import org.openmdx.kernel.loading.Classes;
 import org.openmdx.kernel.log.SysLog;
-import org.openmdx.portal.servlet.DataBinding_1_0;
+import org.openmdx.portal.servlet.ApplicationContext;
+import org.openmdx.portal.servlet.DataBinding;
 import org.w3c.spi2.Datatypes;
 
 /**
  * Allows to set/get features of composite objects.
- * 
  */
-public class CompositeObjectDataBinding implements DataBinding_1_0 {
+public class CompositeObjectDataBinding extends DataBinding {
 
-    //-----------------------------------------------------------------------    
     enum ParameterMode {
         ALL,
         OPTIONAL_ONLY,
         OMIT_OPTIONAL
     }
     
-    //-----------------------------------------------------------------------    
+    /**
+     * Constructor 
+     *
+     * @param parameterString
+     */
     public CompositeObjectDataBinding(
         String parameterString
     ) {
@@ -109,32 +109,11 @@ public class CompositeObjectDataBinding implements DataBinding_1_0 {
             Boolean.FALSE;
     }
     
-    //-----------------------------------------------------------------------    
-    protected String getAttributeName(
-       String qualifiedFeatureName
-    ) {
-        return qualifiedFeatureName.substring(
-            qualifiedFeatureName.lastIndexOf("!") + 1
-        );        
-    }
-    
-    //-----------------------------------------------------------------------
-    protected String[] getReferenceNames(
-       String qualifiedFeatureName
-    ) {        
-        String qualifiedReferenceName = qualifiedFeatureName.substring(
-            0, 
-            qualifiedFeatureName.indexOf("!")
-        );
-        String referenceNames = qualifiedReferenceName.indexOf("*") > 0 ?
-            qualifiedReferenceName.substring(qualifiedReferenceName.lastIndexOf(":") + 1, qualifiedReferenceName.indexOf("*")) :
-            qualifiedReferenceName.substring(qualifiedReferenceName.lastIndexOf(":") + 1);
-        return referenceNames.startsWith("(") && referenceNames.endsWith(")") ?
-            referenceNames.substring(1, referenceNames.length()-1).split(";") :
-            referenceNames.split(";");
-    }
-    
-    //-----------------------------------------------------------------------
+    /**
+     * Get query parameters.
+     * @param parameterMode
+     * @return
+     */
     protected Map<String,String> getQueryParameters(
         ParameterMode parameterMode
     ) {
@@ -165,13 +144,20 @@ public class CompositeObjectDataBinding implements DataBinding_1_0 {
         return queryParameters;
     }
 
-    //-----------------------------------------------------------------------
+    /**
+     * Get UUID.
+     * @return
+     */
     protected String uuidAsString(
     ) {
         return UUIDConversion.toUID(UUIDs.newUUID());
     }
     
-    //-----------------------------------------------------------------------
+    /**
+     * Map string value to typed value.
+     * @param value
+     * @return
+     */
     protected Object getParameterValue(
         String value
     ) {
@@ -211,7 +197,13 @@ public class CompositeObjectDataBinding implements DataBinding_1_0 {
         return Datatypes.create(valueClass, value);
     }
     
-    //-----------------------------------------------------------------------
+    /**
+     * Map parameter mode to query.
+     * @param refPackage
+     * @param parameterMode
+     * @param pm
+     * @return
+     */
     protected Query newQuery(
         RefPackage refPackage,
         ParameterMode parameterMode,
@@ -274,23 +266,13 @@ public class CompositeObjectDataBinding implements DataBinding_1_0 {
         return query;
     }
         
-    //-----------------------------------------------------------------------
     /**
-     * Return object referenced by referenceNames.
+     * Find composite.
+     * @param object
+     * @param qualifiedFeatureName
+     * @param parameterMode
+     * @return
      */
-    public RefObject getReferencedObject(
-        RefObject object,
-        String[] referenceNames
-    ) {
-        RefObject referencedObject = object;
-        for(int i = 0; i < referenceNames.length-1; i++) {
-            referencedObject = (RefObject)referencedObject.refGetValue(referenceNames[i]);
-            if(referencedObject == null) break;
-        }
-        return referencedObject;
-    }
-    
-    //-----------------------------------------------------------------------
     protected RefObject findComposite(
         RefObject object,
         String qualifiedFeatureName,
@@ -334,7 +316,11 @@ public class CompositeObjectDataBinding implements DataBinding_1_0 {
         return null;
     }
 
-    //-----------------------------------------------------------------------
+    /**
+     * Init object.
+     * @param object
+     * @param parameterMode
+     */
     protected void initObject(
         RefObject object,
         ParameterMode parameterMode
@@ -350,7 +336,8 @@ public class CompositeObjectDataBinding implements DataBinding_1_0 {
                 try {
                     Object value = object.refGetValue(parameter.getKey());
                     if(value instanceof Collection) {
-                        Collection values = (Collection)value;
+                        @SuppressWarnings("unchecked")
+                        Collection<Object> values = (Collection)value;
                         values.add(
                             this.getParameterValue(parameter.getValue())
                         );
@@ -369,7 +356,12 @@ public class CompositeObjectDataBinding implements DataBinding_1_0 {
         }        
     }
     
-    //-----------------------------------------------------------------------
+    /**
+     * Create composite object. 
+     * @param object
+     * @param qualifiedReferenceName
+     * @return
+     */
     protected RefObject createComposite(
         RefObject object,
         String qualifiedReferenceName
@@ -400,10 +392,14 @@ public class CompositeObjectDataBinding implements DataBinding_1_0 {
         return composite;
     }
     
-    //-----------------------------------------------------------------------
+    /* (non-Javadoc)
+     * @see org.openmdx.portal.servlet.DataBinding#getValue(javax.jmi.reflect.RefObject, java.lang.String, org.openmdx.portal.servlet.ApplicationContext)
+     */
+    @Override
     public Object getValue(
         RefObject object, 
-        String qualifiedFeatureName
+        String qualifiedFeatureName,
+        ApplicationContext app
     ) {
         try {
             RefObject composite = this.findComposite(
@@ -432,10 +428,12 @@ public class CompositeObjectDataBinding implements DataBinding_1_0 {
         }
     }
 
-    //-----------------------------------------------------------------------
     /**
      * Set new value for attribute. Subclasses can override this default
      * behavior, e.g. delete or disable the composite in case newValue is empty.
+     * @param object
+     * @param attributeName
+     * @param newValue
      */
     protected void updateComposite(
         RefObject object,
@@ -448,11 +446,15 @@ public class CompositeObjectDataBinding implements DataBinding_1_0 {
         );        
     }
     
-    //-----------------------------------------------------------------------
+    /* (non-Javadoc)
+     * @see org.openmdx.portal.servlet.DataBinding#setValue(javax.jmi.reflect.RefObject, java.lang.String, java.lang.Object, org.openmdx.portal.servlet.ApplicationContext)
+     */
+    @Override
     public void setValue(
         RefObject object, 
         String qualifiedFeatureName, 
-        Object newValue
+        Object newValue,
+        ApplicationContext app
     ) {
         try {
             RefObject composite = this.findComposite(
@@ -496,10 +498,11 @@ public class CompositeObjectDataBinding implements DataBinding_1_0 {
                 String attributeName = this.getAttributeName(qualifiedFeatureName);      
                 Object oldValue = composite.refGetValue(attributeName);
                 if(oldValue instanceof Collection) {
-                    Collection values = (Collection)oldValue;
+                    @SuppressWarnings("unchecked")
+                    Collection<Object> values = (Collection)oldValue;
                     values.clear();
                     if(newValue instanceof Collection) {
-                        values.addAll((Collection)newValue);
+                        values.addAll((Collection<?>)newValue);
                     }
                     else {
                         values.add(newValue);

@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: XMLOutputFactories.java,v 1.6 2010/05/18 00:32:43 hburger Exp $
  * Description: XML Output Factory Builder
- * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/05/18 00:32:43 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

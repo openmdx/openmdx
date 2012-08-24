@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Security, http://www.openmdx.org/
- * Name:        $Id: ManagedConnectionFactory.java,v 1.11 2010/09/06 15:18:47 hburger Exp $
  * Description: Managed Key Store Connection Factory
- * Revision:    $Revision: 1.11 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/09/06 15:18:47 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

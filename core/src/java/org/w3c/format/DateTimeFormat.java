@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: DateTimeFormat.java,v 1.4 2010/06/02 13:46:51 hburger Exp $
  * Description: infrastructure: date format
- * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/06/02 13:46:51 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

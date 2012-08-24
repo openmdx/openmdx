@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: _newURLContextFactory.java,v 1.1 2010/10/11 06:47:00 hburger Exp $
  * Description: Java Bean URL Context Factory
- * Revision:    $Revision: 1.1 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/10/11 06:47:00 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

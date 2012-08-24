@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Configuration.java,v 1.9 2010/10/11 21:58:24 hburger Exp $
  * Description: Configuration
- * Revision:    $Revision: 1.9 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/10/11 21:58:24 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

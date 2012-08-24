@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: ExtendedRecordFactory.java,v 1.11 2011/11/26 01:35:00 hburger Exp $
  * Description: Java Connector Architecture: Initialized Record Factory
- * Revision:    $Revision: 1.11 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/11/26 01:35:00 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

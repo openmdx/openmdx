@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: XMLEncoder.java,v 1.7 2008/03/21 18:32:18 hburger Exp $
  * Description: XML Encoder 
- * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/03/21 18:32:18 $
  * ====================================================================
  *
  * This software is published under the BSD license

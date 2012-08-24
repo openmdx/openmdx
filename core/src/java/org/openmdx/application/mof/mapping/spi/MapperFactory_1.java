@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: MapperFactory_1.java,v 1.8 2011/05/29 23:35:42 hburger Exp $
  * Description: MapperFactory_1
- * Revision:    $Revision: 1.8 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/05/29 23:35:42 $
  * ====================================================================
  *
  * This software is published under the BSD license

@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: StructuralFeatureDef.java,v 1.5 2011/07/08 13:20:51 wfro Exp $
  * Description: VelocityStructuralFeatureDef class
- * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/07/08 13:20:51 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

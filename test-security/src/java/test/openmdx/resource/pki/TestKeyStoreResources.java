@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: TestKeyStoreResources.java,v 1.11 2010/09/06 04:12:36 hburger Exp $
  * Description: Test Key Store Resources
- * Revision:    $Revision: 1.11 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/09/06 04:12:36 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

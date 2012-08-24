@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: UpdateAvoidance_1.java,v 1.2 2011/11/25 14:12:18 hburger Exp $
  * Description: Refreshing Plug-In
- * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/11/25 14:12:18 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

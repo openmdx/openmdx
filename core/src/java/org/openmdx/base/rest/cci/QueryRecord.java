@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: QueryRecord.java,v 1.3 2011/01/21 10:07:19 hburger Exp $
  * Description: Query Record
- * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/01/21 10:07:19 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -179,4 +176,22 @@ public interface QueryRecord extends MappedRecord {
      */
     void setSize(Long size);
 
+    /**
+     * Tells whether the object shall be refreshed before answering the query.
+     * 
+     * @param refresh <code>true</code> if the object shall be refreshed before 
+     * answering the query
+     */
+    void setRefresh(
+        boolean refresh
+    );
+
+    /**
+     * Tells whether the object shall be refreshed before answering the query.
+     * 
+     * @return <code>true</code> if the object shall be refreshed before 
+     * answering the query
+     */
+    boolean isRefresh();
+    
 }

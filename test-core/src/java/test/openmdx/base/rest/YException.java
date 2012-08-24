@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: YException.java,v 1.1 2009/09/15 16:37:57 hburger Exp $
  * Description: YException 
- * Revision:    $Revision: 1.1 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/09/15 16:37:57 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -55,10 +52,14 @@ import javax.jmi.reflect.RefException;
 
 /**
  * YException
- *
  */
 public class YException
     extends RefException
 {
+
+	/**
+	 * Implements <code>Serializable</code>
+	 */
+	private static final long serialVersionUID = -4466102763715366035L;
 
 }

@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Layer_1.java,v 1.41 2012/01/05 23:20:20 hburger Exp $
  * Description: User Profile Service
- * Revision:    $Revision: 1.41 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2012/01/05 23:20:20 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -51,7 +48,6 @@
 package org.openmdx.application.dataprovider.spi;
 
 import java.util.List;
-import java.util.UUID;
 
 import javax.resource.ResourceException;
 import javax.resource.cci.Connection;
@@ -87,9 +83,7 @@ import org.openmdx.base.rest.spi.AbstractRestInteraction;
 import org.openmdx.base.rest.spi.Facades;
 import org.openmdx.base.rest.spi.Object_2Facade;
 import org.openmdx.base.rest.spi.Query_2Facade;
-import org.openmdx.base.text.conversion.UUIDConversion;
 import org.openmdx.kernel.exception.BasicException;
-import org.openmdx.kernel.id.UUIDs;
 import org.openmdx.kernel.log.SysLog;
 import org.w3c.cci2.SparseArray;
 
@@ -119,19 +113,6 @@ public abstract class Layer_1 implements Dataprovider_1_0, Port {
         return requestId.getParent().getChild(requestId.getBase() + "*-");
     }
     
-    /**
-     * To replace the deprecated UIDFactory.create() calls
-     * 
-     * @return a UID as string
-     */
-    protected final String uidAsString(
-    ){
-        UUID uuid = UUIDs.newUUID();
-        return this.compressUID ?
-            UUIDConversion.toUID(uuid) :
-            uuid.toString();
-    }
-
     /**
      * Get the layer's id
      */
@@ -189,6 +170,20 @@ public abstract class Layer_1 implements Dataprovider_1_0, Port {
     }
 
     /**
+     * Activates a dataprovider layer with its legacy configuration
+     * 
+     * @param   configuration   the dataprovider'a configuration
+     *
+     * @exception   ServiceException in case of an activation failure
+     */
+    protected void applyLegacyConfiguration(
+        Configuration configuration
+    ) throws ServiceException{
+        // Subclasses should override this method and propagate their
+        // configuration values to corresponding java beans setters.
+    }
+    
+    /**
      * Activates a dataprovider layer
      * 
      * @param   id              the dataprovider layer's id
@@ -208,9 +203,6 @@ public abstract class Layer_1 implements Dataprovider_1_0, Port {
         Configuration configuration,
         Layer_1 delegation
     ) throws ServiceException{
-        this.compressUID = configuration.isOn(
-            SharedConfigurationEntries.COMPRESS_UID
-        );        
         this.configuration = configuration;
         this.delegation = delegation;
         this.id = id;
@@ -224,6 +216,9 @@ public abstract class Layer_1 implements Dataprovider_1_0, Port {
             "Activating " + DataproviderLayers.toString(id) + " layer " + getClass().getName(),
             configuration
         );
+        if(configuration.isOn(SharedConfigurationEntries.LEGACY_CONFIGURATION)) {
+            applyLegacyConfiguration(configuration);
+        }
     }
         
     //-----------------------------------------------------------------------
@@ -233,40 +228,6 @@ public abstract class Layer_1 implements Dataprovider_1_0, Port {
         return new LayerInteraction(connection);
     }
 
-    /**
-     * Wrap a MappedRecord into an object facade
-     * 
-     * @param object an object record
-     * @return the facade wrapping the given object record
-     * 
-     * @throws ServiceException
-     * 
-     * @deprecated use {@link Facades#asObject(MappedRecord)}
-     */
-    @Deprecated
-    public static Object_2Facade asObject(
-        MappedRecord object
-    ) throws ServiceException {
-    	return Facades.asObject(object);
-    }
-
-    /**
-     * Wrap a MappedRecord into a query facade
-     * 
-     * @param query a query record
-     * @return the facade wrapping the given query record
-     * 
-     * @throws ServiceException
-     * 
-     * @deprecated use {@link Facades#asQuery(MappedRecord)}
-     */
-    @Deprecated
-    public static Query_2Facade asQuery(
-        MappedRecord query
-    ) throws ServiceException {
-    	return Facades.asQuery(query);
-    }
-    
     //-----------------------------------------------------------------------
     public class LayerInteraction extends AbstractRestInteraction {
         
@@ -365,14 +326,6 @@ public abstract class Layer_1 implements Dataprovider_1_0, Port {
                     BasicException.newEmbeddedExceptionStack(e)
                 )
             );        
-        }
-        
-        protected final String uidAsString(
-        ){
-            UUID uuid = UUIDs.newUUID();
-            return Layer_1.this.compressUID ?
-                UUIDConversion.toUID(uuid) :
-                uuid.toString();
         }
         
         protected final Layer_1 getDelegatingLayer(
@@ -649,11 +602,6 @@ public abstract class Layer_1 implements Dataprovider_1_0, Port {
     //------------------------------------------------------------------------
     // Variables
     //------------------------------------------------------------------------
-
-    /**
-     * Defines whether the UID's should be in compressed or UUID format.
-     */
-    protected boolean compressUID;
 
     /**
      * The layer's id

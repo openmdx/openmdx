@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: PersistenceManager_1_0.java,v 1.9 2011/11/25 14:18:33 hburger Exp $
  * Description: Persistence Manager Interface 2.0
- * Revision:    $Revision: 1.9 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/11/25 14:18:33 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

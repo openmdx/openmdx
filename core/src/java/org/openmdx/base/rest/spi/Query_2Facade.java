@@ -1,16 +1,13 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: Query_2Facade.java,v 1.16 2011/11/26 01:34:57 hburger Exp $
  * Description: Query Facade
- * Revision:    $Revision: 1.16 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/11/26 01:34:57 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2009-2011, OMEX AG, Switzerland
+ * Copyright (c) 2009-2012, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -167,21 +164,6 @@ public class Query_2Facade {
         );
     }
     
-    /**
-     * Create a facade for the given query type
-     * 
-     * @return the object facade
-     * 
-     * @throws ResourceException
-     * 
-     * @deprecated use {@link Query_2Facade#newInstance(Path)}
-     */
-    @Deprecated
-    public static Query_2Facade newInstance(
-    ) throws ResourceException {
-        return new Query_2Facade();
-    }
-
     /**
      * Test whether the given record is an object facade delegate
      * 
@@ -383,6 +365,30 @@ public class Query_2Facade {
      */
     public void setFeatures(Set<String> features) {
         this.delegate.setFeatures(features);
+    }
+
+    /**
+     * Tells whether the object shall be refreshed before answering the query.
+     * 
+     * @param refresh <code>true</code> if the object shall be refreshed before 
+     * answering the query
+     * 
+     * @see org.openmdx.base.rest.cci.QueryRecord#setRefresh(boolean)
+     */
+    public void setRefresh(boolean refresh) {
+        this.delegate.setRefresh(refresh);
+    }
+
+    /**
+     * Tells whether the object shall be refreshed before answering the query.
+     * 
+     * @return <code>true</code> if the object shall be refreshed before 
+     * answering the query
+     * 
+     * @see org.openmdx.base.rest.cci.QueryRecord#isRefresh()
+     */
+    public boolean isRefresh() {
+        return this.delegate.isRefresh();
     }
 
     /* (non-Javadoc)

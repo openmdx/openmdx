@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: HttpHeaderFieldContent.java,v 1.7 2010/06/02 13:44:39 hburger Exp $
  * Description: HTTP Header Field Content 
- * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/06/02 13:44:39 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

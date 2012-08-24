@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: DataproviderReply.java,v 1.11 2010/06/07 08:47:27 hburger Exp $
  * Description: DataproviderReply class
- * Revision:    $Revision: 1.11 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/06/07 08:47:27 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

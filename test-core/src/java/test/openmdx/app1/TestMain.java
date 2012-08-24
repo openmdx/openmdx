@@ -1,15 +1,12 @@
 /*
  * ====================================================================
- * Name:        $Id: TestMain.java,v 1.102 2012/01/05 16:31:46 hburger Exp $
  * Description: Unit test for model app1
- * Revision:    $Revision: 1.102 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2012/01/05 16:31:46 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2011, OMEX AG, Switzerland
+ * Copyright (c) 2004-2012, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -67,9 +64,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.lang.reflect.UndeclaredThrowableException;
 import java.math.BigDecimal;
 import java.net.URI;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -91,6 +90,7 @@ import javax.jdo.JDOFatalDataStoreException;
 import javax.jdo.JDOHelper;
 import javax.jdo.JDOOptimisticVerificationException;
 import javax.jdo.JDOUnsupportedOptionException;
+import javax.jdo.JDOUserException;
 import javax.jdo.PersistenceManager;
 import javax.jdo.PersistenceManagerFactory;
 import javax.jdo.Query;
@@ -107,6 +107,7 @@ import javax.resource.spi.CommException;
 import javax.servlet.ServletException;
 import javax.transaction.Status;
 import javax.transaction.UserTransaction;
+import javax.xml.datatype.Duration;
 import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.junit.After;
@@ -152,7 +153,6 @@ import org.openmdx.base.naming.Path;
 import org.openmdx.base.persistence.cci.ConfigurableProperty;
 import org.openmdx.base.persistence.cci.PersistenceHelper;
 import org.openmdx.base.persistence.cci.UserObjects;
-import org.openmdx.base.persistence.spi.Queries;
 import org.openmdx.base.persistence.spi.SharedObjects;
 import org.openmdx.base.persistence.spi.TransientContainerId;
 import org.openmdx.base.query.Condition;
@@ -174,6 +174,7 @@ import org.openmdx.generic1.jmi1.UriProperty;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.exception.Throwables;
 import org.openmdx.kernel.lightweight.naming.NonManagedInitialContextFactoryBuilder;
+import org.openmdx.kernel.loading.Factory;
 import org.openmdx.kernel.log.SysLog;
 import org.openmdx.kernel.naming.ComponentEnvironment;
 import org.w3c.cci2.BinaryLargeObject;
@@ -193,6 +194,7 @@ import test.openmdx.app1.cci2.InvoiceHasInvoicePosition;
 import test.openmdx.app1.cci2.InvoicePositionQuery;
 import test.openmdx.app1.cci2.InvoiceQuery;
 import test.openmdx.app1.cci2.PersonQuery;
+import test.openmdx.app1.cci2.PostalAddressQuery;
 import test.openmdx.app1.cci2.ProductQuery;
 import test.openmdx.app1.cci2.SegmentHasAddress;
 import test.openmdx.app1.cci2.SegmentHasPerson;
@@ -244,12 +246,15 @@ import test.openmdx.application.rest.http.ServletPort;
     {
         TestMain.LocalConnectionTest.class,
         TestMain.ProxyConnectionTest.class,
+//      TestMain.RemoteConnectionTest.class,
         TestMain.OptimisticContainerManagedTransactionTest.class,
         TestMain.PessimisticContainerManagedTransactionTest.class
     }
 )
 public class TestMain {
 
+    protected static final String ENTITY_MANAGER_FACTORY_NAME = "test-Main-EntityManagerFactory";
+    protected static final String ENTITY_MANAGER_PROXY_FACTORY_NAME = "test-Main-EntityManagerProxyFactory";
     protected static final boolean DUMP = false;
     protected static final String AUDIT_PROVIDER_NAME = "Audit";
     protected static final String DATA_PROVIDER_NAME = "Data";
@@ -334,7 +339,7 @@ public class TestMain {
         protected PersistenceManagerFactory newEntityManagerFactory(){
             PersistenceManagerFactory entityManagerFactory = JDOHelper.getPersistenceManagerFactory(
                 configuration(),
-                "test-Main-EntityManagerFactory"
+                ENTITY_MANAGER_FACTORY_NAME
             );
             entityManagerFactory.getDataStoreCache().pinAll(true, AddressFormat.class);
             return entityManagerFactory;
@@ -404,9 +409,21 @@ public class TestMain {
         static private final int TEST_PERSON_COUNT = N_PERSONS - 1; // TODO one is missing for some reason
         static private final int SIMILAR_NAME_COUNT = 3; 
         private final boolean VALIDATE_PERSISTENCE_MANAGER = !(this instanceof ProxyConnectionTest); // TODO include Proxy Connections
+        private final boolean REMOTE_EXCEPTIONS_ARE_GENERIC = true; // TODO CR20020019
         
         protected long id;
 
+        /**
+         * TODO
+         * 
+         * @return <code>true</code> if remote exception are mapped to GENERIC
+         */
+        protected boolean causeIsGeneric(){
+            return 
+                REMOTE_EXCEPTIONS_ARE_GENERIC && 
+                this instanceof RemoteConnectionTest;
+        }
+        
         /**
          * Switch back and forth to test both variants
          * 
@@ -512,6 +529,14 @@ public class TestMain {
                 super.taskId = null;
             }
         }
+        
+        protected void testCR20020032(
+        ) throws ServiceException, IOException{
+//            File target = File.createTempFile("orm", ".html");
+//            ClassToTableMapping classToTableMapping = new ClassToTableMapping(ENTITY_MANAGER_FACTORY_NAME);
+//            classToTableMapping.exportToHTML(target);
+//            System.out.println("ORM exported to " + target);
+        }
 
         protected void testPackageAcquisition(
         ){
@@ -564,7 +589,7 @@ public class TestMain {
 
         @SuppressWarnings("deprecation")
         protected void testMain(
-        ) throws ServiceException, CanNotFormatNameException, IOException, ParseException, ClassNotFoundException{
+        ) throws Exception {
             this.id = 500000l;
             System.out.println("getting root package...");
             //          Authority app1 = (Authority) persistenceManager.getObjectById(new Path(App1Package.AUTHORITY_XRI));
@@ -617,6 +642,19 @@ public class TestMain {
             MessageTemplateClass messageTemplateClass = app1Package.getMessageTemplate();
             DocumentClass documentClass = app1Package.getDocument();
             PersonGroupClass personGroupClass = app1Package.getPersonGroup();
+
+            //
+            // CR20018821
+            //
+            try {
+                super.taskId = "CR20018821";
+                @SuppressWarnings("unused")
+                RefContainer<?> segments = (RefContainer<?>) persistenceManager.getObjectById(
+                    provider.refGetPath().getChild("segment")
+                );
+            } finally {
+                super.taskId = null;
+            }
 
             // segment
             Provider provider = app1.getProvider(false, DATA_PROVIDER_NAME);
@@ -688,6 +726,7 @@ public class TestMain {
                 invoice = invoiceClass.createInvoice();        
                 invoice.setDescription("this is an invoice for PG0");
                 invoice.setProductGroupId("PG0");
+                invoice.setPaymentPeriod(Datatypes.create(Duration.class, "P30D")); // CR20020068
                 assertNull("CR0003551", JDOHelper.getObjectId(invoice));
                 @SuppressWarnings("unchecked")
 				RefContainer<Invoice> refInvoices = (RefContainer<Invoice>) segment.<Invoice>getInvoice();
@@ -735,6 +774,23 @@ public class TestMain {
             } finally {
                 super.taskId = null;
             }            
+            //
+            // CR20019592
+            //
+            try {
+                super.taskId = "CR20019592";
+                ProductQuery productQuery = (ProductQuery) entityManager.newQuery(Product.class);
+                productQuery.createdAt().lessThanOrEqualTo(null);
+                fail("Null values are not allowed in queries");
+            } catch (JmiServiceException expected) {
+            	assertEquals(
+            		"Null values are not allowed in queries",
+            		BasicException.Code.BAD_PARAMETER,
+            		expected.getExceptionCode()
+            	);
+            } finally {
+                super.taskId = null;
+            }
             //
             // CR20019959
             //
@@ -829,7 +885,7 @@ public class TestMain {
             } catch (JDOFatalDataStoreException exception) {
                 assertEquals(
                     "Missing mandatory feature ProductGroupId", 
-                    BasicException.Code.VALIDATION_FAILURE, 
+                    causeIsGeneric() ? BasicException.Code.GENERIC : BasicException.Code.VALIDATION_FAILURE, 
                     Throwables.getCause(exception, null).getExceptionCode()
                 );
             } finally {
@@ -1113,13 +1169,72 @@ public class TestMain {
                 super.taskId = null;
             }
             //
+            // CR20020022 
+            // 
+            try {
+                this.taskId = "CR20020022";
+                RefQuery_1_0 query = (RefQuery_1_0) persistenceManager.newQuery(CycleMember1.class);
+                org.openmdx.base.persistence.spi.Queries.applyStatements(
+            		query, 
+                    "thereExistsM2(){" +
+                    		"thereExistsDescription().elementOf(\"Cycle Member \\\"CR20020022\\\"\",\"n/a\");" +
+                    		"m1().isNull()" +
+                    "}"
+                );
+                validateCycleQuery(query);
+                this.taskId = "CR10010637";
+                ByteArrayOutputStream byteOutputStream = new ByteArrayOutputStream();
+                ObjectOutputStream objectOutputStream = new ObjectOutputStream(byteOutputStream);
+                objectOutputStream.writeObject(query);
+                objectOutputStream.flush();
+                ByteArrayInputStream byteInputStream = new ByteArrayInputStream(byteOutputStream.toByteArray());
+                ObjectInputStream objectInputStream = new ObjectInputStream(byteInputStream);
+                RefQuery_1_0 deserializedQuery = (RefQuery_1_0) objectInputStream.readObject();
+                validateCycleQuery(deserializedQuery);
+                this.taskId = "CR?";
+                RefQuery_1_0 clonedQuery = PersistenceHelper.clone(query);
+                validateCycleQuery(clonedQuery);
+            } finally {
+                super.taskId = null;
+            }
+            //
+            // CR20020024 
+            // 
+            try {
+                this.taskId = "CR20020024";
+                String cycle1ContainerId = segment.refMofId() + "/cycleMember1";
+                String cycle2Id = segment.refMofId() + "/cycleMember2/CR20020022";
+                RefQuery_1_0 query = (RefQuery_1_0) persistenceManager.newQuery(
+            		org.openmdx.base.persistence.cci.Queries.QUERY_LANGUAGE,
+                	new URI(
+                		cycle1ContainerId + '?' +
+	                	"queryType=" + URLEncoder.encode("test:openmdx:app1:CycleMember1","UTF-8") + '&' +
+	                	"query=" + URLEncoder.encode("thereExistsM2().equalTo(\"" + cycle2Id + "\")", "UTF-8")
+	                ) // a simple String would work as well...
+                );
+                List<Condition> conditions = query.refGetFilter().getCondition();
+                assertEquals("Conditions", 2, conditions.size());
+                assertEquals("Condition 0", SystemAttributes.OBJECT_INSTANCE_OF, conditions.get(0).getFeature());
+                assertEquals("Condition 0", Quantifier.THERE_EXISTS, conditions.get(0).getQuantifier());
+                assertEquals("Condition 0", ConditionType.IS_IN, conditions.get(0).getType());
+                assertEquals("Condition 0", 1, conditions.get(0).getValue().length);
+                assertEquals("Condition 0", "test:openmdx:app1:CycleMember1", conditions.get(0).getValue(0));
+                assertEquals("Condition 1", "m2", conditions.get(1).getFeature());
+                assertEquals("Condition 1", Quantifier.THERE_EXISTS, conditions.get(1).getQuantifier());
+                assertEquals("Condition 1", ConditionType.IS_IN, conditions.get(1).getType());
+                assertEquals("Condition 1", 1, conditions.get(1).getValue().length);
+                assertEquals("Condition 1", new Path(cycle2Id), conditions.get(1).getValue(0));
+            } finally {
+                super.taskId = null;
+            }
+            //
             // CR20019668 
             // 
             try {
                 this.taskId = "CR20019668";
-                RefQuery_1_0 query = (RefQuery_1_0) Queries.prepareQuery(
-                    persistenceManager.newQuery(Invoice.class), 
-                    segment.getInvoice(), 
+                RefQuery_1_0 query = (RefQuery_1_0) persistenceManager.newQuery(Invoice.class);
+                org.openmdx.base.persistence.spi.Queries.applyStatements(
+            		query, 
                     "forAllDescription().unlike(\"./.\");thereExistsInvoicePosition().productId().like(\"P.*\");forAllProperty().name().equalTo(\"FLAG\")"
                 );
                 List<Condition> conditions = query.refGetFilter().getCondition();
@@ -1613,11 +1728,34 @@ public class TestMain {
                 default: 
                     emailAddressSendMessageTemplateParams = null;
             }
-            
+            //
+            // CR20020011 PersistenceHelper.clone()
+            //
+            try {
+            	super.taskId = "CR20020011";
+                MessageTemplate clone = PersistenceHelper.clone(messageTemplate);
+                segment.addMessageTemplate(
+                    false,
+                    "CR20020011",
+                    clone
+                );
+            } finally {
+            	super.taskId = null;
+            }
             EmailAddressSendMessageTemplateResult sendResult = emailAddress.sendMessageTemplate(
                 emailAddressSendMessageTemplateParams
             );
             assertNotNull("Send result", sendResult);
+            {
+	            PersistenceManager targetManager = JDOHelper.getPersistenceManager(emailAddress);
+	            assertSame("Operation Target Manager", this.entityManager, targetManager);
+	            targetManager.flush();
+	            MessageTemplate deliveredBody = sendResult.getDeliveredBody();
+	            assertNotNull("messageTemplate", messageTemplate);
+	            PersistenceManager resultManager = JDOHelper.getPersistenceManager(deliveredBody);
+	            assertSame("Operation Result Manager", targetManager, resultManager);
+	            assertEquals("Body", "hello world", deliveredBody.getText());
+            }
             this.commit();
 
             // create a person without qualifier
@@ -1704,7 +1842,7 @@ public class TestMain {
                 super.taskId = "CR20019721";
                 this.begin();
                 person = personClass.createPerson();
-                person.setForeignId("FX");
+                person.setForeignId("YF");
                 XMLGregorianCalendar birthDate = DatatypeFactories.xmlDatatypeFactory().newXMLGregorianCalendar("1960-01-01");
                 birthDate.setTimezone(-1);
                 person.setBirthdate(birthDate);
@@ -1728,10 +1866,19 @@ public class TestMain {
                         fail("Birthdate with time zone is invalid: " + birthDate);
                     } catch (JmiServiceException expected) {
                         BasicException exceptionStack = BasicException.toExceptionStack(expected);
-                        assertEquals("Unit of work has to be rolled back", BasicException.Code.TRANSFORMATION_FAILURE, exceptionStack.getExceptionCode());
-                        assertEquals("Unit of work has to be rolled back", CommException.class.getName(), exceptionStack.getExceptionClass());
-                        assertEquals("cause", BasicException.Code.BAD_PARAMETER, exceptionStack.getCause(null).getExceptionCode());
-                        assertEquals("cause", IllegalArgumentException.class.getName(), exceptionStack.getCause(null).getExceptionClass());
+                        if(this.causeIsGeneric()) {
+                            assertEquals("Unit of work has to be rolled back", BasicException.Code.GENERIC, exceptionStack.getExceptionCode());
+                        } else {
+                            assertEquals("Unit of work has to be rolled back", BasicException.Code.TRANSFORMATION_FAILURE, exceptionStack.getExceptionCode());
+                            assertEquals("Unit of work has to be rolled back", CommException.class.getName(), exceptionStack.getExceptionClass());
+                            if(BasicException.Code.GENERIC == exceptionStack.getCause(null).getExceptionCode()){
+                                assertEquals("cause", org.xml.sax.SAXException.class.getName(), exceptionStack.getCause(null).getExceptionClass());
+                            } else {
+                                assertEquals("cause", BasicException.Code.BAD_PARAMETER, exceptionStack.getCause(null).getExceptionCode());
+                                assertEquals("cause", IllegalArgumentException.class.getName(), exceptionStack.getCause(null).getExceptionClass());
+                            }
+                        }
+                        System.out.println("ProxyConnectionTest: " + exceptionStack.getCause(null).getExceptionClass());
                     } finally {
                         this.rollback();
                     }
@@ -1788,7 +1935,7 @@ public class TestMain {
             {
                 this.begin();
                 person = personClass.createPerson();
-                person.setForeignId("FX");
+                person.setForeignId("YF");
                 XMLGregorianCalendar birthDate = Datatypes.create(XMLGregorianCalendar.class, "1960-01-01");
                 person.setBirthdate(birthDate);
                 person.setBirthdateAsDateTime(Datatypes.create(Date.class, "19600101T120000.000Z"));
@@ -1857,6 +2004,13 @@ public class TestMain {
                         BasicException.Code.CONCURRENT_ACCESS_FAILURE,
                         BasicException.toExceptionStack(exception).getCause(null).getExceptionCode()
                     );
+                } catch (JDOFatalDataStoreException exception){
+                    assertTrue("TODO", causeIsGeneric());
+                    assertEquals(
+                        "CONCURRENT_ACCESS_FAILURE expected",
+                        BasicException.Code.GENERIC,
+                        BasicException.toExceptionStack(exception).getCause(null).getExceptionCode()
+                    );
                 }          
                 {
                     PersistenceManager anotherPersistenceManager = super.entityManager.getPersistenceManagerFactory().getPersistenceManager();
@@ -1884,6 +2038,88 @@ public class TestMain {
             assertEquals("person.refIdentity() must corrspond to its path", pId.toXRI(), person.getIdentity());
             assertEquals("person.refMofId() must corrspond to its path", pId.toXRI(), person.refMofId());
 
+			if(!(this instanceof AbstractContainerManagedTransactionTest))try {
+				super.taskId = "CR20020005";
+				PersistenceManagerFactory persistenceManagerFactory = super.entityManager.getPersistenceManagerFactory();				
+				PersistenceManager persistenceManager1 = persistenceManagerFactory.getPersistenceManager();
+				assertEquals("Transaction Isolation Level", Constants.TX_REPEATABLE_READ, persistenceManagerFactory.getTransactionIsolationLevel());
+				{
+					final Date transactionTime1 = new Date(
+						System.currentTimeMillis() - 20L
+					);
+					UserObjects.setTransactionTime(
+						persistenceManager1,
+						new Factory<Date>() {
+							public Date instantiate() {
+								return transactionTime1;
+							}
+							public Class<? extends Date> getInstanceClass() {
+								return Date.class;
+							}
+						}
+					);
+				}
+				PersistenceManager persistenceManager2 = super.entityManager.getPersistenceManagerFactory().getPersistenceManager();
+				{
+					final Date transactionTime2 = new Date(
+						System.currentTimeMillis() - 10L
+					);
+					UserObjects.setTransactionTime(
+						persistenceManager2,
+						new Factory<Date>() {
+							public Date instantiate() {
+								return transactionTime2;
+							}
+							public Class<? extends Date> getInstanceClass() {
+								return Date.class;
+							}
+						}
+					);
+				}
+				{
+					persistenceManager2.currentTransaction().begin();
+					Person person2 = (Person) persistenceManager2.getObjectById(personId);
+					person2.getGivenName().add("Maria");
+					persistenceManager2.currentTransaction().commit();
+				}
+				if(this instanceof LocalConnectionTest) {
+					try {
+						persistenceManager1.currentTransaction().begin();
+						Person person1 = (Person) persistenceManager1.getObjectById(personId);
+						person1.getGivenName().add("Klaus");
+						persistenceManager1.currentTransaction().commit();
+						fail("Write lock failure expected");
+					} catch (JDOOptimisticVerificationException expected) {
+						// Expected exception
+					}
+					try {
+						persistenceManager1.currentTransaction().begin();
+						Person person1 = (Person) persistenceManager1.getObjectById(personId);
+						persistenceManager1.makeTransactional(person1);
+						persistenceManager1.currentTransaction().commit();
+						fail("Read lock failure expected");
+					} catch (JDOOptimisticVerificationException expected) {
+						// Expected exception
+					}
+					{
+						persistenceManager1.currentTransaction().begin();
+						Person person1 = (Person) persistenceManager1.getObjectById(personId);
+						persistenceManager1.makeTransactional(person1);
+						persistenceManager1.refresh(person1);
+						persistenceManager1.currentTransaction().commit();
+					}
+					PersistenceManager persistenceManager3 = super.entityManager.getPersistenceManagerFactory().getPersistenceManager();
+					{
+						persistenceManager3.currentTransaction().begin();
+						Person person3 = (Person) persistenceManager3.getObjectById(personId);
+						persistenceManager3.makeTransactional(person3);
+						persistenceManager3.currentTransaction().commit();
+					}
+				}
+			} finally {
+				super.taskId = null;
+			}
+            
             assertEquals(
                 "Initial postal code without country code",
                 "8005",
@@ -1892,6 +2128,7 @@ public class TestMain {
 
             
             // Add country code to postal code
+            entityManager.refresh(person);
             this.begin();
             person.voidOp();
             //
@@ -2002,9 +2239,34 @@ public class TestMain {
                 default:
                     personAssignAddressParams = null;
             }
-            person.assignAddress(personAssignAddressParams);
-            this.commit();
-
+            //
+            // CR20020140 Non-query operation
+            // 
+            try {
+                super.taskId = "CR20020140";
+                assertFalse(
+                    "Person is clean before the address is assigned", 
+                    JDOHelper.isDirty(person)
+                );
+                person.assignAddress(personAssignAddressParams);
+                Object oldVersion = person.getModifiedAt();
+                assertTrue(
+                    "Person is dirty after the address has been assigned", 
+                    JDOHelper.isDirty(person)
+                );
+                this.commit();
+                Object newVersion = person.getModifiedAt();
+                assertFalse(
+                    "Person is clean after commit", 
+                    JDOHelper.isDirty(person)
+                );
+                assertFalse(
+                    "Person has been touched", 
+                    oldVersion.equals(newVersion)
+                );
+            } finally {
+                super.taskId = null;
+            }
             //
             // CR20018578 State After Removal
             // 
@@ -2028,8 +2290,7 @@ public class TestMain {
                 assertNull("Deleted additional address", segment.getAddress("CR0002096"));
             } finally {
                 super.taskId = null;
-            }
-            
+            }            
             //
             // CR0002096
             // 
@@ -2327,7 +2588,7 @@ public class TestMain {
             person = personClass.createPerson();
             person.setBirthdate(Datatypes.create(XMLGregorianCalendar.class, "1960-01-01"));
             person.setBirthdateAsDateTime(Datatypes.create(Date.class, "19600101T120000.000Z"));
-            person.setForeignId("FX");
+            person.setForeignId("YF");
             person.setLastName("MusterX");
             person.setSalutation("Herr");
             person.setSex((short)0);
@@ -2832,6 +3093,21 @@ public class TestMain {
                 super.taskId = null;
             }
             //
+            // Avoid null values
+            //
+            try {
+                super.taskId = "CR20019351";
+                this.begin();
+                List<String> givenName = person.getGivenName();
+                givenName.set(0, null);
+                fail("Null values can neither be set nor be added to lists");
+            } catch (JDOUserException expected) {
+            	assertTrue(expected.getNestedExceptions()[0] instanceof NullPointerException);
+            } finally {
+                this.rollback();
+                super.taskId = null;
+            }
+            //
             // keep given name
             //
             try {
@@ -2851,6 +3127,7 @@ public class TestMain {
                 super.taskId = "CR20019967";
 	            assertFalse("A givenName", person.getGivenName().isEmpty());
                 PersistenceManager anotherManager = newEntityManagerFactory().getPersistenceManager();
+                UserObjects.setBulkLoad(anotherManager, true);
 	            try {
 	                Person samePerson = anotherManager.getObjectById(Person.class, person.refMofId()); 
 		            anotherManager.currentTransaction().begin();
@@ -2876,8 +3153,8 @@ public class TestMain {
 	            	}
 	            	anotherManager.close();
 	            }
-	            this.entityManager.refresh(person);
-	            assertTrue("No givenName", person.getGivenName().isEmpty());
+                this.entityManager.refresh(person);
+                assertTrue("No givenName", person.getGivenName().isEmpty());	                
             } finally {
                 super.taskId = null;
             }
@@ -2968,6 +3245,9 @@ public class TestMain {
             } catch(CanNotFormatNameException e) {
                 e.toString();
                 System.out.println("formatNameAs() raised exception as expected \n" + e.getMessage());
+            } catch(UndeclaredThrowableException e) {
+                assertTrue("TODO", causeIsGeneric());
+                e.printStackTrace();
             }
             
             try {
@@ -3294,7 +3574,8 @@ public class TestMain {
                 super.taskId = null;
             }
             
-            {
+            try {
+                super.taskId = "CR10010692";
                 //
                 // test cycles
                 //
@@ -3305,27 +3586,30 @@ public class TestMain {
                 member2.setDescription("this is member2");
                 member1.setM2(member2);
                 member2.setM1(member1);
-                segment.addCycleMember1(false, new BigDecimal(1), member1);
+                segment.addCycleMember1(false, BigDecimal.valueOf(1), member1);
                 segment.addCycleMember2(false, "member2", member2);
                 this.commit();
+                
+                @SuppressWarnings("unused")
+                test.openmdx.app1.cci2.CycleMember1 jpaMember  =  this.entityManager.detachCopy(member1);
     
                 // verify member1, member2
-                member1 = segment.getCycleMember1(new BigDecimal(1));
+                member1 = segment.getCycleMember1(BigDecimal.valueOf(1));
                 member2 = member1.getM2();
                 System.out.println("member1" + member1);
                 System.out.println("member2" + member2);
-                {
-                    assertNotNull("We need a member value for the next test", member2);
-                    CycleMember1Query query = app1Package.createCycleMember1Query();
-                    query.thereExistsM2().equalTo(member2);
-                    query.m2().isNonNull();
-                    try {
-                        query.thereExistsM2().equalTo(null);
-                        fail("equalTo's argument must not be null");
-                    } catch (JmiServiceException exception) {
-                        assertEquals("equalTo(null)", BasicException.Code.BAD_PARAMETER, exception.getExceptionCode());
-                    }
+                assertNotNull("We need a member value for the next test", member2);
+                CycleMember1Query query = app1Package.createCycleMember1Query();
+                query.thereExistsM2().equalTo(member2);
+                query.m2().isNonNull();
+                try {
+                    query.thereExistsM2().equalTo(null);
+                    fail("equalTo's argument must not be null");
+                } catch (JmiServiceException exception) {
+                    assertEquals("equalTo(null)", BasicException.Code.BAD_PARAMETER, exception.getExceptionCode());
                 }
+            } finally {
+                super.taskId = null;
             }
 
             // test streams
@@ -3511,7 +3795,17 @@ public class TestMain {
             } finally {
                 super.taskId = null;
             }
-            
+            //
+            // CR10010692
+            //
+            try {
+                super.taskId = "CR10010692";
+                PostalAddressQuery query = (PostalAddressQuery) this.entityManager.newQuery(PostalAddress.class);
+                @SuppressWarnings("unused")
+                List<test.openmdx.app1.cci2.PostalAddress> addresses = segment.<test.openmdx.app1.cci2.PostalAddress>getAddress().getAll(query);
+            } finally {
+                super.taskId = null;
+            }
             //
             // CR20018889
             //
@@ -3679,6 +3973,40 @@ public class TestMain {
             
         }
 
+		/**
+		 * Validate the cycle query
+		 * 
+		 * @param query
+		 */
+		private void validateCycleQuery(RefQuery_1_0 query) {
+            assertTrue("CycleMember1QueryCCI Query Interface", query instanceof CycleMember1Query);
+			List<Condition> m1Conditions = query.refGetFilter().getCondition();
+			assertEquals("m1 Conditions", 2, m1Conditions.size());
+			assertEquals("m1 Condition 0", SystemAttributes.OBJECT_INSTANCE_OF, m1Conditions.get(0).getFeature());
+			assertEquals("m1 Condition 0", Quantifier.THERE_EXISTS, m1Conditions.get(0).getQuantifier());
+			assertEquals("m1 Condition 0", ConditionType.IS_IN, m1Conditions.get(0).getType());
+			assertEquals("m1 Condition 0", 1, m1Conditions.get(0).getValue().length);
+			assertEquals("m1 Condition 0", "test:openmdx:app1:CycleMember1", m1Conditions.get(0).getValue(0));
+			assertTrue("m1 Condition 1", m1Conditions.get(1).getValue(0) instanceof Filter);
+			List<Condition> m2Conditions = ((Filter)m1Conditions.get(1).getValue(0)).getCondition();
+			assertEquals("m2 Conditions", 3, m2Conditions.size());
+			assertEquals("m2 Condition 0", SystemAttributes.OBJECT_INSTANCE_OF, m2Conditions.get(0).getFeature());
+			assertEquals("m2 Condition 0", Quantifier.THERE_EXISTS, m2Conditions.get(0).getQuantifier());
+			assertEquals("m2 Condition 0", ConditionType.IS_IN, m2Conditions.get(0).getType());
+			assertEquals("m2 Condition 0", 1, m2Conditions.get(0).getValue().length);
+			assertEquals("m2 Condition 0", "test:openmdx:app1:CycleMember2", m2Conditions.get(0).getValue(0));
+			assertEquals("m2 Condition 1", "description", m2Conditions.get(1).getFeature());
+			assertEquals("m2 Condition 1", Quantifier.THERE_EXISTS, m2Conditions.get(1).getQuantifier());
+			assertEquals("m2 Condition 1", ConditionType.IS_IN, m2Conditions.get(1).getType());
+			assertEquals("m2 Condition 1", 2, m2Conditions.get(1).getValue().length);
+			assertEquals("m2 Condition 1", "Cycle Member \"CR20020022\"", m2Conditions.get(1).getValue(0));
+			assertEquals("m2 Condition 1", "n/a", m2Conditions.get(1).getValue(1));
+			assertEquals("m2 Condition 2", "m1", m2Conditions.get(2).getFeature());
+			assertEquals("m2 Condition 2", Quantifier.FOR_ALL, m2Conditions.get(2).getQuantifier());
+			assertEquals("m2 Condition 2", ConditionType.IS_IN, m2Conditions.get(2).getType());
+			assertEquals("m2 Condition 2", 0, m2Conditions.get(2).getValue().length);
+		}
+
         /**
          * Test the audit entries
          * 
@@ -3767,7 +4095,7 @@ public class TestMain {
             Collection<UnitOfWork> task = AuditQueries.getUnitOfWorkInvolvingObject(from, null, person); 
             String id = "involve Person # ID500012";            
             dumpTask(id + scope, task);
-            assertEquals(id + scope, (1 * create + 4) * factor, task.size());
+            assertEquals(id + scope, (1 * create + 7) * factor, task.size());
             if(scoped || run == 1) {
                 Modifiable lastImage = null;
                 for(UnitOfWork unitOfWork : task){
@@ -3799,7 +4127,7 @@ public class TestMain {
                 id = "touch Person # ID500012"; 
                 task = AuditQueries.getUnitOfWorkTouchingObject(from, null, null, person ); 
                 dumpTask(id + scope, task);
-                assertEquals(id + scope, (0 * create + 4) * factor, task.size());
+                assertEquals(id + scope, (0 * create + 7) * factor, task.size());
                 id = "touch specific attributes of Person # ID500012"; 
                 task = AuditQueries.getUnitOfWorkTouchingObject(
                     from, 
@@ -3824,7 +4152,7 @@ public class TestMain {
             id = "all units of work"; 
             task = AuditQueries.getUnitOfWorkForTimeRange(super.entityManager, from, null);
             dumpTask(id + scope, task);
-            assertEquals(id + scope, (16 * create + 17) * factor, task.size());
+            assertEquals(id + scope, (16 * create + 24) * factor, task.size());
             id = "units of work involving people"; 
             task = AuditQueries.getUnitOfWorkInvolvingObject(
                 from, 
@@ -3835,7 +4163,7 @@ public class TestMain {
                 )
             );
             dumpTask(id + scope, task);
-            assertEquals(id + scope, (3 * create + 8) * factor, task.size());
+            assertEquals(id + scope, (3 * create + 13) * factor, task.size());
             id = "units of work involving deleted object";
             Path addressId = DATA_SEGMENT_ID.getDescendant("address","CR0002096"); 
             task = AuditQueries.getUnitOfWorkInvolvingObject(
@@ -4027,6 +4355,7 @@ public class TestMain {
             super.testCR20019462();
             super.testCR20018726();
             super.testCR20019014();
+            super.testCR20020032();
             super.testMain();
             super.testAudit(1);
         }
@@ -4214,8 +4543,7 @@ public class TestMain {
         protected Boolean isOptimistic() {
             return Boolean.FALSE;
         }
-        
-        
+                
     }
     
 
@@ -4297,4 +4625,18 @@ public class TestMain {
 
     }
 
+    public static class RemoteConnectionTest extends ProxyConnectionTest {
+
+        /* (non-Javadoc)
+         * @see test.openmdx.app1.TestMain.ProxyConnectionTest#newEntityManagerFactory()
+         */
+        @Override
+        protected PersistenceManagerFactory newEntityManagerFactory(){
+            return JDOHelper.getPersistenceManagerFactory(
+                configuration(),
+                ENTITY_MANAGER_PROXY_FACTORY_NAME
+            );
+        }
+        
+    }
 }

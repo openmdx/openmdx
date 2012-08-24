@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<uml:Model xmi:version="2.1" xmlns:xmi="http://schema.omg.org/spec/XMI/2.1" xmlns:uml="http://www.eclipse.org/uml2/3.0.0/UML" xmi:id="_9M97kHLeEeGNgPDkuA6txQ" name="preferences2" viewpoint="">
+  <packagedElement xmi:type="uml:Package" xmi:id="_KWNCsHLfEeGNgPDkuA6txQ" name="org">
+    <packagedElement xmi:type="uml:Package" xmi:id="_Y8TwcHLfEeGNgPDkuA6txQ" name="openmdx">
+      <packagedElement xmi:type="uml:Package" xmi:id="_c6xKEHLfEeGNgPDkuA6txQ" name="preferences2">
+        <packagedElement xmi:type="uml:Class" xmi:id="_TBCZ8HLhEeGNgPDkuA6txQ" name="Root" isAbstract="true">
+          <eAnnotations xmi:id="_MjAb-d65EdmrtKJSXC0_FR" source="keywords">
+            <details xmi:id="_MjAb-t65EdmrtKJSXC0_FR" key="root"/>
+          </eAnnotations>
+          <ownedComment xmi:id="_YItd0HTjEeGLucv0LfX07g">
+            <body>There are two separate trees of preference nodes, one for user preferences and one for system preferences.
+Each user has a separate user preference tree, and all users in a given system share the same system preference tree.
+The precise description of &quot;user&quot; and &quot;system&quot; will vary from implementation to implementation.
+Typical information stored in the user preference tree might include font choice, color choice, or preferred window location and size for a particular application.
+Typical information stored in the system preference tree might include installation configuration data for an application.
+
+</body>
+          </ownedComment>
+          <generalization xmi:id="_tkGiMHUAEeGyh_yxMtArkA">
+            <general xmi:type="uml:Class" href="org.openmdx.base.uml#_3C7B8A60016D3FB3D6450214"/>
+          </generalization>
+          <ownedAttribute xmi:id="_hFJFgHLvEeGDZOi-upD3nQ" name="type" isReadOnly="true" aggregation="composite">
+            <type xmi:type="uml:PrimitiveType" href="org.w3c.uml#_3C7B8A60016D3C8B62E40010"/>
+            <defaultValue xmi:type="uml:LiteralString" xmi:id="_o4aYgHTnEeGVna5QQHtn2w" value=""/>
+          </ownedAttribute>
+          <ownedAttribute xmi:id="_Z0TdEHNbEeG9T95WWtTPPg" name="node" type="_mZj_wHLfEeGNgPDkuA6txQ" isUnique="false" aggregation="composite" association="_Z0S2AHNbEeG9T95WWtTPPg">
+            <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_Z0UEIXNbEeG9T95WWtTPPg" value="1"/>
+            <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_Z0UEIHNbEeG9T95WWtTPPg"/>
+            <qualifier xmi:id="" name="id" visibility="private">
+              <type xmi:type="uml:PrimitiveType" href="org.w3c.uml#_3C7B8A60016D3C8B62E40010"/>
+            </qualifier>
+          </ownedAttribute>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Class" xmi:id="_mZj_wHLfEeGNgPDkuA6txQ" name="Node">
+          <ownedComment xmi:id="_GWTMIHTjEeGLucv0LfX07g">
+            <body>A node in a hierarchical collection of preference data. This class allows applications to store and retrieve user and system preference and configuration data.
+This data is stored persistently in an implementation-dependent backing store.
+Typical implementations include flat files, OS-specific registries, directory servers and SQL databases.
+The user of this class needn't be concerned with details of the backing store.
+
+Nodes in a preference tree are named in a similar fashion to directories in a hierarchical file system.
+Every node in a preference tree has a node name (which is not necessarily unique), a unique absolute path name, and a path name relative to each ancestor including itself.</body>
+          </ownedComment>
+          <generalization xmi:id="_0jO3gHUAEeGyh_yxMtArkA">
+            <general xmi:type="uml:Class" href="org.openmdx.base.uml#_3C7B8A60016D3FB3D6450214"/>
+          </generalization>
+          <ownedAttribute xmi:id="_4y2GYHLuEeGDZOi-upD3nQ" name="name" isReadOnly="true" aggregation="composite">
+            <ownedComment xmi:id="_cuH_MHTiEeGLucv0LfX07g">
+              <body>The root node has a node name of the empty string (&quot;&quot;).
+Every other node has an arbitrary node name, specified at the time it is created.
+The only restrictions on this name are that it cannot be the empty string, and it cannot contain the slash character ('/').</body>
+            </ownedComment>
+            <type xmi:type="uml:PrimitiveType" href="org.w3c.uml#_3C7B8A60016D3C8B62E40010"/>
+          </ownedAttribute>
+          <ownedAttribute xmi:id="_akg_kHM7EeG9T95WWtTPPg" name="absolutePath" isReadOnly="true" isDerived="true" aggregation="composite">
+            <ownedComment xmi:id="_2B8M0HTiEeGLucv0LfX07g">
+              <body>The root node has an absolute path name of &quot;/&quot;.
+Children of the root node have absolute path names of &quot;/&quot; + &lt;node name>.
+All other nodes have absolute path names of &lt;parent's absolute path name> + &quot;/&quot; + &lt;node name>.
+Note that all absolute path names begin with the slash character.</body>
+            </ownedComment>
+            <type xmi:type="uml:PrimitiveType" href="org.w3c.uml#_3C7B8A60016D3C8B62E40010"/>
+          </ownedAttribute>
+          <ownedAttribute xmi:id="_fzweEXNbEeG9T95WWtTPPg" name="entry" type="_j1JBkHLnEeGNgPDkuA6txQ" isUnique="false" aggregation="composite" association="_fzweEHNbEeG9T95WWtTPPg">
+            <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_fzxFIXNbEeG9T95WWtTPPg" value="1"/>
+            <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_fzxFIHNbEeG9T95WWtTPPg"/>
+            <qualifier xmi:id="" name="id" visibility="private">
+              <type xmi:type="uml:PrimitiveType" href="org.w3c.uml#_3C7B8A60016D3C8B62E40010"/>
+            </qualifier>
+          </ownedAttribute>
+          <ownedAttribute xmi:id="_fZaCQHT5EeGVpIuYZ3xTrw" name="parent" type="_mZj_wHLfEeGNgPDkuA6txQ" association="_fZW-8HT5EeGVpIuYZ3xTrw">
+            <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_fZaCQnT5EeGVpIuYZ3xTrw" value="1"/>
+            <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_fZaCQXT5EeGVpIuYZ3xTrw"/>
+          </ownedAttribute>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Class" xmi:id="_j1JBkHLnEeGNgPDkuA6txQ" name="Entry">
+          <generalization xmi:id="_1Oy9AHUAEeGyh_yxMtArkA">
+            <general xmi:type="uml:Class" href="org.openmdx.base.uml#_3C7B8A60016D3FB3D6450214"/>
+          </generalization>
+          <ownedAttribute xmi:id="_UU9e8HLsEeGNgPDkuA6txQ" name="name" isOrdered="true" isReadOnly="true" isDerived="true" aggregation="composite">
+            <type xmi:type="uml:PrimitiveType" href="org.w3c.uml#_3C7B8A60016D3C8B62E40010"/>
+          </ownedAttribute>
+          <ownedAttribute xmi:id="_dknscHLsEeGNgPDkuA6txQ" name="value" aggregation="composite">
+            <type xmi:type="uml:PrimitiveType" href="org.w3c.uml#_3C7B8A60016D3C8B62E40010"/>
+            <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_eJbVAHThEeGLucv0LfX07g"/>
+          </ownedAttribute>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Class" xmi:id="_9hkoQHNPEeG9T95WWtTPPg" name="Preferences">
+          <generalization xmi:id="_d1Yt4HNQEeG9T95WWtTPPg" general="_TBCZ8HLhEeGNgPDkuA6txQ"/>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Class" xmi:id="_IMtKsHNPEeG9T95WWtTPPg" name="Segment">
+          <generalization xmi:id="_6MzE0HNPEeG9T95WWtTPPg">
+            <general xmi:type="uml:Class" href="org.openmdx.base.uml#_3C7B8A60016D3FC487C80099"/>
+          </generalization>
+          <ownedAttribute xmi:id="_63VDAXNkEeG9T95WWtTPPg" name="preferences" type="_9hkoQHNPEeG9T95WWtTPPg" isUnique="false" aggregation="composite" association="_63VDAHNkEeG9T95WWtTPPg">
+            <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_63WRIXNkEeG9T95WWtTPPg" value="1"/>
+            <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_63WRIHNkEeG9T95WWtTPPg"/>
+            <qualifier xmi:id="" name="id" visibility="private">
+              <type xmi:type="uml:PrimitiveType" href="org.w3c.uml#_3C7B8A60016D3C8B62E40010"/>
+            </qualifier>
+          </ownedAttribute>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Association" xmi:id="_Z0S2AHNbEeG9T95WWtTPPg" name="RootHasNodes" memberEnd="_Z0TdEHNbEeG9T95WWtTPPg _Z0UEInNbEeG9T95WWtTPPg" navigableOwnedEnd="_Z0UEInNbEeG9T95WWtTPPg">
+          <ownedEnd xmi:id="_Z0UEInNbEeG9T95WWtTPPg" name="root" type="_TBCZ8HLhEeGNgPDkuA6txQ" isUnique="false" association="_Z0S2AHNbEeG9T95WWtTPPg">
+            <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_Z0UrMXNbEeG9T95WWtTPPg" value="1"/>
+            <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_Z0UrMHNbEeG9T95WWtTPPg" value="1"/>
+          </ownedEnd>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Association" xmi:id="_fzweEHNbEeG9T95WWtTPPg" name="NodeHasEntries" memberEnd="_fzweEXNbEeG9T95WWtTPPg _fzxsMHNbEeG9T95WWtTPPg">
+          <ownedEnd xmi:id="_fzxsMHNbEeG9T95WWtTPPg" name="node" type="_mZj_wHLfEeGNgPDkuA6txQ" isUnique="false" association="_fzweEHNbEeG9T95WWtTPPg">
+            <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_fzyTQHNbEeG9T95WWtTPPg" value="1"/>
+            <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_fzxsMXNbEeG9T95WWtTPPg" value="1"/>
+          </ownedEnd>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Association" xmi:id="_63VDAHNkEeG9T95WWtTPPg" name="SegmentHostsPreferences" memberEnd="_63VDAXNkEeG9T95WWtTPPg _63W4MHNkEeG9T95WWtTPPg">
+          <ownedEnd xmi:id="_63W4MHNkEeG9T95WWtTPPg" name="segment" type="_IMtKsHNPEeG9T95WWtTPPg" isUnique="false" association="_63VDAHNkEeG9T95WWtTPPg">
+            <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_63W4MnNkEeG9T95WWtTPPg" value="1"/>
+            <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_63W4MXNkEeG9T95WWtTPPg" value="1"/>
+          </ownedEnd>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Association" xmi:id="_fZW-8HT5EeGVpIuYZ3xTrw" name="NodeHasParent" memberEnd="_fZY0IHT5EeGVpIuYZ3xTrw _fZaCQHT5EeGVpIuYZ3xTrw" navigableOwnedEnd="_fZY0IHT5EeGVpIuYZ3xTrw">
+          <ownedEnd xmi:id="_fZY0IHT5EeGVpIuYZ3xTrw" name="child" type="_mZj_wHLfEeGNgPDkuA6txQ" isReadOnly="true" association="_fZW-8HT5EeGVpIuYZ3xTrw">
+            <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_fZZbMXT5EeGVpIuYZ3xTrw" value="*"/>
+            <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_fZZbMHT5EeGVpIuYZ3xTrw"/>
+            <qualifier xmi:id="_FKQ_YHT6EeGVpIuYZ3xTrw" name="nodeContainer" type="_TBCZ8HLhEeGNgPDkuA6txQ"/>
+          </ownedEnd>
+        </packagedElement>
+      </packagedElement>
+    </packagedElement>
+  </packagedElement>
+</uml:Model>

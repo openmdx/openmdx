@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Jmi1ContainerInvocationHandler.java,v 1.25 2011/06/21 22:29:20 hburger Exp $
  * Description: ContainerInvocationHandler 
- * Revision:    $Revision: 1.25 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/06/21 22:29:20 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

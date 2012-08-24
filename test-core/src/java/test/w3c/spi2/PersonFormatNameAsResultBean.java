@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: PersonFormatNameAsResultBean.java,v 1.1 2011/03/04 22:25:30 hburger Exp $
  * Description: PersonFormatNameAsResultBean 
- * Revision:    $Revision: 1.1 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/03/04 22:25:30 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

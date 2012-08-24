@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: RefException_1.java,v 1.10 2011/04/11 08:56:27 hburger Exp $
  * Description: RefException_1 class
- * Revision:    $Revision: 1.10 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/04/11 08:56:27 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: TabControl.java,v 1.18 2011/08/11 15:10:14 wfro Exp $
  * Description: ShowObjectView 
- * Revision:    $Revision: 1.18 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/08/11 15:10:14 $
  * ====================================================================
  *
  * This software is published under the BSD license

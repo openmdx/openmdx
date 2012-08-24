@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: ConfigurableProperty.java,v 1.7 2011/04/27 06:04:21 hburger Exp $
  * Description: JDO 2.0 Options
- * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/04/27 06:04:21 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

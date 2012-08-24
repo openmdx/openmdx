@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: Loader.java,v 1.12 2011/09/16 09:01:41 wfro Exp $
  * Description: Loader
- * Revision:    $Revision: 1.12 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/09/16 09:01:41 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -78,7 +75,7 @@ public class Loader {
       this.context = context;
       this.portalExtension = portalExtension;
   }
-          
+
   //-------------------------------------------------------------------------
   /**
    * Map last path component to segment name, i.e. path
@@ -155,6 +152,8 @@ public class Loader {
     return crc.getValue();
   }
   
+  //-------------------------------------------------------------------------
+  // Members
   //-------------------------------------------------------------------------
   protected final ServletContext context;
   protected final PortalExtension_1_0 portalExtension;

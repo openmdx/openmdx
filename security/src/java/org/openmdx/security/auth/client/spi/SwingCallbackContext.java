@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Security, http://www.openmdx.org/
- * Name:        $Id: SwingCallbackContext.java,v 1.1 2007/11/26 14:04:34 hburger Exp $
  * Description: Swing Callback Context
- * Revision:    $Revision: 1.1 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/11/26 14:04:34 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

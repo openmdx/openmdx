@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: ImportMode.java,v 1.1 2009/10/08 15:24:04 hburger Exp $
  * Description: Import Mode
- * Revision:    $Revision: 1.1 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/10/08 15:24:04 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

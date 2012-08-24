@@ -2,17 +2,17 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: JspReport.jsp,v 1.1 2006/07/16 23:58:03 wfro Exp $
+ * Name:        $Id: JspReport.jsp,v 1.2 2012/07/08 13:08:26 wfro Exp $
  * Description: ShowObject.jsp
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2006/07/16 23:58:03 $
+ * Date:        $Date: 2012/07/08 13:08:26 $
  * ====================================================================
  *
  * This software is published under the BSD license
  * as listed below.
  * 
- * Copyright (c) 2004-2006, OMEX AG, Switzerland
+ * Copyright (c) 2004-2012, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or

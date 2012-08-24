@@ -170,6 +170,7 @@
 			Parent_View 	@5
 			location   	(2156, 132)
 			fill_color 	13434879
+
 			nlines     	2
 			max_width  	288
 			justify    	0
@@ -181,7 +182,7 @@
 		    width      	300
 		    height     	180)
 		(object CategoryView "Logical View::org::openmdx" @6
-		    location   	(238, 512)
+		    location   	(241, 512)
 		    font       	(object Font
 			size       	8
 			face       	"Arial"
@@ -193,7 +194,7 @@
 			default_color 	TRUE)
 		    label      	(object ItemLabel
 			Parent_View 	@6
-			location   	(94, 428)
+			location   	(97, 428)
 			fill_color 	13434879
 			nlines     	2
 			max_width  	288

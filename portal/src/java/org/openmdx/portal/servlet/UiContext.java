@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: UiContext.java,v 1.31 2010/07/08 16:50:38 wfro Exp $
  * Description: UiContext 
- * Revision:    $Revision: 1.31 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/07/08 16:50:38 $
  * ====================================================================
  *
  * This software is published under the BSD license

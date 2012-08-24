@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: AttributeSpecifier.java,v 1.9 2011/11/26 01:34:57 hburger Exp $
  * Description: openMDX Compatibility Mode: Attribute specifier
- * Revision:    $Revision: 1.9 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/11/26 01:34:57 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

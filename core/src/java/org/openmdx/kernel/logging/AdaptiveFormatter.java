@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: AdaptiveFormatter.java,v 1.1 2009/04/01 13:33:33 hburger Exp $
  * Description: AdaptiveFormatter 
- * Revision:    $Revision: 1.1 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/04/01 13:33:33 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

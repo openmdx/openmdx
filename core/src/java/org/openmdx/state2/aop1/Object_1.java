@@ -1,16 +1,13 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Object_1.java,v 1.5 2011/04/04 14:42:42 hburger Exp $
  * Description: Stated Object Interceptor
- * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/04/04 14:42:42 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2009, OMEX AG, Switzerland
+ * Copyright (c) 2009-2012, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -66,7 +63,7 @@ import org.openmdx.kernel.exception.BasicException;
 /**
  * Stated Object Interceptor
  */
-public class Object_1 extends Interceptor_1 {
+abstract public class Object_1 extends Interceptor_1 {
 
     /**
      * Constructor 
@@ -74,7 +71,7 @@ public class Object_1 extends Interceptor_1 {
      * @param self
      * @param next
      */
-    public Object_1(
+    protected Object_1(
         ObjectView_1_0 self, 
         Interceptor_1 next
     ) {
@@ -118,7 +115,7 @@ public class Object_1 extends Interceptor_1 {
             // A state capable container is required even if there is no state context  
             // in order to avoid the returning of states not requested explicitly.
             //
-            container = reference.getModel().isSubtypeOf(type, "org:openmdx:state2:StateCapable") ? new StateCapableContainer_1(
+            container = reference.getModel().isSubtypeOf(type, "org:openmdx:state2:StateCapable") ? newStateCapableContainer(
                 this.self,
                 dataObject.objGetContainer(feature), 
                 type
@@ -132,6 +129,20 @@ public class Object_1 extends Interceptor_1 {
         }
     }
 
-    
-    
+    /**
+     * Create a <code>StateCapable</code> container
+     * 
+     * @param parent
+     * @param container
+     * @param type
+     * @return a new <code>StateCapable</code> container
+     * 
+     * @throws ServiceException
+     */
+    protected abstract Container_1_0 newStateCapableContainer(
+        ObjectView_1_0 parent,
+        Container_1_0 container, 
+        String type 
+    ) throws ServiceException;
+        
 }

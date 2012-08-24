@@ -75,16 +75,16 @@ class ModuleDecorator<T extends Module>
      * @see org.openmdx.kernel.application.deploy.spi.Deployment.Module#getModuleId()
      */
     public String getModuleURI() {
-        return super.delegate.getModuleURI();
+        return getDelegate().getModuleURI();
     }
 
     public String getDisplayName() {
-        return super.delegate.getDisplayName();
+        return getDelegate().getDisplayName();
     }
 
     public Collection<? extends Component>  getComponents() {
         Collection<Component> components = new ArrayList<Component>();
-        for(Component component: super.delegate.getComponents()) {
+        for(Component component: getDelegate().getComponents()) {
             if (component instanceof SessionBean) {
                 components.add(
                     new SessionBeanDecorator((SessionBean)component)
@@ -99,11 +99,11 @@ class ModuleDecorator<T extends Module>
     }
 
     public URL[] getModuleClassPath() {
-        return super.delegate.getModuleClassPath();
+        return getDelegate().getModuleClassPath();
     }
 
     public URL[] getApplicationClassPath() {
-        return super.delegate.getApplicationClassPath();
+        return getDelegate().getApplicationClassPath();
     }
 
 }

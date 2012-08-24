@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: RoseImporter_1.java,v 1.13 2011/11/26 01:34:59 hburger Exp $
  * Description: model.importer.RoseImporter
- * Revision:    $Revision: 1.13 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/11/26 01:34:59 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

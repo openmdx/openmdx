@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: MarshallingContainer_1.java,v 1.18 2011/04/12 15:50:29 hburger Exp $
  * Description: Marshalling Filterable Map
- * Revision:    $Revision: 1.18 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/04/12 15:50:29 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

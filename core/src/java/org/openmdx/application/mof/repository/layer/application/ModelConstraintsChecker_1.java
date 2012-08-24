@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: ModelConstraintsChecker_1.java,v 1.8 2011/07/08 13:20:51 wfro Exp $
  * Description: check MOF Model Constraints
- * Revision:    $Revision: 1.8 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/07/08 13:20:51 $
  * ====================================================================
  *
  * This software is published under the BSD license

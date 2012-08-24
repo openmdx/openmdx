@@ -1,10 +1,7 @@
 /*
  * ====================================================================
- * Name:        $Id: Aspect_1.java,v 1.24 2011/09/07 11:44:45 hburger Exp $
  * Description: org::openmdx::base::Aspect plug-in
- * Revision:    $Revision: 1.24 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/09/07 11:44:45 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

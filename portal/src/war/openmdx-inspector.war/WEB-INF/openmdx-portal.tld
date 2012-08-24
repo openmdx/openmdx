@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<taglib xmlns="http://java.sun.com/xml/ns/j2ee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee/web-jsptaglibrary_2_1.xsd" version="2.1">
+	<tlibversion>1.0</tlibversion>
+	<jspversion>1.1</jspversion>
+	<shortname>openmdx-portal</shortname>
+	<uri>http://www.openmdx.org/tags/openmdx-portal</uri>
+	<info>
+		The openMDX/Portal Tag Library is the easy and flexible way to
+		implement openMDX/Portal based wizards in JavaServer Pages (JSP).
+	</info>
+	<!-- The showobject tag allows to show an object with attribute and reference panes. -->
+	<tag>
+		<name>showobject</name>
+		<tagclass>org.openmdx.portal.servlet.tag.ShowObjectTag</tagclass>
+		<bodycontent>JSP</bodycontent>
+		<!-- id of element -->		
+		<attribute>
+			<name>id</name>
+			<required>true</required>
+			<rtexprvalue>true</rtexprvalue>
+		</attribute>
+		<!-- object to be displayed. Must be instance of Path or RefObject. -->
+		<attribute>
+			<name>object</name>
+			<required>true</required>
+			<rtexprvalue>true</rtexprvalue>
+		</attribute>
+		<!-- Attribute pane is rendered if true. -->
+		<attribute>
+			<name>showAttributes</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+		</attribute>
+		<!-- Comma-separated list of (unqualified) reference names of grids to be rendered. -->
+		<attribute>
+			<name>grids</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+		</attribute>
+		<attribute>
+			<name>scope</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+		</attribute>
+		<!-- Prefix for generated URLs. Default is "../../". -->
+		<attribute>
+			<name>resourcePathPrefix</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+		</attribute>
+		<!-- Target tag generated for navigation anchor tags. Allowed values are Values are "_none", "_blank", "_parent", "_self", "_top". -->
+		<attribute>
+			<name>navigationTarget</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+		</attribute>		
+	</tag>
+	<!-- The query tag is a nested tag of the showobject tag. It allows to specify the default query for the named reference -->
+	<tag>
+		<name>query</name>
+		<tagclass>org.openmdx.portal.servlet.tag.QueryTag</tagclass>
+		<bodycontent>JSP</bodycontent>
+		<!-- Reference name -->
+		<attribute>
+			<name>name</name>
+			<required>true</required>
+			<rtexprvalue>true</rtexprvalue>
+		</attribute>
+		<!-- Query as object -->
+		<attribute>
+			<name>query</name>
+			<required>true</required>
+			<rtexprvalue>true</rtexprvalue>
+		</attribute>
+	</tag>
+</taglib>

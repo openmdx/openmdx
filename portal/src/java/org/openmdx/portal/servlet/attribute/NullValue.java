@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.opencrx.org/
- * Name:        $Id: NullValue.java,v 1.14 2010/04/27 08:27:38 wfro Exp $
  * Description: openCRX application plugin
- * Revision:    $Revision: 1.14 $
  * Owner:       CRIXP AG, Switzerland, http://www.crixp.com
- * Date:        $Date: 2010/04/27 08:27:38 $
  * ====================================================================
  *
  * This software is published under the BSD license

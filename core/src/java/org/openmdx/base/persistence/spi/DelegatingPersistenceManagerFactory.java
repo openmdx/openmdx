@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: DelegatingPersistenceManagerFactory.java,v 1.3 2011/04/12 15:44:01 hburger Exp $
  * Description: Delegating Persistence Manager Factory 
- * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/04/12 15:44:01 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

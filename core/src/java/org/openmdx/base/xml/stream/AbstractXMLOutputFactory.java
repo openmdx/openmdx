@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: AbstractXMLOutputFactory.java,v 1.5 2010/04/07 15:33:14 hburger Exp $
  * Description: Abstract XML Output Factory 
- * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/04/07 15:33:14 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

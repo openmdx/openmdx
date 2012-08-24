@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <!--
 =======================================================================
-= Name:        $Id: build.xml,v 1.254 2011/12/09 15:33:43 wfro Exp $
+= Name:        $Id: build.xml,v 1.255 2012/03/30 16:34:02 hburger Exp $
 = Description: openMDX/Core Build File
-= Revision:    $Revision: 1.254 $
-= Date:        $Date: 2011/12/09 15:33:43 $
+= Revision:    $Revision: 1.255 $
+= Date:        $Date: 2012/03/30 16:34:02 $
 = Copyright:   (c) 2003-2011 OMEX AG
 =======================================================================
 =
@@ -160,6 +160,24 @@
 			<param name="preprocess-jt.target" value="java"/>
 		</antcall>
 		<fail message="JRE ${build.target.jre} not found" unless="build.target.jre.found"/>
+		<patternset id="openmdx-bootstrap.content">
+			<include name="javax/jmi/**/*.java"/>
+			<include name="org/openmdx/base/**/*.java"/>
+			<include name="org/openmdx/kernel/**/*.java"/>
+			<include name="org/openmdx/uses/**/*.java"/>
+			<include name="org/openmdx/dataprovider/**/*.java"/>
+			<include name="org/openmdx/application/mof/**/*.java"/>
+			<include name="org/openmdx/application/xml/spi/*.java"/>
+			<exclude name="org/openmdx/base/accessor/jmi/**/*.java"/>
+			<exclude name="org/openmdx/base/accessor/jmi1/**/*.java"/>
+			<exclude name="org/openmdx/base/accessor/rest/**/*.java"/>
+			<exclude name="org/openmdx/base/accessor/view/**/*.java"/>
+			<exclude name="org/openmdx/base/persistence/**/*.java"/>
+			<exclude name="org/openmdx/base/rest/**/*.java"/>
+			<exclude name="org/openmdx/base/aop2/*.java"/>
+			<patternset refid="build.exclude"/>
+		</patternset>
+		
 		<antcontrib:if>
 			<istrue value="${build.compile.without.bootclasspath}"/>
 			<antcontrib:then>
@@ -177,18 +195,7 @@
 				>
 					<src path="${build.dir}/src/java"/>
 					<src path="${basedir}/src/java"/>		    
-					<include name="javax/jmi/**/*.java"/>
-					<include name="org/openmdx/base/**/*.java"/>
-					<include name="org/openmdx/kernel/**/*.java"/>
-					<include name="org/openmdx/uses/**/*.java"/>
-					<include name="org/openmdx/compatibility/kernel/**/*.java"/>
-					<include name="org/openmdx/application/mof/**/*.java"/>
-					<include name="org/openmdx/application/xml/spi/*.java"/>
-					<exclude name="org/openmdx/base/accessor/**/*.java"/>
-					<exclude name="org/openmdx/base/persistence/**/*.java"/>
-					<exclude name="org/openmdx/base/rest/**/*.java"/>
-					<exclude name="org/openmdx/base/aop2/*.java"/>
-					<patternset refid="build.exclude"/>
+					<patternset refid="openmdx-bootstrap.content"/>
 				</javac>
 			</antcontrib:then>
 			<antcontrib:elseif>
@@ -206,18 +213,7 @@
 					>
 						<src path="${build.dir}/src/java"/>
 						<src path="${basedir}/src/java"/>		    
-						<include name="javax/jmi/**/*.java"/>
-						<include name="org/openmdx/base/**/*.java"/>
-						<include name="org/openmdx/kernel/**/*.java"/>
-						<include name="org/openmdx/uses/**/*.java"/>
-						<include name="org/openmdx/compatibility/kernel/**/*.java"/>
-						<include name="org/openmdx/application/mof/**/*.java"/>
-						<include name="org/openmdx/application/xml/spi/*.java"/>
-						<exclude name="org/openmdx/base/accessor/**/*.java"/>
-						<exclude name="org/openmdx/base/persistence/**/*.java"/>
-						<exclude name="org/openmdx/base/rest/**/*.java"/>
-						<exclude name="org/openmdx/base/aop2/*.java"/>
-						<patternset refid="build.exclude"/>
+						<patternset refid="openmdx-bootstrap.content"/>
 					</javac>
 				</antcontrib:then>
 			</antcontrib:elseif>
@@ -237,21 +233,7 @@
 				>
 					<src path="${build.dir}/src/java"/>
 					<src path="${basedir}/src/java"/>		    
-					<include name="javax/jmi/**/*.java"/>
-					<include name="org/openmdx/base/**/*.java"/>
-					<include name="org/openmdx/kernel/**/*.java"/>
-					<include name="org/openmdx/uses/**/*.java"/>
-					<include name="org/openmdx/compatibility/kernel/**/*.java"/>
-					<include name="org/openmdx/application/mof/**/*.java"/>
-					<include name="org/openmdx/application/xml/spi/*.java"/>
-					<exclude name="org/openmdx/base/accessor/jmi/**/*.java"/>
-					<exclude name="org/openmdx/base/accessor/jmi1/**/*.java"/>
-					<exclude name="org/openmdx/base/accessor/rest/**/*.java"/>
-					<exclude name="org/openmdx/base/accessor/view/**/*.java"/>
-					<exclude name="org/openmdx/base/persistence/**/*.java"/>
-					<exclude name="org/openmdx/base/rest/**/*.java"/>
-					<exclude name="org/openmdx/base/aop2/*.java"/>
-					<patternset refid="build.exclude"/>
+					<patternset refid="openmdx-bootstrap.content"/>
 				</javac>
 			</antcontrib:else>
 		</antcontrib:if>

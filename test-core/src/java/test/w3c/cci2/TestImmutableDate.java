@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: TestImmutableDate.java,v 1.1 2011/09/29 11:10:21 hburger Exp $
  * Description: TestImmutableDate 
- * Revision:    $Revision: 1.1 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/09/29 11:10:21 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

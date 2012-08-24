@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: LocalTransactions.java,v 1.5 2009/12/22 17:55:50 hburger Exp $
  * Description: Local Transaction Support
- * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/12/22 17:55:50 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: StateImportPlugIn.java,v 1.13 2011/11/26 01:35:00 hburger Exp $
  * Description: State Import Plug-In
- * Revision:    $Revision: 1.13 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/11/26 01:35:00 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -60,7 +57,6 @@ import javax.jdo.JDOObjectNotFoundException;
 import javax.jdo.PersistenceManager;
 import javax.jmi.reflect.JmiException;
 import javax.jmi.reflect.RefObject;
-import javax.resource.ResourceException;
 import javax.resource.cci.MappedRecord;
 import javax.xml.datatype.XMLGregorianCalendar;
 
@@ -68,6 +64,7 @@ import org.oasisopen.cci2.QualifierType;
 import org.oasisopen.jmi1.RefContainer;
 import org.openmdx.application.dataprovider.cci.JmiHelper;
 import org.openmdx.application.xml.spi.ImportMode;
+import org.openmdx.base.accessor.cci.SystemAttributes;
 import org.openmdx.base.accessor.spi.PersistenceManager_1_0;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.naming.Path;
@@ -76,6 +73,7 @@ import org.openmdx.base.rest.spi.Object_2Facade;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.state2.cci.DateStateViews;
 import org.openmdx.state2.jmi1.DateState;
+import org.openmdx.state2.jmi1.Legacy;
 import org.openmdx.state2.jmi1.StateCapable;
 import org.openmdx.state2.spi.DateStateViewContext;
 import org.openmdx.state2.spi.Parameters;
@@ -155,6 +153,8 @@ public class StateImportPlugIn implements ImportPlugIn {
                         break;
                 }
                 return refObject;
+            } else if (facade.attributeValue(SystemAttributes.REMOVED_AT) != null){
+            	return null;
             } else {
                 XMLGregorianCalendar validFrom =  (XMLGregorianCalendar) facade.attributeValue("stateValidFrom");
                 XMLGregorianCalendar validTo = (XMLGregorianCalendar) facade.attributeValue("stateValidTo");
@@ -288,18 +288,19 @@ public class StateImportPlugIn implements ImportPlugIn {
     /**
      * Tests the "validTimeUnqiue" flag
      * 
-     * @param objectHolder
+     * @param target
+     * @param source
      * 
      * @return <code>true</code> in case of unique valid time
-     * @throws ResourceException  
+     * 
      * @throws ServiceException 
      */
     private static boolean isValidTimeUnique(
-        MappedRecord objectHolder
+        RefObject target,
+        MappedRecord source
     ) throws ServiceException {
-        Object_2Facade facade = Facades.asObject(objectHolder);
-        return Boolean.TRUE.equals(
-            facade.attributeValue("validTimeUnique")
+        return target instanceof Legacy && Boolean.TRUE.equals(
+            Facades.asObject(source).attributeValue("validTimeUnique")
         );
     }
     
@@ -314,8 +315,7 @@ public class StateImportPlugIn implements ImportPlugIn {
      ) throws ServiceException {
         if(
 		    refObject instanceof DateState && 
-		    refObject instanceof StateCapable && 
-		    !StateImportPlugIn.isValidTimeUnique(objectHolder)
+		    !StateImportPlugIn.isValidTimeUnique(refObject, objectHolder)
 		) {
 		    DateState dateState = (DateState) refObject;
 		    JmiHelper.toRefObject(
@@ -326,26 +326,23 @@ public class StateImportPlugIn implements ImportPlugIn {
 		        !Parameters.STRICT_QUERY
 		    );
 		    if(!JDOHelper.isPersistent(refObject)){
-		        Object_2Facade facade = Facades.asObject(objectHolder);
-		        if(facade.attributeValue("removedAt") == null) {
-		            Path objectId = (Path)facade.attributeValue("core");
-		            if(objectId == null) {
-		                throw new ServiceException(
-		                    BasicException.Code.DEFAULT_DOMAIN,
-		                    BasicException.Code.BAD_PARAMETER,
-		                    "Missing core value, objectId can't be determined",
-		                    new BasicException.Parameter("externalId", facade.getPath().toXRI())
-		                );
-		            }
-		            dateState.setCore(
-		                this.getInstance(
-		                    persistenceManager,
-		                    ImportMode.UPDATE,
-		                    Facades.newObject(objectId).getDelegate(), 
-		                    StateCapable.class
-		                )
-		            );
-		        }
+		        Path objectId = (Path)Facades.asObject(objectHolder).attributeValue("core");
+	            if(objectId == null) {
+	                throw new ServiceException(
+	                    BasicException.Code.DEFAULT_DOMAIN,
+	                    BasicException.Code.BAD_PARAMETER,
+	                    "Missing core value, objectId can't be determined",
+	                    new BasicException.Parameter("externalId", Facades.asObject(objectHolder).getPath().toXRI())
+	                );
+	            }
+	            dateState.setCore(
+	                this.getInstance(
+	                    persistenceManager,
+	                    ImportMode.UPDATE,
+	                    Facades.newObject(objectId).getDelegate(), 
+	                    StateCapable.class
+	                )
+	            );
 		    }
 		} else {
 		    this.delegate.prepareInstance(

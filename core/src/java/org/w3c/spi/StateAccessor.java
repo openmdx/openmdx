@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: StateAccessor.java,v 1.8 2010/06/02 16:18:49 hburger Exp $
  * Description: JPA State Interrogation 
- * Revision:    $Revision: 1.8 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/06/02 16:18:49 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

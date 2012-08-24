@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: StandardDbObject.java,v 1.17 2011/09/05 22:01:26 hburger Exp $
  * Description: Standard DB Object
- * Revision:    $Revision: 1.17 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/09/05 22:01:26 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

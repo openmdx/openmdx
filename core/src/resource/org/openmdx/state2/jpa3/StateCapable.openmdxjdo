@@ -7,7 +7,6 @@
 	<package name="org.openmdx.state2.jpa3">
 		<class name="StateCapable">
 			<field name="transactionTimeUnique" visibility="cci" persistence-modifier="none"/>
-			<field name="validTimeUnique" visibility="cci" persistence-modifier="none"/>
 			<field name="stateVersion" visibility="none"  persistence-modifier="persistent"/>
 		</class>
 	</package>

@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: UserTransactions.java,v 1.8 2010/08/06 12:02:30 hburger Exp $
  * Description: User Transaction Support
- * Revision:    $Revision: 1.8 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/08/06 12:02:30 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: WBXMLPlugIn.java,v 1.3 2010/06/02 15:34:32 hburger Exp $
  * Description: REST Plug-In
- * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/06/02 15:34:32 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

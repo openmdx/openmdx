@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: JavaBean.java,v 1.1 2010/10/11 07:10:35 hburger Exp $
  * Description: A Java Bean 
- * Revision:    $Revision: 1.1 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/10/11 07:10:35 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

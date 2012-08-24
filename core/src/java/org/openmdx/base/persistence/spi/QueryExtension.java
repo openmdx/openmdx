@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: QueryExtension.java,v 1.5 2011/11/26 01:35:00 hburger Exp $
  * Description: Query Extension 
- * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/11/26 01:35:00 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

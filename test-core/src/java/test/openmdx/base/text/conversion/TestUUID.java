@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: TestUUID.java,v 1.4 2010/06/03 15:58:15 hburger Exp $
  * Description: Test UUID 
- * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/06/03 15:58:15 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

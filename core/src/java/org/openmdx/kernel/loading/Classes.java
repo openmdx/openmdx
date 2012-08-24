@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Classes.java,v 1.3 2010/04/16 12:35:30 hburger Exp $
  * Description: Application Framework: Classes 
- * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/04/16 12:35:30 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

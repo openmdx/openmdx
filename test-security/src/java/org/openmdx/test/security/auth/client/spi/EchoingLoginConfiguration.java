@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Security
- * Name:        $Id: EchoingLoginConfiguration.java,v 1.1 2009/03/11 16:32:33 hburger Exp $
  * Description: Echoing Login Configuration
- * Revision:    $Revision: 1.1 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/03/11 16:32:33 $
  * ====================================================================
  *
  * Copyright (c) 2007, OMEX AG, Switzerland

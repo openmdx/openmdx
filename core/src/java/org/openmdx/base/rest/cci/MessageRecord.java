@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: MessageRecord.java,v 1.3 2010/03/23 19:03:08 hburger Exp $
  * Description: Message Record 
- * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/03/23 19:03:08 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

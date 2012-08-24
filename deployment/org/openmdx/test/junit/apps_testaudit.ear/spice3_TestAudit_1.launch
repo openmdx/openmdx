@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<launchConfiguration type="org.eclipse.jdt.launching.localJavaApplication">
-    <stringAttribute key="org.eclipse.debug.core.source_locator_id" value="org.eclipse.jdt.debug.ui.javaSourceLocator"/>
-    <stringAttribute key="org.eclipse.debug.ui.target_debug_perspective" value="perspective_default"/>
-    <stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="ch.omex.test.audit1.junit.TestAudit_1"/>
-    <stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-Dch.omex.model.deployment1.accessor.basic.configuration=deployment/ch/omex/test/junit/apps_testaudit.ear/deployment.configuration.xml,deployment/ch/omex/test/junit/deployment.configuration.xml -DLOG_PROPERTY_FILE=config/junit.log.properties -Djava.protocol.handler.pkgs=ch.omex.spice.protocol"/>
-    <stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="spice"/>
-    <stringAttribute key="org.eclipse.debug.ui.target_run_perspective" value="perspective_default"/>
-</launchConfiguration>

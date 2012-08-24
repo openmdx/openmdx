@@ -2,11 +2,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: WorkspacesDashlet.jsp,v 1.8 2011/09/16 13:36:39 wfro Exp $
+ * Name:        $Id: WorkspacesDashlet.jsp,v 1.9 2012/07/08 12:59:06 wfro Exp $
  * Description: WorkspacesDashlet.jsp
- * Revision:    $Revision: 1.8 $
+ * Revision:    $Revision: 1.9 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/09/16 13:36:39 $
+ * Date:        $Date: 2012/07/08 12:59:06 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -67,7 +67,6 @@ org.openmdx.base.accessor.jmi.cci.*,
 org.openmdx.portal.servlet.*,
 org.openmdx.portal.servlet.attribute.*,
 org.openmdx.portal.servlet.view.*,
-org.openmdx.portal.servlet.texts.*,
 org.openmdx.portal.servlet.control.*,
 org.openmdx.portal.servlet.reports.*,
 org.openmdx.portal.servlet.wizards.*,

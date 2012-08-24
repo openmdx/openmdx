@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: LightweightXADataSource.jt,v 1.2 2011/11/11 02:09:45 hburger Exp $
+ * Name:        $Id: LightweightXADataSource.jt,v 1.4 2012/06/22 13:37:03 hburger Exp $
  * Description: Lightweight XADataSource
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/11/11 02:09:45 $
+ * Date:        $Date: 2012/06/22 13:37:03 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -58,7 +58,6 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
-import java.util.logging.Logger;
 
 import javax.sql.XAConnection;
 import javax.sql.XADataSource;
@@ -169,7 +168,7 @@ public class LightweightXADataSource
                 Classes.getKernelClass(driver);
             } catch (ClassNotFoundException exception) {
                 throw Throwables.initCause(
-                    new SQLException("Coluld not load the specified driver"),
+                    new SQLException("Could not load the specified driver"),
                     exception,
                     BasicException.Code.DEFAULT_DOMAIN,
                     BasicException.Code.MEDIA_ACCESS_FAILURE,
@@ -200,7 +199,7 @@ public class LightweightXADataSource
     // Since JRE 7
     //-----------------------------------------------------------------------
     
-	public Logger getParentLogger(
+	public java.util.logging.Logger getParentLogger(
 	) throws java.sql.SQLFeatureNotSupportedException {
 		throw new java.sql.SQLFeatureNotSupportedException();
 	}

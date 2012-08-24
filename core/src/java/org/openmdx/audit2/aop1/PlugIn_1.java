@@ -1,16 +1,13 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: PlugIn_1.java,v 1.8 2010/11/16 07:24:41 hburger Exp $
  * Description: Audit Plug-in
- * Revision:    $Revision: 1.8 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/11/16 07:24:41 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2009, OMEX AG, Switzerland
+ * Copyright (c) 2009-2012, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -51,9 +48,11 @@
 package org.openmdx.audit2.aop1;
 
 import javax.jdo.JDOHelper;
+import javax.resource.cci.InteractionSpec;
 
 import org.openmdx.audit2.spi.Configuration;
 import org.openmdx.base.accessor.cci.DataObject_1_0;
+import org.openmdx.base.accessor.rest.DataObject_1;
 import org.openmdx.base.accessor.view.Interceptor_1;
 import org.openmdx.base.accessor.view.ObjectView_1_0;
 import org.openmdx.base.aop1.PlugIn_1_0;
@@ -116,6 +115,29 @@ public class PlugIn_1 implements PlugIn_1_0 {
             }
         }
         return next;
+    }
+
+	/* (non-Javadoc)
+	 * @see org.openmdx.base.aop1.PlugIn_1_0#propagatedEagerly(org.openmdx.base.accessor.rest.DataObject_1, java.lang.String, java.lang.Object)
+	 */
+//  @Override
+	public boolean propagatedEagerly(
+		DataObject_1 object, 
+		String feature,
+		Object value
+	) throws ServiceException {
+		return false;
+	}
+
+    /* (non-Javadoc)
+     * @see org.openmdx.base.aop1.PlugIn_1_0#resolveObjectClass(java.lang.String, javax.resource.cci.InteractionSpec)
+     */
+//  @Override
+    public String resolveObjectClass(
+        String objectClass,
+        InteractionSpec interactionSpec
+    ) throws ServiceException {
+        return objectClass;
     }
 
 }

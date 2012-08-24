@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: PathTest.java,v 1.5 2011/11/21 06:32:15 hburger Exp $
  * Description: class TestPath 
- * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/11/21 06:32:15 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

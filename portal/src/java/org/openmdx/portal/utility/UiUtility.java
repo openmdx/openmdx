@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: UiUtility.java,v 1.23 2011/11/06 23:03:42 wfro Exp $
  * Description: UiUtility
- * Revision:    $Revision: 1.23 $
  * Owner:       CRIXP AG, Switzerland, http://www.crixp.com
- * Date:        $Date: 2011/11/06 23:03:42 $
  * ====================================================================
  *
  * This software is published under the BSD license

@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: CacheFilter.java,v 1.1 2008/08/10 21:39:18 wfro Exp $
  * Description: CacheFilter 
- * Revision:    $Revision: 1.1 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/08/10 21:39:18 $
  * ====================================================================
  *
  * This software is published under the BSD license

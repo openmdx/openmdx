@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: WildcardTest.java,v 1.5 2011/01/24 12:28:16 hburger Exp $
  * Description: class TestPath 
- * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/01/24 12:28:16 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

@@ -1,7 +1,7 @@
 /* iui.css (c) 2007-9 by iUI Project Members, see LICENSE.txt for license */
 body {
     margin: 0;
-    font-family: "DejaVu Sans Condensed", "lucida sans", tahoma, verdana, arial, helvetica, sans-serif;
+	  font-family: "Open Sans", "DejaVu Sans Condensed", "lucida sans", tahoma, verdana, arial, sans-serif;
     background: #FFFFFF;
     color: #000000;
     overflow-x: hidden;

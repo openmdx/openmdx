@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: UpdateAvoidance.java,v 1.1 2011/11/25 14:09:58 hburger Exp $
  * Description: Configuration 
- * Revision:    $Revision: 1.1 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/11/25 14:09:58 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

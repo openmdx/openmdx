@@ -1,17 +1,14 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: ReferencePaneControl.java,v 1.214 2011/11/28 13:33:51 wfro Exp $
  * Description: ReferencePaneControl
- * Revision:    $Revision: 1.214 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/11/28 13:33:51 $
  * ====================================================================
  *
  * This software is published under the BSD license
  * as listed below.
  * 
- * Copyright (c) 2004-2007, OMEX AG, Switzerland
+ * Copyright (c) 2004-2012, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -63,7 +60,6 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.SortedMap;
 
 import javax.jdo.PersistenceManager;
 
@@ -78,6 +74,7 @@ import org.openmdx.portal.servlet.ApplicationContext;
 import org.openmdx.portal.servlet.Autocompleter_1_0;
 import org.openmdx.portal.servlet.HtmlEncoder_1_0;
 import org.openmdx.portal.servlet.ObjectReference;
+import org.openmdx.portal.servlet.Texts_1_0;
 import org.openmdx.portal.servlet.ViewPort;
 import org.openmdx.portal.servlet.WebKeys;
 import org.openmdx.portal.servlet.action.GridGetRowMenuAction;
@@ -90,7 +87,6 @@ import org.openmdx.portal.servlet.attribute.NullValue;
 import org.openmdx.portal.servlet.attribute.NumberValue;
 import org.openmdx.portal.servlet.attribute.ObjectReferenceValue;
 import org.openmdx.portal.servlet.attribute.TextValue;
-import org.openmdx.portal.servlet.texts.Texts_1_0;
 import org.openmdx.portal.servlet.view.Grid;
 import org.openmdx.portal.servlet.view.ReferencePane;
 import org.openmdx.portal.servlet.view.ShowObjectView;
@@ -151,7 +147,7 @@ public class ReferencePaneControl
                   tab.getIconKey(),
                   true
               )
-          );      
+          );
           this.gridControl[i] = controlFactory.createGridControl(
               Integer.toString(i),
               perspective,
@@ -169,19 +165,19 @@ public class ReferencePaneControl
     //-------------------------------------------------------------------------
     public Action getRowMenuAction(
         String targetRowXri,
-        long rowId
+        String rowId
     ) {
         return new Action(
             GridGetRowMenuAction.EVENT_ID,
             new Action.Parameter[]{
                 new Action.Parameter(Action.PARAMETER_TARGETXRI, targetRowXri),
-                new Action.Parameter(Action.PARAMETER_ROW_ID, Long.toString(rowId))
+                new Action.Parameter(Action.PARAMETER_ROW_ID, rowId)
             },
             "",
             true
         );
     }
-        
+
     //-------------------------------------------------------------------------
     public GridControl[] getGridControl(
     ) {
@@ -368,7 +364,7 @@ public class ReferencePaneControl
             String fieldIdShowSearchFormOnInit = SEARCH_FORM_NAME + id + "." + WebKeys.REQUEST_PARAMETER_SHOW_SEARCH_FORM;
             searchParams += "+'&" + WebKeys.REQUEST_PARAMETER_SHOW_SEARCH_FORM + "='+encodeURIComponent($F('" + fieldIdShowSearchFormOnInit + "'))";
             p.write("      <a type=\"submit\" class=\"abutton\" onclick=\"javascript:", updateTabScriptletPre, p.getEvalHRef(columnFilterAddAction), searchParams, updateTabScriptletPost, ";\">&nbsp;&nbsp;&nbsp;", texts.getOkTitle(), "&nbsp;&nbsp;&nbsp;</a>");
-            p.write("      <a type=\"submit\" class=\"abutton\" onclick=\"javascript:$('", FILTER_AREA_NAME, id, "').style.display='none';return false;\">", texts.getCancelTitle(), "</a>");
+            p.write("      <a type=\"submit\" class=\"abutton\" onclick=\"javascript:$('", id, "_filterArea').style.display='none';return false;\">", texts.getCancelTitle(), "</a>");
             p.write("      &nbsp;&nbsp;&nbsp;&nbsp;<input type=\"checkbox\" id=\"", fieldIdShowSearchFormOnInit, "\" name=\"", fieldIdShowSearchFormOnInit, "\" ", (showSearchFormOnInit ? "checked" : ""), " value=\"true\">&nbsp;", texts.getShowTitle(), "</input><br />");
 	        p.write("      </td></tr>");        	
     		p.write("    </table>");
@@ -378,7 +374,7 @@ public class ReferencePaneControl
     		p.write("    	  try{", updateTabScriptletPre, p.getEvalHRef(columnFilterAddAction), searchParams, updateTabScriptletPost, ";}catch(e){}");
     		p.write("      };");
     		p.write("      function closeForm", id, "(e){");
-    		p.write("          $('", FILTER_AREA_NAME, id, "').style.display='none';");
+    		p.write("          $('", id, "_filterArea').style.display='none';");
     		p.write("      };");
     		p.write("      new YAHOO.util.KeyListener($('", SEARCH_FORM_NAME, id, "'), {keys:13}, submitForm", id, ").enable();");
     		p.write("      new YAHOO.util.KeyListener($('", SEARCH_FORM_NAME, id, "'), {keys:27}, closeForm", id, ").enable();");
@@ -393,7 +389,22 @@ public class ReferencePaneControl
     public void paint(
         ViewPort p,
         String frame,
-        boolean forEditing        
+        boolean forEditing
+    ) throws ServiceException {
+    	this.paint(
+    		p, 
+    		frame, 
+    		forEditing, 
+    		null // show all grids by default
+    	);
+    }
+    
+    //---------------------------------------------------------------------------------
+    public void paint(
+        ViewPort p,
+        String frame,
+        boolean forEditing,
+        List<String> grids
     ) throws ServiceException {
     	SysLog.detail("> paint");
        
@@ -404,10 +415,9 @@ public class ReferencePaneControl
         HtmlEncoder_1_0 htmlEncoder = app.getHtmlEncoder();
             
         int paneIndex = this.getPaneIndex();
-        String containerId = view.getContainerElementId() == null ? 
-            "gridContent" + Integer.toString(paneIndex) : 
-            view.getContainerElementId();
-        
+        String gridContentId = view.getContainerElementId() == null ? 
+        	"G_" + Integer.toString(paneIndex) :
+        		view.getContainerElementId() + "_" + Integer.toString(paneIndex);         
         // View
         int zIndex = (view.getReferencePane().length - this.getPaneIndex()) * 10;
         if(FRAME_VIEW.equals(frame)) {
@@ -436,13 +446,14 @@ public class ReferencePaneControl
 	            		view.getRefObject(), 
 	            		app, 
 	            		WebKeys.PERMISSION_REVOKE_SHOW
-	            	);
-	            	if(!isRevokeShow) {
+	            	);	            	
+	            	if(
+	            		!isRevokeShow && 
+	            		(grids == null || grids.contains(gridControl.getObjectContainer().getReferenceName()))
+	            	) {
 	            		hasTabs = true;
-		                int tabIndex = 100*paneIndex + i;
-		                String tabId = view.getContainerElementId() == null ? 
-		                	Integer.toString(tabIndex) : 
-		                	view.getContainerElementId() + "-" + Integer.toString(tabIndex);                                    
+		                int tabIndex = 100 * paneIndex + i;
+		                String tabId = gridContentId + "_" + Integer.toString(tabIndex);  
 		                String tabLabel = action.getTitle();
 		                boolean isGroupTab = tabLabel.startsWith(WebKeys.TAB_GROUPING_CHARACTER);
 		                if(isGroupTab) tabLabel = tabLabel.substring(1);
@@ -481,13 +492,13 @@ public class ReferencePaneControl
 		                		"";
 		            	if(p.getViewPortType() == ViewPort.Type.MOBILE) {
 		            		p.write("      <li>");
-		            		p.write("        <a href=\"#\" class=\"", tabClass, "\" onclick=\"javascript:var c=$('gridContent", tabId, "');if(c.style.display=='block'){c.style.display='none';}else{c.style.display='block';new Ajax.Updater('gridContent", tabId, "', ", p.getEvalHRef(action), ", {asynchronous:true, evalScripts: true});};return false;\" title=\"", (encodedTabTitle == null ? "" : encodedTabTitle), "\">", encodedTabLabel, "</a>");
-				            p.write("        <div id=\"gridContent", tabId, "\">");
+		            		p.write("        <a href=\"#\" class=\"", tabClass, "\" onclick=\"javascript:var c=$('", tabId, "');if(c.style.display=='block'){c.style.display='none';}else{c.style.display='block';new Ajax.Updater('", tabId, "', ", p.getEvalHRef(action), ", {asynchronous:true, evalScripts: true});};return false;\" title=\"", (encodedTabTitle == null ? "" : encodedTabTitle), "\">", encodedTabLabel, "</a>");
+				            p.write("        <div id=\"", tabId, "\">");
 				            p.write("        </div>");                
 		            		p.write("      </li>");
 		            	}
 		            	else {
-		            		p.write("  <a href=\"#\" class=\"", tabClass, "\" onclick=\"javascript:gTabSelect(this);new Ajax.Updater('", containerId, "', ", p.getEvalHRef(action), ", {asynchronous:true, evalScripts: true, onComplete: function(){try{makeZebraTable('gridTable", tabId, "',1);}catch(e){};}});return false;\" title=\"", (encodedTabTitle == null ? "" : encodedTabTitle), "\">", encodedTabLabel, "</a>");
+		            		p.write("  <a href=\"#\" class=\"", tabClass, "\" onclick=\"javascript:gTabSelect(this);new Ajax.Updater('", gridContentId, "', ", p.getEvalHRef(action), ", {asynchronous:true, evalScripts: true, onComplete: function(){try{makeZebraTable('", tabId, "_gridTable',1);}catch(e){};}});return false;\" title=\"", (encodedTabTitle == null ? "" : encodedTabTitle), "\">", encodedTabLabel, "</a>");
 		            	}
 	            	}
 	            }
@@ -497,7 +508,7 @@ public class ReferencePaneControl
 	            else {
 	        		p.write("</div>");
 	        		if(hasTabs) {
-			            p.write("<div id=\"", containerId, "\" class=\"gContent\" style=\"position:relative;z-index:", Integer.toString(zIndex), ";\">");
+			            p.write("<div id=\"", gridContentId, "\" class=\"gContent\" style=\"position:relative;z-index:", Integer.toString(zIndex), ";\">");
 			            p.write("  <div class=\"loading\" style=\"height:40px;\"></div>");
 			            p.write("</div>");
 	        		}
@@ -509,28 +520,26 @@ public class ReferencePaneControl
             Grid grid = referencePane.getGrid();
             GridControl gridControl = grid.getGridControl();
             int tabIndex = paneIndex*100 + referencePane.getSelectedReference();
-            String tabId = view.getContainerElementId() == null ? 
-            	Integer.toString(tabIndex) : 
-            	view.getContainerElementId() + "-" + Integer.toString(tabIndex);                
+            String tabId = gridContentId + "_" + Integer.toString(tabIndex);
+            String gridMenuId = tabId + "_gridMenu";
             String updateTabScriptletPre = null;
             String updateTabScriptletPost = null;
             if(p.getViewPortType() == ViewPort.Type.MOBILE) {
-	            updateTabScriptletPre = "new Ajax.Updater('gridContent" + tabId + "', ";
+	            updateTabScriptletPre = "new Ajax.Updater('" + tabId + "', ";
 	            updateTabScriptletPost = ", {asynchronous:true, evalScripts:true });return false;";            	            	
             }
             else {
-	            updateTabScriptletPre = "new Ajax.Updater('" + containerId + "', ";
-	            updateTabScriptletPost = ", {asynchronous:true, evalScripts:true, onComplete: function(){try{makeZebraTable('gridTable" + tabId + "',1);}catch(e){};}});loadingIndicator($('" + containerId + "'));return false;";
+	            updateTabScriptletPre = "new Ajax.Updater('" + gridContentId + "', ";
+	            updateTabScriptletPost = ", {asynchronous:true, evalScripts:true, onComplete: function(){try{makeZebraTable('" + tabId + "_gridTable',1);}catch(e){};}});loadingIndicator($('" + gridContentId + "'));return false;";
             }
         	boolean isRevokeEdit = app.getPortalExtension().hasPermission(
         		gridControl.getQualifiedReferenceTypeName(), 
         		view.getRefObject(), 
         		app, 
         		WebKeys.PERMISSION_REVOKE_EDIT
-        	);	                    
-            Action selectGridTabAction = referencePane.getSelectReferenceAction()[referencePane.getSelectedReference()];
-            if(grid != null) {
-                
+        	);
+            Action selectGridTabAction = referencePane.getSelectReferenceActions().get(referencePane.getSelectedReference());
+            if(grid != null) {                
                 // Get grid rows. This also brings all grid properties to a consistent state
             	SysLog.detail("grid rows");
             	if(p.getViewPortType() == ViewPort.Type.MOBILE) {
@@ -549,7 +558,6 @@ public class ReferencePaneControl
                 Action pagePreviousAction = grid.getPagePreviousAction(pagePreviousIsEnabled);
                 Action pagePreviousFastAction = grid.getPagePreviousFastAction(pagePreviousIsEnabled); 
                 org.openmdx.portal.servlet.Filter[] filters = grid.getFilters();
-
                 // Sortable columns
                 List<Action> sortableColumns = new ArrayList<Action>();
                 if(grid.isComposite()) {
@@ -573,8 +581,13 @@ public class ReferencePaneControl
                 // Non-composite, multi-valued reference                
                 if(!grid.isComposite()) {
                     if(p.getViewPortType() != ViewPort.Type.MOBILE) {                	
-	                    // Grid operations only if changeable and not embedded
-	                    if(!isRevokeEdit && grid.isChangeable() && (view.getContainerElementId() == null)) {                    
+	                    // Grid operations only if changeable and not embedded and view is not read-only
+	                    if(
+	                    	!isRevokeEdit && 
+	                    	grid.isChangeable() && 
+	                    	(view.getContainerElementId() == null) && 
+	                    	!Boolean.TRUE.equals(view.isReadOnly())
+	                    ) {                    
 	                        Action addObjectAction = grid.getAddObjectAction();
 	                        Action removeObjectAction = grid.getRemoveObjectAction();
 	                        Action moveUpObjectAction = grid.getMoveUpObjectAction();
@@ -587,18 +600,18 @@ public class ReferencePaneControl
 	                            addObjectAction.getParameter(Action.PARAMETER_REFERENCE),
 	                            app
 	                        );
-	                        p.write("<div id=\"menuOpPanel\" class=\"menuOpPanel\">");
+	                        p.write("<div id=\"", gridMenuId, "\" class=\"menuOpPanel\">");
 	                        p.write("  <table cellspacing=\"0\" cellpadding=\"0\" id=\"menuOp\" width=\"100%\">");
 	                        p.write("    <tr>");
 	                        p.write("      <td>");
-	                        p.write("        <div id=\"showGridButtons", tabId, "\">");
+	                        p.write("        <div id=\"", tabId, "_gridButtons\">");
 	                        p.write("          <ul id=\"nav\" class=\"nav\" onmouseover=\"sfinit(this);\" >");
 	                        p.write("            <li><a href=\"#\" onclick=\"javascript:return false;\">", htmlEncoder.encode(texts.getEditTitle(), false), "&nbsp;&nbsp;&nbsp;</a>");
 	                        p.write("              <ul onclick=\"this.style.left='-999em';\" onmouseout=\"this.style.left='';\">");
 	                        p.write("                <li><a href=\"#\" onclick=\"javascript:", updateTabScriptletPre, p.getEvalHRef(addObjectAction), "+'&amp;", WebKeys.REQUEST_PARAMETER_LIST, "=", Action.PARAMETER_OBJECTXRI, "*('+encodeURIComponent($F('", adderFieldId, "'))+')'", updateTabScriptletPost, "\">", htmlEncoder.encode(texts.getAddObjectTitle(), false), "</a></li>");
-	                        p.write("                <li><a href=\"#\" onclick=\"javascript:", updateTabScriptletPre, p.getEvalHRef(removeObjectAction), "+'&amp;", WebKeys.REQUEST_PARAMETER_LIST, "='+encodeURIComponent(getSelectedGridRows('gridTable", tabId, "',1))", updateTabScriptletPost, "\">", htmlEncoder.encode(texts.getRemoveObjectTitle(), false), "</a></li>");
-	                        p.write("                <li><a href=\"#\" onclick=\"javascript:", updateTabScriptletPre, p.getEvalHRef(moveUpObjectAction), "+'&amp;", WebKeys.REQUEST_PARAMETER_LIST, "='+encodeURIComponent(getSelectedGridRows('gridTable", tabId, "',1))", updateTabScriptletPost, "\">", htmlEncoder.encode(texts.getMoveUpObjectTitle(), false), "</a></li>");
-	                        p.write("                <li><a href=\"#\" onclick=\"javascript:", updateTabScriptletPre, p.getEvalHRef(moveDownObjectAction), "+'&amp;", WebKeys.REQUEST_PARAMETER_LIST, "='+encodeURIComponent(getSelectedGridRows('gridTable", tabId, "',1))", updateTabScriptletPost, "\">", htmlEncoder.encode(texts.getMoveDownObjectTitle(), false), "</a></li>");
+	                        p.write("                <li><a href=\"#\" onclick=\"javascript:", updateTabScriptletPre, p.getEvalHRef(removeObjectAction), "+'&amp;", WebKeys.REQUEST_PARAMETER_LIST, "='+encodeURIComponent(getSelectedGridRows('" + tabId, "_gridTable',1))", updateTabScriptletPost, "\">", htmlEncoder.encode(texts.getRemoveObjectTitle(), false), "</a></li>");
+	                        p.write("                <li><a href=\"#\" onclick=\"javascript:", updateTabScriptletPre, p.getEvalHRef(moveUpObjectAction), "+'&amp;", WebKeys.REQUEST_PARAMETER_LIST, "='+encodeURIComponent(getSelectedGridRows('" + tabId, "_gridTable',1))", updateTabScriptletPost, "\">", htmlEncoder.encode(texts.getMoveUpObjectTitle(), false), "</a></li>");
+	                        p.write("                <li><a href=\"#\" onclick=\"javascript:", updateTabScriptletPre, p.getEvalHRef(moveDownObjectAction), "+'&amp;", WebKeys.REQUEST_PARAMETER_LIST, "='+encodeURIComponent(getSelectedGridRows('" + tabId, "_gridTable',1))", updateTabScriptletPost, "\">", htmlEncoder.encode(texts.getMoveDownObjectTitle(), false), "</a></li>");
 	                        p.write("              </ul>");
 	                        p.write("            </li>");
 	                        p.write("          </ul>");
@@ -626,7 +639,7 @@ public class ReferencePaneControl
 	                        else {
 	                            autocompleter.paint(                    
 	                                p,
-	                                null,
+	                                adderFieldId,
 	                                tabIndex,
 	                                "addObject",
 	                                null,
@@ -649,7 +662,7 @@ public class ReferencePaneControl
                 // Composite objects
                 else {
                     if(p.getViewPortType() != ViewPort.Type.MOBILE) {                	
-	                    p.write("<div id=\"menuOpPanel" , "\" class=\"menuOpPanel\">");
+	                    p.write("<div id=\"", gridMenuId, "" , "\" class=\"menuOpPanel\">");
 	                    p.write("  <table cellspacing=\"0\" cellpadding=\"0\" id=\"menuOp\" width=\"100%\">");
 	                    p.write("    <tr>");
 	                    //
@@ -700,11 +713,11 @@ public class ReferencePaneControl
 		                		}
 		                	}
 		                    if(firstSearchableColumn == null) {
-		                    	p.write("        <a href=\"#\" onclick=\"javascript:ft=$('", FILTER_AREA_NAME, tabId, "');if(ft.style.display!='block'){ft.style.display='block';}else{ft.style.display='none';};return false;\">", p.getImg("src=\"", p.getResourcePath("images/"), WebKeys.ICON_SEARCH_PANEL, "\" border=\"0\" align=\"bottom\" alt=\"v\""), "</a>");	                    	
+		                    	p.write("        <a href=\"#\" onclick=\"javascript:ft=$('", tabId, "_filterArea');if(ft.style.display!='block'){ft.style.display='block';}else{ft.style.display='none';};return false;\">", p.getImg("src=\"", p.getResourcePath("images/"), WebKeys.ICON_SEARCH_PANEL, "\" border=\"0\" align=\"bottom\" alt=\"v\""), "</a>");	                    	
 		                    }
 		                    else {
 		                    	boolean hilite = grid.hasFilterValues();
-		                    	p.write("        <a href=\"#\" onclick=\"javascript:ft=$('", FILTER_AREA_NAME, tabId, "');if(ft.style.display!='block'){ft.style.display='block';try{$('", this.getSearchFormFieldId(tabId, firstSearchableColumn), "').focus();}catch(e){};}else{ft.style.display='none';};return false;\">", p.getImg("src=\"", p.getResourcePath("images/"), WebKeys.ICON_SEARCH_PANEL, "\" ", (hilite ? " class=\"hilite\"" : ""), " border=\"0\" align=\"bottom\" alt=\"v\""), "</a>");
+		                    	p.write("        <a href=\"#\" onclick=\"javascript:ft=$('", tabId, "_filterArea');if(ft.style.display!='block'){ft.style.display='block';try{$('", this.getSearchFormFieldId(tabId, firstSearchableColumn), "').focus();}catch(e){};}else{ft.style.display='none';};return false;\">", p.getImg("src=\"", p.getResourcePath("images/"), WebKeys.ICON_SEARCH_PANEL, "\" ", (hilite ? " class=\"hilite\"" : ""), " border=\"0\" align=\"bottom\" alt=\"v\""), "</a>");
 		                    }
 	                    }
 	                    p.write("      </td>");
@@ -722,22 +735,25 @@ public class ReferencePaneControl
 	                    	""
 	                    );
 	                    // Filter actions
-	                    Action setCurrentFilterAsDefaultAction = grid.getSetCurrentFilterAsDefaultAction();
-	                    Action setDefaultFilterOnInitAction = grid.getSetShowGridContentOnInitAction();
-	                    p.write("          <li><a href=\"#\" onclick=\"javascript:", updateTabScriptletPre, p.getEvalHRef(setCurrentFilterAsDefaultAction), updateTabScriptletPost, "\">", p.getImg("src=\"", p.getResourcePath("images/"), setCurrentFilterAsDefaultAction.getIconKey(), "\" border=\"0\" align=\"absmiddle\" alt=\"o\" title=\"", htmlEncoder.encode(setCurrentFilterAsDefaultAction.getTitle(), false), "\""), "</a></li>");
-	                    p.write("          <li><a href=\"#\" onclick=\"javascript:", updateTabScriptletPre, p.getEvalHRef(setDefaultFilterOnInitAction), updateTabScriptletPost, "\">", p.getImg("src=\"", p.getResourcePath("images/"), setDefaultFilterOnInitAction.getIconKey(), "\" border=\"0\" align=\"absmiddle\" alt=\"v\" title=\"", htmlEncoder.encode(setDefaultFilterOnInitAction.getTitle(), false), "\""), "</a></li>");	                  
+	                    if(!Boolean.TRUE.equals(view.isReadOnly())) {
+		                    Action setCurrentFilterAsDefaultAction = grid.getSetCurrentFilterAsDefaultAction();
+		                    Action setDefaultFilterOnInitAction = grid.getSetShowGridContentOnInitAction();
+		                    p.write("          <li><a href=\"#\" onclick=\"javascript:", updateTabScriptletPre, p.getEvalHRef(setCurrentFilterAsDefaultAction), updateTabScriptletPost, "\">", p.getImg("src=\"", p.getResourcePath("images/"), setCurrentFilterAsDefaultAction.getIconKey(), "\" border=\"0\" align=\"absmiddle\" alt=\"o\" title=\"", htmlEncoder.encode(setCurrentFilterAsDefaultAction.getTitle(), false), "\""), "</a></li>");
+		                    p.write("          <li><a href=\"#\" onclick=\"javascript:", updateTabScriptletPre, p.getEvalHRef(setDefaultFilterOnInitAction), updateTabScriptletPost, "\">", p.getImg("src=\"", p.getResourcePath("images/"), setDefaultFilterOnInitAction.getIconKey(), "\" border=\"0\" align=\"absmiddle\" alt=\"v\" title=\"", htmlEncoder.encode(setDefaultFilterOnInitAction.getTitle(), false), "\""), "</a></li>");
+	                    }
 	                    p.write("        </ul>");
 	                    //
 	                    // Menu
 	                    //
 	                    p.write("        <div class=\"filterGap\">&nbsp;</div>");
-	                    p.write("        <div id=\"showGridButtons", tabId, "\">");
+	                    p.write("        <div id=\"", tabId, "_gridButtons\">");
 	                    p.write("          <ul id=\"nav\" class=\"nav\" onmouseover=\"sfinit(this);\" >");
 	                    Action multiDeleteAction = grid.getMultiDeleteAction();
 	                    if(
 	                        (grid.getObjectCreator() != null) &&
 	                        (grid.getObjectCreator().length > 0) &&
-	                        !isRevokeEdit
+	                        !isRevokeEdit && 
+	                        !Boolean.TRUE.equals(view.isReadOnly())
 	                    ) {
 	                        //
 	                        // Menu New
@@ -757,14 +773,14 @@ public class ReferencePaneControl
 	                        p.write("                <ul onclick=\"this.style.left='-999em';\" onmouseout=\"this.style.left='';\">");
 	                        // In-place edit
 	                        if(gridControl.inPlaceEditable() && (view.getLookupType() == null)) {
-	                            p.write("                  <li><a href=\"#\" onclick=\"javascript:$('editGrid", tabId, "').style.display='block';$('showGrid", tabId, "').style.display='none';$('showGridButtons", tabId, "').style.display='none';\">", htmlEncoder.encode(texts.getEditTitle(), false), "</a></li>");
+	                            p.write("                  <li><a href=\"#\" onclick=\"javascript:$('editGrid", tabId, "').style.display='block';$('", tabId, "_grid').style.display='none';$('", tabId, "_gridButtons').style.display='none';\">", htmlEncoder.encode(texts.getEditTitle(), false), "</a></li>");
 	                        }
 	                        else {
 	                            p.write("                  <li><a href=\"#\" onclick=\"javascript:;\"><span>", htmlEncoder.encode(texts.getEditTitle(), false), "</span></a></li>");
 	                        }               
 	                        // Multi-delete
 	                        if(referencePane.getReferencePaneControl().getIsMultiDeleteEnabled() && (multiDeleteAction != null)) {
-	                            p.write("                  <li><a href=\"#\" onclick=\"javascript:var para=getSelectedGridRows('gridTable", tabId, "',1);if(para.length>1){$('parameter.list", tabId, "').value=para;};$('event.submit", tabId, "').value='", Integer.toString(multiDeleteAction.getEvent()), "';document.showForm", tabId, ".submit();\">", htmlEncoder.encode(multiDeleteAction.getTitle(), false), "</a></li>");
+	                            p.write("                  <li><a href=\"#\" onclick=\"javascript:var para=getSelectedGridRows('", tabId, "_gridTable',1);if(para.length>1){$('parameter.list", tabId, "').value=para;};$('event.submit", tabId, "').value='", Integer.toString(multiDeleteAction.getEvent()), "';document.showForm", tabId, ".submit();\">", htmlEncoder.encode(multiDeleteAction.getTitle(), false), "</a></li>");
 	                        }
 	                        else {
 	                            p.write("                  <li><a href=\"#\" onclick=\"javascript:;\"><span>", htmlEncoder.encode(texts.getDeleteTitle(), false), "</span></a></li>");                    
@@ -779,7 +795,7 @@ public class ReferencePaneControl
 		                        p.write("              <li><a href=\"#\" onclick=\"javascript:return false;\">", htmlEncoder.encode(texts.getActionsTitle(), false), "&nbsp;&nbsp;&nbsp;</a>");
 		                        p.write("                <ul onclick=\"this.style.left='-999em';\" onmouseout=\"this.style.left='';\">");
 		                        for(Action action: gridActions) {
-		                            p.write("                  <li><a href=\"#\" onclick=\"javascript:var para=getSelectedGridRows('gridTable", tabId, "',1);if(para.length>1){$('parameter.list", tabId, "').value=para;};$('event.submit", tabId, "').value='", Integer.toString(action.getEvent()), "';document.showForm", tabId, ".submit();\">", htmlEncoder.encode(action.getTitle(), false), "</a></li>");		                        	
+		                            p.write("                  <li><a href=\"#\" onclick=\"javascript:var para=getSelectedGridRows('", tabId, "_gridTable',1);if(para.length>1){$('parameter.list", tabId, "').value=para;};$('event.submit", tabId, "').value='", Integer.toString(action.getEvent()), "';$('parameter.size", tabId, "').value='", action.getParameter(Action.PARAMETER_SIZE), "';document.showForm", tabId, ".submit();\">", htmlEncoder.encode(action.getTitle(), false), "</a></li>");		                        	
 		                        }
 		                        p.write("                </ul>");
 		                        p.write("              </li>");	                    		
@@ -804,10 +820,11 @@ public class ReferencePaneControl
 	                    // Actions Form: multi-delete and user-defined actions
 	                    //
 	                    {
-	                    	p.write("        <form id=\"showForm", tabId, "\" name=\"showForm", tabId, "\" enctype=\"multipart/form-data\" accept-charset=\"utf-8\" method=\"post\" action=\"\" style=\"padding:0px;\">");
+	                    	p.write("        <form id=\"showForm", tabId, "\" action=\"", p.getResourcePath(WebKeys.SERVLET_NAME), "\" name=\"showForm", tabId, "\" enctype=\"multipart/form-data\" accept-charset=\"utf-8\" method=\"post\" style=\"padding:0px;\">");
 	                        p.write("          <input type=\"hidden\" name=\"requestId.submit\" value=\"", view.getRequestId(), "\" />");
 	                        p.write("          <input type=\"hidden\" name=\"", Action.PARAMETER_REFERENCE, "\" value=\"", Integer.toString(referencePane.getSelectedReference()), "\" />");
 	                        p.write("          <input type=\"hidden\" name=\"", Action.PARAMETER_PANE, "\" value=\"", Integer.toString(paneIndex), "\" />");
+	                        p.write("          <input id=\"parameter.size", tabId, "\" type=\"hidden\" name=\"", Action.PARAMETER_SIZE, "\" value=\"\" />");
 	                        p.write("          <input id=\"event.submit", tabId, "\" type=\"hidden\" name=\"event.submit\" value=\"\" />");
 	                        p.write("          <input id=\"parameter.list", tabId, "\" type=\"hidden\" name=\"parameter.list\" value=\"\" />");
 		                    p.write("        </form>");                
@@ -827,7 +844,7 @@ public class ReferencePaneControl
 	                    p.write("</div>");
 	                }
                 }
-                p.write("<div id=\"showGrid", tabId, "\" style=\"display: block;\">");
+                p.write("<div id=\"", tabId, "_grid\" style=\"display: block;\">");
                 //
                 // Filter menues and search form
                 //
@@ -877,11 +894,11 @@ public class ReferencePaneControl
                 }
                 else {
 	                boolean showSearchFormOnInit = app.getPortalExtension().showSearchForm(gridControl, app);
-	                p.write("<div id=\"", FILTER_AREA_NAME, tabId, "\" style=\"display:", (showSearchFormOnInit ? "block" : "none"), ";\">");
-	                p.write("  <div id=\"customFilterArea", tabId, "\"></div>");                
+	                p.write("<div id=\"", tabId, "_filterArea\" style=\"display:", (showSearchFormOnInit ? "block" : "none"), ";\">");
+	                p.write("  <div id=\"", tabId, "_customFilterArea\"></div>");                
 	                if(filters.length > 1) {
-	                    p.write("  <div id=\"defaultFilterArea", tabId, "\">");                
-	                    p.write("    <table id=\"filterTable", tabId, "\" class=\"filterTable\">");
+	                    p.write("  <div id=\"", tabId, "_defaultFilterArea\">");                
+	                    p.write("    <table id=\"", tabId, "_filterTable\" class=\"filterTable\">");
 	                    p.write("      <tr>");
                         p.write("        <td>");
 	                    // only show filter values input field if there is at least one sortable column
@@ -915,7 +932,7 @@ public class ReferencePaneControl
                     p.write("        <tr class=\"header\">");
                 }
                 else {
-                	p.write("<table class=\"gridTable", gridClassNameSuffix, "\" id=\"gridTable", tabId, "\">");
+                	p.write("<table class=\"gridTable", gridClassNameSuffix, "\" id=\"", tabId, "_gridTable\">");
                     p.write("  <tr class=\"gridTableHeader", gridClassNameSuffix, "\">");
                     if(grid.showRowSelectors()) {
                         p.write("<td class=\"gridColTypeCheck\"></td>");
@@ -931,7 +948,7 @@ public class ReferencePaneControl
                         else {
 	                        p.write("<td class=\"gridColTypeIcon-3\">");
 	                        p.write("  <table class=\"filterHeader\"><tr><td>");
-	                        p.write("    <a href=\"#\" onclick=\"javascript:", updateTabScriptletPre, p.getEvalHRef(gridAlignmentAction), updateTabScriptletPost, "\">", p.getImg("class=\"borderedimg\" src=\"", p.getResourcePath("images/"), gridAlignmentAction.getIconKey(), "\" title=\"", htmlEncoder.encode(gridAlignmentAction.getTitle(), false), "\" align=\"bottom\"", p.getOnMouseOver("javascript:this.className='borderedimghover';"), p.getOnMouseOut("javascript:this.className='borderedimg';"), " alt=\"\""), "</a><input id=\"multiselect", tabId, "\" type=\"checkbox\" onclick=\"javascript:selectGridRows('gridTable", tabId, "',1, this.checked);\"/>");
+	                        p.write("    <a href=\"#\" onclick=\"javascript:", updateTabScriptletPre, p.getEvalHRef(gridAlignmentAction), updateTabScriptletPost, "\">", p.getImg("class=\"borderedimg\" src=\"", p.getResourcePath("images/"), gridAlignmentAction.getIconKey(), "\" title=\"", htmlEncoder.encode(gridAlignmentAction.getTitle(), false), "\" align=\"bottom\"", p.getOnMouseOver("javascript:this.className='borderedimghover';"), p.getOnMouseOut("javascript:this.className='borderedimg';"), " alt=\"\""), "</a><input id=\"multiselect", tabId, "\" type=\"checkbox\" onclick=\"javascript:selectGridRows('", tabId, "_gridTable',1, this.checked);\"/>");
 	                        p.write("  </td></tr></table>");
 	                        p.write("</td>");
                         }
@@ -988,8 +1005,9 @@ public class ReferencePaneControl
                 p.write("</tr>");
                 // Show grid
                 for(int j = 0; j < rows.length; j++) {
-                    long rowId = ReferencePaneControl.currentRowId++;                    
-                    Object[] row = (Object[])rows[j];    
+                	long rowNumber = ReferencePaneControl.currentRowId++;
+                    String rowId = tabId + "_row" + rowNumber;                    
+                    Object[] row = (Object[])rows[j];
                     ObjectReference objRow = (ObjectReference)((AttributeValue)row[0]).getValue(true);
                     // row color
                     String[] gridRowColors = app.getPortalExtension().getGridRowColors(objRow.getObject());
@@ -1023,7 +1041,7 @@ public class ReferencePaneControl
                     	}
                     	else {
 	                        if((view.getLookupType() != null) && objRow.isInstanceof(view.getLookupType())) {
-	                        	p.write("<td class=\"gridColTypeCheck\"><input type=\"checkbox\" name=\"objselect\" value=\"\" onclick=\"OF.selectAndClose('", htmlEncoder.encode(objRow.refMofId(), false), "', '", htmlEncoder.encode(objRow.getTitleEscapeQuote(), false), "', '", view.getId(), "', window);\" /></td>");
+	                        	p.write("<td class=\"gridColTypeCheck\"><span class=\"lookupSelector\"><input type=\"checkbox\" name=\"objselect\" value=\"\" onclick=\"OF.selectAndClose('", htmlEncoder.encode(objRow.getXRI(), false), "', '", htmlEncoder.encode(objRow.getTitleEscapeQuote(), false), "', '", view.getId(), "', window);\" /></span></td>");
 	                        }
 	                        else {
 	                        	p.write("<td class=\"gridColTypeCheck\"></td>");
@@ -1122,7 +1140,7 @@ public class ReferencePaneControl
                                     catch(Exception e0) {
                                         ServiceException e1 = new ServiceException(e0);
                                         List<?> params = Arrays.asList(
-                                            objRow.refMofId(), 
+                                            objRow.getXRI(), 
                                             valueHolder.getFieldDef().featureName, 
                                             app.getLoginPrincipal(),
                                             e0.getMessage()
@@ -1148,6 +1166,7 @@ public class ReferencePaneControl
                             else {
                                 ObjectReference objRef = (ObjectReference)value;
                                 Action action = objRef.getSelectObjectAction();                        
+                                String navigationTarget = view.getNavigationTarget();
                                 // Image only in first column
                                 if(k == 0) {      
                                 	if(p.getViewPortType() == ViewPort.Type.MOBILE) {
@@ -1156,7 +1175,7 @@ public class ReferencePaneControl
                                 	else {
 	                                    // Expand rows modifier
 	                                    p.write("<!-- ObjectReferenceValue -->"); // used as tag for multi-delete. Do not write as debug!
-	                                    p.write("<td class=\"gridColTypeIcon-3\"><table id=\"gm\"<tr><td><a href=\"#\" onmouseover=\"javascript:this.href=", p.getEvalHRef(action), ";onmouseover=function(){};\">", p.getImg("src=\"", p.getResourcePath("images/"), action.getIconKey(), "\" border=\"0\" align=\"bottom\" alt=\"o\" title=\"\""), "</a></td><td><div id=\"", "gridRow", Long.toString(rowId), "-menu\" class=\"gridMenu\" onclick=\"try{this.parentNode.parentNode.onclick();}catch(e){};\"><div class=\"gridMenuIndicator\" onclick=\"javascript:new Ajax.Updater('gridRow", Long.toString(rowId), "-menu', ", p.getEvalHRef(this.getRowMenuAction(objRef.refMofId(), rowId)), ", {asynchronous:true, evalScripts: true, onComplete: function(){}});\">", p.getImg("border=\"0\" height=\"16\" width=\"16\" alt=\"\" src=\"", p.getResourcePath("images/"), "spacer.gif\""), "</div>", p.getImg("border=\"0\" align=\"bottom\" alt=\"\" src=\"", p.getResourcePath("images/"), WebKeys.ICON_MENU_DOWN, "\" style=\"display:none;\""), "</div></td></tr></table></td>");
+	                                    p.write("<td class=\"gridColTypeIcon-3\"><table id=\"gm\"<tr><td><a href=\"#\"" + (navigationTarget != null && !"_none".equals(navigationTarget) ? "target=\"" + navigationTarget + "\"" : "") + " onmouseover=\"javascript:this.href=", p.getEvalHRef(action), ";onmouseover=function(){};\"" + ("_none".equals(navigationTarget) ? " onclick=\"javascript:return false;\"" : "") + ">", p.getImg("src=\"", p.getResourcePath("images/"), action.getIconKey(), "\" border=\"0\" align=\"bottom\" alt=\"o\" title=\"\""), "</a></td><td><div id=\"", rowId, "_menu\" class=\"gridMenu\" onclick=\"try{this.parentNode.parentNode.onclick();}catch(e){};\"><div class=\"gridMenuIndicator\" onclick=\"javascript:new Ajax.Updater('", rowId, "_menu', ", p.getEvalHRef(this.getRowMenuAction(objRef.getXRI(), rowId)), ", {asynchronous:true, evalScripts: true, onComplete: function(){}});\">", p.getImg("border=\"0\" height=\"16\" width=\"16\" alt=\"\" src=\"", p.getResourcePath("images/"), "spacer.gif\""), "</div>", p.getImg("border=\"0\" align=\"bottom\" alt=\"\" src=\"", p.getResourcePath("images/"), WebKeys.ICON_MENU_DOWN, "\" style=\"display:none;\""), "</div></td></tr></table></td>");
                                 	}
                                 }
                                 // only text in columns > 0
@@ -1182,7 +1201,7 @@ public class ReferencePaneControl
                                         p.write("</div></td>");
                                     }
                                     else {
-                                        p.write("<td><a href=\"\" onmouseover=\"javascript:this.href=", p.getEvalHRef(action), ";onmouseover=function(){};\" title=\"", htmlEncoder.encode(toolTip, false), "\">");
+                                        p.write("<td><a href=\"#\"" + (navigationTarget != null && !"_none".equals(navigationTarget) ? "target=\"" + navigationTarget + "\"" : "") + " onmouseover=\"javascript:this.href=", p.getEvalHRef(action), ";onmouseover=function(){};\"" + ("_none".equals(navigationTarget) ? " onclick=\"javascript:return false;\"" : "") + " title=\"", htmlEncoder.encode(toolTip, false), "\">");
                                         app.getPortalExtension().renderTextValue(p, htmlEncoder.encode(title, false), false);
                                         p.write("</a></td>");
                                     }
@@ -1221,7 +1240,7 @@ public class ReferencePaneControl
                     }
                     if((objRow != null) && grid.showRowSelectors()) {
                         if((view.getLookupType() != null) && objRow.isInstanceof(view.getLookupType())) {
-                          p.write("<td class=\"gridColTypeCheck\"><input type=\"checkbox\" name=\"objselect\" value=\"\" onclick=\"javascript:OF.selectAndClose('", htmlEncoder.encode(objRow.refMofId(), false), "', '", htmlEncoder.encode(objRow.getTitleEscapeQuote(), false), "', '", view.getId(), "', window);\" /></td>");
+                          p.write("<td class=\"gridColTypeCheck\"><span class=\"lookupSelector\"><input type=\"checkbox\" name=\"objselect\" value=\"\" onclick=\"javascript:OF.selectAndClose('", htmlEncoder.encode(objRow.getXRI(), false), "', '", htmlEncoder.encode(objRow.getTitleEscapeQuote(), false), "', '", view.getId(), "', window);\" /></span></td>");
                         }
                         else {
                           p.write("<td class=\"gridColTypeCheck\"></td>");
@@ -1232,8 +1251,8 @@ public class ReferencePaneControl
                     if(p.getViewPortType() != ViewPort.Type.MOBILE) {                    
 	                    p.write("<tr class=\"rowDetails\">");
 	                    p.write("  <td colspan=\"", Integer.toString(gridControl.getShowMaxMember()), "\"><table class=\"tablePanel\">");
-	                    p.write("    <td class=\"gridCloser\"><img class=\"imgCloser\" id=\"gridRow", Long.toString(rowId), "-details-closer\" src=\"", p.getResourcePath("images/"), WebKeys.ICON_CLOSE, "\" alt=\"\" style=\"display:none;\" onclick=\"javascript:$('gridRow", Long.toString(rowId), "-details').innerHTML='';this.style.display='none';\" /></td>");
-	                    p.write("    <td width=\"100%\"><div id=\"", "gridRow", Long.toString(rowId), "-details\" /></td>");
+	                    p.write("    <td class=\"gridCloser\"><img class=\"imgCloser\" id=\"", rowId, "_details-closer\" src=\"", p.getResourcePath("images/"), WebKeys.ICON_CLOSE, "\" alt=\"\" style=\"display:none;\" onclick=\"javascript:$('", rowId, "_details').innerHTML='';this.style.display='none';\" /></td>");
+	                    p.write("    <td width=\"100%\"><div id=\"", rowId, "_details\" /></td>");
 	                    p.write("  </table></td>");
 	                    p.write("</tr>");
                     }
@@ -1305,7 +1324,7 @@ public class ReferencePaneControl
                    p.write("            <input type=\"hidden\" name=\"requestId.submit\" value=\"", view.getRequestId(), "\" />");
                    p.write("            <input type=\"hidden\" name=\"event.submit\" value=\"", Integer.toString(saveAction.getEvent()), "\" />");
                    p.write("            <input class=\"flatsubmit\" type=\"submit\" title=\"", htmlEncoder.encode(saveAction.getTitle(), false), "\" value=\"", htmlEncoder.encode(saveAction.getTitle(), false), "\" id=\"tr-editForm", tabId, "\"", p.getOnMouseOver("javascript:this.className='flatsubmithover';"), p.getOnMouseOut("javascript:this.className='flatsubmit';"), " />");
-                   p.write("            <input class=\"flatsubmit\" type=\"submit\" title=\"", htmlEncoder.encode(texts.getCancelTitle(), false), "\" value=\"", texts.getCancelTitle(), "\" onclick=\"javascript:$('editGrid", tabId, "').style.display='none'; $('showGrid", tabId, "').style.display='block';$('showGridButtons", tabId, "').style.display='block'; if($('menuCrPanel", tabId, "')) {$('menuCrPanel", tabId, "').style.display='block';}; return false;\"", p.getOnMouseOver("javascript:this.className='flatsubmithover';"), p.getOnMouseOut("javascript:this.className='flatsubmit';"), " />");
+                   p.write("            <input class=\"flatsubmit\" type=\"submit\" title=\"", htmlEncoder.encode(texts.getCancelTitle(), false), "\" value=\"", texts.getCancelTitle(), "\" onclick=\"javascript:$('editGrid", tabId, "').style.display='none'; $('", tabId, "_grid').style.display='block';$('", tabId, "_gridButtons').style.display='block'; if($('menuCrPanel", tabId, "')) {$('menuCrPanel", tabId, "').style.display='block';}; return false;\"", p.getOnMouseOver("javascript:this.className='flatsubmithover';"), p.getOnMouseOut("javascript:this.className='flatsubmit';"), " />");
                    p.write("          </div>");
                    p.write("        </td>");                              
                    p.write("      </tr>");
@@ -1320,7 +1339,7 @@ public class ReferencePaneControl
                        p.write("      <script language=\"javascript\" type=\"text/javascript\">");
                        p.write("        rowIndex", tabId, " = " + rows.length);
                        p.write("      </script>");
-                       p.write("      <div id=\"menuOpPanel\" class=\"menuOpPanel\" >");
+                       p.write("      <div id=\"", gridMenuId, "\" class=\"menuOpPanel\" >");
                        p.write("        <table cellspacing=\"0\" cellpadding=\"0\" id=\"menuOp\" width=\"100%\">");
                        p.write("          <tr>");
                        p.write("            <td>");
@@ -1380,7 +1399,7 @@ public class ReferencePaneControl
                                   p.write("<td nowrap>");
                                   p.write("  <table class=\"gridSplit\"><tr><td width=\"100%\"><input type=\"text\" class=\"valueRG\" id=\"cal_field", Integer.toString(templateGridFieldIndex), "\" name=\"", feature, "[", Integer.toString(templateGridFieldIndex), "]", "\" tabindex=\"", Integer.toString(templateGridFieldIndex), "\" value=\"\"></td>");
                                   if(((DateValue)valueHolder).isDate()) {
-                                      SimpleDateFormat dateFormatter = ((DateValue)valueHolder).getLocalizedDateFormatter();
+                                      SimpleDateFormat dateFormatter = ((DateValue)valueHolder).getLocalizedDateFormatter(true);
                                       p.write("<td>", p.getImg("class=\"popUpButton\" id=\"cal_trigger", Integer.toString(templateGridFieldIndex), "\" border=\"0\" alt=\"Click to open Calendar\" src=\"", p.getResourcePath("images/"), WebKeys.ICON_CALENDAR, "\""));
                                       p.write("<script language=\"javascript\" type=\"text/javascript\">");
                                       p.write("   Calendar.setup({");
@@ -1396,7 +1415,7 @@ public class ReferencePaneControl
                                       p.write("</script></td></tr></table>");
                                   }
                                   else {
-                                      SimpleDateFormat dateTimeFormatter = ((DateValue)valueHolder).getLocalizedDateTimeFormatter();
+                                      SimpleDateFormat dateTimeFormatter = ((DateValue)valueHolder).getLocalizedDateTimeFormatter(true);
                                       p.write("<td>", p.getImg("class=\"popUpButton\" id=\"cal_trigger", Integer.toString(templateGridFieldIndex), "\" border=\"0\" alt=\"Click to open Calendar\" src=\"", p.getResourcePath("images/"), WebKeys.ICON_CALENDAR, "\""));
                                       p.write("<script language=\"javascript\" type=\"text/javascript\">");
                                       p.write("  Calendar.setup({");
@@ -1420,8 +1439,7 @@ public class ReferencePaneControl
                             }
                             else if(valueHolder instanceof CodeValue) {
                               if(isEditable) { // and also isSingleValued()
-                                SortedMap longTextsT = ((CodeValue)valueHolder).getLongText(false, false);
-    
+                                Map longTextsT = ((CodeValue)valueHolder).getLongText(false, false);    
                                 String longTextsAsJsArray = "";
                                 for(Iterator options = longTextsT.keySet().iterator(); options.hasNext(); ) {
                                   longTextsAsJsArray += longTextsAsJsArray.length() == 0 ? "" : ",";
@@ -1633,7 +1651,7 @@ public class ReferencePaneControl
                               p.write("<td nowrap>");
                               p.write("  <table class=\"gridSplit\"><tr><td width=\"100%\"><input type=\"text\" class=\"valueRG\" id=\"cal_field", Integer.toString(editGridFieldIndex), "\" name=\"",  feature, "[", Integer.toString(editGridFieldIndex), "]", "\" tabindex=\"", Integer.toString(editGridFieldIndex), "\" value=\"", stringifiedValueEdit, "\"></td>");
                               if(((DateValue)valueHolder).isDate()) {
-                                  SimpleDateFormat dateFormatter = ((DateValue)valueHolder).getLocalizedDateFormatter();
+                                  SimpleDateFormat dateFormatter = ((DateValue)valueHolder).getLocalizedDateFormatter(true);
                                   p.write("<td>", p.getImg("class=\"popUpButton\" id=\"cal_trigger", Integer.toString(editGridFieldIndex), "\" border=\"0\" alt=\"Click to open Calendar\" src=\"", p.getResourcePath("images/"), WebKeys.ICON_CALENDAR, "\""));
                                   p.write("  <script language=\"javascript\" type=\"text/javascript\">");
                                   p.write("    Calendar.setup({");
@@ -1649,7 +1667,7 @@ public class ReferencePaneControl
                                   p.write("  </script></td></tr></table>");
                               }
                               else {
-                                  SimpleDateFormat dateTimeFormatter = ((DateValue)valueHolder).getLocalizedDateTimeFormatter();
+                                  SimpleDateFormat dateTimeFormatter = ((DateValue)valueHolder).getLocalizedDateTimeFormatter(true);
                                   p.write("<td>", p.getImg("class=\"popUpButton\" id=\"cal_trigger", Integer.toString(editGridFieldIndex), "\" border=\"0\" alt=\"Click to open Calendar\" src=\"", p.getResourcePath("images/"), WebKeys.ICON_CALENDAR, "\""));
                                   p.write("  <script language=\"javascript\" type=\"text/javascript\">");
                                   p.write("    Calendar.setup({");
@@ -1674,13 +1692,12 @@ public class ReferencePaneControl
                         // CodeValue
                         else if(valueHolder instanceof CodeValue) {
                             if(isEditable) { // and also isSingleValued()
-                              SortedMap longTextsT = ((CodeValue)valueHolder).getLongText(false, false);
-    
+                              Map longTextsT = ((CodeValue)valueHolder).getLongText(false, false);    
                               String longTextsAsJsArray = "";
                               for(Iterator options = longTextsT.keySet().iterator(); options.hasNext(); ) {
                                 longTextsAsJsArray += longTextsAsJsArray.length() == 0 ? "" : ",";
                                 longTextsAsJsArray += "'" + options.next() + "'";
-                              }            
+                              }
                               p.write("<td>");
                               p.write("  <select class=\"valueLG\" name=\"", feature, "[", Integer.toString(editGridFieldIndex), "]", "\" tabindex=\"", Integer.toString(editGridFieldIndex), "\">");
                               for(Iterator options = longTextsT.entrySet().iterator(); options.hasNext(); ) {
@@ -1745,7 +1762,7 @@ public class ReferencePaneControl
                                   }
                                   p.write(p.getImg("src=\"", p.getResourcePath("images/"), WebKeys.ICON_DELETE_SMALL, "\" class=\"popUpButton\" border=\"0\" align=\"bottom\" alt=\"o\" title=\"", htmlEncoder.encode(texts.getDeleteTitle(), false), "\" onclick=\"javascript:deleteGridRow(this);\"", p.getOnMouseOver("javascript:this.className='popUpButtonhover';"), p.getOnMouseOut("javascript:this.className='popUpButton';"), " style=\"display: none;\""));
                               }
-                              p.write("  <input type=\"hidden\" name=\"refMofId",  "[", Integer.toString(editGridFieldIndex), "]", "\" tabindex=\"", Integer.toString(editGridFieldIndex), "\" value=\"", objRow.refMofId(), "\">");
+                              p.write("  <input type=\"hidden\" name=\"refMofId",  "[", Integer.toString(editGridFieldIndex), "]", "\" tabindex=\"", Integer.toString(editGridFieldIndex), "\" value=\"", objRow.getXRI(), "\">");
                               p.write("</td>");
                             }
                             // columns > 0
@@ -1777,7 +1794,7 @@ public class ReferencePaneControl
                                         );
                                         p.write("<td nowrap>");
                                         p.write("  <table class=\"gridSplit\"><tr><td width=\"100%\"><input type=\"text\" class=\"valueLG\" name=\"", feature, "[", Integer.toString(editGridFieldIndex), "]", ".Title\" tabindex=\"", Integer.toString(editGridFieldIndex), "\" value=\"", (objectReference == null ? "" : htmlEncoder.encode(objectReference.getTitle(), false)), "\"></td><td>", p.getImg("class=\"popUpButton\" border=\"0\" alt=\"Click to open ObjectFinder\" src=\"", p.getResourcePath("images/"), findObjectAction.getIconKey(), "\" name=\"", feature, "[", Integer.toString(editGridFieldIndex+1), "]", "\" id=\"", feature, "[", Integer.toString(editGridFieldIndex+1), "]\" onclick=\"javascript:var IDsplit = this.id.split(/[\\[|\\]]/); var tidx = parseInt(IDsplit[1])-1; var par1 = '", feature, "' + '[' + tidx.toString() + ']'; var par2 = par1 + '.Title'; OF.findObject(", p.getEvalHRef(findObjectAction), ", document.forms['editForm", tabId, "'].elements[par2], document.forms['editForm", tabId, "'].elements[par1], '", lookupId, "');\""));
-                                        p.write("  <input type=\"hidden\" class=\"valueLLocked\" name=\"", feature, "[", Integer.toString(editGridFieldIndex), "]", "\" value=\"", (objectReference == null ? "" : objectReference.refMofId()), "\">");
+                                        p.write("  <input type=\"hidden\" class=\"valueLLocked\" name=\"", feature, "[", Integer.toString(editGridFieldIndex), "]", "\" value=\"", (objectReference == null ? "" : objectReference.getXRI()), "\">");
                                         p.write("  </td></tr></table>");
                                         p.write("</td>");
                                     }
@@ -1834,11 +1851,11 @@ public class ReferencePaneControl
                   p.write("  <input type=\"hidden\" name=\"", Action.PARAMETER_PANE, "\" value=\"", saveAction.getParameter(Action.PARAMETER_PANE), "\" />");
                   p.write("  <div style=\"float: right; padding-top:1px;\">");
                   p.write("    <input class=\"flatsubmit\" type=\"submit\" title=\"", htmlEncoder.encode(saveAction.getTitle(), false), "\" value=\"", htmlEncoder.encode(saveAction.getTitle(), false), "\" id=\"bl-editForm", tabId, "\"", p.getOnMouseOver("javascript:this.className='flatsubmithover';"), p.getOnMouseOut("javascript:this.className='flatsubmit';"), " />");
-                  p.write("    <input class=\"flatsubmit\" type=\"submit\" title=\"", htmlEncoder.encode(texts.getCancelTitle(), false), "\" value=\"", texts.getCancelTitle(), "\" onclick=\"javascript:$('editGrid", tabId, "').style.display='none'; $('showGrid", tabId, "').style.display='block';$('showGridButtons", tabId, "').style.display='block'; if($('menuCrPanel", tabId, "')) {$('menuCrPanel", tabId, "').style.display='block';}; return false;\"", p.getOnMouseOver("javascript:this.className='flatsubmithover';"), p.getOnMouseOut("javascript:this.className='flatsubmit';"), " />");
+                  p.write("    <input class=\"flatsubmit\" type=\"submit\" title=\"", htmlEncoder.encode(texts.getCancelTitle(), false), "\" value=\"", texts.getCancelTitle(), "\" onclick=\"javascript:$('editGrid", tabId, "').style.display='none'; $('", tabId, "_grid').style.display='block';$('", tabId, "_gridButtons').style.display='block'; if($('menuCrPanel", tabId, "')) {$('menuCrPanel", tabId, "').style.display='block';}; return false;\"", p.getOnMouseOver("javascript:this.className='flatsubmithover';"), p.getOnMouseOut("javascript:this.className='flatsubmit';"), " />");
                   p.write("  </div>");
                   p.write("  <div style=\"padding-top:1px;\">");
                   p.write("    <input class=\"flatsubmit\" type=\"submit\" title=\"", htmlEncoder.encode(saveAction.getTitle(), false), "\" value=\"", htmlEncoder.encode(saveAction.getTitle(), false), "\" id=\"br-editForm", tabId, "\"", p.getOnMouseOver("javascript:this.className='flatsubmithover';"), p.getOnMouseOut("javascript:this.className='flatsubmit';"), " />");
-                  p.write("    <input class=\"flatsubmit\" type=\"submit\" title=\"", htmlEncoder.encode(texts.getCancelTitle(), false), "\" value=\"", texts.getCancelTitle(), "\" onclick=\"javascript:$('editGrid", tabId, "').style.display='none'; $('showGrid", tabId, "').style.display='block';$('showGridButtons", tabId, "').style.display='block'; if ($('menuCrPanel", tabId, "')) {$('menuCrPanel", tabId, "').style.display='block';}; return false;\"", p.getOnMouseOver("javascript:this.className='flatsubmithover';"), p.getOnMouseOut("javascript:this.className='flatsubmit';"), " />");
+                  p.write("    <input class=\"flatsubmit\" type=\"submit\" title=\"", htmlEncoder.encode(texts.getCancelTitle(), false), "\" value=\"", texts.getCancelTitle(), "\" onclick=\"javascript:$('editGrid", tabId, "').style.display='none'; $('", tabId, "_grid').style.display='block';$('", tabId, "_gridButtons').style.display='block'; if ($('menuCrPanel", tabId, "')) {$('menuCrPanel", tabId, "').style.display='block';}; return false;\"", p.getOnMouseOver("javascript:this.className='flatsubmithover';"), p.getOnMouseOut("javascript:this.className='flatsubmit';"), " />");
                   p.write("  </div>");
                   p.write(" </form>");
                   p.write("</div>");
@@ -1856,7 +1873,6 @@ public class ReferencePaneControl
     public static final String FRAME_CONTENT = "Content";
 
     public static final String SEARCH_FORM_NAME = "searchForm";
-    public static final String FILTER_AREA_NAME = "filterArea";
     public static final int[] DEFAULT_PAGE_SIZES = new int[]{5, 10, 20, 50, 100, 200, 500};  
 
     // Unique number for each generated row allows to generate unique id tags 

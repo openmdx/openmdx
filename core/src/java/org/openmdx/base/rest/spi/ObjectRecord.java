@@ -1,17 +1,13 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: ObjectRecord.java,v 1.6 2011/11/11 01:32:21 hburger Exp $
- * Description: ObjectRecord 
- * Revision:    $Revision: 1.6 $
+ * Description: Object Record 
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/11/11 01:32:21 $
  * ====================================================================
  *
- * This software is published under the BSD license
- * as listed below.
+ * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2010, OMEX AG, Switzerland
+ * Copyright (c) 2010-2012, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -49,9 +45,9 @@
  * This product includes software developed by other organizations as
  * listed in the NOTICE file.
  */
-
 package org.openmdx.base.rest.spi;
 
+import java.util.Arrays;
 import java.util.Map;
 
 import javax.resource.cci.MappedRecord;
@@ -89,12 +85,13 @@ public class ObjectRecord
     /**
      * Implements <code>Serializable</code>
      */
-    private static final long serialVersionUID = -8775933562461890569L;
+    private static final long serialVersionUID = 1436275899255948883L;
 
     /**
      * Alphabetically ordered keys
      */
     private static final String[] KEYS = {
+        "lock",
         "path",
         "value",
         "version"
@@ -114,6 +111,11 @@ public class ObjectRecord
      * The <code>"version"</code> entry
      */
     private Object version;
+
+    /**
+     * The <code>"lock"</code> entry
+     */
+    private Object lock;
     
     /* (non-Javadoc)
      * @see org.openmdx.base.resource.spi.AbstractRecord#clone()
@@ -173,6 +175,22 @@ public class ObjectRecord
     }
 
     /* (non-Javadoc)
+	 * @see org.openmdx.base.rest.cci.ObjectRecord#getLock()
+	 */
+//  @Override
+	public Object getLock() {
+		return this.lock;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.openmdx.base.rest.cci.ObjectRecord#setLock(java.lang.Object)
+	 */
+//  @Override
+	public void setLock(Object lock) {
+		this.lock = lock;
+	}
+
+	/* (non-Javadoc)
      * @see javax.resource.cci.Record#getRecordName()
      */
 //  @Override
@@ -191,9 +209,10 @@ public class ObjectRecord
         int index
     ){
         switch(index) {
-            case 0: return this.path;
-            case 1: return this.value;
-            case 2: return this.version;
+            case 0: return this.lock;
+            case 1: return this.path;
+            case 2: return this.value;
+            case 3: return this.version;
             default: return null;
         }
     }
@@ -213,17 +232,38 @@ public class ObjectRecord
     ){
         switch(index) {
             case 0:
+                this.lock = value;
+                break;
+            case 1:
                 this.path = (Path) value;
                 break;
-            case 1: 
+            case 2: 
                 this.value = (MappedRecord) value;
                 break;
-            case 2:
+            case 3:
                 this.version = value;
                 break;
         }
     }
 
+    /**
+     * Null-safe comparison
+     * 
+     * @param thisValue
+     * @param thatValue
+     * 
+     * @return <code>true</code> of both values are either equal or <code>null</code>
+     */
+    private static boolean areMatching(Object thisValue, Object thatValue) {
+    	if(thisValue == null) {
+    		return thatValue == null;
+    	} else if (thisValue instanceof byte[]) {
+    		return thatValue instanceof byte[] && Arrays.equals((byte[])thisValue, (byte[])thatValue);
+    	} else {
+    		return thisValue.equals(thatValue);
+    	}
+    }
+    
     @Override
     public boolean equals(
         Object obj
@@ -231,9 +271,10 @@ public class ObjectRecord
         if(obj instanceof ObjectRecord) {
             ObjectRecord that = (ObjectRecord)obj;
             return 
-                this.path.equals(that.path) && 
-                this.value.equals(that.value) && 
-                (this.version == null ? that.version == null : this.version.equals(that.version));
+            	areMatching(this.path, that.path) &&
+            	areMatching(this.value, that.value) &&
+            	areMatching(this.version, that.version) &&
+            	areMatching(this.lock, that.lock);
         } else {
             return false;
         }

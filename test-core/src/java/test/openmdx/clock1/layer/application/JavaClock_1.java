@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: JavaClock_1.java,v 1.10 2010/06/03 15:58:22 hburger Exp $
  * Description: Java Clock Provider
- * Revision:    $Revision: 1.10 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/06/03 15:58:22 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -80,6 +77,13 @@ import org.openmdx.kernel.exception.BasicException;
  */
 public class JavaClock_1 extends Layer_1 {
 	
+    /**
+     * Constructor 
+     */
+    public JavaClock_1() {
+        super();
+    }
+
     // --------------------------------------------------------------------------
     @Override
     public Interaction getInteraction(
@@ -91,7 +95,13 @@ public class JavaClock_1 extends Layer_1 {
     // --------------------------------------------------------------------------
     public class LayerInteraction extends Standard_1.LayerInteraction {
         
-        public LayerInteraction(
+        /**
+         * Constructor 
+         *
+         * @param connection
+         * @throws ResourceException
+         */
+        protected LayerInteraction(
             Connection connection
         ) throws ResourceException {
             super(connection);
@@ -100,7 +110,8 @@ public class JavaClock_1 extends Layer_1 {
     	/* (non-Javadoc)
     	 * @see org.openmdx.compatibility.base.dataprovider.spi.Layer_1_0#get(org.openmdx.compatibility.base.dataprovider.cci.ServiceHeader, org.openmdx.compatibility.base.dataprovider.cci.DataproviderRequest)
     	 */
-        @Override
+        @SuppressWarnings("unchecked")
+		@Override
         public boolean get(
             RestInteractionSpec ispec,
             Query_2Facade input,
@@ -150,7 +161,8 @@ public class JavaClock_1 extends Layer_1 {
     	/* (non-Javadoc)
     	 * @see org.openmdx.compatibility.base.dataprovider.spi.Operation_1_0#operation(org.openmdx.compatibility.base.dataprovider.cci.ServiceHeader, org.openmdx.compatibility.base.dataprovider.cci.DataproviderRequest)
     	 */
-        @Override
+        @SuppressWarnings("unchecked")
+		@Override
         public boolean invoke(
             RestInteractionSpec ispec, 
             MessageRecord input, 

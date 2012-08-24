@@ -1,3 +1,59 @@
+REM Test test::openmdx::preferences2
+
+  DROP TABLE PREFERENCES2_SEGMENT ;
+  CREATE TABLE PREFERENCES2_SEGMENT (
+    OBJECT_RID varchar(200) NOT NULL,
+	  OBJECT_OID varchar(200) NOT NULL,
+	  OBJECT__CLASS varchar(200),
+	  DESCRIPTION varchar(200)
+  );
+  
+  DROP TABLE PREFERENCES2_ROOT;
+  CREATE TABLE PREFERENCES2_ROOT(
+    object_rid varchar(100) NOT NULL,
+    object_oid varchar(200) NOT NULL,
+    p$$object_parent__rid varchar(100) NULL, 
+    p$$object_parent__oid varchar(200) NULL,
+    object__class varchar(200) NOT NULL ,
+    type varchar(10) NOT NULL,
+    created_at TIMESTAMP (6) WITH TIME ZONE NULL,
+    modified_at TIMESTAMP (6) WITH TIME ZONE NULL,
+    modified_by_0 varchar(50) NULL ,
+    created_by_0 varchar(50) NULL
+  );
+
+  DROP TABLE PREFERENCES2_NODE;
+  CREATE TABLE PREFERENCES2_NODE(
+    object_rid varchar(100) NOT NULL,
+    object_oid varchar(200) NOT NULL,
+    p$$object_parent__rid varchar(100) NULL, 
+    p$$object_parent__oid varchar(200) NULL,
+    object__class varchar(200) NOT NULL ,
+    parent varchar (200) NULL ,
+    p$$parent__rid varchar (200) NULL ,
+    p$$parent__oid varchar (200) NULL ,
+    name varchar(100) NULL,
+    absolute_path varchar(1000) NOT NULL,
+    created_at TIMESTAMP (6) WITH TIME ZONE NULL,
+    modified_at TIMESTAMP (6) WITH TIME ZONE NULL,
+    modified_by_0 varchar(50) NULL ,
+    created_by_0 varchar(50) NULL
+  );
+
+  DROP TABLE PREFERENCES2_ENTRY;
+  CREATE TABLE PREFERENCES2_ENTRY(
+    object_rid varchar(100) NOT NULL,
+    object_oid varchar(200) NOT NULL,
+    p$$object_parent__rid varchar(100) NULL, 
+    p$$object_parent__oid varchar(200) NULL,
+    object__class varchar(200) NOT NULL,
+    value varchar(4000) NULL,
+    created_at TIMESTAMP (6) WITH TIME ZONE NULL,
+    modified_at TIMESTAMP (6) WITH TIME ZONE NULL,
+    modified_by_0 varchar(50) NULL ,
+    created_by_0 varchar(50) NULL
+  );
+  
 DROP TABLE prefs_Preference;
 CREATE TABLE prefs_Preference(
     object_rid varchar(100) NOT NULL,
@@ -118,7 +174,8 @@ CREATE SEQUENCE test_ref_seq
     modified_at TIMESTAMP (6) WITH TIME ZONE NULL,
     created_by_0 VARCHAR (100) NULL ,
     modified_by_0 VARCHAR (100) NULL,
-    internationalproductgroupid VARCHAR (100) NULL
+    internationalproductgroupid VARCHAR (100) NULL,
+    payment_period VARCHAR (100) NULL    
   );
   
   DROP TABLE app1_InvoicePosition;

@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: DefaultActionFactory.java,v 1.3 2011/08/26 11:57:59 wfro Exp $
  * Description: DefaultActionFactory 
- * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/08/26 11:57:59 $
  * ====================================================================
  *
  * This software is published under the BSD license

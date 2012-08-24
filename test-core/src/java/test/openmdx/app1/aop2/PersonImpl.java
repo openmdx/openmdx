@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: PersonImpl.java,v 1.6 2011/04/01 22:08:59 hburger Exp $
  * Description: Person 
- * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/04/01 22:08:59 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -284,6 +281,7 @@ public class PersonImpl <S extends test.openmdx.app1.jmi1.Person, N extends test
      * @see org.openmdx.base.aop2.AbstractObject#newContext()
      */
     @Override
+    @SuppressWarnings("unchecked")
     protected C newContext() {
         return (C) new Date();
     }

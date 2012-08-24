@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<uml:Model xmi:version="2.1" xmlns:xmi="http://schema.omg.org/spec/XMI/2.1" xmlns:uml="http://www.eclipse.org/uml2/3.0.0/UML" xmi:id="_wdbxAN67EdmkJO73lqONhA" name="state2">
+<uml:Model xmi:version="2.1" xmlns:xmi="http://schema.omg.org/spec/XMI/2.1" xmlns:uml="http://www.eclipse.org/uml2/3.0.0/UML" xmi:id="_wdbxAN67EdmkJO73lqONhA" name="state2" viewpoint="">
   <packagedElement xmi:type="uml:Package" xmi:id="_3C7B8A60016D407170B300B4PP" name="org">
     <packagedElement xmi:type="uml:Package" xmi:id="_3C7B8A60016D407170B300B4P" name="openmdx">
       <packagedElement xmi:type="uml:Package" xmi:id="_3C7B8A60016D407170B300B4" name="state2">
@@ -71,13 +71,19 @@
           <ownedAttribute xmi:id="_FpXZ0KtHEd2CZJkknFnJMw" name="transactionTimeUnique" isReadOnly="true">
             <type xmi:type="uml:PrimitiveType" href="org.w3c.uml#_3C7B8A60016D3C8B63180083"/>
           </ownedAttribute>
+          <ownedAttribute xmi:id="_mvwMwNsnEd23fqg3-BoJNA" name="stateVersion" visibility="public" isReadOnly="true" isDerived="true">
+            <type xmi:type="uml:PrimitiveType" href="org.w3c.uml#_3C7B8A60016D3CC6A34B0011"/>
+          </ownedAttribute>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Class" xmi:id="_LoXHEDlYEeGI4drss5KBww" name="Legacy" isAbstract="true">
+          <eAnnotations xmi:id="_uPX-YDlYEeGI4drss5KBww" source="http://www.eclipse.org/uml2/2.0.0/UML">
+            <details xmi:id="_uPX-YTlYEeGI4drss5KBww" key="root"/>
+          </eAnnotations>
+          <generalization xmi:id="_olmpwDlpEeGXmauThx7sfg" general="_-U_-kIC4Ed2lDKTVYu2_Tw"/>
           <ownedAttribute xmi:id="_QWC0YKtGEd2CZJkknFnJMw" name="validTimeUnique" isReadOnly="true">
             <type xmi:type="uml:PrimitiveType" href="org.w3c.uml#_3C7B8A60016D3C8B63180083"/>
             <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_0IzGEatGEd2CZJkknFnJMw" value="1"/>
             <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_0IzGEKtGEd2CZJkknFnJMw" value="1"/>
-          </ownedAttribute>
-          <ownedAttribute xmi:id="_mvwMwNsnEd23fqg3-BoJNA" name="stateVersion" visibility="public" isReadOnly="true" isDerived="true">
-            <type xmi:type="uml:PrimitiveType" href="org.w3c.uml#_3C7B8A60016D3CC6A34B0011"/>
           </ownedAttribute>
         </packagedElement>
       </packagedElement>

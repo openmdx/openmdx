@@ -2,17 +2,17 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: MobileMain.jsp,v 1.5 2009/10/16 21:46:27 wfro Exp $
+ * Name:        $Id: MobileMain.jsp,v 1.6 2012/07/08 13:08:26 wfro Exp $
  * Description: ShowObject.jsp
- * Revision:    $Revision: 1.5 $
+ * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/10/16 21:46:27 $
+ * Date:        $Date: 2012/07/08 13:08:26 $
  * ====================================================================
  *
  * This software is published under the BSD license
  * as listed below.
  * 
- * Copyright (c) 2004-2006, OMEX AG, Switzerland
+ * Copyright (c) 2004-2012, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -58,9 +58,8 @@
 org.openmdx.base.naming.*,
 org.openmdx.portal.servlet.*,
 org.openmdx.portal.servlet.control.*,
-org.openmdx.portal.servlet.view.*,
-org.openmdx.portal.servlet.texts.*" %>
-<%
+org.openmdx.portal.servlet.view.*" 
+%><%
 	ApplicationContext app = (ApplicationContext)session.getValue(WebKeys.APPLICATION_KEY);
 	ViewsCache viewsCache = (ViewsCache)session.getValue(WebKeys.VIEW_CACHE_KEY_SHOW);
 	String requestId = request.getParameter(Action.PARAMETER_REQUEST_ID);

@@ -1,10 +1,7 @@
 /*
  * ====================================================================
- * Name:        $Id: XMLGregorianCalendarMarshaller.java,v 1.8 2011/04/18 16:36:34 hburger Exp $
  * Description: XMLGregorianCalendarMarshaller 
- * Revision:    $Revision: 1.8 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/04/18 16:36:34 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

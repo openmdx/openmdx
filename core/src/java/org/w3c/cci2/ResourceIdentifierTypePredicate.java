@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: ResourceIdentifierTypePredicate.java,v 1.3 2008/05/06 09:24:27 hburger Exp $
  * Description: Resource Identifier Type Predicate
- * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/05/06 09:24:27 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

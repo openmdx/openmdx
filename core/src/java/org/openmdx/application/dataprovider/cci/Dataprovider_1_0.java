@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: Dataprovider_1_0.java,v 1.3 2009/12/14 14:07:57 wfro Exp $
  * Description: Dataprovider Interface
- * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/12/14 14:07:57 $
  * ====================================================================
  *
  * This software is published under the BSD license

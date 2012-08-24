@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: ArrayBasedIndexedRecord.java,v 1.3 2004/04/02 16:59:00 wfro Exp $
  * Description: Java Connector Architecture: Initialized Record Factory
- * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2004/04/02 16:59:00 $
  * ====================================================================
  *
  * This software is published under the BSD license

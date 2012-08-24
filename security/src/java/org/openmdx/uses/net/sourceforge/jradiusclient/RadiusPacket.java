@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Security, http://www.openmdx.org/
- * Name:        $Id: RadiusPacket.java,v 1.9 2010/03/13 20:14:05 hburger Exp $
  * Description: Java Radius Client Derivate
- * Revision:    $Revision: 1.9 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/03/13 20:14:05 $
  * ====================================================================
  *
  * Copyright (C) 2004-2010  OMEX AG

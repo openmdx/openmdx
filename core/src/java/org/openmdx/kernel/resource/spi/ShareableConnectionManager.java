@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: ShareableConnectionManager.java,v 1.3 2010/08/03 14:03:07 hburger Exp $
  * Description: Shareable Connection Manager
- * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/08/03 14:03:07 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

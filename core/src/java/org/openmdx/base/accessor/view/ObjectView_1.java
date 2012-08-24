@@ -1,14 +1,12 @@
 /*
  * ====================================================================
  * Description: Abstract Object_1
- * Revision:    $Revision: 1.56 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/07/08 13:20:51 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2009, OMEX AG, Switzerland
+ * Copyright (c) 2004-2012, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -61,6 +59,7 @@ import javax.resource.cci.InteractionSpec;
 
 import org.openmdx.base.accessor.cci.DataObjectManager_1_0;
 import org.openmdx.base.accessor.cci.DataObject_1_0;
+import org.openmdx.base.accessor.rest.DataObject_1;
 import org.openmdx.base.accessor.spi.ExceptionHelper;
 import org.openmdx.base.accessor.spi.MarshallingObject_1;
 import org.openmdx.base.accessor.view.ViewManager_1.ObjectIdMarshaller;
@@ -393,36 +392,18 @@ class ObjectView_1
         return this.dataObject.jdoGetTransactionalObjectId();
     }
 
-    /**
-     * Tells whether the value has to be set onto the uninitialized view
-     *  
-     * @param feature
-     * @param to
-     * 
-     * @return <code>true</code> if the value has to be set onto the uninitialized view
-     * 
-     * @throws ServiceException  
-     */
-    protected boolean propagateToDataObject(
-        String feature, 
-        Object to
-    ) throws ServiceException {
-        return 
-            ("validTimeUnique".equals(feature) || "transactionTimeUnique".equals(feature)) && 
-            Boolean.TRUE.equals(to) &&
-            this.getModel().isInstanceof(this.dataObject, "org:openmdx:state2:StateCapable");
-    }
-        
     /* (non-Javadoc)
 	 * @see org.openmdx.base.accessor.spi.MarshallingObject_1#objSetValue(java.lang.String, java.lang.Object)
 	 */
 	@Override
 	public void objSetValue(String feature, Object to) throws ServiceException {
-		if(this.hollow && propagateToDataObject(feature, to)) {
-			this.dataObject.objSetValue(feature, to);
-		} else {
-    		super.objSetValue(feature, to);
+		if(this.hollow && this.dataObject instanceof DataObject_1) {
+			DataObject_1 object = (DataObject_1)this.dataObject;
+			for(PlugIn_1_0 plugIn : super.marshaller.getPlugIn()) {
+				if(plugIn.propagatedEagerly(object, feature, to)) return;
+			}
 		}
+		super.objSetValue(feature, to);
 	}
 
 

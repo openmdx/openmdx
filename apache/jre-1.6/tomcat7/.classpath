@@ -9,7 +9,7 @@
 	<classpathentry exported="true" kind="lib" path="lib/ecj-3.6.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/el-api.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/jasper-el.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/jasper.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/jasper.jar" sourcepath="src/jasper.zip"/>
 	<classpathentry exported="true" kind="lib" path="lib/jsp-api.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/servlet-api.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/tomcat-api.jar"/>

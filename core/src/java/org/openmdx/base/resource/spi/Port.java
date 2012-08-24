@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: Port.java,v 1.2 2009/10/01 16:19:39 hburger Exp $
  * Description: JCA Plug-In
- * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/10/01 16:19:39 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

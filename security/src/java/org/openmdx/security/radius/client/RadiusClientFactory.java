@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Security, http://www.openmdx.org/
- * Name:        $Id: RadiusClientFactory.java,v 1.9 2010/08/03 14:27:24 hburger Exp $
  * Description: Java Radius Client Derivate
- * Revision:    $Revision: 1.9 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/08/03 14:27:24 $
  * ====================================================================
  *
  * Copyright (C) 2004-2010  OMEX AG

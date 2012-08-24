@@ -1,16 +1,13 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: BasicState_1.java,v 1.37 2011/11/03 07:17:07 hburger Exp $
  * Description: Basic State Plug-In
- * Revision:    $Revision: 1.37 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/11/03 07:17:07 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2008-2011, OMEX AG, Switzerland
+ * Copyright (c) 2008-2012, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -158,16 +155,6 @@ public abstract class BasicState_1<C extends StateContext<?>>
      * Tells whether this instances handles a state view, a transient state or an object
      * with unique valid time.
      * 
-     * @return <code>true</code> for state views.
-     */
-    private boolean isView(){
-        return this.enabled;
-    }
-
-    /**
-     * Tells whether this instances handles a state view, a transient state or an object
-     * with unique valid time.
-     * 
      * @param feature the feature to be tested
      * 
      * @return <code>true</code> for state view features
@@ -204,7 +191,7 @@ public abstract class BasicState_1<C extends StateContext<?>>
         C context, 
         AccessMode accessMode
     ) throws ServiceException {
-        if(!candidate.jdoIsDeleted() && getModel().isInstanceof(candidate, getStateClass())) {
+        if(!candidate.jdoIsDeleted() && getModel().isInstanceof(candidate, "org:openmdx:state2:BasicState")) {
     		Date removedAt = (Date) candidate.objGetValue(REMOVED_AT); 
         	switch(context.getViewKind()) {
 	        	case TIME_POINT_VIEW:
@@ -239,9 +226,6 @@ public abstract class BasicState_1<C extends StateContext<?>>
     protected abstract void initialize(
         DataObject_1_0 dataObject
     ) throws ServiceException;
-
-    protected abstract String getStateClass(
-    );
 
     protected abstract boolean isValidTimeFeature(
         String featureName
@@ -278,7 +262,7 @@ public abstract class BasicState_1<C extends StateContext<?>>
             null,
             ASPECT_QUERY
         ).execute(
-            getStateClass(),
+            "org:openmdx:state2:BasicState",
             core
         );
     }
@@ -363,7 +347,7 @@ public abstract class BasicState_1<C extends StateContext<?>>
             BasicException.Code.DEFAULT_DOMAIN,
             BasicException.Code.BAD_PARAMETER,
             "Illegal access mode for the given view kind",
-            ExceptionHelper.newObjectIdParameter("id", this),
+            getIdParameter(),
             new BasicException.Parameter("viewKind", viewKind),
             ExceptionHelper.newObjectIdParameter("accessMode", accessMode)
         );
@@ -445,6 +429,10 @@ public abstract class BasicState_1<C extends StateContext<?>>
         }
     }
 
+    protected Boolean transactionTimeUniqueDefaultValue(){
+    	return Boolean.valueOf(!this.enabled);
+    }
+    
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.generic.spi.StaticallyDelegatingObject_1#objGetValue(java.lang.String)
      */
@@ -460,18 +448,27 @@ public abstract class BasicState_1<C extends StateContext<?>>
                 for(DataObject_1_0 state : getInvolved(this.getQueryAccessMode())){
                     reply.set(state.objGetValue(feature));
                 }
-                return reply.get();
+                try {
+                    return reply.get();
+                } catch (ServiceException exception) {
+                    throw new ServiceException(
+                        exception, 
+                        BasicException.Code.DEFAULT_DOMAIN,
+                        BasicException.Code.ILLEGAL_STATE,
+                        "The underlaying states do not allow the determination of a unique feature value",
+                        ExceptionHelper.newObjectIdParameter("xri", this)
+                    );
+                }
+                
             }
         } else {
-            Object value = super.objGetValue(feature); 
-            if(
-                value == null && 
-                this.jdoIsPersistent() &&
-                ("validTimeUnique".equals(feature) || "transactionTimeUnique".equals(feature))
-            ) {
-                return Boolean.valueOf(!this.enabled);
-            }
-            return value;
+        	Object value = super.objGetValue(feature);
+        	if(value == null) {
+        		if("transactionTimeUnique".equals(feature)) {
+	        		value = transactionTimeUniqueDefaultValue();
+        		}
+        	}
+        	return value;
         }
     }
 
@@ -489,7 +486,7 @@ public abstract class BasicState_1<C extends StateContext<?>>
                     BasicException.Code.DEFAULT_DOMAIN,
                     BasicException.Code.ILLEGAL_STATE,
                     "The core object can't be replaced",
-                    ExceptionHelper.newObjectIdParameter("id", this),
+                    getIdParameter(),
                     new BasicException.Parameter("feature", feature),
                     ExceptionHelper.newObjectIdParameter("value", to)
                 );
@@ -498,7 +495,7 @@ public abstract class BasicState_1<C extends StateContext<?>>
                     BasicException.Code.DEFAULT_DOMAIN,
                     BasicException.Code.NOT_SUPPORTED,
                     "The valid time of a persistent state can't be modified",
-                    ExceptionHelper.newObjectIdParameter("id", this),
+                    getIdParameter(),
                     new BasicException.Parameter("feature", feature),
                     new BasicException.Parameter("value", to)
                 );
@@ -517,7 +514,7 @@ public abstract class BasicState_1<C extends StateContext<?>>
                             BasicException.Code.DEFAULT_DOMAIN,
                             BasicException.Code.NOT_SUPPORTED,
                             "Use setValidTimeUnique(true) instead",
-                            ExceptionHelper.newObjectIdParameter("id", this),
+                            getIdParameter(),
                             new BasicException.Parameter("feature", feature),
                             new BasicException.Parameter("value", "<self>")
                         );
@@ -592,13 +589,22 @@ public abstract class BasicState_1<C extends StateContext<?>>
         }
     }
 
+    /**
+     * Determine the Id parameter
+     * 
+     * @return
+     */
+    public BasicException.Parameter getIdParameter() {
+        return ExceptionHelper.newObjectIdParameter("id", this);
+    }
+
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.generic.spi.StaticallyDelegatingObject_1#objDefaultFetchGroup()
      */
     @Override
     public Set<String> objDefaultFetchGroup(
     ) throws ServiceException {
-        if(isView()){
+        if(this.enabled){
             Set<String> defaultFetchGroup = null;
             for(DataObject_1_0 state : getInvolved(AccessMode.FOR_QUERY)){
                 if(defaultFetchGroup == null) {
@@ -621,7 +627,7 @@ public abstract class BasicState_1<C extends StateContext<?>>
     @Override
     public void objDelete(
     ) throws ServiceException {
-        if(isView()) {
+        if(this.enabled) {
             for(
                 Iterator<DataObject_1_0> i = getInvolved(AccessMode.FOR_UPDATE).iterator();
                 i.hasNext();
@@ -640,7 +646,7 @@ public abstract class BasicState_1<C extends StateContext<?>>
     @Override
     public void objMakeTransactional(
     ) throws ServiceException {
-        if(isView()) {
+        if(this.enabled) {
             for(DataObject_1_0 state : getInvolved(AccessMode.FOR_QUERY)){
                 JDOHelper.getPersistenceManager(state).makeTransactional(state);
             }
@@ -655,7 +661,7 @@ public abstract class BasicState_1<C extends StateContext<?>>
     @Override
     public void objMakeNontransactional(
     ) throws ServiceException {
-        if(isView()) {
+        if(this.enabled) {
             for(DataObject_1_0 state : getInvolved(AccessMode.FOR_QUERY)){
                 JDOHelper.getPersistenceManager(state).makeNontransactional(state);
             }
@@ -670,7 +676,7 @@ public abstract class BasicState_1<C extends StateContext<?>>
     @Override
     public void objRefresh(
     ) throws ServiceException {
-        if(isView()) {
+        if(this.enabled) {
             for(DataObject_1_0 state : getInvolved(AccessMode.FOR_QUERY)){
                 JDOHelper.getPersistenceManager(state).refresh(state);
             }
@@ -685,7 +691,7 @@ public abstract class BasicState_1<C extends StateContext<?>>
     @Override
     public boolean jdoIsDeleted(
     ) {
-        if(isView()) {
+        if(this.enabled) {
             try {
                 return !getInvolved(AccessMode.FOR_QUERY).iterator().hasNext();
             } catch(Exception e) {
@@ -706,12 +712,22 @@ public abstract class BasicState_1<C extends StateContext<?>>
     @Override
     public String objGetClass(
     ) throws ServiceException {
-        if(isView()) {
+        if(this.enabled) {
             UniqueValue<String> reply = new UniqueValue<String>();
             for(DataObject_1_0 state : getInvolved(AccessMode.FOR_QUERY)){
                 reply.set(state.objGetClass());
             }
-            return reply.isEmpty() ? null : reply.get();
+            try {
+                return reply.isEmpty() ? null : reply.get();
+            } catch (ServiceException exception) {
+                throw new ServiceException(
+                    exception, 
+                    BasicException.Code.DEFAULT_DOMAIN,
+                    BasicException.Code.ILLEGAL_STATE,
+                    "The underlaying states do not allow the determination of a unique object class",
+                    getIdParameter()
+                );
+            }
         } else {
             return super.objGetClass();
         }
@@ -723,7 +739,7 @@ public abstract class BasicState_1<C extends StateContext<?>>
     @Override
     public boolean jdoIsDirty(
     ) {
-        if(isView()) {
+        if(this.enabled) {
             try {
                 boolean dirty = false;
                 for(DataObject_1_0 state : getInvolved(AccessMode.FOR_QUERY)){
@@ -749,7 +765,7 @@ public abstract class BasicState_1<C extends StateContext<?>>
     @Override
     public boolean jdoIsTransactional(
     ) {
-        if(isView()) {
+        if(this.enabled) {
             try {
                 boolean inUnitOfWork = false;
                 for(DataObject_1_0 state : getInvolved(AccessMode.FOR_QUERY)){

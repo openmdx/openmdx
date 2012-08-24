@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: ManagedConnectionFactory.java,v 1.6 2010/09/04 19:52:37 hburger Exp $
  * Description: Managed RADIUS Connection Factory
- * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/09/04 19:52:37 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

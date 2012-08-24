@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: eisURLContextFactory.java,v 1.2 2010/09/23 12:19:03 hburger Exp $
  * Description: eis URL Context Factory
- * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/09/23 12:19:03 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

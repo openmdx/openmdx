@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: PlugInContexts.java,v 1.4 2011/04/05 14:30:50 hburger Exp $
  * Description: Plug-In Contexts
- * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/04/05 14:30:50 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

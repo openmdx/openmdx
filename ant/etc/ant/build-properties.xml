@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <!--
 =======================================================================
-= Name:        $Id: build-properties.xml,v 1.37 2011/05/04 13:36:34 wfro Exp $
+= Name:        $Id: build-properties.xml,v 1.38 2012/03/15 15:01:36 hburger Exp $
 = Description: openMDX Build Properties
-= Revision:    $Revision: 1.37 $
-= Date:        $Date: 2011/05/04 13:36:34 $
+= Revision:    $Revision: 1.38 $
+= Date:        $Date: 2012/03/15 15:01:36 $
 = Copyright:   (c) 2003-2011 OMEX AG
 =======================================================================
 =
@@ -258,9 +258,9 @@
 	<property name="datetime.data.pattern" value="yyyyMMdd'T'HHmmss'Z'" />
 	<property name="datetime.text.pattern" value="yyyy-MM-dd'T'HH:mm:ss'Z'" />
 	<property 
-		name="openmdx.log.format" 
-		value="$${logger}|$${time}|$${level}|$${logsource}|$${host}|$${thread}|$${class}|$${method}|$${line}|$${summary}|$${detail}"
-	/><!-- The deprecated openmdx.log.format property is no longer used -->
+		name="openmdx.log.formatter"
+		value="org.openmdx.kernel.logging.ClassicFormatter"
+	/>
 	
 	<!-- =================================================================== -->
 	<!-- = Vendor Properties                                               = -->

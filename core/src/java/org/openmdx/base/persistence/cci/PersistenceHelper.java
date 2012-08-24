@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: PersistenceHelper.java,v 1.30 2011/11/19 16:38:04 hburger Exp $
  * Description: PersistenceHelper 
- * Revision:    $Revision: 1.30 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/11/19 16:38:04 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -91,9 +88,9 @@ public class PersistenceHelper {
      * 
      * @param object
      * 
-     * @return a clone, or <code>null</code> if the class is not cloneable
+     * @return a clone, or <code>null</code> if the object is <code>null</code>
      * 
-     * @exception RuntimeException if cloning fails 
+     * @exception RuntimeException if cloning fails or if the object is not cloneable 
      */
     @SuppressWarnings("unchecked")
     public static <T> T clone(
@@ -102,28 +99,42 @@ public class PersistenceHelper {
     ) {
         if(object instanceof org.openmdx.base.persistence.spi.Cloneable) {
             return ((org.openmdx.base.persistence.spi.Cloneable<T>)object).openmdxjdoClone(exclude);
+        } else if(exclude != null && exclude.length > 0) throw new RuntimeServiceException(
+            BasicException.Code.DEFAULT_DOMAIN,
+            BasicException.Code.BAD_PARAMETER,
+            "Exclude is supported for org.openmdx.base.persistence.spi.Cloneable objects only",
+            new BasicException.Parameter("exclude", (Object[])exclude),
+            new BasicException.Parameter("supported", java.lang.Cloneable.class.getName(), org.openmdx.base.persistence.spi.Cloneable.class.getName()),
+            new BasicException.Parameter("class", object.getClass().getName())
+        );
+        if(object instanceof java.lang.Cloneable) {
+        	try {
+	            return (T) object.getClass(
+	            ).getMethod(
+	                "clone"
+	            ).invoke(
+	                object
+	            );
+	        } catch (RuntimeException exception) {
+	            throw exception;
+	        } catch (Exception exception) {
+	            throw new RuntimeServiceException(
+	                exception,
+	                BasicException.Code.DEFAULT_DOMAIN,
+	                BasicException.Code.GENERIC,
+	                "A class declared as Cloneable can't be cloned",
+	                new BasicException.Parameter("interface", java.lang.Cloneable.class.getName()),
+	                new BasicException.Parameter("class", object.getClass().getName())
+	            );
+	        }
         }
-        if(object instanceof java.lang.Cloneable) try {
-            return (T) object.getClass(
-            ).getMethod(
-                "clone"
-            ).invoke(
-                object
-            );
-        } catch (RuntimeException exception) {
-            throw exception;
-        } catch (Exception exception) {
-            throw new RuntimeServiceException(
-                exception,
-                BasicException.Code.DEFAULT_DOMAIN,
-                BasicException.Code.GENERIC,
-                "A class declared as Cloneable can't be cloned",
-                new BasicException.Parameter("interface", java.lang.Cloneable.class.getName()),
-                new BasicException.Parameter("class", object.getClass().getName())
-
-            );
-        }
-        return null;
+        throw new RuntimeServiceException(
+            BasicException.Code.DEFAULT_DOMAIN,
+            BasicException.Code.NOT_SUPPORTED,
+            "A class not declared as Cloneable can't be cloned",
+            new BasicException.Parameter("supported", java.lang.Cloneable.class.getName(), org.openmdx.base.persistence.spi.Cloneable.class.getName()),
+            new BasicException.Parameter("class", object.getClass().getName())
+        );
     }
 
     /**
@@ -254,8 +265,7 @@ public class PersistenceHelper {
     public static String getLastXRISegment(
     	Object pc
     ){
-        PersistenceManager_1_0 pm = (PersistenceManager_1_0) JDOHelper.getPersistenceManager(pc);
-    	return pm.getLastXRISegment(pc);
+        return ((PersistenceManager_1_0) JDOHelper.getPersistenceManager(pc)).getLastXRISegment(pc);
     }
     
 }

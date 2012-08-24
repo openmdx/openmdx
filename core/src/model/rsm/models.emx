@@ -216,6 +216,9 @@
           <contents xmi:type="ecore:EAnnotation" xmi:id="_Rw4a8JI9Ed2cwPP4iruzRw" source="eObjectShortcut">
             <references xmi:type="uml:Package" href="org.openmdx.role2.emx#_3C7B8A60016D407129D101F2?role2/role2?"/>
           </contents>
+          <contents xmi:type="ecore:EAnnotation" xmi:id="_XV6iMHTTEeGNposaCGm5NA" source="eObjectShortcut">
+            <references xmi:type="uml:Package" href="org.openmdx.preferences2.emx#_sUE1XXTSEeGNposaCGm5NA?preferences2/preferences2?"/>
+          </contents>
         </eAnnotations>
         <packagedElement xmi:type="uml:Package" xmi:id="_3C7B8A60016D3FF0C2EF0115" name="compatibility">
           <eAnnotations xmi:id="_Mi6VaN65EdmrtKJSXC0_FQ" source="uml2.diagrams" references="_3C7B8A60016D400E55C40281">

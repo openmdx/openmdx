@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: TestDateState.java,v 1.3 2011/11/18 16:46:01 hburger Exp $
  * Description: TestState 
- * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/11/18 16:46:01 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

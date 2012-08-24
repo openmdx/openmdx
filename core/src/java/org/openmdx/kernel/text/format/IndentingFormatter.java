@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMEX, http://www.openmdx.org/
- * Name:        $Id: IndentingFormatter.java,v 1.9 2010/06/21 17:34:45 hburger Exp $
  * Description: Intending Formatter
- * Revision:    $Revision: 1.9 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/06/21 17:34:45 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

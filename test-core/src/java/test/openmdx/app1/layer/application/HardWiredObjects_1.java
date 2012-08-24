@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: HardWiredObjects_1.java,v 1.13 2011/12/02 10:34:10 hburger Exp $
  * Description: Hard-Wired Objects Layer
- * Revision:    $Revision: 1.13 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/12/02 10:34:10 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -86,6 +83,7 @@ import org.openmdx.kernel.exception.BasicException;
  * This layer implementation shall be replaced by an aspect oriented
  * persistence plug-in in future.
  */
+@SuppressWarnings("unchecked")
 public class HardWiredObjects_1 extends Standard_1 {
 
     // --------------------------------------------------------------------------

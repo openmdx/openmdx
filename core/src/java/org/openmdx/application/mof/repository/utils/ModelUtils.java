@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: ModelUtils.java,v 1.6 2011/04/12 15:29:26 hburger Exp $
  * Description: model1 model elements
- * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/04/12 15:29:26 $
  * ====================================================================
  *
  * This software is published under the BSD license

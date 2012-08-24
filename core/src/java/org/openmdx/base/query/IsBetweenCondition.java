@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: IsBetweenCondition.java,v 1.11 2010/09/13 16:46:29 hburger Exp $
  * Description: Is-Between Condition
- * Revision:    $Revision: 1.11 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/09/13 16:46:29 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -114,7 +111,7 @@ public class IsBetweenCondition extends Condition {
      */
     @Override
     public IsBetweenCondition clone(
-    ) throws CloneNotSupportedException {
+    ){
         return new IsBetweenCondition(
             this.getQuantifier(), 
             this.getFeature(), 

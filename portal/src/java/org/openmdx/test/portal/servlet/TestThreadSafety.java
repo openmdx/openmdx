@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: TestThreadSafety.java,v 1.11 2011/07/07 22:35:42 wfro Exp $
  * Description: TestThreadSafety
- * Revision:    $Revision: 1.11 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/07/07 22:35:42 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -271,7 +268,7 @@ public class TestThreadSafety
             components[n++] = WebKeys.REQUEST_ID;
             components[n++] = requestId;
         }
-      
+
         // REQUEST_EVENT
         components[n++] = WebKeys.REQUEST_EVENT;
         components[n++] = Integer.toString(action.getEvent());

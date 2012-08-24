@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: ViewManager_1.java,v 1.54 2011/11/25 14:51:58 hburger Exp $
  * Description: View Manager
- * Revision:    $Revision: 1.54 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/11/25 14:51:58 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -1335,8 +1332,12 @@ public class ViewManager_1
         UUID transientObjectId
     ) throws ServiceException{
         validateState();
+        String modelClass = objectClass;
+        for(PlugIn_1_0 plugIn : getPlugIn()) {
+            modelClass = plugIn.resolveObjectClass(modelClass, interactionSpec);
+        }
         return (DataObject_1_0)marshal(
-            this.connection.newInstance(objectClass, transientObjectId)
+            this.connection.newInstance(modelClass, transientObjectId)
         );
     }
 

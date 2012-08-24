@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: UserSettings.java,v 1.6 2011/10/23 11:44:27 wfro Exp $
  * Description: UserSettings 
- * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/10/23 11:44:27 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -56,22 +53,36 @@ package org.openmdx.portal.servlet;
  * UserSettings
  *
  */
-public class UserSettings {
+public enum UserSettings {
 
-	public static final String LOCALE_NAME = "Locale.Name";
-	public static final String TIMEZONE_NAME = "TimeZone.Name";
-	public static final String PERSPECTIVE_ID = "Perspective.ID";
-	public static final String SHOW_ROWS_ON_INIT = "Page.DefaultFilterOnInit";
-	public static final String SHOW_SEARCH_FORM = "Page.ShowSearchForm";
-	public static final String PAGE_ALIGNMENT = "Page.Alignment";
-    public static final String TOP_NAVIGATION_SHOW_MAX = "TopNavigation.ShowMax";
-	public static final String TOP_NAVIGATION_SHOW_SUBLEVEL = "TopNavigation.ShowSublevel";
-	public static final String DEFAULT_FILTER = "Filter.Default";
-	public static final String PAGE_SIZE = "Page.Size";
-	public static final String ROOT_OBJECT_STATE = "RootObject";
-	public static final String WORKSPACE_ID = "Workspace.ID";	
-	public static final String HIDE_WORKSPACE_DASHBOARD = "WorkspaceDashboard.Hide";
-	public static final String GRID_DEFAULT_ALIGNMENT_IS_WIDE = "Grid.DefaultAlignmentIsWide";
-	public static final String AUTOSTART_URL = "Autostart.URL";
+	LOCALE_NAME("Locale.Name"),
+	TIMEZONE_NAME("TimeZone.Name"),
+	PERSPECTIVE_ID("Perspective.ID"),
+	SHOW_ROWS_ON_INIT("Page.DefaultFilterOnInit"),
+	SHOW_SEARCH_FORM("Page.ShowSearchForm"),
+	PAGE_ALIGNMENT("Page.Alignment"),
+    TOP_NAVIGATION_SHOW_MAX("TopNavigation.ShowMax"),
+	TOP_NAVIGATION_SHOW_SUBLEVEL("TopNavigation.ShowSublevel"),
+	DEFAULT_FILTER("Filter.Default"),
+	PAGE_SIZE("Page.Size"),
+	ROOT_OBJECT_STATE("RootObject"),
+	WORKSPACE_ID("Workspace.ID"),	
+	HIDE_WORKSPACE_DASHBOARD("WorkspaceDashboard.Hide"),
+	GRID_DEFAULT_ALIGNMENT_IS_WIDE("Grid.DefaultAlignmentIsWide"),
+	AUTOSTART_URL("Autostart.URL"),
+	SCROLL_HEADER("Header.Scroll");
+
+	private final String name;
+	
+	private UserSettings(
+		String name
+	) {
+		this.name = name;
+	}
+	
+	public String getName(
+	) {
+	    return this.name;
+	}    
 	
 }

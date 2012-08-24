@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: XMIExternalizer.java,v 1.4 2010/04/13 14:05:44 wfro Exp $
  * Description: RoseExporterMain command-line tool
- * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/04/13 14:05:44 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

@@ -6,5 +6,6 @@
 	<classpathentry exported="true" kind="lib" path="lib/osgi.enterprise.servlet.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/osgi.enterprise.transaction.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/osgi.enterprise.xml.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/osgi.enterprise.el.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

@@ -75,22 +75,22 @@ abstract class BeanDecorator<T extends Bean>
     }
 
     public String getEjbClass() {
-        return super.delegate.getEjbClass();
+        return getDelegate().getEjbClass();
     }
 
     public String getJndiName() {
-        return super.delegate.getJndiName();
+        return getDelegate().getJndiName();
     }
 
     public String getLocalJndiName() {
-        return super.delegate.getLocalJndiName();
+        return getDelegate().getLocalJndiName();
     }
 
     /* (non-Javadoc)
      * @see org.openmdx.kernel.application.deploy.spi.Deployment.AssemblyDescriptor#getContainerTransaction()
      */
     public List<ContainerTransaction> getContainerTransaction() {
-        return super.delegate.getContainerTransaction();
+        return getDelegate().getContainerTransaction();
     }
 
     public void deploy(
@@ -99,7 +99,7 @@ abstract class BeanDecorator<T extends Bean>
         Reference localReference,
         Reference remoteReference
     ) throws NamingException {
-        super.delegate.deploy(
+        getDelegate().deploy(
             containerContext,
             applicationContext,
             localReference,
@@ -108,13 +108,13 @@ abstract class BeanDecorator<T extends Bean>
     }
 
     public String getName() {
-        return super.delegate.getName();
+        return getDelegate().getName();
     }
 
     public void populate(
         Context componentContext
     ) throws NamingException {
-        super.delegate.populate(componentContext);
+        getDelegate().populate(componentContext);
     }
 
     public Integer getInitialCapacity(
@@ -149,7 +149,7 @@ abstract class BeanDecorator<T extends Bean>
      * @see org.openmdx.kernel.application.deploy.spi.Pool#getMaximumIdle()
      */
     public Integer getMaximumIdle() {
-        return super.delegate.getMaximumIdle();
+        return getDelegate().getMaximumIdle();
     }
 
     /**
@@ -157,7 +157,7 @@ abstract class BeanDecorator<T extends Bean>
      * @see org.openmdx.kernel.application.deploy.spi.Pool#getMinimumEvictableIdleTime()
      */
     public Long getMinimumEvictableIdleTime() {
-        return super.delegate.getMinimumEvictableIdleTime();
+        return getDelegate().getMinimumEvictableIdleTime();
     }
 
     /**
@@ -165,7 +165,7 @@ abstract class BeanDecorator<T extends Bean>
      * @see org.openmdx.kernel.application.deploy.spi.Pool#getMinimumIdle()
      */
     public Integer getMinimumIdle() {
-        return super.delegate.getMinimumIdle();
+        return getDelegate().getMinimumIdle();
     }
 
     /**
@@ -173,7 +173,7 @@ abstract class BeanDecorator<T extends Bean>
      * @see org.openmdx.kernel.application.deploy.spi.Pool#getNumberOfTestsPerEvictionRun()
      */
     public Integer getNumberOfTestsPerEvictionRun() {
-        return super.delegate.getNumberOfTestsPerEvictionRun();
+        return getDelegate().getNumberOfTestsPerEvictionRun();
     }
 
     /**
@@ -181,7 +181,7 @@ abstract class BeanDecorator<T extends Bean>
      * @see org.openmdx.kernel.application.deploy.spi.Pool#getTestOnBorrow()
      */
     public Boolean getTestOnBorrow() {
-        return super.delegate.getTestOnBorrow();
+        return getDelegate().getTestOnBorrow();
     }
 
     /**
@@ -189,7 +189,7 @@ abstract class BeanDecorator<T extends Bean>
      * @see org.openmdx.kernel.application.deploy.spi.Pool#getTestOnReturn()
      */
     public Boolean getTestOnReturn() {
-        return super.delegate.getTestOnReturn();
+        return getDelegate().getTestOnReturn();
     }
 
     /**
@@ -197,7 +197,7 @@ abstract class BeanDecorator<T extends Bean>
      * @see org.openmdx.kernel.application.deploy.spi.Pool#getTestWhileIdle()
      */
     public Boolean getTestWhileIdle() {
-        return super.delegate.getTestWhileIdle();
+        return getDelegate().getTestWhileIdle();
     }
 
     /**
@@ -205,7 +205,7 @@ abstract class BeanDecorator<T extends Bean>
      * @see org.openmdx.kernel.application.deploy.spi.Pool#getTimeBetweenEvictionRuns()
      */
     public Long getTimeBetweenEvictionRuns() {
-        return super.delegate.getTimeBetweenEvictionRuns();
+        return getDelegate().getTimeBetweenEvictionRuns();
     }
 
     @Override
@@ -216,7 +216,7 @@ abstract class BeanDecorator<T extends Bean>
         {
             Report report = super.validate();
 
-            this.maximumCapacity = super.delegate.getMaximumCapacity();
+            this.maximumCapacity = getDelegate().getMaximumCapacity();
             if (this.maximumCapacity == null)
             {
                 // set default value
@@ -224,7 +224,7 @@ abstract class BeanDecorator<T extends Bean>
                 report.addInfo("unset attribute 'MaximumCapacity' was overriden with default value " + this.maximumCapacity);
             }
 
-            this.initialCapacity = super.delegate.getInitialCapacity();
+            this.initialCapacity = getDelegate().getInitialCapacity();
             if (this.initialCapacity == null)
             {
                 // set default value
@@ -232,7 +232,7 @@ abstract class BeanDecorator<T extends Bean>
                 report.addInfo("unset attribute 'InitialCapacity' was overriden with default value " + this.initialCapacity);
             }
 
-            this.maximumWait = super.delegate.getMaximumWait();
+            this.maximumWait = getDelegate().getMaximumWait();
             if (this.maximumWait == null)
             {
                 // set default value

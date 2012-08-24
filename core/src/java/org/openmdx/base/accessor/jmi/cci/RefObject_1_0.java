@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: RefObject_1_0.java,v 1.22 2010/01/18 17:57:32 hburger Exp $
  * Description: RefObject_1_0 interface
- * Revision:    $Revision: 1.22 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/01/18 17:57:32 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -56,6 +53,7 @@ import javax.jmi.reflect.RefObject;
 
 import org.openmdx.base.accessor.view.ObjectView_1_0;
 import org.openmdx.base.naming.Path;
+import org.openmdx.base.persistence.cci.PersistenceHelper;
 
 /**
  * This interface extends the javax.jmi.reflect.RefObject interface 
@@ -101,7 +99,10 @@ public interface RefObject_1_0 extends RefObject {
    * 
    * @param existing existing object.
    * @throws JmiServiceException thrown if object can not be initialized. 
+   * 
+   * @deprecated use {@link PersistenceHelper#clone(Object, String...)}
    */
+  @Deprecated
   public void refInitialize(
     RefObject source
   );

@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: SlicedDbObject2NonIndexedParentRidOnly.java,v 1.2 2011/02/11 12:40:56 hburger Exp $
  * Description: SlicedDbObjectParentRidOnly class
- * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/02/11 12:40:56 $
  * ====================================================================
  *
  * This software is published under the BSD license

@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: UiLoader.java,v 1.83 2011/10/30 17:32:28 wfro Exp $
  * Description: UiLoader
- * Revision:    $Revision: 1.83 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/10/30 17:32:28 $
  * ====================================================================
  *
  * This software is published under the BSD license

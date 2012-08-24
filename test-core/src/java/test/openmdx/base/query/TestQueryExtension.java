@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: TestQueryExtension.java,v 1.2 2010/06/08 12:34:52 hburger Exp $
  * Description: Test Query Extension
- * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/06/08 12:34:52 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

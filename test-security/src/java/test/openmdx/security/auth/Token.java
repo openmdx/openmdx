@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     OMEX/Security, http://www.omex.ch/
- * Name:        $Id: Token.java,v 1.2 2010/06/04 22:38:01 hburger Exp $
  * Description: Token 
- * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/06/04 22:38:01 $
  * ====================================================================
  *
  * This software is published under the BSD license

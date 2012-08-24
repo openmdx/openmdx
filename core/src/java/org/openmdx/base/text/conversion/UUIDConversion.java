@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: UUIDConversion.java,v 1.11 2010/10/24 08:57:05 hburger Exp $
  * Description: UUID conversion
- * Revision:    $Revision: 1.11 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/10/24 08:57:05 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

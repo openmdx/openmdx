@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: TestBasicAuthentication.java,v 1.1 2010/10/29 12:45:00 hburger Exp $
  * Description: TestBasicAuthentication 
- * Revision:    $Revision: 1.1 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/10/29 12:45:00 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

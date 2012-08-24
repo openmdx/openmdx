@@ -1,17 +1,14 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: DateValue.java,v 1.58 2011/08/11 15:08:58 wfro Exp $
  * Description: DateValue 
- * Revision:    $Revision: 1.58 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/08/11 15:08:58 $
  * ====================================================================
  *
  * This software is published under the BSD license
  * as listed below.
  * 
- * Copyright (c) 2004-2007, OMEX AG, Switzerland
+ * Copyright (c) 2004-2012, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -77,7 +74,13 @@ public class DateValue
     extends AttributeValue
     implements Serializable {
 
-    //-------------------------------------------------------------------------
+    /**
+     * Create a DateValue attribute.
+     * @param object
+     * @param fieldDef
+     * @param application
+     * @return
+     */
     public static AttributeValue createDateValue(
         Object object,
         FieldDef fieldDef,
@@ -85,24 +88,30 @@ public class DateValue
     ) {
         // Return user defined attribute value class or DateValue as default
         String valueClassName = (String)application.getMimeTypeImpls().get(fieldDef.mimeType);
-        AttributeValue attributeValue = valueClassName == null
-            ? null
-            : AttributeValue.createAttributeValue(
-                valueClassName,
-                object,
-                fieldDef,
-                application
-              );
-        return attributeValue != null
-            ? attributeValue
-            : new DateValue(
-                object,
-                fieldDef,
-                application
-            );
+        AttributeValue attributeValue = valueClassName == null ? 
+        	null : 
+        		AttributeValue.createAttributeValue(
+	                valueClassName,
+	                object,
+	                fieldDef,
+	                application
+        		);
+        return attributeValue != null ? 
+        	attributeValue : 
+        		new DateValue(
+	                object,
+	                fieldDef,
+	                application
+	            );
     }
     
-    //-------------------------------------------------------------------------
+    /**
+     * Constructor 
+     *
+     * @param object
+     * @param fieldDef
+     * @param application
+     */
     protected DateValue(
         Object object,
         FieldDef fieldDef,
@@ -120,7 +129,10 @@ public class DateValue
         }
     }
 
-    //-------------------------------------------------------------------------
+    /**
+     * Assert that formatter has a 4-digit year as pattern.
+     * @param formatter
+     */
     public static void assert4DigitYear(
         SimpleDateFormat formatter
     ) {
@@ -131,17 +143,11 @@ public class DateValue
         formatter.applyPattern(pattern);
     }
     
-    //-------------------------------------------------------------------------
-    public SimpleDateFormat getLocalizedDateFormatter(
-    ) {
-        return DateValue.getLocalizedDateFormatter(
-            this.fieldDef.qualifiedFeatureName,
-            true,
-            this.app
-        );
-    }
-
-    //-------------------------------------------------------------------------
+    /**
+     * Get localized date formatter with given edit style.
+     * @param useEditStyle
+     * @return
+     */
     public SimpleDateFormat getLocalizedDateFormatter(
         boolean useEditStyle
     ) {
@@ -152,23 +158,28 @@ public class DateValue
         );
     }
 
-    //-------------------------------------------------------------------------
+    /**
+     * Get localized date formatter.
+     * @param qualifiedFeatureName
+     * @param useEditStyle
+     * @param app
+     * @return
+     */
     public static SimpleDateFormat getLocalizedDateFormatter(
         String qualifiedFeatureName,
         boolean useEditStyle,        
-        ApplicationContext application
+        ApplicationContext app
     ) {
+    	TimeZone timezone = app.getPortalExtension().getTimeZone(qualifiedFeatureName, app);    	
         Map<String,SimpleDateFormat> cachedDateFormatters = DateValue.cachedLocalizedDateFormatters.get();
-        String key = application.getCurrentLocaleAsString() + ":" + application.getCurrentTimeZone() + ":" + useEditStyle;
+        String key = app.getCurrentLocaleAsString() + ":" + timezone.getID() + ":" + useEditStyle;
         SimpleDateFormat dateFormatter = (SimpleDateFormat)cachedDateFormatters.get(key);
         if(dateFormatter == null) {
             dateFormatter = (SimpleDateFormat)SimpleDateFormat.getDateInstance(
-                useEditStyle ? java.text.DateFormat.SHORT : application.getPortalExtension().getDateStyle(qualifiedFeatureName, application),
-                application.getCurrentLocale()
+                useEditStyle ? java.text.DateFormat.SHORT : app.getPortalExtension().getDateStyle(qualifiedFeatureName, app),
+                app.getCurrentLocale()
             );
-            dateFormatter.setTimeZone(
-                TimeZone.getTimeZone(application.getCurrentTimeZone())
-            );
+            dateFormatter.setTimeZone(timezone);
             DateValue.assert4DigitYear(dateFormatter);            
             cachedDateFormatters.put(
                 key,
@@ -178,17 +189,11 @@ public class DateValue
         return dateFormatter;
     }
 
-    //-------------------------------------------------------------------------
-    public SimpleDateFormat getLocalizedDateTimeFormatter(
-    ) {
-        return DateValue.getLocalizedDateTimeFormatter(
-            this.fieldDef.qualifiedFeatureName,
-            true,
-            this.app
-        );
-    }
-  
-    //-------------------------------------------------------------------------
+    /**
+     * Get localized dateTime formatter for given attribute and edit style.
+     * @param useEditStyle
+     * @return
+     */
     public SimpleDateFormat getLocalizedDateTimeFormatter(
         boolean useEditStyle
     ) {
@@ -199,34 +204,44 @@ public class DateValue
         );
     }
   
-    //-------------------------------------------------------------------------
+    /**
+     * Get localized dateTime formatter.
+     * @param qualifiedFeatureName
+     * @param useEditStyle
+     * @param app
+     * @return
+     */
     public static SimpleDateFormat getLocalizedDateTimeFormatter(
         String qualifiedFeatureName,
         boolean useEditStyle,
-        ApplicationContext application
+        ApplicationContext app
     ) {
-        String key = application.getCurrentLocaleAsString() + ":" + application.getCurrentTimeZone() + ":" + useEditStyle;
+    	TimeZone timezone = app.getPortalExtension().getTimeZone(qualifiedFeatureName, app);
+        String key = app.getCurrentLocaleAsString() + ":" + timezone.getID() + ":" + useEditStyle;
         Map<String,SimpleDateFormat> cachedDateTimeFormatters = DateValue.cachedLocalizedDateTimeFormatters.get();
         SimpleDateFormat dateTimeFormatter = cachedDateTimeFormatters.get(key);
         if(dateTimeFormatter == null) {
             dateTimeFormatter = (SimpleDateFormat)SimpleDateFormat.getDateTimeInstance(
-                useEditStyle ? java.text.DateFormat.SHORT : application.getPortalExtension().getDateStyle(qualifiedFeatureName, application),
-                useEditStyle ? java.text.DateFormat.MEDIUM : application.getPortalExtension().getTimeStyle(qualifiedFeatureName, application),
-                application.getCurrentLocale()
+                useEditStyle ? java.text.DateFormat.SHORT : app.getPortalExtension().getDateStyle(qualifiedFeatureName, app),
+                useEditStyle ? java.text.DateFormat.MEDIUM : app.getPortalExtension().getTimeStyle(qualifiedFeatureName, app),
+                app.getCurrentLocale()
             );
-            dateTimeFormatter.setTimeZone(
-                TimeZone.getTimeZone(application.getCurrentTimeZone())
-            );
+            dateTimeFormatter.setTimeZone(timezone);
             DateValue.assert4DigitYear(dateTimeFormatter);                        
             cachedDateTimeFormatters.put(
                 key,
                 dateTimeFormatter
             );
         }
-        return dateTimeFormatter;  
+        return dateTimeFormatter;
     }
   
-    //-------------------------------------------------------------------------
+    /**
+     * Return localized and formatted attribute value.
+     * @param value
+     * @param useEditStyle
+     * @return
+     */
     private String formatLocalized(
         Object value,
         boolean useEditStyle
@@ -234,24 +249,27 @@ public class DateValue
         SimpleDateFormat dateFormatter = this.getLocalizedDateFormatter(useEditStyle);
         SimpleDateFormat dateTimeFormatter = this.getLocalizedDateTimeFormatter(useEditStyle);
         if(value instanceof Date) {
-            return this.isDate()
-                ? dateFormatter.format(value)
-                : dateTimeFormatter.format(value);
+            return this.isDate() ? 
+            	dateFormatter.format(value) : 
+            		dateTimeFormatter.format(value);
         } else if(value instanceof XMLGregorianCalendar) {
             GregorianCalendar calendar = ((XMLGregorianCalendar)value).toGregorianCalendar(
                 TimeZone.getTimeZone(app.getCurrentTimeZone()),
                 this.app.getCurrentLocale(),
                 null
             );
-            return this.isDate()
-                ? dateFormatter.format(calendar.getTime())
-                : dateTimeFormatter.format(calendar.getTime());
+            return this.isDate() ? 
+            	dateFormatter.format(calendar.getTime()) : 
+            		dateTimeFormatter.format(calendar.getTime());
         } else {
         	return value == null ? null : value.toString();
         }
     }
 
-    //-------------------------------------------------------------------------
+    /* (non-Javadoc)
+     * @see org.openmdx.portal.servlet.attribute.AttributeValue#getStringifiedValueInternal(org.openmdx.portal.servlet.ViewPort, java.lang.Object, boolean, boolean, boolean)
+     */
+    @Override
     protected String getStringifiedValueInternal(
         ViewPort p,
         Object v,
@@ -263,27 +281,40 @@ public class DateValue
         return this.app.getHtmlEncoder().encode(s, false);
     }
 
-    //-------------------------------------------------------------------------
+    /* (non-Javadoc)
+     * @see org.openmdx.portal.servlet.attribute.AttributeValue#getDefaultValue()
+     */
+    @Override
     public Object getDefaultValue(
     ) {
-        return this.defaultValue == null
-            ? null
-            : this.formatLocalized(this.defaultValue, false);
+        return this.defaultValue == null ? 
+        	null : 
+        		this.formatLocalized(this.defaultValue, false);
     }
 
-    //-------------------------------------------------------------------------
+    /**
+     * Returns true if the attribute has format DATE.
+     * @return
+     */
     public boolean isDate(
     ) {
         return this.getFormat().equals(DATE_FORMAT);
     }
 
-    //-------------------------------------------------------------------------
+    /**
+     * Get format of date field.
+     * @return
+     */
     public String getFormat(
     ) {
         return this.fieldDef.format;
     }
 
-    //-------------------------------------------------------------------------
+    /**
+     * Get calendar format pattern matching the given formatter.
+     * @param formatter
+     * @return
+     */
     public static String getCalendarFormat(
         SimpleDateFormat formatter
     )  {
@@ -326,7 +357,9 @@ public class DateValue
         return pattern;
     }
     
-    //-------------------------------------------------------------------------
+    /* (non-Javadoc)
+     * @see org.openmdx.portal.servlet.attribute.AttributeValue#paint(org.openmdx.portal.servlet.attribute.Attribute, org.openmdx.portal.servlet.ViewPort, java.lang.String, java.lang.String, org.openmdx.base.accessor.jmi.cci.RefObject_1_0, int, int, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, boolean)
+     */
     @Override
     public void paint(
         Attribute attribute,
@@ -367,7 +400,7 @@ public class DateValue
                 p.write("<td class=\"addon\" ", rowSpanModifier, ">");
                 if(readonlyModifier.isEmpty()) {
                     if(this.isDate()) {
-                        SimpleDateFormat dateFormatter = this.getLocalizedDateFormatter();
+                        SimpleDateFormat dateFormatter = this.getLocalizedDateFormatter(true);
                         String calendarFormat = DateValue.getCalendarFormat(dateFormatter);
                         p.write("        <a>", p.getImg("class=\"popUpButton\" id=\"", id, ".Trigger\" border=\"0\" alt=\"Click to open Calendar\" src=\"", p.getResourcePath("images/cal"), p.getImgType(), "\""), "</a>");
                         p.write("        <script language=\"javascript\" type=\"text/javascript\">");
@@ -384,7 +417,7 @@ public class DateValue
                         p.write("        </script>");
                     }
                     else {
-                        SimpleDateFormat dateTimeFormatter = this.getLocalizedDateTimeFormatter();
+                        SimpleDateFormat dateTimeFormatter = this.getLocalizedDateTimeFormatter(true);
                         String calendarFormat = DateValue.getCalendarFormat(dateTimeFormatter);
                         p.write("        <a>", p.getImg("class=\"popUpButton\" id=\"", id, ".Trigger\" border=\"0\" alt=\"Click to open Calendar\" src=\"", p.getResourcePath("images/cal"), p.getImgType(), "\""), "</a>");
                         p.write("        <script language=\"javascript\" type=\"text/javascript\">");

@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: AbstractUnicodeTransformer_1.java,v 1.1 2009/05/26 13:10:13 wfro Exp $
  * Description: SPICE Character Conversions: Abstract Unicode Transformation 
- * Revision:    $Revision: 1.1 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/05/26 13:10:13 $
  * ====================================================================
  *
  * This software is published under the BSD license

@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: ArrayDeque.java,v 1.4 2010/09/13 16:46:29 hburger Exp $
  * Description: ArrayDeque 
- * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/09/13 16:46:29 $
  * ====================================================================
  *
  * Copyright 2006 Sun Microsystems, Inc. All rights reserved.

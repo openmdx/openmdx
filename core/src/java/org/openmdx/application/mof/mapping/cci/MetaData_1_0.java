@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: MetaData_1_0.java,v 1.1 2009/01/13 02:10:40 wfro Exp $
  * Description: Meta Data 1 Intfercace 
- * Revision:    $Revision: 1.1 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/13 02:10:40 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

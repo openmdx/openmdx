@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: ResourceAdapter_1.java,v 1.1 2008/03/25 23:20:27 hburger Exp $
  * Description: ResourceAdapter_1 
- * Revision:    $Revision: 1.1 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/03/25 23:20:27 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

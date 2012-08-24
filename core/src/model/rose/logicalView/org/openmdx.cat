@@ -39,7 +39,12 @@
 	    is_unit    	TRUE
 	    is_loaded  	FALSE
 	    file_name  	"$curdir\\openmdx\\role2.cat"
-	    quid       	"491C365801D4"))
+	    quid       	"491C365801D4")
+	(object Class_Category "preferences2"
+	    is_unit    	TRUE
+	    is_loaded  	FALSE
+	    file_name  	"$curdir\\openmdx\\preferences2.cat"
+	    quid       	"4F6C7106029B"))
     logical_presentations 	(list unit_reference_list
 	(object ClassDiagram "Contains"
 	    quid       	"400E55220148"
@@ -76,7 +81,7 @@
 		    width      	300
 		    height     	180)
 		(object CategoryView "Logical View::org::openmdx::generic1" @2
-		    location   	(609, 491)
+		    location   	(613, 487)
 		    font       	(object Font
 			size       	8
 			face       	"Arial"
@@ -88,7 +93,7 @@
 			default_color 	TRUE)
 		    label      	(object ItemLabel
 			Parent_View 	@2
-			location   	(465, 407)
+			location   	(469, 403)
 			fill_color 	13434879
 			nlines     	2
 			max_width  	288
@@ -198,5 +203,30 @@
 		    line_color 	3342489
 		    fill_color 	13434879
 		    quidu      	"491C365801D4"
+		    width      	300
+		    height     	180)
+		(object CategoryView "Logical View::org::openmdx::preferences2" @7
+		    location   	(1416, 793)
+		    font       	(object Font
+			size       	8
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@7
+			location   	(1272, 709)
+			fill_color 	13434879
+			nlines     	2
+			max_width  	288
+			justify    	0
+			label      	"preferences2")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"4F6C7106029B"
 		    width      	300
 		    height     	180)))))

@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: MetaData_2.java,v 1.7 2011/06/21 22:28:57 hburger Exp $
  * Description: Meta Data Provider
- * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/06/21 22:28:57 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

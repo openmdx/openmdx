@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: IncompleteOrder.java,v 1.1 2010/11/11 10:39:30 hburger Exp $
  * Description: Flush Order 
- * Revision:    $Revision: 1.1 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/11/11 10:39:30 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

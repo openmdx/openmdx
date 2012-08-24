@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: TestContext.java,v 1.1 2008/11/14 10:26:15 hburger Exp $
  * Description: Test Aspects 
- * Revision:    $Revision: 1.1 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/11/14 10:26:15 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

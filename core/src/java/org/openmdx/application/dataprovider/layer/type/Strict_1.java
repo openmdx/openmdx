@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: Strict_1.java,v 1.23 2011/11/26 01:35:00 hburger Exp $
  * Description: Strict_1 class performing type checking of DataproviderRequest/DataproviderReply
- * Revision:    $Revision: 1.23 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/11/26 01:35:00 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

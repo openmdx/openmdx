@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Security, http://www.openmdx.org/
- * Name:        $Id: TestLDAPConnector.java,v 1.3 2011/04/05 13:44:41 hburger Exp $
  * Description: LDAP Connector Test
- * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/04/05 13:44:41 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

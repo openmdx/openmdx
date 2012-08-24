@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: LayerConfigurationEntries.java,v 1.5 2010/12/09 15:14:50 hburger Exp $
  * Description: TYPE layer configuration entries
- * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/12/09 15:14:50 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

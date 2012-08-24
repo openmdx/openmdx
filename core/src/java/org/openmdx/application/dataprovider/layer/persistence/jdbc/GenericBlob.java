@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: GenericBlob.java,v 1.2 2011/04/12 15:27:59 hburger Exp $
  * Description: Generic Binary Large Object 
- * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/04/12 15:27:59 $
  * ====================================================================
  *
  * This software is published under the BSD license

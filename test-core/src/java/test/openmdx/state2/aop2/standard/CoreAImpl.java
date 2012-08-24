@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: CoreAImpl.java,v 1.5 2010/06/03 15:58:28 hburger Exp $
  * Description: CoraAImpl 
- * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/06/03 15:58:28 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

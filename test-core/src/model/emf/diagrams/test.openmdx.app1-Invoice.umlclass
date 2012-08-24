@@ -86,6 +86,10 @@
         <element xmi:type="uml:Property" href="../test.openmdx.app1.uml#_IQ7tsMt6EeCd0bUG66JYmw"/>
         <layoutConstraint xmi:type="notation:Location" xmi:id="_ITEbsct6EeCd0bUG66JYmw"/>
       </children>
+      <children xmi:type="notation:Node" xmi:id="_6BMCIKKsEeGWlbsv5SidnA" type="3001">
+        <element xmi:type="uml:Property" href="../test.openmdx.app1.uml#_6Ae3gKKsEeGWlbsv5SidnA"/>
+        <layoutConstraint xmi:type="notation:Location" xmi:id="_6BMCIaKsEeGWlbsv5SidnA"/>
+      </children>
       <styles xmi:type="notation:TitleStyle" xmi:id="_2qvSc0efEd-q-_EMCS6NuQ" showTitle="true"/>
       <styles xmi:type="notation:SortingStyle" xmi:id="_2qvSdEefEd-q-_EMCS6NuQ"/>
       <styles xmi:type="notation:FilteringStyle" xmi:id="_2qvSdUefEd-q-_EMCS6NuQ"/>

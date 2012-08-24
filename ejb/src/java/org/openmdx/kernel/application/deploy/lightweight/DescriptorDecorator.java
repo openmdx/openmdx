@@ -76,7 +76,7 @@ abstract class DescriptorDecorator<T extends Deployment.Descriptor>
      * @see org.openmdx.kernel.application.deploy.spi.Deployment.Descriptor#isExpanded()
      */
     public boolean isExpanded() {
-        return this.delegate.isExpanded();
+        return getDelegate().isExpanded();
     }
 
 }

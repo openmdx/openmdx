@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     OMEX/Security, http://www.omex.ch/
- * Name:        $Id: TokenFactory.java,v 1.1 2010/03/05 13:21:20 hburger Exp $
  * Description: Token Factory
- * Revision:    $Revision: 1.1 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/03/05 13:21:20 $
  * ====================================================================
  *
  * This software is published under the BSD license

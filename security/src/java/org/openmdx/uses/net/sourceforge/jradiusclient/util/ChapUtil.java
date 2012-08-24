@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: ChapUtil.java,v 1.2 2004/10/14 19:28:24 hburger Exp $
  * Description: Java Radius Client Derivate
- * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2004/10/14 19:28:24 $
  * ====================================================================
  *
  * Copyright (C) 2004  OMEX AG

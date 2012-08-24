@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: PrimitiveTypes.java,v 1.2 2010/06/21 17:29:50 hburger Exp $
  * Description: Constants for PrimitiveTypes
- * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/06/21 17:29:50 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

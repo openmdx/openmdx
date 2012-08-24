@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: RefContainer_1.java,v 1.60 2011/04/17 14:32:36 hburger Exp $
  * Description: RefContainer_1 class
- * Revision:    $Revision: 1.60 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/04/17 14:32:36 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

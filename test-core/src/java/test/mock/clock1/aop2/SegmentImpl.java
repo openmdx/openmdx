@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: SegmentImpl.java,v 1.2 2011/04/05 13:40:26 hburger Exp $
  * Description: SegmentImpl 
- * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/04/05 13:40:26 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

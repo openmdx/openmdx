@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: MenuControl.java,v 1.25 2008/11/10 10:20:11 wfro Exp $
  * Description: MenuControl
- * Revision:    $Revision: 1.25 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/11/10 10:20:11 $
  * ====================================================================
  *
  * This software is published under the BSD license

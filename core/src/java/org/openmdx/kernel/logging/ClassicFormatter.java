@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: ClassicFormatter.java,v 1.3 2009/04/01 13:33:33 hburger Exp $
  * Description: Classic Formatter 
- * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/04/01 13:33:33 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: XMI2Parser.java,v 1.12 2011/06/10 12:52:37 hburger Exp $
  * Description: XMI2 Parser
- * Revision:    $Revision: 1.12 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/06/10 12:52:37 $
  * ====================================================================
  *
  * This software is published under the BSD license

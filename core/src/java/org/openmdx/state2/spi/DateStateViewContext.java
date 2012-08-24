@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: DateStateViewContext.java,v 1.6 2010/12/01 10:09:32 hburger Exp $
  * Description: Date State View
- * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/12/01 10:09:32 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

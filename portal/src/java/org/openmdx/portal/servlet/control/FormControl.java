@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: FormControl.java,v 1.8 2011/04/15 12:03:06 wfro Exp $
  * Description: TabControl
- * Revision:    $Revision: 1.8 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/04/15 12:03:06 $
  * ====================================================================
  *
  * This software is published under the BSD license

@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: MarshallingStructure_1.java,v 1.3 2010/06/02 13:43:52 hburger Exp $
  * Description: SPICE Basic Accessor Object interface
- * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/06/02 13:43:52 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

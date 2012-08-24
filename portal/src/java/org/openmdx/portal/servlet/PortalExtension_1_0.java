@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: PortalExtension_1_0.java,v 1.56 2011/12/23 15:49:51 wfro Exp $
  * Description: Evaluator_1_0
- * Revision:    $Revision: 1.56 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/12/23 15:49:51 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -57,6 +54,7 @@ package org.openmdx.portal.servlet;
 
 import java.util.List;
 import java.util.Map;
+import java.util.TimeZone;
 
 import javax.jdo.PersistenceManager;
 import javax.jmi.reflect.RefStruct;
@@ -96,16 +94,18 @@ public interface PortalExtension_1_0 {
     /**
      * Evaluates the title for a given action and locale.
      * 
+     * @param obj title is evaluated for action for given object.
      * @param action action id
-     * @param name name parameter
+     * @param title default title for this action
      * @param app application context
      */
     String getTitle(
-    	int action,
-    	String name,
+    	Object obj,
+    	Action action,
+    	String title,
     	ApplicationContext app
     );
-    
+
     /**
      * Returns true if user has permission for specified elementName and actions
      * in the context of object.
@@ -314,6 +314,20 @@ public interface PortalExtension_1_0 {
     );
 
     /**
+     * Get time zone for given feature. For most date and dateTime features the time zone of the 
+     * current context is returned, i.e. TimeZone.getTimeZone(app.getCurrentTimeZone()). However,
+     * for fields such as birthday it makes sense to return UTC (the displayed date is then
+     * not adjusted with the meaning relative to the place of birth).
+     * @param qualifiedFeatureName
+     * @param app
+     * @return
+     */
+    TimeZone getTimeZone(
+    	String qualifiedFeatureName,
+    	ApplicationContext app
+    );
+
+    /**
      * Get data binding with given name 
      */
     DataBinding getDataBinding(
@@ -407,17 +421,16 @@ public interface PortalExtension_1_0 {
     ) throws ServiceException;
  
     /**
-     * Get autostart URL. This method is invoked after immediately after session
-     * and app creation. If not null, the user is forwarded immediately to 
-     * the specified URL. This option allows to launch a different app than
-     * the ObjectInspectorServlet. 
+     * Get autostart URL. This method is invoked immediately after creation of the session
+     * and the application context. If not null, the user is forwarded to 
+     * the specified URL.
      * 
      * @return autostart URL or null
      */
     String getAutostartUrl(
     	ApplicationContext app
     );
- 
+
     /**
      * 
      */
@@ -441,6 +454,14 @@ public interface PortalExtension_1_0 {
     ConditionParser getConditionParser(
     	ValuedField field,
     	Condition defaultCondition
+    );
+
+    /**
+     * Get custom-specific extension.
+     * @return custom-specific extension.
+     */
+    Object getExtension(
+    	String name
     );
 
 }

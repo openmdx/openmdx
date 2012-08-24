@@ -1,16 +1,13 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: AbstractObject.java,v 1.13 2011/12/29 15:15:41 hburger Exp $
  * Description: Abstract Object
- * Revision:    $Revision: 1.13 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/12/29 15:15:41 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2008-2009, OMEX AG, Switzerland
+ * Copyright (c) 2008-2011, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -50,22 +47,16 @@
  */
 package org.openmdx.base.aop2;
 
-import java.util.Collections;
 import java.util.UUID;
 
 import javax.jdo.JDOHelper;
 import javax.jdo.PersistenceManager;
-import javax.jdo.listener.ClearCallback;
-import javax.jdo.listener.DeleteCallback;
-import javax.jdo.listener.LoadCallback;
-import javax.jdo.listener.StoreCallback;
 import javax.jmi.reflect.RefObject;
 import javax.jmi.reflect.RefPackage;
 
 import org.openmdx.base.jmi1.BasePackage;
 import org.openmdx.base.jmi1.Void;
 import org.openmdx.base.persistence.spi.SharedObjects;
-import org.openmdx.jdo.listener.ConstructCallback;
 
 /**
  * Abstract Object

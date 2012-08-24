@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Selector.java,v 1.3 2009/10/12 10:33:26 hburger Exp $
  * Description: Selector Interface
- * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/10/12 10:33:26 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

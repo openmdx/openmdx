@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: FakeLoginModule.java,v 1.2 2010/03/05 13:21:20 hburger Exp $
  * Description: FakeLoginModule
- * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/03/05 13:21:20 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: DataManager_2Bean.java,v 1.8 2010/10/15 16:24:18 hburger Exp $
  * Description: Data Manager 2 Bean 
- * Revision:    $Revision: 1.8 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/10/15 16:24:18 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: XMISchemaMapper.java,v 1.7 2011/08/23 22:22:26 hburger Exp $
  * Description: write XML schema (XSD)
- * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/08/23 22:22:26 $
  * ====================================================================
  *
  * This software is published under the BSD license

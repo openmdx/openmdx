@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: BinaryValue.java,v 1.54 2011/08/11 15:08:58 wfro Exp $
  * Description: BinaryValue
- * Revision:    $Revision: 1.54 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/08/11 15:08:58 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -80,9 +77,9 @@ import org.openmdx.kernel.log.SysLog;
 import org.openmdx.portal.servlet.Action;
 import org.openmdx.portal.servlet.ApplicationContext;
 import org.openmdx.portal.servlet.HtmlEncoder_1_0;
+import org.openmdx.portal.servlet.Texts_1_0;
 import org.openmdx.portal.servlet.ViewPort;
 import org.openmdx.portal.servlet.WebKeys;
-import org.openmdx.portal.servlet.texts.Texts_1_0;
 import org.w3c.cci2.BinaryLargeObject;
 
 public class BinaryValue 
@@ -220,7 +217,7 @@ public class BinaryValue
                     new Action(
                         Action.EVENT_DOWNLOAD_FROM_FEATURE,
                         new Action.Parameter[]{
-                            new Action.Parameter(Action.PARAMETER_OBJECTXRI, ((RefObject_1_0)this.object).refMofId()),
+                            new Action.Parameter(Action.PARAMETER_OBJECTXRI, ((RefObject_1_0)this.object).refGetPath().toXRI()),
                             new Action.Parameter(Action.PARAMETER_FEATURE, this.fieldDef.qualifiedFeatureName),
                             new Action.Parameter(Action.PARAMETER_NAME, encodedName),
                             new Action.Parameter(Action.PARAMETER_MIME_TYPE, this.mimeType)
@@ -474,7 +471,7 @@ public class BinaryValue
             p.write("<td ", rowSpanModifier, ">");
             p.write("  <input ", idTag, " type=\"file\" class=\"valueL", lockedModifier, "\" name=\"", feature, "[", Integer.toString(tabIndex), "]\" ", readonlyModifier, " ", (readonlyModifier.isEmpty() ? "" : "disabled"), " tabindex=\"", Integer.toString(tabIndex), "\" title=\"", texts.getEnterNullToDeleteText(), "\">");
             p.write("</td>");
-            p.write("<td class=\"addon\" ", rowSpanModifier, ">");            
+            p.write("<td class=\"addon\" ", rowSpanModifier, "></td>");            
         }
         else {
         	if(WebKeys.LOCKED_VALUE.equals(stringifiedValue)) {
@@ -521,9 +518,12 @@ public class BinaryValue
 	                    label, 
 	                    gapModifier, 
 	                    rowSpanModifier, 
-	                    widthModifier, 
+	                    forEditing ? "" : widthModifier, 
 	                    styleModifier
 	                );
+		            if(forEditing) {
+		            	p.write("<td class=\"addon\" />");
+		            }
 	            }
 	            // Single-valued BinaryValue as link -->
 	            else {
@@ -534,9 +534,12 @@ public class BinaryValue
 	            	else {
 		                p.write(gapModifier);
 		                p.write("<td class=\"label\" title=\"", (title == null ? "" : htmlEncoder.encode(title, false)), "\"><span class=\"nw\">", label, "</span></td>");
-		                p.write("<td ", rowSpanModifier, " class=\"valueL\" ", widthModifier, ">");
+		                p.write("<td ", rowSpanModifier, " class=\"valueL\" ", (forEditing ? "" : widthModifier), ">");
 		                p.write("<div class=\"field\">", attribute.getStringifiedValue(p, false, false), "</div>");
 		                p.write("</td>");
+			            if(forEditing) {
+			            	p.write("<td class=\"addon\" />");
+			            }
 	            	}
 	            }
 	        }

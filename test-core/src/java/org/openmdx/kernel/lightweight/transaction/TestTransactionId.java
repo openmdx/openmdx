@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: TestTransactionId.java,v 1.2 2009/09/15 15:38:47 hburger Exp $
  * Description: Test Transaction Id
- * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/09/15 15:38:47 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: UnmodifiableContext.java,v 1.1 2010/10/11 06:49:06 hburger Exp $
  * Description: Unmodifiable Context 
- * Revision:    $Revision: 1.1 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/10/11 06:49:06 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

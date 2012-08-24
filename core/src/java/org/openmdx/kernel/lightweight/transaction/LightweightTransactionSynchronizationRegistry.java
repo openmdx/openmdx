@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: LightweightTransactionSynchronizationRegistry.java,v 1.2 2011/06/10 12:45:58 hburger Exp $
  * Description: Lightweight Transaction Manager Registry
- * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/06/10 12:45:58 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

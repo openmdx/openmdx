@@ -1,16 +1,13 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: PlugIn_1.java,v 1.18 2011/12/29 03:06:35 hburger Exp $
  * Description: Standard Plug-In
- * Revision:    $Revision: 1.18 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/12/29 03:06:35 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2009-2011, OMEX AG, Switzerland
+ * Copyright (c) 2009-2012, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -311,7 +308,17 @@ public class PlugIn_1
         return false;
     }
 
+	/* (non-Javadoc)
+	 * @see org.openmdx.base.aop0.PlugIn_1_0#isAspect(org.openmdx.base.accessor.rest.DataObject_1)
+	 */
+//  @Override
+	public Boolean isAspect(
+		DataObject_1 object
+	) throws ServiceException {
+		return Boolean.valueOf(object.isAspect());
+	}
 
+	
     //------------------------------------------------------------------------
     // Enum QualifierType
     //------------------------------------------------------------------------

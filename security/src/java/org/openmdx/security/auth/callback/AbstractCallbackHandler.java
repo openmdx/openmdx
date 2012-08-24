@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Security, http://www.openmdx.org/
- * Name:        $Id: AbstractCallbackHandler.java,v 1.3 2010/03/05 13:26:09 hburger Exp $
  * Description: Abstract Callback Handler
- * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/03/05 13:26:09 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

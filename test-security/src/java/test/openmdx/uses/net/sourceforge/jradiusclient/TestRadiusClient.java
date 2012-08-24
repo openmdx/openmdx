@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: TestRadiusClient.java,v 1.1 2010/08/03 14:30:14 hburger Exp $
  * Description: Java Radius Client Derivate
- * Revision:    $Revision: 1.1 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/08/03 14:30:14 $
  * ====================================================================
  *
  * Copyright (C) 2004  OMEX AG

@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: OperationPaneControl.java,v 1.83 2011/08/11 11:55:34 wfro Exp $
  * Description: UiBasedOperationPaneControl class
- * Revision:    $Revision: 1.83 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/08/11 11:55:34 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -64,6 +61,7 @@ import org.openmdx.base.exception.ServiceException;
 import org.openmdx.kernel.log.SysLog;
 import org.openmdx.portal.servlet.Action;
 import org.openmdx.portal.servlet.ApplicationContext;
+import org.openmdx.portal.servlet.Texts_1_0;
 import org.openmdx.portal.servlet.ViewPort;
 import org.openmdx.portal.servlet.ObjectReference;
 import org.openmdx.portal.servlet.attribute.Attribute;
@@ -72,7 +70,6 @@ import org.openmdx.portal.servlet.attribute.AttributeValueFactory;
 import org.openmdx.portal.servlet.attribute.TextValue;
 import org.openmdx.portal.servlet.reports.ReportDefinition;
 import org.openmdx.portal.servlet.reports.ReportDefinitionFactory;
-import org.openmdx.portal.servlet.texts.Texts_1_0;
 import org.openmdx.portal.servlet.view.EditObjectView;
 import org.openmdx.portal.servlet.view.FieldGroup;
 import org.openmdx.portal.servlet.view.ObjectCreationResult;

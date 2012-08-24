@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: AbstractDataObject_1.java,v 1.9 2011/11/26 01:34:59 hburger Exp $
  * Description: SPICE Object Layer: Abstract Object_1_0 Implementation
- * Revision:    $Revision: 1.9 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/11/26 01:34:59 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

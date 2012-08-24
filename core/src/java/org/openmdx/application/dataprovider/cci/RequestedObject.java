@@ -1,16 +1,13 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: RequestedObject.java,v 1.15 2011/11/26 01:34:58 hburger Exp $
  * Description: Request Object
- * Revision:    $Revision: 1.15 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/11/26 01:34:58 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2011, OMEX AG, Switzerland
+ * Copyright (c) 2004-2012, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -342,5 +339,21 @@ public class RequestedObject
     public void setVersion(Object version) {
         this.getObject().setVersion(version);
     }
+
+	/* (non-Javadoc)
+	 * @see org.openmdx.base.rest.cci.ObjectRecord#getLock()
+	 */
+//  @Override
+	public Object getLock() {
+		return this.getObject().getLock();
+	}
+
+	/* (non-Javadoc)
+	 * @see org.openmdx.base.rest.cci.ObjectRecord#setLock(java.lang.Object)
+	 */
+//  @Override
+	public void setLock(Object lock) {
+		this.getObject().setLock(lock);
+	}
 
 }

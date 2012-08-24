@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: GridSelectReferenceAction.java,v 1.2 2011/07/07 22:35:35 wfro Exp $
  * Description: GridEventHandler 
- * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/07/07 22:35:35 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -68,6 +65,7 @@ import org.openmdx.portal.servlet.Action;
 import org.openmdx.portal.servlet.ViewPort;
 import org.openmdx.portal.servlet.ViewPortFactory;
 import org.openmdx.portal.servlet.ViewsCache;
+import org.openmdx.portal.servlet.WebKeys;
 import org.openmdx.portal.servlet.control.ReferencePaneControl;
 import org.openmdx.portal.servlet.view.Grid;
 import org.openmdx.portal.servlet.view.ObjectView;

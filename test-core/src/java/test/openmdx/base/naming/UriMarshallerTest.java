@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: UriMarshallerTest.java,v 1.4 2010/06/03 15:58:00 hburger Exp $
  * Description: TestUriMarshaller
- * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/06/03 15:58:00 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

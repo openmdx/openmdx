@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: Jmi1StructInvocationHandler.java,v 1.44 2011/08/24 07:12:59 hburger Exp $
  * Description: Jmi1StructInvocationHandler 
- * Revision:    $Revision: 1.44 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/08/24 07:12:59 $
  * ====================================================================
  *
  * This software is published under the BSD license

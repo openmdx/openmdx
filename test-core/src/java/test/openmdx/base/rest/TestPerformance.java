@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: TestPerformance.java,v 1.6 2010/01/03 15:15:27 wfro Exp $
  * Description: Test Performance 
- * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/01/03 15:15:27 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -87,6 +84,7 @@ import org.w3c.format.DateTimeFormat;
 /**
  * Test Performance
  */
+@SuppressWarnings("unchecked")
 public class TestPerformance {
 
     Map<Path, ValueObject> valueObjects;
@@ -109,7 +107,7 @@ public class TestPerformance {
     static long receiveReference = 0L;
     static int sizeReference = 0;
     
-    @Before
+	@Before
     public void setUp(
     ) throws Exception {
         this.xmlDatatypeFactory = DatatypeFactory.newInstance();

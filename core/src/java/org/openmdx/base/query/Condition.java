@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: Condition.java,v 1.17 2011/11/26 01:34:59 hburger Exp $
  * Description: Condition
- * Revision:    $Revision: 1.17 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/11/26 01:34:59 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -71,7 +68,7 @@ public abstract class Condition implements Serializable, Cloneable {
     }
 
     /**
-     * Constructor 
+     * Constructor clone
      *
      * @param quantifier
      * @param feature
@@ -118,10 +115,8 @@ public abstract class Condition implements Serializable, Cloneable {
      * @see java.lang.Object#clone()
      */
     @Override
-    public Object clone(
-    ) throws CloneNotSupportedException {
-        return super.clone();
-    }
+    public abstract Condition clone(
+    );
 
     /**
      * Retrieve the quantifier's <code>enum</code> representation

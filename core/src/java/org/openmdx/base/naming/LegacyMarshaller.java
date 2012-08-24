@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: LegacyMarshaller.java,v 1.2 2010/06/21 17:31:22 hburger Exp $
  * Description: Legacy Marshaller 
- * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/06/21 17:31:22 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

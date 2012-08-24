@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: Entities.java,v 1.2 2010/03/01 09:16:49 hburger Exp $
  * Description: Entities 
- * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/03/01 09:16:49 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

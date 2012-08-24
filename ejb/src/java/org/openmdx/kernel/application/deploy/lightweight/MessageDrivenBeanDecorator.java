@@ -67,23 +67,23 @@ public class MessageDrivenBeanDecorator
     }
 
     public String getMessageSelector() {
-        return super.delegate.getMessageSelector();
+        return getDelegate().getMessageSelector();
     }
 
     public String getAcknowledgeMode() {
-        return super.delegate.getAcknowledgeMode();
+        return getDelegate().getAcknowledgeMode();
     }
 
     public String getTransactionType() {
-        return super.delegate.getTransactionType();
+        return getDelegate().getTransactionType();
     }
 
     public String getMessageDrivenDestinationType() {
-        return super.delegate.getMessageDrivenDestinationType();
+        return getDelegate().getMessageDrivenDestinationType();
     }
 
     public String getMessageDrivenDestinationSubscriptionDurability() {
-        return super.delegate.getMessageDrivenDestinationSubscriptionDurability();
+        return getDelegate().getMessageDrivenDestinationSubscriptionDurability();
     }
 
 }

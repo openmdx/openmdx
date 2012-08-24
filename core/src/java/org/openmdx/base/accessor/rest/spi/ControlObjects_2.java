@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: ControlObjects_2.java,v 1.3 2010/05/06 07:57:50 hburger Exp $
  * Description: Control Objects 
- * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/05/06 07:57:50 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

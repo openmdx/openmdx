@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: Stereotypes.java,v 1.1 2009/05/16 22:17:54 wfro Exp $
  * Description: Constants for Stereotypes
- * Revision:    $Revision: 1.1 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/05/16 22:17:54 $
  * ====================================================================
  *
  * This software is published under the BSD license

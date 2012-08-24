@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: TestBasicException.java,v 1.1 2009/04/03 08:06:10 hburger Exp $
  * Description: class TestBasicException.Code 
- * Revision:    $Revision: 1.1 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/04/03 08:06:10 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

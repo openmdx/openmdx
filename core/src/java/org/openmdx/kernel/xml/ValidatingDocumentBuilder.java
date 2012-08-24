@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: ValidatingDocumentBuilder.java,v 1.8 2011/06/21 22:52:45 hburger Exp $
  * Description: Validating Document Builder 
- * Revision:    $Revision: 1.8 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/06/21 22:52:45 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

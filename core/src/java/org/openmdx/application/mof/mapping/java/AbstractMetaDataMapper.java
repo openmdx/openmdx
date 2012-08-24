@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: AbstractMetaDataMapper.java,v 1.1 2011/05/27 16:20:23 hburger Exp $
  * Description: Abstract Meta Data Mapper 
- * Revision:    $Revision: 1.1 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/05/27 16:20:23 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

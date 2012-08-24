@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: HttpClient.java,v 1.3 2010/06/02 09:18:13 hburger Exp $
  * Description: HTTP Client
- * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/06/02 09:18:13 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

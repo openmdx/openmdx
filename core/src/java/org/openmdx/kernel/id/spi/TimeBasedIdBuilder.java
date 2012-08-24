@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: TimeBasedIdBuilder.java,v 1.1 2004/05/21 14:42:38 hburger Exp $
  * Description: Time Based Id Provider
- * Revision:    $Revision: 1.1 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2004/05/21 14:42:38 $
  * ====================================================================
  *
  * This software is published under the BSD license

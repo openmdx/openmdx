@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: TreeSparseArray.java,v 1.8 2008/04/09 12:33:43 hburger Exp $
  * Description: TreeSparseArray 
- * Revision:    $Revision: 1.8 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/04/09 12:33:43 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

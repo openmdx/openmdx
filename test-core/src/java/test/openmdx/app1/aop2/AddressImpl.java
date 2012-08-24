@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: AddressImpl.java,v 1.1 2009/09/17 16:23:01 hburger Exp $
  * Description: Address  
- * Revision:    $Revision: 1.1 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/09/17 16:23:01 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

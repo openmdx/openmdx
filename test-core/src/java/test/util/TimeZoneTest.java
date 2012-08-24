@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: TimeZoneTest.java,v 1.2 2009/09/18 12:44:37 hburger Exp $
  * Description: TestTimeZone 
- * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/09/18 12:44:37 $
  * ====================================================================
  *
  * This software is published under the BSD license

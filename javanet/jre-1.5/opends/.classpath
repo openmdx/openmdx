@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<classpath>
-	<classpathentry exported="true" kind="lib" path="lib/OpenDS.jar" sourcepath="src/src.zip"/>
-	<classpathentry exported="true" kind="lib" path="lib/je.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/aspectjrt.jar"/>
-	<classpathentry kind="output" path="bin"/>
-</classpath>

@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: ViewMode.java,v 1.2 2008/05/31 18:05:30 wfro Exp $
  * Description: ViewMode 
- * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/05/31 18:05:30 $
  * ====================================================================
  *
  * This software is published under the BSD license

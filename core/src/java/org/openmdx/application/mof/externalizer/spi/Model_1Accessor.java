@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: Model_1Accessor.java,v 1.16 2012/01/05 23:20:20 hburger Exp $
  * Description: Wrapper for a org::omg::model1 compliant in-process dataprovider.
- * Revision:    $Revision: 1.16 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2012/01/05 23:20:20 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -190,14 +187,6 @@ public class Model_1Accessor {
               org.openmdx.application.dataprovider.layer.persistence.none.InMemory_1.class.getName()
           );
         }
-
-        // INTERCEPTION        
-        else if(section[0].equals(DataproviderLayers.toString(DataproviderLayers.INTERCEPTION))) {
-          configuration.values("propagateSet").put(
-              0, 
-              Boolean.TRUE
-          );
-        } 
 
         // APPLICATION        
         else if(section[0].equals(DataproviderLayers.toString(DataproviderLayers.APPLICATION))) {

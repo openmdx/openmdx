@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: TransactionIdFactory.java,v 1.1 2009/09/07 15:14:13 hburger Exp $
  * Description: Transaction Branch Id
- * Revision:    $Revision: 1.1 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/09/07 15:14:13 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

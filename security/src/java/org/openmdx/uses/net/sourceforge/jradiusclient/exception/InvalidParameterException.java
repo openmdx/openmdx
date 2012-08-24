@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: InvalidParameterException.java,v 1.5 2005/04/26 20:28:51 hburger Exp $
  * Description: Java Radius Client Derivate
- * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2005/04/26 20:28:51 $
  * ====================================================================
  *
  * Copyright (C) 2004  OMEX AG

@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: PortalSessionCloser.java,v 1.1 2010/04/22 17:07:43 wfro Exp $
  * Description: SessionCloser 
- * Revision:    $Revision: 1.1 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/04/22 17:07:43 $
  * ====================================================================
  *
  * This software is published under the BSD license

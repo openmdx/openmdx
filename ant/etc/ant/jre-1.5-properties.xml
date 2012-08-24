@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <!--
 =======================================================================
-= Name:        $Id: jre-1.5-properties.xml,v 1.56 2011/09/09 10:45:16 hburger Exp $
+= Name:        $Id: jre-1.5-properties.xml,v 1.58 2012/04/13 13:21:27 hburger Exp $
 = Description: JRE 5.0 Platform Properties
-= Revision:    $Revision: 1.56 $
-= Date:        $Date: 2011/09/09 10:45:16 $
+= Revision:    $Revision: 1.58 $
+= Date:        $Date: 2012/04/13 13:21:27 $
 = Copyright:   (c) 2003-2011 OMEX AG
 =======================================================================
 =
 = This software is published under the BSD license as listed below.
 = 
-= Copyright (c) 2005-2011, OMEX AG, Switzerland
+= Copyright (c) 2005-2012, OMEX AG, Switzerland
 = All rights reserved.
 = 
 = Redistribution and use in source and binary forms, with or without 
@@ -109,6 +109,7 @@
 		<pathelement location="${openmdx.home}/osgi/${build.java.platform}/extension/lib/serp.jar"/>
 		<pathelement location="${openmdx.home}/osgi/${build.java.platform}/extension/lib/netscape-ldap.jar"/>
 		<pathelement location="${openmdx.home}/osgi/${build.java.platform}/extension/lib/ejb.jar"/>
+		<pathelement location="${openmdx.home}/osgi/${build.java.platform}/extension/lib/javax.enterprise.deploy.jar"/>
 	</path>
 	<path id="osgi.enterprise.lib">
 		<path refid="osgi.enterprise.api"/>
@@ -132,8 +133,8 @@
 		<pathelement location="${openmdx.home}/opt/microsoft/${build.java.platform}/sql-server-2005/lib/sqljdbc.jar"/>
 	</path>
 	<path id="oracle.jdbc.lib">
-		<pathelement location="${openmdx.home}/opt/oracle/${build.java.platform}/oracle-10/lib/ojdbc14.jar"/>
-		<pathelement location="${openmdx.home}/opt/oracle/${build.java.platform}/oracle-10/lib/orai18n.jar"/>
+		<pathelement location="${openmdx.home}/opt/oracle/${build.java.platform}/oracle-11/lib/ojdbc5.jar"/>
+		<pathelement location="${openmdx.home}/opt/oracle/${build.java.platform}/oracle-11/lib/orai18n.jar"/>
 	</path>
 	<path id="postgresql.jdbc.lib">
 		<pathelement location="${openmdx.home}/opt/postgresql/${build.java.platform}/postgresql-9/lib/postgresql-9.0.jdbc4.jar"/>

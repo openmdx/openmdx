@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: ReferenceDef.java,v 1.8 2011/10/28 18:13:09 hburger Exp $
  * Description: ReferenceDef class
- * Revision:    $Revision: 1.8 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/10/28 18:13:09 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

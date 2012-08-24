@@ -1,16 +1,13 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: VariableSizeMappedRecord.java,v 1.23 2011/11/02 00:56:01 hburger Exp $
  * Description: JCA: variable-size MappedRecord implementation
- * Revision:    $Revision: 1.23 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/11/02 00:56:01 $
  * ====================================================================
  *
  * This software is published under the BSD license  as listed below.
  * 
- * Copyright (c) 2004-2010, OMEX AG, Switzerland
+ * Copyright (c) 2004-2012, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -109,9 +106,9 @@ class VariableSizeMappedRecord
     private String recordShortDescription;
 
     /**
-     * 
+     * The values are serialized explicitly
      */
-    private transient Map values = new IdentityHashMap();
+    private transient Map values;
     
     /**
      * Implements <code>Serializable</code>
@@ -126,9 +123,16 @@ class VariableSizeMappedRecord
      * <li><code>Integer</code>s in the range <code>-128</code> to <code>128</code>
      * </ul>
      * 
-     * @param key
+     * @param key the key to be normalized
      * 
      * @return the normalized key
+     * 
+     * @exception IllegalArgumentException unless the key is one of<ul>
+     * <li>a <code>java.lang.String</code> instance
+     * <li>a <code>java.lang.Instance</code> instance in the range 
+     * <code>-128</code> to <code>127</code>
+     * </ul>
+     * @exception NullPointerException if the key is <code>null</code>
      */
     private static Object normalizeKey(
         Object key
@@ -138,7 +142,7 @@ class VariableSizeMappedRecord
         } else if (key instanceof Integer) {
             Integer i = ((Integer) key).intValue();
             if(i < -128 || i > 127) throw BasicException.initHolder(
-                new RuntimeException(
+                new IllegalArgumentException(
                     "Inappropriate key value",
                     BasicException.newEmbeddedExceptionStack(
                         BasicException.Code.DEFAULT_DOMAIN,
@@ -149,8 +153,10 @@ class VariableSizeMappedRecord
                 ) 
             );
             return Integer.valueOf(i);
-        } else throw BasicException.initHolder(
-            new RuntimeException(
+        } else throw key == null ? new NullPointerException(
+            "Null keys are not allowed"
+        ) : BasicException.initHolder(
+            new IllegalArgumentException(
                 "Inappropriate key class",
                 BasicException.newEmbeddedExceptionStack(
                     BasicException.Code.DEFAULT_DOMAIN,
@@ -234,12 +240,14 @@ class VariableSizeMappedRecord
      * @exception ClassCastException
      *            if the class of the specified key or value prevents it from
      *            being stored in this map.
-     * @exception IllegalArgumentException
-     *            if some aspect of this key or value prevents it from being
-     *            stored in this map.
-     * @exception NullPointerException
+     * @exception IllegalArgumentException unless the key is one of<ul>
+     * <li>a <code>java.lang.String</code> instance
+     * <li>a <code>java.lang.Instance</code> instance in the range 
+     * <code>-128</code> to <code>127</code>
+     * </ul>
+     * @exception NullPointerException 
      *            this map does not permit null keys or values, and the
-     *            specified key or value is null.
+     *            specified key or value is <code>null</code>
      */
     @Override
     public Object put(

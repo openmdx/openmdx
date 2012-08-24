@@ -1,16 +1,13 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: Object_2Facade.java,v 1.16 2011/11/26 01:34:57 hburger Exp $
  * Description: Object Facade
- * Revision:    $Revision: 1.16 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/11/26 01:34:57 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2009-2011, OMEX AG, Switzerland
+ * Copyright (c) 2009-2012, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -91,17 +88,19 @@ public class Object_2Facade {
     private Object_2Facade(
         MappedRecord delegate
     ) throws ResourceException {
-        if(!isDelegate(delegate)) throw BasicException.initHolder(
-            new ResourceException(
-                "The delegate has the wrong type",
-                BasicException.newEmbeddedExceptionStack(
-                    BasicException.Code.DEFAULT_DOMAIN,
-                    BasicException.Code.BAD_PARAMETER,
-                    new BasicException.Parameter("expected", ObjectRecord.NAME),
-                    new BasicException.Parameter("actual", delegate.getRecordName())
+        if(!isDelegate(delegate)) {
+            throw BasicException.initHolder(
+                new ResourceException(
+                    "The delegate has the wrong type",
+                    BasicException.newEmbeddedExceptionStack(
+                        BasicException.Code.DEFAULT_DOMAIN,
+                        BasicException.Code.BAD_PARAMETER,
+                        new BasicException.Parameter("expected", ObjectRecord.NAME),
+                        new BasicException.Parameter("actual", delegate.getRecordName())
+                    )
                 )
-            )
-        );
+            );
+        }
         this.delegate = (ObjectRecord) delegate;
     }
 
@@ -133,23 +132,6 @@ public class Object_2Facade {
         return record == null ? null : new Object_2Facade(record);
     }
     
-    /**
-     * Create a facade for the given object class
-     * 
-     * @param objectClass the object class
-     * 
-     * @return the object facade
-     * 
-     * @throws ResourceException
-     * 
-     * @deprecated use {@link Object_2Facade#newInstance(Path)} 
-     */
-    @Deprecated
-    public static Object_2Facade newInstance(
-    ) throws ResourceException {
-        return new Object_2Facade();
-    }
-
     /**
      * Create a facade with the given object identifier
      * 
@@ -360,6 +342,38 @@ public class Object_2Facade {
     ) {
         this.delegate.setValue(value);
     }
+
+    /**
+     * Retrieve the read lock.
+     *
+     * @return Returns the read lock.
+     */
+    public final Object getLock(
+    ) {
+        return getLock(this.delegate);
+    }
+    
+    /**
+     * Retrieve the read lock.
+     *
+     * @return Returns the read lock.
+     */
+    public static Object getLock(
+        MappedRecord delegate
+    ) {
+        return delegate instanceof ObjectRecord ? 
+            ((ObjectRecord)delegate).getLock() :
+            delegate.get("lock");
+    }
+    
+    /**
+     * Set the read lock.
+     * 
+     * @param version The lock to set.
+     */
+    public final void setLock(Object lock) {
+        this.delegate.setLock(lock);
+    }
     
     /**
      * Retrieve version.
@@ -450,8 +464,9 @@ public class Object_2Facade {
     
     
     //-----------------------------------------------------------------------
-    // SparseListFacade
+    // List Facade    
     //-----------------------------------------------------------------------
+    
     private static class ListFacade<E>
         implements List<E>, Cloneable, Serializable
     {
@@ -470,10 +485,6 @@ public class Object_2Facade {
         private static final long serialVersionUID = 9044898033126787944L;
         private MappedRecord record;    
         private Object key;
-        
-        //------------------------------------------------------------------------
-        // Implements SparseList
-        //------------------------------------------------------------------------
         
         private List<E> nonDelegate(
         ){
@@ -1153,14 +1164,19 @@ public class Object_2Facade {
     }
 
     //-----------------------------------------------------------------------
-    // SparseListFacade
+    // Sparse Array Facade
     //-----------------------------------------------------------------------
+    
     private static class SparseArrayFacade<E>
         implements SparseArray<E>, Cloneable, Serializable
     {
-    
+
         /**
-         * Creates <code>SparseArrayFacade</code>. The value is managed in record at key.
+         * Creates <code>SparseArrayFacade</code>. 
+         * The value is managed in record at key.
+         *
+         * @param record
+         * @param key
          */
         public SparseArrayFacade(
             MappedRecord record,
@@ -1173,10 +1189,6 @@ public class Object_2Facade {
         private static final long serialVersionUID = 5241681200495515635L;
         private MappedRecord record;    
         private Object key;
-        
-        //------------------------------------------------------------------------
-        // Implements SparseArray
-        //------------------------------------------------------------------------
         
         private synchronized SparseArray<E> attributeValues(
         ){

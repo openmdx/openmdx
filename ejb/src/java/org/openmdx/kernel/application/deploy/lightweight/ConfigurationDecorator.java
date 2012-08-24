@@ -87,7 +87,12 @@ abstract class ConfigurationDecorator <T extends Configuration>
         return (this.validationReport != null);
     }
 
-    protected final T delegate;
+    protected final T getDelegate(
+    ){
+    	return this.delegate;
+    }
+    
+    private final T delegate;
 
     private Report validationReport = null;
 

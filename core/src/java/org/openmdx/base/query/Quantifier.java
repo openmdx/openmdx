@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: Quantifier.java,v 1.4 2010/05/27 15:48:50 hburger Exp $
  * Description: Quantifier 
- * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/05/27 15:48:50 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

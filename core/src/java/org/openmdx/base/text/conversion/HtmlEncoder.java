@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     opencrx, http://www.opencrx.org/
- * Name:        $Id: HtmlEncoder.java,v 1.19 2009/09/03 14:50:07 wfro Exp $
  * Description: HttpEncoder class
- * Revision:    $Revision: 1.19 $
  * Owner:       CRIXP AG, Switzerland, http://www.crixp.com
- * Date:        $Date: 2009/09/03 14:50:07 $
  * ====================================================================
  *
  * This software is published under the BSD license

@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: GenericClob.java,v 1.2 2011/04/12 15:28:01 hburger Exp $
  * Description: Generic Character Large Object 
- * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/04/12 15:28:01 $
  * ====================================================================
  *
  * This software is published under the BSD license

@@ -1,16 +1,13 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: AbstractContainer_1.java,v 1.24 2011/11/26 01:34:55 hburger Exp $
  * Description: Container_1 
- * Revision:    $Revision: 1.24 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/11/26 01:34:55 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2009-2011, OMEX AG, Switzerland
+ * Copyright (c) 2009-2012, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -86,14 +83,12 @@ import org.openmdx.base.accessor.cci.Container_1_0;
 import org.openmdx.base.accessor.cci.DataObject_1_0;
 import org.openmdx.base.accessor.cci.SystemAttributes;
 import org.openmdx.base.accessor.rest.spi.AbstractFilter;
+import org.openmdx.base.aop0.PlugIn_1_0;
 import org.openmdx.base.collection.Maps;
 import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.base.mof.cci.Model_1_0;
-import org.openmdx.base.mof.spi.Model_1Factory;
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.persistence.spi.PersistenceCapableCollection;
-import org.openmdx.base.persistence.spi.SharedObjects;
 import org.openmdx.base.persistence.spi.StandardFetchPlan;
 import org.openmdx.base.persistence.spi.TransientContainerId;
 import org.openmdx.base.query.AnyTypeCondition;
@@ -109,7 +104,6 @@ import org.openmdx.base.text.conversion.JavaBeans;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.exception.Throwables;
 import org.openmdx.kernel.log.SysLog;
-import org.openmdx.state2.spi.Configuration;
 import org.w3c.cci2.ImmutableDatatype;
 import org.w3c.spi.DatatypeFactories;
 import org.w3c.spi.ImmutableDatatypeFactory;
@@ -1693,27 +1687,31 @@ abstract class AbstractContainer_1 implements Container_1_0 {
 
             Map.Entry<String, DataObject_1_0> current;
 
+            private boolean isAspect(
+            	DataObject_1_0 value
+            ) throws ServiceException{
+            	if(value instanceof DataObject_1) {
+            		DataObject_1 object = (DataObject_1) value;
+            		for(PlugIn_1_0 plugIn : openmdxjdoGetDataObjectManager().getPlugIns()) {
+            			Boolean aspect = plugIn.isAspect(object);
+            			if(aspect != null) {
+            				return aspect.booleanValue();
+            			}
+            		}
+            	}
+            	return false;
+            }
+            
         //  @Override
             public boolean hasNext() {
                 while(this.preFetched == null && this.delegate.hasNext()) try {
                     Map.Entry<String, DataObject_1_0> candidate = this.delegate.next();
                     DataObject_1_0 value = candidate.getValue();
-                    if(AbstractContainer_1.this.containsValue(value)) {
-                        Model_1_0 model = Model_1Factory.getModel();
-                        if(
-                            (
-                                !model.isInstanceof(value, "org:openmdx:base:Aspect") || 
-                                value.objGetValue("core") != null 
-                            ) || (
-                                value.jdoIsPersistent() &&
-                                SharedObjects.getPlugInObject(value.jdoGetPersistenceManager(), Configuration.class).isValidTimeUnique(value.jdoGetObjectId()) 
-                            ) || (      
-                                model.isInstanceof(value, "org:openmdx:state2:StateCapable") && 
-                                Boolean.TRUE.equals(value.objGetValue("validTimeUnique"))
-                            )
-                        ) {
-                            this.preFetched = candidate;
-                        }
+                    if(
+                    	AbstractContainer_1.this.containsValue(value) && 
+                    	(!isAspect(value) || value.objGetValue("core") != null)
+                    ){
+                        this.preFetched = candidate;
                     }
                 } catch (ServiceException exception) {
                     SysLog.trace("Acceptance test failure", exception);

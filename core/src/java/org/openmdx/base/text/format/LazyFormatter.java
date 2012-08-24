@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: LazyFormatter.java,v 1.1 2010/02/16 18:39:49 hburger Exp $
  * Description: Lazy Formatter 
- * Revision:    $Revision: 1.1 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/02/16 18:39:49 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

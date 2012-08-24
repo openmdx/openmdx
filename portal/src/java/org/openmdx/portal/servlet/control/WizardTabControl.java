@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: WizardTabControl.java,v 1.20 2011/08/23 21:57:41 wfro Exp $
  * Description: WizardTabControl
- * Revision:    $Revision: 1.20 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/08/23 21:57:41 $
  * ====================================================================
  *
  * This software is published under the BSD license

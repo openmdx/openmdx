@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: TestRecord.java,v 1.7 2010/06/03 15:58:06 hburger Exp $
  * Description: Test Record
- * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/06/03 15:58:06 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -71,6 +68,7 @@ import junit.framework.TestSuite;
 import org.openmdx.base.resource.Records;
 import org.openmdx.base.resource.cci.ExtendedRecordFactory;
 
+@SuppressWarnings("unchecked")
 public class TestRecord extends TestCase {
     
     /**

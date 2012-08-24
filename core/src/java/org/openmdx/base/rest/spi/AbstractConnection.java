@@ -1,16 +1,13 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: AbstractConnection.java,v 1.9 2010/10/07 05:58:11 hburger Exp $
  * Description: Abstract Connection
- * Revision:    $Revision: 1.9 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/10/07 05:58:11 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2009, OMEX AG, Switzerland
+ * Copyright (c) 2009-2012, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -53,19 +50,19 @@ package org.openmdx.base.rest.spi;
 import javax.resource.NotSupportedException;
 import javax.resource.ResourceException;
 import javax.resource.cci.Connection;
-import javax.resource.cci.ConnectionMetaData;
 import javax.resource.cci.ResultSetInfo;
 import javax.resource.spi.IllegalStateException;
 
 import org.openmdx.base.Version;
 import org.openmdx.base.resource.spi.ResourceExceptions;
+import org.openmdx.base.rest.cci.RestConnectionMetaData;
 import org.openmdx.base.rest.cci.RestConnectionSpec;
 import org.openmdx.kernel.exception.BasicException;
 
 /**
  * Abstract Connection
  */
-public abstract class AbstractConnection implements Connection, ConnectionMetaData {
+public abstract class AbstractConnection implements Connection {
 
     /**
      * Constructor 
@@ -76,13 +73,13 @@ public abstract class AbstractConnection implements Connection, ConnectionMetaDa
         final RestConnectionSpec connectionSpec
     ){
         this.closed = false;
-        this.connectionSpec = connectionSpec;
+        this.metaData = new MetaData(connectionSpec);
     }
 
     /**
-     * The inbound connection's meta data
+     * The REST connection meta data
      */
-    private final RestConnectionSpec connectionSpec;
+    private final MetaData metaData;
     
     /**
      * Tells whether the 
@@ -94,9 +91,9 @@ public abstract class AbstractConnection implements Connection, ConnectionMetaDa
      *
      * @return Returns the connectionSpec.
      */
-    public final RestConnectionSpec getConnectionSpec(
+    protected RestConnectionSpec getConnectionSpec(
     ) {
-        return this.connectionSpec;
+        return this.metaData.connectionSpec;
     }
 
     
@@ -108,9 +105,9 @@ public abstract class AbstractConnection implements Connection, ConnectionMetaDa
      * @see javax.resource.cci.Connection#getMetaData()
      */
 //  @Override
-    public final ConnectionMetaData getMetaData(
+    public final RestConnectionMetaData getMetaData(
     ) throws ResourceException {
-        return this;
+        return this.metaData;
     }
 
     /* (non-Javadoc)
@@ -160,36 +157,65 @@ public abstract class AbstractConnection implements Connection, ConnectionMetaDa
         this.closed = true;
     }
 
-    
+
     //------------------------------------------------------------------------
-    // Implements ConnectionMetaData
+    // Class MetaData
     //------------------------------------------------------------------------
-    
-    /**
-     * It's an openMDX connection
-     */
-//  @Override
-    public String getEISProductName(
-    ) throws ResourceException {
-        return "openMDX/REST";
-    }
 
     /**
-     * with the given openMDX version
+     * REST Connection Meta Data
      */
-//  @Override
-    public String getEISProductVersion(
-    ) throws ResourceException {
-        return Version.getSpecificationVersion();
-    }
+    static class MetaData implements RestConnectionMetaData {
+        
+        /**
+         * Constructor 
+         *
+         * @param connectionSpec
+         */
+        MetaData(RestConnectionSpec connectionSpec) {
+            this.connectionSpec = connectionSpec;
+        }
 
-    /**
-     * Use the stringified principal chain
-     */
-//  @Override
-    public String getUserName(
-    ) throws ResourceException {
-        return this.connectionSpec == null ? null : this.connectionSpec.getUserName();
+        /**
+         * The connection's spec
+         */
+        final RestConnectionSpec connectionSpec;
+        
+        /**
+         * It's an openMDX connection
+         */
+    //  @Override
+        public String getEISProductName(
+        ) throws ResourceException {
+            return "openMDX/REST";
+        }
+    
+        /**
+         * with the given openMDX version
+         */
+    //  @Override
+        public String getEISProductVersion(
+        ) throws ResourceException {
+            return Version.getSpecificationVersion();
+        }
+    
+        /**
+         * Use the stringified principal chain
+         */
+    //  @Override
+        public String getUserName(
+        ) throws ResourceException {
+            return this.connectionSpec == null ? null : this.connectionSpec.getUserName();
+        }
+
+        /* (non-Javadoc)
+         * @see org.openmdx.base.rest.cci.RestConnectionMetaData#isBulkLoad()
+         */
+        //  @Override
+        public boolean isBulkLoad() {
+            return this.connectionSpec != null && this.connectionSpec.isBulkLoad();
+        }
+        
     }
 
 }

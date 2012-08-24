@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: InboundConnectionFactory_2.java,v 1.26 2011/04/27 06:12:40 hburger Exp $
  * Description: Inbound REST Connection Factory
- * Revision:    $Revision: 1.26 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/04/27 06:12:40 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -303,8 +300,15 @@ public class InboundConnectionFactory_2 implements ConnectionFactory {
             ); 
             Object tenant = connectionSpec.getTenant();
             if(tenant != null) {
-                UserObjects.setTenant(persistenceManager, tenant);
+                UserObjects.setTenant(
+                    persistenceManager, 
+                    tenant
+                );
             }
+            UserObjects.setBulkLoad(
+                persistenceManager, 
+                connectionSpec.isBulkLoad()
+            );
             return new InboundConnection_2(
                 connectionSpec, 
                 persistenceManager

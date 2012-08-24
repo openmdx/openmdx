@@ -1,17 +1,14 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: ObjectInspectorServlet.java,v 1.127 2011/11/28 13:32:27 wfro Exp $
  * Description: ObjectInspectorServlet 
- * Revision:    $Revision: 1.127 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/11/28 13:32:27 $
  * ====================================================================
  *
  * This software is published under the BSD license
  * as listed below.
  * 
- * Copyright (c) 2004-2011, OMEX AG, Switzerland
+ * Copyright (c) 2004-2012, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -154,7 +151,6 @@ import org.openmdx.portal.servlet.loader.TextsLoader;
 import org.openmdx.portal.servlet.loader.UiLoader;
 import org.openmdx.portal.servlet.loader.WizardsLoader;
 import org.openmdx.portal.servlet.reports.ReportDefinitionFactory;
-import org.openmdx.portal.servlet.texts.TextsFactory;
 import org.openmdx.portal.servlet.view.EditObjectView;
 import org.openmdx.portal.servlet.view.LayoutFactory;
 import org.openmdx.portal.servlet.view.ObjectView;
@@ -243,7 +239,7 @@ public class ObjectInspectorServlet
         System.out.println();
         System.out.println();
         System.out.println(messagePrefix + "Starting web application \"" + conf.getServletContext().getContextPath() + "\"");
-        System.out.println(messagePrefix + "Driven by openMDX/Portal. Revision: $Revision: 1.127 $");
+        System.out.println(messagePrefix + "Driven by openMDX/Portal. Revision: $Revision: 1.130 $");
         System.out.println(messagePrefix + "For more information see http://www.openmdx.org");
         System.out.println(messagePrefix + "Loading... (see log for more information)");
         
@@ -255,11 +251,11 @@ public class ObjectInspectorServlet
                 maxLocale = i+1;
             }
         }
-        this.locale = new String[maxLocale];
+        this.locales = new String[maxLocale];
         for(int i = 0; i < maxLocale; i++) {
-            this.locale[i] = this.getInitParameter("locale[" + i + "]");
+            this.locales[i] = this.getInitParameter("locale[" + i + "]");
         }
-        SysLog.info("configured locale " + locale);
+        SysLog.info("configured locale " + locales);
 
         // exception domain
         this.exceptionDomain = null;
@@ -321,19 +317,6 @@ public class ObjectInspectorServlet
         }
         // Reload UI
         this.reloadUi();
-        // Get texts
-        try {
-            this.textsLoader = new TextsLoader(
-                this.getServletContext(),
-                this.portalExtension
-            );
-            this.textsFactory = this.textsLoader.loadTexts(
-                this.locale
-            );
-        }
-        catch(ServiceException e) {
-            this.log("loading texts failed", e);
-        }      
         // Layouts
         try {
             this.layoutLoader = new LayoutLoader(
@@ -341,7 +324,7 @@ public class ObjectInspectorServlet
                 this.portalExtension
             );
             this.layoutFactory = this.layoutLoader.loadLayouts(
-                this.locale,
+                this.locales,
                 this.model
             );
         }
@@ -356,7 +339,7 @@ public class ObjectInspectorServlet
             );
             this.reportFactory = this.reportsLoader.loadReportDefinitions(
                 context,
-                this.locale,
+                this.locales,
                 model
             );
         }
@@ -371,17 +354,44 @@ public class ObjectInspectorServlet
             );
             this.wizardFactory = this.wizardsLoader.loadWizardDefinitions(
                 context,
-                this.locale,
+                this.locales,
                 this.model
             );
         }
         catch(ServiceException e) {
             this.log("loading wizards failed", e);
         }
+        // Codes
+        this.codes = null;
+        try {
+            this.codeSegmentIdentity = new Path(this.getInitParameter("codeSegment"));
+            PersistenceManager pm = this.createPersistenceManagerData(
+                Arrays.asList(
+                	this.portalExtension.getAdminPrincipal(new Path(this.codeSegmentIdentity).get(4))
+                )
+            );
+            RefObject_1_0 codeSegment = this.codeSegmentIdentity == null ? null : 
+            	(RefObject_1_0)pm.getObjectById(this.codeSegmentIdentity);
+            if(codeSegment != null) {
+                this.codes = new Codes(codeSegment);
+            }
+        } catch(Exception e) {
+        	SysLog.warning("Unable to initialize codes", e.getMessage());
+        }
+        // Get texts
+        try {
+        	this.texts = new Texts(
+        		this.locales,
+        		TextsLoader.getDefaultTextsBundles(this.locales, this.getServletContext()),
+        		this.codes
+        	);
+        } catch(ServiceException e) {
+            this.log("Loading texts failed", e);
+        }
         // Control factory
         this.controlFactory = new ControlFactory(
             this.uiContext,
-            this.textsFactory,
+            this.texts,
             this.wizardFactory,
             this.reportFactory
         );      
@@ -484,27 +494,6 @@ public class ObjectInspectorServlet
                 this.getInitParameter("mimeTypeClass[" + i + "]")              
             );
             i++;
-        }
-        // Codes
-        this.codes = null;
-        try {
-            Path codeSegmentIdentity = new Path(this.getInitParameter("codeSegment"));
-            PersistenceManager pm = this.createPersistenceManagerData(
-                Arrays.asList(
-                    new String[]{
-                        this.portalExtension.getAdminPrincipal(new Path(codeSegmentIdentity).get(4))
-                    }
-                )
-            );
-            RefObject_1_0 codeSegment = codeSegmentIdentity == null ? 
-            	null : 
-            		(RefObject_1_0)pm.getObjectById(codeSegmentIdentity);
-            if(codeSegment != null) {
-                this.codes = new Codes(codeSegment);
-            }
-        }
-        catch(Exception e) {
-        	SysLog.warning("can not initialize codes", e.getMessage());
         }
         // Mobile user agents
         this.mobileUserAgents = new ArrayList<String>();
@@ -621,7 +610,7 @@ public class ObjectInspectorServlet
                 this.uiProviderPath
             );
             List<Path> uiSegmentPaths = this.uiLoader.load(
-                this.locale
+                this.locales
             );
             if(this.uiContext == null) {
                 this.uiContext = new UiContext(
@@ -981,10 +970,12 @@ public class ObjectInspectorServlet
                           requestedObjectIdentity,
                           app,
                           new LinkedHashMap<Path,Action>(),
-                          null,
-                          null
+                          null, // lookupType
+                          null, // resourcePathPrefix
+                          null, // navigationTarget
+                          null // isReadOnly
                       );
-                  } 
+                  }
                   catch(Exception e) {
                       ServiceException e0 = new ServiceException(e);
                       SysLog.warning("can not get object", e.getMessage());
@@ -1012,8 +1003,10 @@ public class ObjectInspectorServlet
                       homeObjectIdentity,
                       app,
                       new LinkedHashMap<Path,Action>(),
-                      null,
-                      null
+                      null, // lookupType
+                      null, // resourcePathPrefix
+                      null, // navigationTarget
+                      null // isReadOnly
                   );
               }
               // FIND_OBJECT events are handled even if the view is newly created
@@ -1079,12 +1072,24 @@ public class ObjectInspectorServlet
                             this.portalExtension,
                             this.pmfMetaData              
                         ).loadCodes(
-                            this.locale
+                            this.locales
                         );
                         Codes.refresh(app.getPmControl());
+                    } catch(ServiceException e) {
+                    	this.log("Loading Codes failed", e);
                     }
-                    catch(ServiceException e) {
-                    	this.log("code import failed", e);
+                    // Texts
+                    try {
+                        new TextsLoader(
+                        	this.codeSegmentIdentity,
+                            this.getServletContext(), 
+                            this.portalExtension,
+                            this.pmfMetaData
+                        ).loadTexts(
+                            this.locales
+                        );
+                    } catch(ServiceException e) {
+                    	this.log("Loading Texts failed", e);
                     }
                     // Data
                     try {
@@ -1095,8 +1100,7 @@ public class ObjectInspectorServlet
                         ).loadData(
                             "data"
                         );
-                    }
-                    catch(ServiceException e) {
+                    } catch(ServiceException e) {
                     	this.log("data import failed", e);
                     }
                     // Ui
@@ -1248,8 +1252,10 @@ public class ObjectInspectorServlet
                                 app.getRootObject()[0].refGetPath(),
                                 app,
                                 new LinkedHashMap<Path,Action>(),
-                                null,
-                                null
+                                null, // lookupTyp0e
+                                null, // resourcePathPrefix
+                                null, // navigationTarget
+                                null // isReadOnly
                             );
                         }
                         catch(Exception e) {
@@ -1347,8 +1353,9 @@ public class ObjectInspectorServlet
     private Model_1_0 model = null;
     private List<Path> retrieveByPathPatterns = null;
     private Map filters = new HashMap();
+    private Path codeSegmentIdentity = null;
     private Codes codes = null;
-    private TextsFactory textsFactory = null;
+    private Texts texts = null;
     private LayoutFactory layoutFactory = null;
     private ReportDefinitionFactory reportFactory = null;
     private WizardDefinitionFactory wizardFactory = null;
@@ -1360,7 +1367,7 @@ public class ObjectInspectorServlet
     private int uiRefreshRate = 0;
     private int viewsTimeoutMinutes = 5;
     private String favoritesReference = null;
-    private String[] locale;
+    private String[] locales;
     private Map<String,String> mimeTypeImpls = null;
     private List<String> mobileUserAgents = null;
     private String exceptionDomain = null;
@@ -1368,11 +1375,10 @@ public class ObjectInspectorServlet
     private String[] filterValuePattern = new String[]{"(?i)",  ".*", ".*"};
     private UiLoader uiLoader;
     private FilterLoader filterLoader;
-    private TextsLoader textsLoader;
     private LayoutLoader layoutLoader;
     private ReportsLoader reportsLoader;
     private WizardsLoader wizardsLoader;
-  
+
 }
 
 //--- End of File -----------------------------------------------------------

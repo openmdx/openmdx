@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<classpath>
-	<classpathentry kind="lib" path="jrockit/lib/tools.jar"/>
-	<classpathentry exported="true" kind="lib" path="server/lib/weblogic.jar"/>
-	<classpathentry kind="lib" path="server/lib/wlclient.jar"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry kind="output" path="bin"/>
-</classpath>

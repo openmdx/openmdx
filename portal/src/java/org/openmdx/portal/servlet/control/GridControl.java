@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.opencrx.org/
- * Name:        $Id: GridControl.java,v 1.50 2011/08/15 08:42:43 wfro Exp $
  * Description: GridControlDef
- * Revision:    $Revision: 1.50 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/08/15 08:42:43 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -175,7 +172,7 @@ public class GridControl
                       new Action.Parameter(Action.PARAMETER_NAME, columnDef.getFeatureName())          
                   },
                   columnLabel,
-                  controlFactory.getTextsFactory().getTexts(locale).getSearchIncrementallyText(),
+                  controlFactory.getTextsFactory().getTextsBundle(locale).getSearchIncrementallyText(),
                   WebKeys.ICON_SEARCH_INC,
                   true
               )

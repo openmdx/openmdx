@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: Connection_2LocalPort.java,v 1.4 2010/06/02 13:43:07 hburger Exp $
  * Description: Local REST Connection Port
- * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/06/02 13:43:07 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

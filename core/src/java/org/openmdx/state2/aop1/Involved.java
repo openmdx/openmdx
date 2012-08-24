@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Involved.java,v 1.5 2010/07/09 13:52:41 hburger Exp $
  * Description: Involved 
- * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/07/09 13:52:41 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -50,6 +47,8 @@
  */
 package org.openmdx.state2.aop1;
 
+import org.openmdx.kernel.exception.BasicException;
+
 
 /**
  * Involved
@@ -78,4 +77,11 @@ interface Involved<T> {
      */
     AccessMode getQueryAccessMode();
 
+    /**
+     * Provide the parameter for exception enhancement
+     * 
+     * @return the parameter for exception enhancement
+     */
+    BasicException.Parameter getIdParameter();
+    
 }

@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: DBOSlicedWithParentAndIdAsKey.java,v 1.5 2011/09/06 12:27:13 hburger Exp $
  * Description: DBOSlicedWithParentAndIdAsKey 
- * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/09/06 12:27:13 $
  * ====================================================================
  *
  * This software is published under the BSD license

@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: YMarker.java,v 1.1 2009/09/15 16:37:57 hburger Exp $
  * Description: YMarker 
- * Revision:    $Revision: 1.1 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/09/15 16:37:57 $
  * ====================================================================
  *
  * This software is published under the BSD license

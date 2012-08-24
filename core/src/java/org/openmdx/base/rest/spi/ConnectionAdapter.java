@@ -1,16 +1,13 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: ConnectionAdapter.java,v 1.38 2010/12/22 00:14:28 hburger Exp $
  * Description: REST Connection Adapter
- * Revision:    $Revision: 1.38 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/12/22 00:14:28 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2009-2010, OMEX AG, Switzerland
+ * Copyright (c) 2009-2012, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -168,6 +165,14 @@ public class ConnectionAdapter
         "xri://@openmdx*org.openmdx.kernel/transaction"
     );
     
+    /* (non-Javadoc)
+     * @see org.openmdx.base.rest.spi.AbstractConnection#getConnectionSpec()
+     */
+    @Override
+    public RestConnectionSpec getConnectionSpec() {
+        return super.getConnectionSpec();
+    }
+
     /**
      * Acquire the <code>TransactionManager</code>
      * 
@@ -341,7 +346,11 @@ public class ConnectionAdapter
         return this.getCacheAccessor().getManagedConnectionCache();
     }
 
-    
+    static {
+        ComponentEnvironment.register(new TransactionManagerFactory());
+    }
+
+
     //------------------------------------------------------------------------
     // Class TransactionAdapter
     //------------------------------------------------------------------------

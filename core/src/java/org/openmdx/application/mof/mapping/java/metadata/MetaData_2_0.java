@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: MetaData_2_0.java,v 1.1 2009/01/13 02:10:29 wfro Exp $
  * Description: Meta Data 2 interface 
- * Revision:    $Revision: 1.1 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/13 02:10:29 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

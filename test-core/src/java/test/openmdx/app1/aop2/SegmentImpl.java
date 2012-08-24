@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: SegmentImpl.java,v 1.1 2009/09/17 16:23:01 hburger Exp $
  * Description: SegmentImpl 
- * Revision:    $Revision: 1.1 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/09/17 16:23:01 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -80,6 +77,7 @@ public class SegmentImpl extends AbstractObject<test.openmdx.app1.jmi1.Segment,t
     /* (non-Javadoc)
      * @see test.openmdx.app1.cci2.Segment#getForeignPerson()
      */
+    @SuppressWarnings("unchecked")
     public <T extends test.openmdx.app1.cci2.Person> SegmentReferencesForgeignPerson.ForeignPerson<T> getForeignPerson() {
         if(this.foreignPerson == null) {
             this.foreignPerson = new SegmentReferencesForeignPersonImpl(sameObject());   

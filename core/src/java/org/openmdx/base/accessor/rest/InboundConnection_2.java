@@ -1,16 +1,13 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: InboundConnection_2.java,v 1.68 2011/11/26 01:34:54 hburger Exp $
  * Description: InboundConnection_2 
- * Revision:    $Revision: 1.68 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/11/26 01:34:54 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2009-2011, OMEX AG, Switzerland
+ * Copyright (c) 2009-2012, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -90,6 +87,7 @@ import javax.resource.cci.MappedRecord;
 import javax.resource.cci.Record;
 import javax.transaction.Status;
 import javax.transaction.Synchronization;
+import javax.xml.datatype.Duration;
 import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.oasisopen.cci2.QualifierType;
@@ -179,16 +177,6 @@ public class InboundConnection_2
      */
     protected static final Path BASE_AUTHORITY = new Path("xri://@openmdx*org.openmdx.base");
 
-    /**
-     * Tells whether refInitialize() shall be applied to new objects
-     * 
-     * @return <code>true</code> if refInitialize() shall be applied to new objects
-     */
-    protected boolean isRefInitializeOnCreate(){
-        RestConnectionSpec connectionSpec = super.getConnectionSpec();
-        return connectionSpec != null && connectionSpec.isRefInitializeOnCreate(); 
-    }
-    
     /**
      * Retrieve an object by its resource identifier
      * 
@@ -647,6 +635,14 @@ public class InboundConnection_2
                         XMLGregorianCalendar.class,
                         (String)jcaValue
                     );
+                } else if(
+                    jcaValue instanceof String &&
+                    PrimitiveTypes.DURATION.equals(featureType.objGetValue("qualifiedName"))
+                ) {
+                    return Datatypes.create(
+                        Duration.class,
+                        (String)jcaValue
+                    );
                 } else {
                     return featureDef.getModel().isReferenceType(featureDef) ? getObjectByResourceIdentifier(jcaValue) : jcaValue;
                 }
@@ -972,6 +968,9 @@ public class InboundConnection_2
                 }
             } else {
                 RefObject refObject = getObjectByResourceIdentifier(xri);
+                if(input.isRefresh()) {
+                    getPersistenceManager().refresh(refObject);
+                }
                 if(output == null) {
                     return true;
                 } else {
@@ -1030,9 +1029,6 @@ public class InboundConnection_2
                 RefObject_1_0 newObject = (RefObject_1_0)refPackage.refClass(input.getObjectClass()).refCreateInstance(
                     Collections.singletonList(xri)
                 );
-                if(InboundConnection_2.this.isRefInitializeOnCreate()){
-                    newObject.refInitialize(false, false);
-                }
                 this.toRefObject(
                     xri,
                     newObject,
@@ -1044,9 +1040,6 @@ public class InboundConnection_2
                 int featurePosition = xri.size() - (newId ? 1 : 2);
                 RefObject refParent = getObjectByResourceIdentifier(xri.getPrefix(featurePosition));
                 RefObject_1_0 refObject = (RefObject_1_0)refParent.refOutermostPackage().refClass(input.getObjectClass()).refCreateInstance(null);
-                if(InboundConnection_2.this.isRefInitializeOnCreate()){
-                    refObject.refInitialize(false, false);
-                }
                 this.toRefObject(
                     xri,
                     refObject,

@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: ObjectReferenceValue.java,v 1.73 2011/08/11 15:08:58 wfro Exp $
  * Description: ObjectReferenceValue 
- * Revision:    $Revision: 1.73 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/08/11 15:08:58 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -84,26 +81,26 @@ implements Serializable {
     public static AttributeValue createObjectReferenceValue(
         Object object,
         FieldDef fieldDef,
-        ApplicationContext application
+        ApplicationContext app
     ) {
         // Return user defined attribute value class or ObjectReferenceValue as default
         String valueClassName = fieldDef == null
         ? null
-            : (String)application.getMimeTypeImpls().get(fieldDef.mimeType);
+            : (String)app.getMimeTypeImpls().get(fieldDef.mimeType);
         AttributeValue attributeValue = valueClassName == null
         ? null
             : AttributeValue.createAttributeValue(
                 valueClassName,
                 object,
                 fieldDef,
-                application
+                app
             );
         return attributeValue != null
         ? attributeValue
             : new ObjectReferenceValue(
                 object,
                 fieldDef,
-                application
+                app
             );
     }
 
@@ -263,10 +260,11 @@ implements Serializable {
             Action action = ((ObjectReference)v).getSelectObjectAction();
             String encodedTitle = (action.getTitle().startsWith("<") ? 
             	action.getTitle() : 
-            	this.app.getHtmlEncoder().encode(action.getTitle(), false));
+            		this.app.getHtmlEncoder().encode(action.getTitle(), false));
+            String navigationTarget = p.getView().getNavigationTarget();
             return action.getEvent() == Action.EVENT_NONE ? 
             	encodedTitle : 
-            	"<a href=\"\" onmouseover=\"javascript:this.href=" + p.getEvalHRef(action) + ";onmouseover=function(){};\">" + encodedTitle + "</a>";
+            		"<a href=\"#\"" + (navigationTarget != null && !"_none".equals(navigationTarget) ? "target=\"" + navigationTarget + "\"" : "") + " onmouseover=\"javascript:this.href=" + p.getEvalHRef(action) + ";onmouseover=function(){};\"" + ("_none".equals(navigationTarget) ? " onclick=\"javascript:return false;\"" : "") + ">" + encodedTitle + "</a>";
         }
     }
 
@@ -275,16 +273,16 @@ implements Serializable {
     implements Marshaller, Serializable {
 
         public ObjectReferenceMarshaller(
-            ApplicationContext application
+            ApplicationContext app
         ) {
-            this.application = application;
+            this.app = app;
         }
 
         public Object marshal(Object source) throws ServiceException {
             if(source instanceof RefObject_1_0) {
                 return new ObjectReference(
                     (RefObject_1_0)source,
-                    this.application
+                    this.app
                 );
             }
             else if(source == null) {
@@ -295,7 +293,7 @@ implements Serializable {
                         "Null object can not be marshalled",
                         new BasicException.Parameter("path")
                     ),
-                    this.application
+                    this.app
                 );
             }
             else {
@@ -313,7 +311,7 @@ implements Serializable {
         }
 
         private static final long serialVersionUID = 3257289132211778355L;
-        private final ApplicationContext application;
+        private final ApplicationContext app;
     }
 
     //-------------------------------------------------------------------------
@@ -359,7 +357,7 @@ implements Serializable {
                 p.write("  <input id=\"", id, ".Title\" name=\"", id, ".Title\" type=\"text\" class=\"", classModifier, lockedModifier, "\" ", readonlyModifier, " tabindex=\"" + tabIndex, "\" value=\"", (objectReference == null ? "" : objectReference.getTitle()), "\"");
                 p.writeEventHandlers("    ", attribute.getEventHandler());
                 p.write("  >");
-                p.write("  <input id=\"", id, "\" name=\"", id, "\" type=\"hidden\" class=\"valueLLocked\" readonly value=\"", (objectReference == null ? "" : objectReference.refMofId()), "\">");
+                p.write("  <input id=\"", id, "\" name=\"", id, "\" type=\"hidden\" class=\"valueLLocked\" readonly value=\"", (objectReference == null ? "" : objectReference.getXRI()), "\">");
             }
             else {
                 autocompleter.paint(                    

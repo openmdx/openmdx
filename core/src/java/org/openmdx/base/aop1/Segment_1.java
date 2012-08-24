@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Segment_1.java,v 1.4 2009/11/27 19:06:15 hburger Exp $
  * Description: Removable_1 
- * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/11/27 19:06:15 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

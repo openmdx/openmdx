@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Security, http://www.openmdx.org/
- * Name:        $Id: BasicHostnameVerifier.java,v 1.2 2010/03/09 14:27:24 hburger Exp $
  * Description: Basic Host Name Verifier
- * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/03/09 14:27:24 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

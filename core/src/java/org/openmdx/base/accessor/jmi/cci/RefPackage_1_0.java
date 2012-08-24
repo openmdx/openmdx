@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: RefPackage_1_0.java,v 1.41 2010/07/07 21:55:33 hburger Exp $
  * Description: RefPackage 1.0 Interface
- * Revision:    $Revision: 1.41 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/07/07 21:55:33 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

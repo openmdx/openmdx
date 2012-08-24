@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: PropertiesConfigurationProvider.java,v 1.8 2010/11/05 16:20:30 hburger Exp $
  * Description: Properties Configuration Provider
- * Revision:    $Revision: 1.8 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/11/05 16:20:30 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

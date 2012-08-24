@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: PlugInReplacement_1.java,v 1.10 2011/12/02 10:34:10 hburger Exp $
  * Description: TestApp_1's standard stack
- * Revision:    $Revision: 1.10 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/12/02 10:34:10 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

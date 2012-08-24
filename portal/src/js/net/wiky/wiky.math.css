@@ -1,7 +1,7 @@
 /* math */
 dfn, div.eq {
   white-space: nowrap;
-  font-family: sans-serif;
+  font-family: "Open Sans", "DejaVu Sans Condensed", "lucida sans", tahoma, verdana, arial, sans-serif;
   font-style: normal;
   color: navy;
 }

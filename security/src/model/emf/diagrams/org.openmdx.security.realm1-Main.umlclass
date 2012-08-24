@@ -67,7 +67,7 @@
     </children>
     <styles xmi:type="notation:CanonicalStyle" xmi:id="_1L1LcUdSEd-q-_EMCS6NuQ"/>
     <element xmi:type="uml:Class" href="../org.openmdx.security.realm1.uml#_3C7B8A60016D41823DBD00CD"/>
-    <layoutConstraint xmi:type="notation:Bounds" xmi:id="_1L1LckdSEd-q-_EMCS6NuQ" x="340" y="26"/>
+    <layoutConstraint xmi:type="notation:Bounds" xmi:id="_1L1LckdSEd-q-_EMCS6NuQ" x="324" y="17"/>
   </children>
   <children xmi:type="notation:Shape" xmi:id="_2AEEwEdSEd-q-_EMCS6NuQ" type="2001" fontName="Arial" fontHeight="11" fillColor="13369343" lineColor="2763429">
     <eAnnotations xmi:type="ecore:EAnnotation" xmi:id="_2APq8EdSEd-q-_EMCS6NuQ" source="Shortcut">
@@ -251,7 +251,7 @@
     <styles xmi:type="notation:RoutingStyle" xmi:id="_2AT8YUdSEd-q-_EMCS6NuQ" routing="Rectilinear"/>
     <styles xmi:type="notation:FontStyle" xmi:id="_2AT8YkdSEd-q-_EMCS6NuQ" fontName="Arial" fontHeight="11"/>
     <element xmi:type="uml:Association" href="../org.openmdx.security.realm1.uml#_3C7B8A60016D41823E270102"/>
-    <bendpoints xmi:type="notation:RelativeBendpoints" xmi:id="_2AT8Y0dSEd-q-_EMCS6NuQ" points="[0, 0, -487, -49]$[445, 45, -42, -4]"/>
+    <bendpoints xmi:type="notation:RelativeBendpoints" xmi:id="_2AT8Y0dSEd-q-_EMCS6NuQ" points="[-27, -61, 5, 247]$[-27, -278, 5, 30]"/>
   </edges>
   <edges xmi:type="notation:Edge" xmi:id="_71jRcEdSEd-q-_EMCS6NuQ" type="4005" source="_71SLsEdSEd-q-_EMCS6NuQ" target="_2AEEwEdSEd-q-_EMCS6NuQ">
     <children xmi:type="notation:DecorationNode" xmi:id="_71jRdEdSEd-q-_EMCS6NuQ" type="6003">
@@ -281,7 +281,7 @@
     <styles xmi:type="notation:RoutingStyle" xmi:id="_71jRcUdSEd-q-_EMCS6NuQ" routing="Rectilinear"/>
     <styles xmi:type="notation:FontStyle" xmi:id="_71jRckdSEd-q-_EMCS6NuQ" fontName="Arial" fontHeight="11"/>
     <element xmi:type="uml:Association" href="../org.openmdx.security.realm1.uml#_3C7B8A60016D3FC6082D0369"/>
-    <bendpoints xmi:type="notation:RelativeBendpoints" xmi:id="_71jRc0dSEd-q-_EMCS6NuQ" points="[0, 0, -489, -275]$[405, 228, -84, -47]"/>
+    <bendpoints xmi:type="notation:RelativeBendpoints" xmi:id="_71jRc0dSEd-q-_EMCS6NuQ" points="[-426, -74, -5, 269]$[-426, -281, -5, 62]"/>
   </edges>
   <edges xmi:type="notation:Connector" xmi:id="_DJPhgEdTEd-q-_EMCS6NuQ" type="4001" source="_DI-bwEdTEd-q-_EMCS6NuQ" target="_71SLsEdSEd-q-_EMCS6NuQ" routing="Rectilinear" lineColor="2763429">
     <children xmi:type="notation:DecorationNode" xmi:id="_DJPhg0dTEd-q-_EMCS6NuQ" type="6018">

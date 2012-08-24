@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: ConnectionFactory.java,v 1.1 2010/07/15 16:39:30 hburger Exp $
  * Description: Generic Connection Factory
- * Revision:    $Revision: 1.1 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/07/15 16:39:30 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

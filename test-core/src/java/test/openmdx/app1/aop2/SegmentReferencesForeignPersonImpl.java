@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: SegmentReferencesForeignPersonImpl.java,v 1.7 2011/04/05 14:34:03 hburger Exp $
  * Description: SegmentReferencesForgeignPerson 
- * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/04/05 14:34:03 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

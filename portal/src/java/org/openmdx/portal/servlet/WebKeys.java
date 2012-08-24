@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: WebKeys.java,v 1.36 2011/08/19 22:50:47 wfro Exp $
  * Description: WebKeys 
- * Revision:    $Revision: 1.36 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/08/19 22:50:47 $
  * ====================================================================
  *
  * This software is published under the BSD license

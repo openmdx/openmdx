@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: ConfigurationSpecifier.java,v 1.2 2012/01/05 23:20:20 hburger Exp $
  * Description: Application Framework 
- * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2012/01/05 23:20:20 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

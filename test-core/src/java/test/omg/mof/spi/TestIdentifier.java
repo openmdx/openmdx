@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: TestIdentifier.java,v 1.1 2009/03/05 15:46:32 hburger Exp $
  * Description: Test "ear" Protocol Handler
- * Revision:    $Revision: 1.1 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/03/05 15:46:32 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

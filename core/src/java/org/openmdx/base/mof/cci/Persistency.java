@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: Persistency.java,v 1.4 2011/12/29 03:07:41 hburger Exp $
  * Description: Persistency 
- * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/12/29 03:07:41 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

@@ -1,16 +1,13 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: OrderSpecifier.java,v 1.15 2011/11/26 01:34:59 hburger Exp $
  * Description: Order Specifier
- * Revision:    $Revision: 1.15 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/11/26 01:34:59 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2011, OMEX AG, Switzerland
+ * Copyright (c) 2004-2012, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -57,9 +54,7 @@ import org.openmdx.base.resource.Records;
 /**
  * Order Specifier
  */
-public class OrderSpecifier
-    implements Serializable 
-{
+public class OrderSpecifier implements Serializable, Cloneable {
 
     /**
      * Constructor 
@@ -125,6 +120,15 @@ public class OrderSpecifier
         "order"
     };
     
+    /* (non-Javadoc)
+     * @see java.lang.Object#clone()
+     */
+    @Override
+    public OrderSpecifier clone(
+    ){
+        return new OrderSpecifier(feature, order);
+    }
+
     /**
      * Retrieve sortOrder.
      *

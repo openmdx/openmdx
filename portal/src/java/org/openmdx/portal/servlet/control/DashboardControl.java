@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: DashboardControl.java,v 1.13 2011/03/16 18:59:45 wfro Exp $
  * Description: DashboardControl 
- * Revision:    $Revision: 1.13 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/03/16 18:59:45 $
  * ====================================================================
  *
  * This software is published under the BSD license

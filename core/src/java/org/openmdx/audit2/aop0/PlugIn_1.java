@@ -1,16 +1,13 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: PlugIn_1.java,v 1.27 2011/12/29 03:05:57 hburger Exp $
  * Description: Audit Plug-In
- * Revision:    $Revision: 1.27 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/12/29 03:05:57 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2009-2011, OMEX AG, Switzerland
+ * Copyright (c) 2009-2012, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -521,7 +518,7 @@ public class PlugIn_1 implements Configuration, PlugIn_1_0 {
                     //
                     DataObject_1 beforeImage = candidate.getBeforeImage(); // do not in-line!
                     if(beforeImage != null && !beforeImage.jdoIsPersistent()) {
-                        if(candidate.jdoIsDeleted() || candidate.objIsModified()){
+                        if(candidate.jdoIsDeleted() || candidate.objIsModified() || !unitOfWork.isUpdateAvoidanceEnabled()){
                             auditBeforeImages.put(
                                 Qualifiers.getAudit2BeforeImageId(
                                     this,
@@ -581,9 +578,18 @@ public class PlugIn_1 implements Configuration, PlugIn_1_0 {
 	/* (non-Javadoc)
 	 * @see org.openmdx.base.aop0.PlugIn_1_0#isExemptFromValidation(org.openmdx.base.mof.cci.ModelElement_1_0)
 	 */
+//  @Override
 	public boolean isExemptFromValidation(DataObject_1 object, ModelElement_1_0 feature)
 			throws ServiceException {
 		return false;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.openmdx.base.aop0.PlugIn_1_0#isAspect(org.openmdx.base.accessor.rest.DataObject_1)
+	 */
+//  @Override
+	public Boolean isAspect(DataObject_1 object) {
+		return null;
 	}
 
 }

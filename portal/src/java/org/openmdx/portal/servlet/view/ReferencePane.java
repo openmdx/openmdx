@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: ReferencePane.java,v 1.12 2011/12/23 11:28:10 wfro Exp $
  * Description: ReferencePaneControl
- * Revision:    $Revision: 1.12 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/12/23 11:28:10 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -61,19 +58,27 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.openmdx.base.mof.cci.Model_1_0;
-import org.openmdx.kernel.log.SysLog;
 import org.openmdx.portal.servlet.Action;
 import org.openmdx.portal.servlet.ApplicationContext;
 import org.openmdx.portal.servlet.WebKeys;
 import org.openmdx.portal.servlet.control.GridControl;
 import org.openmdx.portal.servlet.control.ReferencePaneControl;
 
-//-----------------------------------------------------------------------------
+/**
+ * ReferencePane
+ *
+ */
 public class ReferencePane
     extends ControlState
     implements Serializable {
   
-	//-------------------------------------------------------------------------
+	/**
+	 * Constructor 
+	 *
+	 * @param control
+	 * @param view
+	 * @param lookupType
+	 */
 	public ReferencePane(
 		ReferencePaneControl control,
 		ObjectView view,
@@ -111,15 +116,21 @@ public class ReferencePane
 		this.selectReference(initialReference == -1 ? 0 : initialReference);
 	}
 
-    //-------------------------------------------------------------------------
+    /**
+     * Get control for this reference pane view.
+     * 
+     * @return
+     */
     public ReferencePaneControl getReferencePaneControl(
     ) {
         return (ReferencePaneControl)this.control;
     }
     
-    //-------------------------------------------------------------------------
     /**
      * Returns true if control was refreshed while selecting it.
+     * 
+     * @param id
+     * @return
      */
     public boolean selectReference(
         int id
@@ -150,7 +161,11 @@ public class ReferencePane
         return refreshed;
     }
 
-    //-------------------------------------------------------------------------
+    /**
+     * Get selected reference.
+     * 
+     * @return
+     */
     public int getSelectedReference(
     ) {
         this.selectedReference = java.lang.Math.min(
@@ -160,7 +175,11 @@ public class ReferencePane
         return this.selectedReference;
     }
     
-    //-------------------------------------------------------------------------
+    /**
+     * Get grid view.
+     * 
+     * @return
+     */
     public Grid getGrid(
     ) {
         if(
@@ -174,31 +193,39 @@ public class ReferencePane
         }
     }
   
-    //-------------------------------------------------------------------------
-    public Action[] getSelectReferenceAction(
+    /**
+     * Get actions for selecting the references for this pane.
+     * 
+     * @return
+     */
+    public List<Action> getSelectReferenceActions(
     ) {
-        Action[] actions = this.getReferencePaneControl().getSelectReferenceAction();
-        Action[] actionsWithXri = new Action[actions.length];
-        for(int i = 0; i < actions.length; i++) {
+    	ApplicationContext app = this.view.getApplicationContext();
+        List<Action> selectReferenceActions = new ArrayList<Action>();
+        for(Action template: this.getReferencePaneControl().getSelectReferenceAction()) {
             List<Action.Parameter> parameters = new ArrayList<Action.Parameter>(
-                Arrays.asList(actions[i].getParameters())
+                Arrays.asList(template.getParameters())
             );
             parameters.add(
-                new Action.Parameter(Action.PARAMETER_OBJECTXRI, this.view.getObjectReference().getObject().refMofId())
+                new Action.Parameter(Action.PARAMETER_OBJECTXRI, this.view.getObjectReference().getXRI())
             );
-            actionsWithXri[i] = new Action(
-                actions[i].getEvent(),
-                (Action.Parameter[])parameters.toArray(new Action.Parameter[parameters.size()]),
-                actions[i].getTitle(),
-                actions[i].getToolTip(),
-                actions[i].getIconKey(),
-                actions[i].isEnabled()
+            selectReferenceActions.add(
+            	new Action(
+	                template.getEvent(),
+	                (Action.Parameter[])parameters.toArray(new Action.Parameter[parameters.size()]),
+	                app.getPortalExtension().getTitle(this.view.getObject(), template, template.getTitle(), app),
+	                template.getToolTip(),
+	                template.getIconKey(),
+	                template.isEnabled()
+	            )
             );
-        }        
-        return actionsWithXri;
+        }
+        return selectReferenceActions;
     }
-      
-    //-------------------------------------------------------------------------
+
+    /* (non-Javadoc)
+     * @see org.openmdx.portal.servlet.view.ControlState#refresh(boolean)
+     */
     public void refresh(
         boolean refreshData
     ) {
@@ -209,6 +236,8 @@ public class ReferencePane
         }
     }
     
+    //-------------------------------------------------------------------------
+    // Members
     //-------------------------------------------------------------------------
     private static final long serialVersionUID = 3258132466186203704L;
   

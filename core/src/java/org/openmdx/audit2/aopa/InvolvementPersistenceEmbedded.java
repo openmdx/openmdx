@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: InvolvementPersistenceEmbedded.java,v 1.1 2010/10/19 21:58:57 hburger Exp $
  * Description: InvolvementPersistence EMBEDDED
- * Revision:    $Revision: 1.1 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/10/19 21:58:57 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

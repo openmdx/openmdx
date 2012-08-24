@@ -1,16 +1,13 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Standard_1.java,v 1.46 2012/01/05 23:20:21 hburger Exp $
  * Description: Model layer
- * Revision:    $Revision: 1.46 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2012/01/05 23:20:21 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2011, OMEX AG, Switzerland
+ * Copyright (c) 2004-2012, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -52,8 +49,6 @@ package org.openmdx.application.dataprovider.layer.model;
 
 import static org.openmdx.base.accessor.cci.SystemAttributes.OBJECT_IDENTITY;
 
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
@@ -71,6 +66,7 @@ import org.openmdx.application.dataprovider.spi.Layer_1;
 import org.openmdx.application.mof.cci.ModelAttributes;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
+import org.openmdx.base.mof.cci.ModelHelper;
 import org.openmdx.base.resource.spi.RestInteractionSpec;
 import org.openmdx.base.rest.spi.Facades;
 import org.openmdx.base.rest.spi.Object_2Facade;
@@ -141,73 +137,44 @@ public class Standard_1 extends Layer_1 {
     }
 
     // --------------------------------------------------------------------------
+    
+    /**
+     * @param facade the data object facade
+     * 
+     * @return the corresponding class definition
+     */
+    private ModelElement_1_0 getClassDef(
+        Object_2Facade facade
+    ) {
+        try {
+            ModelElement_1_0 elementDef = getModel().getElement(facade.getObjectClass()); 
+            return ModelAttributes.STRUCTURE_TYPE.equals(elementDef.objGetClass()) ? null : elementDef;
+        } catch(ServiceException e){
+            return null;
+        }
+    }
+    
+    // --------------------------------------------------------------------------
+    
+    
     /**
      * Touches all object features with object.values(featureName) for all 
      * non-derived features. This way the feature is added to the set
-     * of attributes of object. This allows to minimize roundtrips.
+     * of attributes of object. This allows to minimize round trips.
+     * 
+     * @param object
      * @param touchNonDerivedFeatures 
-     * @param features 
      */
-    private void adjustEmptyFeatureSet(
-        MappedRecord object,
-        boolean touchNonDerivedFeatures, 
-        Set<String> features
-    ) throws ServiceException {
-        Object_2Facade facade = Facades.asObject(object);
-        String objectClass = facade.getObjectClass();
-        ModelElement_1_0 classDef = null;
-        try {
-            ModelElement_1_0 elementDef = getModel().getElement(
-                objectClass
-            ); 
-            classDef = ModelAttributes.STRUCTURE_TYPE.equals(elementDef.objGetClass()) ? null : elementDef;
-        } 
-        catch(ServiceException e){
-            classDef = null;
-        }
-        if(classDef == null) {
-            return;
-        }
-        for(
-            Iterator<?> i = ((Map<?,?>)classDef.objGetValue("allFeature")).values().iterator();
-            i.hasNext();
-        ) {
-            ModelElement_1_0 featureDef = (ModelElement_1_0)i.next();
-            boolean touch;
-            boolean attribute;
-            if(this.getModel().isAttributeType(featureDef)) {
-                attribute = true;
-                touch = touchNonDerivedFeatures && !((Boolean)featureDef.objGetValue("isDerived")).booleanValue();
-            } 
-            else if (
-                this.getModel().isReferenceType(featureDef) && 
-                this.getModel().referenceIsStoredAsAttribute(featureDef)
-            ) {
-                attribute = true;
-                touch = touchNonDerivedFeatures && !this.getModel().referenceIsDerived(featureDef); 
-            } 
-            else {
-                attribute = false;
-                touch = false;
-            }
-            if(attribute) {
-                String feature = (String)featureDef.objGetValue("name");
-                if(touch) {
-                    facade.attributeValues(feature);
-                }
-            }
-        }
-    }
-
-    // --------------------------------------------------------------------------
     @SuppressWarnings("unchecked")
     private void adjustEmptyFeatureSet(
         MappedRecord object, 
         boolean touchNonDerivedFeatures
     ) throws ServiceException {
         Object_2Facade facade = Facades.asObject(object);
-        Set<String> features = new HashSet<String>(facade.getValue().keySet());
-        for(String attributeName : features) {
+        //
+        // Validate Feature Set
+        //
+        for(String attributeName : (Set<String>)facade.getValue().keySet()) {
             if(attributeName.lastIndexOf(':') > 0 || attributeName.indexOf('$') > 0) {
                 throw new ServiceException(
                     BasicException.Code.DEFAULT_DOMAIN,
@@ -218,11 +185,23 @@ public class Standard_1 extends Layer_1 {
                 );
             } 
         }
-        this.adjustEmptyFeatureSet(
-            object,
-            touchNonDerivedFeatures, 
-            features
-        );
+        //
+        // Update Feature Set
+        //
+        if(touchNonDerivedFeatures) {
+            ModelElement_1_0 classDef = this.getClassDef(facade);
+            if(classDef != null) {
+                for(Map.Entry<String,ModelElement_1_0> feature : ((Map<String,ModelElement_1_0>)classDef.objGetValue("allFeature")).entrySet()) {
+                    ModelElement_1_0 featureDef = feature.getValue();
+                    if(
+                        ModelHelper.isStoredAsAttribute(featureDef) &&
+                        !ModelHelper.isDerived(featureDef)
+                    ){
+                        facade.attributeValues(feature.getKey());
+                    }
+                }
+            }
+        }
     }
 
     // --------------------------------------------------------------------------

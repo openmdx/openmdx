@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: DatabaseConfiguration.java,v 1.22 2011/11/19 19:54:08 hburger Exp $
  * Description: DatabaseConfiguration 
- * Revision:    $Revision: 1.22 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/11/19 19:54:08 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

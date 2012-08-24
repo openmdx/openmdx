@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Database_1.java,v 1.19 2011/08/24 07:12:59 hburger Exp $
  * Description: JDBC 2 Database Plug-In
- * Revision:    $Revision: 1.19 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/08/24 07:12:59 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -433,7 +430,7 @@ public class Database_1 extends AbstractDatabase_1 {
         int lastPosition,
         int lastRowCount,
         boolean isIndexed, 
-        boolean absolutePositioningDisabled
+        DbObjectConfiguration dbObjectConfiguration
     ) throws ServiceException, SQLException {
 
         boolean hasMore = rs.next();
@@ -453,14 +450,16 @@ public class Database_1 extends AbstractDatabase_1 {
         if(position > 0) {
             boolean positioned = false;
             // Move forward to position by ResultSet.absolute()
-            if(!isIndexed && !absolutePositioningDisabled && this.supportsAbsolutePositioning) {
-                try {
-                    hasMore = frs.absolute(position+1);
-                    positioned = true;
-                } catch(SQLException e) {
-                    this.supportsAbsolutePositioning = false;
-                    SysLog.warning("Absolute positioning not supported. Fallback to positioning by iteration");
-                }            
+            if(!isIndexed && !dbObjectConfiguration.isAbsolutePositioningDisabled()) try {
+                hasMore = frs.absolute(position+1);
+                positioned = true;
+            } catch(SQLException e) {
+                dbObjectConfiguration.setAbsolutePositioningDisabled();
+                SysLog.info(
+                    "Disable absolute positioning for the given DB object type and fall " +
+                    "back to positioning by iteration for this DB object type", 
+                    dbObjectConfiguration.getTypeName()
+                );
             }
             // Move forward to position by iterating the result set
             if(!positioned) {
@@ -578,7 +577,6 @@ public class Database_1 extends AbstractDatabase_1 {
     //---------------------------------------------------------------------------
     // Members
     //---------------------------------------------------------------------------
-    private boolean supportsAbsolutePositioning = true;
     private boolean supportsLargeObjectLength = true;
     
 }

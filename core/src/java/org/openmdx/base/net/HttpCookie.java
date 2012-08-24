@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Security, http://www.openmdx.org/
- * Name:        $Id: HttpCookie.java,v 1.11 2010/10/23 16:27:56 hburger Exp $
  * Description: Basic Cookie
- * Revision:    $Revision: 1.11 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/10/23 16:27:56 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

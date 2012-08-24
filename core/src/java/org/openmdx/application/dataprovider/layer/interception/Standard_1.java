@@ -1,16 +1,13 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Standard_1.java,v 1.12 2012/01/05 23:20:21 hburger Exp $
  * Description: Standard Interception Plug-In
- * Revision:    $Revision: 1.12 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2012/01/05 23:20:21 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2009, OMEX AG, Switzerland
+ * Copyright (c) 2004-2012, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -54,9 +51,7 @@ import javax.resource.ResourceException;
 import javax.resource.cci.Connection;
 import javax.resource.cci.Interaction;
 
-import org.openmdx.application.configuration.Configuration;
 import org.openmdx.application.dataprovider.spi.Layer_1;
-import org.openmdx.base.exception.ServiceException;
 
 /**
  * The standard implementation of the interception layer's plug-in.
@@ -90,14 +85,4 @@ public class Standard_1 extends Layer_1 {
                 
     }
     
-    //--------------------------------------------------------------------------
-    @Override
-    public void activate(
-        short id,
-        Configuration configuration,
-        Layer_1 delegation
-    ) throws ServiceException {
-        super.activate(id,configuration,delegation);
-    }
-            
 }

@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: UnitOfWork.java,v 1.1 2011/03/08 17:23:04 hburger Exp $
  * Description: Unit Of Work
- * Revision:    $Revision: 1.1 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/03/08 17:23:04 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

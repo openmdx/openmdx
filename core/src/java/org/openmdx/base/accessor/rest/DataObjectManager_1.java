@@ -1,16 +1,13 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: DataObjectManager_1.java,v 1.85 2012/01/07 03:04:48 hburger Exp $
  * Description: Data Object Manager
- * Revision:    $Revision: 1.85 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2012/01/07 03:04:48 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2011, OMEX AG, Switzerland
+ * Copyright (c) 2004-2012, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -108,7 +105,6 @@ import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.marshalling.Marshaller;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
 import org.openmdx.base.mof.cci.Model_1_0;
-import org.openmdx.base.mof.cci.Persistency;
 import org.openmdx.base.mof.spi.Model_1Factory;
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.persistence.cci.UserObjects;
@@ -172,25 +168,14 @@ public class DataObjectManager_1 implements Marshaller, DataObjectManager_1_0 {
         this.optimalFetchSize = optimalFetchSize == null ? OPTIMAL_FETCH_SIZE_DEFAULT : optimalFetchSize.intValue();
         this.cacheThreshold = cacheThreshold == null ? CACHE_THRESHOLD_DEFAULT : cacheThreshold.intValue();
         this.workContext = new HashMap<Object,Object>();
-        if(plugIns == null){
-            this.plugIns = NO_PLUG_INS;
-        } else {
-            for(PlugIn_1_0 plugIn : this.plugIns = plugIns) {
-                if(plugIn instanceof InstanceLifecycleListener) {
-                    this.addInstanceLifecycleListener(
-                        (InstanceLifecycleListener) plugIn, 
-                        (Class<?>[])null
-                    );
-                }
-            }
-        }
+        this.plugIns = getRegisteredPlugIns(plugIns);
         setMultithreaded(factory.getMultithreaded());
         setCopyOnAttach(factory.getCopyOnAttach());
         setDetachAllOnCommit(factory.getDetachAllOnCommit());
         setIgnoreCache(factory.getIgnoreCache());
         this.connectionSpec = connectionSpec;
     }
-    
+
     /**
      * The REST Connection Spec
      */
@@ -343,6 +328,11 @@ public class DataObjectManager_1 implements Marshaller, DataObjectManager_1_0 {
     protected Object tenant = null;
     
     /**
+     * The bulk load flag
+     */
+    protected boolean bulkLoad = false;
+    
+    /**
      * The plug-ins
      */
     private final PlugIn_1_0[] plugIns;
@@ -396,7 +386,24 @@ public class DataObjectManager_1 implements Marshaller, DataObjectManager_1_0 {
             DataObjectManager_1.this.tenant = tenant;
         }
 
+        /* (non-Javadoc)
+         * @see org.openmdx.base.persistence.spi.SharedObjects.Accessor#setBulkLoad(boolean)
+         */
 //      @Override
+        public void setBulkLoad(boolean bulkLoad) {
+            DataObjectManager_1.this.bulkLoad = bulkLoad;
+        }
+
+        /* (non-Javadoc)
+         * @see org.openmdx.base.persistence.spi.SharedObjects.Accessor#isBulkLoad()
+         */
+//      @Override
+        public boolean isBulkLoad(
+        ) {
+            return DataObjectManager_1.this.bulkLoad;
+        }
+
+        //      @Override
         public <T> T getPlugInObject(
             Class<T> type
         ){
@@ -425,7 +432,30 @@ public class DataObjectManager_1 implements Marshaller, DataObjectManager_1_0 {
         }
         
     };
-        
+
+    /**
+     * Register the plug-ins
+     * 
+     * @param plugIns the (maybe <code>null</code>) plug-in array to be registered
+     * 
+     * @return a maybe empty but never <code>null</code> plug-in array
+     */
+    private PlugIn_1_0[] getRegisteredPlugIns(PlugIn_1_0[] plugIns) {
+        if(plugIns == null){
+            return NO_PLUG_INS;
+        } else {
+            for(PlugIn_1_0 plugIn : plugIns) {
+                if(plugIn instanceof InstanceLifecycleListener) {
+                    addInstanceLifecycleListener(
+                        (InstanceLifecycleListener) plugIn, 
+                        (Class<?>[])null
+                    );
+                }
+            }
+            return plugIns;
+        }
+    }
+    
     /**
      * Provide the plug-ins
      * 
@@ -469,6 +499,7 @@ public class DataObjectManager_1 implements Marshaller, DataObjectManager_1_0 {
     	Connection connection
     ) throws ResourceException {
         this.connectionSpec.setTenant(UserObjects.getTenant(this));
+        this.connectionSpec.setBulkLoad(UserObjects.isBulkLoad(this));
     	return connection.createInteraction();
     }
     

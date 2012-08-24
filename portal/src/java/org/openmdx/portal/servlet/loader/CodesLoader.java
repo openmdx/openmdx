@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: CodesLoader.java,v 1.34 2011/10/30 17:18:59 wfro Exp $
  * Description: TextsLoader class
- * Revision:    $Revision: 1.34 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/10/30 17:18:59 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -57,8 +54,6 @@ package org.openmdx.portal.servlet.loader;
 
 import java.net.MalformedURLException;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -67,30 +62,30 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeSet;
 
-import javax.jdo.PersistenceManager;
 import javax.jdo.PersistenceManagerFactory;
-import javax.jmi.reflect.RefObject;
 import javax.resource.ResourceException;
 import javax.resource.cci.MappedRecord;
 import javax.servlet.ServletContext;
 
-import org.oasisopen.cci2.QualifierType;
-import org.oasisopen.jmi1.RefContainer;
-import org.openmdx.application.dataprovider.cci.JmiHelper;
 import org.openmdx.application.xml.Importer;
-import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.base.jmi1.Authority;
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.rest.spi.Object_2Facade;
 import org.openmdx.kernel.log.SysLog;
+import org.openmdx.portal.servlet.Codes;
 import org.openmdx.portal.servlet.PortalExtension_1_0;
 
-public class CodesLoader
-    extends Loader {
+public class CodesLoader extends Loader {
 
-	//-------------------------------------------------------------------------
-	public CodesLoader(      
+	/**
+	 * Constructor 
+	 *
+	 * @param codeProviderIdentity
+	 * @param context
+	 * @param portalExtension
+	 * @param pmf
+	 */
+	public CodesLoader(
 		ServletContext context,
 		PortalExtension_1_0 portalExtension,      
 		PersistenceManagerFactory pmf
@@ -102,7 +97,11 @@ public class CodesLoader
 		this.pmf = pmf;     
 	}
     
-    //-------------------------------------------------------------------------
+    /**
+     * Load and store codes.
+     * @param locale
+     * @throws ServiceException
+     */
     @SuppressWarnings("unchecked")
     synchronized public void loadCodes(
         String[] locale
@@ -165,7 +164,7 @@ public class CodesLoader
                             	throw new ServiceException(e0);
                             }
                             // do not merge if shortText for locale 0 is not set
-                            if("org:opencrx:kernel:code1:CodeValueEntry".equals(mergedCodeEntryFacade.getObjectClass())) {
+                            if(mergedCodeEntryFacade.getObjectClass().endsWith("CodeValueEntry")) {
                                 if(mergedCodeEntryFacade.attributeValuesAsList("shortText").size() <= j) {
                                 	if(fallbackLocaleIndex < mergedCodeEntryFacade.attributeValuesAsList("shortText").size()) {
 	                                	mergedCodeEntryFacade.attributeValuesAsList("shortText").add(
@@ -236,103 +235,10 @@ public class CodesLoader
                   throw new ServiceException(e);
               }
             }
-            
-            // Store merged codes
-            SysLog.info("Storing " + mergedCodes.size() + " code entries");
-            System.out.println(messagePrefix + "Storing " + mergedCodes.size() + " code entries");
-            PersistenceManager store = this.pmf.getPersistenceManager(
-                this.getAdminPrincipal(dir),
-                null
+            Codes.storeCodes(
+            	this.pmf.getPersistenceManager(this.getAdminPrincipal(dir), null),
+            	mergedCodes
             );
-            Set<Path> codeSegmentIdentities = new HashSet<Path>();
-            // Load objects in multiple runs in order to resolve object dependencies.
-            Map<Path,RefObject> loadedObjects = new HashMap<Path,RefObject>(); 
-            for(int run = 0; run < 5; run++) {
-                boolean hasNewObjects = false;
-                store.currentTransaction().begin();
-                for(
-                    Iterator<MappedRecord> j = mergedCodes.values().iterator(); 
-                    j.hasNext(); 
-                ) {
-                  MappedRecord entry = j.next();
-                  Path entryPath = Object_2Facade.getPath(entry);
-                  codeSegmentIdentities.add(
-                	  entryPath.getPrefix(5)
-                  );
-                  // create new entries, update existing
-                  try {
-                    RefObject_1_0 existing = null;
-                    try {
-                      existing = (RefObject_1_0)store.getObjectById(
-                    	  entryPath
-                      );
-                    }
-                    catch(Exception e) {}
-                    if(existing != null) {
-                        loadedObjects.put(
-                        	entryPath, 
-                            existing
-                        );
-                        // Object exists: if it was created on first run it does not have to be updated 
-                        // on subsequent runs. If it was updated on first run do not update it again.
-                        if(run == 0) {
-	                        JmiHelper.toRefObject(
-	                            entry,
-	                            existing,
-	                            loadedObjects, // object cache
-	                            null, // ignorable features
-	                            true // compareWithBeforeImage
-	                        );
-                        }
-                    }
-                    else {
-                        String qualifiedClassName = Object_2Facade.getObjectClass(entry);
-                        String packageName = qualifiedClassName.substring(0, qualifiedClassName.lastIndexOf(':'));
-                        RefObject_1_0 newEntry = (RefObject_1_0)((org.openmdx.base.jmi1.Authority)store.getObjectById(
-                            Authority.class,
-                            "xri://@openmdx*" + packageName.replace(":", ".")
-                        )).refImmediatePackage().refClass(qualifiedClassName).refCreateInstance(null);
-                        newEntry.refInitialize(false, false);
-                        JmiHelper.toRefObject(
-                            entry,
-                            newEntry,
-                            loadedObjects, // object cache
-                            null, // ignorable features
-                            true // compareWithBeforeImage
-                        );
-                        Path parentIdentity = entryPath.getParent().getParent();
-                        RefObject_1_0 parent = null;
-                        try {
-                            parent = loadedObjects.containsKey(parentIdentity) ? 
-                            	(RefObject_1_0)loadedObjects.get(parentIdentity) : 
-                            	(RefObject_1_0)store.getObjectById(parentIdentity);
-                        } 
-                        catch(Exception e) {}
-                        if(parent != null) {
-                            RefContainer container = (RefContainer)parent.refGetValue(
-                            	entryPath.get(entryPath.size() - 2)
-                            );
-                            container.refAdd(
-                                QualifierType.REASSIGNABLE,
-                                entryPath.get(entryPath.size() - 1),
-                                newEntry
-                            );
-                        }
-                        loadedObjects.put(
-                        	entryPath, 
-                            newEntry
-                        );
-                        hasNewObjects = true;
-                    }
-                  }
-                  catch(Exception e) {
-                    new ServiceException(e).log();
-                    System.out.println(messagePrefix + "STATUS: " + e.getMessage() + " (for more info see log)");
-                  }
-                }
-                store.currentTransaction().commit();
-                if(!hasNewObjects) break;
-            }
         }
         SysLog.info("Done");
         System.out.println(messagePrefix + "Done");

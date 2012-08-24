@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: ExceptionListenerMarshaller.java,v 1.5 2011/06/21 22:30:00 hburger Exp $
  * Description: SPICE Collections: Merging List
- * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/06/21 22:30:00 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

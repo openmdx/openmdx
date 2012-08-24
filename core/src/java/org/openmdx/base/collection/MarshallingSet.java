@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: MarshallingSet.java,v 1.18 2011/04/12 12:20:43 hburger Exp $
  * Description: Marshalling Set
- * Revision:    $Revision: 1.18 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/04/12 12:20:43 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

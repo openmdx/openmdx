@@ -1,10 +1,7 @@
 /*
  * ====================================================================
- * Name:        $Id: InstanceMapper.java,v 1.17 2011/01/12 17:07:09 hburger Exp $
  * Description: Instance Mapper 
- * Revision:    $Revision: 1.17 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/01/12 17:07:09 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -258,6 +255,7 @@ extends AbstractClassMapper {
     // -----------------------------------------------------------------------
     public void mapReferenceSetNoQualifier(
         ReferenceDef referenceDef, 
+        boolean optional, 
         boolean referencedEnd
     ) throws ServiceException {
         String referenceName;
@@ -273,8 +271,7 @@ extends AbstractClassMapper {
                 org.openmdx.application.mof.mapping.java.metadata.Visibility.CCI,
                 false
             );
-        } 
-        else {
+        } else {
             referenceName = getFeatureName(referenceDef.getExposedEndName());
             qualifiedTypeName = referenceDef.getExposedEndQualifiedTypeName();
             beanSetterName = Identifier.OPERATION_NAME.toIdentifier(
@@ -295,7 +292,11 @@ extends AbstractClassMapper {
             this.pw.println(MapperUtils.wrapText("   * ", referenceDef.getAnnotation()));
         }
         String methodName = this.getMethodName(beanSetterName);
-        this.pw.println("   * @param " + referenceName + " The non-null new value for this reference.");
+        this.pw.println(
+            "   * @param " + referenceName + " The new " + (
+                optional ? "&ndash; possibly <code>null</code> &ndash;" : "non-<code>null</code>"
+            ) + " value for this reference."
+        );
         this.pw.println("   */");
         this.pw.println("  public void " + methodName + "(");
         this.pw.println("    " + argumentType + ' ' + referenceName);
@@ -805,6 +806,7 @@ extends AbstractClassMapper {
                 if(this.getFormat() == Format.JPA3) {        
                     this.mapReferenceSetNoQualifier(
                         this.directCompositeReference, 
+                        false, // optional
                         false // referencedEnd
                     );
                 }

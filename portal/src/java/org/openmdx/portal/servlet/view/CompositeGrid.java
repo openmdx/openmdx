@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.opencrx.org/
- * Name:        $Id: CompositeGrid.java,v 1.27 2011/11/28 13:34:40 wfro Exp $
  * Description: CompositeGrid
- * Revision:    $Revision: 1.27 $
  * Owner:       CRIXP AG, Switzerland, http://www.crixp.com
- * Date:        $Date: 2011/11/28 13:34:40 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -68,8 +65,6 @@ import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.log.SysLog;
-import org.openmdx.portal.servlet.DataBinding_1_0;
-import org.openmdx.portal.servlet.DataBinding_2_0;
 import org.openmdx.portal.servlet.Filter;
 import org.openmdx.portal.servlet.control.GridControl;
 
@@ -100,19 +95,11 @@ implements Serializable {
     	RefObject_1_0 parent = (RefObject_1_0)pm.getObjectById(
     		this.view.getObjectReference().getObject().refGetPath()
     	);
-    	if(this.dataBinding instanceof DataBinding_1_0) {
-	        allObjects = (Collection<RefObject_1_0>)((DataBinding_1_0)this.dataBinding).getValue(
-	            parent, 
-	            this.getGridControl().getObjectContainer().getReferenceName()
-	        );
-    	}
-    	else {
-	        allObjects = (Collection<RefObject_1_0>)((DataBinding_2_0)this.dataBinding).getValue(
-	            parent, 
-	            this.getGridControl().getObjectContainer().getReferenceName(),
-	            this.view.getApplicationContext()
-	        );    		
-    	}
+        allObjects = (Collection<RefObject_1_0>)this.dataBinding.getValue(
+            parent, 
+            this.getGridControl().getObjectContainer().getReferenceName(),
+            this.view.getApplicationContext()
+        );    		
     	if(allObjects == null) {
     		allObjects = Collections.emptyList();
     	}

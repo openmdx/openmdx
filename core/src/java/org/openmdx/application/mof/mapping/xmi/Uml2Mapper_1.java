@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: Uml2Mapper_1.java,v 1.9 2011/04/12 15:29:20 hburger Exp $
  * Description: XMIExternalizer_1
- * Revision:    $Revision: 1.9 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/04/12 15:29:20 $
  * ====================================================================
  *
  * This software is published under the BSD license

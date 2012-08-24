@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Security, http://www.openmdx.org/
- * Name:        $Id: AbstractRadiusClient.java,v 1.5 2010/09/01 12:59:50 hburger Exp $
  * Description: Abstract Java Radius Client
- * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/09/01 12:59:50 $
  * ====================================================================
  *
  * Copyright (C) 2007-2010  OMEX AG

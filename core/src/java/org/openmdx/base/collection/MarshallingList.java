@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: MarshallingList.java,v 1.21 2011/04/12 12:19:18 hburger Exp $
  * Description: MarshallingList
- * Revision:    $Revision: 1.21 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/04/12 12:19:18 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

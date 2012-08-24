@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: WizardControl.java,v 1.28 2009/10/21 17:16:10 wfro Exp $
  * Description: WizardControl
- * Revision:    $Revision: 1.28 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/10/21 17:16:10 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -97,13 +94,13 @@ public class WizardControl
   
     //-----------------------------------------------------------------------
     public Action getInvokeWizardAction(
-        String identity
+        String objectXRI
     ) {
         Action action = 
             new Action(
                 Action.EVENT_INVOKE_WIZARD, 
                 new Action.Parameter[]{
-                    new Action.Parameter(Action.PARAMETER_OBJECTXRI, identity)
+                    new Action.Parameter(Action.PARAMETER_OBJECTXRI, objectXRI)
                 },
                 "",
                 true

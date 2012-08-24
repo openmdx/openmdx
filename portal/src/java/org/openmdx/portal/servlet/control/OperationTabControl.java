@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: OperationTabControl.java,v 1.59 2011/09/16 09:01:41 wfro Exp $
  * Description: OperationTabControl
- * Revision:    $Revision: 1.59 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/09/16 09:01:41 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -66,6 +63,7 @@ import org.openmdx.portal.servlet.Action;
 import org.openmdx.portal.servlet.ApplicationContext;
 import org.openmdx.portal.servlet.Autocompleter_1_0;
 import org.openmdx.portal.servlet.ObjectReference;
+import org.openmdx.portal.servlet.Texts_1_0;
 import org.openmdx.portal.servlet.ViewPort;
 import org.openmdx.portal.servlet.WebKeys;
 import org.openmdx.portal.servlet.action.InvokeOperationAction;
@@ -77,7 +75,6 @@ import org.openmdx.portal.servlet.attribute.CodeValue;
 import org.openmdx.portal.servlet.attribute.DateValue;
 import org.openmdx.portal.servlet.attribute.ObjectReferenceValue;
 import org.openmdx.portal.servlet.attribute.TextValue;
-import org.openmdx.portal.servlet.texts.Texts_1_0;
 import org.openmdx.portal.servlet.view.FieldGroup;
 import org.openmdx.portal.servlet.view.OperationPane;
 import org.openmdx.portal.servlet.view.OperationTab;
@@ -171,7 +168,7 @@ public class OperationTabControl
                 InvokeOperationAction.EVENT_ID,
                 new Action.Parameter[]{
                     new Action.Parameter(Action.PARAMETER_PANE, Integer.toString(this.getPaneIndex())),
-                    new Action.Parameter(Action.PARAMETER_OBJECTXRI, view.getObjectReference().refMofId()),                
+                    new Action.Parameter(Action.PARAMETER_OBJECTXRI, view.getObjectReference().getXRI()),                
                     new Action.Parameter(Action.PARAMETER_TAB, Integer.toString(this.getTabIndex()))
                 },
                 "OK",
@@ -335,10 +332,10 @@ public class OperationTabControl
                                         // single-valued
                                         if(valueHolder.isSingleValued()) {
                                             if(valueHolder instanceof CodeValue) {
-                                                SortedMap longTextsT = app.getCodes().getLongText(
+                                                Map longTextsT = app.getCodes().getLongText(
                                                     fieldName, 
                                                     app.getCurrentLocaleAsIndex(), 
-                                                    false, 
+                                                    false, // codeAsKey 
                                                     false
                                                 );
                                                 p.write("<td>");
@@ -403,7 +400,7 @@ public class OperationTabControl
                                                 p.write("<td>");
                                                 if(autocompleter == null) {
                                                     p.write("  <input type=\"text\" class=\"valueL\" name=\"", fieldId, ".Title\" tabindex=\"", Integer.toString(index), "\" value=\"", (objectReference == null ? "" : objectReference.getTitle()), "\">");
-                                                    p.write("  <input type=\"hidden\" class=\"valueLLocked\" name=\"", fieldId, "\" value=\"", (objectReference == null ? "" : objectReference.refMofId()), "\">");
+                                                    p.write("  <input type=\"hidden\" class=\"valueLLocked\" name=\"", fieldId, "\" value=\"", (objectReference == null ? "" : objectReference.getXRI()), "\">");
                                                 }
                                                 // Show drop-down with selectable lookup values
                                                 else {

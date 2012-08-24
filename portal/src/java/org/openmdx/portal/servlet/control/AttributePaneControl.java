@@ -1,11 +1,9 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: AttributePaneControl.java,v 1.42 2011/08/19 22:50:46 wfro Exp $
  * Description: TabControl
  * Revision:    $AttributePaneRenderer: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/08/19 22:50:46 $
  * ====================================================================
  *
  * This software is published under the BSD license

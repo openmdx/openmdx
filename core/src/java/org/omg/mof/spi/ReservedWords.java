@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: ReservedWords.java,v 1.1 2009/01/13 02:11:10 wfro Exp $
  * Description: Reserved Words 
- * Revision:    $Revision: 1.1 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/13 02:11:10 $
  * ====================================================================
  *
  * This software is published under the BSD license

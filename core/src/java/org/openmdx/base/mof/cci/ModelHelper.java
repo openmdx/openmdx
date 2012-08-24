@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: ModelHelper.java,v 1.4 2011/12/09 22:45:39 hburger Exp $
  * Description: ModelUtils
- * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/12/09 22:45:39 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -152,8 +149,9 @@ public class ModelHelper {
     public static boolean isChangeable(
         ModelElement_1_0 feature
     ) throws ServiceException{
-        return feature.getModel().isReferenceType(feature) ? (
-            !feature.getModel().referenceIsDerived(feature) 
+        Model_1_0 model = feature.getModel();
+        return model.isReferenceType(feature) ? (
+            !model.referenceIsDerived(feature) 
         ) : (
             !((Boolean)feature.objGetValue("isDerived")).booleanValue() && 
             ((Boolean)feature.objGetValue("isChangeable")).booleanValue()
@@ -175,6 +173,25 @@ public class ModelHelper {
     	return 
     		feature.getModel().isReferenceType(feature) || // standard
     		hasFeatures(feature, "exposedEnd", "referencedEnd"); // list of references stored as attribute
+    }
+
+    /**
+     * Tells whether the feature is an attribute or a reference stored as attribute
+     * 
+     * @param feature the feature to be inspected
+     * 
+     * @return <code>true</code> if he feature is an attribute or a reference stored as attribute
+     * 
+     * @throws ServiceException 
+     */
+    public static boolean isStoredAsAttribute(
+        ModelElement_1_0 feature
+    ) throws ServiceException{
+        Model_1_0 model = feature.getModel();
+        return model.isAttributeType(feature) || (
+            model.isReferenceType(feature) && 
+            model.referenceIsStoredAsAttribute(feature)
+        );
     }
     
     /**
@@ -224,6 +241,44 @@ public class ModelHelper {
     }
     
     /**
+     * Retrieve the referenced or exposed end
+     * 
+     * @param referenceDef
+     * @param exposedEnd
+     * 
+     * @return the referenced or exposed end
+     * 
+     * @throws ServiceException
+     */
+    private static ModelElement_1_0 getEnd(
+        ModelElement_1_0 referenceDef,
+        boolean exposedEnd
+    ) throws ServiceException {
+        return referenceDef.getModel().getElement(
+            referenceDef.objGetValue(
+                exposedEnd ? "exposedEnd" : "referencedEnd"
+            )
+        );
+    }
+    
+    /**
+     * Retrieve the referenced or exposed end's aggregation
+     * 
+     * @param referenceDef
+     * @param exposedEnd
+     * 
+     * @return the referenced or exposed end's aggregation
+     * 
+     * @throws ServiceException
+     */
+    private static Object getAggregation(
+        ModelElement_1_0 referenceDef,
+        boolean exposedEnd
+    )throws ServiceException {
+        return getEnd(referenceDef, exposedEnd).objGetValue("aggregation");
+    }
+
+    /**
      * Tells whether aggregation of association end is AggregationKind.COMPOSITE.
      * 
      * @param referenceDef model element of type Reference.
@@ -236,15 +291,11 @@ public class ModelHelper {
         ModelElement_1_0 referenceDef,
         boolean exposedEnd
     ) throws ServiceException {
-        Model_1_0 model = referenceDef.getModel();
-        ModelElement_1_0 end = model.getElement(
-            exposedEnd ? 
-                referenceDef.objGetValue("exposedEnd") :
-                    referenceDef.objGetValue("referencedEnd")
+        return AggregationKind.COMPOSITE.equals(
+            getAggregation(referenceDef, exposedEnd)
         );
-        return AggregationKind.COMPOSITE.equals(end.objGetValue("aggregation"));
     }
-    
+
     /**
      * Tells whether aggregation of association end is AggregationKind.SHARED.
      * 
@@ -258,13 +309,9 @@ public class ModelHelper {
         ModelElement_1_0 referenceDef,
         boolean exposedEnd
     ) throws ServiceException {
-        Model_1_0 model = referenceDef.getModel();
-        ModelElement_1_0 end = model.getElement(
-            exposedEnd ? 
-                referenceDef.objGetValue("exposedEnd") :
-                    referenceDef.objGetValue("referencedEnd")
+        return AggregationKind.SHARED.equals(
+            getAggregation(referenceDef, exposedEnd)
         );
-        return AggregationKind.SHARED.equals(end.objGetValue("aggregation"));
     }
 
 }

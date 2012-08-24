@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: ConnectionFactoryAdapter.java,v 1.11 2010/12/22 00:14:56 hburger Exp $
  * Description: Connection Factory Adapter 
- * Revision:    $Revision: 1.11 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/12/22 00:14:56 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

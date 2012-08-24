@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: TestPerformance.java,v 1.13 2011/12/02 15:07:31 hburger Exp $
  * Description: class TestPerformance
- * Revision:    $Revision: 1.13 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/12/02 15:07:31 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -238,6 +235,7 @@ public class TestPerformance {
     }
 
     @BeforeClass
+    @SuppressWarnings("unchecked")
     static public void setUp(
     ) throws ResourceException{
         XMLGregorianCalendar today = DateStateViews.today(); 

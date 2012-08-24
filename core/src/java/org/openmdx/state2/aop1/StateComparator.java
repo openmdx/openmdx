@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: StateComparator.java,v 1.3 2009/05/16 22:17:49 wfro Exp $
  * Description: StateComparator 
- * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/05/16 22:17:49 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

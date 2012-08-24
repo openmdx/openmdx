@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: FlashBinaryValue.java,v 1.7 2009/11/05 18:01:17 hburger Exp $
  * Description: FlashBinaryValue 
- * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/11/05 18:01:17 $
  * ====================================================================
  *
  * This software is published under the BSD license

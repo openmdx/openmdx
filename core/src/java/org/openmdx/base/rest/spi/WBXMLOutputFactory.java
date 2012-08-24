@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: WBXMLOutputFactory.java,v 1.2 2010/04/07 15:34:46 hburger Exp $
  * Description: WBXML Output Factory 
- * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/04/07 15:34:46 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

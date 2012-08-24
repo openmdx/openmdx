@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: DataObjectManager_1_0.java,v 1.8 2011/11/25 14:21:56 hburger Exp $
  * Description: openMDX Object Layer: Object Factory Interface
- * Revision:    $Revision: 1.8 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/11/25 14:21:56 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

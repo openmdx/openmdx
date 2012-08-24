@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: JspWizardDefinition.java,v 1.11 2008/08/12 16:38:08 wfro Exp $
  * Description: Reports
- * Revision:    $Revision: 1.11 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/08/12 16:38:08 $
  * ====================================================================
  *
  * This software is published under the BSD license

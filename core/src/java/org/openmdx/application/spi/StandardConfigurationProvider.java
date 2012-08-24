@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: StandardConfigurationProvider.java,v 1.6 2009/09/01 14:11:11 hburger Exp $
  * Description: Standard Configuration Provider
- * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/09/01 14:11:11 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

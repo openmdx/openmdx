@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: InstanceCallbackAdapter_1.java,v 1.5 2009/11/05 16:22:58 hburger Exp $
  * Description: Instance Callback Adapter
- * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/11/05 16:22:58 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

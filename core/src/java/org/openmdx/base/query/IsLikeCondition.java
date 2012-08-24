@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: IsLikeCondition.java,v 1.10 2010/06/01 09:00:06 hburger Exp $
  * Description: 
- * Revision:    $Revision: 1.10 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/06/01 09:00:06 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -106,7 +103,7 @@ public class IsLikeCondition extends Condition {
      */
     @Override
     public IsLikeCondition clone(
-    ) throws CloneNotSupportedException {
+    ){
         return new IsLikeCondition(
             this.getQuantifier(), 
             this.getFeature(), 

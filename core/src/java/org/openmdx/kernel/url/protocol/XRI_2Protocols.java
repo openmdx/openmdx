@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: XRI_2Protocols.java,v 1.2 2008/08/21 20:15:05 hburger Exp $
  * Description: XRI Protocol Constants
- * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/08/21 20:15:05 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

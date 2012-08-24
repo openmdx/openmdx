@@ -1,16 +1,13 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: PlugIn_1.java,v 1.9 2010/07/14 06:45:37 hburger Exp $
  * Description: org::openmdx::state2 Plug-In
- * Revision:    $Revision: 1.9 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/07/14 06:45:37 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2010, OMEX AG, Switzerland
+ * Copyright (c) 2010-2012, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -50,25 +47,13 @@
  */
 package org.openmdx.state2.aop0;
 
-import org.openmdx.base.naming.PathComponent;
 
 /**
  * Compatibility Plug-In
+ * 
+ * @deprecated use either {@link BangPlugIn_1}, {@link ColonPlugIn_1} or {@link LegacyPlugIn_1}
  */
-public class PlugIn_1 extends AbstractPlugIn_1 {
-
-    /* (non-Javadoc)
-     * @see org.openmdx.state2.aop0.PlugIn_1#toQualifier(org.openmdx.base.naming.PathComponent, java.lang.Integer)
-     */
-    @Override
-    protected String toQualifier(
-        PathComponent coreQualifier,
-        Integer stateQualifier
-    ) {
-        return coreQualifier.getDescendant(
-            stateQualifier.toString(),
-            ""
-        ).toString();
-    }
+@Deprecated 
+public class PlugIn_1 extends ColonPlugIn_1 {
 
 }

@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Names.java,v 1.6 2011/04/18 09:15:03 hburger Exp $
  * Description: Names 
- * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/04/18 09:15:03 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

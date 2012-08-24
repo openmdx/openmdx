@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: PathComponent.java,v 1.6 2011/04/04 15:15:34 hburger Exp $
  * Description: A Path COmponent 
- * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/04/04 15:15:34 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

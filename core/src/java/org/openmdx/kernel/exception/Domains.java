@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: Domains.java,v 1.2 2009/04/02 15:05:29 hburger Exp $
  * Description: Exception Code 
- * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/04/02 15:05:29 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

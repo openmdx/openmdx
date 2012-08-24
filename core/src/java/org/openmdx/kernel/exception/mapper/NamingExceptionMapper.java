@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMEX, http://www.openmdx.org/
- * Name:        $Id: NamingExceptionMapper.java,v 1.2 2009/06/05 15:21:53 hburger Exp $
  * Description: Naming Exception Mapper
- * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/06/05 15:21:53 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

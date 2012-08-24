@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: TestRemovable.java,v 1.4 2010/11/11 10:39:30 hburger Exp $
  * Description: Test Removable 
- * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/11/11 10:39:30 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

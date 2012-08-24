@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: LargeObject.java,v 1.3 2007/12/17 16:54:04 hburger Exp $
  * Description: Large Object 
- * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/12/17 16:54:04 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

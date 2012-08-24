@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: Exporter.java,v 1.13 2011/08/23 22:14:59 hburger Exp $
  * Description: XML Exporter
- * Revision:    $Revision: 1.13 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/08/23 22:14:59 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

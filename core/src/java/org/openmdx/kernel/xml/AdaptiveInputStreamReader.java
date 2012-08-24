@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: AdaptiveInputStreamReader.java,v 1.6 2010/06/02 13:46:30 hburger Exp $
  * Description: Adaptive InputStream Reader
- * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/06/02 13:46:30 $
  * ====================================================================
  *
  * This software is published under the BSD license  as listed below.

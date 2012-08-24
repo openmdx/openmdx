@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: Records.java,v 1.11 2009/06/03 15:42:38 hburger Exp $
  * Description: JCA: Utility methods for records
- * Revision:    $Revision: 1.11 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/06/03 15:42:38 $
  * ====================================================================
  *
  * This software is published under the BSD license

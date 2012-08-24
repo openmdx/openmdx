@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: Base64OutputStream.java,v 1.1 2010/10/16 18:29:50 hburger Exp $
  * Description: Base64 Output Stream
- * Revision:    $Revision: 1.1 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/10/16 18:29:50 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

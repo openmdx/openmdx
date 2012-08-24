@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Arrays.java,v 1.2 2010/06/01 15:13:31 hburger Exp $
  * Description: Arrays
- * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/06/01 15:13:31 $
  * ====================================================================
  *
  * Copyright 2006 Sun Microsystems, Inc. All rights reserved.

@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: StandardPlugIn.java,v 1.1 2010/02/27 06:12:19 hburger Exp $
  * Description: Standard Plug-In
- * Revision:    $Revision: 1.1 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/02/27 06:12:19 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

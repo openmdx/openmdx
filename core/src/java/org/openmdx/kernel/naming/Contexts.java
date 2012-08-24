@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Contexts.java,v 1.7 2008/01/10 15:26:57 hburger Exp $
  * Description: Contexts
- * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/01/10 15:26:57 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

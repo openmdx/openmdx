@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: RequestCallbackHandler.java,v 1.3 2011/04/27 06:20:07 hburger Exp $
  * Description: HTTP Request Callback Handler
- * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/04/27 06:20:07 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -104,14 +101,7 @@ public class RequestCallbackHandler implements CallbackHandler {
 	 * @return <code>true</code> if the callback could be handled
 	 */
 	protected boolean handle(Callback callback) {
-		if (callback instanceof PrincipalCallback) {
-			PrincipalCallback principalCallback = (PrincipalCallback) callback;
-			String prompt = principalCallback.getPrompt();
-			if (CallbackPrompts.USER_PRINCIPAL.equals(prompt)) {
-				principalCallback.setPrincipal(this.request.getUserPrincipal());
-				return true;
-			}
-		} else if (callback instanceof NameCallback) {
+		if (callback instanceof NameCallback) {
 			NameCallback nameCallback = (NameCallback) callback;
 			String prompt = nameCallback.getPrompt();
 			if (CallbackPrompts.REMOTE_USER.equals(prompt)) {
@@ -139,9 +129,11 @@ public class RequestCallbackHandler implements CallbackHandler {
 		} else if (callback instanceof BooleanCallback) {
             BooleanCallback booleanCallback = (BooleanCallback) callback;
             String prompt = booleanCallback.getPrompt();
-            if (CallbackPrompts.REF_INITIALIZE_ON_CREATE.equals(prompt)) {
-                String refInitializeOnCreate = this.request.getParameter("RefInitializeOnCreate");
-                booleanCallback.setValue(refInitializeOnCreate == null ? null : Boolean.valueOf(refInitializeOnCreate));
+            if (CallbackPrompts.BULK_LOAD.equals(prompt)) {
+                String bulkLoad = this.request.getParameter(prompt);
+                if(bulkLoad != null) {
+                    booleanCallback.setValue(Boolean.valueOf(bulkLoad));
+                }
                 return true;
             }
         }

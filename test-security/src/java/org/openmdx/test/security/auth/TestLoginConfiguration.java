@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: TestLoginConfiguration.java,v 1.3 2009/09/07 15:16:04 hburger Exp $
  * Description: Test Login Configuration
- * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/09/07 15:16:04 $
  * ====================================================================
  *
  * This software is published under the BSD license

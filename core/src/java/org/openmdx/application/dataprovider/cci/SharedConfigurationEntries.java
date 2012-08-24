@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: SharedConfigurationEntries.java,v 1.9 2012/01/05 23:20:21 hburger Exp $
  * Description: Generated constants for SharedConfigurationEntries
- * Revision:    $Revision: 1.9 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2012/01/05 23:20:21 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -87,12 +84,6 @@ public class SharedConfigurationEntries {
   static public final String DATAPROVIDER_CONNECTION_FACTORY = "dataprovider";
 
   /**
-   * Defines whether the UID's should be in compressed or UUID format 
-   * (default). 
-   */
-  static public final String COMPRESS_UID = "compressUID";
-
-  /**
    * SEQUENCE_SUPPORTED flag
    */
   static public final String SEQUENCE_SUPPORTED = "sequenceSupported";
@@ -102,4 +93,17 @@ public class SharedConfigurationEntries {
    */
   static public final String BATCH_SIZE = "batchSize";
 
+  /**
+   * Java bean plug-in enumeration
+   */
+  static public final String PLUG_IN = "plugIn";
+
+  /**
+   * Tells whether the plug-ins deployed as Java beans or not:<ul>
+   * <li><code>true</code> the plug-ins are deployed as legacy layers
+   * <li><code>false</code> the plug-ins are deployed as Java beans
+   * </ul>
+   */
+  static public final String LEGACY_CONFIGURATION = "legacyConfiguration";
+  
 }

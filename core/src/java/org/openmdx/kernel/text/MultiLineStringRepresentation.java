@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: MultiLineStringRepresentation.java,v 1.2 2007/10/10 16:06:08 hburger Exp $
  * Description: Multi Line String Representation
- * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/10/10 16:06:08 $
  * ====================================================================
  *
  * This software is published under the BSD license

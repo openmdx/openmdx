@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: EntityMapper.java,v 1.4 2008/03/13 17:16:15 hburger Exp $
  * Description: EntityMapper
- * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/03/13 17:16:15 $
  * ====================================================================
  *
  * This software is published under the BSD license  as listed below.

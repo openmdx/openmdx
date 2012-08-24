@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: EmailAddressImpl.java,v 1.2 2010/06/03 15:57:01 hburger Exp $
  * Description: E-Mail Address  
- * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/06/03 15:57:01 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -51,6 +48,8 @@
 package test.openmdx.app1.aop2;
 
 import org.openmdx.base.jmi1.Void;
+import org.openmdx.kernel.log.SysLog;
+
 import test.openmdx.app1.jmi1.AddressFormatAsParams;
 import test.openmdx.app1.jmi1.AddressFormatAsResult;
 import test.openmdx.app1.jmi1.App1Package;
@@ -58,7 +57,6 @@ import test.openmdx.app1.jmi1.EmailAddress;
 import test.openmdx.app1.jmi1.EmailAddressSendMessageParams;
 import test.openmdx.app1.jmi1.EmailAddressSendMessageTemplateParams;
 import test.openmdx.app1.jmi1.EmailAddressSendMessageTemplateResult;
-import test.openmdx.app1.jmi1.MessageTemplate;
 
 /**
  * E-Mail Address
@@ -131,11 +129,9 @@ public class EmailAddressImpl extends AddressImpl<test.openmdx.app1.jmi1.EmailAd
     public EmailAddressSendMessageTemplateResult sendMessageTemplate(
         EmailAddressSendMessageTemplateParams in
      ) {
-        EmailAddress same = sameObject();
-        System.out.println("sending message " + in.getBody().getText() + " with template to " + same.refMofId());
-        App1Package app1Package = samePackage();
-        return app1Package.createEmailAddressSendMessageTemplateResult(
-            (MessageTemplate) in.getBody()
+        SysLog.detail("sending message " + in.getBody().getText() + " with template to " + sameObject().refMofId());
+        return this.<App1Package>samePackage().createEmailAddressSendMessageTemplateResult(
+            in.getBody()
         );
     }
 

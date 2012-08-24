@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: DelegatingMappedRecord.java,v 1.14 2011/04/12 15:44:02 hburger Exp $
  * Description: openMDX JCA: Delegating Mapped Record
- * Revision:    $Revision: 1.14 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/04/12 15:44:02 $
  * ====================================================================
  *
  * This software is published under the BSD license

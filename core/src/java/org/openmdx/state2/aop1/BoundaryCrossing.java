@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: BoundaryCrossing.java,v 1.1 2009/01/09 23:22:16 hburger Exp $
  * Description: Boundary Crossing
- * Revision:    $Revision: 1.1 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/09 23:22:16 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

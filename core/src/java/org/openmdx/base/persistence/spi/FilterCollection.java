@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: FilterCollection.java,v 1.1 2011/10/21 17:34:21 hburger Exp $
  * Description: Filter Collection 
- * Revision:    $Revision: 1.1 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/10/21 17:34:21 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

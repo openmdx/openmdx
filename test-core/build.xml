@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <!--
 =======================================================================
-= Name:        $Id: build.xml,v 1.68 2011/11/02 14:26:07 wfro Exp $
+= Name:        $Id: build.xml,v 1.69 2012/05/01 12:30:43 hburger Exp $
 = Description: openMDX/Test Core
-= Revision:    $Revision: 1.68 $
-= Date:        $Date: 2011/11/02 14:26:07 $
+= Revision:    $Revision: 1.69 $
+= Date:        $Date: 2012/05/01 12:30:43 $
 = Copyright:   (c) 2003-2010 OMEX AG
 =======================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2010, OMEX AG, Switzerland
+ * Copyright (c) 2004-2012, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without 
@@ -96,11 +96,9 @@
 		<ant dir="${openmdx.home}/core" inheritAll="false" target="deliverables">
 			<property name="build.target.platform" value="${build.java.platform}"/>
 		</ant> 
-		<!-- There are no JT files at the moment
-			<antcall target="-preprocess-jt-files-">
-				<param name="preprocess-jt.target" value="java"/>
-			</antcall>
-		-->
+		<antcall target="-preprocess-jt-files-">
+			<param name="preprocess-jt.target" value="java"/>
+		</antcall>
 		<antcall target="-preprocess-model-files-"/>
 	</target>
 
@@ -108,10 +106,74 @@
 	<!-- * deliverables -->
 	<!-- ******************************************************************* -->
 	<target 
+		name="web-archives" 
+		description="Create the Web Application archives" 
+		depends="deliverables-init,build"
+	>
+		<mkdir dir="${build.dir}/module"/>
+		<openmdx:archive 
+			destfile="${build.dir}/module/test-app1."
+			format="war"
+		>
+			<openmdx:archivefileset 
+				dir="${basedir}/src/war/test-app1" 
+			/>
+		</openmdx:archive>
+	</target>
+
+	<target 
+		name="java-archives" 
+		description="Create the test java archive" 
+		depends="deliverables-init,build"
+	>
+		<mkdir dir="${build.dir}/lib"/>
+		<openmdx:archive 
+			destfile="${build.dir}/lib/test-core."
+			format="jar"
+		>
+			<openmdx:archivefileset 
+				dir="${build.dir}/bin" 
+			/>
+			<openmdx:archivefileset 
+				dir="${basedir}/src/resource" 
+			/>
+			<archivefileset 
+				src="${build.dir}/model/openmdx-test.core.openmdx-xmi.zip" 
+			/>
+		</openmdx:archive>
+	</target>
+	
+	<target 
 		name="deliverables" 
 		description="Populate the project's distribution directory" 
-		depends="deliverables-init,build,source-archives"
-	/>
+		depends="deliverables-init,build,source-archives,web-archives,java-archives"
+	>
+		<openmdx:archive 
+			destfile="${deliver.dir}/deployment-unit/test-app1."
+			format="ear"
+		>
+			<openmdx:archivefileset 
+				dir="${basedir}/src/ear/test-app1" 
+			/>
+			<openmdx:archivefileset 
+				dir="${build.dir}/module" 
+			>
+				<include name="test-app1.war"/>
+			</openmdx:archivefileset>
+			<openmdx:archivefileset 
+				dir="${openmdx.home}/${build.target.platform}/core/lib" 
+				prefix="lib"
+			>
+				<include name="openmdx-base.jar"/>
+			</openmdx:archivefileset>
+			<openmdx:archivefileset 
+				dir="${build.dir}/lib" 
+				prefix="lib"
+			>
+				<include name="test-core.jar"/>
+			</openmdx:archivefileset>
+		</openmdx:archive>
+	</target>
 
 	<!-- ******************************************************************* -->
 	<!-- * distribution -->

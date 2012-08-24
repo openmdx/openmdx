@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: ObjectReference.java,v 1.42 2011/08/19 22:50:47 wfro Exp $
  * Description: ObjectReference 
- * Revision:    $Revision: 1.42 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/08/19 22:50:47 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -288,7 +285,7 @@ public class ObjectReference
         return new Action(
             SelectAndEditObjectAction.EVENT_ID,
             new Action.Parameter[]{
-                new Action.Parameter(Action.PARAMETER_OBJECTXRI, this.object.refMofId()),
+                new Action.Parameter(Action.PARAMETER_OBJECTXRI, this.object.refGetPath().toXRI()),
             },
             this.getTitle(),
             this.getIconKey(),
@@ -311,7 +308,7 @@ public class ObjectReference
       return new Action(
           ReloadAction.EVENT_ID,
           new Action.Parameter[]{
-              new Action.Parameter(Action.PARAMETER_OBJECTXRI, this.object.refMofId())
+              new Action.Parameter(Action.PARAMETER_OBJECTXRI, this.object.refGetPath().toXRI())
           },
           this.getTitle(true),
           this.getIconKey(),
@@ -325,7 +322,7 @@ public class ObjectReference
         return new Action(
             ObjectGetAttributesAction.EVENT_ID, 
             new Action.Parameter[]{ 
-               new Action.Parameter(Action.PARAMETER_OBJECTXRI, this.object.refMofId())
+               new Action.Parameter(Action.PARAMETER_OBJECTXRI, this.object.refGetPath().toXRI())
             }, 
             this.app.getTexts().getShowDetailsTitle(), 
             true
@@ -347,7 +344,7 @@ public class ObjectReference
         return new Action(
             EditAction.EVENT_ID,  
             new Action.Parameter[]{
-                new Action.Parameter(Action.PARAMETER_OBJECTXRI, this.object == null ? "" : this.object.refMofId()),
+                new Action.Parameter(Action.PARAMETER_OBJECTXRI, this.object == null ? "" : this.object.refGetPath().toXRI()),
                 new Action.Parameter(Action.PARAMETER_MODE, mode.toString())
             },
             this.app.getTexts().getEditTitle(),
@@ -369,7 +366,7 @@ public class ObjectReference
         return new Action(
             DeleteAction.EVENT_ID,
             new Action.Parameter[]{
-                new Action.Parameter(Action.PARAMETER_OBJECTXRI, this.object == null ? "" : this.object.refMofId())
+                new Action.Parameter(Action.PARAMETER_OBJECTXRI, this.object == null ? "" : this.object.refGetPath().toXRI())
             },
             this.app.getTexts().getDeleteTitle(),
             this.app.getTexts().getDeleteTitle(),
@@ -412,7 +409,7 @@ public class ObjectReference
             return new Action(
                 SelectObjectAction.EVENT_ID,
                 new Action.Parameter[]{
-                    new Action.Parameter(Action.PARAMETER_OBJECTXRI, identity.getParent().getParent().toXri()),
+                    new Action.Parameter(Action.PARAMETER_OBJECTXRI, identity.getParent().getParent().toXRI()),
                     new Action.Parameter(Action.PARAMETER_REFERENCE_NAME, identity.getParent().getBase())
                 },
                 parentTitle != null
@@ -447,17 +444,30 @@ public class ObjectReference
         return this.getTitle();
     }
 
-    //-------------------------------------------------------------------------
-    public String refMofId(
+    /**
+     * Return object's path.
+     * @return
+     */
+    public Path getPath(
     ) {
         if(this.object != null) {
-            return this.object.refMofId();
+            return this.object.refGetPath();
         }
         else {
-            return "";
+            return null;
         }
     }
 
+    /**
+     * Return objects XRI.
+     * @return
+     */
+    public String getXRI(
+    ) {
+    	Path path = this.getPath();
+    	return path == null ? "" : path.toXRI();
+    }
+    
     //-------------------------------------------------------------------------
     // Variables
     //-------------------------------------------------------------------------

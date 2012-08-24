@@ -1,16 +1,13 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: UnitOfWork_1.java,v 1.47 2011/11/26 01:34:55 hburger Exp $
  * Description: Unit Of Work
- * Revision:    $Revision: 1.47 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/11/26 01:34:55 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2011, OMEX AG, Switzerland
+ * Copyright (c) 2004-2012, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -67,6 +64,7 @@ import javax.jdo.JDOUnsupportedOptionException;
 import javax.jdo.JDOUserCallbackException;
 import javax.jdo.JDOUserException;
 import javax.jdo.PersistenceManager;
+import javax.jdo.PersistenceManagerFactory;
 import javax.jdo.Transaction;
 import javax.resource.ResourceException;
 import javax.resource.cci.Connection;
@@ -78,7 +76,7 @@ import javax.transaction.SystemException;
 import javax.transaction.TransactionSynchronizationRegistry;
 import javax.transaction.UserTransaction;
 
-import org.openmdx.base.accessor.rest.DataObjectManager_1.AspectObjectDispatcher;
+import org.openmdx.base.accessor.rest.DataObjectManager_1;
 import org.openmdx.base.accessor.rest.spi.DataStoreCache_2_0;
 import org.openmdx.base.accessor.rest.spi.Synchronization_2_0;
 import org.openmdx.base.aop0.PlugIn_1_0;
@@ -116,14 +114,15 @@ public class UnitOfWork_1 implements Serializable, Transaction, UnitOfWork, Sync
     UnitOfWork_1(
         DataObjectManager_1 persistenceManager,
         Connection connection,
-        AspectObjectDispatcher aspectSpecificContexts
+        DataObjectManager_1.AspectObjectDispatcher aspectSpecificContexts
     ){
         this.dataObjectManager = persistenceManager;
         this.connection = connection;
         this.aspectSpecificContexts = aspectSpecificContexts;
-        this.optimistic = persistenceManager.getPersistenceManagerFactory().getOptimistic();
+        PersistenceManagerFactory persistenceManagerFactory = persistenceManager.getPersistenceManagerFactory();
+		this.optimistic = persistenceManagerFactory.getOptimistic();
         try {
-            String transactionType = persistenceManager.getPersistenceManagerFactory().getTransactionType();
+            String transactionType = persistenceManagerFactory.getTransactionType();
             if(Constants.RESOURCE_LOCAL.equals(transactionType)) {
                 this.userTransaction = null;
                 this.localTransaction = LocalTransactions.getLocalTransaction( 
@@ -146,6 +145,9 @@ public class UnitOfWork_1 implements Serializable, Transaction, UnitOfWork, Sync
                 )
             );
         }
+        this.setIsolationLevel(
+        	persistenceManagerFactory.getTransactionIsolationLevel()
+        );
     }
 
     /**
@@ -183,7 +185,7 @@ public class UnitOfWork_1 implements Serializable, Transaction, UnitOfWork, Sync
      * Rollback-only covers the whole transaction
      */
     private boolean rollbackOnly = false;
-
+    
     /**
      * Forget-only is restricted to the unit of work
      */
@@ -228,7 +230,7 @@ public class UnitOfWork_1 implements Serializable, Transaction, UnitOfWork, Sync
     /**
      * 
      */
-    private final AspectObjectDispatcher aspectSpecificContexts;
+    private final DataObjectManager_1.AspectObjectDispatcher aspectSpecificContexts;
 
     /**
      * The delegate in case of an optimistic transaction
@@ -267,6 +269,11 @@ public class UnitOfWork_1 implements Serializable, Transaction, UnitOfWork, Sync
     private final SystemObjects systemObjects = new SystemObjects();
 
     /**
+     * The requested transaction isolation level
+     */
+    private String isolationLevel;
+
+    /**
      * Flush the unit of work to the data store
      * 
      * @param beforeCompletion <code>true</code> if the before completion
@@ -296,9 +303,6 @@ public class UnitOfWork_1 implements Serializable, Transaction, UnitOfWork, Sync
                    "Synchronization failure",
                    exception
                );
-           }
-           if(this.transactionTime == null) {
-               this.transactionTime = this.systemObjects.newTransactionTime();
            }
            boolean preparing = true;
            for(
@@ -443,8 +447,7 @@ public class UnitOfWork_1 implements Serializable, Transaction, UnitOfWork, Sync
     ){
         return this.transactionTime;
     }
-    
-    
+        
     /* (non-Javadoc)
      * @see org.openmdx.base.persistence.spi.UnitOfWorkContext#getTaskIdentifier()
      */
@@ -562,6 +565,7 @@ public class UnitOfWork_1 implements Serializable, Transaction, UnitOfWork, Sync
         this.members.clear();
         this.unitOfWorkId = UUIDConversion.toUID(UUIDs.newUUID());
         this.taskId = this.systemObjects.newTaskIdentifier();
+        this.transactionTime = this.systemObjects.newTransactionTime();
     }
     
     /**
@@ -826,18 +830,14 @@ public class UnitOfWork_1 implements Serializable, Transaction, UnitOfWork, Sync
      * @see javax.jdo.Transaction#getIsolationLevel()
      */
     public String getIsolationLevel() {
-        return this.dataObjectManager.getPersistenceManagerFactory().getTransactionIsolationLevel();
+        return this.isolationLevel;
     }
 
     /* (non-Javadoc)
      * @see javax.jdo.Transaction#setIsolationLevel(java.lang.String)
      */
     public void setIsolationLevel(String isolationLevel) {
-        if(isolationLevel == null ? getIsolationLevel() != null : !isolationLevel.equals(getIsolationLevel())) {
-            throw new JDOUnsupportedOptionException(
-                "The isolation-level option can't be changed at unit-of-work level"
-            );
-        }
+    	this.isolationLevel = isolationLevel;
     }
     
     /* (non-Javadoc)
@@ -1119,6 +1119,21 @@ public class UnitOfWork_1 implements Serializable, Transaction, UnitOfWork, Sync
 	 */
 	public boolean isUpdateAvoidanceEnabled() {
 		return !this.updateAvoidanceDisabled;
+	}
+	
+	/**
+     * If read lock is required then a concurrent modification exception shall
+     * be thrown if the object is<ul>
+	 *     <li>either updated by both this unit of work and another unit of
+	 *         work concurrently
+	 *     <li>or made transactional in this unit of work and
+	 *         updated by another unit of work concurrently
+	 *     </ul>
+	 * </ul>
+	 * @return <code>true</code>
+	 */
+	public boolean isReadLockRequired(){
+		return Constants.TX_REPEATABLE_READ.equals(this.isolationLevel);
 	}
 
 	

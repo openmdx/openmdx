@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: Multiplicity.java,v 1.3 2011/09/15 17:11:26 hburger Exp $
  * Description: Multiplicity
- * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/09/15 17:11:26 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -69,7 +66,7 @@ public enum Multiplicity {
 	SINGLE_VALUE("1..1"),
 	
 	/**
-	 * An unbounded listpa
+	 * An unbounded list
 	 */
 	LIST("list"),
 	

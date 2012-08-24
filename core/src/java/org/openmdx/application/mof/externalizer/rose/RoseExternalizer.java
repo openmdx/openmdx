@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: RoseExternalizer.java,v 1.3 2009/06/09 15:39:58 hburger Exp $
  * Description: RoseExporterMain command-line tool
- * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/06/09 15:39:58 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

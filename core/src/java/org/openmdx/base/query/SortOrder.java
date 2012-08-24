@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: SortOrder.java,v 1.6 2010/06/01 09:00:06 hburger Exp $
  * Description: Sort Order 
- * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/06/01 09:00:06 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

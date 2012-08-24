@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: ModelAwareFilter.java,v 1.8 2011/08/15 15:35:23 hburger Exp $
  * Description: Model Aware Filter
- * Revision:    $Revision: 1.8 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/08/15 15:35:23 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

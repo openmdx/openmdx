@@ -1,16 +1,13 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: FastResultSet.java,v 1.3 2011/10/28 17:19:41 wfro Exp $
- * Description: 
- * Revision:    $Revision: 1.3 $
+ * Project:     openMDX, http://www.openmdx.org/
+ * Description: Fast Result Set
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/10/28 17:19:41 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2006, OMEX AG, Switzerland
+ * Copyright (c) 2004-2012, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -97,9 +94,13 @@ public class FastResultSet {
         ResultSetMetaData rsmd
     ) throws SQLException {
         List<String> columnNames = new ArrayList<String>();
-        for(int i = 0; i < rsmd.getColumnCount(); i++) {
+        for(
+            int columnIndex = 1, columnCount = rsmd.getColumnCount(); 
+            columnIndex <= columnCount; 
+            columnIndex++
+        ) {
             columnNames.add(
-                rsmd.getColumnName(i+1).toLowerCase()
+                rsmd.getColumnName(columnIndex).toLowerCase()
             );
         }
         return columnNames;
@@ -178,11 +179,7 @@ public class FastResultSet {
     protected Object toJdbcObject(
         Object nativeObject
     ) throws SQLException{
-        return nativeObject == null ?
-            null :
-        nativeObject.getClass().getName().startsWith("oracle.sql.") ?
-            Datums.toJdbcObject(nativeObject) :
-            nativeObject;
+        return Datums.isDatum(nativeObject) ? Datums.toJdbcObject(nativeObject) : nativeObject;
     }
 
     //-----------------------------------------------------------------------

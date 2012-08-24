@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: AbstractHttpInteraction.java,v 1.10 2010/11/18 08:16:05 hburger Exp $
  * Description: Abstract HTTP Interaction
- * Revision:    $Revision: 1.10 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/11/18 08:16:05 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

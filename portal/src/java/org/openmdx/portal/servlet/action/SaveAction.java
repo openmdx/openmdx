@@ -2,11 +2,8 @@ package org.openmdx.portal.servlet.action;
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: SaveAction.java,v 1.2 2011/07/07 22:35:36 wfro Exp $
  * Description: EditObjectEventHandler 
- * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/07/07 22:35:36 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -148,11 +145,12 @@ public class SaveAction extends BoundAction {
 	                        application,
 	                        editView.getHistoryActions(),
 	                        editView.getLookupType(),
-	                        editView.getRestrictToElements(),
 	                        editView.getParentObject(),
 	                        editView.getForReference(),
+	                        editView.getResourcePathPrefix(),
+	                        editView.getNavigationTarget(),
 	                        editView.getMode()
-	                    );            
+	                    );
 	                }
 	                // Can not stay in edit object view. Return to returnToView as fallback
 	                catch(Exception e1) {
@@ -173,7 +171,7 @@ public class SaveAction extends BoundAction {
 	                            );                    
 	                        ((ShowObjectView)nextView).setCreateObjectResult(
 	                            new ObjectCreationResult(
-	                                editView.getRefObject().refMofId(),
+	                                editView.getRefObject().refGetPath().toXRI(),
 	                                createdObject.getLabel(),
 	                                createdObject.getTitle(),
 	                                createdObject.getIconKey()

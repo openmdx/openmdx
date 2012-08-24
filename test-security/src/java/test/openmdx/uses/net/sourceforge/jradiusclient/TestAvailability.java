@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: TestAvailability.java,v 1.1 2010/08/03 14:30:14 hburger Exp $
  * Description: Test Availability
- * Revision:    $Revision: 1.1 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/08/03 14:30:14 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

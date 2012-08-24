@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: LightweightTransactionManager.java,v 1.5 2011/06/30 09:14:37 hburger Exp $
  * Description: Lightweight Transaction Manager
- * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/06/30 09:14:37 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

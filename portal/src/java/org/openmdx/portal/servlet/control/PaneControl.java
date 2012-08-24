@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: PaneControl.java,v 1.10 2008/11/10 10:20:11 wfro Exp $
  * Description: ReferencePaneControl
- * Revision:    $Revision: 1.10 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/11/10 10:20:11 $
  * ====================================================================
  *
  * This software is published under the BSD license

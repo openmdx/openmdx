@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: WizardDefinition.java,v 1.14 2008/08/12 16:38:08 wfro Exp $
  * Description: WizardDefinition 
- * Revision:    $Revision: 1.14 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/08/12 16:38:08 $
  * ====================================================================
  *
  * This software is published under the BSD license

@@ -20,7 +20,7 @@ color: #000000;}
                              .cellInfo, .cellUserInfo, .cellUserInfo a, .cellUserInfo a:hover, .cellLogo, .cellHistory, .cellHistory a:hover {
 color: #F6D66D;}
                              a {
-color: #444444;}
+color: #111;}
                              a.language:hover, a.ophover, input.ophover, a.new:hover, a.backButton:hover, a.noIcon:hover, a.noIconhover, .noIcon:hover, .noIconhover, input.flatsubmit:hover, input.flatsubmithover, input.selflatsubmit:hover, input.selflatsubmithover, input.classsubmit:hover, input.classsubmithover, input.imgsubmithover, input.selimgsubmit:hover, input.selimgsubmithover, a.backButton:hover, a.backButtonhover {
 color: #000000;}
                              a.opTabhover, a.SopTab, a.tabhover, a.Stab, a.groupTab:hover, a.groupTabhover, a.SgroupTab {
@@ -51,7 +51,7 @@ background-color: white;}
 background-color: #CCCCFF;}
                              .menuOpPanel a:hover img {
 background-color: #DDDDDD;}
-                             a.language:hover, a.opTabhover, a.new:hover, a.noIcon:hover, a.noIconhover, .imgfilterhover, input.flatsubmit:hover, input.flatsubmithover, input.selflatsubmit:hover, input.selflatsubmithover, input.classsubmithover, input.imgsubmithover, input.selimgsubmit:hover, input.selimgsubmithover, a.backButton:hover, a.backButton:hover, a.backButtonhover, .gridColTypeCheck, .dragable {
+                             a.language:hover, a.opTabhover, a.new:hover, a.noIcon:hover, a.noIconhover, .imgfilterhover, input.flatsubmit:hover, input.flatsubmithover, input.selflatsubmit:hover, input.selflatsubmithover, input.classsubmithover, input.imgsubmithover, input.selimgsubmit:hover, input.selimgsubmithover, a.backButton:hover, a.backButton:hover, a.backButtonhover, .gridColTypeCheck, .lookupSelector, .dragable {
 background-color: #F6D66D;}
                              a.tabhover, a.opTab:hover, a.ophover, input.ophover, a.groupTab:hover, a.groupTabhover, .borderedimg:hover, .borderedimghover {
 background-color: #F6D66D;}
@@ -118,7 +118,7 @@ border-color: #888888;}
 border-color: #888888;}
                              .imgsubmit, .imgsubmit:hover, input.imgsubmithover, input.selimgsubmit:hover, input.selimgsubmithover, input.selimgsubmit {
 border-color: #888888;}
-                             .objectTitle, .attributeTitle, .tableBreadCrum, .tableOpMenu {
+                             .objectTitle, .attributeTitle, .tableBreadCrum, .tableOpMenu, .lookupSelector {
 border-color: #DDDDDD;}
                              .gridTable, .gridTableFull, .gridTableFullEdit {
 border-color: #AAAAAA;}

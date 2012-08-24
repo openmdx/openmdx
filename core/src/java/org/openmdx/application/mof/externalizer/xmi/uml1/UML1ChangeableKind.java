@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: UML1ChangeableKind.java,v 1.2 2010/06/02 13:42:16 hburger Exp $
  * Description: lab client
- * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/06/02 13:42:16 $
  * ====================================================================
  *
  * This software is published under the BSD license

@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: Ui_1.java,v 1.89 2011/11/28 09:25:05 wfro Exp $
  * Description: Ui_1 plugin
- * Revision:    $Revision: 1.89 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/11/28 09:25:05 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -100,6 +97,7 @@ import org.openmdx.base.rest.spi.Facades;
 import org.openmdx.base.rest.spi.Object_2Facade;
 import org.openmdx.base.rest.spi.Query_2Facade;
 import org.openmdx.kernel.exception.BasicException;
+import org.openmdx.kernel.id.UUIDs;
 import org.openmdx.kernel.log.SysLog;
 
 /**
@@ -1265,7 +1263,6 @@ public class Ui_1 extends Standard_1 {
             boolean customizedGroup = groupFacade.getPath().getBase().indexOf("Tab:100000") < 0;
             // Add column breaks to group
             // calculate columnSizeMin/Max of group 
-            int currentColumn = 0;
             int currentColumnSizeMax = 0;
             int fieldIndex = 0;
             int memberIndex = 0;
@@ -1296,7 +1293,6 @@ public class Ui_1 extends Standard_1 {
                 	groupFacade.attributeValuesAsList("columnSizeMin").add(new Integer(330));
                 	groupFacade.attributeValuesAsList("columnSizeMax").add(new Integer(currentColumnSizeMax));
                 	groupFacade.attributeValuesAsList("columnBreakAtElement").add(new Integer(memberIndex));
-                    currentColumn++;
                     currentColumnSizeMax = 0;
                     fieldIndex = 0;
                 }
@@ -3272,7 +3268,7 @@ public class Ui_1 extends Standard_1 {
 		            }
 		            Object_2Facade result = Object_2Facade.newInstance(
 		                request.path().getDescendant(
-		                    new String[]{ "reply", super.uidAsString()}
+		                    new String[]{ "reply", UUIDs.newUUID().toString()}
 		                ),
 		                "org:openmdx:base:Void"
 		            );		            

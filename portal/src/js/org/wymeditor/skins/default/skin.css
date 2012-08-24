@@ -27,7 +27,7 @@
 
 
 /*TYPO*/
-        .wym_skin_default                { font-size: 62.5%; font-family: Verdana, Arial, sans-serif; }
+        .wym_skin_default                { font-size: 62.5%; font-family: "Open Sans", "DejaVu Sans Condensed", "lucida sans", tahoma, verdana, arial, sans-serif; }
         .wym_skin_default h2             { font-size: 110%; /* = 11px */}
         .wym_skin_default h3             { font-size: 100%; /* = 10px */}
         .wym_skin_default li             { font-size: 100%; /* = 10px */}

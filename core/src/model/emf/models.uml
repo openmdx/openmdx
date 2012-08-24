@@ -42,4 +42,7 @@
   <eAnnotations xmi:id="_2UgcoEcDEd-o1OTPw_6HJg" source="org.openmdx.state2">
     <references xmi:type="uml:Package" href="org.openmdx.state2.uml#_3C7B8A60016D407170B300B4"/>
   </eAnnotations>
+  <eAnnotations xmi:id="_Th7QwHLyEeGDZOi-upD3nQ" source="org.openmdx.preferences2">
+    <references xmi:type="uml:Package" href="org.openmdx.preferences2.uml#_c6xKEHLfEeGNgPDkuA6txQ"/>
+  </eAnnotations>
 </uml:Model>

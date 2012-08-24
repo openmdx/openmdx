@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: NamingConfigurationProvider.java,v 1.5 2012/01/05 23:20:21 hburger Exp $
  * Description: Naming Configuration Provider
- * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2012/01/05 23:20:21 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

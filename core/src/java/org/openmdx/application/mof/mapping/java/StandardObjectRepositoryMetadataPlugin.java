@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: StandardObjectRepositoryMetadataPlugin.java,v 1.1 2009/01/13 02:10:37 wfro Exp $
  * Description: StandardObjectRelationalMapping 
- * Revision:    $Revision: 1.1 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/13 02:10:37 $
  * ====================================================================
  *
  * This software is published under the BSD license

@@ -1,16 +1,13 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: CallbackPrompts.java,v 1.3 2011/04/27 06:20:09 hburger Exp $
  * Description: Callback Propmpts 
- * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/04/27 06:20:09 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2010, OMEX AG, Switzerland
+ * Copyright (c) 2010-2012, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -51,13 +48,16 @@
 package org.openmdx.application.rest.http;
 
 /**
- * Callback Propmpts
+ * Callback Prompts
  */
 public class CallbackPrompts {
 
-   private CallbackPrompts() {
+    /**
+     * Constructor 
+     */
+    private CallbackPrompts() {
       // Avoid instantiation
-   }
+    }
 
    /**
     * Remote User Name Callback Prompt
@@ -85,8 +85,8 @@ public class CallbackPrompts {
    public static String CONNECTION_PASSWORD = "ConnectionPassword";
 
    /**
-    * REST Connection RefInitializeOnCreate Callback Prompt
+    * REST Connection BulkLoad Callback Prompt
     */
-   public static String REF_INITIALIZE_ON_CREATE = "RefInitializeOnCreate";
+   public static String BULK_LOAD = "BulkLoad";
    
 }

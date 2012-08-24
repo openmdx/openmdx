@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: TestDatatypes.java,v 1.16 2011/12/11 17:01:29 hburger Exp $
  * Description: Test Oracle
- * Revision:    $Revision: 1.16 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/12/11 17:01:29 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -848,7 +845,8 @@ public class TestDatatypes  {
         assertEquals("70 min", "P0Y0M0DT0H70M0S", t.toString());
     }
 
-    private <T> T copy(T t) throws IOException, ClassNotFoundException {
+    @SuppressWarnings("unchecked")
+	private <T> T copy(T t) throws IOException, ClassNotFoundException {
         ByteArrayOutputStream buffer = new ByteArrayOutputStream();
         ObjectOutput target = new ObjectOutputStream(buffer);
         target.writeObject(t);

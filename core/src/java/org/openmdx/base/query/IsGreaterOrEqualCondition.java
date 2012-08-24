@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: IsGreaterOrEqualCondition.java,v 1.10 2010/06/01 09:00:06 hburger Exp $
  * Description: Is-Greater-Than-Or-Equal-To Condition
- * Revision:    $Revision: 1.10 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/06/01 09:00:06 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -105,7 +102,7 @@ public class IsGreaterOrEqualCondition extends Condition {
      */
     @Override
     public IsGreaterOrEqualCondition clone(
-    ) throws CloneNotSupportedException {
+    ){
         return new IsGreaterOrEqualCondition(
             this.getQuantifier(), 
             this.getFeature(), 

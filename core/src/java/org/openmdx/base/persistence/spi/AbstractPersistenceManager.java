@@ -1,10 +1,7 @@
 /*
  * ====================================================================
- * Name:        $Id: AbstractPersistenceManager.java,v 1.20 2011/10/04 23:15:12 hburger Exp $
  * Description: Abstract PersistenceManager
- * Revision:    $Revision: 1.20 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/10/04 23:15:12 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

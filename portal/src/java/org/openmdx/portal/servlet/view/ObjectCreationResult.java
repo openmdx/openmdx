@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: ObjectCreationResult.java,v 1.5 2011/07/07 22:35:40 wfro Exp $
  * Description: CreateOperationResult
- * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/07/07 22:35:40 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -63,7 +60,7 @@ public class ObjectCreationResult {
 
     //-----------------------------------------------------------------------
     public ObjectCreationResult(
-        String refMofId,
+        String objectXRI,
         String label,
         String title,
         String iconKey
@@ -71,7 +68,7 @@ public class ObjectCreationResult {
         this.selectObjectAction = new Action(
             SelectObjectAction.EVENT_ID,
             new Action.Parameter[]{
-                new Action.Parameter(Action.PARAMETER_OBJECTXRI, refMofId)
+                new Action.Parameter(Action.PARAMETER_OBJECTXRI, objectXRI)
             },
             label,
             title,
@@ -81,7 +78,7 @@ public class ObjectCreationResult {
         this.editObjectAction = new Action(
             SelectAndEditObjectAction.EVENT_ID,
             new Action.Parameter[]{
-                new Action.Parameter(Action.PARAMETER_OBJECTXRI, refMofId)
+                new Action.Parameter(Action.PARAMETER_OBJECTXRI, objectXRI)
             },
             label,
             title,
@@ -89,7 +86,7 @@ public class ObjectCreationResult {
             true
         );
     }
-    
+
     //-----------------------------------------------------------------------
     public Action getSelectObjectAction(
     ) {

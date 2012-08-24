@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     opencrx, http://www.opencrx.org/
- * Name:        $Id: XMIReferenceResolver.java,v 1.2 2010/06/18 12:58:44 hburger Exp $
  * Description: openCRX application plugin
- * Revision:    $Revision: 1.2 $
  * Owner:       CRIXP AG, Switzerland, http://www.crixp.com
- * Date:        $Date: 2010/06/18 12:58:44 $
  * ====================================================================
  *
  * This software is published under the BSD license

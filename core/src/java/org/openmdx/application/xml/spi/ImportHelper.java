@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: ImportHelper.java,v 1.4 2010/01/20 08:49:35 hburger Exp $
  * Description: XML Importer
- * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/01/20 08:49:35 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

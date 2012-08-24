@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: Codes.java,v 1.22 2011/11/18 13:36:43 wfro Exp $
  * Description: Codes
- * Revision:    $Revision: 1.22 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/11/18 13:36:43 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -61,24 +58,44 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.jdo.JDOHelper;
 import javax.jdo.PersistenceManager;
+import javax.jmi.reflect.RefObject;
+import javax.resource.cci.MappedRecord;
 
+import org.oasisopen.cci2.QualifierType;
+import org.oasisopen.jmi1.RefContainer;
+import org.openmdx.application.dataprovider.cci.JmiHelper;
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
 import org.openmdx.base.exception.ServiceException;
+import org.openmdx.base.jmi1.Authority;
+import org.openmdx.base.mof.cci.Multiplicity;
 import org.openmdx.base.naming.Path;
+import org.openmdx.base.rest.spi.Object_2Facade;
 import org.openmdx.kernel.exception.BasicException;
+import org.openmdx.kernel.log.SysLog;
 
+/**
+ * Codes
+ *
+ */
 public final class Codes implements Serializable {
 
-	static class CodeEntry {
+	/**
+	 * CodeEntry
+	 *
+	 */
+	public static class CodeEntry {
 		
 		public CodeEntry(
 			Path id,
@@ -143,62 +160,34 @@ public final class Codes implements Serializable {
 		private final Date validTo;
 	}
 	
-    //-------------------------------------------------------------------------
+    /**
+     * Constructor 
+     *
+     * @param codeSegment
+     * @throws ServiceException
+     */
     public Codes(
         RefObject_1_0 codeSegment
     ) {
     	if(System.currentTimeMillis() > refreshedAt + TTL) {
-    		PersistenceManager pm = JDOHelper.getPersistenceManager(codeSegment);
     		codeSegmentIdentity = codeSegment.refGetPath();
+    		PersistenceManager pm = JDOHelper.getPersistenceManager(codeSegment);
     		refresh(pm);
     	}
     }
 
-    //-------------------------------------------------------------------------
-    @SuppressWarnings("unchecked")
+    /**
+     * Refresh codes.
+     * @param pm
+     * @throws ServiceException
+     */
     public static void refresh(
     	PersistenceManager pm
     ) {
     	if(codeSegmentIdentity != null) {
-    		RefObject_1_0 codeSegment = (RefObject_1_0)pm.getObjectById(codeSegmentIdentity);
-	    	Map<String,SortedMap<Short,CodeEntry>> codeEntryContainers = new ConcurrentHashMap<String,SortedMap<Short,CodeEntry>>();    	
-	        Collection<RefObject_1_0> valueContainers = (Collection)codeSegment.refGetValue("valueContainer");
-	        for(RefObject_1_0 valueContainer: valueContainers) {
-	        	Set<String> containerNames = new HashSet<String>( 
-	        		(Set<String>)valueContainer.refGetValue("name")
-	        	);
-	        	containerNames.add(
-	        		valueContainer.refGetPath().getBase()
-	        	);
-	        	for(String containerName: containerNames) {
-	        		SortedMap<Short,CodeEntry> codeEntries = new TreeMap<Short,CodeEntry>();
-	        		Collection<RefObject_1_0> entries = (Collection)valueContainer.refGetValue("entry");
-	        		for(RefObject_1_0 entry: entries) {
-	                    Short code = 0;
-	                    try {
-	                        code = new Short(entry.refGetPath().getBase());
-	                    } catch(Exception e) {}        			
-	        			codeEntries.put(
-	        				code,
-	        				new CodeEntry(
-	        					entry.refGetPath(),
-	        					new ArrayList<String>((List<String>)entry.refGetValue("shortText")),
-	        					new ArrayList<String>((List<String>)entry.refGetValue("longText")),
-	        					(String)entry.refGetValue("iconKey"),
-	        					(String)entry.refGetValue("color"),
-	        					(String)entry.refGetValue("backColor"),        					
-	        			        (Date)entry.refGetValue("validFrom"),
-	        			        (Date)entry.refGetValue("validTo")
-	        			    )
-	        			);
-	        		}
-	        		codeEntryContainers.put(
-	        			containerName,
-	        			codeEntries
-	        		);
-	        	}
-	        }
-	        cachedCodeEntryContainer = codeEntryContainers;
+        	RefObject_1_0 codeSegment = (RefObject_1_0)pm.getObjectById(codeSegmentIdentity);
+    		Map<String,SortedMap<Short,CodeEntry>> codeEntries = loadCodes(codeSegment);
+	        cachedCodeEntryContainer = codeEntries;
 	        cachedShortTexts.clear();
 	        cachedLongTexts.clear();
 	        cachedIconKeys.clear();
@@ -208,7 +197,244 @@ public final class Codes implements Serializable {
     	}
     }
 
-    //-------------------------------------------------------------------------
+	/**
+	 * Store codes to specified segment.
+	 * @param codeProviderIdentity
+	 * @param segmentName
+	 * @param pmf
+	 * @param codes
+	 */
+	public static void storeCodes(
+		PersistenceManager pm,
+		Map<Path,MappedRecord> codes
+	) throws ServiceException {
+    	String messagePrefix = new Date() + "  ";
+        SysLog.info("Storing " + codes.size() + " code entries");
+        System.out.println(messagePrefix + "Storing " + codes.size() + " code entries");
+        // Load objects in multiple runs in order to resolve object dependencies.
+        Map<Path,RefObject> loadedObjects = new HashMap<Path,RefObject>(); 
+        for(int run = 0; run < 5; run++) {
+            boolean hasNewObjects = false;
+            pm.currentTransaction().begin();
+            for(
+                Iterator<MappedRecord> j = codes.values().iterator(); 
+                j.hasNext(); 
+            ) {
+              MappedRecord entry = j.next();
+              Path entryPath = Object_2Facade.getPath(entry);
+              // create new entries, update existing
+              try {
+                RefObject_1_0 existing = null;
+                try {
+                  existing = (RefObject_1_0)pm.getObjectById(
+                	  entryPath
+                  );
+                }
+                catch(Exception e) {}
+                if(existing != null) {
+                    loadedObjects.put(
+                    	entryPath, 
+                        existing
+                    );
+                    // Object exists: if it was created on first run it does not have to be updated 
+                    // on subsequent runs. If it was updated on first run do not update it again.
+                    if(run == 0) {
+                        JmiHelper.toRefObject(
+                            entry,
+                            existing,
+                            loadedObjects, // object cache
+                            null, // ignorable features
+                            true // compareWithBeforeImage
+                        );
+                    }
+                }
+                else {
+                    String qualifiedClassName = Object_2Facade.getObjectClass(entry);
+                    String packageName = qualifiedClassName.substring(0, qualifiedClassName.lastIndexOf(':'));
+                    RefObject_1_0 newEntry = (RefObject_1_0)pm.getObjectById(
+                        Authority.class,
+                        "xri://@openmdx*" + packageName.replace(":", ".")
+                    ).refImmediatePackage().refClass(qualifiedClassName).refCreateInstance(null);
+                    newEntry.refInitialize(false, false);
+                    JmiHelper.toRefObject(
+                        entry,
+                        newEntry,
+                        loadedObjects, // object cache
+                        null, // ignorable features
+                        true // compareWithBeforeImage
+                    );
+                    Path parentIdentity = entryPath.getParent().getParent();
+                    RefObject_1_0 parent = null;
+                    try {
+                        parent = loadedObjects.containsKey(parentIdentity) ? 
+                        	(RefObject_1_0)loadedObjects.get(parentIdentity) : 
+                        		(RefObject_1_0)pm.getObjectById(parentIdentity);
+                    } catch(Exception e) {}
+                    if(parent != null) {
+                        RefContainer container = (RefContainer)parent.refGetValue(
+                        	entryPath.get(entryPath.size() - 2)
+                        );
+                        container.refAdd(
+                            QualifierType.REASSIGNABLE,
+                            entryPath.get(entryPath.size() - 1),
+                            newEntry
+                        );
+                    }
+                    loadedObjects.put(
+                    	entryPath, 
+                        newEntry
+                    );
+                    hasNewObjects = true;
+                }
+              }
+              catch(Exception e) {
+            	  new ServiceException(e).log();
+            	  System.out.println(messagePrefix + "STATUS: " + e.getMessage() + " (for more info see log)");
+              }
+            }
+            pm.currentTransaction().commit();
+            if(!hasNewObjects) break;
+        }
+	}
+
+	/**
+	 * Store bundles in code segment.
+	 * @param codeSegmentIdentity
+	 * @param pm
+	 * @param bundles
+	 */
+	public static void storeBundles(
+		Path codeSegmentIdentity,
+		String containerName,
+		PersistenceManager pm,
+		List<ResourceBundle> bundles
+	) throws ServiceException {
+		RefObject_1_0 codeSegment = (RefObject_1_0)pm.getObjectById(codeSegmentIdentity);
+		Map<Path,MappedRecord> codes = new HashMap<Path,MappedRecord>();
+		// Derive class of value containers and entries from existing value containers
+		String classNameContainer = null;
+		String classNameEntry = null;
+        @SuppressWarnings("unchecked")
+        Collection<RefObject_1_0> valueContainers = (Collection)codeSegment.refGetValue("valueContainer");
+        if(!valueContainers.isEmpty()) {
+        	RefObject_1_0 valueContainer = valueContainers.iterator().next();
+        	classNameContainer = valueContainer.refClass().refMofId();
+        	@SuppressWarnings("unchecked")
+            Collection<RefObject_1_0> entries = (Collection)valueContainer.refGetValue("entry");
+        	if(!entries.isEmpty()) {
+        		classNameEntry = entries.iterator().next().refClass().refMofId();
+        	}
+        }
+        // Map bundles to CodeValueContainer / CodeValueEntry
+        if(classNameContainer != null && classNameEntry != null) {
+        	Path valueContainerIdentity = codeSegmentIdentity.getDescendant("valueContainer", containerName);        	
+        	Object_2Facade valueContainer = null;
+        	try {
+        		valueContainer = Object_2Facade.newInstance(
+	        		valueContainerIdentity, 
+	        		classNameContainer
+	        	);
+        	} catch(Exception e) {}
+        	@SuppressWarnings("unchecked")
+            List<Object> names = (List<Object>)valueContainer.attributeValues("name");
+        	names.add(containerName);
+        	codes.put(
+        		valueContainerIdentity, 
+        		valueContainer.getDelegate()
+        	);
+        	ResourceBundle primaryBundle = bundles.get(0);
+    		Set<String> keys = new TreeSet<String>(primaryBundle.keySet());
+    		int codeIndex = 0;
+    		for(String key: keys) {
+    			Path entryIdentity = valueContainerIdentity.getDescendant("entry", Integer.toString(codeIndex));
+    			Object_2Facade entry = null;
+                try {
+	                entry = Object_2Facade.newInstance(
+	                	entryIdentity,
+	                	classNameEntry
+	                );
+                } catch(Exception e) {}
+    			@SuppressWarnings("unchecked")
+                List<Object> shortTexts = (List<Object>)entry.attributeValues("shortText", Multiplicity.LIST);
+    			shortTexts.add(key);
+    			@SuppressWarnings("unchecked")
+                List<Object> longTexts = (List<Object>)entry.attributeValues("longText", Multiplicity.LIST);
+    			longTexts.add(primaryBundle.getObject(key));    			
+    			for(int localeIndex = 1; localeIndex < bundles.size(); localeIndex++) {
+    				longTexts.add(
+    					bundles.get(localeIndex).containsKey(key) ? bundles.get(localeIndex).getObject(key) : ""
+    				);
+    			}
+        		codes.put(
+        			entryIdentity,
+        			entry.getDelegate()
+        		);
+        		codeIndex++;
+    		}
+        }
+		storeCodes(
+			pm, 
+			codes
+		);
+	}
+
+	/**
+	 * Load codes.
+	 * @param codeProviderIdentity
+	 * @param segmentName
+	 * @param pmf
+	 * @return
+	 * @throws ServiceException
+	 */
+	public static Map<String,SortedMap<Short,CodeEntry>> loadCodes(
+		RefObject_1_0 codeSegment
+	) {
+    	Map<String,SortedMap<Short,CodeEntry>> codeEntryContainers = new ConcurrentHashMap<String,SortedMap<Short,CodeEntry>>();    	
+        @SuppressWarnings("unchecked")
+        Collection<RefObject_1_0> valueContainers = (Collection)codeSegment.refGetValue("valueContainer");
+        for(RefObject_1_0 valueContainer: valueContainers) {
+        	Set<String> containerNames = new HashSet<String>( 
+        		(Set<String>)valueContainer.refGetValue("name")
+        	);
+        	containerNames.add(
+        		valueContainer.refGetPath().getBase()
+        	);
+        	for(String containerName: containerNames) {
+        		SortedMap<Short,CodeEntry> codeEntries = new TreeMap<Short,CodeEntry>();
+        		@SuppressWarnings("unchecked")
+                Collection<RefObject_1_0> entries = (Collection)valueContainer.refGetValue("entry");
+        		for(RefObject_1_0 entry: entries) {
+                    Short code = 0;
+                    try {
+                        code = new Short(entry.refGetPath().getBase());
+                    } catch(Exception e) {}        			
+        			codeEntries.put(
+        				code,
+        				new CodeEntry(
+        					entry.refGetPath(),
+        					new ArrayList<String>((List<String>)entry.refGetValue("shortText")),
+        					new ArrayList<String>((List<String>)entry.refGetValue("longText")),
+        					(String)entry.refGetValue("iconKey"),
+        					(String)entry.refGetValue("color"),
+        					(String)entry.refGetValue("backColor"),        					
+        			        (Date)entry.refGetValue("validFrom"),
+        			        (Date)entry.refGetValue("validTo")
+        			    )
+        			);
+        		}
+        		codeEntryContainers.put(
+        			containerName,
+        			codeEntries
+        		);
+        	}
+        }
+        return codeEntryContainers;
+	}
+	
+    /**
+     * @param codeEntry
+     * @return
+     */
     private static boolean entryIsValid(
         CodeEntry codeEntry
     ) {
@@ -220,10 +446,15 @@ public final class Codes implements Serializable {
 	        ((validTo == null) || validTo.after(current));
     }
 
-    //-------------------------------------------------------------------------
     /**
-     * @return Returns true if at least one short text is locale-specific. Returns false
-     *         if all short texts are fallback texts (taken from locale 0).  
+     * Returns true if at least one short text is locale-specific. Returns false
+     * if all short texts are fallback texts (taken from locale 0)
+     * @param name
+     * @param locale
+     * @param codeAsKey
+     * @param key
+     * @param includeAll
+     * @return
      */
     private static boolean prepareShortText(
         String name,
@@ -262,10 +493,15 @@ public final class Codes implements Serializable {
         return hasLocaleSpecificTexts;
     }
 
-    //-------------------------------------------------------------------------
     /**
-     * @return Returns true if at least one long text is locale-specific. Returns false
-     *         if all long texts are fallback texts (taken from locale 0).  
+     * Returns true if at least one long text is locale-specific. Returns false
+     * if all long texts are fallback texts (taken from locale 0). 
+     * @param name
+     * @param locale
+     * @param codeAsKey
+     * @param key
+     * @param includeAll
+     * @return
      */
     private static boolean prepareLongText(
         String name,
@@ -317,8 +553,14 @@ public final class Codes implements Serializable {
         );
         return hasLocaleSpecificTexts;
     }
-
-    //-------------------------------------------------------------------------
+	
+    /**
+     * @param name
+     * @param locale
+     * @param codeAsKey
+     * @param includeAll
+     * @return
+     */
     private String getKey(
     	String name,
     	short locale,
@@ -328,8 +570,14 @@ public final class Codes implements Serializable {
     	return name + ":" + locale + ":" + codeAsKey + ":" + includeAll;
     }
     
-    //-------------------------------------------------------------------------
-    public SortedMap<Object,Object> getLongText(
+    /**
+     * @param name
+     * @param locale
+     * @param codeAsKey
+     * @param includeAll
+     * @return
+     */
+    public Map getLongText(
         String name,
         short locale,
         boolean codeAsKey,
@@ -350,8 +598,44 @@ public final class Codes implements Serializable {
         return longTexts;
     }
 
-    //-------------------------------------------------------------------------
-    public SortedMap<Object,Object> getShortText(
+    /**
+     * @param name
+     * @param locale
+     * @param includeAll
+     * @return
+     */
+    @SuppressWarnings("unchecked")
+    public Map<Short,String> getLongTextByCode(
+    	String name,
+        short locale,
+        boolean includeAll
+    ) {
+    	return this.getLongText(name, locale, true, includeAll);
+    }
+
+    /**
+     * @param name
+     * @param locale
+     * @param includeAll
+     * @return
+     */
+    @SuppressWarnings("unchecked")
+    public Map<String,Short> getLongTextByText(
+    	String name,
+        short locale,
+        boolean includeAll
+    ) {
+    	return this.getLongText(name, locale, false, includeAll);
+    }
+
+    /**
+     * @param name
+     * @param locale
+     * @param codeAsKey
+     * @param includeAll
+     * @return
+     */
+    public Map getShortText(
         String name,
         short locale,
         boolean codeAsKey,
@@ -372,7 +656,41 @@ public final class Codes implements Serializable {
         return shortTexts;      
     }
 
-    //-------------------------------------------------------------------------
+    /**
+     * @param name
+     * @param locale
+     * @param includeAll
+     * @return
+     */
+    @SuppressWarnings("unchecked")
+    public Map<Short,String> getShortTextByCode(
+        String name,
+        short locale,
+        boolean includeAll
+    ) {
+    	return this.getShortText(name, locale, true, includeAll);
+    }
+
+    /**
+     * @param name
+     * @param locale
+     * @param includeAll
+     * @return
+     */
+    @SuppressWarnings("unchecked")
+    public Map<String,Short> getShortTextByText(
+        String name,
+        short locale,
+        boolean includeAll
+    ) {
+    	return this.getShortText(name, locale, false, includeAll);
+    }
+
+    /**
+     * @param name
+     * @param includeAll
+     * @return
+     */
     public SortedMap getIconKeys(
         String name,
         boolean includeAll
@@ -401,7 +719,11 @@ public final class Codes implements Serializable {
         return iconKeys;
     }
 
-    //-------------------------------------------------------------------------
+    /**
+     * @param name
+     * @param includeAll
+     * @return
+     */
     public SortedMap getColors(
         String name,
         boolean includeAll
@@ -430,7 +752,11 @@ public final class Codes implements Serializable {
         return colors;
     }
 
-    //-------------------------------------------------------------------------
+    /**
+     * @param name
+     * @param includeAll
+     * @return
+     */
     public SortedMap getBackColors(
         String name,
         boolean includeAll
@@ -459,7 +785,11 @@ public final class Codes implements Serializable {
         return backColors;
     }
 
-    //-------------------------------------------------------------------------
+    /**
+     * @param value
+     * @param feature
+     * @return
+     */
     public short findCodeFromValue(
         String value,
         String feature
@@ -474,18 +804,27 @@ public final class Codes implements Serializable {
                     	return code;
                     }
             	}
+                @SuppressWarnings("unchecked")
                 Map<Object,Object> longTexts = this.getLongText(feature, locale, true, false);
+                Integer lastMatchLength = null;
+                Short lastMatchCode = null;
                 for(Map.Entry<Object,Object> entry: longTexts.entrySet()) {
-                    String longText = ((String)entry.getValue()).trim();
-                    if((longText != null) && longText.toUpperCase().startsWith(value)) {
-                    	return (Short)entry.getKey();
+                    String text = ((String)entry.getValue()).trim();
+                    if((text != null) && text.toUpperCase().indexOf(value) >= 0) {
+    	    			if(lastMatchLength == null || text.length() < lastMatchLength) {
+    	    				lastMatchCode = (Short)entry.getKey();
+    	    				lastMatchLength = text.length();
+    	    			}
                     }
+                }
+                if(lastMatchCode != null) {
+                	return lastMatchCode;
                 }
             }
         }
         return code;
     }
-    
+
     //-------------------------------------------------------------------------
     // Variables
     //-------------------------------------------------------------------------

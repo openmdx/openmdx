@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: LayerManagerFactory_2.java,v 1.6 2010/08/09 13:12:05 hburger Exp $
  * Description: Layer Manager Factory 
- * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/08/09 13:12:05 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

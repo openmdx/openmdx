@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: Filter.java,v 1.22 2011/11/26 01:34:59 hburger Exp $
  * Description: Filter
- * Revision:    $Revision: 1.22 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/11/26 01:34:59 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -88,6 +85,20 @@ import org.w3c.cci2.AnyTypePredicate;
 public class Filter
     implements Serializable, AnyTypePredicate {
 
+    private Filter(
+        Filter that
+    ){
+        this.conditions = new ArrayList<Condition>(that.conditions.size());
+        for(Condition condition : that.conditions) {
+            this.conditions.add(condition.clone());
+        }
+        this.orderSpecifiers = new ArrayList<OrderSpecifier>(that.orderSpecifiers.size());
+        for(OrderSpecifier orderSpecifier : this.orderSpecifiers) {
+            this.orderSpecifiers.add(orderSpecifier.clone());
+        }
+        this.extension = extension == null ? null : extension.clone();
+    }
+    
     /**
      * Constructs a filter with the specified conditions and
      * order specifiers.
@@ -414,6 +425,19 @@ public class Filter
 		        this.extension
 		    }
 		).toString();
+    }
+
+    //-------------------------------------------------------------------------
+    // Implements Cloneable
+    //-------------------------------------------------------------------------
+    
+    /* (non-Javadoc)
+     * @see java.lang.Object#clone()
+     */
+    @Override
+    public Filter clone(
+    ){
+        return new Filter(this);
     }
 
     

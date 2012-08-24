@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: TimeBasedUUIDGeneratorUsingRandomBasedNode.java,v 1.8 2008/01/08 16:16:32 hburger Exp $
  * Description: Random Based UUID Provider
- * Revision:    $Revision: 1.8 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/01/08 16:16:32 $
  * ====================================================================
  *
  * This software is published under the BSD license

@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: UML1AssociationEnd.java,v 1.3 2011/04/12 15:30:02 hburger Exp $
  * Description: lab client
- * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/04/12 15:30:02 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

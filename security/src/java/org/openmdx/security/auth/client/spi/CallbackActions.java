@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Security, http://www.openmdx.org/
- * Name:        $Id: CallbackActions.java,v 1.1 2007/11/26 14:04:34 hburger Exp $
  * Description: Callback Actions
- * Revision:    $Revision: 1.1 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/11/26 14:04:34 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

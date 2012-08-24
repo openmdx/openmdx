@@ -1,10 +1,10 @@
 // ====================================================================
 // Project:     openmdx, http://www.openmdx.org/
-// Name:        $Id: guicontrol.js,v 1.12 2011/04/15 14:12:10 cmu Exp $
+// Name:        $Id: guicontrol.js,v 1.13 2012/05/21 04:30:07 cmu Exp $
 // Description: java script helpers
-// Revision:    $Revision: 1.12 $
+// Revision:    $Revision: 1.13 $
 // Owner:       OMEX AG, Switzerland, http://www.omex.ch
-// Date:        $Date: 2011/04/15 14:12:10 $
+// Date:        $Date: 2012/05/21 04:30:07 $
 // ====================================================================
 //
 // This software is published under the BSD license
@@ -1179,6 +1179,18 @@ function yuiPrint() {
     if (content_value == null || content_value.length == 0) {
 		    try {content_value = $('contentHeaderNoLeftNo').innerHTML;} catch(e) {};
     }
+    if (content_value == null || content_value.length == 0) {
+		    try {content_value = $('contentHeaderYesLeftYesNoScroll').innerHTML;} catch(e) {};
+    }
+    if (content_value == null || content_value.length == 0) {
+		    try {content_value = $('contentHeaderNoLeftYesNoScroll').innerHTML;} catch(e) {};
+    }
+    if (content_value == null || content_value.length == 0) {
+		    try {content_value = $('contentHeaderYesLeftNoNoScroll').innerHTML;} catch(e) {};
+    }
+    if (content_value == null || content_value.length == 0) {
+		    try {content_value = $('contentHeaderNoLeftNoNoScroll').innerHTML;} catch(e) {};
+    }
     if ($('paneLeft')) {$('paneLeft').style.display='block';}
     var docprint=window.open("","",disp_setting);
     docprint.document.open();
@@ -1193,7 +1205,7 @@ function yuiPrint() {
           for (var R = 0; R < document.styleSheets[S].cssRules.length; R++) {
             docprint.document.write(document.styleSheets[S].cssRules[R].cssText);
           }
-        } else {
+        } else if (document.styleSheets[S].rules) {
           for (var R = 0; R < document.styleSheets[S].rules.length; R++) {
             docprint.document.write(document.styleSheets[S].rules[R].cssText);
           }

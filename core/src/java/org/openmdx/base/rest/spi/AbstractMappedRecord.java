@@ -1,16 +1,13 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: AbstractMappedRecord.java,v 1.7 2011/11/26 01:34:57 hburger Exp $
  * Description: Abstract Mapped Record 
- * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/11/26 01:34:57 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2010, OMEX AG, Switzerland
+ * Copyright (c) 2010-2012, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -425,6 +422,22 @@ abstract class AbstractMappedRecord implements MultiLineStringRepresentation, Ma
     }
     
     /**
+     * Convert the value to a <code>Boolean</code> if necessary
+     * 
+     * @param value
+     * 
+     * @return the value as <code>Boolean</code>
+     */
+    protected static Boolean toBoolean(
+        Object value
+    ){
+        return 
+            value == null ? null :
+            value instanceof Boolean ? (Boolean)value :
+            Boolean.valueOf((String) value);
+    }
+
+    /**
      * Convert the value to a <code>Long</code> if necessary
      * 
      * @param value
@@ -439,7 +452,7 @@ abstract class AbstractMappedRecord implements MultiLineStringRepresentation, Ma
             value instanceof Long ? (Long)value :
             Long.valueOf((String) value);
     }
-
+    
     /**
      * Returns a multi-line string representation of this MappedRecord.
      * <p>

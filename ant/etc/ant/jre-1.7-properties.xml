@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <!--
 =======================================================================
-= Name:        $Id: jre-1.7-properties.xml,v 1.2 2011/11/25 17:58:53 wfro Exp $
+= Name:        $Id: jre-1.7-properties.xml,v 1.5 2012/07/08 12:39:33 wfro Exp $
 = Description: JRE 7 Platform Properties
-= Revision:    $Revision: 1.2 $
-= Date:        $Date: 2011/11/25 17:58:53 $
+= Revision:    $Revision: 1.5 $
+= Date:        $Date: 2012/07/08 12:39:33 $
 = Copyright:   (c) 2011 OMEX AG
 =======================================================================
 =
 = This software is published under the BSD license as listed below.
 = 
-= Copyright (c) 2011, OMEX AG, Switzerland
+= Copyright (c) 2011-2012, OMEX AG, Switzerland
 = All rights reserved.
 = 
 = Redistribution and use in source and binary forms, with or without 
@@ -90,6 +90,7 @@
 		<pathelement location="${openmdx.home}/osgi/${build.java.platform}/enterprise/lib/osgi.enterprise.servlet.jar"/>
 		<pathelement location="${openmdx.home}/osgi/${build.java.platform}/enterprise/lib/osgi.enterprise.transaction.jar"/>
 		<pathelement location="${openmdx.home}/osgi/${build.java.platform}/enterprise/lib/osgi.enterprise.xml.jar"/>
+		<pathelement location="${openmdx.home}/osgi/${build.java.platform}/enterprise/lib/osgi.enterprise.el.jar"/>
 	</path>
 	<path id="osgi.extension.lib">
 		<pathelement location="${openmdx.home}/osgi/${build.java.platform}/extension/lib/commons-collections.jar"/>
@@ -104,6 +105,7 @@
 		<pathelement location="${openmdx.home}/osgi/${build.java.platform}/extension/lib/netscape-ldap.jar"/>
 		<pathelement location="${openmdx.home}/osgi/${build.java.platform}/extension/lib/ejb.jar"/>
 		<pathelement location="${openmdx.home}/osgi/${build.java.platform}/extension/lib/javax.enterprise.deploy.jar"/>
+		<pathelement location="${openmdx.home}/osgi/${build.java.platform}/extension/lib/javax.el.jar"/>
 	</path>
 	<path id="osgi.enterprise.lib">
 		<path refid="osgi.enterprise.api"/>
@@ -127,7 +129,7 @@
 		<pathelement location="${openmdx.home}/opt/microsoft/${build.java.platform}/sql-server-2005/lib/sqljdbc.jar"/>
 	</path>
 	<path id="oracle.jdbc.lib">
-		<pathelement location="${openmdx.home}/opt/oracle/${build.java.platform}/oracle-11/lib/ojdbc.jar"/>
+		<pathelement location="${openmdx.home}/opt/oracle/${build.java.platform}/oracle-11/lib/ojdbc6.jar"/>
 		<pathelement location="${openmdx.home}/opt/oracle/${build.java.platform}/oracle-11/lib/orai18n.jar"/>
 	</path>
 	<path id="postgresql.jdbc.lib">

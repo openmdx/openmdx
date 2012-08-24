@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: Selection_1.java,v 1.1 2011/05/15 22:25:17 hburger Exp $
  * Description: Container_1 
- * Revision:    $Revision: 1.1 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/05/15 22:25:17 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

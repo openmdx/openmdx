@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: CharacterWriter.java,v 1.2 2010/06/02 09:22:56 hburger Exp $
  * Description: Character Writer 
- * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/06/02 09:22:56 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

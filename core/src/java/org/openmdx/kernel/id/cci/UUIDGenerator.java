@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: UUIDGenerator.java,v 1.4 2008/01/08 16:16:32 hburger Exp $
  * Description: UUID Generator
- * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/01/08 16:16:32 $
  * ====================================================================
  *
  * This software is published under the BSD license

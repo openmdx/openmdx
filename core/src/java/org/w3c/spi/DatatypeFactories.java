@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: DatatypeFactories.java,v 1.3 2009/10/19 12:40:35 hburger Exp $
  * Description: Datatype Factories 
- * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/10/19 12:40:35 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -51,11 +48,9 @@
 package org.w3c.spi;
 
 
-import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
 
-import org.openmdx.base.exception.RuntimeServiceException;
-import org.openmdx.kernel.exception.BasicException;
+import org.w3c.cci2.MutableDatatypeFactory;
 
 /**
  * DatatypeFactories
@@ -72,11 +67,6 @@ public class DatatypeFactories {
     /**
      * The XML Datatype Factory is lazily initialized
      */
-    private static DatatypeFactory xmlFactory;
-
-    /**
-     * The XML Datatype Factory is lazily initialized
-     */
     private static ImmutableDatatypeFactory immutableFactory;
     
     /**
@@ -86,17 +76,7 @@ public class DatatypeFactories {
      */
     public static DatatypeFactory xmlDatatypeFactory(
     ){
-        if(xmlFactory == null) try {
-            xmlFactory = DatatypeFactory.newInstance();
-        } catch (DatatypeConfigurationException exception) {
-            throw new RuntimeServiceException(
-                exception,
-                BasicException.Code.DEFAULT_DOMAIN,
-                BasicException.Code.INVALID_CONFIGURATION,
-                "Datatype factory acquisition failure"
-            ).log();
-        }
-        return xmlFactory;
+        return MutableDatatypeFactory.xmlDatatypeFactory();
     }
 
     /**

@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: ObjectView.java,v 1.31 2011/08/11 11:59:10 wfro Exp $
  * Description: View 
- * Revision:    $Revision: 1.31 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/08/11 11:59:10 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -88,40 +85,26 @@ public abstract class ObjectView
     public ObjectView(
         String id,
         String containerElementId,
-        Path objectIdentity,
-        ApplicationContext app,
-        Map<Path,Action> historyActions,
-        String lookupType,
-        Map restrictToElements
-    ) {    	
-        this(
-            id,
-            containerElementId,
-            // Get a new persistence manager for each view. This results
-            // in more DB round-trips, however different views do not
-            // interfere with each other.
-            app.getNewPmData().getObjectById(objectIdentity),
-            app,
-            historyActions,
-            lookupType,
-            restrictToElements
-        );
-    }
-
-    //-------------------------------------------------------------------------
-    public ObjectView(
-        String id,
-        String containerElementId,
         Object object,
         ApplicationContext app,
         Map<Path,Action> historyActions,
         String lookupType,
-        Map restrictToElements
+        String resourcePathPrefix,        
+        String navigationTarget,
+        Boolean isReadOnly
     ) {
         super(
             id,
             containerElementId,
-            object,
+            object instanceof Path ? 
+                // Get a new persistence manager. This results
+                // in more DB round-trips, however different views do not
+                // interfere with each other.
+            	app.getNewPmData().getObjectById(object) :
+            		object,
+            resourcePathPrefix,
+            navigationTarget,
+            isReadOnly,
             app
         );
         this.objectReference = new ObjectReference(
@@ -130,7 +113,6 @@ public abstract class ObjectView
         );
         this.historyActions = historyActions;
         this.lookupType = lookupType;
-        this.restrictToElements = restrictToElements;   
     }
 
     // -------------------------------------------------------------------------
@@ -360,8 +342,10 @@ public abstract class ObjectView
                           previousObjectIdentity,
                           this.app,
                           historyActions,
-                          null,
-                          null
+                          null, // lookupType
+                          this.getResourcePathPrefix(),
+                          this.getNavigationTarget(),
+                          this.isReadOnly()
                       );
                   }
               } 
@@ -375,8 +359,10 @@ public abstract class ObjectView
               this.app.getRootObject()[0].refGetPath(),
               this.app,
               new LinkedHashMap<Path,Action>(),
-              null,
-              null
+              null, // lookupType
+              this.getResourcePathPrefix(),
+              this.getNavigationTarget(),
+              this.isReadOnly()
           );
       }
       catch(Exception e) {
@@ -400,12 +386,6 @@ public abstract class ObjectView
     }
     
     //-------------------------------------------------------------------------
-    public Map getRestrictToElements(
-    ) {
-        return this.restrictToElements;
-    }
-    
-    //-------------------------------------------------------------------------
     public abstract RefObject_1_0 getLookupObject(
     );
     
@@ -417,7 +397,6 @@ public abstract class ObjectView
     protected ObjectReference objectReference;
     protected AttributePane attributePane = null;
     protected String lookupType = null;
-    protected Map restrictToElements = null;
   
     protected Map<Path,Action> historyActions = null;
     protected Action[] favoriteActions = null;

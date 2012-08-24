@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: EntityManagerFactory_1.java,v 1.23 2011/04/12 12:11:38 hburger Exp $
  * Description: Entity Manager Factory
- * Revision:    $Revision: 1.23 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/04/12 12:11:38 $
  * ====================================================================
  *
  * This software is published under the BSD license

@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: AttributeValue.java,v 1.106 2011/12/03 15:32:38 wfro Exp $
  * Description: AttributeValue
- * Revision:    $Revision: 1.106 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/12/03 15:32:38 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -76,8 +73,6 @@ import org.openmdx.kernel.log.SysLog;
 import org.openmdx.portal.servlet.ApplicationContext;
 import org.openmdx.portal.servlet.Autocompleter_1_0;
 import org.openmdx.portal.servlet.DataBinding;
-import org.openmdx.portal.servlet.DataBinding_1_0;
-import org.openmdx.portal.servlet.DataBinding_2_0;
 import org.openmdx.portal.servlet.HtmlEncoder_1_0;
 import org.openmdx.portal.servlet.ViewPort;
 import org.openmdx.portal.servlet.WebKeys;
@@ -238,20 +233,11 @@ implements Serializable {
             try {
                 RefObject_1_0 refObj = (RefObject_1_0)this.object;
                 Object value;
-                if(this.fieldDef.dataBinding instanceof DataBinding_1_0) {
-                    value = ((DataBinding_1_0)this.fieldDef.dataBinding).getValue(
-                        refObj,
-                        feature
-                    );
-                	
-                }
-                else {
-                    value = ((DataBinding_2_0)this.fieldDef.dataBinding).getValue(
-                        refObj,
-                        feature,
-                        this.app
-                    );                	
-                }
+                value = this.fieldDef.dataBinding.getValue(
+                    refObj,
+                    feature,
+                    this.app
+                );
                 Object defaultValue = this.getDefaultValue();
                 if(
                     !JDOHelper.isPersistent(refObj) &&
@@ -640,7 +626,7 @@ implements Serializable {
                         if(attribute.getSpanRow() > 4) {
                         	p.write("  <table style=\"width:100%;\"><tr>");
                             p.write("    <td><div onclick=\"javascript:loadHTMLedit('", id, "', '", p.getResourcePathPrefix(), "');\"", p.getOnMouseOver("javascript: this.style.backgroundColor='#FF9900';this.style.cursor='pointer';"), p.getOnMouseOut("javascript: this.style.backgroundColor='';"), " >", p.getImg("src=\"", p.getResourcePath("images/html"), p.getImgType(), "\" border=\"0\" alt=\"html\" title=\"\""), "</div></td>");
-                            p.write("    <td style=\"width:100%;\"><div onclick=\"javascript:loadWIKYedit('", id, "','./');\"", p.getOnMouseOver("javascript: this.style.backgroundColor='#FF9900';this.style.cursor='pointer';"), p.getOnMouseOut("javascript: this.style.backgroundColor='';"), " >", p.getImg("src=\"", p.getResourcePath("images/wiki"), p.getImgType(), "\" border=\"0\" alt=\"wiki\" title=\"\""), "</div></td>");                             
+                            p.write("    <td style=\"width:100%;\"><div onclick=\"javascript:loadWIKYedit('", id, "','", p.getResourcePathPrefix(), "');\"", p.getOnMouseOver("javascript: this.style.backgroundColor='#FF9900';this.style.cursor='pointer';"), p.getOnMouseOut("javascript: this.style.backgroundColor='';"), " >", p.getImg("src=\"", p.getResourcePath("images/wiki"), p.getImgType(), "\" border=\"0\" alt=\"wiki\" title=\"\""), "</div></td>");                             
                             p.write("    <td><div onclick=\"javascript:$('", id, "').value=Wiky.toWiki($('", id, "').value);\"", p.getOnMouseOver("javascript: this.style.backgroundColor='#FF9900';this.style.cursor='pointer';"), p.getOnMouseOut("javascript: this.style.backgroundColor='';"), " >", p.getImg("src=\"", p.getResourcePath("images/htmltowiki"), p.getImgType(), "\" border=\"0\" alt=\"html &gt; wiki\" title=\"\""), "</div></td>");
                             p.write("  </tr></table>");
                         }

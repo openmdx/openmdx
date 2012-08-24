@@ -1,5 +1,5 @@
-Release Name: openMDX/Portal 2.9.0
-Release Date: 2012-01-06
+Release Name: openMDX/Portal 2.10.0
+Release Date: 2012-08-24
 
 ---------------------------------------------------------------------
 Notes:
@@ -54,172 +54,50 @@ Changes:
       * Bug fixes
 
 ==============================================================================
-Version 2.9.0                                                       2012-01-08
+Version 2.10.0                                                      2012-08-24
 ==============================================================================
 
 1.    NEW FEATURES
+
+      CR10010707
+      JSP tag library. Portal offers the following tags:
+      * portal:showobject
+      * portal:query
+      The tags can be used in wizards and make it easy to render objects and grids. 
+      Example:      
       
-      CR20019878
-      GridMoveUpObjectAction, GridMoveDownObjectAction. Add grid actions which 
-      allow to move position of values for multi-valued, ordered reference features.
-      
-      CR10010042
-      PortalExtension: grid actions. Allow to add custom-specific actions 
-      to grid menu 'Actions'.              
+        <%@ taglib uri="http://www.openmdx.org/tags/openmdx-portal" prefix="portal" %>
+         ...
+         <div id="content-wrap">
+      	   <div id="content" style="padding:10px 0.5em 0px 0.5em;">
+	         <portal:showobject id="AAA" object="<%= userHome %>" showAttributes="true" grids="alert,assignedActivity" navigationTarget="_none">
+	           <portal:query name="assignedActivity" query="<%= activityQuery %>" />
+	         </portal:showobject>
+	         <portal:showobject id="BBB" object="<%= userHome.getContact() %>" showAttributes="true" grids="address" navigationTarget="_none" />
+           </div> <!-- content -->
+        </div>
+
                                     
 2.    CHANGES  
      
 2.0.  CHANGED FEATURES
       
-      CR20019914
-      Deprecate RoleMapper_1_0 and remove dependency to openMDX/Security.
+      CR10010930
+      Unify Texts and Codes. The class Texts now delegates to Codes, i.e. texts
+      are now stored as codes in the CodeValueContainer with name 'TextsBundle'.
+      In case Codes are not defined, Texts falls back to resource bundles. 
+
+      CR10010942
+      Refactoring data bindings. Replace DataBinding_1_0 and DataBinding_2_0 
+      interfaces by DataBinding interface.
             
-      CR10010109
-      The method PortalExtension_1_0.isEnabled() was renamed to the more general
-      method hasPermission(). The new signature allows to control show- and edit-
-      permissions for GUI elements such as fields, field groups, operations and
-      references.
+      CR20020010
+      Improve grid search for code columns. Use short and long texts for filter 
+      value to code mapping.
             
 2.1.  FIXED BUGS
       none      
       
-2.2.  DEPRECATED FEATURES
-      none
-            
-2.3   REMOVED FEATURES
-      none
-
-==============================================================================
-Version 2.8.20                                                      2011-05-04
-==============================================================================
-
-1.    NEW FEATURES
-      
-      CR10009791
-      Workspaces. Left-pane added which hosts workspace-level dashboard. The
-      workspace-level dashboard works like the (horizontal) object-level dashboard:
-      * dashlets can be added removed by admin or user
-      * dashlets can be shared by admin by prefixing the label with a *
-      Workspaces can be managed by the segment admin only.
-       
-                                    
-2.    CHANGES  
-     
-2.0.  CHANGED FEATURES
-      
-      CR20019725
-      Portal: refactoring event handlers. Event handlers are object-oriented. 
-            
-2.1.  FIXED BUGS
-      
-      C10009805	 
-      Portal: Main Menu Error.
-      More info see http://sourceforge.net/projects/opencrx/forums/forum/329844/topic/4064101
-      
-      CR20019583
-      Fix pm handling for INVOKE_OPERATION. INVOKE_OPERATION closes pm 
-      sometimes to early.
-      
-      
-2.2.  DEPRECATED FEATURES
-      none
-            
-2.3   REMOVED FEATURES
-      none
-
-==============================================================================
-Version 2.8.0                                                       2010-12-27
-==============================================================================
-
-1.    NEW FEATURES
-      
-      CR20019414
-      Portal: tooltips for tabs. Generate title element to tabs.
-      
-      CR10009592
-      PortalExtension: grid coloring. Extend portal extension by method 
-      getGridRowColors(RefObject). Deprecate at the same time the method
-      hasGridColors().
-      
-     /**
-      * Returns colors which is used as foreground and background colors when an 
-      * object is rendered in a grid.
-      * @return foreground (at index 0) and background color (at index 1) or null. 
-      */    
-     @Override
-     public String[] getGridRowColors(
-    	RefObject_1_0 obj
-     ) {
-         if(obj instanceof Activity) {
-             Activity activity = (Activity)obj;
-             if(activity.getDueBy() != null) {
-                 String dueByDate = DateTimeFormat.BASIC_UTC_FORMAT.format(activity.getDueBy()).substring(0, 8);
-                 String todayDate = DateTimeFormat.BASIC_UTC_FORMAT.format(new Date()).substring(0, 8);
-                 return dueByDate.compareTo(todayDate) > 0 ?
-                     new String[]{null, "red"} :
-                         dueByDate.compareTo(todayDate) == 0 ?
-                             new String[]{null, "green"} :
-                                 null;
-              }
-          }
-          return super.getGridRowColors(obj);
-      }
-      
-      CR10009558
-      LookupObjectEventHandler. Action EVENT_FIND_OBJECT takes as 
-      parameter PARAMETER_REFERENCE which defines the type of the lookup object. 
-      In addition to modeled reference names, user-defined structural feature 
-      definitions are also supported.
-      
-      CR10009494
-      Show-always option for search forms. Option allows the user to show search
-      form automatically when a grid is displayed.
-      
-      CR10009511
-      Root objects per perspective. User settings should allow to configure 
-      the state (show|hide) of root objects per perspective.
-      
-      CR20019321
-      Title tag for labels. Create a title tag for labels if a tooltip for a 
-      field is customized.
-                                    
-2.    CHANGES  
-     
-2.0.  CHANGED FEATURES
-      none
-            
-2.1.  FIXED BUGS
-      none
-      
-2.2.  DEPRECATED FEATURES
-      none
-            
-2.3   REMOVED FEATURES
-      none
-
-==============================================================================
-Version 2.7.0                                                       2010-08-20
-==============================================================================
-
-1.    NEW FEATURES
-      none
-                                    
-2.    CHANGES  
-     
-2.0.  CHANGED FEATURES
-      none
-            
-2.1.  FIXED BUGS
-      
-	  CR1000947
-	  References / Lookups. Populating references with the GUI should be possible 
-	  by entering an XRI into the appropriate field
-      
-      CR10009463
-      Turning off unneeded locales leads to NA's. Grid column labels are set 
-      to NA if only one locale (locale[0]) is enabled in web.xml.
-      
-
 2.2.  DEPRECATED FEATURES
       none
             

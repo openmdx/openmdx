@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: DbObjectConfiguration.java,v 1.8 2011/11/26 01:34:56 hburger Exp $
  * Description: TypeConfigurationEntry class
- * Revision:    $Revision: 1.8 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/11/26 01:34:56 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -93,7 +90,7 @@ public class DbObjectConfiguration {
         String joinColumnEnd2, 
         String unitOfWorkProvider, 
         String removableReferenceIdPrefix, 
-        boolean aboslutePositioningDisabled, 
+        boolean absolutePositioningDisabled, 
         String referenceIdPattern
     ) throws ServiceException { 
 
@@ -140,7 +137,7 @@ public class DbObjectConfiguration {
         }                          
         this.unitOfWorkProvider = unitOfWorkProvider == null || unitOfWorkProvider.length() == 0 ? null : new Path(unitOfWorkProvider).lock();  
         this.removableReferenceIdPrefix = removableReferenceIdPrefix == null || removableReferenceIdPrefix.length() == 0 ? null : removableReferenceIdPrefix;
-        this.absolutePositioningDisabled = aboslutePositioningDisabled;
+        this.absolutePositioningDisabled = absolutePositioningDisabled;
         if(referenceIdPattern == null) {
             this.referenceIdPattern = null;
         } else {
@@ -309,6 +306,12 @@ public class DbObjectConfiguration {
     }
     
     //---------------------------------------------------------------------------
+    public void setAbsolutePositioningDisabled(
+    ) {
+        this.absolutePositioningDisabled = true;
+    }
+
+    //---------------------------------------------------------------------------
     public Map<String, Pattern> getReferenceIdPattern() {
         return this.referenceIdPattern;
     }
@@ -333,7 +336,7 @@ public class DbObjectConfiguration {
     private final String[] joinCriteria;
     private final Path unitOfWorkProvider;
     private final String removableReferenceIdPrefix;
-    private final boolean absolutePositioningDisabled;
+    private boolean absolutePositioningDisabled;
     private final Map<String, Pattern> referenceIdPattern;
 
     private static final String[] TO_STRING_FIELDS = {

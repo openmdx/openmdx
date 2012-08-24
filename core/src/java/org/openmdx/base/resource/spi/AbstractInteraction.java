@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: AbstractInteraction.java,v 1.5 2010/10/26 13:39:34 hburger Exp $
  * Description: Abstract Interaction 
- * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/10/26 13:39:34 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

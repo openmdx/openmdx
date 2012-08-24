@@ -75,14 +75,14 @@ public class ApplicationClientDecorator
 
     @Override
 	public String getDisplayName() {
-        return super.delegate.getDisplayName();
+        return getDelegate().getDisplayName();
     }
 
     /**
      * @return
      */
     public String getCallbackHandler() {
-        return super.delegate.getCallbackHandler();
+        return getDelegate().getCallbackHandler();
     }
 
     /**
@@ -90,14 +90,14 @@ public class ApplicationClientDecorator
      */
     @Override
 	public URL[] getModuleClassPath() {
-        return super.delegate.getModuleClassPath();
+        return getDelegate().getModuleClassPath();
     }
 
     /**
      * @return
      */
     public String getMainClass() {
-        return super.delegate.getMainClass();
+        return getDelegate().getMainClass();
     }
 
     /* (non-Javadoc)
@@ -107,7 +107,7 @@ public class ApplicationClientDecorator
         Context applicationClientContext, 
         Map<String,String> applicationClientEnvironment
     ) throws NamingException {
-        super.delegate.populate(
+        getDelegate().populate(
             applicationClientContext,
             applicationClientEnvironment
         );
@@ -120,7 +120,7 @@ public class ApplicationClientDecorator
         Context containerContext, 
         Reference reference
     ) throws NamingException {
-        super.delegate.deploy(containerContext, reference);
+        getDelegate().deploy(containerContext, reference);
     }
 
 }

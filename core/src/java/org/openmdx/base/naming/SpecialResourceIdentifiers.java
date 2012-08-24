@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: SpecialResourceIdentifiers.java,v 1.2 2010/06/25 17:09:28 hburger Exp $
  * Description: Special Resource Identifiers 
- * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/06/25 17:09:28 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

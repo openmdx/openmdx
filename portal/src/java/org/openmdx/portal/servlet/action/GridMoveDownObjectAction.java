@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: GridMoveDownObjectAction.java,v 1.1 2011/08/26 11:57:59 wfro Exp $
  * Description: GridEventHandler 
- * Revision:    $Revision: 1.1 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/08/26 11:57:59 $
  * ====================================================================
  *
  * This software is published under the BSD license

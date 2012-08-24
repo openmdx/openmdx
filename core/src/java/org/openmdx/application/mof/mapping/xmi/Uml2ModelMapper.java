@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: Uml2ModelMapper.java,v 1.7 2011/07/08 13:20:51 wfro Exp $
  * Description: Uml2ModelMapper
- * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/07/08 13:20:51 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

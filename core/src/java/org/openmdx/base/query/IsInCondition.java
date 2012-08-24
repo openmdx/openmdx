@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: IsInCondition.java,v 1.11 2010/06/01 09:00:06 hburger Exp $
  * Description: Is-In Condition
- * Revision:    $Revision: 1.11 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/06/01 09:00:06 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -112,7 +109,7 @@ public class IsInCondition extends Condition {
      */
     @Override
     public IsInCondition clone(
-    ) throws CloneNotSupportedException {
+    ){
         return new IsInCondition(
             this.getQuantifier(), 
             this.getFeature(), 

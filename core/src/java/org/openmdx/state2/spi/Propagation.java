@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: Propagation.java,v 1.1 2010/11/07 16:18:03 hburger Exp $
  * Description: Propagation 
- * Revision:    $Revision: 1.1 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/11/07 16:18:03 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

@@ -1,16 +1,13 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: SharedObjects.java,v 1.10 2011/11/25 14:14:57 hburger Exp $
  * Description: Shared Objects
- * Revision:    $Revision: 1.10 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/11/25 14:14:57 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2008-2010, OMEX AG, Switzerland
+ * Copyright (c) 2008-2012, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -235,6 +232,23 @@ public class SharedObjects {
          * @return the tenant information
          */
         Object getTenant(
+        );
+        
+        /**
+         * Set the bulk load flag
+         * 
+         * @param bulkLoad <code>true</code> in case of bulk load
+         */
+        void setBulkLoad(
+            boolean bulkLoad
+        );
+        
+        /**
+         * Retrieve the bulk load flag value
+         * 
+         * @return <code>true</code> in case of bulk load
+         */
+        boolean isBulkLoad(
         );
         
         /**

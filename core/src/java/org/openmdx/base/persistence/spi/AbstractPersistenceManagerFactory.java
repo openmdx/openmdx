@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: AbstractPersistenceManagerFactory.java,v 1.33 2011/05/16 09:34:06 hburger Exp $
  * Description: Abstract Manager Factory
- * Revision:    $Revision: 1.33 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/05/16 09:34:06 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -62,6 +59,7 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.WeakHashMap;
 
+import javax.jdo.Constants;
 import javax.jdo.FetchGroup;
 import javax.jdo.JDOFatalUserException;
 import javax.jdo.JDOUserException;
@@ -129,6 +127,9 @@ public abstract class AbstractPersistenceManagerFactory<P extends PersistenceMan
         );
         if(configuration.containsKey(ConfigurableProperty.TransactionType.qualifiedName())) this.setTransactionType(
             (String)configuration.get(ConfigurableProperty.TransactionType.qualifiedName())
+        );
+        if(configuration.containsKey(ConfigurableProperty.TransactionIsolationLevel.qualifiedName())) this.setTransactionIsolationLevel(
+            (String)configuration.get(ConfigurableProperty.TransactionIsolationLevel.qualifiedName())
         );
         if(configuration.containsKey(ConfigurableProperty.ConnectionDriverName.qualifiedName())) this.setConnectionDriverName(
             (String)configuration.get(ConfigurableProperty.ConnectionDriverName.qualifiedName())
@@ -640,7 +641,7 @@ public abstract class AbstractPersistenceManagerFactory<P extends PersistenceMan
      */
 //  @Override
     public String getTransactionIsolationLevel() {
-        return this.configurableProperties.get(ConfigurableProperty.TransactionIsolationLevel).toString();     
+        return (String) this.configurableProperties.get(ConfigurableProperty.TransactionIsolationLevel);     
     }
 
     /* (non-Javadoc)
@@ -978,6 +979,7 @@ public abstract class AbstractPersistenceManagerFactory<P extends PersistenceMan
 	    	((AbstractPersistenceManagerFactory<?>)persistenceManagerFactory).getContainerManaged();
     }
     
+    
     static {
         AbstractPersistenceManagerFactory.NON_CONFIGURABLE_PROPERTIES.setProperty(
             NonConfigurableProperty.VendorName.qualifiedName(), 
@@ -1003,6 +1005,17 @@ public abstract class AbstractPersistenceManagerFactory<P extends PersistenceMan
             ConfigurableProperty.NontransactionalRead.qualifiedName(),
             Boolean.TRUE.toString()
         );    
+        AbstractPersistenceManagerFactory.DEFAULT_CONFIGURATION.put(
+            ConfigurableProperty.TransactionIsolationLevel.qualifiedName(),
+            Constants.TX_REPEATABLE_READ
+        );    
+        for(ConfigurableProperty configurableProperty : ConfigurableProperty.values()) {
+            String qualifiedName = configurableProperty.qualifiedName();
+            Object value = System.getProperty(qualifiedName);
+            if(value != null) {
+                DEFAULT_CONFIGURATION.put(qualifiedName, value);
+            }
+        }
     }
 
 }

@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: SlicedDbObject2NonIndexed.java,v 1.2 2011/02/11 12:40:55 hburger Exp $
  * Description: Slicde DB Object 2 Without Index
- * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/02/11 12:40:55 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

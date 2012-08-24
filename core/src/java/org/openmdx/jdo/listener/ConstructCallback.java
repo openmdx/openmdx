@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: ConstructCallback.java,v 1.1 2009/01/23 13:55:47 hburger Exp $
  * Description: Construct Callback 
- * Revision:    $Revision: 1.1 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/23 13:55:47 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

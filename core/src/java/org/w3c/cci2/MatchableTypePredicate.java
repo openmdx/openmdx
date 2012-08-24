@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: MatchableTypePredicate.java,v 1.2 2008/05/06 09:24:26 hburger Exp $
  * Description: Matchable Type Predicate
- * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/05/06 09:24:26 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: ExportTarget.java,v 1.6 2011/07/01 16:16:42 hburger Exp $
  * Description: Export Target 
- * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/07/01 16:16:42 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

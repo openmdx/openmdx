@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Security, http://www.openmdx.org/
- * Name:        $Id: URLConfiguration.java,v 1.3 2010/06/04 22:41:44 hburger Exp $
  * Description: URL Configuration
- * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/06/04 22:41:44 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: View.java,v 1.71 2011/08/11 12:04:17 wfro Exp $
  * Description: View 
- * Revision:    $Revision: 1.71 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/08/11 12:04:17 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -76,11 +73,12 @@ import org.openmdx.portal.servlet.action.SaveSettingsAction;
 import org.openmdx.portal.servlet.action.SetPanelStateAction;
 import org.openmdx.portal.servlet.control.Control;
 
-//---------------------------------------------------------------------------
-public abstract class View
-    implements Serializable {
+/**
+ * View
+ *
+ */
+public abstract class View implements Serializable {
   
-    //-------------------------------------------------------------------------
     /**
      * Creates view.
      * 
@@ -89,43 +87,69 @@ public abstract class View
      *        embedded in another view. null if the view is a not embedded. The
      *        containerElementId is used by controls to create unique tag ids. 
      * @param object object to be rendered
-     * @param application application context
-     * @param controlFactory factory used to created new controls
+     * @param navigationTarget navigation anchors are generated with specified target.
+     * @param isReadOnly if specified overrides changeable property of controls.
+     * @param app application context
      */
     public View(
         String id,
         String containerElementId,
         Object object,
-        ApplicationContext application
+        String resourcePathPrefix,
+        String navigationTarget,
+        Boolean isReadOnly,
+        ApplicationContext app
     ) {
         this.id = id;
         this.containerElementId = containerElementId;
         this.object = object;
-        this.app = application;
+        this.resourcePathPrefix = resourcePathPrefix;
+        this.navigationTarget = navigationTarget;
+        this.isReadOnly = isReadOnly;
+        this.app = app;
     }
 
-    //-------------------------------------------------------------------------
+    /**
+     * Get view type.
+     * 
+     * @return
+     */
     public abstract String getType();
   
-    //-------------------------------------------------------------------------
+    /**
+     * Create a unique request id for this view.
+     * 
+     */
     public void createRequestId(
     ) {
         this.requestId = UUIDConversion.toUID(UUIDs.newUUID());
     }
   
-    //-------------------------------------------------------------------------
+    /**
+     * Get unique request id.
+     * 
+     * @return
+     */
     public String getRequestId(
     ) {
         return this.requestId;
     }
   
-    //-------------------------------------------------------------------------
+    /**
+     * Get application context.
+     * 
+     * @return
+     */
     public ApplicationContext getApplicationContext(
     ) {
         return this.app;
     }
   
-    //-------------------------------------------------------------------------
+    /**
+     * Get logoff action.
+     * 
+     * @return
+     */
     public Action getLogoffAction(
     ) {
         return new Action(
@@ -136,7 +160,11 @@ public abstract class View
         );
     }
 
-    //-------------------------------------------------------------------------
+    /**
+     * Get save settings action.
+     * 
+     * @return
+     */
     public Action getSaveSettingsAction(
     ) {
         return new Action(
@@ -147,35 +175,76 @@ public abstract class View
         );
     }
 
-    //-------------------------------------------------------------------------
+    /**
+     * Get resource path prefix.
+     * 
+     * @return
+     */
+    public String getResourcePathPrefix(
+    ) {
+    	return this.resourcePathPrefix;
+    }
+    
+    /**
+     * The navigation target is rendered for anchor tags generated for object navigation.
+     *   
+     * @return navigation target. Values are "_none", "_blank", "_parent", "_self", "_top". 
+	 */
+	public String getNavigationTarget(
+	) {
+	    return this.navigationTarget;
+	}
+
+	/**
+	 * If specified, overrides changeable property of controls.
+	 * 
+	 * @return true if view is read-only. If null, changeable property of control is applied.
+	 */
+	public Boolean isReadOnly(
+	) {
+		return this.isReadOnly;
+	}
+	
+    /**
+     * Get set role actions.
+     * 
+     * @return
+     */
     public Action[] getSetRoleActions(
     ) {
     	List<String> userRoles = this.app.getUserRoles();
     	Map<String,Action> selectRoleActions = new TreeMap<String,Action>();
     	for(String roleName: userRoles) {
-    		Action action = new Action(
+    		Action template = new Action(
     			Action.EVENT_SET_ROLE,
     			new Action.Parameter[]{
     				new Action.Parameter(Action.PARAMETER_NAME, roleName)
     			},
-    			this.app.getPortalExtension().getTitle(
-        			Action.EVENT_SET_ROLE,
-        			roleName,
-        			this.app
-        		),
+    			roleName,
         		this.app.getTexts().getSelectUserRoleText(),
     			WebKeys.ICON_ROLE,
     			true
-    		);
+    		);    		
     		selectRoleActions.put(
-    			action.getTitle(),
-    			action
+    			template.getTitle(),
+    			new Action(
+    				template.getEvent(),
+    				template.getParameters(),
+    				this.app.getPortalExtension().getTitle(this.getObject(), template, roleName, this.app),
+    				template.getToolTip(),
+    				template.getIconKey(),
+    				template.isEnabled()    				
+    			)
     		);
     	}
     	return selectRoleActions.values().toArray(new Action[selectRoleActions.size()]);
     }
 
-    //-------------------------------------------------------------------------
+    /**
+     * Get quick access actions.
+     * 
+     * @return
+     */
     public Action[] getQuickAccessActions(
     ) {
         QuickAccessor[] quickAccessors = this.getApplicationContext().getQuickAccessors();
@@ -186,26 +255,44 @@ public abstract class View
         return actions;
     }
   
-    //-------------------------------------------------------------------------
+    /**
+     * Get macros.
+     * 
+     * @return
+     */
     public Object[] getMacro(
     ) {
         return this.macro;
     }
     
-    //-------------------------------------------------------------------------
+    /**
+     * Set macros.
+     * 
+     * @param newValue
+     */
     public void setMacro(
         Object[] newValue
     ) {
         this.macro = newValue;
     }
     
-    //-------------------------------------------------------------------------
+    /**
+     * Get select root object actions.
+     * 
+     * @return
+     */
     public Action[] getSelectRootObjectActions(
     ) {
         return this.getApplicationContext().getRootObjectActions();
     }
     
-    //-------------------------------------------------------------------------  
+    /**
+     * Get set panel state action.
+     * 
+     * @param panelName
+     * @param panelState
+     * @return
+     */
     public Action getSetPanelStateAction(
         String panelName,
         int panelState
@@ -221,14 +308,18 @@ public abstract class View
         );      
     }
   
-    //-------------------------------------------------------------------------  
+    /**
+     * Get state for given panel.
+     * 
+     * @param panelName
+     * @return
+     */
     public int getPanelState(
         String panelName
     ) {
         return this.getApplicationContext().getPanelState(panelName);
     }
   
-    //-------------------------------------------------------------------------  
     /**
      * Each view has an id and a childId. Normally all views of the same
      * 'layer' have the same id, i.e. a view which creates a 'next' view
@@ -238,14 +329,17 @@ public abstract class View
      * A JSP wants to create a ShowObject dialog in a new window. This
      * can be done by creating a new child id and then issuing an event
      * (e.g. EVENT_FIND_OBJECT) which creates a view with the new child id.
+     * 
+     * @return
      */
     public String getId(
     ) {
         return this.id;
     }
   
-    //-------------------------------------------------------------------------  
     /**
+     * Get id of container element.
+     * 
      * @return id of the container element if the view is embedded, null
      * otherwise
      */
@@ -254,7 +348,11 @@ public abstract class View
         return this.containerElementId;
     }
     
-    //-------------------------------------------------------------------------
+    /**
+     * Handle can not commit exception.
+     * 
+     * @param e
+     */
     public void handleCanNotCommitException(
         BasicException e
     ) {
@@ -285,7 +383,14 @@ public abstract class View
         }
     }
   
-    //-------------------------------------------------------------------------
+    /**
+     * Refresh view.
+     * 
+     * @param refreshData
+     * @param closePm
+     * @return
+     * @throws ServiceException
+     */
     public PersistenceManager refresh(
         boolean refreshData,
         boolean closePm
@@ -293,7 +398,14 @@ public abstract class View
     	return null;
     }
   
-    //-------------------------------------------------------------------------
+    /**
+     * Create control.
+     * 
+     * @param id
+     * @param controlClass
+     * @return
+     * @throws ServiceException
+     */
     public Control createControl(
         String id,
         Class controlClass
@@ -304,7 +416,15 @@ public abstract class View
         );
     }
   
-    //-------------------------------------------------------------------------
+    /**
+     * Create control.
+     * 
+     * @param id
+     * @param controlClass
+     * @param parameter
+     * @return
+     * @throws ServiceException
+     */
     public Control createControl(
         String id,
         Class controlClass,
@@ -317,13 +437,22 @@ public abstract class View
        );
     } 
   
-    //-------------------------------------------------------------------------
+    /**
+     * Get view object.
+     * 
+     * @return
+     */
     public Object getObject(
     ) {
         return this.object;
     }
     
-    //-------------------------------------------------------------------------
+    /**
+     * Get request id in given format.
+     * 
+     * @param requestIdFormat
+     * @return
+     */
     protected String getRequestId(
         short requestIdFormat
     ) {
@@ -344,7 +473,12 @@ public abstract class View
         return requestId;
     }
     
-    //-------------------------------------------------------------------------
+    /**
+     * Get href for given action.
+     * 
+     * @param action
+     * @return
+     */
     public String getEvalHRef(
         Action action
     ) {
@@ -354,7 +488,13 @@ public abstract class View
         );
     }
     
-    //-------------------------------------------------------------------------
+    /**
+     * Get href for given action.
+     * 
+     * @param action
+     * @param includeRequestId
+     * @return
+     */
     public String getEvalHRef(
         Action action,
         boolean includeRequestId
@@ -367,7 +507,13 @@ public abstract class View
         );
     }
     
-    //-------------------------------------------------------------------------
+    /**
+     * Get href for given action.
+     * 
+     * @param action
+     * @param requestIdFormat
+     * @return
+     */
     public String getEvalHRef(
         Action action,
         short requestIdFormat
@@ -377,7 +523,12 @@ public abstract class View
         );
     }
         
-    //-------------------------------------------------------------------------
+    /**
+     * Get href for given action.
+     * 
+     * @param action
+     * @return
+     */
     public String getEncodedHRef(
         Action action
     ) {
@@ -387,7 +538,13 @@ public abstract class View
         );
     }
     
-    //-------------------------------------------------------------------------
+    /**
+     * Get href for given action.
+     * 
+     * @param action
+     * @param includeRequestId
+     * @return
+     */
     public String getEncodedHRef(
         Action action,
         boolean includeRequestId
@@ -400,7 +557,13 @@ public abstract class View
        );
     }
     
-    //-------------------------------------------------------------------------
+    /**
+     * Get href for given action.
+     * 
+     * @param action
+     * @param requestIdFormat
+     * @return
+     */
     public String getEncodedHRef(
         Action action,
         short requestIdFormat
@@ -410,7 +573,13 @@ public abstract class View
         );
     }
         
-    //-------------------------------------------------------------------------
+    /**
+     * Get find object action.
+     * 
+     * @param feature
+     * @param id
+     * @return
+     */
     public Action getFindObjectAction(
         String feature,
         String id
@@ -422,7 +591,7 @@ public abstract class View
     }
 
     //-------------------------------------------------------------------------
-    // Variables
+    // Members
     //-------------------------------------------------------------------------
     public static final String VIEW_EDIT_OBJECT = "EditObject";
     public static final String VIEW_SHOW_OBJECT = "ShowObject";
@@ -438,7 +607,9 @@ public abstract class View
     protected final String id;
     protected final String containerElementId;
     protected Object object;
-  
+    protected String resourcePathPrefix = null;
+    protected String navigationTarget = null;
+    protected Boolean isReadOnly = null;
     protected String requestId = null;
     protected Object[] macro = null;
     

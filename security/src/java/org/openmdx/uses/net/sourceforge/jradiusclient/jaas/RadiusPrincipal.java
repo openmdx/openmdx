@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: RadiusPrincipal.java,v 1.3 2010/06/04 22:41:44 hburger Exp $
  * Description: Java Radius Client Derivate
- * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/06/04 22:41:44 $
  * ====================================================================
  *
  * Copyright (C) 2004  OMEX AG

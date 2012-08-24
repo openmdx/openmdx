@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Identity.java,v 1.5 2007/12/12 18:14:38 hburger Exp $
  * Description: Object Identity 
- * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/12/12 18:14:38 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

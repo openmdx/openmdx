@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: FilterLoader.java,v 1.36 2011/09/16 09:01:41 wfro Exp $
  * Description: TextsLoader class
- * Revision:    $Revision: 1.36 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/09/16 09:01:41 $
  * ====================================================================
  *
  * This software is published under the BSD license

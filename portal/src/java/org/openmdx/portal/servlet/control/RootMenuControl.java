@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: RootMenuControl.java,v 1.31 2011/07/07 22:35:42 wfro Exp $
  * Description: RootMenuControl
- * Revision:    $Revision: 1.31 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/07/07 22:35:42 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -61,12 +58,12 @@ import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.naming.Path;
 import org.openmdx.portal.servlet.Action;
 import org.openmdx.portal.servlet.ApplicationContext;
+import org.openmdx.portal.servlet.Texts_1_0;
 import org.openmdx.portal.servlet.UserSettings;
 import org.openmdx.portal.servlet.ViewPort;
 import org.openmdx.portal.servlet.WebKeys;
 import org.openmdx.portal.servlet.action.SelectAndNewObjectAction;
 import org.openmdx.portal.servlet.action.SelectObjectAction;
-import org.openmdx.portal.servlet.texts.Texts_1_0;
 import org.openmdx.portal.servlet.view.ObjectView;
 
 public class RootMenuControl
@@ -133,7 +130,7 @@ public class RootMenuControl
         int topNavigationShowMax = 6;
         boolean topNavigationShowSublevel = false; 
         try {
-            topNavigationShowMax = Integer.valueOf(app.getSettings().getProperty(UserSettings.TOP_NAVIGATION_SHOW_MAX, "7")).intValue();
+            topNavigationShowMax = Integer.valueOf(app.getSettings().getProperty(UserSettings.TOP_NAVIGATION_SHOW_MAX.getName(), "7")).intValue();
             // Never show sub levels. Use Dashlets instead
             // topNavigationShowSublevel = Boolean.valueOf(app.getSettings().getProperty(UserSettings.TOP_NAVIGATION_SHOW_SUBLEVEL, "true")).booleanValue();
         }

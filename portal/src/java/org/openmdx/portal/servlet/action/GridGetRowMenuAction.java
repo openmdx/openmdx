@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: GridGetRowMenuAction.java,v 1.2 2011/07/07 22:35:35 wfro Exp $
  * Description: GridEventHandler 
- * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/07/07 22:35:35 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -57,7 +54,6 @@ package org.openmdx.portal.servlet.action;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -81,6 +77,10 @@ import org.openmdx.portal.servlet.view.ReferencePane;
 import org.openmdx.portal.servlet.view.ShowObjectView;
 import org.openmdx.portal.servlet.view.ViewMode;
 
+/**
+ * GridGetRowMenuAction
+ *
+ */
 public class GridGetRowMenuAction extends BoundAction {
 
     public final static int EVENT_ID = 44;
@@ -110,17 +110,19 @@ public class GridGetRowMenuAction extends BoundAction {
                 String rowId = Action.getParameter(parameter, Action.PARAMETER_ROW_ID);
                 if(
                     (targetRowXri != null) && (targetRowXri.length() > 0) &&
-                    (rowId != null) && (rowId.length() > 0)
+                    (rowId != null) && !rowId.isEmpty()
                 ) {
-                    String gridRowDetailsId = "gridRow" + rowId + "-details";
+                    String gridRowDetailsId = rowId + "_details";
                     ShowObjectView selectedObjectView = new ShowObjectView(
                         view.getId(),
                         gridRowDetailsId,
                         new Path(targetRowXri),
                         app,
                         view.getHistoryActions(),
-                        null,
-                        new HashMap()
+                        null, // lookupType
+                        view.getResourcePathPrefix(),
+                        view.getNavigationTarget(),
+                        view.isReadOnly()
                     );                            
                     selectedObjectView.createRequestId();
                     showViewsCache.addView(
@@ -130,43 +132,40 @@ public class GridGetRowMenuAction extends BoundAction {
                     HtmlEncoder_1_0 htmlEncoder = app.getHtmlEncoder();
                     p.write("<span class=\"gridMenu\" onclick=\"try{this.parentNode.parentNode.onclick();}catch(e){};\">");
                     p.write("  <ul id=\"nav\" class=\"nav\">");
-                    p.write("    <li><a href=\"#\" onclick=\"javascript:return false;\"><img id=\"gridRow", rowId, "-details-opener\" border=\"0\" height=\"16\" width=\"15\" align=\"bottom\" alt=\"\" src=\"", p.getResourcePath("images/"), WebKeys.ICON_MENU_DOWN, "\" /></a>");
+                    p.write("    <li><a href=\"#\" onclick=\"javascript:return false;\"><img id=\"", rowId, "_details-opener\" border=\"0\" height=\"16\" width=\"15\" align=\"bottom\" alt=\"\" src=\"", p.getResourcePath("images/"), WebKeys.ICON_MENU_DOWN, "\" /></a>");
                     p.write("      <ul onclick=\"this.style.left='-999em';\" onmouseout=\"this.style.left='';\">");
                     // 000 - Show
                     Action getAttributesAction = selectedObjectView.getObjectReference().getObjectGetAttributesAction(); 
-                    p.write("        <li><a onclick=\"javascript:$('", gridRowDetailsId, "').parentNode.className+=' wait';$('", gridRowDetailsId, "').innerHTML='';new Ajax.Updater('", gridRowDetailsId, "', ", selectedObjectView.getEvalHRef(getAttributesAction), ", {asynchronous:true, evalScripts: true, onComplete: function(){$('", gridRowDetailsId, "').parentNode.className='';}});$('gridRow", rowId, "-details-closer').style.display='block';return false;\" href=\"#\">000 - ", htmlEncoder.encode(getAttributesAction.getTitle(), false), "</a></li>");
+                    p.write("        <li><a onclick=\"javascript:$('", gridRowDetailsId, "').parentNode.className+=' wait';$('", gridRowDetailsId, "').innerHTML='';new Ajax.Updater('", gridRowDetailsId, "', '", p.getResourcePathPrefix(), "'+", selectedObjectView.getEvalHRef(getAttributesAction), ", {asynchronous:true, evalScripts: true, onComplete: function(){$('", gridRowDetailsId, "').parentNode.className='';}});$('", rowId, "_details-closer').style.display='block';return false;\" href=\"#\">000 - ", htmlEncoder.encode(getAttributesAction.getTitle(), false), "</a></li>");
                     // 001 - Edit
                     Action editObjectAction = selectedObjectView.getObjectReference().getEditObjectAction(ViewMode.EMBEDDED);
-                    if(editObjectAction.isEnabled()) {
-                        p.write("        <li><a onclick=\"javascript:$('", gridRowDetailsId, "').parentNode.className+=' wait';$('", gridRowDetailsId, "').innerHTML='';new Ajax.Updater('", gridRowDetailsId, "', ", selectedObjectView.getEvalHRef(editObjectAction), ", {asynchronous:true, evalScripts: true, onComplete: function(){$('", gridRowDetailsId, "').parentNode.className='';}});$('gridRow", rowId, "-details-closer').style.display='block';return false;\" href=\"#\">001 - ", htmlEncoder.encode(editObjectAction.getTitle(), false), "</a></li>");                            
+                    if(
+                    	editObjectAction.isEnabled() && 
+                    	!Boolean.TRUE.equals(view.isReadOnly())
+                    ) {
+                        p.write("        <li><a onclick=\"javascript:$('", gridRowDetailsId, "').parentNode.className+=' wait';$('", gridRowDetailsId, "').innerHTML='';new Ajax.Updater('", gridRowDetailsId, "', '", p.getResourcePathPrefix(), "'+", selectedObjectView.getEvalHRef(editObjectAction), ", {asynchronous:true, evalScripts: true, onComplete: function(){$('", gridRowDetailsId, "').parentNode.className='';}});$('", rowId, "_details-closer').style.display='block';return false;\" href=\"#\">001 - ", htmlEncoder.encode(editObjectAction.getTitle(), false), "</a></li>");                            
                     }
                     else {
                         p.write("        <li><a href=\"#\"><span>001 - ", htmlEncoder.encode(app.getTexts().getEditTitle(), false), "</span></a></li>");                                
                     }
                     ReferencePane[] referencePanes = selectedObjectView.getReferencePane();
                     List secondLevelMenuEntryActions = new ArrayList();
-                    for(
-                        int i = 0; 
-                        i < referencePanes.length; 
-                        i++
-                    ) {
+                    for(int i = 0; i < referencePanes.length; i++) {
                         ReferencePane referencePane = referencePanes[i];
-                        Action[] selectReferenceActions = referencePane.getSelectReferenceAction();
-                        if(selectReferenceActions.length > 0) {
-                            for(
-                                int j = 0;
-                                j < selectReferenceActions.length;
-                                j++
-                            ) {                                        
-                                int detailTabIndex = 100*referencePane.getReferencePaneControl().getPaneIndex() + j;
-                                String title = selectReferenceActions[j].getTitle();
+                        List<Action> selectReferenceActions = referencePane.getSelectReferenceActions();
+                        if(selectReferenceActions.isEmpty()) {
+                            for(int j = 0; j < selectReferenceActions.size(); j++) {
+                            	Action selectReferenceAction = selectReferenceActions.get(j);
+                            	int paneIndex = referencePane.getReferencePaneControl().getPaneIndex();
+        		                int tabIndex = 100 * paneIndex + j;
+        		                String tabId = Integer.toString(tabIndex);          		                
+                                String title = selectReferenceAction.getTitle();
                                 if(title.startsWith(WebKeys.TAB_GROUPING_CHARACTER) || (title.length() < 2)) {
                                     secondLevelMenuEntryActions.add(
-                                        new Object[]{new Integer(detailTabIndex), selectReferenceActions[j]}
+                                        new Object[]{tabId, selectReferenceAction}
                                     );
-                                }
-                                else {
-                                    p.write("        <li><a onclick=\"javascript:$('", gridRowDetailsId, "').parentNode.className+=' wait';$('", gridRowDetailsId, "').innerHTML='';new Ajax.Updater('", gridRowDetailsId, "', ", selectedObjectView.getEvalHRef(selectReferenceActions[j]), ", {asynchronous:true, evalScripts: true, onComplete: function(){$('", gridRowDetailsId, "').parentNode.className='';try{makeZebraTable('gridTable", gridRowDetailsId, "-", Integer.toString(detailTabIndex), "',1);}catch(e){};}});$('gridRow", rowId, "-details-closer').style.display='block';return false;\" href=\"#\">", Integer.toString(i+1), (j < 10 ? "0" + Integer.toString(j) : Integer.toString(j)), " - ", htmlEncoder.encode(title, false), "</a></li>");
+                                } else {
+                                    p.write("        <li><a onclick=\"javascript:$('", gridRowDetailsId, "').parentNode.className+=' wait';$('", gridRowDetailsId, "').innerHTML='';new Ajax.Updater('", gridRowDetailsId, "', '", p.getResourcePathPrefix(), "'+", selectedObjectView.getEvalHRef(selectReferenceAction), ", {asynchronous:true, evalScripts: true, onComplete: function(){$('", gridRowDetailsId, "').parentNode.className='';try{makeZebraTable('", gridRowDetailsId, "_", tabId, "_gridTable',1);}catch(e){};}});$('", rowId, "_details-closer').style.display='block';return false;\" href=\"#\">", Integer.toString(i+1), (j < 10 ? "0" + Integer.toString(j) : Integer.toString(j)), " - ", htmlEncoder.encode(title, false), "</a></li>");
                                 }
                             }
                         }
@@ -177,13 +176,11 @@ public class GridGetRowMenuAction extends BoundAction {
                         int ii = 0;
                         for(Iterator i = secondLevelMenuEntryActions.iterator(); i.hasNext(); ii++) {
                             Object[] entry = (Object[])i.next();
-                            int detailTabIndex = ((Number)entry[0]).intValue();
+                            String tabId = (String)entry[0];
                             Action selectReferenceAction = (Action)entry[1];
                             String title = selectReferenceAction.getTitle();
-                            title = title.startsWith(WebKeys.TAB_GROUPING_CHARACTER)
-                                ? title.substring(1)
-                                : title;
-                            p.write("        <li><a onclick=\"javascript:$('", gridRowDetailsId, "').parentNode.className+=' wait';$('", gridRowDetailsId, "').innerHTML='';new Ajax.Updater('", gridRowDetailsId, "', ", selectedObjectView.getEvalHRef(selectReferenceAction), ", {asynchronous:true, evalScripts: true, onComplete: function(){$('", gridRowDetailsId, "').parentNode.className='';try{makeZebraTable('gridTable", gridRowDetailsId, "-", Integer.toString(detailTabIndex), "',1);}catch(e){};}});$('gridRow", rowId, "-details-closer').style.display='block';return false;\" href=\"#\">", Integer.toString(100*(referencePanes.length+1)+ii), " - ", htmlEncoder.encode(title, false), "</a></li>");
+                            title = title.startsWith(WebKeys.TAB_GROUPING_CHARACTER) ? title.substring(1) : title;
+                            p.write("        <li><a onclick=\"javascript:$('", gridRowDetailsId, "').parentNode.className+=' wait';$('", gridRowDetailsId, "').innerHTML='';new Ajax.Updater('", gridRowDetailsId, "', '", p.getResourcePathPrefix(), "'+", selectedObjectView.getEvalHRef(selectReferenceAction), ", {asynchronous:true, evalScripts: true, onComplete: function(){$('", gridRowDetailsId, "').parentNode.className='';try{makeZebraTable('", gridRowDetailsId, "_", tabId, "_gridTable',1);}catch(e){};}});$('", rowId, "_details-closer').style.display='block';return false;\" href=\"#\">", Integer.toString(100*(referencePanes.length+1)+ii), " - ", htmlEncoder.encode(title, false), "</a></li>");
                         }
                         p.write("          </ul>");
                         p.write("        </li>");
@@ -193,8 +190,8 @@ public class GridGetRowMenuAction extends BoundAction {
                     p.write("  </ul>");
                     p.write("  <script language=\"javascript\" type=\"text/javascript\">");
                     p.write("    try{");
-                    p.write("      sfinit($('gridRow", rowId, "-details-opener').parentNode.parentNode.parentNode);");
-                    p.write("      $('gridRow", rowId, "-details-opener').click();");
+                    p.write("      sfinit($('", rowId, "_details-opener').parentNode.parentNode.parentNode);");
+                    p.write("      $('", rowId, "_details-opener').click();");
                     p.write("    } catch(e){}");
                     p.write("  </script>");                    
                     p.write("</span>");

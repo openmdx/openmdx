@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: FlushOrder.java,v 1.3 2011/01/21 10:05:24 hburger Exp $
  * Description: Flush Order 
- * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/01/21 10:05:24 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: Filters.java,v 1.18 2011/11/28 09:24:47 wfro Exp $
  * Description: Filters
- * Revision:    $Revision: 1.18 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/11/28 09:24:47 $
  * ====================================================================
  *
  * This software is published under the BSD license

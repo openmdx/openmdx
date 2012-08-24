@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: ImplementationMapping_1.java,v 1.12 2011/11/26 01:34:56 hburger Exp $
  * Description: Implementation Mapper 
- * Revision:    $Revision: 1.12 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/11/26 01:34:56 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: GridSetRowsOnInitAction.java,v 1.1 2011/04/15 12:03:06 wfro Exp $
  * Description: GridEventHandler 
- * Revision:    $Revision: 1.1 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/04/15 12:03:06 $
  * ====================================================================
  *
  * This software is published under the BSD license

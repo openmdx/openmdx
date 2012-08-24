@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: UUIDs.java,v 1.9 2009/11/05 17:44:19 hburger Exp $
  * Description: UUIDs
- * Revision:    $Revision: 1.9 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/11/05 17:44:19 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: GlobalTokens.java,v 1.1 2010/02/27 06:12:20 hburger Exp $
  * Description: Global Tokens
- * Revision:    $Revision: 1.1 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/02/27 06:12:20 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

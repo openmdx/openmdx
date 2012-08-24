@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: GetObjectAction.java,v 1.2 2011/05/06 13:54:08 wfro Exp $
  * Description: ShowObjectView 
- * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/05/06 13:54:08 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -57,6 +54,7 @@ package org.openmdx.portal.servlet.action;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.jdo.PersistenceManager;
@@ -103,7 +101,7 @@ public abstract class GetObjectAction extends BoundAction {
 		ShowObjectView currentView = (ShowObjectView)view;
     	ObjectView nextView = currentView;
         ViewPort.Type nextViewPortType = null;
-        ApplicationContext application = currentView.getApplicationContext();
+        ApplicationContext app = currentView.getApplicationContext();
         // parameter is of format
         // reference=n][;forReference=name][;forClass=name][;refMofId=id]
         String objectXri = Action.getParameter(parameter, Action.PARAMETER_OBJECTXRI);
@@ -127,22 +125,23 @@ public abstract class GetObjectAction extends BoundAction {
             }
             // EVENT_SELECT_AND_EDIT_OBJECT
             else if(this.isGetAndEdit()) {
-            	PersistenceManager pm = application.getNewPmData();
+            	PersistenceManager pm = app.getNewPmData();
                 RefObject_1_0 object = (RefObject_1_0)pm.getObjectById(objectIdentity);                    
                 nextView = new EditObjectView(
                     currentView.getId(),
                     null,
                     object.refGetPath(),
-                    application,
+                    app,
                     historyActions,
                     currentView.getLookupType(),
-                    currentView.getRestrictToElements(),
+                    null, // do not propagate resourcePathPrefix
+                    null, // do not propagate navigationTarget
                     ViewMode.STANDARD
                 );
             }
             // EVENT_SELECT_AND_NEW_OBJECT
             else if(this.isGetAndNew() && (forClass.length() > 0) && (forReference.length() > 0)) {
-            	PersistenceManager pm = application.getNewPmData();
+            	PersistenceManager pm = app.getNewPmData();
                 RefObject_1_0 parent = (RefObject_1_0)pm.getObjectById(objectIdentity);
                 RefObject_1_0 newObject = (RefObject_1_0)parent.refOutermostPackage().refClass(forClass).refCreateInstance(null);
                 nextView = new EditObjectView(
@@ -150,12 +149,13 @@ public abstract class GetObjectAction extends BoundAction {
                     null,
                     newObject,
                     null,
-                    application,
+                    app,
                     historyActions,
                     currentView.getLookupType(),
-                    currentView.getRestrictToElements(),
                     parent,
                     forReference,
+                    null, // do not propagate resourcePathPrefix
+                    null, // do not propagate navigationTarget
                     ViewMode.STANDARD
                 );
             }
@@ -164,10 +164,12 @@ public abstract class GetObjectAction extends BoundAction {
                     currentView.getId(),
                     null,
                     objectIdentity,
-                    application,
-                    historyActions,
+                    app,
+                    historyActions,                    
                     currentView.getLookupType(),
-                    currentView.getRestrictToElements()
+                    null, // do not propagate resourcePathPrefix
+                    null, // do not propagate navigationTarget
+                    null // isReadOnly
                 );
                 // Show same grid in refreshed object
                 if(this.isReload()) {
@@ -194,9 +196,10 @@ public abstract class GetObjectAction extends BoundAction {
                 // reference name)
                 else if (referenceName.length() > 0) {
                     ShowObjectView showNextView = (ShowObjectView) nextView;
-                    for (int i = 0; i < showNextView.getReferencePane().length; i++) {
-                        for (int j = 0; j < showNextView.getReferencePane()[i].getSelectReferenceAction().length; j++) {
-                            Action selectReferenceAction = showNextView.getReferencePane()[i].getSelectReferenceAction()[j];
+                    for(int i = 0; i < showNextView.getReferencePane().length; i++) {
+                    	List<Action> selectReferenceActions = showNextView.getReferencePane()[i].getSelectReferenceActions();
+                        for(int j = 0; j < selectReferenceActions.size(); j++) {
+                            Action selectReferenceAction = selectReferenceActions.get(j);
                             if (selectReferenceAction.getParameter(Action.PARAMETER_REFERENCE_NAME).endsWith(referenceName)) {
                             	showNextView.selectReferencePane(i);
                             	showNextView.getReferencePane()[i].selectReference(j);
@@ -210,8 +213,8 @@ public abstract class GetObjectAction extends BoundAction {
         catch (Exception e) {
             ServiceException e0 = new ServiceException(e);
             SysLog.warning(e0.getMessage(), e0.getCause());
-            application.addErrorMessage(
-                application.getTexts().getErrorTextCannotSelectObject(), new String[] { objectXri, e.getMessage() }
+            app.addErrorMessage(
+                app.getTexts().getErrorTextCannotSelectObject(), new String[] { objectXri, e.getMessage() }
             );
             nextView = currentView;
         }

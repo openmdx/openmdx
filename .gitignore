@@ -1,10 +1,11 @@
 ant/build/
 core/build/
 distribution/
-source-archive/
-/jre-1.6/
+jre-1.5/
+jre-1.6/
 portal/build/
 security/build/
+source-archive/
 test-core/build/
 tomcat/build/
 

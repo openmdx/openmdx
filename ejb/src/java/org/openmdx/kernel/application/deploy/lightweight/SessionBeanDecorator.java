@@ -66,27 +66,27 @@ public class SessionBeanDecorator
   }
 
   public String getHome() {
-    return super.delegate.getHome();
+    return getDelegate().getHome();
   }
 
   public String getRemote() {
-    return super.delegate.getRemote();
+    return getDelegate().getRemote();
   }
 
   public String getLocalHome() {
-    return super.delegate.getLocalHome();
+    return getDelegate().getLocalHome();
   }
 
   public String getLocal() {
-    return super.delegate.getLocal();
+    return getDelegate().getLocal();
   }
 
   public String getSessionType() {
-    return super.delegate.getSessionType();
+    return getDelegate().getSessionType();
   }
 
   public String getTransactionType() {
-    return super.delegate.getTransactionType();
+    return getDelegate().getTransactionType();
   }
 
   public String getHomeClass(
@@ -113,12 +113,12 @@ public Report validate(
     if (!this.isValidated())
     {
       Report report = super.validate();
-      if ("Stateful".equals(super.delegate.getSessionType()))
+      if ("Stateful".equals(getDelegate().getSessionType()))
       {
         report.addError("stateful session beans are not supported at the moment");
       }
 
-      this.homeClass = super.delegate.getHomeClass();
+      this.homeClass = getDelegate().getHomeClass();
       if (this.homeClass == null && this.getHome() != null)
       {
         // derive home class from home if possible
@@ -133,7 +133,7 @@ public Report validate(
         }
       }
 
-      this.localHomeClass = super.delegate.getLocalHomeClass();
+      this.localHomeClass = getDelegate().getLocalHomeClass();
       if (this.localHomeClass != null) report.addInfo("Deprecated attribute 'LocalHomeClass' ignored");
 
       return report;

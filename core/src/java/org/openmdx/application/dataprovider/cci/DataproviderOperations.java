@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: DataproviderOperations.java,v 1.3 2009/12/13 23:46:06 wfro Exp $
  * Description: Generated constants for DataproviderOperations
- * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/12/13 23:46:06 $
  * ====================================================================
  *
  * This software is published under the BSD license

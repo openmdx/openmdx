@@ -1,15 +1,12 @@
 /*
  * ==================================================================== 
- * Name: $Id: RefObject_1.java,v 1.150 2011/11/25 14:51:58 hburger Exp $ 
  * Description: RefObject_1 class 
- * Revision: $Revision: 1.150 $ 
  * Owner: OMEX AG, Switzerland, http://www.omex.ch 
- * Date: $Date: 2011/11/25 14:51:58 $
  * ====================================================================
  * 
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2010, OMEX AG, Switzerland
+ * Copyright (c) 2004-2012, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -110,9 +107,11 @@ import org.openmdx.base.mof.cci.ModelElement_1_0;
 import org.openmdx.base.mof.cci.ModelHelper;
 import org.openmdx.base.mof.cci.Model_1_0;
 import org.openmdx.base.mof.cci.Multiplicity;
+import org.openmdx.base.mof.cci.Persistency;
 import org.openmdx.base.mof.cci.PrimitiveTypes;
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.naming.PathComponent;
+import org.openmdx.base.persistence.cci.PersistenceHelper;
 import org.openmdx.base.persistence.spi.TransientContainerId;
 import org.openmdx.base.query.Filter;
 import org.openmdx.base.query.IsInCondition;
@@ -150,24 +149,23 @@ class RefObject_1
         try {
             this.object = object;
             RefRootPackage_1 refPackage = (RefRootPackage_1) refClass.refOutermostPackage();
-                InteractionSpec objContext = object.getInteractionSpec();
-                Object refContext = refPackage.refInteractionSpec();
-                if(
-                    InteractionSpecs.NULL == objContext || (
-                        objContext == null ? refContext == null : objContext.equals(refContext)
-                    )
-                ){
-                    this.refClass = refClass;
-                } else {
-                    this.refClass = refPackage.refPackage(
-                        objContext
-                    ).refClass(
-                        refClass.refMofId()
-                    );
-                }
-        }
-        catch(Exception e) {
-            throw new JmiServiceException(e);
+            InteractionSpec objContext = object.getInteractionSpec();
+            Object refContext = refPackage.refInteractionSpec();
+            if(
+                InteractionSpecs.NULL == objContext || (
+                    objContext == null ? refContext == null : objContext.equals(refContext)
+                )
+            ){
+                this.refClass = refClass;
+            } else {
+                this.refClass = refPackage.refPackage(
+                    objContext
+                ).refClass(
+                    refClass.refMofId()
+                );
+            }
+        } catch(RuntimeException exception) {
+            throw new JmiServiceException(exception);
         }
     }
 
@@ -197,6 +195,7 @@ class RefObject_1
      */
     private RefClass refClass;
 
+    @Deprecated
     private static final List<String> excludeFromInitialization = Arrays.asList(
         "org:openmdx:base:Aspect:core",
         "org:openmdx:base:Creatable:createdAt",
@@ -209,9 +208,9 @@ class RefObject_1
         "org:openmdx:state2:DateState:stateValidTo",
         "org:openmdx:state2:DateTimeState:stateValidFrom",
         "org:openmdx:state2:DateTimeState:stateInvalidFrom",
+        "org:openmdx:state2:Legacy:validTimeUnique",
         "org:openmdx:state2:StateCapable:stateVersion",
-        "org:openmdx:state2:StateCapable:transactionTimeUnique",
-        "org:openmdx:state2:StateCapable:validTimeUnique"
+        "org:openmdx:state2:StateCapable:transactionTimeUnique"
     );
  
     // -------------------------------------------------------------------------
@@ -296,6 +295,22 @@ class RefObject_1
     }
 
     // -------------------------------------------------------------------------
+    
+    /**
+     * Remove the optional "Container" suffix from the qualifier name 
+     * 
+     * @param qualifierName
+     * 
+     * @return the qualifier name without "Container" suffix
+     */
+    private String removeContainerSuffix(
+        String qualifierName
+    ){
+        return qualifierName.endsWith("Container") || qualifierName.endsWith("container") ?
+            qualifierName.substring(0, qualifierName.length() - "Container".length()) :
+            qualifierName;
+    }
+    
     private final Object getValue(
         ModelElement_1_0 featureDef,
         Object qualifier
@@ -501,16 +516,7 @@ class RefObject_1
                         new BasicException.Parameter("feature", featureDef),
                         new BasicException.Parameter("type", type),
                         new BasicException.Parameter("actual-multiplicity", multiplicity),
-                        new BasicException.Parameter(
-                            "supported-multiplicity", 
-                            Multiplicity.SET,
-                            Multiplicity.LIST,
-                            Multiplicity.SPARSEARRAY,
-                            Multiplicity.MAP,
-                            Multiplicity.STREAM,
-                            Multiplicity.OPTIONAL,
-                            Multiplicity.SINGLE_VALUE
-                        )
+                        new BasicException.Parameter("supported-multiplicity", (Object[])Multiplicity.values())
                     );
             }
         }
@@ -529,16 +535,9 @@ class RefObject_1
                 String exposedEndName = (String) model.getElement(
                     featureDef.objGetValue("exposedEnd")
                 ).objGetValue("name");
-                String qualifierName = (String) model.getElement(
-                    featureDef.objGetValue("referencedEnd")
-                ).objGetValue("qualifierName");
-                int pos = 0;
-                if (
-                    ((pos = qualifierName.indexOf("Container")) >= 0) || 
-                    ((pos = qualifierName.indexOf("container")) >= 0)
-                ) {
-                    qualifierName = qualifierName.substring(0, pos);
-                }
+                String qualifierName = removeContainerSuffix(
+                    (String) model.getElement(featureDef.objGetValue("referencedEnd")).objGetValue("qualifierName")
+                );
                 Container_1_0 container = ((RefObject_1_0)qualifier).refDelegate().objGetContainer(
                     qualifierName
                 ).subMap(
@@ -1662,21 +1661,21 @@ class RefObject_1
         try {
             ModelElement_1_0 elementDef = ((RefMetaObject_1)this.refMetaObject()).getElementDef();
             for (
-                    Iterator<ModelElement_1_0> i = ((Map) elementDef.objGetValue("allFeature")).values().iterator(); 
-                    i.hasNext();
+                Iterator<ModelElement_1_0> i = ((Map) elementDef.objGetValue("allFeature")).values().iterator(); 
+                i.hasNext();
             ) {
                 ModelElement_1_0 featureDef = i.next();
-                if (
-                    this.isAttributeOrReferenceStoredAsAttribute(featureDef) && 
-                    ((Boolean) featureDef.objGetValue("isChangeable")).booleanValue() 
+                if(
+                    this.isAttributeOrReferenceStoredAsAttribute(featureDef) &&
+                    Persistency.getInstance().isPersistentAttribute(featureDef)
                 ) {
                     ModelElement_1_0 type = this.object.getModel().getElementType(featureDef);
                 	switch(ModelHelper.getMultiplicity(featureDef)) {
 	                	case OPTIONAL: {
-	                        if (setOptionalToNull) {
-	                            this.setValue(featureDef, null);
-	                        }
-	                    } break;
+	                	    if(setOptionalToNull) {
+	                	        this.setValue(featureDef, null);
+	                	    }
+	                	} break;
 	                	case SINGLE_VALUE: {
 	                        if (setRequiredToNull) {
 	                            this.setValue(featureDef, null);
@@ -1690,8 +1689,7 @@ class RefObject_1
 	                                this.setValue(
 	                                    featureDef, 
 	                                    DateTimeMarshaller.NORMALIZE.marshal
-	                                    (org.w3c.format.DateTimeFormat.BASIC_UTC_FORMAT.format(new Date())
-	                                    )
+	                                    (org.w3c.format.DateTimeFormat.BASIC_UTC_FORMAT.format(new Date()))
 	                                );
 	                            } else if (PrimitiveTypes.DATE.equals(qualifiedTypeName)) {
 	                                this.setValue(
@@ -1720,8 +1718,8 @@ class RefObject_1
 	                                    "Initialization of structs not supported"
 	                                );
 	                            } else if (
-	                                    this.object.getModel().isClassType(type) || 
-	                                    PrimitiveTypes.OBJECT_ID.equals(qualifiedTypeName)
+	                                this.object.getModel().isClassType(type) || 
+	                                PrimitiveTypes.OBJECT_ID.equals(qualifiedTypeName)
 	                            ) {
 	                                SysLog.detail("Initialization of object references not supported", featureDef);
 	                            } else if(
@@ -1746,7 +1744,16 @@ class RefObject_1
         }
     }
 
-    // -------------------------------------------------------------------------
+    /**
+     * Initializes the object based on the source object. The source object
+     * must be of the same class or a subtype of the target.
+     * 
+     * @param existing existing object.
+     * @throws JmiServiceException thrown if object can not be initialized. 
+     * 
+     * @deprecated use {@link PersistenceHelper#clone(Object, String...)}
+     */
+    @Deprecated
     final public void refInitialize(
         RefObject source
     ) {

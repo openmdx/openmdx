@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: IntegerMarshaller.java,v 1.1 2009/10/19 12:29:01 hburger Exp $
  * Description: IntegerMarshaller class
- * Revision:    $Revision: 1.1 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/10/19 12:29:01 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

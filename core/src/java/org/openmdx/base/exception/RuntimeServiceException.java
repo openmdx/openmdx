@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: RuntimeServiceException.java,v 1.21 2011/04/11 08:56:27 hburger Exp $
  * Description: Exception Framework 
- * Revision:    $Revision: 1.21 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/04/11 08:56:27 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

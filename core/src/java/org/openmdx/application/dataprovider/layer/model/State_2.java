@@ -1,16 +1,13 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: State_2.java,v 1.3 2012/01/07 01:37:45 hburger Exp $
  * Description: Model layer
- * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2012/01/07 01:37:45 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2011, OMEX AG, Switzerland
+ * Copyright (c) 2004-2012, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -67,14 +64,26 @@ public class State_2 extends Standard_1 {
 	 * Tells whether the transaction time is unique for object hosted by this
 	 * provider.
 	 */
-	private boolean transactionTimeUnique;
-	
-	/**
-	 * Tells whether the transaction time is unique for object hosted by this
-	 * provider.
-	 */
-	private boolean validTimeUnique;
-	
+	private boolean transactionTimeUnique = false;
+    
+    /**
+     * Retrieve transactionTimeUnique.
+     *
+     * @return Returns the transactionTimeUnique.
+     */
+    public boolean isTransactionTimeUnique() {
+        return this.transactionTimeUnique;
+    }
+    
+    /**
+     * Set transactionTimeUnique.
+     * 
+     * @param transactionTimeUnique The transactionTimeUnique to set.
+     */
+    public void setTransactionTimeUnique(boolean transactionTimeUnique) {
+        this.transactionTimeUnique = transactionTimeUnique;
+    }
+
     /* (non-Javadoc)
 	 * @see org.openmdx.application.dataprovider.spi.Layer_1#activate(short, org.openmdx.application.configuration.Configuration, org.openmdx.application.dataprovider.spi.Layer_1)
 	 */
@@ -85,36 +94,44 @@ public class State_2 extends Standard_1 {
 		Layer_1 delegation
 	) throws ServiceException {
 		super.activate(id, configuration, delegation);
-		this.transactionTimeUnique = configuration.isOn(LayerConfigurationEntries.TRANSACTION_TIME_UNIQUE);
-		this.validTimeUnique = configuration.isOn(LayerConfigurationEntries.VALID_TIME_UNIQUE);
+		if(configuration.containsEntry(LayerConfigurationEntries.TRANSACTION_TIME_UNIQUE)) {
+    		setTransactionTimeUnique(configuration.isOn(LayerConfigurationEntries.TRANSACTION_TIME_UNIQUE));
+		}
 	}
 
 	/**
+	 * Complete a StateCapable's values
+	 * 
+	 * @param request
+	 * @param object
+	 * 
+	 * @throws ServiceException
+	 */
+    @SuppressWarnings("unchecked")
+	protected void completeStateCapable(
+        DataproviderRequest request,
+        MappedRecord object
+	) throws ServiceException {
+        Object_2Facade.getValue(object).put("transactionTimeUnique", Boolean.valueOf(this.transactionTimeUnique));
+	}
+	
+	/**
      * Set known derived features
+     * 
+     * @param request
+     * @param object
+     * 
+     * @throws ServiceException
      */
-	@SuppressWarnings("unchecked")
 	@Override
     protected void completeObject(
         DataproviderRequest request,
         MappedRecord object
     ) throws ServiceException {
     	super.completeObject(request, object);
-		if(isInstanceOfStateCapable(object)) {
-    		MappedRecord value = Object_2Facade.getValue(object);
-    		value.put("transactionTimeUnique", Boolean.valueOf(this.transactionTimeUnique));
-    		value.put("validTimeUnique", Boolean.valueOf(this.validTimeUnique));
+		if(getModel().objectIsSubtypeOf(object, "org:openmdx:state2:StateCapable")) {
+		    completeStateCapable(request, object);
     	}
     }
 
-    /**
-     * @param object
-     * @return
-     * @throws ServiceException
-     */
-    protected boolean isInstanceOfStateCapable(
-        MappedRecord object
-    ) throws ServiceException {
-        return super.getModel().objectIsSubtypeOf(object, "org:openmdx:state2:StateCapable");
-    }
-	
 }

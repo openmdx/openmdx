@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: NonManagedInitialContext.java,v 1.4 2011/06/29 06:20:03 hburger Exp $
  * Description: NonManagedInitialContext 
- * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/06/29 06:20:03 $
  * ====================================================================
  *
  * This software is published under the BSD license

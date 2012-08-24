@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: Jmi1ObjectInvocationHandler.java,v 1.156 2011/12/08 15:15:15 hburger Exp $
  * Description: JMI 1 Object Invocation Handler 
- * Revision:    $Revision: 1.156 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/12/08 15:15:15 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -85,10 +82,13 @@ import javax.jmi.reflect.RefPackage;
 import org.oasisopen.jmi1.RefContainer;
 import org.omg.mof.spi.Identifier;
 import org.openmdx.application.mof.cci.ModelAttributes;
+import org.openmdx.base.accessor.cci.DataObject_1_0;
 import org.openmdx.base.accessor.jmi.cci.JmiServiceException;
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
 import org.openmdx.base.accessor.jmi.cci.RefPackage_1_0;
 import org.openmdx.base.accessor.jmi.cci.RefStruct_1_0;
+import org.openmdx.base.accessor.jmi.spi.FeatureMapper.Kind;
+import org.openmdx.base.accessor.rest.DataObject_1;
 import org.openmdx.base.accessor.view.ObjectView_1_0;
 import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;
@@ -96,6 +96,7 @@ import org.openmdx.base.mof.cci.ModelElement_1_0;
 import org.openmdx.base.mof.cci.ModelHelper;
 import org.openmdx.base.mof.cci.Model_1_0;
 import org.openmdx.base.naming.Path;
+import org.openmdx.base.persistence.cci.PersistenceHelper;
 import org.openmdx.base.persistence.spi.PersistenceCapableCollection;
 import org.openmdx.jdo.listener.ConstructCallback;
 import org.openmdx.kernel.collection.ArraysExtension;
@@ -481,10 +482,10 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
                                 FeatureMapper.MethodSignature.RETURN_IS_VOID : 
                                 FeatureMapper.MethodSignature.DEFAULT
                         );
-                        boolean isOperation = feature.objGetClass().equals(ModelAttributes.OPERATION);
+                        boolean operation = feature.objGetClass().equals(ModelAttributes.OPERATION);
                         String featureName = (String)feature.objGetValue("name");
                         // Getters
-                        if(!isOperation && methodName.startsWith("get")) {
+                        if(!operation && methodName.startsWith("get")) {
                             if((args == null) || (args.length == 0)) {      
                                 return marshal(
                                     this.refDelegate.refGetValue(featureName),
@@ -505,20 +506,28 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
                             	//
                                 // Qualifier
                             	//
-                                Object qualifier;
-                                if(args.length == 2 && args[0] instanceof Boolean) {
-                                    qualifier = ((Boolean)args[0]).booleanValue() ? "!" + args[1] : validateSubSegment(args[1]);
+                                if(args.length == 1 && args[0] instanceof RefObject){
+                                    Container<?> collection = (Container<?>) ((Jmi1Object_1_0)this.refDelegate).refGetValue(
+                                        featureName,
+                                        args[0]
+                                    );
+                                    return collection.getAll(null);
                                 } else {
-                                    qualifier = validateSubSegment(args[0]);
+                                    Object qualifier;
+                                    if(args.length == 2 && args[0] instanceof Boolean) {
+                                        qualifier = ((Boolean)args[0]).booleanValue() ? "!" + args[1] : validateSubSegment(args[1]);
+                                    } else {
+                                        qualifier = validateSubSegment(args[0]);
+                                    }
+                                    return ((Jmi1Object_1_0)this.refDelegate).refGetValue(
+                                        featureName,
+                                        qualifier
+                                    );
                                 }
-                                return ((Jmi1Object_1_0)this.refDelegate).refGetValue(
-                                    featureName,
-                                    qualifier
-                                );
                             }
                         }
                         // Boolean getters
-                        else if(!isOperation && methodName.startsWith("is")) {
+                        else if(!operation && methodName.startsWith("is")) {
                             if((args == null) || (args.length == 0)) {  
                                 return this.refDelegate.refGetValue(
                                     featureName
@@ -526,7 +535,7 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
                             }
                         }
                         // Setters
-                        else if(!isOperation && methodName.startsWith("set")) {
+                        else if(!operation && methodName.startsWith("set")) {
                             if((args != null) && (args.length == 1)) {
                                 switch(ModelHelper.getMultiplicity(feature)){
                                     case OPTIONAL: case SINGLE_VALUE: case STREAM: 
@@ -677,7 +686,7 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
                                         getFeatureMapper().getAccessor(args[0]), 
                                         null, 
                                         this.refClass.getMarshaller(), 
-                                        false // operation
+                                        FeatureMapper.Kind.METHOD
                                     );
                                 case 3:
                                     LargeObject largeObject = (LargeObject)this.invokeCci(
@@ -685,7 +694,7 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
                                         getFeatureMapper().getAccessor(args[0]), 
                                         null, 
                                         this.refClass.getMarshaller(), 
-                                        false // operation
+                                        FeatureMapper.Kind.METHOD
                                     );
                                     long position = args[2] == null ? 0l : (Long)args[2];
                                     if(largeObject instanceof BinaryLargeObject) {
@@ -711,7 +720,7 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
                                         getFeatureMapper().getMutator(args[0]), 
                                         new Object[]{args[1]}, 
                                         this.refClass.getMarshaller(), 
-                                        false // operation
+                                        FeatureMapper.Kind.METHOD
                                     );
                                 case LIST: case SET:
                                     return setMultivalue(
@@ -720,7 +729,7 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
                                             getFeatureMapper().getAccessor(args[0]), 
                                             null, 
                                             this.refClass.getMarshaller(), 
-                                            false // operation
+                                            FeatureMapper.Kind.METHOD
                                         ), 
                                         args[1]
                                     );
@@ -731,19 +740,20 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
                                             getFeatureMapper().getAccessor(args[0]), 
                                             null, 
                                             this.refClass.getMarshaller(), 
-                                            false // operation
+                                            FeatureMapper.Kind.METHOD
                                         ), 
                                         args[1]
                                     );
                             }
                         } 
                         else if("refInvokeOperation".equals(methodName) && args.length == 2){
+                            Object feature = args[0];
                             return this.invokeCci(
                                 proxy,
-                                getFeatureMapper().getOperation(args[0]), 
+                                getFeatureMapper().getOperation(feature), 
                                 ((List<?>)args[1]).toArray(), 
                                 this.refClass.getMarshaller(), 
-                                true // operation
+                                getFeatureMapper().getKind(feature) 
                             );
                         } 
                         else {
@@ -763,7 +773,7 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
                                 method, 
                                 args, 
                                 this.refClass.getMarshaller(), 
-                                false // operation
+                                FeatureMapper.Kind.METHOD
                             );
                         } else {
                             ModelElement_1_0 feature = getFeatureMapper().getFeature(
@@ -772,11 +782,12 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
                                     FeatureMapper.MethodSignature.RETURN_IS_VOID : 
                                     FeatureMapper.MethodSignature.DEFAULT
                             );
-                            boolean operation = feature.objGetClass().equals(ModelAttributes.OPERATION); 
+                            boolean operation = feature.objGetClass().equals(ModelAttributes.OPERATION);
                             if(
                                 !operation &&
-                                (methodName.length() > 3) &&
-                                (args != null && args.length > 0)
+                                methodName.length() > 3 &&
+                                args != null && 
+                                args.length > 0
                             ) {
                                 if(methodName.startsWith("add")) {
                                     RefContainer<?> container = (RefContainer<?>) this.invokeCci(
@@ -784,22 +795,24 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
                                         getFeatureMapper().getAccessor(feature.objGetValue("name")), 
                                         null, 
                                         this.refClass.getMarshaller(), 
-                                        false // operation
+                                        FeatureMapper.Kind.METHOD
                                     );
                                     container.refAdd(jmiToRef(args));
                                     return null;
                                 } else if (methodName.startsWith("get")) { 
-                                    RefContainer<?> container = (RefContainer<?>) this.invokeCci(
-                                        proxy,
-                                        getFeatureMapper().getAccessor(feature.objGetValue("name")), 
-                                        null, 
-                                        this.refClass.getMarshaller(), 
-                                        false // operation
-                                    );
-                                    if(AnyTypePredicate.class.isAssignableFrom(method.getParameterTypes()[0])){
-                                    	return container.refGetAll(args[0]);
-                                    } else {
-                                    	return container.refGet(jmiToRef(args));
+                                    if(args.length != 1 || !(args[0] instanceof RefObject)) {
+                                        RefContainer<?> container = (RefContainer<?>) this.invokeCci(
+                                            proxy,
+                                            getFeatureMapper().getAccessor(feature.objGetValue("name")), 
+                                            null, 
+                                            this.refClass.getMarshaller(), 
+                                            FeatureMapper.Kind.METHOD
+                                        );
+                                        if(AnyTypePredicate.class.isAssignableFrom(method.getParameterTypes()[0])){
+                                        	return container.refGetAll(args[0]);
+                                        } else {
+                                        	return container.refGet(jmiToRef(args));
+                                        }
                                     }
                                 } else if(methodName.startsWith("set")) {
                                     boolean array = args[0] instanceof Object[];
@@ -812,7 +825,7 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
                                             getFeatureMapper().getCollection(methodName), 
                                             null, 
                                             this.refClass.getMarshaller(), 
-                                            false // operation
+                                            FeatureMapper.Kind.METHOD
                                         );
                                         collection.clear();
                                         collection.addAll(
@@ -822,12 +835,15 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
                                     }
                                 }
                             }
+                            Kind kind = operation ? (
+                                Boolean.TRUE.equals(feature.objGetValue("isQuery")) ? Kind.QUERY_OPERATION : Kind.NON_QUERY_OPERATION
+                            ) : Kind.METHOD;
                             return this.invokeCci(
                                 proxy,
                                 getFeatureMapper().getMethod(method), 
                                 args, 
                                 this.refClass.getMarshaller(), 
-                                operation
+                                kind
                             );
                         }
                     }
@@ -1008,7 +1024,7 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
      * @param method
      * @param args
      * @param marshaller
-     * @param operation
+     * @param kind tells which kind of method or operation invocation has to be executed
      * 
      * @return the methods return value
      * 
@@ -1024,9 +1040,10 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
         Method method, 
         Object[] args, 
         StandardMarshaller marshaller, 
-        boolean operation
+        Kind kind
     ) throws IllegalArgumentException, IllegalAccessException, InvocationTargetException, ServiceException, SecurityException, NoSuchMethodException{
-        Object next = ((DelegatingRefObject_1_0)this.refDelegate).openmdxjdoGetDelegate(); 
+        DelegatingRefObject_1_0 delegate = (DelegatingRefObject_1_0)this.refDelegate;
+        Object next = delegate.openmdxjdoGetDelegate(); 
         InvocationTarget invocationTarget = this.getImpl(
             proxy,
             next,
@@ -1038,7 +1055,7 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
             (args[0] instanceof org.openmdx.base.cci2.Void);
         if(invocationTarget == null) {
             if(
-                operation && 
+                kind != Kind.METHOD && 
                 next instanceof RefObject && 
                 args != null && 
                 args.length == 1 &&
@@ -1127,7 +1144,8 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
                             null, 
                             BasicException.Code.DEFAULT_DOMAIN, 
                             BasicException.Code.ASSERTION_FAILURE,
-                            new BasicException.Parameter("method", method.getDeclaringClass().getName() + "."+ method.getName()),
+                            new BasicException.Parameter("method", method.getDeclaringClass().getName() + "." + method.getName()),
+                            new BasicException.Parameter("kind", kind),
                             new BasicException.Parameter("insufficient-class", insufficientClass.getName()), 
                             new BasicException.Parameter("insufficient-interfaces", insufficientInterfaces),
                             new BasicException.Parameter("formal-argument-types", formalArgumentTypes),
@@ -1149,6 +1167,15 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
             Object reply = invocationTarget.invoke(
                 hasVoidArg ? null : args
             );
+            if(kind == Kind.NON_QUERY_OPERATION) {
+                Object refObject = delegate.openmdxjdoGetDataObject();
+                if(refObject instanceof RefObject_1_0) {
+                    DataObject_1_0 dataObject = ((RefObject_1_0)refObject).refDelegate().objGetDelegate();
+                    if(dataObject instanceof DataObject_1) {
+                        ((DataObject_1)dataObject).touch();
+                    }
+                }
+            }
             return reply instanceof Container<?> && !(reply instanceof RefContainer<?>) ? Classes.newProxyInstance(
                 new Jmi1ContainerInvocationHandler(
                     this.getValidator(), // marshaller
@@ -1668,9 +1695,16 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
             throw newUnsupportedOperationException(REFLECTIVE, feature);
         }
     
-        /* (non-Javadoc)
-         * @see org.openmdx.base.accessor.jmi.cci.RefObject_1_0#refInitialize(javax.jmi.reflect.RefObject)
+        /**
+         * Initializes the object based on the source object. The source object
+         * must be of the same class or a subtype of the target.
+         * 
+         * @param existing existing object.
+         * @throws JmiServiceException thrown if object can not be initialized. 
+         * 
+         * @deprecated use {@link PersistenceHelper#clone(Object, String...)}
          */
+        @Deprecated
         public void refInitialize(
             RefObject source
         ) {

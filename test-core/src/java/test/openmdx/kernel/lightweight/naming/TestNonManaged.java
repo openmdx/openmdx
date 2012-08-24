@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: TestNonManaged.java,v 1.1 2011/06/29 06:23:05 hburger Exp $
  * Description: Test Non-Managed Naming Contexts
- * Revision:    $Revision: 1.1 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/06/29 06:23:05 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

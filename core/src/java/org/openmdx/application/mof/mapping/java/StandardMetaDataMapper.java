@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: StandardMetaDataMapper.java,v 1.3 2011/11/01 13:27:59 wfro Exp $
  * Description: JPA3 Meta Data Mapper 
- * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/11/01 13:27:59 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

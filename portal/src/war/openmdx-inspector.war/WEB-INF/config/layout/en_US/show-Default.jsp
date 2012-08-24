@@ -2,11 +2,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: show-Default.jsp,v 1.99 2011/04/13 13:11:33 wfro Exp $
+ * Name:        $Id: show-Default.jsp,v 1.100 2012/07/07 08:09:45 wfro Exp $
  * Description: Default.jsp
- * Revision:    $Revision: 1.99 $
+ * Revision:    $Revision: 1.100 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/04/13 13:11:33 $
+ * Date:        $Date: 2012/07/07 08:09:45 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -58,8 +58,7 @@
 org.openmdx.base.naming.*,
 org.openmdx.portal.servlet.*,
 org.openmdx.portal.servlet.control.*,
-org.openmdx.portal.servlet.view.*,
-org.openmdx.portal.servlet.texts.*
+org.openmdx.portal.servlet.view.*
 " %>
 <%
 	ApplicationContext app = (ApplicationContext)session.getValue(WebKeys.APPLICATION_KEY);
@@ -262,7 +261,7 @@ org.openmdx.portal.servlet.texts.*
 %>
 <div id="container">
 	<div id="wrap">
-		<div id="header">
+		<div id="<%= NavigationControl.getHeaderId(p) %>">
 			<div id="hider">
 <%
 				rootPanel.paint(p, false);
@@ -294,9 +293,9 @@ org.openmdx.portal.servlet.texts.*
 		</div> <!-- header -->
 		<div id="content-wrap">
 <%
-			boolean hideWorkspaceDashboard = Boolean.valueOf(app.getSettings().getProperty(UserSettings.HIDE_WORKSPACE_DASHBOARD));
+			boolean hideWorkspaceDashboard = Boolean.valueOf(app.getSettings().getProperty(UserSettings.HIDE_WORKSPACE_DASHBOARD.getName()));
 %>		
-			<div id="<%= "content" + (app.getPanelState("Header") == 0 ? "HeaderYes" : "HeaderNo") + (hideWorkspaceDashboard ? "LeftNo" : "LeftYes") %>">
+			<div id="<%= NavigationControl.getContentHeaderId(p) %>">
 <%@ include file="../../../../show-header.html" %>
 <%
 				if(!hideWorkspaceDashboard) {

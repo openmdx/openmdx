@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: FieldDef.java,v 1.13 2010/02/04 11:25:03 wfro Exp $
  * Description: FieldDef 
- * Revision:    $Revision: 1.13 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/02/04 11:25:03 $
  * ====================================================================
  *
  * This software is published under the BSD license

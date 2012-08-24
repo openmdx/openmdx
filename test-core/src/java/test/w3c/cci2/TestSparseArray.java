@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: TestSparseArray.java,v 1.1 2009/03/05 14:55:56 hburger Exp $
  * Description: Test SparseArray 
- * Revision:    $Revision: 1.1 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/03/05 14:55:56 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

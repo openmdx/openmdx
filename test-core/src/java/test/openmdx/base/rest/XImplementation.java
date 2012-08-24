@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: XImplementation.java,v 1.2 2009/11/11 19:13:51 hburger Exp $
  * Description: XImplementation 
- * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/11/11 19:13:51 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -59,6 +56,7 @@ import java.util.List;
 /**
  * XImplementation
  */
+@SuppressWarnings("unchecked")
 public class XImplementation
     implements XInterface
 {

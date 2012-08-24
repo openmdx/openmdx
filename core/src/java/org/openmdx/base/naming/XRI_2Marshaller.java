@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: XRI_2Marshaller.java,v 1.12 2010/06/25 17:09:28 hburger Exp $
  * Description: Path/ObjectId Marshaller 
- * Revision:    $Revision: 1.12 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/06/25 17:09:28 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -55,8 +52,10 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.regex.Pattern;
 
-import org.openmdx.base.exception.RuntimeServiceException;import org.openmdx.base.exception.ServiceException;
+import org.openmdx.base.exception.RuntimeServiceException;
+import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.marshalling.Marshaller;
 import org.openmdx.base.text.conversion.URITransformation;
 import org.openmdx.base.text.conversion.UnicodeTransformation;
@@ -86,6 +85,13 @@ public final class XRI_2Marshaller
      */
     final static String[] ROOT = {};
 
+    /**
+     * 
+     */
+    final Pattern OPENMDX_OBJECT_AUTHORITY = Pattern.compile(
+        XriAuthorities.OPENMDX_AUTHORITY + "[*][A-Za-z0-9\\-]+([.][A-Za-z0-9\\-]+)*"
+    );
+    
     /**
      * Return the singleton
      */ 
@@ -233,7 +239,7 @@ public final class XRI_2Marshaller
                 }
             } else {
                 //
-                // penMDX cross reference
+                // openMDX cross reference
                 //
                 try {
                     Object xRef = marshal(new Path(segment).getSuffix(0));
@@ -356,10 +362,6 @@ public final class XRI_2Marshaller
                     wildcard = false;
                     String subSegment = segment.getSubSegmentAt(j);
                     String source = subSegment.toString().substring(1);
-//                  int s = source.indexOf(';');
-//                  if(s > 0) {
-//                      source = source.substring(0, s) + source.substring(s).replace(':', '=');
-//                  }
                     String delimiter = 
                         wasParameter ? "=" :
                         subSegment.startsWith("!") ? "!" :
@@ -426,7 +428,7 @@ public final class XRI_2Marshaller
                                     }
                                 } else if ("$...".equals(xrefAuthority)) {
                                     target.append('%');
-                                } else if (xrefAuthority.startsWith(XriAuthorities.OPENMDX_AUTHORITY)) {
+                                } else if (OPENMDX_OBJECT_AUTHORITY.matcher(xrefAuthority).matches()) {
                                     String embeddedXri = source.substring(1, source.length() - 1);
                                     target.append(
                                         delimiter
@@ -487,7 +489,7 @@ public final class XRI_2Marshaller
      * 
      * @return <code>true</code> if the segment could be an XRef
      */
-    private static boolean isForeignCrossReference(
+    private boolean isForeignCrossReference(
         String segment
     ){
         if(

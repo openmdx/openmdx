@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: AbstractLoginModule.java,v 1.2 2010/10/24 22:42:28 hburger Exp $
  * Description: Abstract Login Module 
- * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/10/24 22:42:28 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

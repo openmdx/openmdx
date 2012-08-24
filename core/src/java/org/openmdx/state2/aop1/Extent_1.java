@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Extent_1.java,v 1.4 2011/02/24 16:34:20 hburger Exp $
  * Description: State Object Container
- * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/02/24 16:34:20 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -63,7 +60,7 @@ import org.openmdx.base.query.Quantifier;
 /**
  * org::openmdx::state2 aware extent
  */
-public class Extent_1 extends org.openmdx.base.aop1.Extent_1 {
+public abstract class Extent_1 extends org.openmdx.base.aop1.Extent_1 {
 
     /**
      * Constructor 
@@ -87,14 +84,20 @@ public class Extent_1 extends org.openmdx.base.aop1.Extent_1 {
      * Implements <code>Serializable</code>
      */
     private static final long serialVersionUID = -7540665569698526423L;
- 
+
+    abstract Container_1_0 newStateCapableContainer(
+	    ObjectView_1_0 parent,
+	    Container_1_0 container, 
+	    String type 
+	) throws ServiceException;
+    
     /**
      * Retrieve the state capable container
      */
     private Container_1_0 getStateCapableContainer(
     ) throws ServiceException{
         if(this.stateCapableContainer == null) {
-            this.stateCapableContainer = new StateCapableContainer_1(
+            this.stateCapableContainer = newStateCapableContainer(
                 this.parent,
                 this.container, 
                 null
@@ -127,5 +130,5 @@ public class Extent_1 extends org.openmdx.base.aop1.Extent_1 {
             throw new RuntimeServiceException(exception);
         }
     }
-
+    
 }

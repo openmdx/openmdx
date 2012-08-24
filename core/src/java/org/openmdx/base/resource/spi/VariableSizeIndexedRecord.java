@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: VariableSizeIndexedRecord.java,v 1.15 2011/04/12 15:44:02 hburger Exp $
  * Description: JCA: variable-size IndexedRecord implementation
- * Revision:    $Revision: 1.15 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/04/12 15:44:02 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

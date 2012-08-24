@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: AbstractDashboardControl.java,v 1.8 2011/09/16 09:01:41 wfro Exp $
  * Description: AbstractDashboardControl 
- * Revision:    $Revision: 1.8 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/09/16 09:01:41 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -211,7 +208,7 @@ public abstract class AbstractDashboardControl
 			// Do not merge in edit mode.
 			boolean isAdmin = 
 				(app.getUserHomeIdentity() == null) || 
-				(app.getUserHomeIdentity().equals(userHomeAdminIdentity));
+				(app.getUserHomeIdentityAsPath().equals(userHomeAdminIdentity));
 			if(!forEditing && !isAdmin) {
 				try {
 					Properties settings = app.getUserSettings(userHomeAdminIdentity);

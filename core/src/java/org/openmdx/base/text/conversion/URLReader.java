@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: URLReader.java,v 1.1 2005/05/04 00:42:32 hburger Exp $
  * Description: openMDX URL Reader
- * Revision:    $Revision: 1.1 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2005/05/04 00:42:32 $
  * ====================================================================
  *
  * This software is published under the BSD license

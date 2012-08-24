@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: Reconstructable.java,v 1.1 2004/06/17 13:02:46 hburger Exp $
  * Description: SPICE Common: Reconstructable interface
- * Revision:    $Revision: 1.1 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2004/06/17 13:02:46 $
  * ====================================================================
  *
  * This software is published under the BSD license

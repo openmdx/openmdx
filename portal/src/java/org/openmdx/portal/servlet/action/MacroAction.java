@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: MacroAction.java,v 1.2 2011/07/07 22:35:34 wfro Exp $
  * Description: ShowObjectView 
- * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/07/07 22:35:34 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -93,7 +90,7 @@ public class MacroAction extends BoundAction {
 		ShowObjectView currentView = (ShowObjectView)view;
     	ObjectView nextView = currentView;
         ViewPort.Type nextViewPortType = null;
-        ApplicationContext application = currentView.getApplicationContext();
+        ApplicationContext app = currentView.getApplicationContext();
         // parameter is of format
         // [name=name][;type=type]
         String objectXri = Action.getParameter(parameter, Action.PARAMETER_OBJECTXRI);
@@ -108,10 +105,12 @@ public class MacroAction extends BoundAction {
                 currentView.getId(),
                 currentView.getContainerElementId(),
                 objectIdentity,
-                application,
+                app,
                 currentView.createHistoryAppendCurrent(),
                 currentView.getLookupType(),
-                currentView.getRestrictToElements()
+                null, // do not propagate resourcePathPrefix
+                null, // do not propagate navigationTarget
+                null // do not propagate isReadOnly
             );
             nextView.setMacro(
                 new Object[]{
@@ -124,8 +123,8 @@ public class MacroAction extends BoundAction {
         catch (Exception e) {
             ServiceException e0 = new ServiceException(e);
             SysLog.warning(e0.getMessage(), e0.getCause());
-            application.addErrorMessage(
-                application.getTexts().getErrorTextCannotSelectObject(), new String[] { objectXri, e.getMessage() }
+            app.addErrorMessage(
+                app.getTexts().getErrorTextCannotSelectObject(), new String[] { objectXri, e.getMessage() }
             );
             nextView = currentView;
         }

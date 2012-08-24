@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: AspectImplementationDescriptor.java,v 1.1 2010/04/07 15:37:18 hburger Exp $
  * Description: Aspect Implementation Descriptor
- * Revision:    $Revision: 1.1 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/04/07 15:37:18 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

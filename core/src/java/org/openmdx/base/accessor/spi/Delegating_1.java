@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: Delegating_1.java,v 1.4 2009/04/28 13:58:51 hburger Exp $
  * Description: Delegating_1 
- * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/04/28 13:58:51 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

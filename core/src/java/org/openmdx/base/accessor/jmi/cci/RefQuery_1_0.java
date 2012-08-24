@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: RefQuery_1_0.java,v 1.4 2010/05/26 13:25:43 hburger Exp $
  * Description: RefFilter_1_0 interface
- * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/05/26 13:25:43 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -64,7 +61,7 @@ import org.openmdx.base.query.SortOrder;
  * The RefQuery_1_0 is an extension to JMI and allows to query the Collections
  * returned by JMI methods.
  */
-public interface RefQuery_1_0 extends Query {
+public interface RefQuery_1_0 extends Query, Cloneable {
 
   /**
    * This operation allows to set a filter value with the semantics
@@ -130,6 +127,11 @@ public interface RefQuery_1_0 extends Query {
    */
   String refMofId();
     
+  /* (non-Javadoc)
+   * @see java.lang.Object#clone()
+   */
+  public RefQuery_1_0 clone();
+   
 }
 
 //--- End of File -----------------------------------------------------------

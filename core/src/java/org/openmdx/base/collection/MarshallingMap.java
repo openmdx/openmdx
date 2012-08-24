@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: MarshallingMap.java,v 1.28 2010/07/01 16:24:13 hburger Exp $
  * Description: Marshalling Map
- * Revision:    $Revision: 1.28 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/07/01 16:24:13 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

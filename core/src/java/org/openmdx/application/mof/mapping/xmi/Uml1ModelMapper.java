@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: Uml1ModelMapper.java,v 1.9 2011/07/08 13:20:51 wfro Exp $
  * Description: write XML schema (XSD)
- * Revision:    $Revision: 1.9 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/07/08 13:20:51 $
  * ====================================================================
  *
  * This software is published under the BSD license

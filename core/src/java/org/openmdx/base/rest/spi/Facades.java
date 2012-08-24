@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: Facades.java,v 1.1 2011/11/26 01:34:57 hburger Exp $
  * Description: Facade Factory
- * Revision:    $Revision: 1.1 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/11/26 01:34:57 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -50,11 +47,10 @@
  */
 package org.openmdx.base.rest.spi;
 
-import java.util.UUID;
-
 import javax.resource.ResourceException;
 import javax.resource.cci.MappedRecord;
 
+import org.openmdx.base.accessor.cci.DataObject_1_0;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.naming.Path;
 
@@ -109,26 +105,6 @@ public class Facades {
     }
 
     /**
-     * Create an object facade for the given object id
-     * 
-     * @param transactionalObjectId
-     * 
-     * @return an object facade for the given object id
-     * 
-     * @throws ResourceException
-     */
-    public static Object_2Facade newObject(
-        UUID transactionalObjectId
-    ) throws ServiceException {
-    	try {
-			return Object_2Facade.newInstance(transactionalObjectId);
-        } catch (ResourceException exception) {
-            throw new ServiceException(exception);
-        }
-    }
-
-    
-    /**
      * Creates a facade for a new object with the given path and the given 
      * object class.
      * 
@@ -173,19 +149,23 @@ public class Facades {
     }
 	
     /**
-     * Create a query facade for the given object id
+     * Create a query facade for the given object's id
      * 
-     * @param objectId
+     * @param object a data object
      * 
-     * @return a query facade for the given object id
+     * @return a query facade for the given object's id
      * 
      * @throws ResourceException
      */
     public static Query_2Facade newQuery(
-        Path objectId
+        DataObject_1_0 object
     ) throws ServiceException {
     	try {
-			return Query_2Facade.newInstance(objectId);
+			return object.jdoIsPersistent() ? Query_2Facade.newInstance(
+			    object.jdoGetObjectId()
+			 ) : Query_2Facade.newInstance(
+			    object.jdoGetTransactionalObjectId()
+			 );
         } catch (ResourceException exception) {
             throw new ServiceException(exception);
         }
@@ -194,17 +174,17 @@ public class Facades {
     /**
      * Create a query facade for the given object id
      * 
-     * @param transientObjectId
+     * @param ojectId a data object's id
      * 
      * @return a query facade for the given object id
      * 
      * @throws ResourceException
      */
     public static Query_2Facade newQuery(
-        UUID transientOjectId
+        Path ojectId
     ) throws ServiceException {
     	try {
-			return Query_2Facade.newInstance(transientOjectId);
+			return Query_2Facade.newInstance(ojectId);
         } catch (ResourceException exception) {
             throw new ServiceException(exception);
         }

@@ -498,6 +498,10 @@
             <type xmi:type="uml:PrimitiveType" href="../openMDX%202%20~%20Core%20(EMF)/org.w3c.uml#_3C7B8A60016D3C8B62E40010"/>
             <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_UnBgoMt6EeCd0bUG66JYmw"/>
           </ownedAttribute>
+          <ownedAttribute xmi:id="_6Ae3gKKsEeGWlbsv5SidnA" name="paymentPeriod" aggregation="composite">
+            <type xmi:type="uml:PrimitiveType" href="../openMDX%202%20~%20Core%20(EMF)/org.w3c.uml#_3C7B8A60016D3C8B6303000B"/>
+            <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_fvo5kKKvEeGWlbsv5SidnA"/>
+          </ownedAttribute>
         </packagedElement>
         <packagedElement xmi:type="uml:Class" xmi:id="_3C7B8A60016D3F6EA82402E4" name="InvoicePosition">
           <generalization xmi:id="_3C7B8A60016D3FF14CB90088">

@@ -93,7 +93,7 @@
     </children>
     <styles xmi:type="notation:CanonicalStyle" xmi:id="_HE62Qd7xEeCOUtuf9MgApg"/>
     <element xmi:type="uml:Class" href="../org.openmdx.security.authorization1.uml#_3C7B8A60016D417E3886017B"/>
-    <layoutConstraint xmi:type="notation:Bounds" xmi:id="_HE62Qt7xEeCOUtuf9MgApg" x="245" y="26"/>
+    <layoutConstraint xmi:type="notation:Bounds" xmi:id="_HE62Qt7xEeCOUtuf9MgApg" x="273" y="26"/>
   </children>
   <styles xmi:type="notation:DiagramStyle" xmi:id="_1yeXsUcxEd-o1OTPw_6HJg"/>
   <styles xmi:type="uml2tools.notation:U2TDiagramCanonicalStyle" xmi:id="_1yeXskcxEd-o1OTPw_6HJg"/>
@@ -157,6 +157,6 @@
     <styles xmi:type="notation:RoutingStyle" xmi:id="_HFO_Ud7xEeCOUtuf9MgApg" routing="Rectilinear"/>
     <styles xmi:type="notation:FontStyle" xmi:id="_HFO_Ut7xEeCOUtuf9MgApg" fontName="Arial" fontHeight="11"/>
     <element xmi:type="uml:Association" href="../org.openmdx.security.authorization1.uml#_3C7B8A60016D4183BAD502C9"/>
-    <bendpoints xmi:type="notation:RelativeBendpoints" xmi:id="_HFO_U97xEeCOUtuf9MgApg" points="[-38, -5, 549, 66]$[-587, -71, 0, 0]"/>
+    <bendpoints xmi:type="notation:RelativeBendpoints" xmi:id="_HFO_U97xEeCOUtuf9MgApg" points="[-86, -44, 8, 264]$[-86, -278, 8, 30]"/>
   </edges>
 </notation:Diagram>

@@ -1,10 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: SessionInfoControl.java,v 1.48 2011/11/28 13:34:04 wfro Exp $
  * Description: SessionInfoControl
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/11/28 13:34:04 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -158,7 +156,8 @@ public class SessionInfoControl
             View view = p.getView();        
             Action[] setRoleAction = view.getSetRoleActions();
             String currentRoleTitle = app.getPortalExtension().getTitle(
-            	Action.EVENT_SET_ROLE,
+            	p.getView().getObject(),
+            	new Action(Action.EVENT_SET_ROLE, null, app.getCurrentUserRole(), true),
             	app.getCurrentUserRole(),
             	app
             );

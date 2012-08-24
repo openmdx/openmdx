@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: Jmi1Class_1_0.java,v 1.9 2010/10/28 06:44:01 hburger Exp $
  * Description: Jmi1Class_1_0 
- * Revision:    $Revision: 1.9 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/10/28 06:44:01 $
  * ====================================================================
  *
  * This software is published under the BSD license

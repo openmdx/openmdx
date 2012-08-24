@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: JDOExceptionMapper.java,v 1.1 2009/11/17 16:45:42 hburger Exp $
  * Description: JDO Exception Mapper
- * Revision:    $Revision: 1.1 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/11/17 16:45:42 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

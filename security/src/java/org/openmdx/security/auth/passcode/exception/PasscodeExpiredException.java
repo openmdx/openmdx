@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Security, http://www.openmdx.org/
- * Name:        $Id: PasscodeExpiredException.java,v 1.3 2009/04/28 14:08:45 hburger Exp $
  * Description: Passcode Expired Exception
- * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/04/28 14:08:45 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

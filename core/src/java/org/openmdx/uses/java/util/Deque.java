@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: Deque.java,v 1.2 2010/09/13 16:46:29 hburger Exp $
  * Description: Deque 
- * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/09/13 16:46:29 $
  * ====================================================================
  *
  * Copyright 2006 Sun Microsystems, Inc. All rights reserved.

@@ -1,16 +1,13 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: RestConnectionSpec.java,v 1.6 2011/04/27 06:03:08 hburger Exp $
  * Description: REST Connection Specification
- * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/04/27 06:03:08 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2008-2010, OMEX AG, Switzerland
+ * Copyright (c) 2008-2012, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -86,39 +83,20 @@ public class RestConnectionSpec implements ConnectionSpec, Serializable {
      * @param user
      * @param password
      * @param tenant
-     * 
-     * @deprecated specify refInitialzeOnCreate as well
-     */
-    @Deprecated
-    public RestConnectionSpec(
-        String user,
-        String password,
-        Object tenant
-    ){
-        this(user, password, tenant, false);
-    }
-
-    /**
-     * Constructor 
-     *
-     * @param user
-     * @param password
-     * @param tenant
-     * 
-     * @param refInitializeOnCreate
+     * @param bulkLoad
      */
     public RestConnectionSpec(
         String user,
         String password,
         Object tenant, 
-        boolean refInitializeOnCreate
+        boolean bulkLoad
     ){
         this.userName = user;
         this.password = password;
         this.tenant = tenant;
-        this.refInitializeOnCreate = refInitializeOnCreate;
+        this.bulkLoad = bulkLoad;
     }
-    
+
     /**
      * @serial JCA's standard property 'UserName'
      */
@@ -135,14 +113,14 @@ public class RestConnectionSpec implements ConnectionSpec, Serializable {
     private Object tenant;
     
     /**
-     * @serial The 'RefInitializeOnCreate' property
+     * @serial The 'BulkLoad' property
      */
-    private boolean refInitializeOnCreate;
+    private boolean bulkLoad;
     
     /**
      * Implements <code>Serializable</code>
      */
-    private static final long serialVersionUID = -1796197177166229193L;
+    private static final long serialVersionUID = -1117165712221772605L;
 
     /**
      * Set userName.
@@ -200,31 +178,56 @@ public class RestConnectionSpec implements ConnectionSpec, Serializable {
 	}
 
     /**
-     * Retrieve refInitializeOnCreate.
+     * Retrieve the 'BulkLoad' property.
      *
-     * @return Returns the refInitializeOnCreate.
+     * @return the 'BulkLoad' property
      */
-    public boolean isRefInitializeOnCreate() {
-        return this.refInitializeOnCreate;
+    public boolean isBulkLoad() {
+        return this.bulkLoad;
     }
-    
+	
     /**
-     * Set refInitializeOnCreate.
+     * Set the 'BulkLoad' property.
      * 
-     * @param refInitializeOnCreate The refInitializeOnCreate to set.
+     * @param bulkLoad <code>true</code> in case of bulk load
      */
-    public void setRefInitializeOnCreate(boolean refInitializeOnCreate) {
-        this.refInitializeOnCreate = refInitializeOnCreate;
+    public void setBulkLoad(boolean bulkLoad) {
+        this.bulkLoad = bulkLoad;
     }
 
+    /**
+     * Compares to objects
+     * 
+     * @param left
+     * @param right
+     * 
+     * @return <code>true</code> if both are either <code>null</code> or equal
+     */
+    private static boolean areEqual(
+        Object left,
+        Object right
+    ){
+        return left == null ? right == null : left.equals(right);
+    }
+    
+    private static int hashCode(Object object) {
+        return object == null ? 0 : object.hashCode();
+    }
+    
     /* (non-Javadoc)
      * @see java.lang.Object#equals(java.lang.Object)
      */
     @Override
-    public boolean equals(Object that) {
-        return 
-            that instanceof RestConnectionSpec && 
-            this.userName.equals(((RestConnectionSpec)that).userName);
+    public boolean equals(Object object) {
+        if(object instanceof RestConnectionSpec) {
+            RestConnectionSpec that = (RestConnectionSpec) object;
+            return 
+                this.bulkLoad == that.bulkLoad &&
+                areEqual(this.userName, that.userName) &&
+                areEqual(this.tenant, that.tenant);
+        } else {
+            return false;
+        }
     }
 
     /* (non-Javadoc)
@@ -232,7 +235,10 @@ public class RestConnectionSpec implements ConnectionSpec, Serializable {
      */
     @Override
     public int hashCode() {
-        return this.userName.hashCode();
+        return 
+            hashCode(this.userName) + 
+            hashCode(this.tenant) + 
+            Boolean.valueOf(this.bulkLoad).hashCode();
     }
 
     /* (non-Javadoc)
@@ -241,7 +247,11 @@ public class RestConnectionSpec implements ConnectionSpec, Serializable {
     @Override
     public String toString(
     ) {
-        return this.userName;
+        return 
+            RestConnectionSpec.class.getName() + 
+            ": userName=" + this.userName +
+            ", tenant=" + this.tenant +
+            ", bulkLoad=" + this.bulkLoad;
     }
     
 }

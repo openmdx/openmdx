@@ -1,16 +1,13 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: AbstractRestInteraction.java,v 1.27 2011/11/26 01:34:57 hburger Exp $
  * Description: Abstract REST Interaction
- * Revision:    $Revision: 1.27 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/11/26 01:34:57 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2009-2010, OMEX AG, Switzerland
+ * Copyright (c) 2009-2012, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -57,6 +54,7 @@ import java.util.UUID;
 import javax.resource.NotSupportedException;
 import javax.resource.ResourceException;
 import javax.resource.cci.Connection;
+import javax.resource.cci.ConnectionMetaData;
 import javax.resource.cci.IndexedRecord;
 import javax.resource.cci.InteractionSpec;
 import javax.resource.cci.MappedRecord;
@@ -70,10 +68,11 @@ import org.openmdx.base.resource.Records;
 import org.openmdx.base.resource.spi.AbstractInteraction;
 import org.openmdx.base.resource.spi.ResourceExceptions;
 import org.openmdx.base.resource.spi.RestInteractionSpec;
-import org.openmdx.base.rest.cci.ResultRecord;
 import org.openmdx.base.rest.cci.MessageRecord;
 import org.openmdx.base.rest.cci.ObjectRecord;
 import org.openmdx.base.rest.cci.QueryRecord;
+import org.openmdx.base.rest.cci.RestConnectionMetaData;
+import org.openmdx.base.rest.cci.ResultRecord;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.id.UUIDs;
 
@@ -117,6 +116,23 @@ public class AbstractRestInteraction extends AbstractInteraction<Connection> {
         Path requestId
     ){
         return requestId.getParent().getChild(requestId.getBase() + "*-");
+    }
+
+    /**
+     * Retrieve the REST connection specification
+     * 
+     * @return the REST ConnectionSpec
+     * 
+     * @throws ServiceException 
+     */
+    protected boolean isBulkLoad(
+    ) throws ServiceException{
+        try {
+            ConnectionMetaData metaData = getConnection().getMetaData();
+            return metaData instanceof RestConnectionMetaData && ((RestConnectionMetaData)metaData).isBulkLoad();
+        } catch (ResourceException exception) {
+            throw new ServiceException(exception);
+        }
     }
     
     /**

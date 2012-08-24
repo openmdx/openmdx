@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: RefMetaObject_1.java,v 1.6 2011/04/12 15:54:38 hburger Exp $
  * Description: RefMetaObject_1 class
- * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/04/12 15:54:38 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

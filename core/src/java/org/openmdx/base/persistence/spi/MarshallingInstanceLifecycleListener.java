@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: MarshallingInstanceLifecycleListener.java,v 1.5 2011/04/12 15:44:02 hburger Exp $
  * Description: Dispatching Instance Life-Cycle Listener
- * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/04/12 15:44:02 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

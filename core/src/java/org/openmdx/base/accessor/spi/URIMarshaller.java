@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: URIMarshaller.java,v 1.3 2010/12/22 09:41:15 hburger Exp $
  * Description: URI Marshaller
- * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/12/22 09:41:15 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

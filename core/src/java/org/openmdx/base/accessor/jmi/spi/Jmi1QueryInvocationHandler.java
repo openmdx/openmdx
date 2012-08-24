@@ -1,16 +1,13 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: Jmi1QueryInvocationHandler.java,v 1.6 2010/06/08 12:54:19 hburger Exp $
  * Description: JMI Query Invocation Handler 
- * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/06/08 12:54:19 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2007-2010, OMEX AG, Switzerland
+ * Copyright (c) 2007-2012, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -50,9 +47,11 @@
  */
 package org.openmdx.base.accessor.jmi.spi;
 
+import java.io.Serializable;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 
 import javax.jdo.Query;
 
@@ -64,9 +63,29 @@ import org.openmdx.base.query.Quantifier;
 /**
  * JMI Query Invocation Handler
  */
-public class Jmi1QueryInvocationHandler implements InvocationHandler {
+public class Jmi1QueryInvocationHandler implements Serializable, InvocationHandler {
 
-    public Jmi1QueryInvocationHandler(
+    /**
+	 * Implements <code>Serializable</code>
+	 */
+	private static final long serialVersionUID = -7362765884533797988L;
+
+	/**
+	 * @serial The wrapped query
+	 */
+    private final RefQuery_1 query;
+
+    /**
+     * 
+     */
+    private transient FeatureMapper featureMapper;
+
+    /**
+     * Constructor
+     * 
+     * @param query
+     */
+	public Jmi1QueryInvocationHandler(
         RefQuery_1 query
     ) {
         this.query = query;
@@ -79,7 +98,7 @@ public class Jmi1QueryInvocationHandler implements InvocationHandler {
      * @throws ServiceException 
      */
     protected FeatureMapper getFeatureMapper(
-    ) throws ServiceException{
+    ) throws ServiceException {
         if(this.featureMapper == null) {
             this.featureMapper = this.query.getFeatureMapper();
         }
@@ -111,7 +130,14 @@ public class Jmi1QueryInvocationHandler implements InvocationHandler {
             declaringClass == Query.class ||
             declaringClass == RefQuery_1_0.class 
         ) {
-            try {
+            if("clone".equals(methodName)) {
+                Class<? extends Object> proxyClass = proxy.getClass();
+                return Proxy.newProxyInstance(
+                    proxyClass.getClassLoader(),
+                    proxyClass.getInterfaces(),
+                    new Jmi1QueryInvocationHandler(this.query.clone())
+                );
+            } else try {
                 return method.invoke(
                     this.query, 
                     args
@@ -177,10 +203,4 @@ public class Jmi1QueryInvocationHandler implements InvocationHandler {
         return this.query;
     }
     
-    //-----------------------------------------------------------------------
-    // Members
-    //-----------------------------------------------------------------------
-    private final RefQuery_1 query;
-    private transient FeatureMapper featureMapper;
-   
 }

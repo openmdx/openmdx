@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Registry.java,v 1.3 2010/08/06 12:01:03 hburger Exp $
  * Description: Registry interface 
- * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/08/06 12:01:03 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

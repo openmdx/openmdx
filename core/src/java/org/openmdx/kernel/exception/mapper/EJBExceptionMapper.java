@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: EJBExceptionMapper.java,v 1.2 2009/06/05 15:21:54 hburger Exp $
  * Description: EJB Exception Mapper
- * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/06/05 15:21:54 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

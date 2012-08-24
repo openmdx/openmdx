@@ -1,16 +1,13 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: UniqueValue.java,v 1.5 2010/07/12 16:57:49 hburger Exp $
  * Description: Unique
- * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/07/12 16:57:49 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2008, OMEX AG, Switzerland
+ * Copyright (c) 2008-2012, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -50,9 +47,11 @@
  */
 package org.openmdx.state2.aop1;
 
+import javax.jdo.JDOHelper;
 import javax.jdo.spi.PersistenceCapable;
 
-import org.openmdx.base.accessor.spi.ExceptionHelper;
+import org.openmdx.base.exception.ServiceException;
+import org.openmdx.base.naming.Path;
 import org.openmdx.kernel.exception.BasicException;
 
 /**
@@ -78,27 +77,43 @@ final class UniqueValue<T> {
     private boolean empty = true;
     
     /**
+     * Prepare an exception parameter value
+     * 
+     * @param value
+     * 
+     * @return the prepared value
+     */
+    private static Object toValue(
+        Object value
+    ){
+        if(value instanceof PersistenceCapable) {
+            return JDOHelper.isPersistent(value) ? 
+        		((Path)JDOHelper.getObjectId(value)).toXRI() : 
+    		    JDOHelper.getTransactionalObjectId(value);
+        } else {
+            return value;
+        }
+    }
+    
+    /**
      * Process a single state's reply
      * 
      * @param value
+     * 
+     * @throws ServiceException 
      */
     void set(
         T value
-    ){
+    ) throws ServiceException{
         if(this.empty) {
             this.value = value;
             this.empty = false;
         } else if (this.value == null ? value != null : !this.value.equals(value)) {
-            throw BasicException.initHolder(
-                new IllegalStateException(
-                    "The underlying states have inconsistent values for the given request",
-                    BasicException.newEmbeddedExceptionStack(
-                        BasicException.Code.DEFAULT_DOMAIN,
-                        BasicException.Code.ILLEGAL_STATE,
-                        this.value instanceof PersistenceCapable ? ExceptionHelper.newObjectIdParameter("value1", this.value) : new BasicException.Parameter("value1", this.value),
-                        value instanceof PersistenceCapable ? ExceptionHelper.newObjectIdParameter("value2", value) : new BasicException.Parameter("value2", value)
-                    )
-                )
+            throw new ServiceException(
+                BasicException.Code.DEFAULT_DOMAIN,
+                BasicException.Code.ILLEGAL_STATE,
+                "The underlying states have inconsistent values for the given request",
+                new BasicException.Parameter("values", toValue(this.value), toValue(value))
             );
         }
     }
@@ -111,16 +126,12 @@ final class UniqueValue<T> {
      * @exception IllegalStateException if there is no underlying state
      */
     T get(
-    ){
+    ) throws ServiceException {
         if(this.empty) {
-            throw BasicException.initHolder(
-                new IllegalStateException(
-                    "There is no matching state for the given request",
-                    BasicException.newEmbeddedExceptionStack(
-                        BasicException.Code.DEFAULT_DOMAIN,
-                        BasicException.Code.ILLEGAL_STATE
-                    )
-                )
+            throw new ServiceException(
+                BasicException.Code.DEFAULT_DOMAIN,
+                BasicException.Code.ILLEGAL_STATE,
+                "There is no matching state for the given request"
             );
         } else {
             return this.value;

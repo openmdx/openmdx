@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: MarshallingCollection.java,v 1.17 2011/04/12 12:19:18 hburger Exp $
  * Description: Marshalling Collection
- * Revision:    $Revision: 1.17 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/04/12 12:19:18 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

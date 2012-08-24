@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: QualifierType.java,v 1.1 2008/04/04 01:11:49 hburger Exp $
  * Description: Qualifier Type 
- * Revision:    $Revision: 1.1 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/04/04 01:11:49 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

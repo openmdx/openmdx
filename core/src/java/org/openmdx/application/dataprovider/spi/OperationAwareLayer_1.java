@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: OperationAwareLayer_1.java,v 1.19 2012/01/05 23:20:20 hburger Exp $
  * Description: Stream Operation Aware Layer_1_0 Implementation
- * Revision:    $Revision: 1.19 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2012/01/05 23:20:20 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

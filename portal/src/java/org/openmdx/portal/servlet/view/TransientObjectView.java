@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: TransientObjectView.java,v 1.7 2011/11/28 23:18:02 wfro Exp $
  * Description: FormView 
- * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/11/28 23:18:02 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -79,7 +76,7 @@ public class TransientObjectView
     //-------------------------------------------------------------------------
     public TransientObjectView(
         Object object,
-        ApplicationContext application,
+        ApplicationContext app,
         RefObject_1_0 lookupObject,
         PersistenceManager pm
     ) {
@@ -87,7 +84,10 @@ public class TransientObjectView
             UUIDs.newUUID().toString(),
             null,
             marshalObject(object, pm),
-            application
+            null, // resourcePathPrefix
+            null, // navigationTarget
+            null, // isReadOnly
+            app
         );
         this.lookupObject = lookupObject;
     }

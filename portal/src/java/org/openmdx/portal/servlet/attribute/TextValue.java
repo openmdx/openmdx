@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: TextValue.java,v 1.16 2011/08/15 09:40:39 wfro Exp $
  * Description: TextValue 
- * Revision:    $Revision: 1.16 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/08/15 09:40:39 $
  * ====================================================================
  *
  * This software is published under the BSD license

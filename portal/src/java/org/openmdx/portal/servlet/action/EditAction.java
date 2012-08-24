@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: EditAction.java,v 1.2 2011/07/07 22:35:35 wfro Exp $
  * Description: ShowObjectView 
- * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/07/07 22:35:35 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -100,7 +97,8 @@ public class EditAction extends BoundAction {
                 application,
                 currentView.createHistoryAppendCurrent(),
                 currentView.getLookupType(),
-                currentView.getRestrictToElements(),
+                currentView.getResourcePathPrefix(),
+                currentView.getNavigationTarget(),
                 ViewMode.valueOf(
                     Action.getParameter(parameter, Action.PARAMETER_MODE)
                 )

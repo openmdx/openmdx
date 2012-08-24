@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: BooleanValue.java,v 1.31 2011/08/11 15:08:58 wfro Exp $
  * Description: BooleanValue
- * Revision:    $Revision: 1.31 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/08/11 15:08:58 $
  * ====================================================================
  *
  * This software is published under the BSD license

@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: DelegatingRefObject_1_0.java,v 1.1 2009/05/25 00:43:14 wfro Exp $
  * Description: DelegatingRefObject_1_0 
- * Revision:    $Revision: 1.1 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/05/25 00:43:14 $
  * ====================================================================
  *
  * This software is published under the BSD license

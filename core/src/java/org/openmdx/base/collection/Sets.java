@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Sets.java,v 1.10 2011/04/12 12:20:43 hburger Exp $
  * Description: Sets 
- * Revision:    $Revision: 1.10 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/04/12 12:20:43 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -125,7 +122,7 @@ public class Sets {
      * @return the collection itself if it is a set or a set decorator
      */
     public static <T> Set<T> asSet(
-        final T[] collection
+        final T... collection
     ){
         return collection == null ? null : new ArraySet<T>(collection);
     }

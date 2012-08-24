@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: StateViewContext.java,v 1.11 2010/07/07 11:01:43 hburger Exp $
  * Description: AbstractStateContext 
- * Revision:    $Revision: 1.11 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/07/07 11:01:43 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

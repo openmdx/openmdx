@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: AbstractManagedConnectionFactory.java,v 1.6 2010/09/01 15:07:58 hburger Exp $
  * Description: Abstract Managed LDAP Connection Factory
- * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/09/01 15:07:58 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

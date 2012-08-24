@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Security, http://www.openmdx.org/
- * Name:        $Id: AbstractConnection.java,v 1.1 2010/07/15 16:38:53 hburger Exp $
  * Description: Abstract Connection 
- * Revision:    $Revision: 1.1 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/07/15 16:38:53 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

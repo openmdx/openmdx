@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: EntityManagerProxyFactory_2.java,v 1.12 2011/08/08 14:21:34 hburger Exp $
  * Description: Entity Manager Proxy Factory
- * Revision:    $Revision: 1.12 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/08/08 14:21:34 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

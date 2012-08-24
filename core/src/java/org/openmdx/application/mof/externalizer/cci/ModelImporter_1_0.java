@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: ModelImporter_1_0.java,v 1.1 2009/01/13 02:10:46 wfro Exp $
  * Description: ModelImporter_1_0 interface
- * Revision:    $Revision: 1.1 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/13 02:10:46 $
  * ====================================================================
  *
  * This software is published under the BSD license

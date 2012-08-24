@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: DefaultPortalExtension.java,v 1.123 2011/12/23 15:52:32 wfro Exp $
  * Description: DefaultEvaluator
- * Revision:    $Revision: 1.123 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/12/23 15:52:32 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -87,6 +84,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
+import java.util.TimeZone;
 import java.util.TreeMap;
 
 import javax.jdo.JDOHelper;
@@ -98,7 +96,6 @@ import javax.xml.datatype.DatatypeConstants;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 
-import org.openmdx.base.accessor.jmi.cci.JmiServiceException;
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
 import org.openmdx.base.accessor.jmi.cci.RefPackage_1_0;
 import org.openmdx.base.accessor.jmi.spi.RefMetaObject_1;
@@ -138,60 +135,76 @@ import org.openmdx.ui1.jmi1.FeatureDefinition;
 import org.openmdx.ui1.jmi1.StructuralFeatureDefinition;
 import org.openmdx.ui1.jmi1.ValuedField;
 
-public class DefaultPortalExtension
-  implements PortalExtension_1_0, Serializable {
+/**
+ * DefaultPortalExtension
+ *
+ */
+public class DefaultPortalExtension implements PortalExtension_1_0, Serializable {
   
-    //-------------------------------------------------------------------------
+    /**
+     * obj.toString(). In case of collections return toString() of first element.
+     * @param obj
+     * @return
+     */
     protected String toS(
         Object obj
     ) {
-        return obj == null
-          ? ""
-          : (obj instanceof Collection) && ((Collection)obj).size() > 0
-            ? ((Collection)obj).iterator().next().toString()
-            : obj.toString();
+		return obj == null ? "" : (obj instanceof Collection)
+		    && !((Collection) obj).isEmpty() ? ((Collection) obj).iterator().next().toString() : obj.toString();
     }
-    
-    //-------------------------------------------------------------------------
+
+    /**
+     * Replace blank with &nbsp;
+     * @param obj
+     * @return
+     */
     protected String toNbspS(
         Object obj
     ) {
         return this.toS(obj).replace(" ", "&nbsp;");
     }
     
-    //-------------------------------------------------------------------------
+	/* (non-Javadoc)
+	 * @see org.openmdx.portal.servlet.PortalExtension_1_0#getTitle(java.lang.Object, org.openmdx.portal.servlet.Action, java.lang.String, org.openmdx.portal.servlet.ApplicationContext)
+	 */
 	@Override
     public String getTitle(
-    	int action, 
-    	String name, 
-    	ApplicationContext application
+    	Object obj,
+    	Action action, 
+    	String title, 
+    	ApplicationContext app
     ) {
-		return name;
+		return title;
     }
 
-	//-------------------------------------------------------------------------    
-    /* (non-Javadoc)
-     * @see org.openmdx.portal.servlet.PortalExtension_1_0#getTitle(org.openmdx.base.accessor.jmi.cci.RefObject_1_0, short, java.lang.String, org.openmdx.portal.servlet.ApplicationContext)
+    /**
+     * Return title of refObj.
+     * 
+     * @param obj
+     * @param locale
+     * @param localeAsString
+     * @param app
+     * @return
      */
     public String getTitle(
-        RefObject_1_0 refObj,
+        RefObject_1_0 obj,
         short locale,
         String localeAsString,
-        ApplicationContext application
+        ApplicationContext app
     ) {
     	return this.getTitle(
-    		refObj, 
+    		obj, 
     		locale, 
     		localeAsString,
     		false, // asShortTitle = false
-    		application
+    		app
     	);
     }
 
-	//-------------------------------------------------------------------------    
     /* (non-Javadoc)
-     * @see org.openmdx.portal.servlet.PortalExtension_1_0#getTitle(org.openmdx.base.accessor.jmi.cci.RefObject_1_0, short, java.lang.String, org.openmdx.portal.servlet.ApplicationContext)
+     * @see org.openmdx.portal.servlet.PortalExtension_1_0#getTitle(org.openmdx.base.accessor.jmi.cci.RefObject_1_0, short, java.lang.String, boolean, org.openmdx.portal.servlet.ApplicationContext)
      */
+    @Override
     public String getTitle(
         RefObject_1_0 refObj, 
         short locale,
@@ -247,10 +260,10 @@ public class DefaultPortalExtension
       }
     }
   
-    //-------------------------------------------------------------------------    
     /* (non-Javadoc)
      * @see org.openmdx.portal.servlet.PortalExtension_1_0#hasPermission(java.lang.String, org.openmdx.base.accessor.jmi.cci.RefObject_1_0, java.util.Set, org.openmdx.portal.servlet.ApplicationContext)
      */
+    @Override
     public boolean hasPermission(
         String elementName, 
         RefObject_1_0 object,
@@ -260,10 +273,10 @@ public class DefaultPortalExtension
         return false;
     }
   
-    //-------------------------------------------------------------------------
     /* (non-Javadoc)
-     * @see org.openmdx.portal.servlet.PortalExtension_1_0#hasPermission(org.openmdx.portal.servlet.control.Control, org.openmdx.base.accessor.jmi.cci.RefObject_1_0, java.util.Set, org.openmdx.portal.servlet.ApplicationContext)
+     * @see org.openmdx.portal.servlet.PortalExtension_1_0#hasPermission(org.openmdx.portal.servlet.control.Control, org.openmdx.base.accessor.jmi.cci.RefObject_1_0, org.openmdx.portal.servlet.ApplicationContext, java.lang.String)
      */
+    @Override
     public boolean hasPermission(
         Control control, 
         RefObject_1_0 object,
@@ -273,10 +286,10 @@ public class DefaultPortalExtension
         return false;
     }
     
-    //-------------------------------------------------------------------------     
     /* (non-Javadoc)
      * @see org.openmdx.portal.servlet.PortalExtension_1_0#isEnabled(org.openmdx.base.accessor.jmi.cci.RefObject_1_0, org.openmdx.portal.servlet.ApplicationContext)
      */
+    @Override
     public boolean hasPermission(
         RefObject_1_0 object,
         ApplicationContext app,
@@ -285,10 +298,10 @@ public class DefaultPortalExtension
         return false;
     }
     
-    //-------------------------------------------------------------------------    
     /* (non-Javadoc)
      * @see org.openmdx.portal.servlet.PortalExtension_1_0#getIdentityQueryFilterClause(java.lang.String)
      */
+    @Override
     public org.openmdx.base.query.Filter getQuery(        
     	org.openmdx.ui1.jmi1.ValuedField field,
     	String filterValue,
@@ -298,10 +311,10 @@ public class DefaultPortalExtension
         return null;
     }
     
-    //-------------------------------------------------------------------------    
     /* (non-Javadoc)
      * @see org.openmdx.portal.servlet.PortalExtension_1_0#getGridPageSize(java.lang.String)
      */
+    @Override
     public int getGridPageSize(
         String referencedTypeName
     ) {
@@ -309,20 +322,20 @@ public class DefaultPortalExtension
         return 15;
     }
     
-    //-------------------------------------------------------------------------    
     /* (non-Javadoc)
      * @see org.openmdx.portal.servlet.PortalExtension_1_0#getGridRowBackColor(java.lang.String)
      */
+    @Override
     public String[] getGridRowColors(
         RefObject_1_0 obj
     ) {
         return null;
     }
     
-    //-------------------------------------------------------------------------    
     /* (non-Javadoc)
      * @see org.openmdx.portal.servlet.PortalExtension_1_0#isLookupType(org.openmdx.model1.accessor.basic.cci.ModelElement_1_0)
      */
+    @Override
     public boolean isLookupType(
         ModelElement_1_0 classDef
     ) throws ServiceException {
@@ -332,17 +345,17 @@ public class DefaultPortalExtension
             !"org:openmdx:base:ContextCapable".equals(qualifiedName);
     }
     
-    //-------------------------------------------------------------------------    
     /* (non-Javadoc)
      * @see org.openmdx.portal.servlet.PortalExtension_1_0#getAutocompleter(org.openmdx.portal.servlet.ApplicationContext, org.openmdx.base.accessor.jmi.cci.RefObject_1_0, java.lang.String)
      */
+    @Override
     public Autocompleter_1_0 getAutocompleter(
-        ApplicationContext application,
+        ApplicationContext app,
         RefObject_1_0 context,
         String qualifiedFeatureName
     ) {
         try {
-            Model_1_0 model = application.getModel();
+            Model_1_0 model = app.getModel();
             ModelElement_1_0 lookupType = null;
             // Get lookup type from model
             try {
@@ -352,7 +365,7 @@ public class DefaultPortalExtension
             catch(Exception e) {
                 try {
                     // Fallback to customized feature definitions
-                    FeatureDefinition lookupFeature = application.getFeatureDefinition(qualifiedFeatureName);
+                    FeatureDefinition lookupFeature = app.getFeatureDefinition(qualifiedFeatureName);
                     if(lookupFeature instanceof StructuralFeatureDefinition) {
                         lookupType = model.getElement(((StructuralFeatureDefinition)lookupFeature).getType());
                     }
@@ -367,10 +380,11 @@ public class DefaultPortalExtension
                 RefObject lookupObject = this.getLookupObject(
                     lookupType, 
                     context, 
-                    application
+                    app
                 );
                 Path lookupObjectIdentity = new Path(lookupObject.refMofId());
                 Map<Integer,String> filterByFeatures = new TreeMap<Integer,String>();
+                Map<Integer,String> orderByFeatures = new TreeMap<Integer,String>();
                 Map<Integer,String> filterByLabels = new TreeMap<Integer,String>();
                 Map<Integer,String> lookupReferenceNames = new TreeMap<Integer,String>();
                 ModelElement_1_0 lookupObjectClass = ((RefMetaObject_1)lookupObject.refMetaObject()).getElementDef();
@@ -427,12 +441,12 @@ public class DefaultPortalExtension
                                 ) {
                                     int order = 10000 * (filterByFeatures.size() + 1);
                                     try {
-                                        org.openmdx.ui1.jmi1.ElementDefinition field = application.getUiElementDefinition(
+                                        org.openmdx.ui1.jmi1.ElementDefinition field = app.getUiElementDefinition(
                                             (String)attributeDef.objGetValue("qualifiedName")
                                         );
                                         org.openmdx.ui1.jmi1.AssertableInspector referencedTypeInspector =
-                                            application.getAssertableInspector((String)referencedType.objGetValue("qualifiedName"));                                        
-                                        String referencedTypeLabel =  application.getLabel(
+                                            app.getAssertableInspector((String)referencedType.objGetValue("qualifiedName"));                                        
+                                        String referencedTypeLabel =  app.getLabel(
                                             referencedTypeInspector.getForClass()
                                         );
                                         int orderReferencedType = referencedTypeInspector.getOrder().size() > 2
@@ -443,42 +457,50 @@ public class DefaultPortalExtension
                                                     ? referencedTypeInspector.getOrder().get(0)
                                                     : 0;                                        
                                         if(field.isActive()) {
-                                            int locale = application.getCurrentLocaleAsIndex();
+                                            int locale = app.getCurrentLocaleAsIndex();
                                             // Order autocompleters by <order referenced type,index,field order>
-                                            order =  field.getOrderObjectContainer().size() > 2
-                                                ? 1000000*orderReferencedType + 10000*ii + 100*((Number)field.getOrderObjectContainer().get(1)).intValue() + ((Number)field.getOrderObjectContainer().get(2)).intValue()
-                                                : field.getOrder().size() > 2
-                                                    ? 1000000*orderReferencedType + 10000*ii + 100*((Number)field.getOrder().get(1)).intValue() + ((Number)field.getOrder().get(2)).intValue()
-                                                    : 1000000*orderReferencedType + 10000*ii + order;   
-                                            String label = locale < field.getLabel().size()
-                                                ? field.getLabel().get(locale)
-                                                : field.getLabel().size() == 0 ? attributeName : field.getLabel().get(0);
+                                            order =  field.getOrderObjectContainer().size() > 2 ? 
+                                            	1000000*orderReferencedType + 10000*ii + 100*((Number)field.getOrderObjectContainer().get(1)).intValue() + ((Number)field.getOrderObjectContainer().get(2)).intValue() : 
+                                            		field.getOrder().size() > 2 ? 
+	                                                	1000000*orderReferencedType + 10000*ii + 100*((Number)field.getOrder().get(1)).intValue() + ((Number)field.getOrder().get(2)).intValue() : 
+	                                                		1000000*orderReferencedType + 10000*ii + order;   
+                                            String label = locale < field.getLabel().size() ? 
+                                            	field.getLabel().get(locale) : 
+                                            		field.getLabel().isEmpty() ? attributeName : field.getLabel().get(0);
                                             lookupReferenceNames.put(
                                                 new Integer(order), 
                                                 lookupReferenceName
                                             );
                                             filterByLabels.put(
-                                                new Integer(order),
+                                                order,
                                                 referencedTypeLabel + " / " + label
                                             );
                                             filterByFeatures.put(
-                                                new Integer(order),
+                                                order,
                                                 attributeName
                                             );
+                                            orderByFeatures.put(
+                                            	order,
+                                            	Boolean.TRUE.equals(field.isSortable()) ? attributeName : ""
+                                            );
                                         }
-                                    } 
+                                    }
                                     catch(Exception e) {
                                         lookupReferenceNames.put(
-                                            new Integer(order), 
+                                            order, 
                                             lookupReferenceName
                                         );
                                         filterByLabels.put(
-                                            new Integer(order),
+                                            order,
                                             attributeName
                                         );                                        
                                         filterByFeatures.put(
-                                            new Integer(order),
+                                            order,
                                             attributeName
+                                        );
+                                        orderByFeatures.put(
+                                        	order,
+                                        	""
                                         );
                                     }
                                 }
@@ -501,7 +523,7 @@ public class DefaultPortalExtension
                         (String[])filterByFeatures.values().toArray(new String[filterByFeatures.size()]),
                         (String[])filterByLabels.values().toArray(new String[filterByLabels.size()]),
                         filterOperators,
-                        (String[])filterByFeatures.values().toArray(new String[filterByFeatures.size()])
+                        (String[])orderByFeatures.values().toArray(new String[orderByFeatures.size()])
                     );
                 }
             }        
@@ -513,69 +535,86 @@ public class DefaultPortalExtension
         return null;
     }
         
-    //-------------------------------------------------------------------------    
     /* (non-Javadoc)
      * @see org.openmdx.portal.servlet.PortalExtension_1_0#getFindObjectsBaseFilter(org.openmdx.portal.servlet.ApplicationContext, org.openmdx.base.accessor.jmi.cci.RefObject_1_0, java.lang.String)
      */
     @Override
     public List<Condition> getFindObjectsBaseFilter(
-        ApplicationContext application,
+        ApplicationContext app,
         RefObject_1_0 context,
         String qualifiedFeatureName
     ) {
         return new ArrayList<Condition>();
     }
 
-    //-------------------------------------------------------------------------
+    /**
+     * Get current locale
+     * @param app
+     * @return
+     */
     protected Locale getCurrentLocale(
-        ApplicationContext application
+        ApplicationContext app
     ) {
-        String locale = application.getCurrentLocaleAsString();
+        String locale = app.getCurrentLocaleAsString();
         return new Locale(
             locale.substring(0, 2), 
             locale.substring(locale.indexOf("_") + 1)
         );      
     }
 
-    //-------------------------------------------------------------------------
+    /**
+     * Cast object to Map.
+     * @param object
+     * @return
+     */
     @SuppressWarnings("unchecked")
     static protected Map<String,Object> targetAsValueMap(
-    	Object target
+    	Object object
     ) {
-    	return (Map<String,Object>)target;
+    	return (Map<String,Object>)object;
     }
 
-    //-------------------------------------------------------------------------
+    /**
+     * Cast object to Collection
+     * @param object
+     * @return
+     */
     @SuppressWarnings("unchecked")
     static protected Collection<Object> valueAsCollection(
-    	Object value
+    	Object object
     ) {
-    	return (Collection<Object>)value;
+    	return (Collection<Object>)object;
     }
 
-    //-------------------------------------------------------------------------
+    /**
+     * Get attribute value.
+     * @param valueHolder
+     * @param target
+     * @param featureName
+     * @param app
+     * @return
+     */
     protected Object getValue(
     	AttributeValue valueHolder,
     	Object target,
     	String featureName,
     	ApplicationContext app
     ) {
-    	if(valueHolder.getDataBinding() instanceof DataBinding_1_0) {
-	        return ((DataBinding_1_0)valueHolder.getDataBinding()).getValue(
-	            (RefObject)target, 
-	            featureName
-	        );
-    	}
-    	else {
-	        return ((DataBinding_2_0)valueHolder.getDataBinding()).getValue(
-	            (RefObject)target, 
-	            featureName,
-	            app
-	        );    		
-    	}
+        return valueHolder.getDataBinding().getValue(
+            (RefObject)target, 
+            featureName,
+            app
+        );    		
     }
 
-    //-------------------------------------------------------------------------
+    /**
+     * Set attribute value.
+     * @param valueHolder
+     * @param target
+     * @param featureName
+     * @param value
+     * @param app
+     */
     protected void setValue(
     	AttributeValue valueHolder,
     	Object target,
@@ -583,28 +622,18 @@ public class DefaultPortalExtension
     	Object value,
     	ApplicationContext app
     ) {
-    	if(valueHolder.getDataBinding() instanceof DataBinding_1_0) {
-	        ((DataBinding_1_0)valueHolder.getDataBinding()).setValue(
-	            (RefObject)target,
-	            featureName,
-	            value
-	        );
-    	}
-    	else {
-	        ((DataBinding_2_0)valueHolder.getDataBinding()).setValue(
-	            (RefObject)target,
-	            featureName,
-	            value,
-	            app
-	        );    		
-    	}
+        valueHolder.getDataBinding().setValue(
+            (RefObject)target,
+            featureName,
+            value,
+            app
+        );    		
     }
 
-    //-------------------------------------------------------------------------
-    /**
-     * Maps the request input to the specified object. The object must either
-     * be instanceof RefObject_1_0 or Map.
+    /* (non-Javadoc)
+     * @see org.openmdx.portal.servlet.PortalExtension_1_0#updateObject(java.lang.Object, java.util.Map, java.util.Map, org.openmdx.portal.servlet.ApplicationContext)
      */
+    @Override
     public void updateObject(
         Object target,
         Map<String,String[]> parameterMap,
@@ -656,9 +685,9 @@ public class DefaultPortalExtension
                 if(feature != null) {        
                   // parse parameter values
                   List parameterValues = Arrays.asList((Object[])parameterMap.get(key));
-                  StringTokenizer tokenizer = parameterValues.size() == 0 ? 
+                  StringTokenizer tokenizer = parameterValues.isEmpty() ? 
                 	  new StringTokenizer("", "\n", true) : 
-                	  new StringTokenizer((String)parameterValues.get(0), "\n\r", true);
+                		  new StringTokenizer((String)parameterValues.get(0), "\n\r", true);
                   List<String> newValues = new ArrayList<String>();
                   boolean lastTokenIsNewLine = false;
                   while(tokenizer.hasMoreTokens()) {
@@ -902,24 +931,11 @@ public class DefaultPortalExtension
                               }
                           }
                         }
-                        catch(NumberFormatException e) {
-                          app.addErrorMessage(
-                              app.getTexts().getErrorTextCanNotEditNumber(),
-                              new String[]{feature.getLabel(), (String)newValues.get(0), "can not parse number"}
-                          );
-                        }
-                        catch(JmiServiceException e) {
-                          e.log();
-                          app.addErrorMessage(
-                        	  app.getTexts().getErrorTextCanNotEditNumber(),
-                        	  new String[]{feature.getLabel(), (String)newValues.get(0), e.getMessage()}
-                          );
-                        }
                         catch(Exception e) {
-                        	new ServiceException(e).log();
+                        	SysLog.detail(e.getMessage(), e.getCause());
                         	app.addErrorMessage(
                         	  app.getTexts().getErrorTextCanNotEditNumber(),
-                            	new String[]{feature.getLabel(), (String)newValues.get(0), e.getMessage()}
+                            	new String[]{feature.getLabel(), (String)newValues.get(0), "can not parse number"}
                         	);
                         }
                       }
@@ -980,15 +996,8 @@ public class DefaultPortalExtension
                             	);
                             }
                           }
-                          catch(JmiServiceException e) {
-                        	  e.log();
-                        	  app.addErrorMessage(
-                        		  app.getTexts().getErrorTextCanNotEditNumber(),
-                        		  new String[]{feature.getLabel(), (String)newValues.get(0), e.getMessage()}
-                        	  );
-                          }
                           catch(Exception e) {
-                            new ServiceException(e).log();
+                          	SysLog.detail(e.getMessage(), e.getCause());
                             app.addErrorMessage(
                               app.getTexts().getErrorTextCanNotEditNumber(),
                               new String[]{feature.getLabel(), (String)newValues.get(0), e.getMessage()}
@@ -1145,19 +1154,12 @@ public class DefaultPortalExtension
                             }
                           }
                         }
-                        catch(JmiServiceException e) {
-                          e.log();
-                          app.addErrorMessage(
-                            app.getTexts().getErrorTextCanNotEditDate(),
-                            new String[]{feature.getLabel(), (String)newValues.get(0), e.getMessage()}
-                          );
-                        }
                         catch(Exception e) {
-                          new ServiceException(e).log();
-                          app.addErrorMessage(
-                            app.getTexts().getErrorTextCanNotEditDate(),
-                            new String[]{feature.getLabel(), (String)newValues.get(0), e.getMessage()}
-                          );
+                        	SysLog.detail(e.getMessage(), e.getCause());
+                        	app.addErrorMessage(
+                        		app.getTexts().getErrorTextCanNotEditDate(),
+                        		new String[]{feature.getLabel(), (String)newValues.get(0), e.getMessage()}
+                        	);
                         }
                       }
         
@@ -1222,18 +1224,11 @@ public class DefaultPortalExtension
                             	);
                             }
                           }
-                          catch(JmiServiceException e) {
-                            e.log();
-                            app.addErrorMessage(
-                            	app.getTexts().getErrorTextCanNotEditDate(),
-                              	new String[]{feature.getLabel(), (String)newValues.get(0), e.getMessage()}
-                            );
-                          }
                           catch(Exception e) {
-                            new ServiceException(e).log();
+                          	SysLog.detail(e.getMessage(), e.getCause());
                             app.addErrorMessage(
                             	app.getTexts().getErrorTextCanNotEditDate(),
-                              new String[]{feature.getLabel(), (String)newValues.get(0), e.getMessage()}
+                            	new String[]{feature.getLabel(), (String)newValues.get(0), e.getMessage()}
                             );
                           }
                         }
@@ -1266,7 +1261,7 @@ public class DefaultPortalExtension
                           // If set and invalid and newValues is empty report an error
                           boolean xriSetAsTitleIsInvalid = false;
                           if((titleValues != null) && (titleValues.length > 0)) {
-                            if(titleValues[0].toString().length() == 0) {
+                            if(titleValues[0].toString().isEmpty()) {
                               xri = ""; // reference removed by user
                             }
                             else {
@@ -1298,7 +1293,7 @@ public class DefaultPortalExtension
                             }
                           }
                           // xri entered as title is valid
-                          if(xriSetAsTitleIsInvalid && newValues.size() == 0) {
+                          if(xriSetAsTitleIsInvalid && newValues.isEmpty()) {
                               // title N/A (object not available) and N/P (no permission) is set by show object. Ignore.
                               if(!((String)titleValues[0]).startsWith("N/A") && !((String)titleValues[0]).startsWith("N/P")) {
                             	  app.addErrorMessage(
@@ -1338,15 +1333,8 @@ public class DefaultPortalExtension
                                     );
                                 }
                               }
-                              catch(JmiServiceException e) {
-                                e.log();
-                                app.addErrorMessage(
-                                	app.getTexts().getErrorTextCanNotEditObjectReference(),
-                                  new String[]{feature.getLabel(), (String)newValues.get(0), e.getMessage()}
-                                );
-                              }
                               catch(Exception e) {
-                                new ServiceException(e).log();
+                               	SysLog.detail(e.getMessage(), e.getCause());
                                 app.addErrorMessage(
                                 	app.getTexts().getErrorTextCanNotEditObjectReference(),
                                 	new String[]{feature.getLabel(), (String)newValues.get(0), e.getMessage()}
@@ -1405,19 +1393,12 @@ public class DefaultPortalExtension
                         	  SysLog.warning("Unable to map code field", Arrays.asList(newValues.get(0).toString(), longTexts));
                           }
                         }
-                        catch(JmiServiceException e) {
-                          e.log();
-                          app.addErrorMessage(
-                        	  app.getTexts().getErrorTextCanNotEditCode(),
-                        	  new String[]{feature.getLabel(), (String)newValues.get(0), e.getMessage()}
-                          );
-                        }
                         catch(Exception e) {
-                          new ServiceException(e).log();
-                          app.addErrorMessage(
-                        	  app.getTexts().getErrorTextCanNotEditCode(),
-                        	  new String[]{feature.getLabel(), (String)newValues.get(0), e.getMessage()}
-                          );
+                        	SysLog.detail(e.getMessage(), e.getCause());
+                        	app.addErrorMessage(
+                        		app.getTexts().getErrorTextCanNotEditCode(),
+                        		new String[]{feature.getLabel(), (String)newValues.get(0), e.getMessage()}
+                        	);
                         }
                       }
         
@@ -1454,15 +1435,8 @@ public class DefaultPortalExtension
                               );
                             }
                           }
-                          catch(JmiServiceException e) {
-                            e.log();
-                            app.addErrorMessage(
-                            	app.getTexts().getErrorTextCanNotEditCode(),
-                            	new String[]{feature.getLabel(), (String)newValues.get(0), e.getMessage()}
-                            );
-                          }
                           catch(Exception e) {
-                            new ServiceException(e).log();
+                          	SysLog.detail(e.getMessage(), e.getCause());
                             app.addErrorMessage(
                             	app.getTexts().getErrorTextCanNotEditCode(),
                             	new String[]{feature.getLabel(), (String)newValues.get(0), e.getMessage()}
@@ -1804,12 +1778,14 @@ public class DefaultPortalExtension
         }
     }
     
-    //-------------------------------------------------------------------------  
     /**
      * Returns classes which are in the composition hierarchy of
      * the specified type. Returns a map with the class name as
      * key and a set of reference names as members, whereas the
      * references are composite references of the class.
+     * @param ofType
+     * @param hierarchy
+     * @throws ServiceException
      */
     protected void createCompositionHierarchy(
     	ModelElement_1_0 ofType,
@@ -1856,7 +1832,6 @@ public class DefaultPortalExtension
     	}
     }
 
-    //-------------------------------------------------------------------------    
     /* (non-Javadoc)
      * @see org.openmdx.portal.servlet.PortalExtension_1_0#getLookupObject(org.openmdx.model1.accessor.basic.cci.ModelElement_1_0, org.openmdx.base.accessor.jmi.cci.RefObject_1_0, org.openmdx.portal.servlet.ApplicationContext, javax.jdo.PersistenceManager)
      */
@@ -1930,39 +1905,41 @@ public class DefaultPortalExtension
     	return objectToShow;
     }
       
-    //-------------------------------------------------------------------------
-    /**
-     * Get view required which allows to lookup referenced types
+    /* (non-Javadoc)
+     * @see org.openmdx.portal.servlet.PortalExtension_1_0#getLookupView(java.lang.String, org.openmdx.base.mof.cci.ModelElement_1_0, org.openmdx.base.accessor.jmi.cci.RefObject_1_0, java.lang.String, org.openmdx.portal.servlet.ApplicationContext)
      */
+    @Override
     public ObjectView getLookupView(
         String id,
         ModelElement_1_0 lookupType,
         RefObject_1_0 startFrom,
         String filterValues,
-        ApplicationContext application
+        ApplicationContext app
     ) throws ServiceException {
         RefObject_1_0 lookupObject = this.getLookupObject(
             lookupType, 
             startFrom, 
-            application
+            app
         );
         String qualifiedNameLookupType = (String)lookupType.objGetValue("qualifiedName");        
         ObjectView view = new ShowObjectView(
             id,
             null,
             lookupObject.refGetPath(),
-            application,
+            app,
             new LinkedHashMap<Path,Action>(),
             qualifiedNameLookupType,
-            null //compositionHierarchy,
+            null, // resourcePathPrefix
+            null, // navigationTarget
+            null // isReadOnly
         );
         return view;
     }
     
-    //-------------------------------------------------------------------------
     /* (non-Javadoc)
      * @see org.openmdx.portal.servlet.PortalExtension_1_0#hasUserDefineableQualifier(org.openmdx.ui1.jmi1.Inspector, org.openmdx.portal.servlet.ApplicationContext)
      */
+    @Override
     public boolean hasUserDefineableQualifier(
         org.openmdx.ui1.jmi1.Inspector inspector,
         ApplicationContext app
@@ -1970,47 +1947,44 @@ public class DefaultPortalExtension
         return true;
     }
     
-    //-------------------------------------------------------------------------
-    /**
-     * The default implementation shows the grid content according to the user
-     * settings. The default value is true if no user setting is found.
+    /* (non-Javadoc)
+     * @see org.openmdx.portal.servlet.PortalExtension_1_0#showGridContentOnInit(org.openmdx.portal.servlet.control.GridControl, org.openmdx.portal.servlet.ApplicationContext)
      */
+    @Override
     public boolean showGridContentOnInit(
         GridControl gridControl,
         ApplicationContext app
     ) {
         String propertyName = gridControl.getPropertyName(
             gridControl.getQualifiedReferenceName(),
-            UserSettings.SHOW_ROWS_ON_INIT
+            UserSettings.SHOW_ROWS_ON_INIT.getName()
         );
         return app.getSettings().getProperty(propertyName) != null
             ? Boolean.valueOf(app.getSettings().getProperty(propertyName)).booleanValue()
             : true;        
     }
     
-    //-------------------------------------------------------------------------
-    /**
-     * The default implementation shows the search form according to the
-     * user settings. The default value is false if no user setting is found.
+    /* (non-Javadoc)
+     * @see org.openmdx.portal.servlet.PortalExtension_1_0#showSearchForm(org.openmdx.portal.servlet.control.GridControl, org.openmdx.portal.servlet.ApplicationContext)
      */
+    @Override
     public boolean showSearchForm(
         GridControl gridControl,
         ApplicationContext app
     ) {
         String propertyName = gridControl.getPropertyName(
             gridControl.getQualifiedReferenceName(),
-            UserSettings.SHOW_SEARCH_FORM
+            UserSettings.SHOW_SEARCH_FORM.getName()
         );
         return app.getSettings().getProperty(propertyName) != null ? 
         	Boolean.valueOf(app.getSettings().getProperty(propertyName)).booleanValue() : 
         		false;        
     }
     
-    //-------------------------------------------------------------------------
-    /**
-     * The default implementation renders the unmodified text value, i.e. calls
-     * p.write(value)
+    /* (non-Javadoc)
+     * @see org.openmdx.portal.servlet.PortalExtension_1_0#renderTextValue(org.openmdx.portal.servlet.ViewPort, java.lang.String, boolean)
      */
+    @Override
     public void renderTextValue(
         ViewPort p,
         String value,
@@ -2114,32 +2088,43 @@ public class DefaultPortalExtension
         p.write(value);
     }
     
-    //-------------------------------------------------------------------------
     /* (non-Javadoc)
      * @see org.openmdx.portal.servlet.PortalExtension_1_0#getDateStyle(java.lang.String, org.openmdx.portal.servlet.ApplicationContext)
      */
+    @Override
     public int getDateStyle(
        String qualifiedFeatureName,
-       ApplicationContext application
+       ApplicationContext app
     ) {
         return java.text.DateFormat.SHORT;
     }
 
-    //-------------------------------------------------------------------------    
     /* (non-Javadoc)
      * @see org.openmdx.portal.servlet.PortalExtension_1_0#getTimeStyle(java.lang.String, org.openmdx.portal.servlet.ApplicationContext)
      */
+    @Override
     public int getTimeStyle(
        String qualifiedFeatureName,
-       ApplicationContext application
+       ApplicationContext app
     ) {
         return java.text.DateFormat.MEDIUM;        
     }
     
-    //-------------------------------------------------------------------------
+    /* (non-Javadoc)
+     * @see org.openmdx.portal.servlet.PortalExtension_1_0#getTimeZone(java.lang.String, org.openmdx.portal.servlet.ApplicationContext)
+     */
+    @Override
+    public TimeZone getTimeZone(
+        String qualifiedFeatureName,
+        ApplicationContext app
+    ) {
+    	return TimeZone.getTimeZone(app.getCurrentTimeZone());    	
+    }
+
     /* (non-Javadoc)
      * @see org.openmdx.portal.servlet.PortalExtension_1_0#getDataBinding(java.lang.String, org.openmdx.portal.servlet.ApplicationContext)
      */
+    @Override
     public DataBinding getDataBinding(
        String dataBindingName
     ) {
@@ -2161,10 +2146,8 @@ public class DefaultPortalExtension
         }
     }
     
-    //-------------------------------------------------------------------------
-    /**
-     * The default implementation returns target as result, i.e. after an operation
-     * invocation the view shown to the user remains unchanged.
+    /* (non-Javadoc)
+     * @see org.openmdx.portal.servlet.PortalExtension_1_0#handleOperationResult(org.openmdx.base.accessor.jmi.cci.RefObject_1_0, java.lang.String, javax.jmi.reflect.RefStruct, javax.jmi.reflect.RefStruct)
      */
     public RefObject_1_0 handleOperationResult(
         RefObject_1_0 target, 
@@ -2175,7 +2158,6 @@ public class DefaultPortalExtension
         return null;
     }
 
-    //-------------------------------------------------------------------------
 	/* (non-Javadoc)
      * @see org.openmdx.portal.servlet.PortalExtension_1_0#getNewUserRole(org.openmdx.portal.servlet.ApplicationContext, org.openmdx.base.naming.Path)
      */
@@ -2188,7 +2170,6 @@ public class DefaultPortalExtension
 	    return app.getCurrentUserRole().substring(0, app.getCurrentUserRole().indexOf("@") + 1) + requestedObjectIdentity.get(4);
     }
 
-    //-------------------------------------------------------------------------
 	/* (non-Javadoc)
      * @see org.openmdx.portal.servlet.PortalExtension_1_0#getGridActions(org.openmdx.portal.servlet.view.Grid)
      */
@@ -2200,7 +2181,6 @@ public class DefaultPortalExtension
     	return Collections.<Action>emptyList();
     }
     
-    //-------------------------------------------------------------------------
 	/* (non-Javadoc)
      * @see org.openmdx.portal.servlet.PortalExtension_1_0#getActionFactory()
      */
@@ -2210,7 +2190,9 @@ public class DefaultPortalExtension
     	return this.actionFactory;
     }
 
-    //-------------------------------------------------------------------------
+    /* (non-Javadoc)
+     * @see org.openmdx.portal.servlet.PortalExtension_1_0#checkPrincipal(org.openmdx.base.naming.Path, java.lang.String, javax.jdo.PersistenceManager)
+     */
     @Override
     public boolean checkPrincipal(
         Path realmIdentity,
@@ -2220,10 +2202,8 @@ public class DefaultPortalExtension
     	return false;
     }
     
-    //-------------------------------------------------------------------------
-    /**
-     * Return set of roles for specified principal in given realm.
-     * This role mapper is based on the openMDX/Security model. 
+    /* (non-Javadoc)
+     * @see org.openmdx.portal.servlet.PortalExtension_1_0#getUserRoles(org.openmdx.base.naming.Path, java.lang.String, javax.jdo.PersistenceManager)
      */
     @Override
     public List<String> getUserRoles(
@@ -2234,7 +2214,9 @@ public class DefaultPortalExtension
     	return Collections.emptyList();
     }
 
-    //-----------------------------------------------------------------------
+    /* (non-Javadoc)
+     * @see org.openmdx.portal.servlet.PortalExtension_1_0#getAdminPrincipal(java.lang.String)
+     */
     @Override
     public String getAdminPrincipal(
         String realmName
@@ -2242,7 +2224,9 @@ public class DefaultPortalExtension
         return ADMIN_PRINCIPAL_PREFIX + realmName;
     }
   
-    //-----------------------------------------------------------------------
+    /* (non-Javadoc)
+     * @see org.openmdx.portal.servlet.PortalExtension_1_0#isRootPrincipal(java.lang.String)
+     */
     @Override
     public boolean isRootPrincipal(
         String principalName
@@ -2250,7 +2234,9 @@ public class DefaultPortalExtension
         return principalName.startsWith(ROOT_PRINCIPAL_NAME);
     }
     
-    //-------------------------------------------------------------------------
+    /* (non-Javadoc)
+     * @see org.openmdx.portal.servlet.PortalExtension_1_0#setLastLoginAt(org.openmdx.base.naming.Path, java.lang.String, java.lang.String, javax.jdo.PersistenceManager)
+     */
     @Override
     public void setLastLoginAt(
     	Path realmIdentity,
@@ -2261,15 +2247,20 @@ public class DefaultPortalExtension
     	// no op
     }
     
-    //-------------------------------------------------------------------------
+    /* (non-Javadoc)
+     * @see org.openmdx.portal.servlet.PortalExtension_1_0#getAutostartUrl(org.openmdx.portal.servlet.ApplicationContext)
+     */
     @Override
     public String getAutostartUrl(
     	ApplicationContext app
     ) {
-        return app.getSettings().getProperty(UserSettings.AUTOSTART_URL);
+        return app.getSettings().getProperty(UserSettings.AUTOSTART_URL.getName());
     }
 
-    //-------------------------------------------------------------------------
+    /**
+     * DefaultConditionParser
+     *
+     */
     public static class DefaultConditionParser implements ConditionParser {
 
 		private int offset;
@@ -2404,7 +2395,9 @@ public class DefaultPortalExtension
 
     }
 
-    //-------------------------------------------------------------------------
+    /* (non-Javadoc)
+     * @see org.openmdx.portal.servlet.PortalExtension_1_0#getConditionParser(org.openmdx.ui1.jmi1.ValuedField, org.openmdx.base.query.Condition)
+     */
     @Override
     public ConditionParser getConditionParser(
     	final ValuedField field,
@@ -2416,6 +2409,16 @@ public class DefaultPortalExtension
     	);
     }
 
+	/* (non-Javadoc)
+     * @see org.openmdx.portal.servlet.PortalExtension_1_0#getExtension(java.lang.String)
+     */
+    @Override
+    public Object getExtension(
+    	String name
+    ) {
+	    return null;
+    }
+    
     //-------------------------------------------------------------------------
     // Members
     //-------------------------------------------------------------------------
@@ -2448,7 +2451,7 @@ public class DefaultPortalExtension
     }
     
     private DefaultActionFactory actionFactory = new DefaultActionFactory();
-    
+
 }
 
 //--- End of File -----------------------------------------------------------

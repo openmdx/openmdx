@@ -1,16 +1,13 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: SlicedDbObject.java,v 1.49 2011/12/02 15:01:32 hburger Exp $
- * Description: SlicedDbObject
- * Revision:    $Revision: 1.49 $
+ * Description: Sliced DB Object
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/12/02 15:01:32 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2011, OMEX AG, Switzerland
+ * Copyright (c) 2004-2012, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -635,11 +632,12 @@ public class SlicedDbObject extends StandardDbObject {
         List objectIdColumns,
         List objectIdValues,
         Set excludeAttributes, 
-        String lockAssertion
+        String writeLock, 
+        String readLock
     ) throws ServiceException {
         PreparedStatement ps = null;
         String currentStatement = null;
-        List statementParameters = new ArrayList();
+        List<Object> statementParameters = new ArrayList<Object>();
         Set statementColumns = new HashSet();
         Set processedAttributes = new HashSet();
         if(excludeAttributes != null) {
@@ -684,7 +682,7 @@ public class SlicedDbObject extends StandardDbObject {
             ) {
                 String dbObject = (String)d.next();
                 Set dbObjectColumns = this.getDbObjectColumns(dbObject);
-                String statement = "UPDATE " + dbObject + " SET ";
+                StringBuilder statement = new StringBuilder("UPDATE ").append(dbObject).append(" SET ");
                 statementParameters.clear();
                 boolean hasParameters = false;
                 // newValues
@@ -711,9 +709,14 @@ public class SlicedDbObject extends StandardDbObject {
                                 String columnName = this.database.getColumnName(this.conn, attributeName, valIndex, false, true, false);
                                 if(dbObjectColumns.contains(columnName)) {
                                     if(!columnName.equals(this.database.OBJECT_IDX)) {
-                                        statement += hasParameters ? ", " : "";
-                                        statement += this.database.getColumnName(this.conn, attributeName, valIndex, false, false, false) + " = ";
-                                        statement += this.database.getPlaceHolder(this.conn, value); 
+                                    	if(hasParameters) statement.append(", ");
+                                        statement.append(
+                                        	this.database.getColumnName(this.conn, attributeName, valIndex, false, false, false)
+                                        ).append(
+                                        	" = "
+                                        ).append(
+                                        	this.database.getPlaceHolder(this.conn, value)
+                                        ); 
                                         statementColumns.add(columnName);
                                         statementParameters.add(
                                             this.database.externalizeStringValue(columnName, value)
@@ -759,8 +762,8 @@ public class SlicedDbObject extends StandardDbObject {
                                         !columnName.equals(this.database.OBJECT_IDX) && 
                                         !statementColumns.contains(columnName)
                                     ) {
-                                        statement += hasParameters ? ", " : "";
-                                        statement += columnName + " = NULL";
+                                    	if(hasParameters) statement.append(", ");
+                                        statement.append(columnName).append(" = NULL");
                                         statementColumns.add(columnName);
                                         hasParameters = true;
                                     }
@@ -779,14 +782,14 @@ public class SlicedDbObject extends StandardDbObject {
                 if(hasParameters) {
 
                     // WHERE
-                    statement += " WHERE ";
+                    statement.append(" WHERE ");
                     boolean hasClause = false;
 
                     // rid
                     if(referenceIdColumns != null) {
                         for(Iterator i = referenceIdColumns.iterator(); i.hasNext(); ) {
-                            if(hasClause) statement += " AND ";
-                            statement += "(" + i.next() + " = ?)";
+                            if(hasClause) statement.append(" AND ");
+                            statement.append("(").append(i.next()).append(" = ?)");
                             hasClause = true;
                         }
                         if(!referenceIdColumns.isEmpty()) {
@@ -797,8 +800,8 @@ public class SlicedDbObject extends StandardDbObject {
                     // oid
                     if(objectIdColumns != null) {
                         for(Iterator i = objectIdColumns.iterator(); i.hasNext(); ) {
-                            if(hasClause) statement += " AND ";
-                            statement += "(" + i.next() + " = ?)";
+                            if(hasClause) statement.append(" AND ");
+                            statement.append("(").append(i.next()).append(" = ?)");
                             hasClause = true;
                         }
                         if(!objectIdColumns.isEmpty()) {
@@ -807,25 +810,21 @@ public class SlicedDbObject extends StandardDbObject {
                     }                
                     // idx
                     if(this.getIndexColumn() != null) {
-                        if(hasClause) statement += " AND ";
-                        statement += "(" + this.getIndexColumn() + " = ?)";
+                        if(hasClause) statement.append(" AND ");
+                        statement.append("(").append(this.getIndexColumn()).append(" = ?)");
                         statementParameters.add(Integer.valueOf(index));
                         hasClause = true;
                     }
                     // secondary tables require index
                     else if(processAsSecondary) {
-                        if(hasClause) statement += " AND ";
-                        statement += "(" + this.database.OBJECT_IDX + " = ?)";
+                        if(hasClause) statement.append(" AND ");
+                        statement.append("(").append(this.database.OBJECT_IDX).append(" = ?)");
                         statementParameters.add(Integer.valueOf(index));
                         hasClause = true;                    
                     }
-                    if(!processAsSecondary && lockAssertion != null) {
-                        String versionField = AbstractDatabase_1.getVersionField(lockAssertion);
-                        Object versionValue = AbstractDatabase_1.getVersionValue(lockAssertion, versionField);
-                        statement += getVersionClause(versionField, versionValue);
-                        if(versionValue != null) {
-                            statementParameters.add(versionValue);
-                        }
+                    if(!processAsSecondary) {
+                    	appendLockAssertion(statement, statementParameters, writeLock);
+                    	appendLockAssertion(statement, statementParameters, readLock);
                     }
                     ps = this.database.prepareStatement(
                         this.conn, 
@@ -847,7 +846,7 @@ public class SlicedDbObject extends StandardDbObject {
                     }
                     int rowCount = this.database.executeUpdate(ps, currentStatement, statementParameters);
                     if(rowCount != 1){
-                        if(lockAssertion == null) {
+                        if(writeLock == null) {
                             SysLog.warning("Update failed", newObjectFacade.getPath());
                         } else {
                             throw new ServiceException(
@@ -855,7 +854,7 @@ public class SlicedDbObject extends StandardDbObject {
                                 BasicException.Code.CONCURRENT_ACCESS_FAILURE,
                                 "The object has been modified since it was read",
                                 new BasicException.Parameter("path", newObjectFacade.getPath()),
-                                new BasicException.Parameter("assertion", lockAssertion), 
+                                new BasicException.Parameter("assertion", writeLock), 
                                 new BasicException.Parameter("sqlStatement", currentStatement),
                                 new BasicException.Parameter("parameters", statementParameters),
                                 new BasicException.Parameter("sqlRowCount", rowCount)
@@ -930,7 +929,8 @@ public class SlicedDbObject extends StandardDbObject {
         int index,
         MappedRecord newObject,
         MappedRecord oldObject, 
-        String lockAssertion
+        String writeLock, 
+        String readLock
     ) throws ServiceException {
         this.replaceObjectSlice(
             index, 
@@ -941,7 +941,8 @@ public class SlicedDbObject extends StandardDbObject {
             this.objectIdColumn,
             this.getObjectIdValues(),
             null, 
-            lockAssertion
+            writeLock, 
+            readLock
         );    
     }
 

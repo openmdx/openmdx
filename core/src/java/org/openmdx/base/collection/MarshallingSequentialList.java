@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: MarshallingSequentialList.java,v 1.31 2011/04/12 15:47:21 hburger Exp $
  * Description: Marshalling Sequential List
- * Revision:    $Revision: 1.31 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/04/12 15:47:21 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

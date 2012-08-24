@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: TestImmutableDatatypes.java,v 1.7 2011/04/05 18:06:28 hburger Exp $
  * Description: TestImmutableDatatypes 
- * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/04/05 18:06:28 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -147,15 +144,21 @@ public class TestImmutableDatatypes {
         }
     }
 
+    private boolean isDurationNormalized(){
+        return 
+             !"1.5".equals(System.getProperty("java.specification.version")) &&
+             !"IBM Corporation".equals(System.getProperty("java.vendor"));
+    }
+    
     @Test
     public void durationValues(){
         assertEquals("Normalize year/month duration", "P1Y6M", immutableDatatypeFactory().toNormalizedDuration(oneAndHalfAYear).toString());
         assertEquals("Normalize day/time duration", "PT1H0M0S", immutableDatatypeFactory().toNormalizedDuration(oneHour).toString());
         Duration d = oneAndHalfAYear.add(oneHour);
-        if("1.5".equals(System.getProperty("java.specification.version"))){
-            assertEquals("Standard duration is non-normalized", "P18MT3600S", d.toString());
-        } else {
+        if(isDurationNormalized()) {
             assertEquals("Standard duration is normalized", "P1Y6MT1H0M0S", d.toString());
+        } else {
+            assertEquals("Standard duration is non-normalized", "P18MT3600S", d.toString());
         }
         assertEquals("Normalized duration", "P1Y6MT1H0M0S", immutableDatatypeFactory().toNormalizedDuration(d).toString());
     }

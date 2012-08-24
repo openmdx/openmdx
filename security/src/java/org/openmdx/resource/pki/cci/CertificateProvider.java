@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: CertificateProvider.java,v 1.3 2010/07/15 16:38:53 hburger Exp $
  * Description: KeyStoreProvider
- * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/07/15 16:38:53 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

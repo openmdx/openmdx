@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: ConnectorContext.java,v 1.7 2010/10/11 06:46:24 hburger Exp $
  * Description: DataSource Context 
- * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/10/11 06:46:24 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

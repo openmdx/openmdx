@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     opeMDX/Security, http://www.openmdx.org/
- * Name:        $Id: ManagedKeyStoreConnection.java,v 1.9 2010/09/06 04:06:15 hburger Exp $
  * Description: Managed Key Store Connection 
- * Revision:    $Revision: 1.9 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/09/06 04:06:15 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

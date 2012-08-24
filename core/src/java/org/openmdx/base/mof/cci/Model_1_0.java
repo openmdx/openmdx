@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Model_1_0.java,v 1.8 2010/01/12 15:16:05 hburger Exp $
  * Description: Model_1_0 interface
- * Revision:    $Revision: 1.8 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/01/12 15:16:05 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

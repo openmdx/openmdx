@@ -1,17 +1,13 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: PlugIn_1.java,v 1.4 2012/01/07 01:37:44 hburger Exp $
- * Description: StandardPlugIn 
- * Revision:    $Revision: 1.4 $
+ * Description: Standard Plug-In 
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2012/01/07 01:37:44 $
  * ====================================================================
  *
- * This software is published under the BSD license
- * as listed below.
+ * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2009, OMEX AG, Switzerland
+ * Copyright (c) 2009-2012, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -51,15 +47,14 @@
  */
 package org.openmdx.base.aop1;
 
+import javax.resource.cci.InteractionSpec;
+
 import org.openmdx.base.accessor.cci.Container_1_0;
+import org.openmdx.base.accessor.rest.DataObject_1;
 import org.openmdx.base.accessor.view.Interceptor_1;
 import org.openmdx.base.accessor.view.ObjectView_1_0;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
-import org.openmdx.base.mof.cci.Model_1_0;
-import org.openmdx.base.naming.Path;
-import org.openmdx.base.persistence.spi.SharedObjects;
-import org.openmdx.state2.spi.Configuration;
 
 /**
  * Standard Plug-In
@@ -73,6 +68,59 @@ public class PlugIn_1 implements PlugIn_1_0 {
         super();
     }
 
+    /**
+     * Tells whether the Removable interceptor shall be applied
+     * 
+     * @param type
+     * 
+     * @return <code>true</code> if the Removable interceptor shall be applied
+     * 
+     * @throws ServiceException
+     */
+    protected boolean isRemovable(
+        ObjectView_1_0 view,
+        Interceptor_1 next,
+        ModelElement_1_0 type
+    ) throws ServiceException{
+        return type.getModel().isSubtypeOf(type, "org:openmdx:base:Removable");
+    }
+
+    /**
+     * Tells whether the Segment interceptor shall be applied
+     * 
+     * @param view
+     * @param next
+     * @param type
+     * 
+     * @return <code>true</code> if the Segment interceptor shall be applied
+     * 
+     * @throws ServiceException
+     */
+    protected boolean isSegment(
+        ObjectView_1_0 view,
+        Interceptor_1 next,
+        ModelElement_1_0 type
+    ) throws ServiceException{
+        return type.getModel().isSubtypeOf(type, "org:openmdx:base:Segment");
+    }
+    
+    /**
+     * Tells whether ExtentCapable interceptor shall be applied
+     * 
+     * @param type
+     * 
+     * @return <code>true</code> if the ExtentCapable interceptor shall be applied
+     * 
+     * @throws ServiceException
+     */
+    protected boolean isExtentCapable(
+        ObjectView_1_0 view,
+        Interceptor_1 next,
+        ModelElement_1_0 type
+    ) throws ServiceException{
+        return type.getModel().isSubtypeOf(type, "org:openmdx:base:ExtentCapable");
+    }
+    
     /* (non-Javadoc)
      * @see org.openmdx.base.aop1.PlugIn#getInterceptor(org.openmdx.base.accessor.view.Interceptor_1)
      */
@@ -81,24 +129,20 @@ public class PlugIn_1 implements PlugIn_1_0 {
         Interceptor_1 next
     ) throws ServiceException {
         Interceptor_1 interceptor = next;
-        Model_1_0 model = view.getModel();
-        ModelElement_1_0 dataObjectType = model.getElement(view.objGetDelegate().objGetClass());
-        if(model.isSubtypeOf(dataObjectType, "org:openmdx:base:Removable")) {
-            Path objectId = view.jdoGetObjectId();
-            boolean validTimeUnique = objectId == null ? 
-                model.isSubtypeOf(dataObjectType, "org:openmdx:state2:StateCapable") && Boolean.TRUE.equals(interceptor.objGetValue("validTimeUnique")) :
-                SharedObjects.getPlugInObject(view.jdoGetPersistenceManager(), Configuration.class).isValidTimeUnique(objectId); 
-            if(!validTimeUnique) {
-                //
-                // Removable Capability
-                //
-                interceptor = new org.openmdx.base.aop1.Removable_1(
-                    view,
-                    interceptor
-                );
-            }
+        ModelElement_1_0 type = view.getModel().getElement(view.objGetDelegate().objGetClass());
+        //
+        // Removable Capability
+        //
+        if(isRemovable(view, next, type)) {
+            interceptor = new org.openmdx.base.aop1.Removable_1(
+                view,
+                interceptor
+            );
         }
-        if(model.isSubtypeOf(dataObjectType, "org:openmdx:base:Segment")) {
+        //
+        // Extent Capability
+        //
+        if(isSegment(view, next, type)) {
             interceptor = new Segment_1(
                 view,
                 interceptor
@@ -113,16 +157,36 @@ public class PlugIn_1 implements PlugIn_1_0 {
                 }
                
             };
-        } else if (model.isSubtypeOf(dataObjectType, "org:openmdx:base:ExtentCapable")) {
-            //
-            // Extent Capability
-            //
+        } else if (isExtentCapable(view, next, type)) {
             interceptor = new org.openmdx.base.aop1.ExtentCapable_1(
                 view,
                 interceptor
             );
         }
         return interceptor;
+    }
+
+	/* (non-Javadoc)
+	 * @see org.openmdx.base.aop1.PlugIn_1_0#propagatedEagerly(org.openmdx.base.accessor.rest.DataObject_1, java.lang.String, java.lang.Object)
+	 */
+//  @Override
+	public boolean propagatedEagerly(
+		DataObject_1 object, 
+		String feature,
+		Object value
+	) throws ServiceException {
+		return false;
+	}
+
+    /* (non-Javadoc)
+     * @see org.openmdx.base.aop1.PlugIn_1_0#resolveObjectClass(java.lang.String, javax.resource.cci.InteractionSpec)
+     */
+//  @Override
+    public String resolveObjectClass(
+        String objectClass,
+        InteractionSpec interactionSpec
+    ) throws ServiceException {
+        return objectClass;
     }
 
 }

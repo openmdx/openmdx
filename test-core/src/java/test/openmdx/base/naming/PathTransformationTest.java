@@ -1,16 +1,13 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: PathTransformationTest.java,v 1.11 2010/05/20 16:25:57 hburger Exp $
  * Description: Path Transformation Test
- * Revision:    $Revision: 1.11 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/05/20 16:25:57 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2008, OMEX AG, Switzerland
+ * Copyright (c) 2004-2012, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -61,6 +58,7 @@ import java.net.URLDecoder;
 import java.net.URLEncoder;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.naming.Path;
@@ -112,7 +110,7 @@ public class PathTransformationTest {
             null, // Must be the first entry
             "org::openmdx::preferences1/provider/Java::Properties/segment/System/preferences/lost+found",
             "org::openmdx::preferences1/provider/Java::Properties/segment/(java::comp//env)",
-            "org::openmdx::preferences1/provider/Java::Properties/segment/(java::comp)",
+            "org::openmdx::preferences1/provider/(@openmdx!configuration)/segment/(java::comp)",
             "",
             "::*",
             "A::B",
@@ -136,7 +134,7 @@ public class PathTransformationTest {
             null,
             "spice://org:openmdx:preferences1/provider/Java:Properties/segment/System/preferences/lost+found",
             "spice://org:openmdx:preferences1/provider/Java:Properties/segment/(java:comp%2fenv)",
-            "spice://org:openmdx:preferences1/provider/Java:Properties/segment/(java:comp)",
+            "spice://org:openmdx:preferences1/provider/(@openmdx!configuration)/segment/(java:comp)",
             "spice:/",
             "spice://:*",
             "spice://A:B",
@@ -160,7 +158,7 @@ public class PathTransformationTest {
             null,
             "xri:@openmdx:org.openmdx.preferences1/provider/Java:Properties/segment/System/preferences/lost+found",
             "xri:@openmdx:org.openmdx.preferences1/provider/Java:Properties/segment/(java:comp/env)",
-            "xri:@openmdx:org.openmdx.preferences1/provider/Java:Properties/segment/(java:comp)",
+            "xri:@openmdx:org.openmdx.preferences1/provider/(@openmdx!configuration)/segment/(java:comp)",
             "xri:@openmdx",
             "xri:@openmdx:**",
             "xri:@openmdx:A.B",
@@ -189,7 +187,7 @@ public class PathTransformationTest {
             null,
             "xri://@openmdx*org.openmdx.preferences1/provider/Java:Properties/segment/System/preferences/($t*ces*lost%2Bfound)",
             "xri://@openmdx*org.openmdx.preferences1/provider/Java:Properties/segment/(java:comp/env)",
-            "xri://@openmdx*org.openmdx.preferences1/provider/Java:Properties/segment/(java:comp)",
+            "xri://@openmdx*org.openmdx.preferences1/provider/(@openmdx!configuration)/segment/(java:comp)",
             "xri://@openmdx",
             "xri://@openmdx*($..)",
             "xri://@openmdx*A.B",
@@ -219,7 +217,7 @@ public class PathTransformationTest {
             null,
             "xri://@openmdx*org.openmdx.preferences1/provider/Java:Properties/segment/System/preferences/($t*ces*lost%252Bfound)",
             "xri://@openmdx*org.openmdx.preferences1/provider/Java:Properties/segment/(java:comp%2Fenv)",
-            "xri://@openmdx*org.openmdx.preferences1/provider/Java:Properties/segment/(java:comp)",
+            "xri://@openmdx*org.openmdx.preferences1/provider/(@openmdx!configuration)/segment/(java:comp)",
             "xri://@openmdx",
             "xri://@openmdx*($..)",
             "xri://@openmdx*A.B",
@@ -249,7 +247,7 @@ public class PathTransformationTest {
             null,
             "@openmdx*org.openmdx.preferences1/provider/Java:Properties/segment/System/preferences/($t*ces*lost%252Bfound)",
             "@openmdx*org.openmdx.preferences1/provider/Java:Properties/segment/(java:comp%2Fenv)",
-            "@openmdx*org.openmdx.preferences1/provider/Java:Properties/segment/(java:comp)",
+            "@openmdx*org.openmdx.preferences1/provider/(@openmdx!configuration)/segment/(java:comp)",
             "@openmdx",
             "@openmdx*($..)",
             "@openmdx*A.B",
@@ -272,19 +270,20 @@ public class PathTransformationTest {
         };
     }
 
-//    @Test
-//    public void testX2P(
-//    ) throws ServiceException {
-//        for (
-//            int i = 1;
-//            i < paths.length;
-//            i++
-//        ) assertEquals(
-//            "[" + i + "]: " + paths[i],
-//            paths[i],
-//            new Path(xri1[i]).toString()
-//        );
-//    }
+    @Ignore
+    @Test
+    public void testX2P(
+    ) throws ServiceException {
+        for (
+            int i = 1;
+            i < paths.length;
+            i++
+        ) assertEquals(
+            "[" + i + "]: " + paths[i],
+            paths[i],
+            new Path(xri1[i]).toString()
+        );
+    }
 
     @Test
     public void testU2P(

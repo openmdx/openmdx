@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: DatagramPacketFormatter.java,v 1.1 2004/10/27 11:45:14 hburger Exp $
  * Description: Datagram Packet Formatter
- * Revision:    $Revision: 1.1 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2004/10/27 11:45:14 $
  * ====================================================================
  *
  * This software is published under the BSD license

@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: RefQuery_1.java,v 1.54 2011/10/21 22:32:06 hburger Exp $
  * Description: RefQuery_1 class
- * Revision:    $Revision: 1.54 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/10/21 22:32:06 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -123,7 +120,14 @@ import org.w3c.cci2.StringTypePredicate;
 @SuppressWarnings({"rawtypes","unchecked"})
 public class RefQuery_1 implements RefQuery_1_0 {
 
-    //-------------------------------------------------------------------------
+    /**
+     * Constructor 
+     *
+     * @param filter
+     * @param mapping
+     * @param filterType
+     * @param subclasses
+     */
     protected RefQuery_1(
         org.openmdx.base.query.Filter filter,
         Mapping_1_0 mapping,
@@ -141,6 +145,23 @@ public class RefQuery_1 implements RefQuery_1_0 {
         this.mapping = mapping;
     }
 
+    /**
+     * Constructor 
+     *
+     * @param that the query to be cloned
+     */
+    private RefQuery_1(
+        RefQuery_1 that
+    ) {
+        this.filter = that.filter.clone();
+        this.filterType = that.filterType;
+        int indexOfFilterTypeCondition = that.indexOfFilterTypeCondition();
+        this.filterTypeCondition = indexOfFilterTypeCondition < 0 ?
+            that.filterTypeCondition.clone() : 
+            this.filter.getCondition().get(indexOfFilterTypeCondition);
+        this.mapping = that.mapping;
+    }
+    
     //-----------------------------------------------------------------------
     public abstract class RefPredicate implements AnyTypePredicate {
 
@@ -1430,7 +1451,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
                             throw new ServiceException(
                                 BasicException.Code.DEFAULT_DOMAIN, 
                                 BasicException.Code.BAD_PARAMETER, 
-                                "A value's class is inapprpriate for a reference filter collection",
+                                "A value's class is inappropriate for a reference filter collection",
                                 new BasicException.Parameter("supported", RefObject_1_0.class.getName(), Path.class.getName(), String.class.getName()),
                                 new BasicException.Parameter("actual", v == null ? null : v.getClass().getName())
                             );
@@ -1446,6 +1467,16 @@ public class RefQuery_1 implements RefQuery_1_0 {
                     );
                 }
             } else if(model.isAttributeType(featureDef)) {
+            	for(Object element : value){
+            		if(element == null) {
+                        throw new ServiceException(
+                            BasicException.Code.DEFAULT_DOMAIN, 
+                            BasicException.Code.BAD_PARAMETER, 
+                            "Null is inapprpriate as attribute filter value",
+                            new BasicException.Parameter("value", value)
+                        );
+            		}
+            	}
                 this.filter.getCondition().add(
                     new AnyTypeCondition(
                         quantifier,
@@ -1520,7 +1551,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
                     Object[] instanceOf = new Object[value.size()];
                     int i = 0;
                     for(Object v : value) {
-                        instanceOf[i++] = v instanceof Class<?> ? this.mapping.getModelClassName((Class<?>)v) : (String) v;
+                        instanceOf[i++] = v instanceof Class<?> ? getMapping().getModelClassName((Class<?>)v) : (String) v;
                     }
                     this.filterTypeCondition.setValue(instanceOf);
                 } else {
@@ -1731,7 +1762,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
                         break;
                     }
                 }
-                return this.mapping.getClassMapping(
+                return getMapping().getClassMapping(
                     typeName
                 ).newQuery(
                     new Jmi1ObjectPredicateInvocationHandler(
@@ -1741,7 +1772,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
                         ),
                         new RefQuery_1(
                             filterValue,
-                            this.mapping,
+                            getMapping(),
                             typeName, 
                             true // subclasses
                         )
@@ -1778,14 +1809,31 @@ public class RefQuery_1 implements RefQuery_1_0 {
         return "filter=" + this.filter;
     }
 
+    
     //------------------------------------------------------------------------
     public FeatureMapper getFeatureMapper(
     ) throws ServiceException {
-        return this.mapping.getFeatureMapper(
+        return getMapping().getFeatureMapper(
             this.filterType, 
             FeatureMapper.Type.QUERY
         );
     }
+
+	/**
+	 * Retrieve the mapping instance
+	 * 
+	 * @return the mapping instance
+	 */
+	private Mapping_1_0 getMapping(
+	) throws ServiceException {
+		if(this.mapping != null) {
+			return this.mapping;
+		} else throw new ServiceException(
+            BasicException.Code.DEFAULT_DOMAIN,
+            BasicException.Code.NOT_SUPPORTED,
+            "De-serialized openMDX Query instances are unmodfiable"
+        );
+	}
 
 
     //-------------------------------------------------------------------------
@@ -2034,7 +2082,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
         }
         try {
             this.filterTypeCondition.setValue(
-                this.mapping.getModelClassName(cls)
+                getMapping().getModelClassName(cls)
             );
         } catch (ServiceException exception) {
             throw new JDOUserException(
@@ -2197,8 +2245,36 @@ public class RefQuery_1 implements RefQuery_1_0 {
         );
     }
 
+    /* (non-Javadoc)
+     * @see java.lang.Object#clone()
+     */
+    @Override
+    public RefQuery_1 clone(
+    ){
+        return new RefQuery_1(this);
+    }
+
+    /**
+     * Find the index of the filter type condition
+     * 
+     * @return the index of the filter type condition 
+     */
+    private int indexOfFilterTypeCondition(
+    ){
+        int i = 0;
+        for(Condition candidate : this.filter.getCondition()) {
+            if(candidate == this.filterTypeCondition) {
+                return i;
+            } else {
+                i++;
+            }
+        }
+        return -1;
+    }
+
+
     //-------------------------------------------------------------------------
-    // Variables
+    // Variablesfilter
     //-------------------------------------------------------------------------
     protected static final long serialVersionUID = 5901724265321809315L;
 
@@ -2211,7 +2287,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
     protected final String filterType;
     protected final Condition filterTypeCondition;
     protected final Filter filter;
-    protected final Mapping_1_0 mapping;
+    private transient Mapping_1_0 mapping;
 
 }
 

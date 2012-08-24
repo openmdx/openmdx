@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: EmbeddedDataprovider_1.java,v 1.12 2009/12/30 19:09:50 wfro Exp $
  * Description: Embedded Data Provider
- * Revision:    $Revision: 1.12 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/12/30 19:09:50 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: ReferencedObjectDataBinding.java,v 1.4 2009/11/05 18:04:11 hburger Exp $
  * Description: ReferencedObjectDataBinding 
- * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/11/05 18:04:11 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -59,64 +56,31 @@ import java.util.Collection;
 
 import javax.jmi.reflect.RefObject;
 
-import org.openmdx.portal.servlet.DataBinding_1_0;
+import org.openmdx.portal.servlet.ApplicationContext;
+import org.openmdx.portal.servlet.DataBinding;
 
 /**
  * Allows to set/get features of referenced objects.
  * 
  */
-public class ReferencedObjectDataBinding implements DataBinding_1_0 {
+public class ReferencedObjectDataBinding extends DataBinding {
 
-    //-----------------------------------------------------------------------    
+    /**
+     * Constructor 
+     *
+     */
     public ReferencedObjectDataBinding(
     ) {
     }
     
-    //-----------------------------------------------------------------------    
-    protected String getAttributeName(
-       String qualifiedFeatureName
-    ) {
-        return qualifiedFeatureName.substring(
-            qualifiedFeatureName.lastIndexOf("!") + 1
-        );        
-    }
-    
-    //-----------------------------------------------------------------------
-    protected String[] getReferenceNames(
-       String qualifiedFeatureName
-    ) {        
-        String qualifiedReferenceName = qualifiedFeatureName.substring(
-            0, 
-            qualifiedFeatureName.indexOf("!")
-        );
-        String referenceNames = qualifiedReferenceName.indexOf("*") > 0 ?
-            qualifiedReferenceName.substring(qualifiedReferenceName.lastIndexOf(":") + 1, qualifiedReferenceName.indexOf("*")) :
-            qualifiedReferenceName.substring(qualifiedReferenceName.lastIndexOf(":") + 1);
-        return referenceNames.startsWith("(") && referenceNames.endsWith(")") ?
-            referenceNames.substring(1, referenceNames.length()-1).split(";") :
-            referenceNames.split(";");
-    }
-    
-    //-----------------------------------------------------------------------
-    /**
-     * Return object referenced by referenceNames.
+    /* (non-Javadoc)
+     * @see org.openmdx.portal.servlet.DataBinding#getValue(javax.jmi.reflect.RefObject, java.lang.String, org.openmdx.portal.servlet.ApplicationContext)
      */
-    public RefObject getReferencedObject(
-        RefObject object,
-        String[] referenceNames
-    ) {
-        RefObject referencedObject = object;
-        for(int i = 0; i < referenceNames.length; i++) {
-            referencedObject = (RefObject)referencedObject.refGetValue(referenceNames[i]);
-            if(referencedObject == null) break;
-        }
-        return referencedObject;
-    }
-    
-    //-----------------------------------------------------------------------
+    @Override
     public Object getValue(
         RefObject object, 
-        String qualifiedFeatureName
+        String qualifiedFeatureName,
+        ApplicationContext app
     ) {
         String[] referenceNames = this.getReferenceNames(qualifiedFeatureName);
         RefObject referenced = this.getReferencedObject(
@@ -132,11 +96,15 @@ public class ReferencedObjectDataBinding implements DataBinding_1_0 {
         }
     }
 
-    //-----------------------------------------------------------------------
+    /* (non-Javadoc)
+     * @see org.openmdx.portal.servlet.DataBinding#setValue(javax.jmi.reflect.RefObject, java.lang.String, java.lang.Object, org.openmdx.portal.servlet.ApplicationContext)
+     */
+    @Override
     public void setValue(
         RefObject object, 
         String qualifiedFeatureName, 
-        Object newValue
+        Object newValue,
+        ApplicationContext app
     ) {
         String[] referenceNames = this.getReferenceNames(qualifiedFeatureName);
         RefObject referenced = this.getReferencedObject(
@@ -147,10 +115,11 @@ public class ReferencedObjectDataBinding implements DataBinding_1_0 {
             String attributeName = this.getAttributeName(qualifiedFeatureName);      
             Object oldValue = referenced.refGetValue(attributeName);
             if(oldValue instanceof Collection) {
-                Collection values = (Collection)oldValue;
+                @SuppressWarnings("unchecked")
+                Collection<Object> values = (Collection)oldValue;
                 values.clear();
                 if(newValue instanceof Collection) {
-                    values.addAll((Collection)newValue);
+                    values.addAll((Collection<?>)newValue);
                 }
                 else {
                     values.add(newValue);

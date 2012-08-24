@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: XMIModelMapper.java,v 1.10 2011/04/12 15:29:20 hburger Exp $
  * Description: write model as org.omg.model1.xsd compliant XML file
- * Revision:    $Revision: 1.10 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/04/12 15:29:20 $
  * ====================================================================
  *
  * This software is published under the BSD license

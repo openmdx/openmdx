@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: XRI_1Marshaller.java,v 1.6 2011/08/19 22:28:19 hburger Exp $
  * Description: Path/XRI Marshaller 
- * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/08/19 22:28:19 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

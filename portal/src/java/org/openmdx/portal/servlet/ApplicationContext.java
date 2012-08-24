@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: ApplicationContext.java,v 1.123 2011/11/28 13:31:41 wfro Exp $
  * Description: ApplicationContext
- * Revision:    $Revision: 1.123 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/11/28 13:31:41 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -78,7 +75,6 @@ import java.util.TreeMap;
 
 import javax.jdo.PersistenceManager;
 import javax.jdo.PersistenceManagerFactory;
-import javax.jmi.reflect.RefObject;
 
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
 import org.openmdx.base.exception.ServiceException;
@@ -94,19 +90,26 @@ import org.openmdx.portal.servlet.control.Control;
 import org.openmdx.portal.servlet.control.ControlFactory;
 import org.openmdx.portal.servlet.control.EditInspectorControl;
 import org.openmdx.portal.servlet.control.ShowInspectorControl;
-import org.openmdx.portal.servlet.texts.TextsFactory;
-import org.openmdx.portal.servlet.texts.Texts_1_0;
 import org.openmdx.portal.servlet.view.LayoutFactory;
 
-public final class ApplicationContext
-    implements Serializable {
+/**
+ * ApplicationContext holds the state of the current (user) session.
+ *
+ */
+public final class ApplicationContext implements Serializable {
   
-    //-------------------------------------------------------------------------
+	/**
+	 * Constructor 
+	 *
+	 */
 	public ApplicationContext(
 	) {	
 	}
-	
-    //-------------------------------------------------------------------------
+
+    /**
+     * Init application context.
+     * @throws ServiceException
+     */
     public void init(
     ) throws ServiceException {
         this.currentViewPortType = this.getViewPortType();
@@ -230,50 +233,50 @@ public final class ApplicationContext
         this.loadUserHome();
         this.loadSettings();
         // Init locale
-        if(this.getSettings().getProperty(UserSettings.LOCALE_NAME) != null) {
+        if(this.getSettings().getProperty(UserSettings.LOCALE_NAME.getName()) != null) {
             this.setCurrentLocale(
-                this.getSettings().getProperty(UserSettings.LOCALE_NAME)
+                this.getSettings().getProperty(UserSettings.LOCALE_NAME.getName())
             );
-        }
-        else {
+        } else {
             this.setCurrentLocale(
                 this.getLocale() == null ? "en_US" : this.getLocale()
             );
         }
         // Init TimeZone
-        if(this.getSettings().getProperty(UserSettings.TIMEZONE_NAME) != null) {
+        if(this.getSettings().getProperty(UserSettings.TIMEZONE_NAME.getName()) != null) {
             this.setCurrentTimeZone(
-                this.getSettings().getProperty(UserSettings.TIMEZONE_NAME)
+                this.getSettings().getProperty(UserSettings.TIMEZONE_NAME.getName())
             );
-        }
-        else {
+        } else {
             this.setCurrentTimeZone(
                 this.getTimezone() == null ? TimeZone.getDefault().getID() : this.getTimezone()
             );
         }
         // Init Perspective
-        if(this.getSettings().getProperty(UserSettings.PERSPECTIVE_ID) != null) {
+        if(this.getSettings().getProperty(UserSettings.PERSPECTIVE_ID.getName()) != null) {
             this.setCurrentPerspective(
-                Integer.valueOf(this.getSettings().getProperty(UserSettings.PERSPECTIVE_ID))
+                Integer.valueOf(this.getSettings().getProperty(UserSettings.PERSPECTIVE_ID.getName()))
             );
-        }
-        else {
+        } else {
             this.setCurrentPerspective(0);
         }
         // Init Workspace
-        if(this.getSettings().getProperty(UserSettings.WORKSPACE_ID) != null) {
+        if(this.getSettings().getProperty(UserSettings.WORKSPACE_ID.getName()) != null) {
             this.setCurrentWorkspace(
-                this.getSettings().getProperty(UserSettings.WORKSPACE_ID)
+                this.getSettings().getProperty(UserSettings.WORKSPACE_ID.getName())
             );
-        }
-        else {
+        } else {
             this.setCurrentWorkspace(DEFAULT_WORKSPACE);
-        }        
+        }    
         this.loadQuickAccessors();
         this.loadRootObjects();
     }
 
-    //-------------------------------------------------------------------------
+    /**
+     * Map order list to string.
+     * @param order
+     * @return
+     */
     public static String getOrderAsString(
         List order
     ) {
@@ -286,7 +289,11 @@ public final class ApplicationContext
         return orderAsString;
     }
 
-    //-------------------------------------------------------------------------
+    /**
+     * Map identity to path. Map place holders to :*
+     * @param pattern
+     * @return
+     */
     private Path mapIdentityAsPattern(
         String pattern
     ) {
@@ -296,7 +303,12 @@ public final class ApplicationContext
         );
     }
 
-    //-------------------------------------------------------------------------
+    /**
+     * Map identity to path.
+     * @param pattern
+     * @param asPattern
+     * @return
+     */
     private Path mapIdentity(
     	String pattern,
     	boolean asPattern
@@ -312,7 +324,13 @@ public final class ApplicationContext
     	);
     }
     
-    //-------------------------------------------------------------------------
+    /**
+     * Map identity to path and replace place holders.
+     * @param pattern
+     * @param principalName
+     * @param asPattern
+     * @return
+     */
     private Path mapIdentity(
         String pattern,
         String principalName,
@@ -347,7 +365,9 @@ public final class ApplicationContext
         return new Path(mapped);
     }
 
-    //-------------------------------------------------------------------------
+    /**
+     * Load root objects.
+     */
     private void loadRootObjects(
     ) {
         // Retrieve root objects
@@ -373,7 +393,9 @@ public final class ApplicationContext
         this.rootObjectActions.clear();
     }
   
-    //-------------------------------------------------------------------------
+    /**
+     * Load user home.
+     */
     private void loadUserHome(
     ) {
         this.userHome = null;      
@@ -389,8 +411,9 @@ public final class ApplicationContext
         }      
     }
   
-    //-------------------------------------------------------------------------
-    @SuppressWarnings("unchecked")
+    /**
+     * Load quick accessor.
+     */
     private void loadQuickAccessors(
     ) {
         Map<String,QuickAccessor> quickAccessors = new TreeMap<String,QuickAccessor>();    
@@ -461,8 +484,8 @@ public final class ApplicationContext
                             } 
                             catch(Exception e) {}
                             try {
-                            	actionParams = (List<String>) quickAccessor.refGetValue("actionParam");
-                            } 
+                            	actionParams = (List<String>)quickAccessor.refGetValue("actionParam");
+                            }
                             catch(Exception e) {}
                             if(name == null) {
                                 name = new ObjectReference(target, this).getTitle();
@@ -513,13 +536,19 @@ public final class ApplicationContext
         );      
     }
 
-    //-------------------------------------------------------------------------
+    /**
+     * Get quick accessors.
+     * @return
+     */
     public QuickAccessor[] getQuickAccessors(
     ) {
         return this.quickAccessors;
     }
 
-    //-------------------------------------------------------------------------
+    /**
+     * Save settings.
+     * @param logoff
+     */
     public void saveSettings(
         boolean logoff
     ) {
@@ -538,7 +567,9 @@ public final class ApplicationContext
         }
     }
 
-    //-------------------------------------------------------------------------
+    /**
+     * Store settings.
+     */
     private void storeSettings(
     ) {
         if(this.userHome != null) {
@@ -577,7 +608,9 @@ public final class ApplicationContext
         }
     }
   
-    //-------------------------------------------------------------------------
+    /**
+     * Load settings.
+     */
     private void loadSettings(
     ) {
         this.currentSettings = new Properties();
@@ -598,17 +631,23 @@ public final class ApplicationContext
         }
     }
 
-    //-------------------------------------------------------------------------
+    /**
+     * Get root objects.
+     * @return
+     */
     public RefObject_1_0[] getRootObject(
     ) {
         return this.rootObjects;
     }
 
-    //-------------------------------------------------------------------------
+    /**
+     * Get actions for selecting the root objects (SelectObjectAction.EVENT_ID)
+     * @return
+     */
     public Action[] getRootObjectActions(
     ) {
         if(this.rootObjectActions.get(this.currentPerspective) == null) {
-            RefObject[] rootObject = this.getRootObject();
+            RefObject_1_0[] rootObject = this.getRootObject();
             List<Action> actions = new ArrayList<Action>();
             Set<String> labels = new HashSet<String>();
             Set<String> refMofIds = new HashSet<String>();
@@ -642,7 +681,7 @@ public final class ApplicationContext
                         new Action(
                             SelectObjectAction.EVENT_ID,
                             new Action.Parameter[]{
-                                new Action.Parameter(Action.PARAMETER_OBJECTXRI, rootObject[i].refMofId())
+                                new Action.Parameter(Action.PARAMETER_OBJECTXRI, rootObject[i].refGetPath().toXRI())
                             },
                             // append qualifier in case there are root object labels with same label
                             labels.contains(label) ? 
@@ -688,7 +727,7 @@ public final class ApplicationContext
                                                     new Action.Parameter[]{
                                                         new Action.Parameter(Action.PARAMETER_PANE, "" + paneIndex), 
                                                         new Action.Parameter(Action.PARAMETER_REFERENCE, "" + referenceIndex),
-                                                        new Action.Parameter(Action.PARAMETER_OBJECTXRI, rootObject[i].refMofId())
+                                                        new Action.Parameter(Action.PARAMETER_OBJECTXRI, rootObject[i].refGetPath().toXRI())
                                                     },
                                                     title,
                                                     tab.getIconKey(),
@@ -716,19 +755,30 @@ public final class ApplicationContext
         return this.rootObjectActions.get(this.currentPerspective);
     }
     
-    //-------------------------------------------------------------------------
+    /**
+     * Get current ui context.
+     * @return
+     */
     public UiContext getUiContext(
     ) {
         return this.getControlFactory().getUiContext();
     }
 
-    //-------------------------------------------------------------------------
+    /**
+     * Get HTML encoder.
+     * @return
+     */
     public HtmlEncoder_1_0 getHtmlEncoder(
     ) {
         return this.getHttpEncoder();
     }
 
-    //-------------------------------------------------------------------------
+    /**
+     * Get inspector for given class.
+     * @param forClass
+     * @return
+     * @throws ServiceException
+     */
     public org.openmdx.ui1.jmi1.Inspector getInspector(
         String forClass
     ) throws ServiceException {
@@ -738,7 +788,12 @@ public final class ApplicationContext
         );
     }
 
-    //-------------------------------------------------------------------------
+    /**
+     * Get inspector for given class.
+     * @param forClass
+     * @return
+     * @throws ServiceException
+     */
     public org.openmdx.ui1.jmi1.AssertableInspector getAssertableInspector(
         String forClass
     ) throws ServiceException {
@@ -748,7 +803,12 @@ public final class ApplicationContext
         );
     }
 
-    //-------------------------------------------------------------------------
+    /**
+     * Get label for given class and current locale.
+     * @param forClass
+     * @return
+     * @throws ServiceException
+     */
     public String getLabel(
         String forClass
     ) throws ServiceException {
@@ -759,7 +819,12 @@ public final class ApplicationContext
         );
     }
 
-    //-------------------------------------------------------------------------
+    /**
+     * Get icon key for given class.
+     * @param forClass
+     * @return
+     * @throws ServiceException
+     */
     public String getIconKey(
         String forClass
     ) throws ServiceException {
@@ -769,7 +834,12 @@ public final class ApplicationContext
         );
     }
   
-    //-------------------------------------------------------------------------
+    /**
+     * Get back color for given class.
+     * @param forClass
+     * @return
+     * @throws ServiceException
+     */
     public String getBackColor(
         String forClass
     ) throws ServiceException {
@@ -779,7 +849,12 @@ public final class ApplicationContext
         );
     }
   
-    //-------------------------------------------------------------------------
+    /**
+     * Get color for given class.
+     * @param forClass
+     * @return
+     * @throws ServiceException
+     */
     public String getColor(
         String forClass
     ) throws ServiceException {
@@ -789,14 +864,23 @@ public final class ApplicationContext
         );
     }
   
-    //-------------------------------------------------------------------------
+    /**
+     * Get filters for given reference.
+     * @param forReference
+     * @return
+     */
     public Filters getFilters(
         String forReference
     ) {
         return (Filters)this.getFilters().get(forReference);
     }
   
-    //-------------------------------------------------------------------------
+    /**
+     * Get layout id for given class.
+     * @param forClass
+     * @param forEditing
+     * @return
+     */
     public String getLayout(
         String forClass,
         boolean forEditing
@@ -808,25 +892,37 @@ public final class ApplicationContext
         );
     }
   
-    //-------------------------------------------------------------------------
+    /**
+     * Get text resources.
+     * @return
+     */
     public Texts_1_0 getTexts(
     ) {
-        return this.getTextsFactory().getTexts(this.currentLocaleAsString);
+        return this.getTextsFactory().getTextsBundle(this.currentLocaleAsString);
     }
 
-    //-------------------------------------------------------------------------
-    public TextsFactory getTextsFactory(
+    /**
+     * Get text resource factory.
+     * @return
+     */
+    public Texts getTextsFactory(
     ) {
         return this.getControlFactory().getTextsFactory();
     }
 
-    //-------------------------------------------------------------------------
+    /**
+     * Get time zone configured in user settings.
+     * @return
+     */
     public String getCurrentTimeZone(
     ) {
         return this.currentTimeZone;
     }
   
-    //-------------------------------------------------------------------------
+    /**
+     * Set current time zone and store in user settings.
+     * @param id
+     */
     public synchronized void setCurrentTimeZone(
         String id
     ) {
@@ -839,14 +935,17 @@ public final class ApplicationContext
         }
         // Save in settings
         this.getSettings().setProperty(
-            UserSettings.TIMEZONE_NAME,
+            UserSettings.TIMEZONE_NAME.getName(),
             this.currentTimeZone
         );
         // actions are locale-specific. Invalidate
         this.rootObjectActions.clear();
     }
   
-    //-------------------------------------------------------------------------
+    /**
+     * Set locale and store in user settings.
+     * @param locale
+     */
     public synchronized void setCurrentLocale(
         String locale
     ) {
@@ -871,26 +970,35 @@ public final class ApplicationContext
         }
         // Save in settings
         this.getSettings().setProperty(
-            UserSettings.LOCALE_NAME,
+            UserSettings.LOCALE_NAME.getName(),
             this.currentLocaleAsString
         );
         // actions are locale-specific. Invalidate
         this.rootObjectActions.clear();
     }
   
-    //-------------------------------------------------------------------------
+    /**
+     * Get curren locale.
+     * @return
+     */
     public short getCurrentLocaleAsIndex(
     ) {
         return this.getTexts().getLocaleIndex();
     }
 
-    //-------------------------------------------------------------------------
+    /**
+     * Get current locale.
+     * @return
+     */
     public String getCurrentLocaleAsString(
     ) {
         return this.currentLocaleAsString;
     }
   
-    //-------------------------------------------------------------------------
+    /**
+     * Get current locale.
+     * @return
+     */
     public Locale getCurrentLocale(
     ) {
         String locale = this.getCurrentLocaleAsString();
@@ -900,32 +1008,48 @@ public final class ApplicationContext
         );      
     }
 
-    //-------------------------------------------------------------------------
+    /**
+     * Get current user role.
+     * @return
+     */
     public String getCurrentUserRole(
     ) {
         return this.currentUserRole;
     }
   
-    //-------------------------------------------------------------------------
+    /**
+     * Get available user roles.
+     * @return
+     */
     public List<String> getUserRoles(
     ) {
         return this.currentUserRoles;
     }
 
-    //-------------------------------------------------------------------------
+    /**
+     * Get current view port type.
+     * @return
+     */
     public ViewPort.Type getCurrentViewPortType(
     ) {
     	return this.currentViewPortType;
     }
 
-    //-------------------------------------------------------------------------
+    /**
+     * Set current view port type.
+     * @param viewPortType
+     */
     public void setCurrentViewPortType(
     	ViewPort.Type viewPortType
     ) {
     	this.currentViewPortType = viewPortType;
     }
     
-    //-------------------------------------------------------------------------
+    /**
+     * Add error message to list of error messages.
+     * @param message
+     * @param parameters
+     */
     public void addErrorMessage(
         String message,
         String[] parameters
@@ -949,13 +1073,21 @@ public final class ApplicationContext
         this.errorMessages.add(preparedMessage);
     }
   
-    //-------------------------------------------------------------------------
+    /**
+     * Get list of current error messages.
+     * @return
+     */
     public List getErrorMessages(
     ) {
         return this.errorMessages;
     }
   
-    //-------------------------------------------------------------------------
+    /**
+     * Get temp file name.
+     * @param name
+     * @param extension
+     * @return
+     */
     public String getTempFileName(
         String name,
         String extension
@@ -972,7 +1104,13 @@ public final class ApplicationContext
         	File.separator + this.getTempFilePrefix() + "-" + fileName + extension;
     }
   
-    //-------------------------------------------------------------------------
+    /**
+     * Get new persistence manager for given user role.
+     * @param pmf
+     * @param userRole
+     * @return
+     * @throws ServiceException
+     */
     private PersistenceManager createPersistenceManager(
         PersistenceManagerFactory pmf,
         String userRole
@@ -987,10 +1125,11 @@ public final class ApplicationContext
         );
     }
 
-    //-------------------------------------------------------------------------
     /**
      * Evicts the data persistence manager and rolls back active transactions. 
      * The reset is typically invoked after an operation invocation with isQuery=false.
+     *
+     * @throws ServiceException
      */
     public void resetPmData(
     ) throws ServiceException {
@@ -1002,11 +1141,12 @@ public final class ApplicationContext
         this.pmDataReloadedAt = new Date();
     }
 
-    //-------------------------------------------------------------------------
     /**
      * Create the data persistence manager. This data persistence manager is used
      * to retrieve objects for the attributes and grid panes. This create is invoked
      * after a logon or role change. As a consequence all views must be destroyed.
+     * @return
+     * @throws ServiceException
      */
     public PersistenceManager createPmData(
     ) throws ServiceException {
@@ -1018,13 +1158,16 @@ public final class ApplicationContext
         return this.pmData;
     }
 
-    //-------------------------------------------------------------------------
+    /**
+     * Get persistence manager for accessing ui repository and common ui objects.
+     * @return
+     * @throws ServiceException
+     */
     public PersistenceManager createPmControl(
     ) throws ServiceException {
         return this.createPmControl(true);
     }
 
-    //-------------------------------------------------------------------------
     /**
      * Refresh the control package. This package is used to retrieve control
      * objects, i.e. favorites, user settings, root objects. This refresh is 
@@ -1032,6 +1175,9 @@ public final class ApplicationContext
      * @param loadObjects if true control objects such quick accessors, user
      *        home only refresh the controlPkg. Do not load
      *        any objects such as favorites, user settings, root objects.
+     * @param loadControlObjects
+     * @return
+     * @throws ServiceException
      */
     private PersistenceManager createPmControl(
         boolean loadControlObjects
@@ -1053,9 +1199,9 @@ public final class ApplicationContext
         return this.pmControl;
     }
 
-    //-------------------------------------------------------------------------
     /**
      * Close application context and all associated resources.
+     * 
      */
     public void close(
     ) {
@@ -1075,13 +1221,19 @@ public final class ApplicationContext
         this.pmControl = null;      
     }
   
-    //-------------------------------------------------------------------------
+    /**
+     * Get current persistence manager for accessing user data.
+     * @return
+     */
     private PersistenceManager getPmData(
     ) {
         return this.pmData;
     }
 
-    //-------------------------------------------------------------------------
+    /**
+     * Create new persistence manager for accessing user data.
+     * @return
+     */
     public PersistenceManager getNewPmData(
     ) {
     	return this.pmData.getPersistenceManagerFactory().getPersistenceManager(
@@ -1090,25 +1242,38 @@ public final class ApplicationContext
     	);
     }
     
-    //-------------------------------------------------------------------------
+    /**
+     * Get time when pm data was last reloaded.
+     * @return
+     */
     public Date getPmDataReloadedAt(
     ) {
         return this.pmDataReloadedAt;
     }
 
-    //-------------------------------------------------------------------------
+    /**
+     * Get persistence managet for accessing portal control objects.
+     * @return
+     */
     public PersistenceManager getPmControl(
     ) {
         return this.pmControl;
     }
 
-    //-------------------------------------------------------------------------
+    /**
+     * Get current user settings.
+     * @return
+     */
     public Properties getSettings(
     ) {
         return this.currentSettings;
     }
 
-    //-------------------------------------------------------------------------
+    /**
+     * Get user settings of given user.
+     * @param userHomeIdentity
+     * @return
+     */
     public Properties getUserSettings(
     	Path userHomeIdentity
     ) {
@@ -1126,7 +1291,11 @@ public final class ApplicationContext
 		return settings;
     }
     
-    //-------------------------------------------------------------------------
+    /**
+     * Get identity under which the given object can be retrieved.
+     * @param object
+     * @return
+     */
     public Path getObjectRetrievalIdentity(
         RefObject_1_0 object
     ) {
@@ -1145,7 +1314,11 @@ public final class ApplicationContext
         return retrievalIdentity;
     }
   
-    //-------------------------------------------------------------------------
+    /**
+     * Set state for given panel.
+     * @param panelName
+     * @param panelState
+     */
     public void setPanelState(
         String panelName,
         int panelState
@@ -1156,7 +1329,11 @@ public final class ApplicationContext
         );
     }
   
-    //-------------------------------------------------------------------------
+    /**
+     * Get state of given panel.
+     * @param panelName
+     * @return
+     */
     public int getPanelState(
         String panelName
     ) {
@@ -1168,21 +1345,22 @@ public final class ApplicationContext
             Integer.parseInt(panelState);
     }
 
-    //-------------------------------------------------------------------------
     /**
      * The like condition patterns define prefix and suffix patterns which are
      * added to filter values entered by the user. E.g. used in grid for completing
      * search value. 
      * @return filter value patterns. 0: pattern prefix 1, 1: pattern prefix 2, 2: suffix
+     * @return
      */
     public String[] getFilterValuePattern(
     ) {
         return this.getFilterValuePatterns();
     }
 
-    //-------------------------------------------------------------------------
     /**
      * Locale-specific parsing of specified number.
+     * @param numberAsString
+     * @return
      */
     public BigDecimal parseNumber(
         String numberAsString
@@ -1224,7 +1402,10 @@ public final class ApplicationContext
         }
     }
   
-    //-------------------------------------------------------------------------
+    /**
+     * Get identity of current user's home object.
+     * @return
+     */
     public Path getUserHomeIdentityAsPath(
     ) {
         return this.getUserHomeIdentity() == null ?
@@ -1232,49 +1413,71 @@ public final class ApplicationContext
         		this.mapIdentity(this.getUserHomeIdentity(), false);
     }
 
-    //-------------------------------------------------------------------------
+    /**
+     * Get currently active segment name.
+     * @return
+     */
     public String getCurrentSegment(
     ) {
         return this.currentSegment;
     }
 
-    //-------------------------------------------------------------------------
+    /**
+     * Get current perspective.
+     * @return
+     */
     public int getCurrentPerspective(
     ) {
         return this.currentPerspective;
     }
     
-    //-------------------------------------------------------------------------
+    /**
+     * Set current perspective.
+     * @param perspective
+     */
     public synchronized void setCurrentPerspective(
         int perspective
     ) {
         this.currentPerspective = perspective;
         // Save in settings
         this.getSettings().setProperty(
-            UserSettings.PERSPECTIVE_ID,
+            UserSettings.PERSPECTIVE_ID.getName(),
             Integer.toString(this.currentPerspective)
         );        
     }
     
-    //-------------------------------------------------------------------------
+    /**
+     * Get current workspace.
+     * @return
+     */
     public String getCurrentWorkspace(
     ) {
         return this.currentWorkspace;
     }
     
-    //-------------------------------------------------------------------------
+    /**
+     * Set current workspace.
+     * @param workspace
+     */
     public void setCurrentWorkspace(
         String workspace
     ) {
         this.currentWorkspace = workspace;
         // Save in settings
         this.getSettings().setProperty(
-            UserSettings.WORKSPACE_ID,
+            UserSettings.WORKSPACE_ID.getName(),
             this.currentWorkspace
         );        
     }
     
-    //-------------------------------------------------------------------------
+    /**
+     * Create ui control.
+     * @param id
+     * @param controlClass
+     * @param parameter
+     * @return
+     * @throws ServiceException
+     */
     public Control createControl(
         String id,
         Class<?> controlClass,
@@ -1288,7 +1491,13 @@ public final class ApplicationContext
         );
     }
     
-    //-------------------------------------------------------------------------
+    /**
+     * Create show inspector control for given class.
+     * @param id
+     * @param forClass
+     * @return
+     * @throws ServiceException
+     */
     public ShowInspectorControl createShowInspectorControl(
         String id,
         String forClass
@@ -1303,7 +1512,13 @@ public final class ApplicationContext
         );
     }
     
-    //-------------------------------------------------------------------------
+    /**
+     * Create edit inspector control for given class.
+     * @param id
+     * @param forClass
+     * @return
+     * @throws ServiceException
+     */
     public EditInspectorControl createEditInspectorControl(
         String id,
         String forClass
@@ -1318,7 +1533,13 @@ public final class ApplicationContext
         );
     }
 
-    //-------------------------------------------------------------------------
+    /**
+     * Create attribute control for given field.
+     * @param customizedField
+     * @param object
+     * @return
+     * @throws ServiceException
+     */
     public AttributeValue createAttributeValue(
         org.openmdx.ui1.jmi1.ValuedField customizedField,
         Object object        
@@ -1330,7 +1551,12 @@ public final class ApplicationContext
         );
     }
 
-    //-------------------------------------------------------------------------
+    /**
+     * Get ui element definition for given element id.
+     * @param id
+     * @return
+     * @throws ServiceException
+     */
     public org.openmdx.ui1.jmi1.Element getUiElement(
         String id
     ) throws ServiceException {
@@ -1339,7 +1565,12 @@ public final class ApplicationContext
         );
     }
     
-    //-------------------------------------------------------------------------
+    /**
+     * Get ui element definition for given element id.
+     * @param qualifiedName
+     * @return
+     * @throws ServiceException
+     */
     public org.openmdx.ui1.jmi1.ElementDefinition getUiElementDefinition(
         String qualifiedName
     ) throws ServiceException {
@@ -1355,7 +1586,12 @@ public final class ApplicationContext
         return uiElementDefinition;
     }
     
-    //-------------------------------------------------------------------------
+    /**
+     * Get form definition for given form.
+     * @param name
+     * @return
+     * @throws ServiceException
+     */
     public org.openmdx.ui1.jmi1.FormDefinition getUiFormDefinition(
         String name
     ) throws ServiceException {
@@ -1371,7 +1607,12 @@ public final class ApplicationContext
         return uiFormDefinition;
     }
     
-    //-------------------------------------------------------------------------
+    /**
+     * Get definition for given feature.
+     * @param qualifiedFeatureName
+     * @return
+     * @throws ServiceException
+     */
     public org.openmdx.ui1.jmi1.FeatureDefinition getFeatureDefinition(
         String qualifiedFeatureName
     ) throws ServiceException {
@@ -1387,7 +1628,11 @@ public final class ApplicationContext
         return featureDefinition;
     }
 
-    //-------------------------------------------------------------------------
+    /**
+     * Complete given filter value with configured wildcard patterns.
+     * @param filterValue
+     * @return
+     */
     public String getWildcardFilterValue(
         String filterValue
     ) {
@@ -1406,172 +1651,293 @@ public final class ApplicationContext
         return filterValue.replace("%", ".*");
     }
 
-    //-------------------------------------------------------------------------
-    // Configuration
-    //-------------------------------------------------------------------------
+	/**
+	 * Get application name.
+	 * @return
+	 */
 	public String getApplicationName(
 	) {
 		return this.applicationName;
 	}
 
+	/**
+	 * Set application name.
+	 * @param applicationName
+	 */
 	public void setApplicationName(
 		String applicationName
 	) {
 		this.applicationName = applicationName;
 	}
 
+	/**
+	 * Get current locale.
+	 * @return
+	 */
 	public String getLocale(
 	) {
 		return this.locale;
 	}
 
+	/**
+	 * Set current locale.
+	 * @param locale
+	 */
 	public void setLocale(
 		String locale
 	) {
 		this.locale = locale;
 	}
 
+	/**
+	 * Get current time zone.
+	 * @return
+	 */
 	public String getTimezone(
 	) {
 		return this.timezone;
 	}
 
+	/**
+	 * Set current time zone.
+	 * @param timezone
+	 */
 	public void setTimezone(
 		String timezone
 	) {
 		this.timezone = timezone;
 	}
 
+	/**
+	 * Get control factory.
+	 * @return
+	 */
 	public ControlFactory getControlFactory(
 	) {
 		return this.controlFactory;
 	}
 
+	/**
+	 * Set control factory.
+	 * @param controlFactory
+	 */
 	public void setControlFactory(
 		ControlFactory controlFactory
 	) {
 		this.controlFactory = controlFactory;
 	}
 
+	/**
+	 * Get session id.
+	 * @return
+	 */
 	public String getSessionId(
 	) {
 		return this.sessionId;
 	}
 
+	/**
+	 * Set session id.
+	 * @param sessionId
+	 */
 	public void setSessionId(
 		String sessionId
 	) {
 		this.sessionId = sessionId;
 	}
 
+	/**
+	 * Get login principal.
+	 * @return
+	 */
 	public String getLoginPrincipal(
 	) {
 		return this.loginPrincipal;
 	}
 
+	/**
+	 * Set login principal.
+	 * @param loginPrincipal
+	 */
 	public void setLoginPrincipal(
 		String loginPrincipal
 	) {
 		this.loginPrincipal = loginPrincipal;
 	}
 
+	/**
+	 * Get identity of login realm.
+	 * @return
+	 */
 	public Path getLoginRealmIdentity(
 	) {
 		return this.loginRealmIdentity;
 	}
 
+	/**
+	 * Set identity of login realm.
+	 * @param loginRealmIdentity
+	 */
 	public void setLoginRealmIdentity(
 		Path loginRealmIdentity
 	) {
 		this.loginRealmIdentity = loginRealmIdentity;
 	}
 
+	/**
+	 * Get configured retrieveByPath patterns.
+	 * @return
+	 */
 	public List getRetrieveByPathPatterns(
 	) {
 		return this.retrieveByPathPatterns;
 	}
 
+	/**
+	 * Set retrieveByPath patterns.
+	 * @param retrieveByPathPatterns
+	 */
 	public void setRetrieveByPathPatterns(
 		List retrieveByPathPatterns
 	) {
 		this.retrieveByPathPatterns = retrieveByPathPatterns;
 	}
 
+	/**
+	 * Get user home identity.
+	 * @return
+	 */
 	public String getUserHomeIdentity() {
 		return this.userHomeIdentity;
 	}
 
+	/**
+	 * Set user home identity.
+	 * @param userHomeIdentity
+	 */
 	public void setUserHomeIdentity(
 		String userHomeIdentity
 	) {
 		this.userHomeIdentity = userHomeIdentity;
 	}
 
+	/**
+	 * Get root object identities.
+	 * @return
+	 */
 	public String[] getRootObjectIdentities(
 	) {
 		return this.rootObjectIdentities;
 	}
 
+	/**
+	 * Set root object identities.
+	 * @param rootObjectIdentities
+	 */
 	public void setRootObjectIdentities(
 		String[] rootObjectIdentities
 	) {
 		this.rootObjectIdentities = rootObjectIdentities;
 	}
 
+	/**
+	 * Get portal extension.
+	 * @return
+	 */
 	public PortalExtension_1_0 getPortalExtension(
 	) {
 		return this.portalExtension;
 	}
 
+	/**
+	 * Set portal extension.
+	 * @param portalExtension
+	 */
 	public void setPortalExtension(
 		PortalExtension_1_0 portalExtension
 	) {
 		this.portalExtension = portalExtension;
 	}
 
+	/**
+	 * Get http encoder.
+	 * @return
+	 */
 	public HtmlEncoder_1_0 getHttpEncoder(
 	) {
 		return this.httpEncoder;
 	}
 
+	/**
+	 * Set http encoder.
+	 * @param httpEncoder
+	 */
 	public void setHttpEncoder(
 		HtmlEncoder_1_0 httpEncoder
 	) {
 		this.httpEncoder = httpEncoder;
 	}
 
+	/**
+	 * Get filters.
+	 * @return
+	 */
 	public Map getFilters() {
 		return this.filters;
 	}
 
+	/**
+	 * Set filters.
+	 * @param filters
+	 */
 	public void setFilters(
 		Map filters
 	) {
 		this.filters = filters;
 	}
 
+	/**
+	 * Get codes.
+	 * @return
+	 */
 	public Codes getCodes(
 	) {
 		return this.codes;
 	}
 
+	/**
+	 * Get codes.
+	 * @param codes
+	 */
 	public void setCodes(
 		Codes codes
 	) {
 		this.codes = codes;
 	}
 
+	/**
+	 * Get layout factory.
+	 * @return
+	 */
 	public LayoutFactory getLayoutFactory(
 	) {
 		return this.layoutFactory;
 	}
 
+	/**
+	 * Set layout factory.
+	 * @param layoutFactory
+	 */
 	public void setLayoutFactory(
 		LayoutFactory layoutFactory
 	) {
 		this.layoutFactory = layoutFactory;
 	}
 
+	/**
+	 * Get temp file directory.
+	 * @return
+	 */
 	public File getTempDirectory(
 	) {
 		return this.tempDirectory;
@@ -1583,110 +1949,190 @@ public final class ApplicationContext
 		this.tempDirectory = tempDirectory;
 	}
 
+	/**
+	 * Get temp file prefix.
+	 * @return
+	 */
 	public String getTempFilePrefix(
 	) {
 		return this.tempFilePrefix;
 	}
 
+	/**
+	 * Set temp file prefix.
+	 * @param tempFilePrefix
+	 */
 	public void setTempFilePrefix(
 		String tempFilePrefix
 	) {
 		this.tempFilePrefix = tempFilePrefix;
 	}
 
+	/**
+	 * Get reference path for quick accessors.
+	 * @return
+	 */
 	public String getQuickAccessorsReference(
 	) {
 		return this.quickAccessorsReference;
 	}
 
+	/**
+	 * Set reference path for quick accessors.
+	 * @param quickAccessorsReference
+	 */
 	public void setQuickAccessorsReference(
 		String quickAccessorsReference
 	) {
 		this.quickAccessorsReference = quickAccessorsReference;
 	}
 
+	/**
+	 * Get impls for mime types.
+	 * @return
+	 */
 	public Map getMimeTypeImpls(
 	) {
 		return this.mimeTypeImpls;
 	}
 
+	/**
+	 * Set impls for mime types.
+	 * @param mimeTypeImpls
+	 */
 	public void setMimeTypeImpls(
 		Map mimeTypeImpls
 	) {
 		this.mimeTypeImpls = mimeTypeImpls;
 	}
 
+	/**
+	 * Get exception domain.
+	 * @return
+	 */
 	public String getExceptionDomain(
 	) {
 		return this.exceptionDomain;
 	}
 
+	/**
+	 * Set exception domain.
+	 * @param exceptionDomain
+	 */
 	public void setExceptionDomain(
 		String exceptionDomain
 	) {
 		this.exceptionDomain = exceptionDomain;
 	}
 
+	/**
+	 * Get filter criteria field.
+	 * @return
+	 */
 	public String getFilterCriteriaField(
 	) {
 		return this.filterCriteriaField;
 	}
 
+	/**
+	 * Set filter criteria field.
+	 * @param filterCriteriaField
+	 */
 	public void setFilterCriteriaField(
 		String filterCriteriaField
 	) {
 		this.filterCriteriaField = filterCriteriaField;
 	}
 
+	/**
+	 * Get filter value patterns.
+	 * @return
+	 */
 	public String[] getFilterValuePatterns(
 	) {
 		return this.filterValuePatterns;
 	}
 
+	/**
+	 * set filter value patterns.
+	 * @param filterValuePatterns
+	 */
 	public void setFilterValuePatterns(
 		String[] filterValuePatterns
 	) {
 		this.filterValuePatterns = filterValuePatterns;
 	}
 
+	/**
+	 * Get persistence manager factory for user data persistence managers.
+	 * @return
+	 */
 	public PersistenceManagerFactory getPmfData(
 	) {
 		return this.pmfData;
 	}
 
+	/**
+	 * Set persistence manager factory for user data persistence managers.
+	 * @param pmfData
+	 */
 	public void setPmfData(
 		PersistenceManagerFactory pmfData
 	) {
 		this.pmfData = pmfData;
 	}
 
+	/**
+	 * Get model.
+	 * @return
+	 */
 	public Model_1_0 getModel(
 	) {
 		return this.model;
 	}
 
+	/**
+	 * Set model.
+	 * @param model
+	 */
 	public void setModel(
 		Model_1_0 model
 	) {
 		this.model = model;
 	}
 
+	/**
+	 * Get view port type.
+	 * @return
+	 */
 	public ViewPort.Type getViewPortType(
 	) {
 		return this.viewPortType;
 	}
 
+	/**
+	 * Set view port type.
+	 * @param viewPortType
+	 */
 	public void setViewPortType(
 		ViewPort.Type viewPortType
 	) {
 		this.viewPortType = viewPortType;
 	}
 
+	/**
+	 * Get user role.
+	 * @return
+	 */
 	public String getUserRole(
 	) {
 		return this.userRole;
 	}    
 
+	/**
+	 * Set user role.
+	 * @param userRole
+	 */
 	public void setUserRole(
 		String userRole
 	) {

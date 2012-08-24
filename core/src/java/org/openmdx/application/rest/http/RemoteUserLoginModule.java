@@ -1,16 +1,13 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: RemoteUserLoginModule.java,v 1.2 2011/04/27 06:20:08 hburger Exp $
  * Description: Remote User Login Module 
- * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/04/27 06:20:08 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2010-2011, OMEX AG, Switzerland
+ * Copyright (c) 2010-2012, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -52,37 +49,21 @@ package org.openmdx.application.rest.http;
 
 import javax.security.auth.callback.NameCallback;
 import javax.security.auth.callback.PasswordCallback;
-import javax.security.auth.login.LoginException;
-
-import org.openmdx.application.rest.spi.AbstractLoginModule;
-import org.openmdx.base.rest.cci.RestConnectionSpec;
 
 /**
  * Remote User Login Module
  */
-public class RemoteUserLoginModule extends AbstractLoginModule {
-
-    /**
-     * The default value for the <code>RefInitializeOnCreate</code> property
-     */
-    private static Boolean REF_INITIALIZE_ON_CREATE_DEFAULT = Boolean.TRUE;
+public class RemoteUserLoginModule extends BasicLoginModule {
     
-    //	@Override
-	public boolean login() throws LoginException {
-		NameCallback nameCallback = new NameCallback(CallbackPrompts.REMOTE_USER);
-		PasswordCallback passwordCallback = new PasswordCallback(CallbackPrompts.SESSION_ID, false);
-		BooleanCallback refInitializeOnCreate = new BooleanCallback(CallbackPrompts.REF_INITIALIZE_ON_CREATE, REF_INITIALIZE_ON_CREATE_DEFAULT);
-		this.handle(nameCallback, passwordCallback, refInitializeOnCreate);
-		char[] password = passwordCallback.getPassword();
-		this.setPublicCredential(
-			new RestConnectionSpec(
-				nameCallback.getName(),
-				password == null ? null : new String(password),
-				null,
-				Boolean.TRUE.equals(refInitializeOnCreate.getValue())
-			)
-		);
-		return true;
-	}
+    /**
+     * Constructor 
+     */
+    public RemoteUserLoginModule(
+    ) {
+        super(
+            new NameCallback(CallbackPrompts.REMOTE_USER), 
+            new PasswordCallback(CallbackPrompts.SESSION_ID, false)
+        );
+    }
 
 }

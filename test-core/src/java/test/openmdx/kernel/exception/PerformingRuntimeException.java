@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: PerformingRuntimeException.java,v 1.1 2009/02/24 16:27:20 hburger Exp $
  * Description: PerformingRuntimeException 
- * Revision:    $Revision: 1.1 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/02/24 16:27:20 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -59,12 +56,11 @@ public class PerformingRuntimeException
     extends RuntimeException
 {
 
-    /**
+	/**
      * Constructor 
-     *
      */
     public PerformingRuntimeException() {
-        // TODO Auto-generated constructor stub
+    	super();
     }
 
     /**
@@ -74,7 +70,6 @@ public class PerformingRuntimeException
      */
     public PerformingRuntimeException(String message) {
         super(message);
-        // TODO Auto-generated constructor stub
     }
 
     /**
@@ -84,7 +79,6 @@ public class PerformingRuntimeException
      */
     public PerformingRuntimeException(Throwable cause) {
         super(cause);
-        // TODO Auto-generated constructor stub
     }
 
     /**
@@ -95,7 +89,11 @@ public class PerformingRuntimeException
      */
     public PerformingRuntimeException(String message, Throwable cause) {
         super(message, cause);
-        // TODO Auto-generated constructor stub
     }
+
+	/**
+	 * Implements <code>Serializable</code>
+	 */
+	private static final long serialVersionUID = 1471749267410236566L;
 
 }

@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: QueryRecord.java,v 1.5 2011/01/21 10:08:00 hburger Exp $
  * Description: Query Record 
- * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/01/21 10:08:00 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -67,7 +64,7 @@ public class QueryRecord
     extends AbstractMappedRecord
     implements org.openmdx.base.rest.cci.QueryRecord 
 {
-    
+
     /**
      * Constructor 
      *
@@ -92,7 +89,7 @@ public class QueryRecord
     /**
      * Implements <code>Serializable</code>
      */
-    private static final long serialVersionUID = -1745943351805409146L;
+    private static final long serialVersionUID = -4816775342123136224L;
 
     /**
      * Alphabetically ordered keys
@@ -105,6 +102,7 @@ public class QueryRecord
         "position",
         "query",
         "queryType",
+        "refresh",
         "size"
     };
 
@@ -160,6 +158,11 @@ public class QueryRecord
      * 
      */
     private Long size;    
+    
+    /**
+     * Tells whether the object shall be refreshed before answering the query
+     */
+    private Boolean refresh;
     
     /* (non-Javadoc)
      * @see org.openmdx.base.rest.cci.QueryRecord#getFeatures()
@@ -318,6 +321,22 @@ public class QueryRecord
     }
 
     /* (non-Javadoc)
+     * @see org.openmdx.base.rest.cci.QueryRecord#setRefresh(boolean)
+     */
+//  @Override
+    public void setRefresh(boolean refresh) {
+        this.refresh = Boolean.valueOf(refresh);
+    }
+
+    /* (non-Javadoc)
+     * @see org.openmdx.base.rest.cci.QueryRecord#isRefresh()
+     */
+//  @Override
+    public boolean isRefresh() {
+        return Boolean.TRUE.equals(this.refresh);
+    }
+
+    /* (non-Javadoc)
      * @see org.openmdx.base.resource.spi.AbstractRecord#clone()
      */
     @Override
@@ -352,7 +371,8 @@ public class QueryRecord
             case 4: return this.position;
             case 5: return this.query;
             case 6: return this.queryType;
-            case 7: return this.size;
+            case 7: return this.refresh;
+            case 8: return this.size;
             default: return null;
         }
     }
@@ -393,6 +413,9 @@ public class QueryRecord
                 this.queryType = (String) value;
                 break;
             case 7: 
+                this.refresh = toBoolean(value);
+                break;
+            case 8: 
                 this.size = toLong(value);
                 break;
         }

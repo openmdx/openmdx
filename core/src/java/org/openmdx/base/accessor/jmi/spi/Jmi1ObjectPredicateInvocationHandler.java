@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: Jmi1ObjectPredicateInvocationHandler.java,v 1.10 2011/08/19 22:28:19 hburger Exp $
  * Description: Jmi1ObjectPredicateInvocationHandler 
- * Revision:    $Revision: 1.10 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/08/19 22:28:19 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -66,6 +63,12 @@ import org.w3c.cci2.AnyTypePredicate;
  */
 public class Jmi1ObjectPredicateInvocationHandler extends Jmi1QueryInvocationHandler {
 
+    /**
+     * Constructor 
+     *
+     * @param predicate
+     * @param subQuery
+     */
     public Jmi1ObjectPredicateInvocationHandler(
         RefQuery_1.RefPredicate predicate,
         RefQuery_1 subQuery
@@ -74,6 +77,11 @@ public class Jmi1ObjectPredicateInvocationHandler extends Jmi1QueryInvocationHan
         this.predicate = predicate;        
     }
 
+    /**
+     * Implements <code>Serializable</code>
+     */
+    private static final long serialVersionUID = 4054872493209535130L;
+    
     /* (non-Javadoc)
      * @see java.lang.reflect.InvocationHandler#invoke(java.lang.Object, java.lang.reflect.Method, java.lang.Object[])
      */

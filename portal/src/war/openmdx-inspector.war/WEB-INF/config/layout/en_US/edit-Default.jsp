@@ -2,11 +2,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: edit-Default.jsp,v 1.50 2009/09/25 13:41:35 wfro Exp $
+ * Name:        $Id: edit-Default.jsp,v 1.51 2012/07/07 08:09:46 wfro Exp $
  * Description: edit-Default.jsp
- * Revision:    $Revision: 1.50 $
+ * Revision:    $Revision: 1.51 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/09/25 13:41:35 $
+ * Date:        $Date: 2012/07/07 08:09:46 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -61,8 +61,7 @@ java.math.*,
 org.openmdx.portal.servlet.*,
 org.openmdx.portal.servlet.view.*,
 org.openmdx.portal.servlet.control.*,
-org.openmdx.base.naming.*,
-org.openmdx.portal.servlet.texts.*
+org.openmdx.base.naming.*
 " %><%
 	ApplicationContext app = (ApplicationContext)session.getValue(WebKeys.APPLICATION_KEY);
 	ViewsCache viewsCache = (ViewsCache)session.getValue(WebKeys.VIEW_CACHE_KEY_EDIT);

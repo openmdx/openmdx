@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: FieldGroupControl.java,v 1.53 2011/08/19 22:50:46 wfro Exp $
  * Description: FieldGroupControl
- * Revision:    $Revision: 1.53 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/08/19 22:50:46 $
  * ====================================================================
  *
  * This software is published under the BSD license

@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Security, http://www.openmdx.org/
- * Name:        $Id: LineReader.java,v 1.1 2010/07/16 13:19:02 hburger Exp $
  * Description: Line Reader 
- * Revision:    $Revision: 1.1 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/07/16 13:19:02 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: CodeToken.java,v 1.2 2010/03/01 09:21:25 hburger Exp $
  * Description: Code Token 
- * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/03/01 09:21:25 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

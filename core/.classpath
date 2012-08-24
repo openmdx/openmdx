@@ -6,8 +6,8 @@
 	<classpathentry exported="true" kind="lib" path="build/jre-1.6/src/resource"/>
 	<classpathentry exported="true" kind="lib" path="build/jre-1.6/model/openmdx-core.openmdx-xmi.zip"/>
 	<classpathentry kind="lib" path="build/jre-1.6/lib/openmdx-core.rmi.jar"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JRE 6"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/openMDX Thirdparty ~ OSGi Enterprise (jre-1.6)"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/openMDX Thirdparty ~ OSGi Extension (jre-1.6)"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JRE 6"/>
 	<classpathentry kind="output" path="build/jre-1.6/eclipse"/>
 </classpath>

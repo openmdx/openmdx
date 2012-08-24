@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: TestLargeObject.java,v 1.2 2010/12/22 00:27:28 hburger Exp $
  * Description: Test Large Object 
- * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/12/22 00:27:28 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

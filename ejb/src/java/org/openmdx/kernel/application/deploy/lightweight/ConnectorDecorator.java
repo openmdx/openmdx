@@ -67,29 +67,29 @@ public class ConnectorDecorator
     ) {
         super(delegate);
         this.resourceAdapterDecorator = new ResourceAdapterDecorator(
-            super.delegate.getResourceAdapter(),
+            delegate.getResourceAdapter(),
             this
         );
     }
 
     public String getVendorName(
     ) {
-        return super.delegate.getVendorName();
+        return getDelegate().getVendorName();
     }
 
     public String getEisType(
     ) {
-        return super.delegate.getEisType();
+        return getDelegate().getEisType();
     }
 
     public String getResourceadapterVersion(
     ) {
-        return super.delegate.getResourceadapterVersion();
+        return getDelegate().getResourceadapterVersion();
     }
 
     public Boolean getLicenseRequired(
     ) {
-        return super.delegate.getLicenseRequired();
+        return getDelegate().getLicenseRequired();
     }
 
     public ResourceAdapter getResourceAdapter(

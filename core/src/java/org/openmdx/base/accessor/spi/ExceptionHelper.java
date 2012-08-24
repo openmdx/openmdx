@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: ExceptionHelper.java,v 1.2 2010/07/12 13:19:26 hburger Exp $
  * Description: ExceptionHelper 
- * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/07/12 13:19:26 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

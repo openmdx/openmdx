@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: NonManagedInitialContextFactory.java,v 1.3 2011/06/10 12:45:58 hburger Exp $
  * Description: Non-Managed Context Factory
- * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/06/10 12:45:58 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

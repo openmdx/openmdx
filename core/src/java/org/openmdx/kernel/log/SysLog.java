@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: SysLog.java,v 1.24 2011/06/21 22:51:56 hburger Exp $
  * Description: Former Log API
- * Revision:    $Revision: 1.24 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/06/21 22:51:56 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

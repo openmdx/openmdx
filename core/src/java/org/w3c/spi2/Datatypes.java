@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Datatypes.java,v 1.6 2011/04/18 09:18:00 hburger Exp $
  * Description: Date 
- * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/04/18 09:18:00 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

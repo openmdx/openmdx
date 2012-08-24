@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: SelectLocaleAction.java,v 1.2 2011/07/07 22:35:36 wfro Exp $
  * Description: ShowObjectView 
- * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/07/07 22:35:36 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -90,19 +87,21 @@ public class SelectLocaleAction extends BoundAction {
 		ShowObjectView currentView = (ShowObjectView)view;
     	ObjectView nextView = currentView;
         ViewPort.Type nextViewPortType = null;
-        ApplicationContext application = currentView.getApplicationContext();
+        ApplicationContext app = currentView.getApplicationContext();
         try {
             String locale = Action.getParameter(parameter, Action.PARAMETER_LOCALE);
             SysLog.trace("Setting locale", locale);
-            application.setCurrentLocale(locale);
+            app.setCurrentLocale(locale);
             nextView = new ShowObjectView(
                 currentView.getId(),
                 currentView.getContainerElementId(),
                 currentView.getRefObject().refGetPath(),
-                application,
+                app,
                 currentView.getHistoryActions(),
                 currentView.getLookupType(),
-                currentView.getRestrictToElements()
+                null, // do not propagate resourcePathPrefix
+                null, // do not propagate navigationTarget
+                null // do not propagate isReadOnly
             );
             ShowObjectView showNextView = (ShowObjectView) nextView;
             for (int i = 0; i < currentView.getReferencePane().length; i++) {
@@ -112,8 +111,8 @@ public class SelectLocaleAction extends BoundAction {
         catch (Exception e) {
             ServiceException e0 = new ServiceException(e);
             SysLog.warning(e0.getMessage(), e0.getCause());
-            application.addErrorMessage(
-                application.getTexts().getErrorTextCannotSetLocale(),
+            app.addErrorMessage(
+                app.getTexts().getErrorTextCannotSetLocale(),
                 new String[] { parameter, e.getMessage() });
         }
         return new ActionPerformResult(

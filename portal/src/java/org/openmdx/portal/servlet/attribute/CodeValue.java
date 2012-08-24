@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: CodeValue.java,v 1.49 2011/08/11 15:08:58 wfro Exp $
  * Description: CodeValue
- * Revision:    $Revision: 1.49 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/08/11 15:08:58 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -62,7 +59,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.SortedMap;
 
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
 import org.openmdx.base.exception.ServiceException;
@@ -122,7 +118,7 @@ public class CodeValue
     }
 
     //-------------------------------------------------------------------------
-    public SortedMap getLongText(
+    public Map getLongText(
         boolean codeAsKey,
         boolean includeAll
     ) {
@@ -135,7 +131,7 @@ public class CodeValue
     }
 
     //-------------------------------------------------------------------------
-    public SortedMap getShortText(
+    public Map getShortText(
         boolean codeAsKey,
         boolean includeAll
     ) {

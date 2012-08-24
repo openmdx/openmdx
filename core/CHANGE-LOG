@@ -5,34 +5,665 @@
 
 
 ==============================================================================
-Version 2.9.1                                                       2012-01-10
+Version 2.10.0                                                      2012-08-24
 ==============================================================================
 
 0.    KNOWN ISSUES
 
-      CR20019836
-      State-Aware Proxy
+      CR20020142
+      JDOHelper.getVersion()
       
-      BasicState state instances returned by a container based iterator must 
-      not be updated while the iteration is in progress.
+      The method returns null under certain circumstances.
+      
+      Validate its behaviour especially
+      * in case of an entity manager proxy
+      * in case of a hollow object  
+      
+      CR20019740
+      state2-aware REST-Client 
+      
+      Synchronization of state2-aware proxy,
+      
+      The DateStateViews-API must be available in the proxy. 
 
       CR20019584
       REST Request Exception
       
       Runtime exceptions are not yet handled properly.
-
-      CR20019649
-      Container in time-point view contains null elements
-
-      A state capable container's get method may not return null just because
-      a state capable object has no states in order for the given unit tests 
-      to run properly.
        
       CR20019825
       Transaction Timeout
       
       The lightweight transaction manager's allow now the timeout setting but
-      ignores it.
+      ignores it.      
+      
+1.    NEW FEATURES
+      
+      CR20019258
+      newInstance() 
+      
+      A plug-in specific assertion for org.openmdx.state2.aop1.PlugIn_1 has 
+      been added: 
+      * !(StateCapable.class.isAssignableFrom(c) || (
+      		(DateStateContext != null) == (BasicState.class.isAssignableFrom(c)
+      	) 
+      which has been amended for the org.openmdx.state2.aop1.LegacyPlugIn_1:
+      * Legacy.isAssignableFrom(c) || !(StateCapable.class.isAssignableFrom(c) || (
+      		(DateStateContext != null) == (BasicState.class.isAssignableFrom(c)
+      	) 
+
+2.    CHANGES  
+     
+2.0.  CHANGED FEATURES
+
+      CR20019258
+      resolveObjectClass
+      
+      Each implementation of org.openmdx.base.aop1.PlugIn_1_0 must provide a
+      resolveObjectClass() method.
+
+      CR20020086
+      Context for IllegalStateException thrown by UniqueValue 
+      
+      The exception parameters are now amended by the object's id.
+      
+2.1.  FIXED BUGS
+
+      CR20020140
+      Non-query operation
+      
+      Invocation shall make the object dirty 
+      
+      CR20020084
+      DateStateViews.getResourceIdentifierOfClone 
+      
+      getResourceIdentifierOfClone is erroneous in case of time point 
+      views.
+      
+      The 'invalidated' argument must be either true or false, but never null.  
+            
+      CR20020076
+      DateStateViews.getViewForPropagatedState
+      
+      getViewForPropagatedState does not work for time point views. 
+        
+2.2.  DEPRECATED FEATURES
+      none
+                     
+2.3.  REMOVED FEATURES
+      none
+      
+      
+==============================================================================
+Version 2.9.10                                                      2012-06-01
+==============================================================================
+
+0.    KNOWN ISSUES
+      No changes since 2.9.9
+      
+1.    NEW FEATURES
+      none
+
+2.    CHANGES  
+     
+2.0.  CHANGED FEATURES
+      none
+      
+2.1.  FIXED BUGS
+      
+      CR20020069
+      Set Reference Java-Doc
+      
+      Optional reference setters' Java-Doc pretends the reference was
+      mandatory. 
+        
+2.2.  DEPRECATED FEATURES
+      none
+                     
+2.3.  REMOVED FEATURES
+      none
+      
+      
+==============================================================================
+Version 2.9.9                                                       2012-05-20
+==============================================================================
+
+0.    KNOWN ISSUES
+      No changes since 2.9.8
+      
+1.    NEW FEATURES
+      none
+
+2.    CHANGES  
+     
+2.0.  CHANGED FEATURES
+      none
+      
+2.1.  FIXED BUGS
+      
+      CR20020068
+      Duration & InboundConnection
+      
+      Durations are not marshaled correctly for for inbound connections.
+        
+2.2.  DEPRECATED FEATURES
+      none
+                     
+2.3.  REMOVED FEATURES
+      none
+      
+      
+==============================================================================
+Version 2.9.8                                                       2012-05-16
+==============================================================================
+
+0.    KNOWN ISSUES
+      No changes since 2.9.7
+      
+1.    NEW FEATURES
+      none
+
+2.    CHANGES  
+     
+2.0.  CHANGED FEATURES
+      
+      CR20020058
+      Import of invalid XML documents
+      
+      Invalid features shall not lead to a NullPointerException.
+            
+      CR20020043
+      Performance Improvement
+      
+      The XML Datatype Factory is now cached for clone() operations, too.
+      
+2.1.  FIXED BUGS
+      none
+        
+2.2.  DEPRECATED FEATURES
+
+      CR20020058            
+      ObjectAndValidStateComparator.toString()
+      
+      The toString(Object,Multiplicity) method has been deprecated in
+      favour of toString(Object).
+                     
+2.3.  REMOVED FEATURES
+      none
+      
+      
+==============================================================================
+Version 2.9.7                                                       2012-05-01
+==============================================================================
+
+0.    KNOWN ISSUES
+      No changes since 2.9.6
+      
+1.    NEW FEATURES
+
+      CR20020050
+      TransactionManagerFactory
+      
+      openMDX uses now a ComponentEnvironment plug-in for its 
+      TransactionManager retrieval which tries in turn:
+      * Standard:
+        java:comp/TransactionManager JNDI lookup ()
+      * JBoss:
+        java:/TransactionManager JNDI lookup
+      * WebSphere: 
+        com.ibm.ws.Transaction.TransactionManagerFactory.getTransactionManager() 
+            
+      CR20020030
+      isStoredAsAttribute
+      
+      Method isStoredAsAttribute() added to 
+      org.openmdx.base.mof.cci.ModelHelper.
+       
+      CR20020038
+      BulkLoad
+      
+      Setting
+      * The BulkLoad=true and BulkLoad=false parameters may be used in REST
+        connection request.
+      * The bulk load flag may be set on a persistence manager:
+        UserObjects.setBulkLoad(persistenceManager, bulkLoad);
+        
+      Querying:
+      * The bulk load flag may be queried from the persistence manager:
+        UserObjects.isBulkLoad(persistenceManager);
+      * The bulk load flag may be queried from an AbstractRestInteraction
+        sub-class:
+        AbstractRestInteraction.isBulkLoad();
+      
+      CR20020040
+      The REST Servlet's Login Configuration
+      
+      Override getLoginConfiguration(String name) instead of 
+      getLoginConfiguration() to change the default behaviour. 
+
+2.    CHANGES  
+     
+2.0.  CHANGED FEATURES
+
+      CR20020040
+      The REST Servlet's Login Configuration
+      
+      The remote user login module is now the REST servlet's only default
+      module. 
+      
+2.1.  FIXED BUGS
+
+      CR20020030
+      Refresh
+      
+      Refresh is now propagated from a proxy object to its serving object.
+      
+      CR20020030
+      ObjectRecord
+      
+      Erroneous key/content mapping for org:openmdx:kernel:Object records.
+      
+      CR10010692
+      Reference handling by DetachCopy 
+     
+      detachCopy and detachCopyAll works for lists, sets oder sparsearrays of 
+      references but fails for optional or mandatory references.
+        
+2.2.  DEPRECATED FEATURES
+
+      CR20020040
+      The REST Servlet's Login Configuration
+      
+      Overriding getLoginConfiguration() has been deprecated in favour of 
+      getLoginConfiguration(String name) to to change the default behaviour. 
+                     
+2.3.  REMOVED FEATURES
+
+      CR20020030
+      Facades
+      
+      The following deprecated methods have been removed: 
+      * org.openmdx.base.rest.spi.Query_2Facade.newInstance()
+      * org.openmdx.base.rest.spi.Object_2Facade.newInstance()
+      * org.openmdx.base.rest.spi.Facades.newObject(java.util.UUID)
+
+      CR20020040
+      PrincipalCallback
+      
+      The unused principal callback has been removed. 
+      
+      CR20020038
+      refInitializeOnCreate
+      
+      The refInitializeOnCreate feature has been removed as the behaviour
+      can be accomplished by standard plug-ins.
+            
+      CR20020030
+      ModelUtils
+      
+      The deprecated class org.openmdx.base.mof.spi.ModelUtils has been
+      removed.
+      
+      
+==============================================================================
+Version 2.9.6                                                       2012-03-27
+==============================================================================
+
+0.    KNOWN ISSUES
+      No changes since 2.9.5
+      
+1.    NEW FEATURES
+      
+      CR20020039
+      Cloneable Query
+      
+      cci2 query objects shall be cloneable.
+      
+      PersistenceHelper.clone() may now be used to clone queries.
+
+      CR20020037
+      Preferences
+      
+      The java.util.prefs API may be used as accessor to the 
+      org::openmdx::preferences2 model.
+      
+      CR20020032
+      Disclose ORM
+      
+      The ORM is disclosed as Preferences 
+             
+2.    CHANGES  
+     
+2.0.  CHANGED FEATURES
+      none
+      
+2.1.  FIXED BUGS
+      none
+       
+2.2.  DEPRECATED FEATURES
+      none
+                     
+2.3.  REMOVED FEATURES
+      none
+      
+      
+==============================================================================
+Version 2.9.5                                                       2012-03-22
+==============================================================================
+
+0.    KNOWN ISSUES
+      No changes since 2.9.4
+      
+1.    NEW FEATURES
+      
+      CR20020037
+      Preferences
+      
+      The org::openmdx::preferences2 replaces org::openmdx::preferences1.
+
+2.    CHANGES  
+     
+2.0.  CHANGED FEATURES
+      
+      CR20020031
+      Absolute Positioning
+      
+      Do not disable absolute positioning globally.
+      
+      Disable absolute positioning for a specific DB object only.
+         
+      CR20019592
+      Null values in queries shall throw an exception 
+      
+      Inserting a null value into a JMI query predicate throws a 
+      BAD_PARAMETER JmiServiceException. 
+      
+      CR20019351
+      Reject null in JMI lists and sets
+      
+      Inserting a null value in a JDO object's list or set feature throws
+      a JDOUserException caused by a NullPointerException. 
+
+2.1.  FIXED BUGS
+      
+      CR20020034
+      Iteration over Legacy container
+      
+      In some cases the Legacy containers in time independent views seem to be 
+      empty.
+       
+2.2.  DEPRECATED FEATURES
+
+      CR20020037
+      Preferences
+      
+      org::openmdx::preferences1 has been deprecated in favour of
+      org::openmdx::preferences2.
+                     
+2.3.  REMOVED FEATURES
+      
+      CR20020038
+      RestConnectionSpec
+      
+      Deprecated constructor
+      
+        public RestConnectionSpec(
+          String user,
+          String password,
+          Object tenant 
+        );
+        
+      removed
+      
+      
+==============================================================================
+Version 2.9.4                                                       2012-03-05
+==============================================================================
+
+0.    KNOWN ISSUES
+      No changes since 2.9.3
+      
+1.    NEW FEATURES
+
+      CR20020022
+      Query Predicate
+      
+      openMDX' standard type casts are now supported in addition to their 
+      existing query aliases:
+      * :string:
+        (java.lang.String)
+      * :date:
+        (javax.xml.datatype.XMLGregorianCalendar)
+      * :datetime:
+        (java.util.Date)
+      * :short:
+        (java.lang.Short)
+      * :int:
+        :integer:
+        (java.lang.Integer)
+      * :long:
+        (java.lang.Long)
+      * :decimal:
+        (java.math.BigDecimal)
+      * :duration:
+        (javax.xml.datatype.Duration)
+              
+      CR20020024
+      Query URI
+      
+      The method
+      
+        PersistenceManager.newQuery(
+          "OPENMDXQL",
+           query
+        );
+
+      supports now two additional query object types in addition to 
+      QueryRecord:
+      * a java.net.URI instance containing an XRI query
+      * a java.lang.String instance containing an XRI query
+      
+2.    CHANGES  
+     
+2.0.  CHANGED FEATURES
+      
+      CR20020014
+      Import references in invalidated state
+      
+      Invalidated states are now ignored during import. 
+
+2.1.  FIXED BUGS
+
+      CR10010637
+      Query Serialization
+      
+      * Query objects are now Serializable
+      * De-serialized query object's can't be modified
+
+      CR20019954 	
+      Core Object Removal
+      
+      The core object removal protection can't be activated. 
+      
+      Explicit setting of the StateCapableDeletable flag is ignored as well as 
+      its implicit value "false". 
+      
+      CR20020022
+      Query Predicate 
+      
+      thereExistsReference().equalTo("xri://...") is ignored.
+      
+      CR20019750
+      Separate state2 specific code
+      
+      Missing Rose model updates included.
+       
+2.2.  DEPRECATED FEATURES
+      none
+                     
+2.3.  REMOVED FEATURES
+      none
+
+
+==============================================================================
+Version 2.9.3                                                       2012-02-20
+==============================================================================
+
+0.    KNOWN ISSUES
+      No changes since 2.9.2
+      
+1.    NEW FEATURES
+
+      CR20020005
+      Configurable Properties
+      
+      System properties may be used to override the configurable properties'
+      default values, e.g.
+      * -Djavax.jdo.option.TransactionIsolationLevel=read-committed
+      
+2.    CHANGES  
+     
+2.0.  CHANGED FEATURES
+
+      CR20019750
+      Separate state2 specific code
+      
+      In openMDX 2.8.21 some state2 specific code was in an inappropriate 
+      place (e.g. in AbstractContainer_1)
+      
+      validTimeUnique is now a property of org::openmdx::state2::Legacy, a
+      sub-class of org::openmdx::state::StateCapable. 
+      
+      To keep valid-time-unique support you have to
+      * use org::openmdx::state2::Legacy instead of 
+        org::openmdx::state::StateCapable in your model
+      * use org.openmdx.base.aop1.LegacyPlugIn_1 instead of
+        org.openmdx.base.aop1.PlugIn_1 in your entity manager factory 
+        configuration
+      * use org.openmdx.state2.aop1.LegacyPlugIn_1 instead of
+        org.openmdx.state2.aop1.PlugIn_1in your entity manager factory
+        configuration
+      * use org.openmdx.state2.aop0.LegacyPlugIn_1 instead of 
+        org.openmdx.state2.aop0.PlugIn_1 in your data manager factory
+        configuration
+      * use org.openmdx.application.dataprovider.layer.model.LegacyState_2
+        instead of org.openmdx.application.dataprovider.layer.model.State_2 in
+        your dataprovider configuration
+        
+      
+      CR20020009
+      Layer_1 configuration
+      
+      Add Java bean support 
+       
+      CR20020012
+      Audit & UpdateAvoidance
+      
+      Allow to disable update avoidence for audited objects, too.
+      
+      CR20020005
+      Optimistic Locking
+
+      A concurrent modification exception is thrown if the object is
+	  * either updated by both this unit of work and another unit of work 
+	    concurrently
+	  * or made transactional in this unit of work and updated by another 
+	    unit of work concurrently
+      
+      The supported optimistic transaction isolation levels are:
+      * repeatable-read (default)
+        The object must not be modified concurrently by another unit of 
+        work starting later than the given unit of work unless it has
+        been refreshed
+      * read-committed
+        The object must not be modified concurrently by another unit after 
+        it has been read or refreshed by the given unit of work 
+
+2.1.  FIXED BUGS
+
+      CR20020011
+      PersistenceHelper.clone()
+      
+      A clone may loose some of its not explicitly fetched values
+      
+      CR20020005
+      Optimistic Locking
+      
+      refresh() removes the optimistic read lock, leaving the optimistic
+      write lock to be checked. 
+       
+2.2.  DEPRECATED FEATURES
+
+      CR20019750
+      Separate state2 specific code
+      
+      If you don't need valid-time-unique support you should
+      * use either org.openmdx.state2.aop0.ColonPlugIn_1 or
+        org.openmdx.state2.aop0.BangPlugIn_1 instead of 
+        org.openmdx.state2.aop0.PlugIn_1
+
+      The following methods have been deprecated:
+      * Use org.openmdx.base.accessor.jmi.cci.RefObject_1_0.refInitialize(RefObject)
+        instead of org.openmdx.base.persistence.cci.PersistenceHelper.clone(T, String...)
+                     
+2.3.  REMOVED FEATURES
+      
+      CR20020009
+      Layer_1 configuration
+      
+      The following configuration entries have been removed
+      * PERSISTENCE/compressUID
+
+
+==============================================================================
+Version 2.9.2                                                       2012-01-13
+==============================================================================
+
+0.    KNOWN ISSUES
+      No changes since 2.9.1
+      
+1.    NEW FEATURES
+      none
+      
+2.    CHANGES  
+     
+2.0.  CHANGED FEATURES
+
+      CR20020006
+      refInitialize) must initialize all mandatory and persistent features.
+      
+      CR20020005
+      Optimistic Locking
+      
+      The request consists of two changes
+      * The transaction time shall be set at the beginning of the unit of work
+        (as opposed to the current lazily setting at the beginning of the
+        datastore transaction)
+      * Commit shall fail if a transactional object has been modified since
+        the beginning of the unit of work 
+
+2.1.  FIXED BUGS
+
+      CR20019393
+      Database: wrong SQL for nested queries with embedded features.      
+       
+2.2.  DEPRECATED FEATURES
+
+      CR20020005
+      Optimistic Locking
+      
+      Facades.newObject(UUID) has been deprecated
+            
+2.3.  REMOVED FEATURES
+      none
+
+
+==============================================================================
+Version 2.9.1                                                       2012-01-10
+==============================================================================
+
+0.    KNOWN ISSUES
+      No changes since 2.9.0
       
 1.    NEW FEATURES
       none
@@ -81,30 +712,7 @@ Version 2.9.0                                                       2012-01-04
 ==============================================================================
 
 0.    KNOWN ISSUES
-
-      CR20019836
-      State-Aware Proxy
-      
-      BasicState state instances returned by a container based iterator must 
-      not be updated while the iteration is in progress.
-
-      CR20019584
-      REST Request Exception
-      
-      Runtime exceptions are not yet handled properly.
-
-      CR20019649
-      Container in time-point view contains null elements
-
-      A state capable container's get method may not return null just because
-      a state capable object has no states in order for the given unit tests 
-      to run properly.
-       
-      CR20019825
-      Transaction Timeout
-      
-      The lightweight transaction manager's allow now the timeout setting but
-      ignores it.
+      No changes since 2.8.37
       
 1.    NEW FEATURES
 
@@ -250,7 +858,7 @@ Version 2.9.0                                                       2012-01-04
       The deprecated model package org::openmdx::compatibility::audit1 has 
       been removed.
 
-      
+
 ==============================================================================
 Version 2.8.37                                                      2011-11-18
 ==============================================================================

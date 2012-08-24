@@ -1,11 +1,9 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: ShowErrorsControl.java,v 1.18 2009/09/25 12:02:38 wfro Exp $
  * Description: ReferencePaneRenderer
  * Revision:    $AttributePaneRenderer: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/09/25 12:02:38 $
  * ====================================================================
  *
  * This software is published under the BSD license

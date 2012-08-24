@@ -54,6 +54,7 @@
             </generalization>
             <ownedAttribute xmi:id="_3C7B8A60016D417D2F82002D" name="id" isReadOnly="true" isDerived="true">
               <type xmi:type="uml:PrimitiveType" href="../openMDX%202%20~%20Core%20(EMF)/org.w3c.uml#_3C7B8A60016D3C8B62E40010"/>
+              <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_7OffED1cEeGswrgO6Hs_iQ" value="1"/>
             </ownedAttribute>
             <ownedAttribute xmi:id="_3C7B8A60016D417D43A303D0" name="resetCredential" type="_3C7B8A60016D417D211400A3" isUnique="false" association="_3C7B8A60016D417D439D0056">
               <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_hVI0496-EdmkJO73lqONhA" value="1"/>

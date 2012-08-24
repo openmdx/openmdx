@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: DataproviderRequestProcessor.java,v 1.11 2011/11/26 01:34:58 hburger Exp $
  * Description: RequestCollection class
- * Revision:    $Revision: 1.11 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/11/26 01:34:58 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMEX, http://www.openmdx.org/
- * Name:        $Id: XriAuthorities.java,v 1.4 2008/08/20 23:41:21 hburger Exp $
  * Description: XRI authorities
- * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/08/20 23:41:21 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

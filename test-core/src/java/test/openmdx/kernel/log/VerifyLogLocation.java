@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: VerifyLogLocation.java,v 1.1 2009/09/15 15:47:31 hburger Exp $
  * Description: Relocatable Enumeration
- * Revision:    $Revision: 1.1 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/09/15 15:47:31 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

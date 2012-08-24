@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: TestGregorianCalendar.java,v 1.4 2010/01/03 15:15:27 wfro Exp $
  * Description: Test Gregorian Calendar
- * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/01/03 15:15:27 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

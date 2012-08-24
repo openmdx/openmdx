@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: TransactionalState_1.java,v 1.8 2011/07/01 16:16:42 hburger Exp $
  * Description: Transactional State Implementation 1 
- * Revision:    $Revision: 1.8 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/07/01 16:16:42 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -78,7 +75,12 @@ public final class TransactionalState_1 {
     /**
      * Dirty features have been flushed
      */
-    private boolean dirtyFeaturesFlushed;
+    private boolean dirtyFeaturesFlushed = false;
+
+    /**
+     * A non-query operation has been invoked
+     */
+    private boolean touched = false;
     
     /**
      * @serial
@@ -119,7 +121,23 @@ public final class TransactionalState_1 {
      * An efficient way to return an empty operation queue.
      */
     private static final Queue<Operation> NO_OPERATIONS = new EmptyQueue<Operation>();
+
+    /**
+     * Marks the object as touched
+     */
+    final void touch(){
+        this.touched = true;
+    }
     
+    /**
+     * Retrieve touched.
+     *
+     * @return Returns the touched.
+     */
+    final boolean isTouched() {
+        return this.touched;
+    }
+
     /**
      * Tells whether the data object is out of sync with its "remote" counterpart
      * 
@@ -130,6 +148,8 @@ public final class TransactionalState_1 {
     ){
         return this.lifeCycleEventPending || (
             this.dirtyFeatures != null && !this.dirtyFeatures.isEmpty()
+        ) || (
+        	this.operationQueue != null && !this.operationQueue.isEmpty() 	
         );
     }
 
@@ -141,7 +161,7 @@ public final class TransactionalState_1 {
      */
     final boolean isDirty(
     ){
-        return this.dirtyFeaturesFlushed || isOutOfSync();
+        return this.dirtyFeaturesFlushed || this.touched || isOutOfSync();
     }
     
     /**
@@ -344,6 +364,7 @@ public final class TransactionalState_1 {
             this.dirtyFeatures.clear();
         }
         this.dirtyFeaturesFlushed = false;
+        this.touched = false;
         if(this.contexts != null) {
             this.contexts.clear();
         }

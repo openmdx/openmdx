@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: ExtentCapable_1.java,v 1.6 2009/11/04 15:59:44 hburger Exp $
  * Description: Extent Capable
- * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/11/04 15:59:44 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

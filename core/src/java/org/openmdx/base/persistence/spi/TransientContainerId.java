@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: TransientContainerId.java,v 1.2 2011/11/19 19:57:06 hburger Exp $
  * Description: TransientContainerId 
- * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/11/19 19:57:06 $
  * ====================================================================
  *
  * This software is published under the BSD license

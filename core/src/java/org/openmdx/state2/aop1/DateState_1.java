@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: DateState_1.java,v 1.26 2011/07/01 16:16:42 hburger Exp $
  * Description: Date State
- * Revision:    $Revision: 1.26 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/07/01 16:16:42 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -135,14 +132,6 @@ public class DateState_1
         if(dataObject.objGetValue("stateValidTo") == null) {
             dataObject.objSetValue("stateValidTo", context.getValidTo());
         }
-    }
-
-    /* (non-Javadoc)
-     * @see org.openmdx.state2.aop2.core.AbstractState_1#getStateClass()
-     */
-    @Override
-    protected String getStateClass() {
-        return "org:openmdx:state2:DateState";
     }
 
     /* (non-Javadoc)

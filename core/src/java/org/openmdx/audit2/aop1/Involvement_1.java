@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: Involvement_1.java,v 1.12 2011/08/24 07:12:59 hburger Exp $
  * Description: Involvement_1 
- * Revision:    $Revision: 1.12 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/08/24 07:12:59 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: Base64.java,v 1.9 2010/02/18 14:31:43 hburger Exp $
  * Description: BASE64 encode/decode
- * Revision:    $Revision: 1.9 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/02/18 14:31:43 $
  * ====================================================================
  *
  * This software is published under the BSD license

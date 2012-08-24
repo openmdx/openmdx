@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: AbstractURLConnection.java,v 1.8 2011/04/12 15:44:00 hburger Exp $
  * Description: Delegating URL connection
- * Revision:    $Revision: 1.8 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/04/12 15:44:00 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

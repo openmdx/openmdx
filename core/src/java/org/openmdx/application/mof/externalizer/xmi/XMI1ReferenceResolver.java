@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: XMI1ReferenceResolver.java,v 1.4 2011/04/12 15:29:23 hburger Exp $
  * Description: XMI1 Reference Resolver
- * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/04/12 15:29:23 $
  * ====================================================================
  *
  * This software is published under the BSD license

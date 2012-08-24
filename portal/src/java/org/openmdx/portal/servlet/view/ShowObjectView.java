@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: ShowObjectView.java,v 1.79 2011/08/19 22:50:47 wfro Exp $
  * Description: ShowObjectView 
- * Revision:    $Revision: 1.79 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/08/19 22:50:47 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -72,6 +69,7 @@ import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.log.SysLog;
 import org.openmdx.portal.servlet.Action;
 import org.openmdx.portal.servlet.ApplicationContext;
+import org.openmdx.portal.servlet.Texts_1_0;
 import org.openmdx.portal.servlet.ViewPort;
 import org.openmdx.portal.servlet.WebKeys;
 import org.openmdx.portal.servlet.action.SelectLocaleAction;
@@ -79,7 +77,6 @@ import org.openmdx.portal.servlet.action.SelectObjectAction;
 import org.openmdx.portal.servlet.action.SelectPerspectiveAction;
 import org.openmdx.portal.servlet.action.SelectViewportAction;
 import org.openmdx.portal.servlet.control.ShowInspectorControl;
-import org.openmdx.portal.servlet.texts.Texts_1_0;
 
 // ---------------------------------------------------------------------------
 public class ShowObjectView 
@@ -90,20 +87,24 @@ public class ShowObjectView
     public ShowObjectView(
         String id, 
         String containerElementId,
-        Path objectIdentity, 
-        ApplicationContext application, 
+        Object object, 
+        ApplicationContext app, 
         Map<Path,Action> historyActions, 
         String lookupType,
-        Map restrictToElements 
+        String resourcePathPrefix,
+        String navigationTarget,
+        Boolean isReadOnly
     ) throws ServiceException {
         super(
             id, 
             containerElementId,
-            objectIdentity,
-            application, 
+            object,
+            app, 
             historyActions,
             lookupType,
-            restrictToElements
+            resourcePathPrefix,
+            navigationTarget,
+            isReadOnly
         );
         ShowInspectorControl inspectorControl = this.app.createShowInspectorControl(
             id, 
@@ -231,7 +232,7 @@ public class ShowObjectView
             new Action(
                 SelectObjectAction.EVENT_ID,
                 new Action.Parameter[] { 
-                    new Action.Parameter(Action.PARAMETER_OBJECTXRI, this.getRefObject().refMofId()),
+                    new Action.Parameter(Action.PARAMETER_OBJECTXRI, this.getRefObject().refGetPath().toXRI()),
                     new Action.Parameter(Action.PARAMETER_REQUEST_ID, this.requestId)
                 },
                 this.objectReference.getTitle() + (this.objectReference.getTitle().length() > 0 ? " - " : "") + this.objectReference.getLabel(),
@@ -276,7 +277,7 @@ public class ShowObjectView
     // -------------------------------------------------------------------------
     public Action[] getSelectLocaleAction(
     ) {
-        Texts_1_0[] texts = this.app.getTextsFactory().getTexts();
+        Texts_1_0[] texts = this.app.getTextsFactory().getTextsBundles();
         Map<String,Action> actions = new TreeMap<String,Action>();
         for (int i = 0; i < texts.length; i++) {
             String locale = texts[i].getLocale();
@@ -386,9 +387,9 @@ public class ShowObjectView
     ) {
         if(referenceName != null) {
             for(int i = 0; i < this.referencePane.length; i++) {
-                Action[] selectReferenceAction = this.referencePane[i].getSelectReferenceAction();
-                for(int j = 0; j < selectReferenceAction.length; j++) {
-                    if(referenceName.equals(selectReferenceAction[j].getParameter(Action.PARAMETER_REFERENCE_NAME))) {
+                List<Action> selectReferenceActions = this.referencePane[i].getSelectReferenceActions();
+                for(int j = 0; j < selectReferenceActions.size(); j++) {
+                    if(referenceName.equals(selectReferenceActions.get(j).getParameter(Action.PARAMETER_REFERENCE_NAME))) {
                         this.referencePane[i].selectReference(j);
                         return this.referencePane[i].getGrid();
                     }

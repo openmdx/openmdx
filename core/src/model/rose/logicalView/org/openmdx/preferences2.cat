@@ -1,0 +1,1286 @@
+
+(object Petal
+    version    	50
+    _written   	"Rose 8.3.0407.2800"
+    charSet    	0)
+
+(object Class_Category "preferences2"
+    is_unit    	TRUE
+    is_loaded  	TRUE
+    quid       	"4F6C7106029B"
+    exportControl 	"Public"
+    logical_models 	(list unit_reference_list
+	(object Class "Segment"
+	    quid       	"4F6C714D0225"
+	    superclasses 	(list inheritance_relationship_list
+		(object Inheritance_Relationship
+		    quid       	"4F6C718102AC"
+		    supplier   	"Logical View::org::openmdx::base::Segment"
+		    quidu      	"3FC487C80099")))
+	(object Class "Preferences"
+	    quid       	"4F6C718700B6"
+	    superclasses 	(list inheritance_relationship_list
+		(object Inheritance_Relationship
+		    quid       	"4F6C722B0198"
+		    supplier   	"Logical View::org::openmdx::preferences2::Root"
+		    quidu      	"4F6C71F5006E")))
+	(object Class "Root"
+	    quid       	"4F6C71F5006E"
+	    stereotype 	"root"
+	    class_attributes 	(list class_attribute_list
+		(object ClassAttribute "type"
+		    quid       	"4F6C72A603DA"
+		    type       	"org::w3c::string"
+		    exportControl 	"Public"))
+	    abstract   	TRUE)
+	(object Class "Node"
+	    quid       	"4F6C7201031E"
+	    class_attributes 	(list class_attribute_list
+		(object ClassAttribute "name"
+		    quid       	"4F6C73630042"
+		    type       	"org::w3c::string"
+		    exportControl 	"Public")
+		(object ClassAttribute "absolutePath"
+		    attributes 	(list Attribute_Set
+			(object Attribute
+			    tool       	"SPICE"
+			    name       	"isChangeable"
+			    value      	(value Text "false")))
+		    quid       	"4F6C738B009A"
+		    type       	"org::w3c::string"
+		    exportControl 	"Public"
+		    derived    	TRUE)))
+	(object Class "Entry"
+	    quid       	"4F6C7218017D"
+	    class_attributes 	(list class_attribute_list
+		(object ClassAttribute "name"
+		    attributes 	(list Attribute_Set
+			(object Attribute
+			    tool       	"SPICE"
+			    name       	"isChangeable"
+			    value      	(value Text "false")))
+		    quid       	"4F6C73BC01E5"
+		    type       	"org::w3c::string"
+		    exportControl 	"Public"
+		    derived    	TRUE)
+		(object ClassAttribute "value"
+		    quid       	"4F6C73DA018E"
+		    stereotype 	"0..1"
+		    type       	"org::w3c::string"
+		    exportControl 	"Public")))
+	(object Association "SegmentHostsPrefences"
+	    quid       	"4F6C71CD00CA"
+	    roles      	(list role_list
+		(object Role "preferences"
+		    quid       	"4F6C71CD02D3"
+		    label      	"preferences"
+		    supplier   	"Logical View::org::openmdx::preferences2::Preferences"
+		    quidu      	"4F6C718700B6"
+		    keys       	(list class_attribute_list
+			(object ClassAttribute "id"
+			    quid       	"4F6C74C101CC"
+			    type       	"org::w3c::string"))
+		    client_cardinality 	(value cardinality "0..1")
+		    is_navigable 	TRUE)
+		(object Role "segment"
+		    quid       	"4F6C71CD02D5"
+		    label      	"segment"
+		    supplier   	"Logical View::org::openmdx::preferences2::Segment"
+		    quidu      	"4F6C714D0225"
+		    client_cardinality 	(value cardinality "1"))))
+	(object Association "RootHasNode"
+	    quid       	"4F6C72740189"
+	    roles      	(list role_list
+		(object Role "node"
+		    quid       	"4F6C72750299"
+		    label      	"node"
+		    supplier   	"Logical View::org::openmdx::preferences2::Node"
+		    quidu      	"4F6C7201031E"
+		    keys       	(list class_attribute_list
+			(object ClassAttribute "id"
+			    quid       	"4F6C745402A1"
+			    type       	"org::w3c::string"))
+		    client_cardinality 	(value cardinality "0..1")
+		    is_navigable 	TRUE)
+		(object Role "root"
+		    quid       	"4F6C7275029B"
+		    label      	"root"
+		    supplier   	"Logical View::org::openmdx::preferences2::Root"
+		    quidu      	"4F6C71F5006E"
+		    client_cardinality 	(value cardinality "1"))))
+	(object Association "NodeHasEntries"
+	    quid       	"4F6C7278015D"
+	    roles      	(list role_list
+		(object Role "entry"
+		    quid       	"4F6C727A0173"
+		    label      	"entry"
+		    supplier   	"Logical View::org::openmdx::preferences2::Entry"
+		    quidu      	"4F6C7218017D"
+		    keys       	(list class_attribute_list
+			(object ClassAttribute "name"
+			    quid       	"4F6C755A01D6"
+			    type       	"org::w3c::string"))
+		    client_cardinality 	(value cardinality "0..1")
+		    is_navigable 	TRUE)
+		(object Role "node"
+		    quid       	"4F6C727A0175"
+		    label      	"node"
+		    supplier   	"Logical View::org::openmdx::preferences2::Node"
+		    quidu      	"4F6C7201031E"
+		    client_cardinality 	(value cardinality "1"))))
+	(object Association "NodeHasParent"
+	    quid       	"4F6C76CA0199"
+	    roles      	(list role_list
+		(object Role "parent"
+		    quid       	"4F6C76CD0360"
+		    label      	"parent"
+		    supplier   	"Logical View::org::openmdx::preferences2::Node"
+		    quidu      	"4F6C7201031E"
+		    client_cardinality 	(value cardinality "0..1")
+		    is_navigable 	TRUE)
+		(object Role "child"
+		    quid       	"4F6C76CD0362"
+		    label      	"child"
+		    supplier   	"Logical View::org::openmdx::preferences2::Node"
+		    quidu      	"4F6C7201031E"
+		    keys       	(list class_attribute_list
+			(object ClassAttribute "nodeContainer"
+			    quid       	"4F6C776501C4"
+			    type       	"org::openmdx::preferences2::Root"))
+		    client_cardinality 	(value cardinality "0..n")
+		    Constraints 	"isFrozen"
+		    is_navigable 	TRUE))))
+    logical_presentations 	(list unit_reference_list
+	(object ClassDiagram "_LICENSE"
+	    quid       	"4F6C7122001A"
+	    title      	"_LICENSE"
+	    zoom       	100
+	    max_height 	28350
+	    max_width  	21600
+	    origin_x   	0
+	    origin_y   	0
+	    items      	(list diagram_item_list
+		(object NoteView @1
+		    location   	(742, 1022)
+		    font       	(object Font
+			size       	8
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@1
+			location   	(61, 68)
+			fill_color 	13434879
+			nlines     	46
+			max_width  	1327
+			label      	
+|This software is published under the BSD license
+|as listed below.
+|
+|Copyright (c) 2005, OMEX AG, Switzerland
+|All rights reserved.
+|
+|Redistribution and use in source and binary forms, with or without 
+|modification, are permitted provided that the following conditions 
+|are met:
+|
+|Redistribution and use in source and binary forms, with or
+|without modification, are permitted provided that the following
+|conditions are met:
+|
+|* Redistributions of source code must retain the above copyright
+|notice, this list of conditions and the following disclaimer.
+|
+|* Redistributions in binary form must reproduce the above copyright
+|notice, this list of conditions and the following disclaimer in
+|the documentation and/or other materials provided with the
+|distribution.
+|
+|* Neither the name of OMEX AG nor the names of the contributors
+|to openMDX may be used to endorse or promote products derived
+|from this software without specific prior written permission
+|
+|
+|THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
+|CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
+|INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+|MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+|DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS
+|BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+|EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED
+|TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+|DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+|ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+|OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+|OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+|POSSIBILITY OF SUCH DAMAGE.
+|
+|------------------
+|
+|This product includes software developed by the Apache Software
+|Foundation (http://www.apache.org/).
+			)
+		    line_color 	3342489
+		    fill_color 	16775658
+		    width      	1387
+		    height     	1920)))
+	(object ClassDiagram "Main"
+	    quid       	"4F6C713903C1"
+	    title      	"Main"
+	    zoom       	100
+	    max_height 	28350
+	    max_width  	21600
+	    origin_x   	0
+	    origin_y   	0
+	    items      	(list diagram_item_list
+		(object ClassView "Class" "Logical View::org::openmdx::base::Segment" @2
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(1394, 147)
+		    font       	(object Font
+			size       	8
+			face       	"Arial"
+			bold       	FALSE
+			italics    	TRUE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@2
+			location   	(994, 60)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	800
+			justify    	0
+			label      	"Segment")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	8421631
+		    quidu      	"3FC487C80099"
+		    compartment 	(object Compartment
+			Parent_View 	@2
+			location   	(994, 150)
+			font       	(object Font
+			    size       	8
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			icon_style 	"Icon"
+			fill_color 	13434879
+			anchor     	2
+			nlines     	2
+			max_width  	606)
+		    width      	818
+		    height     	194
+		    annotation 	8)
+		(object ClassView "Class" "Logical View::org::openmdx::preferences2::Preferences" @3
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(444, 628)
+		    font       	(object Font
+			size       	8
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@3
+			location   	(160, 532)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	569
+			justify    	0
+			label      	"Preferences")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"4F6C718700B6"
+		    width      	587
+		    height     	212
+		    annotation 	8)
+		(object ClassView "Class" "Logical View::org::openmdx::preferences2::Segment" @4
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(432, 147)
+		    font       	(object Font
+			size       	8
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@4
+			location   	(141, 63)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	582
+			justify    	0
+			label      	"Segment")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"4F6C714D0225"
+		    width      	600
+		    height     	188
+		    annotation 	8)
+		(object InheritView "" @5
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"4F6C718102AC"
+		    client     	@4
+		    supplier   	@2
+		    vertices   	(list Points
+			(732, 144)
+			(985, 144))
+		    line_style 	3
+		    origin_attachment 	(732, 144)
+		    terminal_attachment 	(985, 144))
+		(object AssociationViewNew "SegmentHostsPrefences" @6
+		    location   	(444, 381)
+		    font       	(object Font
+			size       	8
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object SegLabel @7
+			Parent_View 	@6
+			location   	(442, 411)
+			font       	(object Font
+			    size       	8
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	TRUE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			anchor     	1
+			anchor_loc 	1
+			nlines     	1
+			max_width  	450
+			justify    	0
+			label      	"SegmentHostsPrefences"
+			pctDist    	0.483333
+			height     	30
+			orientation 	1)
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"4F6C71CD00CA"
+		    roleview_list 	(list RoleViews
+			(object RoleView "preferences" @8
+			    Parent_View 	@6
+			    location   	(13, 206)
+			    font       	(object Font
+				size       	8
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @9
+				Parent_View 	@8
+				location   	(575, 505)
+				font       	(object Font
+				    size       	8
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				anchor     	1
+				anchor_loc 	1
+				nlines     	1
+				max_width  	188
+				justify    	0
+				label      	"+preferences"
+				pctDist    	0.889764
+				height     	131
+				orientation 	0)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"4F6C71CD02D3"
+			    client     	@6
+			    supplier   	@3
+			    vertices   	(list Points
+				(444, 381)
+				(444, 522))
+			    line_style 	3
+			    origin_attachment 	(444, 381)
+			    terminal_attachment 	(444, 522)
+			    label      	(object SegLabel @10
+				Parent_View 	@8
+				location   	(394, 492)
+				font       	(object Font
+				    size       	8
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				anchor     	2
+				anchor_loc 	1
+				nlines     	1
+				max_width  	15
+				justify    	0
+				label      	"0..1"
+				pctDist    	0.787402
+				height     	51
+				orientation 	1))
+			(object RoleView "segment" @11
+			    Parent_View 	@6
+			    location   	(13, 206)
+			    font       	(object Font
+				size       	8
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @12
+				Parent_View 	@11
+				location   	(532, 347)
+				font       	(object Font
+				    size       	8
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				anchor     	1
+				anchor_loc 	1
+				nlines     	1
+				max_width  	152
+				justify    	0
+				label      	"+segment"
+				pctDist    	0.240310
+				height     	88
+				orientation 	1)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"4F6C71CD02D5"
+			    client     	@6
+			    supplier   	@4
+			    vertices   	(list Points
+				(444, 381)
+				(444, 241))
+			    line_style 	3
+			    origin_attachment 	(444, 381)
+			    terminal_attachment 	(444, 241)
+			    label      	(object SegLabel @13
+				Parent_View 	@11
+				location   	(417, 350)
+				font       	(object Font
+				    size       	8
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				anchor     	2
+				anchor_loc 	1
+				nlines     	1
+				max_width  	15
+				justify    	0
+				label      	"1"
+				pctDist    	0.221429
+				height     	27
+				orientation 	0)
+			    label      	(object SegLabel @14
+				Parent_View 	@11
+				location   	(444, 275)
+				font       	(object Font
+				    size       	8
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				anchor     	5
+				anchor_loc 	1
+				nlines     	1
+				max_width  	275
+				justify    	0
+				label      	"id : org::w3c::string"
+				pctDist    	0.900000
+				height     	12
+				orientation 	0))))
+		(object ClassView "Class" "Logical View::org::openmdx::preferences2::Root" @15
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(1375, 628)
+		    font       	(object Font
+			size       	8
+			face       	"Arial"
+			bold       	FALSE
+			italics    	TRUE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@15
+			location   	(972, 573)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	807
+			justify    	0
+			label      	"Root")
+		    stereotype 	(object ItemLabel
+			Parent_View 	@15
+			location   	(972, 532)
+			fill_color 	13434879
+			anchor     	10
+			nlines     	1
+			max_width  	807
+			justify    	0
+			label      	"<<root>>")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"4F6C71F5006E"
+		    compartment 	(object Compartment
+			Parent_View 	@15
+			location   	(972, 625)
+			font       	(object Font
+			    size       	8
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	TRUE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			icon_style 	"Icon"
+			fill_color 	13434879
+			anchor     	2
+			nlines     	2
+			max_width  	446)
+		    width      	825
+		    height     	212
+		    annotation 	8)
+		(object InheritView "" @16
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"4F6C722B0198"
+		    client     	@3
+		    supplier   	@15
+		    vertices   	(list Points
+			(737, 628)
+			(963, 628))
+		    line_style 	3
+		    origin_attachment 	(737, 628)
+		    terminal_attachment 	(963, 628))
+		(object ClassView "Class" "Logical View::org::openmdx::preferences2::Entry" @17
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(1356, 1756)
+		    font       	(object Font
+			size       	8
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@17
+			location   	(962, 1660)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	788
+			justify    	0
+			label      	"Entry")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"4F6C7218017D"
+		    compartment 	(object Compartment
+			Parent_View 	@17
+			location   	(962, 1712)
+			font       	(object Font
+			    size       	8
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			icon_style 	"Icon"
+			fill_color 	13434879
+			anchor     	2
+			nlines     	3
+			max_width  	528)
+		    width      	806
+		    height     	213
+		    annotation 	8)
+		(object ClassView "Class" "Logical View::org::openmdx::preferences2::Node" @18
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(1371, 1194)
+		    font       	(object Font
+			size       	8
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@18
+			location   	(968, 1085)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	807
+			justify    	0
+			label      	"Node")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"4F6C7201031E"
+		    compartment 	(object Compartment
+			Parent_View 	@18
+			location   	(968, 1137)
+			font       	(object Font
+			    size       	8
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			icon_style 	"Icon"
+			fill_color 	13434879
+			anchor     	2
+			nlines     	3
+			max_width  	518)
+		    width      	825
+		    height     	238
+		    annotation 	8)
+		(object AssociationViewNew "RootHasNode" @19
+		    location   	(1378, 904)
+		    font       	(object Font
+			size       	8
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object SegLabel @20
+			Parent_View 	@19
+			location   	(1374, 948)
+			font       	(object Font
+			    size       	8
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	TRUE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			anchor     	1
+			anchor_loc 	1
+			nlines     	1
+			max_width  	450
+			justify    	0
+			label      	"RootHasNode"
+			pctDist    	0.450000
+			height     	44
+			orientation 	1)
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"4F6C72740189"
+		    roleview_list 	(list RoleViews
+			(object RoleView "node" @21
+			    Parent_View 	@19
+			    location   	(109, 270)
+			    font       	(object Font
+				size       	8
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @22
+				Parent_View 	@21
+				location   	(1337, 1040)
+				font       	(object Font
+				    size       	8
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				anchor     	1
+				anchor_loc 	1
+				nlines     	1
+				max_width  	108
+				justify    	0
+				label      	"+node"
+				pctDist    	0.800000
+				height     	42
+				orientation 	1)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"4F6C72750299"
+			    client     	@19
+			    supplier   	@18
+			    vertices   	(list Points
+				(1378, 904)
+				(1378, 1075))
+			    line_style 	3
+			    origin_attachment 	(1378, 904)
+			    terminal_attachment 	(1378, 1075)
+			    label      	(object SegLabel @23
+				Parent_View 	@21
+				location   	(1432, 1058)
+				font       	(object Font
+				    size       	8
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				anchor     	2
+				anchor_loc 	1
+				nlines     	1
+				max_width  	15
+				justify    	0
+				label      	"0..1"
+				pctDist    	0.900000
+				height     	54
+				orientation 	0))
+			(object RoleView "root" @24
+			    Parent_View 	@19
+			    location   	(109, 270)
+			    font       	(object Font
+				size       	8
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @25
+				Parent_View 	@24
+				location   	(1425, 834)
+				font       	(object Font
+				    size       	8
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				anchor     	1
+				anchor_loc 	1
+				nlines     	1
+				max_width  	84
+				justify    	0
+				label      	"+root"
+				pctDist    	0.415205
+				height     	47
+				orientation 	1)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"4F6C7275029B"
+			    client     	@19
+			    supplier   	@15
+			    vertices   	(list Points
+				(1378, 904)
+				(1378, 733))
+			    line_style 	3
+			    origin_attachment 	(1378, 904)
+			    terminal_attachment 	(1378, 733)
+			    label      	(object SegLabel @26
+				Parent_View 	@24
+				location   	(1356, 831)
+				font       	(object Font
+				    size       	8
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				anchor     	2
+				anchor_loc 	1
+				nlines     	1
+				max_width  	15
+				justify    	0
+				label      	"1"
+				pctDist    	0.426901
+				height     	22
+				orientation 	0)
+			    label      	(object SegLabel @27
+				Parent_View 	@24
+				location   	(1378, 767)
+				font       	(object Font
+				    size       	8
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				anchor     	5
+				anchor_loc 	1
+				nlines     	1
+				max_width  	275
+				justify    	0
+				label      	"id : org::w3c::string"
+				pctDist    	0.900000
+				height     	12
+				orientation 	0))))
+		(object AssociationViewNew "NodeHasEntries" @28
+		    location   	(1366, 1481)
+		    font       	(object Font
+			size       	8
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object SegLabel @29
+			Parent_View 	@28
+			location   	(1362, 1522)
+			font       	(object Font
+			    size       	8
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	TRUE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			anchor     	1
+			anchor_loc 	1
+			nlines     	1
+			max_width  	450
+			justify    	0
+			label      	"NodeHasEntries"
+			pctDist    	0.450000
+			height     	41
+			orientation 	1)
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"4F6C7278015D"
+		    roleview_list 	(list RoleViews
+			(object RoleView "entry" @30
+			    Parent_View 	@28
+			    location   	(107, 294)
+			    font       	(object Font
+				size       	8
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @31
+				Parent_View 	@30
+				location   	(1428, 1602)
+				font       	(object Font
+				    size       	8
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				anchor     	1
+				anchor_loc 	1
+				nlines     	1
+				max_width  	91
+				justify    	0
+				label      	"+entry"
+				pctDist    	0.721893
+				height     	62
+				orientation 	0)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"4F6C727A0173"
+			    client     	@28
+			    supplier   	@17
+			    vertices   	(list Points
+				(1366, 1481)
+				(1366, 1650))
+			    line_style 	3
+			    origin_attachment 	(1366, 1481)
+			    terminal_attachment 	(1366, 1650)
+			    label      	(object SegLabel @32
+				Parent_View 	@30
+				location   	(1420, 1632)
+				font       	(object Font
+				    size       	8
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				anchor     	2
+				anchor_loc 	1
+				nlines     	1
+				max_width  	15
+				justify    	0
+				label      	"0..1"
+				pctDist    	0.900000
+				height     	54
+				orientation 	0))
+			(object RoleView "node" @33
+			    Parent_View 	@28
+			    location   	(107, 294)
+			    font       	(object Font
+				size       	8
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @34
+				Parent_View 	@33
+				location   	(1419, 1416)
+				font       	(object Font
+				    size       	8
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				anchor     	1
+				anchor_loc 	1
+				nlines     	1
+				max_width  	108
+				justify    	0
+				label      	"+node"
+				pctDist    	0.384615
+				height     	53
+				orientation 	1)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"4F6C727A0175"
+			    client     	@28
+			    supplier   	@18
+			    vertices   	(list Points
+				(1366, 1481)
+				(1366, 1312))
+			    line_style 	3
+			    origin_attachment 	(1366, 1481)
+			    terminal_attachment 	(1366, 1312)
+			    label      	(object SegLabel @35
+				Parent_View 	@33
+				location   	(1420, 1330)
+				font       	(object Font
+				    size       	8
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				anchor     	2
+				anchor_loc 	1
+				nlines     	1
+				max_width  	15
+				justify    	0
+				label      	"1"
+				pctDist    	0.900000
+				height     	54
+				orientation 	1)
+			    label      	(object SegLabel @36
+				Parent_View 	@33
+				location   	(1366, 1346)
+				font       	(object Font
+				    size       	8
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				anchor     	5
+				anchor_loc 	1
+				nlines     	1
+				max_width  	331
+				justify    	0
+				label      	"name : org::w3c::string"
+				pctDist    	0.900000
+				height     	12
+				orientation 	0))))
+		(object AssociationViewNew "NodeHasParent" @37
+		    location   	(2881, 1374)
+		    font       	(object Font
+			size       	8
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object SegLabel @38
+			Parent_View 	@37
+			location   	(2748, 1408)
+			font       	(object Font
+			    size       	8
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	TRUE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			anchor     	1
+			anchor_loc 	1
+			nlines     	1
+			max_width  	450
+			justify    	0
+			label      	"NodeHasParent"
+			pctDist    	-1.716667
+			height     	34
+			orientation 	1)
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"4F6C76CA0199"
+		    roleview_list 	(list RoleViews
+			(object RoleView "parent" @39
+			    Parent_View 	@37
+			    location   	(1510, 180)
+			    font       	(object Font
+				size       	8
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @40
+				Parent_View 	@39
+				location   	(1887, 1100)
+				font       	(object Font
+				    size       	8
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				anchor     	1
+				anchor_loc 	1
+				nlines     	1
+				max_width  	121
+				justify    	0
+				label      	"+parent"
+				pctDist    	0.921527
+				height     	66
+				orientation 	1)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"4F6C76CD0360"
+			    client     	@37
+			    supplier   	@18
+			    vertices   	(list Points
+				(2881, 1374)
+				(2881, 1165)
+				(1783, 1165))
+			    line_style 	3
+			    origin_attachment 	(2881, 1374)
+			    terminal_attachment 	(1783, 1165)
+			    label      	(object SegLabel @41
+				Parent_View 	@39
+				location   	(1838, 1228)
+				font       	(object Font
+				    size       	8
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				anchor     	2
+				anchor_loc 	1
+				nlines     	1
+				max_width  	15
+				justify    	0
+				label      	"0..1"
+				pctDist    	0.958643
+				height     	63
+				orientation 	0)
+			    label      	(object SegLabel @42
+				Parent_View 	@39
+				location   	(2174, 1165)
+				font       	(object Font
+				    size       	8
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				anchor     	5
+				anchor_loc 	1
+				nlines     	1
+				max_width  	744
+				justify    	0
+				label      	"nodeContainer : org::openmdx::preferences2::Root"
+				pctDist    	0.900000
+				height     	12
+				orientation 	1))
+			(object RoleView "child" @43
+			    Parent_View 	@37
+			    location   	(1510, 180)
+			    font       	(object Font
+				size       	8
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @44
+				Parent_View 	@43
+				location   	(1750, 1342)
+				font       	(object Font
+				    size       	8
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				anchor     	1
+				anchor_loc 	1
+				nlines     	1
+				max_width  	104
+				justify    	0
+				label      	"+child"
+				pctDist    	0.978801
+				height     	56
+				orientation 	1)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"4F6C76CD0362"
+			    client     	@37
+			    supplier   	@18
+			    vertices   	(list Points
+				(2881, 1374)
+				(2881, 1434)
+				(1694, 1434)
+				(1694, 1313))
+			    line_style 	3
+			    origin_attachment 	(2881, 1374)
+			    terminal_attachment 	(1694, 1313)
+			    label      	(object SegLabel @45
+				Parent_View 	@43
+				location   	(1648, 1339)
+				font       	(object Font
+				    size       	8
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				anchor     	2
+				anchor_loc 	1
+				nlines     	1
+				max_width  	15
+				justify    	0
+				label      	"0..n"
+				pctDist    	0.980994
+				height     	46
+				orientation 	0)
+			    label      	(object SegLabel @46
+				Parent_View 	@43
+				location   	(1772, 1414)
+				font       	(object Font
+				    size       	8
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				anchor     	3
+				anchor_loc 	1
+				nlines     	1
+				max_width  	141
+				justify    	0
+				label      	"{isFrozen}"
+				pctDist    	0.854532
+				height     	20
+				orientation 	1))))))))

@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Path.java,v 1.29 2011/11/19 19:57:06 hburger Exp $
  * Description: Profile Path 
- * Revision:    $Revision: 1.29 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/11/19 19:57:06 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: ViewPort.java,v 1.5 2010/01/29 23:06:44 wfro Exp $
  * Description: ViewPort class
- * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/01/29 23:06:44 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -112,17 +109,19 @@ public class ViewPort {
     //-----------------------------------------------------------------------
     public String getResourcePathPrefix(
     ) {
-        return this.resourcePathPrefix;
+        return this.view.getResourcePathPrefix() == null ?
+        	this.resourcePathPrefix :
+        		this.view.getResourcePathPrefix();
     }
     
     //-----------------------------------------------------------------------
     public String getResourcePath(
         String relativePath
     ) {
-        return this.resourcePathPrefix + relativePath;
+        return this.getResourcePathPrefix() + relativePath;
     }
     
-    //-----------------------------------------------------------------------
+	//-----------------------------------------------------------------------
     private void ensureCapacity(
         int minimumCapacity
     ) {
@@ -463,4 +462,5 @@ public class ViewPort {
     private final List<StringBuilder> stringBuilders = new ArrayList<StringBuilder>();
     private int nextStringBuilder = 0;
     private Type type;
+    
 }  

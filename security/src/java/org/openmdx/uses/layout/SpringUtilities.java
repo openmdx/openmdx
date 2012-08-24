@@ -1,11 +1,8 @@
 /**
  * ====================================================================
  * Project:     Java Swing Tutorial
- * Name:        $Id: SpringUtilities.java,v 1.1 2007/11/26 14:04:35 hburger Exp $
  * Description: Spring Layout Utilities
- * Revision:    $Revision: 1.1 $
  * Owner:       Sun Microsystems, Inc, http://java.sun.com/
- * Date:        $Date: 2007/11/26 14:04:35 $
  * ====================================================================
  * 
  * This class belongs to Sun's Java Tutorial

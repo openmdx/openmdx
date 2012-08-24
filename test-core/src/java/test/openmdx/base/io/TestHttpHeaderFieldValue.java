@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: TestHttpHeaderFieldValue.java,v 1.6 2010/09/13 16:55:00 hburger Exp $
  * Description: Test HTTP Headers
- * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/09/13 16:55:00 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

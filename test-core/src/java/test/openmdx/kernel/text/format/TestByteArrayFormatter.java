@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: TestByteArrayFormatter.java,v 1.1 2009/09/15 15:47:46 hburger Exp $
  * Description: Test Byte Array Formatter
- * Revision:    $Revision: 1.1 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/09/15 15:47:46 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

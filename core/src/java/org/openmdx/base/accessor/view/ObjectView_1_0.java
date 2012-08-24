@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: ObjectView_1_0.java,v 1.17 2010/12/09 06:24:55 hburger Exp $
  * Description: Object 1.6 
- * Revision:    $Revision: 1.17 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/12/09 06:24:55 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

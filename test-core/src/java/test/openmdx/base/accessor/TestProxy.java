@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: TestProxy.java,v 1.3 2010/09/13 16:57:01 hburger Exp $
  * Description: Test Proxy 
- * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/09/13 16:57:01 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

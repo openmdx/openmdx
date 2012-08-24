@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: TestClock_1.java,v 1.1 2010/09/22 09:04:29 hburger Exp $
  * Description: Class Loading Test
- * Revision:    $Revision: 1.1 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/09/22 09:04:29 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

@@ -1,16 +1,13 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Datums.java,v 1.4 2011/03/18 15:25:53 hburger Exp $
  * Description: Oracle SQL Datum Conversions
- * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/03/18 15:25:53 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2007-2009, OMEX AG, Switzerland
+ * Copyright (c) 2007-2012, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -69,11 +66,51 @@ import org.w3c.spi.DatatypeFactories;
  */
 public class Datums {
 
-    protected Datums(
+	/**
+	 * Constructor
+	 */
+    private Datums(
     ){
         // Avoid instantiation
     }
 
+    /**
+     * Retrieve a class' package name
+     * 
+     * @param className the fully qualified class name
+     * 
+     * @return package name
+     */
+    private static String getPackageName(
+        String className
+    ){
+        int separator = className.lastIndexOf('.');
+        return separator < 0 ? "" : className.substring(0, separator);
+    }
+    
+    /**
+     * Tells whether the native object is an instance of oracle.sql.Datum
+     * 
+     * @return <code>true</code> the native object is an instance of oracle.sql.Datum
+     */
+    public static boolean isDatum(
+        Object nativeObject
+    ){
+        if(nativeObject == null) {
+            return false;
+        }
+        if(oracleDatum == null){
+            if("oracle.sql".equals(getPackageName(nativeObject.getClass().getName()))) try {
+                oracleDatum = Classes.getApplicationClass("oracle.sql.Datum");
+            } catch (ClassNotFoundException exception) {
+                return false; // can't be an instance of a non-existing class
+            } else {
+                return false; // the datum instances are expected to be in the oracle.sql package
+            }
+        }
+        return oracleDatum.isInstance(nativeObject);
+    }
+    
     /**
      * Convert Oracle Datum values to JDBC objects
      * 
@@ -88,148 +125,132 @@ public class Datums {
         Object datum
     ) throws SQLException{
         String nativeClass = datum.getClass().getName();
-        if(nativeClass.startsWith("oracle.sql.")) try {
+        try {
             if(nativeClass.equals("oracle.sql.TIMESTAMPTZ")) {
-                if(timstampToBytes == null) timstampToBytes = datum.getClass().getMethod("toBytes");
-                try {
-//                  [0] - 100 => century
-//                  [1] - 100 => year in century
-//                  [2] - 1   => zero based month
-//                  [3]       => one based day
-//                  [4] - 1   => hour
-//                  [5] - 1   => minute
-//                  [6] - 1   => second
-//                  [7]..[10] => nanoseconds
-//                  [11]/[12] => time zone
-                    byte[] timestampWithTimezone =  (byte[]) timstampToBytes.invoke(
-                        datum, 
-                        (Object[])null
-                    );
-                    byte[] nanos = new byte[4];
-                    System.arraycopy(timestampWithTimezone, 7, nanos, 0, 4);
-                    Calendar calendar = Calendar.getInstance(UTC);
-                    calendar.clear();
-                    calendar.set(
-                        100 * (toInt(timestampWithTimezone[0]) - 100) + (toInt(timestampWithTimezone[1]) - 100), // year
-                        toInt(timestampWithTimezone[2]) - 1, // zero based month
-                        timestampWithTimezone[3], // one based day
-                        timestampWithTimezone[4] - 1, // hour
-                        timestampWithTimezone[5] - 1, // minute
-                        timestampWithTimezone[6] - 1 // second
-                    );
-                    Timestamp timestamp = new Timestamp(
-                        calendar.getTimeInMillis()
-                    );
-                    timestamp.setNanos(
-                        new BigInteger(nanos).intValue()
-                    );    
-                    return timestamp;
-                } catch (InvocationTargetException exception) {
-                    throw exception.getTargetException() instanceof Exception ?
-                        (Exception) exception.getTargetException() :
-                            exception;
-                }
+                if(timestampToBytes == null) timestampToBytes = datum.getClass().getMethod("toBytes");
+                //                                  
+                // [0] - 100 => century
+                // [1] - 100 => year in century
+                // [2] - 1   => zero based month
+                // [3]       => one based day
+                // [4] - 1   => hour
+                // [5] - 1   => minute
+                // [6] - 1   => second
+                // [7]..[10] => nanoseconds
+                // [11]/[12] => time zone
+                //
+                byte[] timestampWithTimezone =  (byte[]) timestampToBytes.invoke(
+                    datum, 
+                    (Object[])null
+                );
+                byte[] nanos = new byte[4];
+                System.arraycopy(timestampWithTimezone, 7, nanos, 0, 4);
+                Calendar calendar = Calendar.getInstance(UTC);
+                calendar.clear();
+                calendar.set(
+                    100 * (toInt(timestampWithTimezone[0]) - 100) + (toInt(timestampWithTimezone[1]) - 100), // year
+                    toInt(timestampWithTimezone[2]) - 1, // zero based month
+                    timestampWithTimezone[3], // one based day
+                    timestampWithTimezone[4] - 1, // hour
+                    timestampWithTimezone[5] - 1, // minute
+                    timestampWithTimezone[6] - 1 // second
+                );
+                Timestamp timestamp = new Timestamp(
+                    calendar.getTimeInMillis()
+                );
+                timestamp.setNanos(
+                    new BigInteger(nanos).intValue()
+                );    
+                return timestamp;
             } else if (nativeClass.equals("oracle.sql.INTERVALDS")) {
                 if(intervalToBytes == null) intervalToBytes = datum.getClass().getMethod("toBytes");
-                try {
-//                  [0]..[3] - 0x80000000 => days
-//                  [4] - 60  => hours
-//                  [5] - 60  => minutes
-//                  [6] - 60  => seconds
-//                  [7]..[10] - 0x80000000 => nanoseconds
-                    byte[] intervalDaysSeconds =  (byte[]) intervalToBytes.invoke(
-                        datum, 
-                        (Object[])null
-                    );
-                	StringBuilder value = new StringBuilder();
-                    int days = toInt(intervalDaysSeconds, 0) - 0x80000000;
-                    int hours = toInt(intervalDaysSeconds[4]) - 60;
-                    int minutes = toInt(intervalDaysSeconds[5]) - 60;
-                    int seconds = toInt(intervalDaysSeconds[6]) - 60;
-                    int nanoseconds = toInt(intervalDaysSeconds, 7) - 0x80000000;
-                    if(days < 0) {
-	                	value.append(
-	                		"-P"
-	                	).append(
-	                		-days
-	                	).append(
-	                		"DT"
-	                	).append(
-	                		-hours
-	                	).append(
-	                		"H"
-	                	).append(
-	                		-minutes
-	                	).append(
-	                		"M"
-	                	).append(
-	                		BigDecimal.valueOf(
-	                			-seconds
-	                		).add(
-			                	BigDecimal.valueOf(-nanoseconds, 9)
-			                )
-		            	).append(
-		            		"S"
-		            	);
-                    } else {
-	                	value.append(
-	                		"P"
-	                	).append(
-	                		days
-	                	).append(
-	                		"DT"
-	                	).append(
-	                		hours
-	                	).append(
-	                		"H"
-	                	).append(
-	                		minutes
-	                	).append(
-	                		"M"
-	                	).append(
-	                		BigDecimal.valueOf(
-	                			seconds
-	                		).add(
-			                	BigDecimal.valueOf(nanoseconds, 9)
-			                )
-		            	).append(
-		            		"S"
-		            	);
-                    }
-                    return DatatypeFactories.xmlDatatypeFactory().newDurationDayTime(value.toString());
-                } catch (InvocationTargetException exception) {
-                    throw exception.getTargetException() instanceof Exception ?
-                        (Exception) exception.getTargetException() :
-                            exception;
-                }
-            } else {
-                if(oracleToJdbc == null) oracleToJdbc = Classes.getApplicationClass(
-                    "oracle.sql.Datum"
-                ).getMethod(
-                    "toJdbc"
+                //
+                // [0]..[3] - 0x80000000 => days
+                // [4] - 60  => hours
+                // [5] - 60  => minutes
+                // [6] - 60  => seconds
+                // [7]..[10] - 0x80000000 => nanoseconds
+                //
+                byte[] intervalDaysSeconds =  (byte[]) intervalToBytes.invoke(
+                    datum, 
+                    (Object[])null
                 );
-                try {
-                    return oracleToJdbc.invoke(datum);
-                } catch (InvocationTargetException exception) {
-                    throw exception.getTargetException() instanceof Exception ?
-                        (Exception) exception.getTargetException() :
-                            exception;
+            	StringBuilder value = new StringBuilder();
+                int days = toInt(intervalDaysSeconds, 0) - 0x80000000;
+                int hours = toInt(intervalDaysSeconds[4]) - 60;
+                int minutes = toInt(intervalDaysSeconds[5]) - 60;
+                int seconds = toInt(intervalDaysSeconds[6]) - 60;
+                int nanoseconds = toInt(intervalDaysSeconds, 7) - 0x80000000;
+                if(days < 0) {
+                	value.append(
+                		"-P"
+                	).append(
+                		-days
+                	).append(
+                		"DT"
+                	).append(
+                		-hours
+                	).append(
+                		"H"
+                	).append(
+                		-minutes
+                	).append(
+                		"M"
+                	).append(
+                		BigDecimal.valueOf(
+                			-seconds
+                		).add(
+		                	BigDecimal.valueOf(-nanoseconds, 9)
+		                ).toPlainString()
+	            	).append(
+	            		"S"
+	            	);
+                } else {
+                	value.append(
+                		"P"
+                	).append(
+                		days
+                	).append(
+                		"DT"
+                	).append(
+                		hours
+                	).append(
+                		"H"
+                	).append(
+                		minutes
+                	).append(
+                		"M"
+                	).append(
+                		BigDecimal.valueOf(
+                			seconds
+                		).add(
+		                	BigDecimal.valueOf(nanoseconds, 9)
+		                ).toPlainString()
+	            	).append(
+	            		"S"
+	            	);
                 }
-            }          
+                return DatatypeFactories.xmlDatatypeFactory().newDurationDayTime(value.toString());
+            } else if (isDatum(datum)) { 
+                if(datumToJdbc == null) datumToJdbc = oracleDatum.getMethod("toJdbc");
+                return datumToJdbc.invoke(datum);
+            } else {
+                return datum; // Don't touch foreign values
+            }
         } catch (Exception exception) {
             throw Throwables.initCause(
                 new SQLException(
                     "Could not convert db object to JDBC object: " + 
                     Datums.class.getName() + "'s unification attempt failed"
                 ),
-                exception,
+                exception instanceof InvocationTargetException ? 
+                    ((InvocationTargetException)exception).getTargetException() : 
+                    exception,
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.TRANSFORMATION_FAILURE,
-                new BasicException.Parameter("class", datum.getClass().getName()),
+                new BasicException.Parameter("class", nativeClass),
                 new BasicException.Parameter("value", datum.toString())
             );
-        } else {
-            return datum;
         }
     }
 
@@ -259,16 +280,21 @@ public class Datums {
     	System.arraycopy(source, offset, value, 0, 4);
     	return new BigInteger(value).intValue();
     }
+
+    /**
+     * oracle.sql.Datum
+     */
+    private static Class<Object> oracleDatum;
     
     /**
      * oracle.sql.Datum.toJdbc()
      */
-    private static Method oracleToJdbc;
+    private static Method datumToJdbc;
 
     /**
      * oracle.sql.TIMESTAMPTZ.toBytes()
      */
-    private static Method timstampToBytes;
+    private static Method timestampToBytes;
 
     /**
      * oracle.sql.INTERVALDS.toBytes()

@@ -1,10 +1,7 @@
 /*
  * ====================================================================
- * Name:        $Id: TestTransaction.java,v 1.3 2010/10/21 14:50:53 hburger Exp $
  * Description: Lightweight container transaction management test
- * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/10/21 14:50:53 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

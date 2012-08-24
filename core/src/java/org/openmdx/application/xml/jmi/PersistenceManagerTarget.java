@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: PersistenceManagerTarget.java,v 1.9 2010/04/16 09:53:12 hburger Exp $
  * Description: Persistence Manager Target 
- * Revision:    $Revision: 1.9 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/04/16 09:53:12 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -140,14 +137,17 @@ public class PersistenceManagerTarget implements ImportTarget {
             modelClassName, 
             Names.JMI1_PACKAGE_SUFFIX
         );
-        RefObject refObject;
         try {
-            refObject = this.target.getInstance(
+        	RefObject refObject = this.target.getInstance(
                 this.persistenceManager, 
                 mode, 
                 objectHolder, 
                 Classes.<RefObject>getApplicationClass(javaClassName)
             );
+        	if(refObject != null) {
+	            this.cache.put(externalId, refObject);
+	            this.data.put(refObject, objectHolder);
+        	}
         } catch (ClassNotFoundException exception) {
               throw new ServiceException(
                   exception,
@@ -159,8 +159,6 @@ public class PersistenceManagerTarget implements ImportTarget {
                   new BasicException.Parameter("java-class", javaClassName)
               );
         }
-        this.cache.put(externalId, refObject);
-        this.data.put(refObject, objectHolder);
     }
 
     /**
@@ -205,9 +203,6 @@ public class PersistenceManagerTarget implements ImportTarget {
                     throw exception;
                 } catch (JDOUserException exception) {
                     throw new ServiceException(exception);
-                } catch (RuntimeException exception) {
-                    this.persistenceManager.currentTransaction().setRollbackOnly();
-                    throw exception;
                 }
             } else {
                 try {

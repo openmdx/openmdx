@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: ModelExceptions.java,v 1.3 2009/04/02 14:56:21 hburger Exp $
  * Description: Generated constants for ModelExceptions
- * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/04/02 14:56:21 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

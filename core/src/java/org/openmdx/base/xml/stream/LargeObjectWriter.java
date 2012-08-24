@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: LargeObjectWriter.java,v 1.1 2010/03/02 18:27:36 hburger Exp $
  * Description: Large Object Writer
- * Revision:    $Revision: 1.1 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/03/02 18:27:36 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

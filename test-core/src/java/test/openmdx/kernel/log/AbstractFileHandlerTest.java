@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: AbstractFileHandlerTest.java,v 1.1 2009/04/01 13:34:45 hburger Exp $
  * Description: Test Standard File Handler 
- * Revision:    $Revision: 1.1 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/04/01 13:34:45 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

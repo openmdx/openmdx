@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Security, http://www.openmdx.org
- * Name:        $Id: GenericPrincipal.java,v 1.2 2010/06/04 22:38:00 hburger Exp $
  * Description: Generic Principal
- * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/06/04 22:38:00 $
  * ====================================================================
  *
  * This software is published under the BSD license

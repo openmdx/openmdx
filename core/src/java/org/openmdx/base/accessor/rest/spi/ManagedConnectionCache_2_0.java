@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: ManagedConnectionCache_2_0.java,v 1.3 2010/05/17 10:01:03 hburger Exp $
  * Description: Managed Connection Cache 2.0
- * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/05/17 10:01:03 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

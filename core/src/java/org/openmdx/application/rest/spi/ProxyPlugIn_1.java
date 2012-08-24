@@ -1,16 +1,13 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: ProxyPlugIn_1.java,v 1.6 2011/12/29 03:05:33 hburger Exp $
  * Description: Proxy Plug-In
- * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/12/29 03:05:33 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2009, OMEX AG, Switzerland
+ * Copyright (c) 2009-2012, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -120,9 +117,18 @@ class ProxyPlugIn_1 implements PlugIn_1_0 {
 	/* (non-Javadoc)
 	 * @see org.openmdx.base.aop0.PlugIn_1_0#isExemptFromValidation(org.openmdx.base.mof.cci.ModelElement_1_0)
 	 */
+//  @Override
 	public boolean isExemptFromValidation(DataObject_1 object, ModelElement_1_0 feature)
 			throws ServiceException {
 		return false;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.openmdx.base.aop0.PlugIn_1_0#isAspect(org.openmdx.base.accessor.rest.DataObject_1)
+	 */
+//  @Override
+	public Boolean isAspect(DataObject_1 object) {
+		return null;
 	}
 
 }

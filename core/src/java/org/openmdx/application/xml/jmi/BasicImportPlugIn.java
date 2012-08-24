@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: BasicImportPlugIn.java,v 1.8 2011/05/27 16:19:20 hburger Exp $
  * Description: Basic Import Plug-In
- * Revision:    $Revision: 1.8 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/05/27 16:19:20 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: UserDefinedView.java,v 1.17 2011/11/28 13:53:13 wfro Exp $
  * Description: UserDefinedView 
- * Revision:    $Revision: 1.17 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/11/28 13:53:13 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -73,14 +70,17 @@ public class UserDefinedView
     //-------------------------------------------------------------------------
     public UserDefinedView(
         Object object,
-        ApplicationContext application,
+        ApplicationContext app,
         View parentView
     ) {
         super(
             UUIDs.newUUID().toString(),
             null,
             object,
-            application
+            null, // resourcePathPrefix
+            null, // navigationTarget
+            null, // isReadOnly
+            app
         );
         this.attributes = new HashMap<String,Attribute>();
         this.requestId = parentView.getRequestId();

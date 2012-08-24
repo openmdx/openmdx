@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <!--
-=======================================================================
-= Name:        $Id: build-library.xml,v 1.176 2011/12/29 11:49:40 hburger Exp $
+==============================org.openmdx.kernel.logging.ClassicFor=========================================
+= Name:        $Id: build-library.xml,v 1.178 2012/07/08 12:39:11 wfro Exp $
 = Description: openMDX Build Library
-= Revision:    $Revision: 1.176 $
-= Date:        $Date: 2011/12/29 11:49:40 $
+= Revision:    $Revision: 1.178 $
+= Date:        $Date: 2012/07/08 12:39:11 $
 = Copyright:   (c) 2003-2011 OMEX AG
 =======================================================================
 =
@@ -611,9 +611,9 @@
 handlers= java.util.logging.FileHandler, java.util.logging.ConsoleHandler
 java.util.logging.FileHandler.level = ${model.transformation.log.level}
 java.util.logging.FileHandler.pattern = build/${build.target.platform}/log/model/transformation.%u.log
-java.util.logging.FileHandler.formatter = org.openmdx.kernel.log.ClassicFormatter
+java.util.logging.FileHandler.formatter = ${openmdx.log.formatter}
 java.util.logging.ConsoleHandler.level = SEVERE
-java.util.logging.ConsoleHandler.formatter = org.openmdx.kernel.log.ClassicFormatter
+java.util.logging.ConsoleHandler.formatter = ${openmdx.log.formatter}
 			    </echo>
 			</antcontrib:then>
 		</antcontrib:if>
@@ -650,9 +650,9 @@ java.util.logging.ConsoleHandler.formatter = org.openmdx.kernel.log.ClassicForma
 handlers= java.util.logging.FileHandler, java.util.logging.ConsoleHandler
 java.util.logging.FileHandler.level = ${model.transformation.log.level}
 java.util.logging.FileHandler.pattern = build/${build.target.platform}/log/model/transformation.%u.log
-java.util.logging.FileHandler.formatter = org.openmdx.kernel.log.ClassicFormatter
+java.util.logging.FileHandler.formatter = ${openmdx.log.formatter}
 java.util.logging.ConsoleHandler.level = SEVERE
-java.util.logging.ConsoleHandler.formatter = org.openmdx.kernel.log.ClassicFormatter
+java.util.logging.ConsoleHandler.formatter = ${openmdx.log.formatter}
 			    </echo>
 			</antcontrib:then>
 		</antcontrib:if>
@@ -913,7 +913,7 @@ java.util.logging.ConsoleHandler.formatter = org.openmdx.kernel.log.ClassicForma
 handlers= java.util.logging.FileHandler
 java.util.logging.FileHandler.level = ${junit.test.log.level}
 java.util.logging.FileHandler.pattern = build/${build.target.platform}/log/junit/junit.%u.log
-java.util.logging.FileHandler.formatter = org.openmdx.kernel.log.ClassicFormatter
+java.util.logging.FileHandler.formatter = ${openmdx.log.formatter}
 	    </echo>
 	</target>
 	<!--*******************************************************************
@@ -1665,27 +1665,29 @@ java.util.logging.FileHandler.formatter = org.openmdx.kernel.log.ClassicFormatte
 	<!-- ******************************************************************* -->
 	<!-- * -validate-war- -->
 	<!-- ******************************************************************* -->
-  <target name="-validate-war-">
-    <taskdef classname="org.apache.jasper.JspC" name="jasper2" >
-      <classpath id="jspc.classpath"> 
-        <pathelement location="${java.home}/../lib/tools.jar"/> 
-        <fileset dir="${tomcat.home}/bin"> 
-          <include name="*.jar"/> 
-        </fileset> 
-        <fileset dir="${tomcat.home}/lib"> 
-          <include name="*.jar"/> 
-        </fileset> 
-      </classpath> 
-    </taskdef>
-    <unzip 
+	<target name="-validate-war-">
+		<taskdef classname="org.apache.jasper.JspC" name="jasper2" >
+			<classpath id="jspc.classpath"> 
+        		<pathelement location="${java.home}/../lib/tools.jar"/>
+        		<path refid="osgi.enterprise.lib"/>				
+        		<path refid="osgi.extension.lib"/>				
+        		<fileset dir="${tomcat.home}/bin"> 
+          			<include name="*.jar"/> 
+        		</fileset> 
+        		<fileset dir="${tomcat.home}/lib"> 
+          			<include name="*.jar"/> 
+        		</fileset> 
+      		</classpath>
+    	</taskdef>
+    	<unzip
 		  src="${build.dir}/module/${module.name}"
 		  dest="${build.dir}/tmp/jspc/webapp"
-	  />
-    <jasper2 
+	  	/>
+    	<jasper2 
 		  validateXml="false" 
 		  uriroot="${build.dir}/tmp/jspc/webapp" 
 		  outputDir="${build.dir}/tmp/jspc/src" 
-    />
+    	/>
 	  <!-- compile JSPs -->
     <mkdir dir="${build.dir}/tmp/jspc/classes"/>
     <mkdir dir="${build.dir}/tmp/jspc/lib"/>

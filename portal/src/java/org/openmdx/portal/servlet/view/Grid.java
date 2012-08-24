@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: Grid.java,v 1.107 2011/12/23 15:53:15 wfro Exp $
  * Description: GridControl
- * Revision:    $Revision: 1.107 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/12/23 15:53:15 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -55,6 +52,7 @@
  */
 package org.openmdx.portal.servlet.view;
 
+import java.beans.ExceptionListener;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.text.ParseException;
@@ -68,6 +66,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.StringTokenizer;
 import java.util.TreeMap;
@@ -78,7 +77,6 @@ import javax.jdo.PersistenceManager;
 
 import org.openmdx.base.accessor.cci.SystemAttributes;
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
-import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
 import org.openmdx.base.mof.cci.Model_1_0;
@@ -93,6 +91,7 @@ import org.openmdx.base.query.Quantifier;
 import org.openmdx.base.query.SortOrder;
 import org.openmdx.base.text.conversion.Base64;
 import org.openmdx.base.text.conversion.JavaBeans;
+import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.log.SysLog;
 import org.openmdx.portal.servlet.Action;
 import org.openmdx.portal.servlet.ApplicationContext;
@@ -101,6 +100,7 @@ import org.openmdx.portal.servlet.Filter;
 import org.openmdx.portal.servlet.Filters;
 import org.openmdx.portal.servlet.HtmlEncoder_1_0;
 import org.openmdx.portal.servlet.PortalExtension_1_0.ConditionParser;
+import org.openmdx.portal.servlet.Texts_1_0;
 import org.openmdx.portal.servlet.UserSettings;
 import org.openmdx.portal.servlet.ViewPort;
 import org.openmdx.portal.servlet.WebKeys;
@@ -129,7 +129,6 @@ import org.openmdx.portal.servlet.attribute.AttributeValue;
 import org.openmdx.portal.servlet.attribute.FieldDef;
 import org.openmdx.portal.servlet.attribute.ObjectReferenceValue;
 import org.openmdx.portal.servlet.control.GridControl;
-import org.openmdx.portal.servlet.texts.Texts_1_0;
 
 @SuppressWarnings("unchecked")
 public abstract class Grid
@@ -209,38 +208,56 @@ public abstract class Grid
                 control.getQualifiedReferenceName()
             );
             // Default filter
-            String defaultFilterPropertyName = control.getPropertyName(
+            String filterPropertyName = control.getPropertyName(
                 control.getContainerId(),
-                UserSettings.DEFAULT_FILTER
+                UserSettings.DEFAULT_FILTER.getName()
             );
             // Fallback to old-style property name for default filter
             if(
-                (app.getSettings().getProperty(defaultFilterPropertyName) == null) &&
+                (app.getSettings().getProperty(filterPropertyName) == null) &&
                 (baseFilterId.indexOf(":") < 0) 
             ) {
-                defaultFilterPropertyName = control.getPropertyName(
+                filterPropertyName = control.getPropertyName(
                     control.getQualifiedReferenceName(),
-                    UserSettings.DEFAULT_FILTER
-                );                
+                    UserSettings.DEFAULT_FILTER.getName()
+                );               
             }
             // Override DEFAULT filter, if at least ALL and DEFAULT filter are defined
             // and settings contains a default filter declaration
             Filter defaultFilter = null;
-            if(app.getSettings().getProperty(defaultFilterPropertyName) != null) {
-                try {
-                    defaultFilter = (Filter)JavaBeans.fromXML(
-                    	new String(
-                    		Base64.decode(app.getSettings().getProperty(defaultFilterPropertyName))
-                    	)
-                    );
-                    defaultFilter.setName(Filters.DEFAULT_FILTER_NAME);
-                    defaultFilter.setGroupName("0");
-                    defaultFilter.setIconKey(WebKeys.ICON_FILTER_DEFAULT);
+            if(app.getSettings().getProperty(filterPropertyName) != null) {
+            	String filterAsXML = new String(
+            		Base64.decode(app.getSettings().getProperty(filterPropertyName))
+            	);
+            	final List<Exception> parseExceptions = new ArrayList<Exception>();
+                defaultFilter = (Filter)JavaBeans.fromXML(
+                	filterAsXML,
+                	new ExceptionListener(){
+						@Override
+                        public void exceptionThrown(
+                        	Exception e
+                        ) {
+							parseExceptions.add(e);
+                        }                		
+                	}
+                );
+                if(!parseExceptions.isEmpty()) {
+                	for(Exception parseException: parseExceptions) {
+                		ServiceException e = new ServiceException(
+                			parseException,
+                            BasicException.Code.DEFAULT_DOMAIN,
+                            BasicException.Code.PARSE_FAILURE,
+                            "Unable to parse user-defined filter",
+                            new BasicException.Parameter("filter", filterAsXML),
+                            new BasicException.Parameter("property", filterPropertyName),
+                            new BasicException.Parameter("user", app.getUserHomeIdentityAsPath())
+                        );
+                		SysLog.warning(e.getMessage(), e.getCause());
+                	}
                 }
-                // Ignore if decoding fails
-                catch(Exception e) {
-                	SysLog.info("can not get default filter from settings", e.getMessage());                    
-                }
+                defaultFilter.setName(Filters.DEFAULT_FILTER_NAME);
+                defaultFilter.setGroupName("0");
+                defaultFilter.setIconKey(WebKeys.ICON_FILTER_DEFAULT);                
             }
             this.filters = filters.getPreparedFilters(
                 baseFilterId,
@@ -280,7 +297,7 @@ public abstract class Grid
         	  addObjectAction = new Action(
         		  GridAddObjectAction.EVENT_ID,
         		  new Action.Parameter[]{
-        			  new Action.Parameter(Action.PARAMETER_OBJECTXRI, view.getRefObject().refMofId()),                        
+        			  new Action.Parameter(Action.PARAMETER_OBJECTXRI, view.getRefObject().refGetPath().toXRI()),                        
         			  new Action.Parameter(Action.PARAMETER_NAME, "+"),
         			  new Action.Parameter(Action.PARAMETER_PANE, Integer.toString(control.getPaneIndex())),
         			  new Action.Parameter(Action.PARAMETER_REFERENCE, (String)reference.objGetValue("qualifiedName"))
@@ -291,7 +308,7 @@ public abstract class Grid
         	  removeObjectAction = new Action(
         		  GridAddObjectAction.EVENT_ID,
         		  new Action.Parameter[]{
-        			  new Action.Parameter(Action.PARAMETER_OBJECTXRI, view.getRefObject().refMofId()),                        
+        			  new Action.Parameter(Action.PARAMETER_OBJECTXRI, view.getRefObject().refGetPath().toXRI()),                        
         			  new Action.Parameter(Action.PARAMETER_NAME, "-"),
         			  new Action.Parameter(Action.PARAMETER_PANE, Integer.toString(control.getPaneIndex())),
         			  new Action.Parameter(Action.PARAMETER_REFERENCE, (String)reference.objGetValue("qualifiedName"))
@@ -302,7 +319,7 @@ public abstract class Grid
         	  moveUpObjectAction = new Action(
         		  GridMoveUpObjectAction.EVENT_ID,
         		  new Action.Parameter[]{
-        			  new Action.Parameter(Action.PARAMETER_OBJECTXRI, view.getRefObject().refMofId()),                        
+        			  new Action.Parameter(Action.PARAMETER_OBJECTXRI, view.getRefObject().refGetPath().toXRI()),                        
         			  new Action.Parameter(Action.PARAMETER_PANE, Integer.toString(control.getPaneIndex())),
         			  new Action.Parameter(Action.PARAMETER_REFERENCE, (String)reference.objGetValue("qualifiedName"))
         		  },
@@ -312,7 +329,7 @@ public abstract class Grid
         	  moveDownObjectAction = new Action(
         		  GridMoveDownObjectAction.EVENT_ID,
         		  new Action.Parameter[]{
-        			  new Action.Parameter(Action.PARAMETER_OBJECTXRI, view.getRefObject().refMofId()),                        
+        			  new Action.Parameter(Action.PARAMETER_OBJECTXRI, view.getRefObject().refGetPath().toXRI()),                        
         			  new Action.Parameter(Action.PARAMETER_PANE, Integer.toString(control.getPaneIndex())),
         			  new Action.Parameter(Action.PARAMETER_REFERENCE, (String)reference.objGetValue("qualifiedName"))
         		  },
@@ -353,7 +370,7 @@ public abstract class Grid
                                 new Action(
                                     NewObjectAction.EVENT_ID,
                                     new Action.Parameter[]{
-                                        new Action.Parameter(Action.PARAMETER_OBJECTXRI, view.getRefObject().refMofId()),                        
+                                        new Action.Parameter(Action.PARAMETER_OBJECTXRI, view.getRefObject().refGetPath().toXRI()),                        
                                         new Action.Parameter(Action.PARAMETER_FOR_REFERENCE, objectContainer.getReferenceName()),
                                         new Action.Parameter(Action.PARAMETER_FOR_CLASS, forClass)
                                     },
@@ -437,7 +454,7 @@ public abstract class Grid
             new Action(
                 MultiDeleteAction.EVENT_ID, 
                 new Action.Parameter[]{
-                    new Action.Parameter(Action.PARAMETER_OBJECTXRI, view.getRefObject().refMofId()),                                                  
+                    new Action.Parameter(Action.PARAMETER_OBJECTXRI, view.getRefObject().refGetPath().toXRI()),                                                  
                 },
                 app.getTexts().getDeleteTitle(), 
                 WebKeys.ICON_DELETE,
@@ -446,7 +463,7 @@ public abstract class Grid
         this.saveAction = new Action(
             SaveGridAction.EVENT_ID,
             new Action.Parameter[]{
-                new Action.Parameter(Action.PARAMETER_OBJECTXRI, view.getRefObject().refMofId()),                        
+                new Action.Parameter(Action.PARAMETER_OBJECTXRI, view.getRefObject().refGetPath().toXRI()),                        
                 new Action.Parameter(Action.PARAMETER_PANE, Integer.toString(control.getPaneIndex())),
                 new Action.Parameter(Action.PARAMETER_REFERENCE, control.getId())
             },
@@ -457,7 +474,7 @@ public abstract class Grid
         this.setCurrentFilterAsDefaultAction = new Action(
             GridSetCurrentFilterAsDefaultAction.EVENT_ID,
             new Action.Parameter[]{
-                new Action.Parameter(Action.PARAMETER_OBJECTXRI, view.getRefObject().refMofId()),                        
+                new Action.Parameter(Action.PARAMETER_OBJECTXRI, view.getRefObject().refGetPath().toXRI()),                        
                 new Action.Parameter(Action.PARAMETER_PANE, Integer.toString(control.getPaneIndex())),                      
                 new Action.Parameter(Action.PARAMETER_REFERENCE, control.getId())     
             },
@@ -469,7 +486,7 @@ public abstract class Grid
         // Show first page
         String showRowsOnInitPropertyName = control.getPropertyName(
             control.getQualifiedReferenceName(),
-            UserSettings.SHOW_ROWS_ON_INIT
+            UserSettings.SHOW_ROWS_ON_INIT.getName()
         );
         if(app.getSettings().getProperty(showRowsOnInitPropertyName) != null) {
             this.setShowGridContentOnInit(
@@ -575,7 +592,7 @@ public abstract class Grid
         return new Action(
             GridPageNextAction.EVENT_ID,
             new Action.Parameter[]{
-                new Action.Parameter(Action.PARAMETER_OBJECTXRI, view.getRefObject().refMofId()),                        
+                new Action.Parameter(Action.PARAMETER_OBJECTXRI, view.getRefObject().refGetPath().toXRI()),                        
                 new Action.Parameter(Action.PARAMETER_PANE, Integer.toString(this.getGridControl().getPaneIndex())),         
                 new Action.Parameter(Action.PARAMETER_REFERENCE, control.getId())       
             },
@@ -592,7 +609,7 @@ public abstract class Grid
         return new Action(
             GridPagePreviousAction.EVENT_ID,
             new Action.Parameter[]{
-                new Action.Parameter(Action.PARAMETER_OBJECTXRI, view.getRefObject().refMofId()),                        
+                new Action.Parameter(Action.PARAMETER_OBJECTXRI, view.getRefObject().refGetPath().toXRI()),                        
                 new Action.Parameter(Action.PARAMETER_PANE, Integer.toString(this.getGridControl().getPaneIndex())),
                 new Action.Parameter(Action.PARAMETER_REFERENCE, control.getId())       
             },
@@ -612,7 +629,7 @@ public abstract class Grid
         return new Action(
             GridSetPageAction.EVENT_ID,
             new Action.Parameter[]{
-                new Action.Parameter(Action.PARAMETER_OBJECTXRI, this.view.getRefObject().refMofId()),
+                new Action.Parameter(Action.PARAMETER_OBJECTXRI, this.view.getRefObject().refGetPath().toXRI()),
                 new Action.Parameter(Action.PARAMETER_PANE, Integer.toString(paneIndex)), 
                 new Action.Parameter(Action.PARAMETER_REFERENCE, gridControl.getId()),       
                 new Action.Parameter(Action.PARAMETER_PAGE, Integer.toString(next10))
@@ -633,7 +650,7 @@ public abstract class Grid
         return new Action(
             GridSetPageAction.EVENT_ID,
             new Action.Parameter[]{
-                new Action.Parameter(Action.PARAMETER_OBJECTXRI, this.view.getRefObject().refMofId()),
+                new Action.Parameter(Action.PARAMETER_OBJECTXRI, this.view.getRefObject().refGetPath().toXRI()),
                 new Action.Parameter(Action.PARAMETER_PANE, Integer.toString(paneIndex)), 
                 new Action.Parameter(Action.PARAMETER_REFERENCE, gridControl.getId()),       
                 new Action.Parameter(Action.PARAMETER_PAGE, Integer.toString(back10))
@@ -703,14 +720,14 @@ public abstract class Grid
               null, // Do not store PiggyBackConditions
         	  this.getGridControl().getContainerId(), 
         	  this.view.getApplicationContext().getCurrentUserRole(), 
-        	  this.view.getObjectReference().refMofId()
+        	  this.view.getObjectReference().getXRI()
           );
           String filterAsXml = JavaBeans.toXML(defaultFilter);
           Properties settings = this.view.getApplicationContext().getSettings();
           settings.setProperty(
               this.getGridControl().getPropertyName(
                   this.getGridControl().getContainerId(),
-                  UserSettings.DEFAULT_FILTER
+                  UserSettings.DEFAULT_FILTER.getName()
               ),
               Base64.encode(filterAsXml.getBytes())
           );
@@ -762,7 +779,7 @@ public abstract class Grid
               settings.setProperty(
                   this.getGridControl().getPropertyName(
                       this.getGridControl().getQualifiedReferenceName(),
-                      UserSettings.PAGE_SIZE
+                      UserSettings.PAGE_SIZE.getName()
                   ),
                   "" + newPageSize
               );
@@ -932,7 +949,7 @@ public abstract class Grid
       if(this.currentPageSize < 0) {
           String pageSizePropertyName = this.getGridControl().getPropertyName(
               this.getGridControl().getQualifiedReferenceName(),
-              UserSettings.PAGE_SIZE
+              UserSettings.PAGE_SIZE.getName()
           );
           if(application.getSettings().getProperty(pageSizePropertyName) != null) {
              this.currentPageSize = 
@@ -965,89 +982,84 @@ public abstract class Grid
     	String filterValues
     ) {
     	GridControl gridControl = this.getGridControl();  
-    	try {
-    		// reset column order indicators if new filter is set
-    		this.columnSortOrders.clear();
-    		this.columnSortOrders.putAll(
-    			gridControl.getInitialColumnSortOrders()
-    		);
-    		this.filterValues.clear();
-    		this.currentFilterValue = null;
-    		// can apply filter only to containers
-    		Filter filter = this.getFilter(filterName);
-    		if(filter == null) {
-    			SysLog.info("filter " + filterName + " not found");
-    		}
-    		else {
-    			this.currentFilter = filter;
-    			int i = 0;
-    			for(Condition condition : this.currentFilter.getCondition()) {
-    				for(Object value : condition.getValue()){
-    					// Replace ? by filter value entered by user
-    					// Replace ${name} by attribute value
-    					if(
-    						"?".equals(value) ||
-    						(value instanceof String && ((String)value).startsWith("${") && ((String)value).endsWith("}")) 
-    					) {
-    						this.currentFilter = new Filter(
-    							this.currentFilter.getName(),
-    							this.currentFilter.getLabel(),
-    							this.currentFilter.getGroupName(),
-    							this.currentFilter.getIconKey(),
-    							this.currentFilter.getOrder(),
-    							this.currentFilter.getCondition(),
-    							this.currentFilter.getOrderSpecifier(),
-    							this.currentFilter.getExtension(),
-								this.getGridControl().getQualifiedReferenceName(), 
-								this.view.getApplicationContext().getCurrentUserRole(), 
-								this.view.getObjectReference().refMofId()
-    						);
-    						Condition newCondition = (Condition)condition.clone();
-    						// ?
-    						if("?".equals(value)) {
-	    						List values = new ArrayList();
-	    						StringTokenizer tokenizer = new StringTokenizer(filterValues, ",;");
-	    						while(tokenizer.hasMoreTokens()) {
-	    							values.add(tokenizer.nextToken());
-	    						}
-	    						if(values.size() == 0) {
-	    							values.add("");
-	    						}
-	    						newCondition.setValue(
-	    							values.toArray(new Object[values.size()])
-	    						);
+		// reset column order indicators if new filter is set
+		this.columnSortOrders.clear();
+		this.columnSortOrders.putAll(
+			gridControl.getInitialColumnSortOrders()
+		);
+		this.filterValues.clear();
+		this.currentFilterValue = null;
+		// can apply filter only to containers
+		Filter filter = this.getFilter(filterName);
+		if(filter == null) {
+			SysLog.info("filter " + filterName + " not found");
+		}
+		else {
+			this.currentFilter = filter;
+			int i = 0;
+			for(Condition condition : this.currentFilter.getCondition()) {
+				for(Object value : condition.getValue()){
+					// Replace ? by filter value entered by user
+					// Replace ${name} by attribute value
+					if(
+						"?".equals(value) ||
+						(value instanceof String && ((String)value).startsWith("${") && ((String)value).endsWith("}")) 
+					) {
+						this.currentFilter = new Filter(
+							this.currentFilter.getName(),
+							this.currentFilter.getLabel(),
+							this.currentFilter.getGroupName(),
+							this.currentFilter.getIconKey(),
+							this.currentFilter.getOrder(),
+							this.currentFilter.getCondition(),
+							this.currentFilter.getOrderSpecifier(),
+							this.currentFilter.getExtension(),
+							this.getGridControl().getQualifiedReferenceName(), 
+							this.view.getApplicationContext().getCurrentUserRole(), 
+							this.view.getObjectReference().getXRI()
+						);
+						Condition newCondition = (Condition)condition.clone();
+						// ?
+						if("?".equals(value)) {
+    						List values = new ArrayList();
+    						StringTokenizer tokenizer = new StringTokenizer(filterValues, ",;");
+    						while(tokenizer.hasMoreTokens()) {
+    							values.add(tokenizer.nextToken());
     						}
-    						// ${name}
-    						else {
-    							String feature = (String)value;
-    							feature = feature.substring(2);
-    							feature = feature.substring(0, feature.length() - 1);
-    							newCondition.setValue(
-    								new Object[]{
-    									this.view.getObjectReference().getObject().refGetValue(feature)
-    								}
-    							);
+    						if(values.size() == 0) {
+    							values.add("");
     						}
-    						this.currentFilter.getCondition(
-    						).set(
-    							i,
-    							newCondition
+    						newCondition.setValue(
+    							values.toArray(new Object[values.size()])
     						);
-    					}
-    				}
-    				i++;
-    			}
-    		}
-    		SysLog.detail("selected filter ", this.currentFilter);
-    		this.numberOfPages = Integer.MAX_VALUE;
-    		this.setPage(
-    			0, 
-    			-1 // do not change page size
-    		);
-    	}
-    	catch(CloneNotSupportedException e) {
-    		throw new RuntimeServiceException(e);
-    	}
+						}
+						// ${name}
+						else {
+							String feature = (String)value;
+							feature = feature.substring(2);
+							feature = feature.substring(0, feature.length() - 1);
+							newCondition.setValue(
+								new Object[]{
+									this.view.getObjectReference().getObject().refGetValue(feature)
+								}
+							);
+						}
+						this.currentFilter.getCondition(
+						).set(
+							i,
+							newCondition
+						);
+					}
+				}
+				i++;
+			}
+		}
+		SysLog.detail("selected filter ", this.currentFilter);
+		this.numberOfPages = Integer.MAX_VALUE;
+		this.setPage(
+			0, 
+			-1 // do not change page size
+		);
     }
 
     //-------------------------------------------------------------------------
@@ -1094,10 +1106,14 @@ public abstract class Grid
     					(app.getCodes().getShortText(column.getQualifiedFeatureName(), (short)0, true, true) != null)
     				) {
     					SysLog.detail("Code filter values", filterValues);
-    					Map shortTexts = app.getCodes().getShortText(
+    					Map<String,Short> shortTexts = app.getCodes().getShortTextByText(
     						column.getQualifiedFeatureName(),
     						app.getCurrentLocaleAsIndex(),
-    						false,
+    						true
+    					);
+    					Map<String,Short> longTexts = app.getCodes().getLongTextByText(
+    						column.getQualifiedFeatureName(),
+    						app.getCurrentLocaleAsIndex(),
     						true
     					);
     					StringTokenizer andExpr = new StringTokenizer(filterValues, "&");
@@ -1123,15 +1139,27 @@ public abstract class Grid
     								).trim();
     								Short code = (Short)shortTexts.get(trimmedToken);
     								if(code == null) {
-    									try {
-    										code = new Short(trimmedToken);
-    									} catch(Exception e) {}
+    									// Try to match a long text
+								    	String trimmedTokenUpper = trimmedToken.toUpperCase();
+								    	String lastMatch = null;
+								    	for(Entry<String,Short> entry: longTexts.entrySet()) {
+								    		if(entry.getKey().toUpperCase().indexOf(trimmedTokenUpper) >= 0) {
+								    			if(lastMatch == null || entry.getKey().length() < lastMatch.length()) {
+								    				code = entry.getValue();
+								    				lastMatch = entry.getKey();
+								    			}
+								    		}
+								    	}
+    									if(code == null) {
+	    									try {
+	    										code = new Short(trimmedToken);
+	    									} catch(Exception e) {}
+    									}
     								}
     								if(code == null) {
-    									SysLog.detail("can not map token " + trimmedToken + " to code");
+    									SysLog.detail("can not map token to code", trimmedToken);
     									values.add((short)-1);
-    								}
-    								else {
+    								} else {
     									values.add(code);
     								}
     							} catch(NumberFormatException e) {}
@@ -1355,7 +1383,7 @@ public abstract class Grid
     				extension,
     				this.getGridControl().getContainerId(), 
     				this.view.getApplicationContext().getCurrentUserRole(), 
-    				this.view.getObjectReference().refMofId()               
+    				this.view.getObjectReference().getXRI()               
     			);
     			break;
     		}
@@ -1434,7 +1462,7 @@ public abstract class Grid
 				  this.currentFilter.getExtension(),
 				  this.getGridControl().getQualifiedReferenceName(), 
 				  this.view.getApplicationContext().getCurrentUserRole(), 
-				  this.view.getObjectReference().refMofId()                 
+				  this.view.getObjectReference().getXRI()                 
 			  );
 		  }
 	  }
@@ -1496,7 +1524,7 @@ public abstract class Grid
         return new Action(
             GridSetPageAction.EVENT_ID,
             new Action.Parameter[]{
-                new Action.Parameter(Action.PARAMETER_OBJECTXRI, this.view.getRefObject().refMofId()),
+                new Action.Parameter(Action.PARAMETER_OBJECTXRI, this.view.getRefObject().refGetPath().toXRI()),
                 new Action.Parameter(Action.PARAMETER_PANE, Integer.toString(paneIndex)), 
                 new Action.Parameter(Action.PARAMETER_REFERENCE, gridControl.getId()),       
                 new Action.Parameter(Action.PARAMETER_PAGE, "0")
@@ -1518,7 +1546,7 @@ public abstract class Grid
             new Action(
                 GridSelectFilterAction.EVENT_ID,
                 new Action.Parameter[]{
-                    new Action.Parameter(Action.PARAMETER_OBJECTXRI, this.view.getRefObject().refMofId()),
+                    new Action.Parameter(Action.PARAMETER_OBJECTXRI, this.view.getRefObject().refGetPath().toXRI()),
                     new Action.Parameter(Action.PARAMETER_PANE, Integer.toString(gridControl.getPaneIndex())),
                     new Action.Parameter(Action.PARAMETER_REFERENCE, gridControl.getId()),
                     new Action.Parameter(Action.PARAMETER_NAME, encoder.encode(filter.getName(), false))
@@ -1702,7 +1730,7 @@ public abstract class Grid
         settings.setProperty(
             gridControl.getPropertyName(
                 gridControl.getQualifiedReferenceName(),
-                UserSettings.SHOW_SEARCH_FORM
+                UserSettings.SHOW_SEARCH_FORM.getName()
             ),
             "" + newValue
         );
@@ -1720,7 +1748,7 @@ public abstract class Grid
         settings.setProperty(
             gridControl.getPropertyName(
                 gridControl.getQualifiedReferenceName(),
-                UserSettings.SHOW_ROWS_ON_INIT
+                UserSettings.SHOW_ROWS_ON_INIT.getName()
             ),
             "" + newValue
         );
@@ -1734,13 +1762,13 @@ public abstract class Grid
         GridControl gridControl = this.getGridControl();
         String gridAlignmentPropertyName = gridControl.getPropertyName(
             gridControl.getQualifiedReferenceName(),
-            UserSettings.PAGE_ALIGNMENT
+            UserSettings.PAGE_ALIGNMENT.getName()
         );
         if(application.getSettings().getProperty(gridAlignmentPropertyName) != null) {
             return Short.valueOf(application.getSettings().getProperty(gridAlignmentPropertyName));
         }
-        else if(application.getSettings().getProperty(UserSettings.GRID_DEFAULT_ALIGNMENT_IS_WIDE) != null) {
-        	return Boolean.valueOf(application.getSettings().getProperty(UserSettings.GRID_DEFAULT_ALIGNMENT_IS_WIDE)) ?
+        else if(application.getSettings().getProperty(UserSettings.GRID_DEFAULT_ALIGNMENT_IS_WIDE.getName()) != null) {
+        	return Boolean.valueOf(application.getSettings().getProperty(UserSettings.GRID_DEFAULT_ALIGNMENT_IS_WIDE.getName())) ?
         		ALIGNMENT_WIDE : 
         			ALIGNMENT_NARROW;
         } else {        
@@ -1760,7 +1788,7 @@ public abstract class Grid
         settings.setProperty(
             gridControl.getPropertyName(
                 gridControl.getQualifiedReferenceName(),
-                UserSettings.PAGE_ALIGNMENT
+                UserSettings.PAGE_ALIGNMENT.getName()
             ),
             "" + alignment
         );

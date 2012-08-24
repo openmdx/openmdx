@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: Switch_2.java,v 1.16 2010/08/06 12:04:04 hburger Exp $
  * Description: REST Router
- * Revision:    $Revision: 1.16 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/08/06 12:04:04 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -189,7 +186,6 @@ public class Switch_2 implements Port {
                 }
             } catch (ServiceException exception) {
                 throw new ResourceException(exception);
-                // TODO Auto-generated catch block
             }
             for(Map.Entry<Path,Port> entry : Switch_2.this.destinations.entrySet()) {
                 if(xri.isLike(entry.getKey())) {
@@ -206,10 +202,6 @@ public class Switch_2 implements Port {
                             "xri", 
                             xri
                         ),
-//                        new BasicException.Parameter(
-//                            "final-objects", 
-//                            Switch_2.this.virtualObjectPlugIn.getFinalPattern() == null ? null : Arrays.asList(Switch_2.this.virtualObjectPlugIn.getFinalPattern())
-//                        ),
                         new BasicException.Parameter(
                             "destinations", 
                             Switch_2.this.destinations.keySet())

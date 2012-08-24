@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: OptionalFeaturePredicate.java,v 1.3 2010/06/21 17:43:30 hburger Exp $
  * Description: Optional Predicate
- * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/06/21 17:43:30 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

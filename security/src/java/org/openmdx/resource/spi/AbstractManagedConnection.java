@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: AbstractManagedConnection.java,v 1.4 2010/09/01 15:07:59 hburger Exp $
  * Description: Abstract managed connection
- * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/09/01 15:07:59 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

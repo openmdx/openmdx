@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: TransactionAttributeType.java,v 1.1 2010/12/22 00:18:52 hburger Exp $
  * Description: REST Format
- * Revision:    $Revision: 1.1 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/12/22 00:18:52 $
  * ====================================================================
  *
  * EasyBeans

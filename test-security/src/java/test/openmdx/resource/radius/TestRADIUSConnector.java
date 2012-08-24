@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Security, http://www.openmdx.org/
- * Name:        $Id: TestRADIUSConnector.java,v 1.2 2010/08/31 14:13:24 hburger Exp $
  * Description: RADIUS Connector Test
- * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/08/31 14:13:24 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

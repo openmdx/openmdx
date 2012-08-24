@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: QuickAccessor.java,v 1.11 2011/07/07 22:35:36 wfro Exp $
  * Description: QuickAccess 
- * Revision:    $Revision: 1.11 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/07/07 22:35:36 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -109,7 +106,7 @@ public class QuickAccessor {
           Action action = new Action(
               MacroAction.EVENT_ID,
               new Action.Parameter[]{
-                  new Action.Parameter(Action.PARAMETER_OBJECTXRI, targetIdentity.toXri()),
+                  new Action.Parameter(Action.PARAMETER_OBJECTXRI, targetIdentity.toXRI()),
                   new Action.Parameter(Action.PARAMETER_NAME, Base64.encode(actionName.getBytes())),
                   new Action.Parameter(Action.PARAMETER_TYPE, Integer.toString(this.actionType))                    
               },

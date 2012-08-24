@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Extent_1.java,v 1.27 2011/04/12 15:47:55 hburger Exp $
  * Description: Extent
- * Revision:    $Revision: 1.27 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/04/12 15:47:55 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

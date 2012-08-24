@@ -1,17 +1,14 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: DataBinding.java,v 1.1 2010/02/04 11:25:03 wfro Exp $
- * Description: DataBinding_2_0
- * Revision:    $Revision: 1.1 $
+ * Project:     openMDX/Portal, http://www.openmdx.org/
+ * Description: DataBinding
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/02/04 11:25:03 $
  * ====================================================================
  *
  * This software is published under the BSD license
  * as listed below.
  * 
- * Copyright (c) 2010, OMEX AG, Switzerland
+ * Copyright (c) 2012, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -52,10 +49,126 @@
 
 package org.openmdx.portal.servlet;
 
+import javax.jmi.reflect.RefObject;
+
 /**
- * Base interface for DataBinding interfaces
+ * Base class for data binding implementations.
  *
  */
-public interface DataBinding {
+public abstract class DataBinding {
+
+    /**
+     * Get value of specified feature.
+     * @param object
+     * @param qualifiedFeatureName
+     * @param app
+     * @return
+     */
+    public abstract Object getValue(
+        RefObject object,
+        String qualifiedFeatureName,
+        ApplicationContext app
+    );
+
+    /**
+     * Set value for specified feature.
+     * @param object
+     * @param qualifiedFeatureName
+     * @param newValue
+     * @param app
+     */
+    public abstract void setValue(
+        RefObject object,
+        String qualifiedFeatureName,
+        Object newValue,
+        ApplicationContext app
+    );
+    
+    /**
+     * Same as getValue() with app == null.
+     * @param object
+     * @param qualifiedFeatureName
+     * @return
+     */
+    public Object getValue(
+        RefObject object,
+        String qualifiedFeatureName
+    ) {
+    	return this.getValue(
+    		object, 
+    		qualifiedFeatureName, 
+    		null // app
+    	);
+    }
+
+    /**
+     * Set as setValue() with app == null.
+     * @param object
+     * @param qualifiedFeatureName
+     * @param newValue
+     */
+    public void setValue(
+        RefObject object,
+        String qualifiedFeatureName,
+        Object newValue
+    ) {
+    	this.setValue(
+    		object, 
+    		qualifiedFeatureName, 
+    		newValue, 
+    		null // app
+    	);
+    }
+
+    /**
+     * Extract attribute name from qualified feature name.
+     * @param qualifiedFeatureName
+     * @return
+     */
+    public String getAttributeName(
+       String qualifiedFeatureName
+    ) {
+        return qualifiedFeatureName.substring(
+            qualifiedFeatureName.lastIndexOf("!") + 1
+        );        
+    }
+    
+    /**
+     * Extract reference names from qualified feature name.
+     * @param qualifiedFeatureName
+     * @return
+     */
+    public String[] getReferenceNames(
+       String qualifiedFeatureName
+    ) {        
+        String qualifiedReferenceName = qualifiedFeatureName.substring(
+            0, 
+            qualifiedFeatureName.indexOf("!")
+        );
+        String referenceNames = qualifiedReferenceName.indexOf("*") > 0 ?
+            qualifiedReferenceName.substring(qualifiedReferenceName.lastIndexOf(":") + 1, qualifiedReferenceName.indexOf("*")) :
+            qualifiedReferenceName.substring(qualifiedReferenceName.lastIndexOf(":") + 1);
+        return referenceNames.startsWith("(") && referenceNames.endsWith(")") ?
+            referenceNames.substring(1, referenceNames.length()-1).split(";") :
+            referenceNames.split(";");
+    }
+        
+    /**
+     * Return object referenced by referenceNames.
+     * @param object
+     * @param referenceNames
+     * @return
+     */
+    public RefObject getReferencedObject(
+        RefObject object,
+        String[] referenceNames
+    ) {
+        RefObject referencedObject = object;
+        for(int i = 0; i < referenceNames.length-1; i++) {
+            referencedObject = (RefObject)referencedObject.refGetValue(referenceNames[i]);
+            if(referencedObject == null) break;
+        }
+        return referencedObject;
+    }
         
 }

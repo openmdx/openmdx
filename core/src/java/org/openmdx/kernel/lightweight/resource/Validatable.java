@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Validatable.java,v 1.1 2009/09/08 12:47:12 hburger Exp $
  * Description: Validatable 
- * Revision:    $Revision: 1.1 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/09/08 12:47:12 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

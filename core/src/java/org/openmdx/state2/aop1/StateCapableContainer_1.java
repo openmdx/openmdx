@@ -1,16 +1,13 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: StateCapableContainer_1.java,v 1.28 2011/05/12 05:15:39 hburger Exp $
  * Description: State Object Container
- * Revision:    $Revision: 1.28 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/05/12 05:15:39 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2008-2011, OMEX AG, Switzerland
+ * Copyright (c) 2008-2012, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -54,6 +51,7 @@ import java.io.Serializable;
 import java.util.AbstractCollection;
 import java.util.AbstractSet;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -84,7 +82,6 @@ import org.openmdx.base.mof.cci.ModelElement_1_0;
 import org.openmdx.base.mof.cci.Model_1_0;
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.naming.PathComponent;
-import org.openmdx.base.persistence.spi.SharedObjects;
 import org.openmdx.base.persistence.spi.TransientContainerId;
 import org.openmdx.base.query.Condition;
 import org.openmdx.base.query.Filter;
@@ -98,7 +95,6 @@ import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.state2.cci.DateStateContext;
 import org.openmdx.state2.cci.DateTimeStateContext;
 import org.openmdx.state2.cci.ViewKind;
-import org.openmdx.state2.spi.Configuration;
 
 /**
  * State Object Container
@@ -119,16 +115,16 @@ public class StateCapableContainer_1
         Container_1_0 container, 
         String type 
     ) throws ServiceException {
-        this(
-            parent,
-            container,
-            StateCapableContainer_1.getFilter(
-                parent, 
-                container == null ? null : (Path) JDOHelper.getObjectId(container), 
-                type
-            ),
-            parent.getInteractionSpec() == null
-        );
+        this.parent = parent;
+		this.container = container;
+		this.selection = container.subMap(
+			getFilter(
+				parent, 
+		        container == null ? null : (Path) JDOHelper.getObjectId(container), 
+		        type
+		    )
+		);
+		this.defaultType = parent.getInteractionSpec() == null;
     }
 
     /**
@@ -168,6 +164,10 @@ public class StateCapableContainer_1
     
     private transient Collection<DataObject_1_0> values;
     
+    private static final Collection<String> TYPE_FEATURES = Arrays.asList(
+    	SystemAttributes.OBJECT_CLASS,
+    	SystemAttributes.OBJECT_INSTANCE_OF
+    );
     
     /**
      * Implements <code>Serializable</code>
@@ -228,7 +228,7 @@ public class StateCapableContainer_1
      * @return the corresponding filter
      * @throws ServiceException 
      */
-    protected static Filter getFilter(
+    protected Filter getFilter(
         ObjectView_1_0 parent,
         Path containerId, 
         String type
@@ -242,96 +242,86 @@ public class StateCapableContainer_1
 	                "org:openmdx:state2:DateState"
 	            )
 	        );
-        	boolean validTimeUnique;
-            if(containerId != null) {
-                validTimeUnique = SharedObjects.getPlugInObject(parent.jdoGetPersistenceManager(), Configuration.class).isValidTimeUnique(containerId);
-            } else if (parent.getModel().isInstanceof(parent, "org:openmdx:state2:StateCapable")) {
-                validTimeUnique = Boolean.TRUE.equals(parent.objGetValue("validTimeUnique"));
-            } else {
-                validTimeUnique = SharedObjects.getPlugInObject(parent.jdoGetPersistenceManager(), Configuration.class).isTheChildrensValidTimeUnique(parent.getModel().getElement(parent.objGetClass()));
-            }
-        	if(!validTimeUnique){
-                switch(stateContext.getViewKind()) {
-                    case TIME_RANGE_VIEW:
-                    	XMLGregorianCalendar validTo = stateContext.getValidTo();
-                    	if(validTo != null) {
-                    		filter.add(
-                                new IsGreaterCondition(
-                                    Quantifier.FOR_ALL,
-                                    "stateValidFrom", // LESS_THAN_OR_EQUAL
-                                    false,
-                                    validTo
-                                )
-                    		);
-                    	}
-                    	XMLGregorianCalendar validFrom = stateContext.getValidFrom();
-                    	if(validFrom != null) {
-                    		filter.add(
-                                new IsGreaterOrEqualCondition(
-                                    Quantifier.FOR_ALL,
-                                    "stateValidTo",
-                                    true,
-                                    validFrom
-                                )
-                    		);
-                    	}
+            switch(stateContext.getViewKind()) {
+                case TIME_RANGE_VIEW:
+                	XMLGregorianCalendar validTo = stateContext.getValidTo();
+                	if(validTo != null) {
+                		filter.add(
+                            new IsGreaterCondition(
+                                Quantifier.FOR_ALL,
+                                "stateValidFrom", // LESS_THAN_OR_EQUAL
+                                false,
+                                validTo
+                            )
+                		);
+                	}
+                	XMLGregorianCalendar validFrom = stateContext.getValidFrom();
+                	if(validFrom != null) {
+                		filter.add(
+                            new IsGreaterOrEqualCondition(
+                                Quantifier.FOR_ALL,
+                                "stateValidTo",
+                                true,
+                                validFrom
+                            )
+                		);
+                	}
+            		filter.add(
+                        new IsInCondition(
+                            Quantifier.FOR_ALL,
+                            SystemAttributes.REMOVED_AT,
+                            true
+                        )
+                    );
+            		break;
+                case TIME_POINT_VIEW:
+                	XMLGregorianCalendar validAt = stateContext.getValidAt();
+                	if(validAt != null) {
+                		filter.add(
+                            new IsGreaterCondition(
+                                Quantifier.FOR_ALL,
+                                "stateValidFrom",
+                                false, // IS_LESS_OR_EQUAL
+                                validAt
+                            )
+                        );
+                		filter.add(
+                            new IsGreaterOrEqualCondition(
+                                Quantifier.FOR_ALL,
+                                "stateValidTo",
+                                true, // IS_GREATER_OR_EQUAL
+                                validAt
+                            )
+                        );
+                	}
+                	Date existsAt = stateContext.getExistsAt();
+                	if(existsAt == null) {
                 		filter.add(
                             new IsInCondition(
                                 Quantifier.FOR_ALL,
                                 SystemAttributes.REMOVED_AT,
-                                true
+                                true // IS_IN
                             )
-                        );
-                		break;
-                    case TIME_POINT_VIEW:
-                    	XMLGregorianCalendar validAt = stateContext.getValidAt();
-                    	if(validAt != null) {
-                    		filter.add(
-                                new IsGreaterCondition(
-                                    Quantifier.FOR_ALL,
-                                    "stateValidFrom",
-                                    false, // IS_LESS_OR_EQUAL
-                                    validAt
-                                )
-                            );
-                    		filter.add(
-                                new IsGreaterOrEqualCondition(
-                                    Quantifier.FOR_ALL,
-                                    "stateValidTo",
-                                    true, // IS_GREATER_OR_EQUAL
-                                    validAt
-                                )
-                            );
-                    	}
-                    	Date existsAt = stateContext.getExistsAt();
-                    	if(existsAt == null) {
-                    		filter.add(
-                                new IsInCondition(
-                                    Quantifier.FOR_ALL,
-                                    SystemAttributes.REMOVED_AT,
-                                    true // IS_IN
-                                )
-    						);
-                    	} else {
-                    		filter.add(
-                                new IsGreaterCondition(
-                                    Quantifier.THERE_EXISTS,
-                                    SystemAttributes.CREATED_AT,
-                                    false, // IS_LESS_OR_EQUAL,
-                                    existsAt
-                                )
-                    		);
-                    		filter.add(
-                                new IsGreaterOrEqualCondition(
-                                    Quantifier.FOR_ALL,
-                                    SystemAttributes.REMOVED_AT,
-                                    true, // IS_GREATER_OR_EQUAL
-                                    existsAt
-                                )
-                			);
-                    	}
-                    	break;
-                }
+						);
+                	} else {
+                		filter.add(
+                            new IsGreaterCondition(
+                                Quantifier.THERE_EXISTS,
+                                SystemAttributes.CREATED_AT,
+                                false, // IS_LESS_OR_EQUAL,
+                                existsAt
+                            )
+                		);
+                		filter.add(
+                            new IsGreaterOrEqualCondition(
+                                Quantifier.FOR_ALL,
+                                SystemAttributes.REMOVED_AT,
+                                true, // IS_GREATER_OR_EQUAL
+                                existsAt
+                            )
+            			);
+                	}
+                	break;
         	}
             return new Filter(filter, null, null);
         } else if(interactionSpec instanceof DateTimeStateContext) {
@@ -369,16 +359,11 @@ public class StateCapableContainer_1
     		);
         }
     }
-        
+
     private static boolean isTypeCondition(
         Condition condition
     ){
-        if(condition instanceof IsInstanceOfCondition) {
-            return true;
-        } else {
-            String feature = condition.getFeature();
-            return SystemAttributes.OBJECT_CLASS.equals(feature) || SystemAttributes.OBJECT_INSTANCE_OF.equals(feature);
-        }
+    	return condition instanceof IsInstanceOfCondition || TYPE_FEATURES.contains(condition.getFeature());
     }
 
     private static boolean isInstanceOfCondition(

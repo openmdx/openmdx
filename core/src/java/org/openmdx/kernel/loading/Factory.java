@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: Factory.java,v 1.1 2009/09/09 10:05:50 hburger Exp $
  * Description: Factory 
- * Revision:    $Revision: 1.1 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/09/09 10:05:50 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

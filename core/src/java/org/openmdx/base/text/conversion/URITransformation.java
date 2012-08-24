@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: URITransformation.java,v 1.3 2010/05/21 14:26:50 hburger Exp $
  * Description: URI Transformation 
- * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/05/21 14:26:50 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

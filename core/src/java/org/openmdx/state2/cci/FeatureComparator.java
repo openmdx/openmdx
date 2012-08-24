@@ -1,10 +1,7 @@
 /*
  * ====================================================================
- * Name:        $Id: FeatureComparator.java,v 1.2 2011/07/01 16:16:42 hburger Exp $
  * Description: Comparator
- * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/07/01 16:16:42 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

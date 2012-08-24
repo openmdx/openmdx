@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: NormalizingMarshaller.java,v 1.3 2010/03/24 15:52:06 hburger Exp $
  * Description: NormalizingMarshaller 
- * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/03/24 15:52:06 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

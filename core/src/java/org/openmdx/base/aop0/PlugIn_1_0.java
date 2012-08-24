@@ -1,16 +1,13 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: PlugIn_1_0.java,v 1.9 2011/12/29 03:06:35 hburger Exp $
  * Description: PlugIn_1_0 
- * Revision:    $Revision: 1.9 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/12/29 03:06:35 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2009, OMEX AG, Switzerland
+ * Copyright (c) 2009-2012, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -147,6 +144,17 @@ public interface PlugIn_1_0 {
     boolean isExemptFromValidation(
         DataObject_1 object, 
         ModelElement_1_0 feature
+    ) throws ServiceException;
+
+    /**
+     * Tells whether the object is an aspect
+     * 
+     * @param object
+     * 
+     * @return <code>true</code> if the object is an aspect
+     */
+    Boolean isAspect(
+		DataObject_1 object
     ) throws ServiceException;
 
 }

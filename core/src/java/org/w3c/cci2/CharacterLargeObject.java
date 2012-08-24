@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: CharacterLargeObject.java,v 1.3 2008/04/16 13:34:53 hburger Exp $
  * Description: Character Large Object 
- * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/04/16 13:34:53 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

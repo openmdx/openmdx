@@ -1,16 +1,13 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: RestFunction.java,v 1.9 2010/09/13 16:46:29 hburger Exp $
  * Description: REST Functions
- * Revision:    $Revision: 1.9 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/09/13 16:46:29 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2009-2010, OMEX AG, Switzerland
+ * Copyright (c) 2009-2012, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -75,8 +72,9 @@ package org.openmdx.base.resource.cci;
  * </ul>
  * <li><b>Object Holder</b><br>
  * Each <code>org:openmdx:kernel:Object</code> holder has the following structure:<ul>
- * <li><code>objectId</code>, the object's resource identifier (an XRI 2 string)
+ * <li><code>path</code>, a path representing the object's resource identifier (an XRI)
  * <li><code>version</code>, the object's version (an opaque byte[])
+ * <li><code>lock</code>, the object's lock (an opaque byte[])
  * <li><code>value</code>, some or all of the object's features (a mapped record)  
  * </ul>
  * </ul>
@@ -86,7 +84,7 @@ public enum RestFunction {
     /**
      * Object retrieval or verification
      * <p>
-     * The input record represents either a query request, a retrieval request or a 
+     * The input record represents either a query, a retrieval, a refresh or a 
      * verification request:<ul>
      * <li>An <code>org:openmdx:kernel:Query</code> input record identifies a query request.<ul>
      * <li><code>queryType</code>, the candidate class' MOF identifier (a string value)
@@ -94,15 +92,16 @@ public enum RestFunction {
      * <li><code>position</code>, the lower bound (a number value)
      * <li><code>size</code>, the maximal number of elements to be returned (a number value) 
      * <li><code>parameters</code>, the parameters (an indexed or mapped record)
+     * <li><code>refresh</code>, a flag telling whether the client asks for the object to be refreshed
      * </ul>
      * <li>An indexed input record identifies an object retrieval request.<ul>
-     * <li>The objects are identified by the XRI 2 string representations of their 
-     * object ids.
+     * <li>The objects are identified by Path instances representing their XRIs.
      * </ul>
      * <li>An <code>org:openmdx:kernel:Object</code> input record identifies a 
      * verification request.<ul>
-     * <li><code>objectId</code>, the object's resource identifier (an XRI 2 string)
+     * <li><code>path</code>, the object's resource identifier (a Path)
      * <li><code>version</code>, the object's version to be verified.
+     * <li><code>lock</code>, the object's lock to be verified.
      * </ul>
      */
     GET,
@@ -120,13 +119,13 @@ public enum RestFunction {
      * <li><code>parameters</code>, the parameters (an indexed or mapped record)
      * </ul>
      * <li>An indexed input record identifies a touch request.<ul>
-     * <li>The objects are identified by the XRI 2 string representations of their 
-     * object ids.
+     * <li>The objects are identified by Path instances representing their XRIs.
      * </ul>
      * <li>An <code>org:openmdx:kernel:Object</code> input record identifies 
      * an update request.<ul>
-     * <li><code>objectId</code>, the object's resource identifier (an XRI 2 string)
+     * <li><code>path</code>, a path representing the object's resource identifier (an XRI)
      * <li><code>version</code>, the object's version to be verified.
+     * <li><code>lock</code>, the object's lock to be verified.
      * </ul>
      */
     PUT,
@@ -144,13 +143,13 @@ public enum RestFunction {
      * <li><code>parameters</code>, the parameters (an indexed or mapped record)
      * </ul>
      * <li>An indexed input record identifies a forced delete request.<ul>
-     * <li>The objects are identified by the XRI 2 string representations of their 
-     * object ids.
+     * <li>The objects are identified by Path instances representing their XRIs.
      * </ul>
      * <li>An <code>org:openmdx:kernel:Object</code> input record identifies a 
-     * verified delete request.<ul>
-     * <li><code>objectId</code>, the object's resource identifier (an XRI 2 string)
+     * verifiedU delete request.<ul>
+     * <li><code>path</code>, a path representing the object's resource identifier (an XRI)
      * <li><code>version</code>, the object's version to be verified.
+     * <li><code>lock</code>, the object's lock to be verified.
      * </ul>
      */
     DELETE,
@@ -160,12 +159,12 @@ public enum RestFunction {
      * <p>
      * The input is a mapped record<ul>
      * <li><b>Object Creation</b><ul>
-     * <li>the key is the XRI 2 string representation of the object id
+     * <li>the key is a Path representing the object's resource identifier (an XRI)
      * <li>the value is a mapped record for the object's values
      * <li>the return or output record member is the corresponding object holder
      * </ul>
      * <li><b>Method Invocation</b><ul>
-     * <li>the key is the XRI 2 string representation of the method invocation URI
+     * <li>the key is a Path representing the method's invocation XRI
      * <li>the value record contains the method invocation arguments
      * <li>the return or output record member is the method invocation result
      * </ul>

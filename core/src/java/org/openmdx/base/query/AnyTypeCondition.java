@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: AnyTypeCondition.java,v 1.7 2010/06/01 09:00:06 hburger Exp $
  * Description: Any Type Condition
- * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/06/01 09:00:06 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -103,7 +100,7 @@ public class AnyTypeCondition extends Condition {
      */
     @Override
     public AnyTypeCondition clone(
-    ) throws CloneNotSupportedException {
+    ){
         return new AnyTypeCondition(
             this.getQuantifier(), 
             this.getFeature(), 

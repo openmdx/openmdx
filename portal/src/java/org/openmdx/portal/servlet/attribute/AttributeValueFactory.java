@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: AttributeValueFactory.java,v 1.29 2009/06/16 17:08:26 wfro Exp $
  * Description: AttributeMapper
- * Revision:    $Revision: 1.29 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/06/16 17:08:26 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -183,7 +180,7 @@ public final class AttributeValueFactory
       // defines a class hierarchy. The ObjectInspectorServlet allows to define codes 
       // either for a) a fully qualified attribute name or b) for an attribute of a class 
       // hierarchy. Option b) allows to define individual code tables for each class 
-      // hiearchy in case the attribute is member of an abstract root class.
+      // hierarchy in case the attribute is member of an abstract root class.
       else if(
           (application.getCodes() != null) &&
           (qualifiedTypeName != null) &&

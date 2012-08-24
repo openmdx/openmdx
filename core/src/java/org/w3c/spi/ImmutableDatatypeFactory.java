@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: ImmutableDatatypeFactory.java,v 1.2 2009/10/19 12:40:35 hburger Exp $
  * Description: Immutable Datatype Factory 
- * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/10/19 12:40:35 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

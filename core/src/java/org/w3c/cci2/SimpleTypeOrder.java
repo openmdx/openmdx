@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: SimpleTypeOrder.java,v 1.1 2006/10/19 17:07:11 hburger Exp $
  * Description: Simple Type Order
- * Revision:    $Revision: 1.1 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2006/10/19 17:07:11 $
  * ====================================================================
  *
  * This software is published under the BSD license

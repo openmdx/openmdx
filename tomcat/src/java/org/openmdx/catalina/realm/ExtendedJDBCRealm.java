@@ -1,16 +1,13 @@
 /*
  * ====================================================================
  * Project:     openMDX/Tomcat, http://www.openmdx.org/
- * Name:        $Id: ExtendedJDBCRealm.java,v 1.3 2011/12/08 13:51:04 wfro Exp $
  * Description: ExtendedJDBCRealm
- * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/12/08 13:51:04 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2011, OMEX AG, Switzerland
+ * Copyright (c) 2012, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or

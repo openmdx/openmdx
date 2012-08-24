@@ -1,14 +1,12 @@
 /*
  * ====================================================================
  * Description: Object_1 class
- * Revision:    $Revision: 1.143 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/12/29 03:08:54 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2011, OMEX AG, Switzerland
+ * Copyright (c) 2004-2012, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -107,6 +105,7 @@ import javax.resource.cci.InteractionSpec;
 import javax.resource.cci.MappedRecord;
 import javax.resource.cci.Record;
 
+import org.openmdx.application.dataprovider.layer.persistence.jdbc.LockAssertions;
 import org.openmdx.base.accessor.cci.Container_1_0;
 import org.openmdx.base.accessor.cci.DataObject_1_0;
 import org.openmdx.base.accessor.cci.SystemAttributes;
@@ -435,10 +434,15 @@ public class DataObject_1
     protected Map<String,Object> transientValues;
     
     /**
-     * @serial
+     * @serial the write lock
      */
     protected Object digest = null;
 
+    /**
+     * @serial the read lock
+     */
+    protected Object lock = null;
+    
     /**
      * Such an object cant't leave its hollow state
      */
@@ -532,15 +536,39 @@ public class DataObject_1
      * 
      * @throws ServiceException
      */
-    private boolean isAspect(
+    public boolean isAspect(
     ) throws ServiceException {
         return getModel().isInstanceof(this, "org:openmdx:base:Aspect");
+    }
+    
+    /**
+     * Tells whether the object is an instance of Modifiable
+     * 
+     * @return <code>true</code> if the object is an instance of Modifiable
+     * 
+     * @throws ServiceException
+     */
+    public boolean isModifiable(
+    ) throws ServiceException {
+        return getModel().isInstanceof(this, "org:openmdx:base:Modifiable");
+    }
+    
+    /**
+     * Tells whether the object is an instance of Removable
+     * 
+     * @return <code>true</code> if the object is an instance of Removable
+     * 
+     * @throws ServiceException
+     */
+    public boolean isRemovable(
+    ) throws ServiceException {
+        return getModel().isInstanceof(this, "org:openmdx:base:Removable");
     }
 
     /**
      * @return the model repository
      */
-    Model_1_0 getModel() {
+    public Model_1_0 getModel() {
         return this.dataObjectManager.getModel();
     }
     
@@ -775,24 +803,24 @@ public class DataObject_1
      * 
      * @param fetchPlan 
      * @param features 
+     * @param refresh tells whether the (remote) object shall be 
+     * refreshed before answering the query
      */
     @SuppressWarnings("unchecked")
     DataObject_1 unconditionalLoad(
         FetchPlan fetchPlan, 
-        Set<String> features
+        Set<String> features, 
+        boolean refresh
     ) throws ServiceException {
         try {
-            Query_2Facade query = this.jdoIsPersistent() ? Facades.newQuery(
-                this.jdoGetObjectId() 
-            ) : Facades.newQuery(
-                this.jdoGetTransactionalObjectId()
-            );
+            Query_2Facade query = Facades.newQuery(this);
             if(fetchPlan != null) {
                 query.setGroups(fetchPlan.getGroups());
             }
             if(features != null) {
                 query.setFeatures(features);
             }
+            query.setRefresh(refresh);
             IndexedRecord reply = (IndexedRecord) this.dataObjectManager.getInteraction().execute(
                 this.dataObjectManager.getInteractionSpecs().GET,
                 query.getDelegate()
@@ -859,7 +887,12 @@ public class DataObject_1
         if(container != null) {
             container.openmdxjdoEvict(false, true);
         }
-        this.unconditionalLoad(this.dataObjectManager.getFetchPlan(), null);
+        this.unconditionalLoad(
+    		this.dataObjectManager.getFetchPlan(), 
+    		null, // features
+    		true // refresh
+        );
+        evictReadLock();
     }
     
     /* (non-Javadoc)
@@ -1023,25 +1056,43 @@ public class DataObject_1
     }
 
     /**
+     * An object is touched when a non query operation is invoked
+     * @throws ServiceException 
+     */
+    public void touch(
+    ) throws ServiceException{
+        objMakeTransactional();
+        this.getUnitOfWork().getState(this,false).touch();
+    }
+    
+    /**
      * Add to unit of work
      * 
      * @param unitOfWork
+     * 
      * @throws ServiceException 
      */
     private final void addTo(
         UnitOfWork_1 unitOfWork
-    ) throws ServiceException{
+    ) throws ServiceException {
         if(unitOfWork.add(this)) {
             if(this.transientValues == null){
                 this.objRetrieve(
                     false, // reload
                     this.dataObjectManager.getFetchPlan(), 
-                    null // features
-, false
+                    null, // features
+                    false // beforeImage
                 );
             } else {
                 unitOfWork.getState(this,false).setValues(this.transientValues);
                 this.transientValues = null;
+            }
+            if(
+            	unitOfWork.isReadLockRequired() &&
+            	this.jdoIsPersistent() && !this.jdoIsNew() && 
+            	isModifiable() && !isRemovable()
+            ) {
+            	this.lock = LockAssertions.newReadLockAssertion(unitOfWork.getTransactionTime());
             }
         }
     }
@@ -1510,8 +1561,9 @@ public class DataObject_1
         flushStructuralFeatures(interaction, state);
         flushBehaviouralFeatures(interaction, state);
         state.setDirtyFeaturesFlushed();
-        if(!beforeCompletion && !this.dataObjectManager.isRetainValues()) {
-            evict();
+        if(!beforeCompletion) {
+    		evictReadLock();
+			evictWriteLock();
         }
     }
 
@@ -1579,6 +1631,30 @@ public class DataObject_1
     }
 
     /**
+     * Initialize a newly created object facade
+     * 
+     * @param input
+     * @param values
+     * 
+     * @return the initialize facade
+     * @throws ResourceException 
+     */
+    private Object_2Facade newInput(
+    	boolean transactionalId,
+    	MappedRecord values
+    ) throws ResourceException{
+    	Object_2Facade input = transactionalId ? 
+    		Object_2Facade.newInstance(this.jdoGetTransactionalObjectId()) :
+			Object_2Facade.newInstance(this.jdoGetObjectId());
+        input.setVersion(this.jdoGetVersion());
+        input.setLock(this.lock);
+        if(values != null) {
+	        input.setValue(values);
+        }
+    	return input;
+    }
+    	
+    /**
      * Flush structural features
      * 
      * @param interaction
@@ -1615,9 +1691,10 @@ public class DataObject_1
                         );                    
                     }
                 }
-                Object_2Facade input = Object_2Facade.newInstance(this.jdoGetTransactionalObjectId());
-                input.setVersion(this.jdoGetVersion());
-                input.setValue(this.persistentValues);                
+                Object_2Facade input = newInput(
+                	true,
+                	this.persistentValues
+                );
                 interaction.execute(
                     this.dataObjectManager.getInteractionSpecs().CREATE,
                     input.getDelegate()
@@ -1627,11 +1704,11 @@ public class DataObject_1
             } else if(this.jdoIsDeleted()){
                 if(state.isLifeCycleEventPending()){
                     if(!this.jdoIsNew() || state.isFlushed()) {
-                        Object_2Facade input = Object_2Facade.newInstance(
-                            this.jdoGetObjectId(),
-                            DataObject_1.getRecordName(this, false)
+                        String objectClass = DataObject_1.getRecordName(this, false);
+						Object_2Facade input = newInput(
+                        	false,
+                        	objectClass == null ? null : Records.getRecordFactory().createMappedRecord(objectClass)
                         );
-                        input.setVersion(this.jdoGetVersion());
                         interaction.execute(
                             this.dataObjectManager.getInteractionSpecs().DELETE,
                             input.getDelegate()
@@ -1665,9 +1742,10 @@ public class DataObject_1
                 Object_2Facade input;
                 if(this.isProxy()) {
                     if(PathComponent.isPlaceHolder(this.identity.getBase())) {
-                    	input = Object_2Facade.newInstance(this.jdoGetTransactionalObjectId());
-                        input.setVersion(this.jdoGetVersion());
-                        input.setValue(this.persistentValues);
+                    	input = newInput(
+                    		true,
+                    		this.persistentValues
+                    	);
                         interaction.execute(
                             this.dataObjectManager.getInteractionSpecs().CREATE,
                             input.getDelegate()
@@ -1687,9 +1765,10 @@ public class DataObject_1
                         );
                         this.identity.setTo(persistent.getPath());
                     } else {
-                    	input = Object_2Facade.newInstance(this.identity);
-                        input.setVersion(this.jdoGetVersion());
-                        input.setValue(this.persistentValues);
+                    	input = newInput(
+                    		false,
+                    		this.persistentValues
+                    	);
                         interaction.execute(
                             this.dataObjectManager.getInteractionSpecs().PUT,
                             input.getDelegate()
@@ -1697,9 +1776,10 @@ public class DataObject_1
                     }
                     state.setFlushed(true);
                 } else { 
-                	input = Object_2Facade.newInstance(this.identity);
-                    input.setVersion(this.jdoGetVersion());
-                    input.setValue(this.persistentValues);
+                	input = newInput(
+                		false,
+                		this.persistentValues
+                	);
                     if(state.isFlushed()) {
                         interaction.execute(
                             this.dataObjectManager.getInteractionSpecs().PUT,
@@ -1755,9 +1835,10 @@ public class DataObject_1
                         );
                     }
                 }
-                Object_2Facade input = Object_2Facade.newInstance(this.identity);
-                input.setVersion(this.jdoGetVersion());
-                input.setValue(this.persistentValues);
+                Object_2Facade input = newInput(
+                	false,
+                	this.persistentValues
+                );
                 this.persistentValues = beforeImage;
                 interaction.execute(
                     this.dataObjectManager.getInteractionSpecs().PUT,
@@ -1853,7 +1934,7 @@ public class DataObject_1
     public boolean objIsModified() throws ServiceException{
         TransactionalState_1 state = this.getState(false);
         Map<String,ModelElement_1_0> attributes = getAttributes();
-        boolean modified = false;
+        boolean modified = state.isTouched();
         Set<String> dirtyFeatures = state.dirtyFeatures(true); 
         for(
             Iterator<String> i = dirtyFeatures.iterator(); 
@@ -2003,6 +2084,20 @@ public class DataObject_1
     }
 
     /**
+     * Reset the read lock
+     */
+    private void evictReadLock(){
+        this.lock = null;
+    }
+    
+    /**
+     * Reset the write lock
+     */
+    private void evictWriteLock(){
+        this.digest = null;
+    }
+    
+    /**
      * Evict the data object
      */
     void evict(
@@ -2039,7 +2134,8 @@ public class DataObject_1
                 }
             }
         }
-        this.digest = null;
+        evictReadLock();
+		evictWriteLock();
         this.persistentValues = null;
         evictBeforeImage();
     }
@@ -2255,9 +2351,17 @@ public class DataObject_1
             if(this.isProxy() && !isVirtual()) {
                 UnitOfWork_1 unitOfWork = this.dataObjectManager.currentTransaction();
                 unitOfWork.synchronize();
-                return this.unconditionalLoad(fetchPlan, features);
+                return this.unconditionalLoad(
+                	fetchPlan, 
+                	features, 
+                	false // refresh
+                );
             } else if (jdoIsPersistent() && !jdoIsNew()) {
-                return this.unconditionalLoad(fetchPlan, features);
+                return this.unconditionalLoad(
+                	fetchPlan, 
+                	features, 
+                	false // refresh
+                );
             } else {
                 return this;
             }
@@ -2290,11 +2394,7 @@ public class DataObject_1
                         new OrderSpecifier(feature, SortOrder.UNSORTED)
                     );
                 }
-                Query_2Facade input = this.jdoIsPersistent() ? Facades.newQuery(
-                    this.jdoGetObjectId()
-                ) : Facades.newQuery(
-                    this.jdoGetTransactionalObjectId()
-                );
+                Query_2Facade input = Facades.newQuery(this);
                 input.setQuery(
                     JavaBeans.toXML(
                         new Filter(
@@ -2407,11 +2507,7 @@ public class DataObject_1
                         ),
                         null // extension
                     );
-                    Query_2Facade input = this.jdoIsPersistent() ? Facades.newQuery(
-                        this.jdoGetObjectId()
-                    ) : Facades.newQuery(
-                        this.jdoGetTransactionalObjectId()
-                    );
+                    Query_2Facade input = Facades.newQuery(this);
                     input.setQuery(JavaBeans.toXML(attributeSpecifier));
                     IndexedRecord indexedRecord = (IndexedRecord) this.dataObjectManager.getInteraction().execute(
                         this.dataObjectManager.getInteractionSpecs().GET,
@@ -3412,7 +3508,19 @@ public class DataObject_1
 		}
     }
     
-
+    protected <T extends Collection<?>> void assertNonNullValue(
+    	Object value,
+    	Class<T> target
+    ) {
+    	if(value == null) {
+	        throw new JDOUserException(
+	            "Null values can't be inserted into such a JMI feature collection",
+	            new NullPointerException(target.getSimpleName() + " does not accept null values"),
+	            this
+	        );
+    	}
+    }
+    
     //--------------------------------------------------------------------------
     // Class ManagedAspect
     //--------------------------------------------------------------------------
@@ -3924,6 +4032,7 @@ public class DataObject_1
             int index,
             Object element
         ){
+        	assertNonNullValue(element, List.class);
             return this.getDelegate(true, false).set(index, element);
         }
 
@@ -3932,6 +4041,7 @@ public class DataObject_1
             int index,
             Object element
         ){
+        	assertNonNullValue(element, List.class);
             this.getDelegate(true, false).add(index, element);
         }
 
@@ -4156,6 +4266,7 @@ public class DataObject_1
          */
         @Override
         public boolean add(Object o) {
+        	assertNonNullValue(o, Set.class);
             return this.getDelegate(true, false).add(o);
         }
 

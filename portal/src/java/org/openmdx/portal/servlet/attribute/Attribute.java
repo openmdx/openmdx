@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: Attribute.java,v 1.19 2011/08/11 11:37:51 wfro Exp $
  * Description: Attribute 
- * Revision:    $Revision: 1.19 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/08/11 11:37:51 $
  * ====================================================================
  *
  * This software is published under the BSD license

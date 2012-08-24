@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Security, http://www.openmdx.org
- * Name:        $Id: AddressCallback.java,v 1.1 2010/03/05 13:26:09 hburger Exp $
  * Description: Address Callback
- * Revision:    $Revision: 1.1 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/03/05 13:26:09 $
  * ====================================================================
  *
  * This software is published under the BSD license

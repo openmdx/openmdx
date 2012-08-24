@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: AuditQueries.java,v 1.15 2011/10/21 13:02:04 hburger Exp $
  * Description: Audit Queries 
- * Revision:    $Revision: 1.15 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/10/21 13:02:04 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

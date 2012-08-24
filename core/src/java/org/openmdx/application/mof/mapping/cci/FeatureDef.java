@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: FeatureDef.java,v 1.2 2011/03/25 14:16:24 hburger Exp $
  * Description: VelocityFeatureDef class
- * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/03/25 14:16:24 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

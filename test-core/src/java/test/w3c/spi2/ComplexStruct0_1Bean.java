@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: ComplexStruct0_1Bean.java,v 1.1 2011/03/04 22:25:30 hburger Exp $
  * Description: ComplexStruct0_1Bean 
- * Revision:    $Revision: 1.1 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/03/04 22:25:30 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

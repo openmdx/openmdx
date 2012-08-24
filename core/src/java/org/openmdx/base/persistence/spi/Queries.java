@@ -1,16 +1,13 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: Queries.java,v 1.7 2011/08/15 18:00:45 hburger Exp $
  * Description: OPENMDXQL Support
- * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/08/15 18:00:45 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2009-2011, OMEX AG, Switzerland
+ * Copyright (c) 2009-2012, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -50,19 +47,25 @@
  */
 package org.openmdx.base.persistence.spi;
 
-import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-import javax.jdo.JDOFatalUserException;
 import javax.jdo.Query;
 import javax.xml.datatype.Duration;
 import javax.xml.datatype.XMLGregorianCalendar;
 
+import org.openmdx.base.accessor.jmi.spi.Jmi1ObjectPredicateInvocationHandler;
+import org.openmdx.base.exception.ServiceException;
+import org.openmdx.base.naming.Path;
 import org.openmdx.kernel.exception.BasicException;
+import org.openmdx.kernel.loading.Classes;
 import org.w3c.spi2.Datatypes;
 
 /**
@@ -77,359 +80,361 @@ public class Queries {
         // Avoid instantiation
     }
 
-    /**
-     * Apply filter and ordering
-     * 
-     * @param query
-     * @param start the initial position is 0 at the beginning and greater 0 in case of nested queries
-     * @param queryString non-XML query
-     * @return the terminal position
-     */
-    private static int setFilterAndOrdering(
-        Query query, 
-        String queryString, 
-        int start
-    ) {
-        if (queryString == null) {
-            return -1;
-        } else {
-            int pos = start;
-            Parsing: while (pos < queryString.length()) {
-                char c = queryString.charAt(pos);
-                if (Character.isWhitespace(c) || (c == ';')) {
-                    pos++;
-                    if(start > 0) break Parsing; // we are processing a nested query
-                } else {
-                    int pos0 = queryString.indexOf("().", pos);
-                    if (pos0 < 0) break;
-                    String predicateName = queryString.substring(pos, pos0);
-                    int pos1 = queryString.indexOf("(", pos0 + 2);
-                    if (pos1 < 0) break;
-                    Method predicateMethod;
-                    Object predicate;
-                    try {
-                        predicateMethod = query.getClass().getMethod(predicateName);
-                        predicate = predicateMethod.invoke(query);
-                    } catch (Exception exception1) {
-                        throw BasicException.initHolder(
-                            new JDOFatalUserException(
-                                "Unknown predicate for query",
-                                BasicException.newEmbeddedExceptionStack(
-                                    exception1,
-                                    BasicException.Code.DEFAULT_DOMAIN,
-                                    BasicException.Code.BAD_QUERY_CRITERIA,
-                                    new BasicException.Parameter(
-                                        "query", 
-                                        query.getClass().getName()
-                                    ),
-                                    new BasicException.Parameter(
-                                        "predicate",
-                                        predicateName
-                                    )
-                                )
-                            )
-                        );
-                    }
-                    if(predicate instanceof Query) {
-                        pos = setFilterAndOrdering((Query) predicate, queryString, pos0 + 3);
-                    } else {
-                        String operator = queryString.substring(pos0 + 3, pos1);
-                        // Parse operands
-                        List<Object> operands = new ArrayList<Object>();
-                        int pos2 = pos1 + 1;
-                        Class<?> valueClass = null;
-                        c = queryString.charAt(pos2);
-                        while ((c != ')' && (pos2 < queryString.length()))) {
-                            if (Character.isWhitespace(c) || (c == ',')) {
-                                pos2++;
-                            }
-                            // String
-                            else if (c == '"') {
-                                StringBuilder s = new StringBuilder();
-                                pos2++;
-                                c = queryString.charAt(pos2);
-                                while ((c != '"') && (pos2 < queryString.length())) {
-                                    s.append(c);
-                                    pos2++;
-                                    c = queryString.charAt(pos2);
-                                    if (c == '\\') {
-                                        pos2++;
-                                        c = queryString.charAt(pos2);
-                                    }
-                                }
-                                if ((valueClass == null)
-                                    || (valueClass == String.class)) {
-                                    operands.add(s.toString());
-                                }
-                                valueClass = null;
-                                pos2++;
-                            }
-                            // Number, Date
-                            else if ((c == '-') || Character.isDigit(c)) {
-                                StringBuilder s = new StringBuilder();
-                                while (!Character.isWhitespace(c) && (c != ',')
-                                    && (c != ')') && (pos2 < queryString.length())) {
-                                    s.append(c);
-                                    pos2++;
-                                    c = queryString.charAt(pos2);
-                                }
-                                if (valueClass != null) {
-                                    operands.add(Datatypes.create(valueClass, s
-                                        .toString()));
-                                } else {
-                                    operands.add(new BigDecimal(s.toString()));
-                                }
-                                valueClass = null;
-                            }
-                            // Type spec
-                            else if (c == ':') {
-                                StringBuilder s = new StringBuilder();
-                                pos2++;
-                                c = queryString.charAt(pos2);
-                                while ((c != ':') && (pos2 < queryString.length())) {
-                                    s.append(c);
-                                    pos2++;
-                                    c = queryString.charAt(pos2);
-                                }
-                                String type = s.toString();
-                                if ("string".equalsIgnoreCase(type)) {
-                                    valueClass = String.class;
-                                } else if ("date".equals(type)) {
-                                    valueClass = XMLGregorianCalendar.class;
-                                } else if ("datetime".equalsIgnoreCase(type)) {
-                                    valueClass = Date.class;
-                                } else if ("short".equalsIgnoreCase(type)) {
-                                    valueClass = Short.class;
-                                } else if ("int".equalsIgnoreCase(type)
-                                    || "integer".equalsIgnoreCase(type)) {
-                                    valueClass = Integer.class;
-                                } else if ("long".equalsIgnoreCase(type)) {
-                                    valueClass = Long.class;
-                                } else if ("decimal".equalsIgnoreCase(type)) {
-                                    valueClass = BigDecimal.class;
-                                } else if ("duration".equalsIgnoreCase(type)) {
-                                    valueClass = Duration.class;
-                                }
-                                pos2++;
-                            }
-                            // Skip unknown char
-                            else {
-                                valueClass = null;
-                                pos2++;
-                            }
-                            c = queryString.charAt(pos2);
-                        }
-                        try {
-                            Class<?> predicateClass = predicateMethod.getReturnType();
-                            Method operatorMethod = null;
-                            int nArgs = 0;
-                            // AnyTypePredicate
-                            if ("equalTo".equalsIgnoreCase(operator) && operands.size() == 1) {
-                                operatorMethod = predicateClass.getMethod(
-                                    "equalTo",
-                                    Object.class
-                                );
-                                nArgs = 1;
-                            } else if ("notEqualTo".equalsIgnoreCase(operator) && operands.size() == 1) {
-                                operatorMethod = predicateClass.getMethod(
-                                    "notEqualTo",
-                                    Object.class
-                                );
-                                nArgs = 1;
-                            } else if ("elementOf".equalsIgnoreCase(operator)) {
-                                operatorMethod = predicateClass.getMethod(
-                                    "elementOf",
-                                    Collection.class
-                                );
-                                nArgs = -1;
-                            } else if ("notAnElementOf".equalsIgnoreCase(operator)) {
-                                operatorMethod = predicateClass.getMethod(
-                                    "notAnElementOf",
-                                    Collection.class
-                                );
-                                nArgs = -1;
-                            }
-                            // OptionalFeaturePredicate
-                            else if ("isNull".equalsIgnoreCase(operator) && (operands.size() == 0)) {
-                                operatorMethod = predicateClass.getMethod("isNull");
-                                nArgs = 0;
-                            } else if ("isNonNull".equalsIgnoreCase(operator) && (operands.size() == 0)) {
-                                operatorMethod = predicateClass.getMethod("isNonNull");
-                                nArgs = 0;
-                            }
-                            // BooleanTypePredicate
-                            else if ("isTrue".equalsIgnoreCase(operator) && (operands.size() == 0)) {
-                                operatorMethod = predicateClass.getMethod("isTrue");
-                                nArgs = 0;
-                            } else if ("isFalse".equalsIgnoreCase(operator) && (operands.size() == 0)) {
-                                operatorMethod = predicateClass.getMethod("isFalse");
-                                nArgs = 0;
-                            }
-                            // MatchableTypePredicate
-                            else if ("like".equalsIgnoreCase(operator)) {
-                                operatorMethod = predicateClass.getMethod(
-                                    "like",
-                                    Collection.class
-                                );
-                                nArgs = -1;
-                            } else if ("unlike".equalsIgnoreCase(operator)) {
-                                operatorMethod = predicateClass.getMethod(
-                                    "unlike",
-                                    Collection.class
-                                );
-                                nArgs = -1;
-                            } else if ("startsWith".equalsIgnoreCase(operator)) {
-                                operatorMethod = predicateClass.getMethod(
-                                    "startsWith",
-                                    Collection.class
-                                );
-                                nArgs = -1;
-                            } else if ("startsNotWith".equalsIgnoreCase(operator)) {
-                                operatorMethod = predicateClass.getMethod(
-                                    "startsNotWith",
-                                    Collection.class
-                                );
-                                nArgs = -1;
-                            } else if ("endsWith".equalsIgnoreCase(operator)) {
-                                operatorMethod = predicateClass.getMethod(
-                                    "endsWith",
-                                    Collection.class
-                                );
-                                nArgs = -1;
-                            } else if ("endsNotWith".equalsIgnoreCase(operator)) {
-                                operatorMethod = predicateClass.getMethod(
-                                    "endsNotWith",
-                                    Collection.class
-                                );
-                                nArgs = -1;
-                            }
-                            // ComparableTypePredicate
-                            else if ("between".equalsIgnoreCase(operator) && operands.size() == 2) {
-                                operatorMethod = predicateClass.getMethod(
-                                    "between",
-                                    Comparable.class,
-                                    Comparable.class
-                                );
-                                nArgs = 2;
-                            } else if ("outside".equalsIgnoreCase(operator) && operands.size() == 2) {
-                                operatorMethod = predicateClass.getMethod(
-                                    "outside",
-                                    Comparable.class,
-                                    Comparable.class
-                                );
-                                nArgs = 2;
-                            } else if ("lessThan".equalsIgnoreCase(operator) && operands.size() == 1) {
-                                operatorMethod = predicateClass.getMethod(
-                                    "lessThan",
-                                    Comparable.class
-                                );
-                                nArgs = 1;
-                            } else if ("lessThanOrEqualTo" .equalsIgnoreCase(operator) && operands.size() == 1) {
-                                operatorMethod = predicateClass.getMethod(
-                                    "lessThanOrEqualTo",
-                                    Comparable.class
-                                );
-                                nArgs = 1;
-                            } else if ("greaterThanOrEqualTo".equalsIgnoreCase(operator) && operands.size() == 1) {
-                                operatorMethod = predicateClass.getMethod(
-                                    "greaterThanOrEqualTo",
-                                    Comparable.class
-                                );
-                                nArgs = 1;
-                            } else if ("greaterThan".equalsIgnoreCase(operator) && operands.size() == 1) {
-                                operatorMethod = predicateClass.getMethod(
-                                    "greaterThan",
-                                    Comparable.class
-                                );
-                                nArgs = 1;
-                            } else if ("ascending".equalsIgnoreCase(operator) && operands.size() == 0) {
-                                operatorMethod = predicateClass.getMethod("ascending");
-                                nArgs = 0;
-                            } else if ("descending".equalsIgnoreCase(operator) && operands.size() == 0) {
-                                operatorMethod = predicateClass.getMethod("descending");
-                                nArgs = 0;
-                            }
-                            if (operatorMethod != null) {
-                                if (nArgs == 0) {
-                                    operatorMethod.invoke(predicate);
-                                } else if (nArgs == 1) {
-                                    operatorMethod.invoke(predicate, operands.get(0));
-                                } else if (nArgs == 2) {
-                                    operatorMethod.invoke(predicate, operands.get(0), operands.get(1));
-                                } else {
-                                    operatorMethod.invoke(predicate, operands);
-                                }
-                            }
-                        } catch (Exception exception) {
-                            throw BasicException.initHolder(
-                                new JDOFatalUserException(
-                                    "Unknown predicate method for query",
-                                    BasicException.newEmbeddedExceptionStack(
-                                        exception,
-                                        BasicException.Code.DEFAULT_DOMAIN,
-                                        BasicException.Code.BAD_QUERY_CRITERIA,
-                                        new BasicException.Parameter(
-                                            "query", 
-                                            query.getClass().getName()
-                                        ),
-                                        new BasicException.Parameter(
-                                            "predicate",
-                                            predicateName
-                                        ),
-                                        new BasicException.Parameter(
-                                            "operator",
-                                            operator
-                                        )
-                                    )
-                                )
-                            );
-                        }
-                        pos = pos2 + 1;
-                    }
-                }
-            }
-            return pos;
-        }        
-    }
+    private static final Class<?>[] OBJECT1 = {Object.class};
+    private static final Class<?>[] COLLECTION = {Collection.class};
+    private static final Class<?>[] COMPARABLE1 = {Comparable.class};
+    private static final Class<?>[] COMPARABLE2 = {Comparable.class, Comparable.class};
+    private static final Object[] EMPTY = {Collections.EMPTY_LIST};
 
+    private static final Map<String,Class<?>[]> ARGUMENTS = new HashMap<String, Class<?>[]>();
+    
     /**
-     * Set the candidate collection
+     * Tells whether we are dispatching to a reference predicate
      * 
-     * @param query
-     * @param openmdxQuery
+     * @param target
+     * 
+     * @return <code>true</code> if we are dispatching to a reference predicate
      */
-    private static void setCandidates(
-        Query query, 
-        Collection<?> candidates
-    ) {
-        if(candidates != null) {
-            query.setCandidates(candidates);
-        }
-    }
-
-    /**
-     * Create a query instance
-     * 
-     * @param refPackage
-     * @param openmdxQuery
-     * 
-     * @return a new populated query instance
-     */
-    public static Query prepareQuery(
-        Query query,
-        Collection<?> candidates,
-        String queryString
+    private static boolean isReferencePredicate(
+    	Object target	
     ){
-        setFilterAndOrdering(
-            query, 
-            queryString, 
-            0
+    	return 
+    		Proxy.isProxyClass(target.getClass()) &&
+    		Proxy.getInvocationHandler(target) instanceof Jmi1ObjectPredicateInvocationHandler;
+    }
+    
+    private static Class<?> toClass(
+    	String name
+    ) throws ServiceException{
+    	if("string".equalsIgnoreCase(name)) {
+    		return String.class;
+    	} else if("date".equals(name)) {
+    		return XMLGregorianCalendar.class;
+    	} else if("datetime".equalsIgnoreCase(name)) {
+    		return Date.class;
+    	} else if("short".equalsIgnoreCase(name)) {
+    		return Short.class;
+    	} else  if("int".equalsIgnoreCase(name) || "integer".equalsIgnoreCase(name)) {
+    		return Integer.class;
+    	} else if("long".equalsIgnoreCase(name)) {
+    		return Long.class;
+    	} else if("decimal".equalsIgnoreCase(name)) {
+    		return BigDecimal.class;
+    	} else if("duration".equalsIgnoreCase(name)) {
+    		return Duration.class;
+    	} else throw new ServiceException(
+            BasicException.Code.DEFAULT_DOMAIN,
+            BasicException.Code.BAD_QUERY_CRITERIA,
+            "Unsupported argument type",
+            new BasicException.Parameter(
+                "type", 
+                name
+            ),
+            new BasicException.Parameter(
+                "supported", 
+                "string", "date", "datetime", "short", "int", "integer", "long", "decimal", "duration"
+            )
         );
-        setCandidates(
-            query,
-            candidates
+    }
+    
+    private static Object toValue(
+    	String parameter
+    ) throws ServiceException{
+    	if(parameter.length() == 0) throw new ServiceException(
+            BasicException.Code.DEFAULT_DOMAIN,
+            BasicException.Code.BAD_QUERY_CRITERIA,
+            "Missing parameter value"
         );
-        return query;
+    	switch(parameter.charAt(0)) {
+	    	case ':': {
+	    		int endOfType = seek(parameter, 1, ':', false);
+	    		String value = parameter.substring(endOfType + 1);
+				String type = parameter.substring(1, endOfType);
+				return Datatypes.create(
+	    			toClass(type),
+	    			value
+	    		);
+	    	}
+	    	case '(': {
+	    		int endOfType = seek(parameter, 1, ')', false);
+	    		String type = parameter.substring(1, endOfType);
+				String value = parameter.substring(endOfType + 1);
+				try {
+					return Datatypes.create(
+						Classes.getApplicationClass(type),
+						value
+					);
+				} catch (ClassNotFoundException exception) {
+					throw new ServiceException(
+						exception,
+	                    BasicException.Code.DEFAULT_DOMAIN,
+	                    BasicException.Code.BAD_QUERY_CRITERIA,
+		                "Invalid parameter class",
+	                    new BasicException.Parameter(
+	                        "parameter", 
+	                        parameter
+	                    ),
+	                    new BasicException.Parameter(
+	                        "class",
+	                        type
+	                    ),
+	                    new BasicException.Parameter(
+	                        "value",
+	                        value
+	                    )
+		            );
+				}
+	    	}
+	    	case '"': {
+	    		int endOfString = seek(parameter, 1, '"', false);
+	    		if(endOfString + 1 == parameter.length()) {
+	    			return parameter.substring(1, parameter.length() - 1).replace("\\\"", "\"");
+	    		} else throw new ServiceException(
+                    BasicException.Code.DEFAULT_DOMAIN,
+                    BasicException.Code.BAD_QUERY_CRITERIA,
+	                "End of value expected after \"",
+                    new BasicException.Parameter(
+                        "parameter", 
+                        parameter
+                    ),
+                    new BasicException.Parameter(
+                        "remaining",
+                        parameter.substring(endOfString + 1)
+                    )
+	            );
+	    	}
+	    	case '-': case '0': case '1': case '2': case '3': case '4': case '5': case '6': case '7': case '8': case '9':
+	    		return Datatypes.create(BigDecimal.class, parameter);
+	    	default: throw new ServiceException(
+                BasicException.Code.DEFAULT_DOMAIN,
+                BasicException.Code.BAD_QUERY_CRITERIA,
+                "Unable to parse parameter value",
+                new BasicException.Parameter(
+                    "parameter", 
+                    parameter
+                )
+            );	
+    	}
+    }
+     
+    /**
+     * Convert string values to object references where necessary
+     * 
+     * @param parameter
+     * @param reference
+     * 
+     * @return converted parameter
+     * @throws ServiceException 
+     */
+    private static Object toValue(
+    	String parameter, 
+    	boolean reference
+    ) throws ServiceException{
+    	Object value = toValue(parameter);
+    	return reference ?  new Path((String)value) : value;
+    }
+    
+    /**
+     * Seek for the given token
+     * 
+     * @param value
+     * @param position
+     * @param token
+     * @param optional
+     * @return the index of the token
+     * @throws ServiceException 
+     */
+    private static int seek(
+    	String value,
+    	int position,
+    	char token, 
+    	boolean optional
+    ) throws ServiceException{
+    	for(
+    		int index = position;
+			index < value.length();
+			index++
+    	){
+    		char current = value.charAt(index);
+    		if(current == token) {
+    			return index;
+    		} else if (current == '\\'){
+    			index++;
+    		} else if (token == '"') {
+    			// ignore mark-up character in Strings
+    		} else if (current == '"') {
+    			index = seek(value, index + 1, '"', optional);
+    		} else if (current == '{') {
+    			index = seek(value, index + 1, '}', optional);
+    		}
+    	}
+    	if(optional) {
+    		return -1;
+    	} else throw new ServiceException(
+            BasicException.Code.DEFAULT_DOMAIN,
+            BasicException.Code.BAD_QUERY_CRITERIA,
+            "Missing closing token",
+            new BasicException.Parameter(
+                "value", 
+                value
+            ),
+            new BasicException.Parameter(
+                "token",
+                token
+            )
+        );
+    }
+    
+    private static Object[] getArguments(
+    	String arguments,
+    	Class<?>[] argumentTypes, 
+    	boolean reference
+    ) throws ServiceException{
+    	if(arguments.length() == 0) {
+    		return argumentTypes == COLLECTION ? EMPTY : null;
+    	} else {
+    		List<Object> values = new ArrayList<Object>();
+    		int cursor = 0;
+    		for(
+    			int comma;
+    			(comma = seek(arguments, cursor, ',', true)) >= 0;
+    			cursor = comma + 1
+    		) {
+    			values.add(toValue(arguments.substring(cursor, comma), reference));
+    		}
+			values.add(toValue(arguments.substring(cursor), reference));
+			return argumentTypes == COLLECTION ? new Object[]{values} : values.toArray();
+    	}
+    }
+    
+    /**
+     * Apply a statement to a given query
+     * 
+     * @param target
+     * @param statement
+     * @throws ServiceException 
+     */
+    private static void applyStatement(
+        Query query, 
+        String statement
+    ) throws ServiceException{
+    	int cursor = 0;
+    	Method: for(Object target = query;;){
+	    	int beginOfArguments = seek(statement, cursor, '(', false);
+	    	String methodName = statement.substring(cursor, beginOfArguments);
+	    	int endOfArguments = seek(statement, beginOfArguments, ')', false);
+	    	Class<?>[] argumentTypes = ARGUMENTS.get(methodName);
+	    	Object[] arguments = getArguments(
+	    		statement.substring(beginOfArguments + 1, endOfArguments),
+	    		argumentTypes, 
+	    		isReferencePredicate(target)
+	    	);
+	        try {
+	        	target = target.getClass().getMethod(
+	        		methodName, 
+	        		argumentTypes
+	        	).invoke(
+	        		target,
+	        		arguments
+	        	);
+	        } catch (Exception exception) {
+	            throw new ServiceException(
+                    exception,
+                    BasicException.Code.DEFAULT_DOMAIN,
+                    BasicException.Code.BAD_QUERY_CRITERIA,
+                    "Unknown method",
+                    new BasicException.Parameter(
+                        "target", 
+                        target.getClass().getName()
+                    ),
+                    new BasicException.Parameter(
+                        "method",
+                        methodName
+                    )
+	            );
+	        }
+	        for(
+	        	cursor = endOfArguments + 1;
+	        	cursor < statement.length();
+	        ){
+	        	char current = statement.charAt(cursor++);
+	        	if (current == '{' && target instanceof Query) {
+	        		int endOfBlock = seek(statement, cursor, '}', false);
+	        		applyStatements((Query)target, statement.substring(cursor, endOfBlock));
+	        		cursor = endOfBlock + 1; 
+	        		if(cursor != statement.length()) throw new ServiceException(
+                        BasicException.Code.DEFAULT_DOMAIN,
+                        BasicException.Code.BAD_QUERY_CRITERIA,
+	                    "End of statement expected after block",
+                        new BasicException.Parameter(
+                            "target", 
+                            target.getClass().getName()
+                        ),
+                        new BasicException.Parameter(
+                            "remaining",
+                            statement.substring(cursor)
+		                )
+		            );
+	        	} else if (current == '.') {
+	        		continue Method;
+	        	} else throw new ServiceException(
+                    BasicException.Code.DEFAULT_DOMAIN,
+                    BasicException.Code.BAD_QUERY_CRITERIA,
+                    "Dot expected",
+                    new BasicException.Parameter(
+                        "target", 
+                        target.getClass().getName()
+                    ),
+                    new BasicException.Parameter(
+                        "remaining",
+                        statement.substring(cursor)
+	                )
+	            );
+	        }
+	        break Method;
+    	}
+    }
+    
+    /**
+     * Apply a statement sequence to a query
+     * 
+     * @param target
+     * @param statements a semicolon separated sequence of statements
+     * 
+     * @throws ServiceException 
+     */
+    public static void applyStatements(
+        Query target, 
+        String statements
+    ) throws ServiceException{
+		for(
+			int cursor = 0, endOfStatement;
+			cursor < statements.length();
+			cursor = endOfStatement + 1
+		) {
+			endOfStatement = seek(statements, cursor, ';', true);
+			if(endOfStatement < 0) endOfStatement = statements.length();
+			applyStatement(target, statements.substring(cursor, endOfStatement));
+		}
+    }
+        
+    static {
+    	ARGUMENTS.put("equalTo", OBJECT1);
+    	ARGUMENTS.put("notEqualTo", OBJECT1);
+    	ARGUMENTS.put("elementOf", COLLECTION);
+    	ARGUMENTS.put("notAnElementOf", COLLECTION);
+    	ARGUMENTS.put("like", COLLECTION);
+    	ARGUMENTS.put("unlike", COLLECTION);
+    	ARGUMENTS.put("startsWith", COLLECTION);
+    	ARGUMENTS.put("startsWith", COLLECTION);
+    	ARGUMENTS.put("endsWith", COLLECTION);
+    	ARGUMENTS.put("endsNotWith", COLLECTION);
+    	ARGUMENTS.put("between", COMPARABLE2);
+    	ARGUMENTS.put("outside", COMPARABLE2);
+    	ARGUMENTS.put("lessThan", COMPARABLE1);
+    	ARGUMENTS.put("lessThanOrEqualTo", COMPARABLE1);
+    	ARGUMENTS.put("greaterThanOrEqualTo", COMPARABLE1);
+    	ARGUMENTS.put("greaterThan", COMPARABLE1);
     }
 
 }

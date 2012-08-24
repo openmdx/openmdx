@@ -1,16 +1,13 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: CollectionView.java,v 1.1 2009/01/09 23:22:17 hburger Exp $
  * Description: Collection View
- * Revision:    $Revision: 1.1 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/09 23:22:17 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2008, OMEX AG, Switzerland
+ * Copyright (c) 2008-2012, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -53,6 +50,11 @@ package org.openmdx.state2.aop1;
 import java.lang.reflect.Array;
 import java.util.Collection;
 
+import org.openmdx.base.exception.ServiceException;
+import org.openmdx.kernel.exception.BasicException;
+import org.openmdx.kernel.exception.BasicException.Parameter;
+import org.openmdx.kernel.exception.Throwables;
+
 
 /**
  * List View
@@ -75,6 +77,17 @@ abstract class CollectionView<O,C extends Collection<E>,E> implements Collection
      */
     protected final InvolvedMembers<O,C> members;
     
+    /**
+     * Provide the id Parameter for exception enhancement
+     * 
+     * @return the id parameter
+     * 
+     * @see org.openmdx.state2.aop1.InvolvedMembers#getIdParameter()
+     */
+    protected Parameter getIdParameter() {
+        return this.members.getIdParameter();
+    }
+
     /* (non-Javadoc)
      * @see java.util.List#add(java.lang.Object)
      */
@@ -111,32 +124,68 @@ abstract class CollectionView<O,C extends Collection<E>,E> implements Collection
      */
     public boolean contains(Object o) {
         UniqueValue<Boolean> reply = new UniqueValue<Boolean>();
-        for(C delegate : members.getInvolved(AccessMode.FOR_QUERY)) {
-            reply.set(Boolean.valueOf(delegate.contains(o)));
+        try{
+            for(C delegate : members.getInvolved(AccessMode.FOR_QUERY)) {
+                reply.set(Boolean.valueOf(delegate.contains(o)));
+            }
+            return reply.get();
+        } catch (ServiceException exception) {
+            throw Throwables.initCause(
+                new IllegalStateException(
+                    "The underlying states do not allow for the determination of the given property"
+                ),
+                exception,
+                BasicException.Code.DEFAULT_DOMAIN,
+                BasicException.Code.ILLEGAL_STATE,
+                getIdParameter()
+            );
         }
-        return reply.get();
     }
 
     /* (non-Javadoc)
      * @see java.util.List#containsAll(java.util.Collection)
      */
     public boolean containsAll(Collection<?> c) {
-        UniqueValue<Boolean> reply = new UniqueValue<Boolean>();
-        for(C delegate : members.getInvolved(AccessMode.FOR_QUERY)) {
-            reply.set(Boolean.valueOf(delegate.containsAll(c)));
+        try {
+            UniqueValue<Boolean> reply = new UniqueValue<Boolean>();
+            for(C delegate : members.getInvolved(AccessMode.FOR_QUERY)) {
+                reply.set(Boolean.valueOf(delegate.containsAll(c)));
+            }
+            return reply.get();
+        } catch (ServiceException exception) {
+            throw Throwables.initCause(
+                new IllegalStateException(
+                    "The underlying states do not allow for the unique determination of the given property"
+                ),
+                exception,
+                BasicException.Code.DEFAULT_DOMAIN,
+                BasicException.Code.ILLEGAL_STATE,
+                getIdParameter()
+            );
         }
-        return reply.get();
     }
 
     /* (non-Javadoc)
      * @see java.util.List#isEmpty()
      */
     public boolean isEmpty() {
-        UniqueValue<Boolean> reply = new UniqueValue<Boolean>();
-        for(C delegate : members.getInvolved(AccessMode.FOR_QUERY)) {
-            reply.set(Boolean.valueOf(delegate.isEmpty()));
+        try {
+            UniqueValue<Boolean> reply = new UniqueValue<Boolean>();
+            for(C delegate : members.getInvolved(AccessMode.FOR_QUERY)) {
+                reply.set(Boolean.valueOf(delegate.isEmpty()));
+            }
+            return reply.get();
+        } catch (ServiceException exception) {
+            throw Throwables.initCause(
+                new IllegalStateException(
+                    "The underlying states do not allow for the unique determination of the given property"
+                ),
+                exception,
+                BasicException.Code.DEFAULT_DOMAIN,
+                BasicException.Code.ILLEGAL_STATE,
+                getIdParameter()
+            );
         }
-        return reply.get();
     }
 
     /* (non-Javadoc)
@@ -176,11 +225,23 @@ abstract class CollectionView<O,C extends Collection<E>,E> implements Collection
      * @see java.util.List#size()
      */
     public int size() {
-        UniqueValue<Integer> reply = new UniqueValue<Integer>();
-        for(C delegate : members.getInvolved(AccessMode.FOR_QUERY)) {
-            reply.set(Integer.valueOf(delegate.size()));
+        try {
+            UniqueValue<Integer> reply = new UniqueValue<Integer>();
+            for(C delegate : members.getInvolved(AccessMode.FOR_QUERY)) {
+                reply.set(Integer.valueOf(delegate.size()));
+            }
+            return reply.get().intValue();
+        } catch (ServiceException exception) {
+            throw Throwables.initCause(
+                new IllegalStateException(
+                    "The underlying states do not allow for the unique determination of the given property"
+                ),
+                exception,
+                BasicException.Code.DEFAULT_DOMAIN,
+                BasicException.Code.ILLEGAL_STATE,
+                getIdParameter()
+            );
         }
-        return reply.get().intValue();
     }
 
     /* (non-Javadoc)

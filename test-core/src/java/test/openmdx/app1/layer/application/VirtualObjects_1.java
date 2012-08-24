@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: VirtualObjects_1.java,v 1.10 2010/06/03 15:57:09 hburger Exp $
  * Description: Hard-Wired Objects Layer
- * Revision:    $Revision: 1.10 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/06/03 15:57:09 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -115,6 +112,7 @@ public class VirtualObjects_1 extends HardWiredObjects_1 {
          * @see org.openmdx.compatibility.base.dataprovider.spi.Layer_1#get(org.openmdx.compatibility.base.dataprovider.cci.ServiceHeader, org.openmdx.compatibility.base.dataprovider.cci.DataproviderRequest)
          */
         @Override
+        @SuppressWarnings("unchecked")
         public boolean get(
             RestInteractionSpec ispec,
             Query_2Facade input,

@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: JmiServiceException.java,v 1.25 2011/04/11 08:56:28 hburger Exp $
  * Description: JmiServiceException class
- * Revision:    $Revision: 1.25 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/04/11 08:56:28 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

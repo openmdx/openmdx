@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: TextsLoader.java,v 1.12 2011/09/16 09:01:41 wfro Exp $
  * Description: TextsLoader
- * Revision:    $Revision: 1.12 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/09/16 09:01:41 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -56,80 +53,143 @@
 package org.openmdx.portal.servlet.loader;
 
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.SequenceInputStream;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.PropertyResourceBundle;
+import java.util.ResourceBundle;
 import java.util.Set;
 
+import javax.jdo.PersistenceManagerFactory;
 import javax.servlet.ServletContext;
 
 import org.openmdx.base.exception.ServiceException;
+import org.openmdx.base.naming.Path;
 import org.openmdx.kernel.log.SysLog;
+import org.openmdx.portal.servlet.Codes;
 import org.openmdx.portal.servlet.PortalExtension_1_0;
-import org.openmdx.portal.servlet.texts.TextsFactory;
+import org.openmdx.portal.servlet.Texts.TextsBundle;
 
-public class TextsLoader
-    extends Loader {
+/**
+ * TextsLoader
+ *
+ */
+public class TextsLoader extends Loader {
 
-  //-------------------------------------------------------------------------
-  public TextsLoader(
-      ServletContext context,
-      PortalExtension_1_0 portalExtension      
-  ) {
-      super(
-          context,
-          portalExtension
-      );
-  }
-  
-  //-------------------------------------------------------------------------
-  synchronized public TextsFactory loadTexts(
-    String[] locale
-  ) throws ServiceException {
-	  String messagePrefix = new Date() + "  ";
-    System.out.println(messagePrefix + "Loading texts");
-    SysLog.info("Loading texts");
-    // 2-dim list: first index=locale, second index = input stream
-    List<List<InputStream>> textsInputStreams = new ArrayList<List<InputStream>>();
-    int fallbackLocaleIndex = 0;
-    for(int i = 0; i < locale.length; i++) {
-        Set localeTextsPaths = new HashSet();
-        if(locale[i] != null) {
-            fallbackLocaleIndex = 0;
-            localeTextsPaths = context.getResourcePaths("/WEB-INF/config/texts/" + locale[i]);
-            if(localeTextsPaths == null) {
-                for(int j = i-1; j >= 0; j--) {
-                    if((locale[j] != null) && locale[i].substring(0,2).equals(locale[j].substring(0,2))) {
-                        fallbackLocaleIndex = j;
-                        break;
-                    }
-                }
-                SysLog.info(locale[i] + " not found. Fallback to " + locale[fallbackLocaleIndex]);
-                localeTextsPaths = context.getResourcePaths("/WEB-INF/config/texts/" + locale[fallbackLocaleIndex]);
-            }
-        }
-        List<InputStream> localeTextsInputStreams = new ArrayList<InputStream>();
-        textsInputStreams.add(localeTextsInputStreams);
-        for(Iterator j = localeTextsPaths.iterator(); j.hasNext(); ) {
-            String path = (String)j.next();
-            if(!path.endsWith("/")) {            
-                SysLog.info("Loading " + path);
-                localeTextsInputStreams.add(
-                    context.getResourceAsStream(path)
-                );
-            }
-        }
-    }
-    System.out.println(messagePrefix + "Done");
-    SysLog.info("Done");
-    return new TextsFactory(
-        locale,
-        (List[])textsInputStreams.toArray(new List[textsInputStreams.size()])
-    );
-  }
-      
+	/**
+	 * Constructor 
+	 *
+	 * @param context
+	 * @param portalExtension
+	 */
+	public TextsLoader(
+		Path codeSegmentIdentity,
+		ServletContext context,
+		PortalExtension_1_0 portalExtension,
+		PersistenceManagerFactory pmf
+	) {
+		super(
+			context,
+			portalExtension
+		);
+		this.pmf = pmf;
+		this.codeSegmentIdentity = codeSegmentIdentity;
+	}
+
+	/**
+	 * Get default texts bundles.
+	 * @param locale
+	 * @param context
+	 * @return
+	 * @throws ServiceException
+	 */
+	public static List<ResourceBundle> getDefaultTextsBundles(
+		String[] locale,
+		ServletContext context
+	) throws ServiceException {
+		// 2-dim list: first index=locale, second index = input stream
+		List<ResourceBundle> textsBundles = new ArrayList<ResourceBundle>();
+		int fallbackLocaleIndex = 0;
+		for(int i = 0; i < locale.length; i++) {
+			Set localeTextsPaths = new HashSet();
+			if(locale[i] != null) {
+				fallbackLocaleIndex = 0;
+				localeTextsPaths = context.getResourcePaths("/WEB-INF/config/texts/" + locale[i]);
+				if(localeTextsPaths == null) {
+					for(int j = i-1; j >= 0; j--) {
+						if((locale[j] != null) && locale[i].substring(0,2).equals(locale[j].substring(0,2))) {
+							fallbackLocaleIndex = j;
+							break;
+						}
+					}
+					SysLog.info(locale[i] + " not found. Fallback to " + locale[fallbackLocaleIndex]);
+					localeTextsPaths = context.getResourcePaths("/WEB-INF/config/texts/" + locale[fallbackLocaleIndex]);
+				}
+			}
+			List<InputStream> textsStreams = new ArrayList<InputStream>();
+			for(Iterator j = localeTextsPaths.iterator(); j.hasNext(); ) {
+				String path = (String)j.next();
+				if(!path.endsWith("/")) {            
+					SysLog.info("Loading " + path);
+					textsStreams.add(
+						context.getResourceAsStream(path)
+					);
+				}
+			}
+			try {
+				textsBundles.add(
+					new PropertyResourceBundle(
+						new InputStreamReader(
+							new SequenceInputStream(Collections.<InputStream>enumeration(textsStreams)),
+							"UTF-8"
+						)
+					)
+				);
+			} catch(Exception e) {
+				throw new ServiceException(e);
+			}
+		}
+		return textsBundles;
+	}
+
+	/**
+	 * Load texts resources for given locales.
+	 * @param locale
+	 * @return
+	 * @throws ServiceException
+	 */
+	synchronized public void loadTexts(
+		String[] locale
+	) throws ServiceException {
+		String messagePrefix = new Date() + "  ";
+		System.out.println(messagePrefix + "Loading texts");
+		SysLog.info("Loading texts");
+		List<ResourceBundle> textBundles = getDefaultTextsBundles(
+			locale, 
+			this.context
+		);
+		String segmentName = this.codeSegmentIdentity.get(4);
+		Codes.storeBundles(
+			this.codeSegmentIdentity,
+			TextsBundle.class.getSimpleName(),
+			this.pmf.getPersistenceManager(this.getAdminPrincipal(segmentName), null),
+			textBundles
+		);
+		System.out.println(messagePrefix + "Done");
+		SysLog.info("Done");
+	}
+
+    //-------------------------------------------------------------------------
+    // Members
+    //-------------------------------------------------------------------------
+    private final PersistenceManagerFactory pmf;
+    private final Path codeSegmentIdentity;
+
 }
 
 //--- End of File -----------------------------------------------------------

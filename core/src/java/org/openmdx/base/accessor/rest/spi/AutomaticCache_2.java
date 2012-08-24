@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: AutomaticCache_2.java,v 1.5 2010/06/02 13:43:44 hburger Exp $
  * Description: Caching Port 
- * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/06/02 13:43:44 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

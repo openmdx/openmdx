@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: RefRootPackage_1.java,v 1.230 2011/11/26 01:34:56 hburger Exp $
  * Description: RefRootPackage_1 class
- * Revision:    $Revision: 1.230 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/11/26 01:34:56 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -55,6 +52,8 @@ import java.io.Serializable;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.net.URI;
+import java.net.URLDecoder;
 import java.security.PrivilegedExceptionAction;
 import java.util.Collection;
 import java.util.Collections;
@@ -92,7 +91,6 @@ import javax.jmi.reflect.RefFeatured;
 import javax.jmi.reflect.RefObject;
 import javax.jmi.reflect.RefPackage;
 import javax.resource.cci.InteractionSpec;
-import javax.resource.cci.MappedRecord;
 import javax.resource.cci.Record;
 import javax.xml.datatype.XMLGregorianCalendar;
 
@@ -137,10 +135,11 @@ import org.openmdx.base.persistence.spi.MarshallingInstanceLifecycleListener;
 import org.openmdx.base.persistence.spi.PersistenceCapableCollection;
 import org.openmdx.base.persistence.spi.SharedObjects;
 import org.openmdx.base.persistence.spi.TransientContainerId;
+import org.openmdx.base.query.Filter;
 import org.openmdx.base.query.Selector;
 import org.openmdx.base.resource.InteractionSpecs;
-import org.openmdx.base.rest.spi.Facades;
-import org.openmdx.base.rest.spi.Query_2Facade;
+import org.openmdx.base.resource.Records;
+import org.openmdx.base.rest.cci.QueryRecord;
 import org.openmdx.base.text.conversion.JavaBeans;
 import org.openmdx.kernel.exception.BasicException;
 import org.w3c.jpa3.AbstractObject;
@@ -374,7 +373,7 @@ public class RefRootPackage_1
      * 
      * @return the object with the same transient object id in the delegate environment
      */
-    private Object unmarshalLenient(
+    Object unmarshalLenient(
     	Object source
     ){
 		return RefRootPackage_1.this.refDelegate().getObjectById(
@@ -1355,6 +1354,88 @@ public class RefRootPackage_1
             throw new UnsupportedOperationException("This JDO operation is not yet supported");            
         }
 
+        private int seekParameters(
+        	String uri
+        ){
+        	int none = uri.length();
+        	for(
+        		int index = 0, xref = 0;
+        		index < none;
+        		index++
+        	){
+        		char current = uri.charAt(index);
+        		switch(current) {
+        			case '(': xref++; break;
+        			case ')': xref--; break;
+        			case '?': if(xref == 0) return index; else break;
+        		}
+        	}
+        	return none;
+        }
+        
+        /**
+         * Decode URI parameters
+         * 
+         * @param uriQuery
+         * 
+         * @return a parameter mao
+         * 
+         * @throws ServiceException
+         */
+        QueryRecord newQueryRecord(
+        	String uri	
+        ) throws ServiceException {
+        	try {
+	        	QueryRecord queryRecord = (QueryRecord) Records.getRecordFactory().createMappedRecord(QueryRecord.NAME);
+	        	int q = seekParameters(uri);
+	        	if(q < 0) {
+	        		queryRecord.setPath(new Path(uri)); 
+	        	} else {
+		        	for(String nvp : uri.substring(q + 1).split("&")) {
+		        		int e  = nvp.indexOf('=');
+		        		queryRecord.put(
+		        			nvp.substring(0, e), 
+		        			URLDecoder.decode(nvp.substring(e + 1), "UTF-8")
+		        		);
+		        	}
+	        	}
+	        	return queryRecord;
+        	} catch (Exception exception) {
+        		throw new ServiceException(exception);
+			}
+        }
+
+        /**
+         * Retrieve the canonical query 
+         * 
+         * @param query a query object
+         * 
+         * @return a query record
+         * 
+         * @throws ServiceException
+         */
+        QueryRecord toQueryRecord(
+        	Object query
+        ) throws ServiceException {
+            if(query instanceof String || query instanceof URI) {
+            	return newQueryRecord(query.toString());
+            } else if (query instanceof QueryRecord) {
+            	return (QueryRecord) query;
+            } else throw new ServiceException(
+                BasicException.Code.DEFAULT_DOMAIN,
+                BasicException.Code.BAD_QUERY_CRITERIA,
+                "Unsupported query obbject",
+                new BasicException.Parameter(
+                    "supported", 
+                    String.class.getName(), QueryRecord.class.getName(), URI.class.getName()
+                ),
+                new BasicException.Parameter(
+                    "actual",
+                    query == null ? null : query.getClass().getName()
+                )
+            );
+        }
+        
         /* (non-Javadoc)
          * @see javax.jdo.PersistenceManager#newQuery(java.lang.String, java.lang.Object)
          */
@@ -1363,90 +1444,76 @@ public class RefRootPackage_1
             String language, 
             Object query
         ) {
-            if(Queries.QUERY_LANGUAGE.equals(language)) {
-                Query_2Facade openmdxQuery;
-                try {
-                    openmdxQuery = Facades.asQuery((MappedRecord)query);
-                }  catch(ServiceException e) {
-                    throw BasicException.initHolder(
-                        new JDOFatalUserException(
-                            "Unknown predicate for query",
-                            BasicException.newEmbeddedExceptionStack(
-                                BasicException.Code.DEFAULT_DOMAIN,
-                                BasicException.Code.BAD_PARAMETER,
-                                new BasicException.Parameter(
-                                    "expected", 
-                                    Map.class.getName()
-                                ),
-                                new BasicException.Parameter(
-                                    "actual",
-                                    query == null ? null : query.getClass().getName()
-                                )
-                            )
-                        )
-                    );
-                }
-                String queryString = openmdxQuery.getQuery();
-                Path resourceIdentifier = openmdxQuery.getPath();
-                RefContainer<?> candidates = null;
-                if(resourceIdentifier != null) {
-                    candidates = RefRootPackage_1.this.refContainer(
-                        resourceIdentifier, 
-                        null
-                    );
-                }                
-                Query cciQuery = null;
-                try {
-                    if((queryString != null) && queryString.startsWith("<?xml")) {
-                        org.openmdx.base.query.Filter filter = (org.openmdx.base.query.Filter)JavaBeans.fromXML(queryString);
-                        cciQuery = RefRootPackage_1.this.refCreateQuery(
-                            openmdxQuery.getQueryType(),
-                            true, // subclasses
-                            filter
-                        );
-                        return org.openmdx.base.persistence.spi.Queries.prepareQuery(
-                            cciQuery,
-                            candidates,
-                            null
-                        );                    
-                    }
-                    else {
-                        cciQuery = RefRootPackage_1.this.refCreateQuery(
-                            openmdxQuery.getQueryType(),
-                            true, // subclasses
-                            null // filter
-                        );
-                        return org.openmdx.base.persistence.spi.Queries.prepareQuery(
-                            cciQuery,
-                            candidates,
-                            queryString
-                        );
-                    }
-                } catch (ServiceException exception) {
-                    throw new JDOFatalUserException(
-                        "Query creation failure",
-                        exception
-                    );
-                }
-            } 
-            else {
-                throw BasicException.initHolder(
-                    new JDOFatalUserException(
-                        "Unsupported query language",
-                        BasicException.newEmbeddedExceptionStack(
-                            BasicException.Code.DEFAULT_DOMAIN,
-                            BasicException.Code.BAD_PARAMETER,
-                            new BasicException.Parameter(
-                                "accepted", 
-                                org.openmdx.base.persistence.cci.Queries.QUERY_LANGUAGE
-                            ),
-                            new BasicException.Parameter(
-                                "actual",
-                                language
-                            )
-                        )
-                    )
-                );
+        	try {
+	            if(Queries.QUERY_LANGUAGE.equals(language)) {
+	                QueryRecord queryRecord;
+	                if(query instanceof String || query instanceof URI) {
+	                	queryRecord = newQueryRecord(query.toString());
+	                } else if (query instanceof QueryRecord) {
+	                	queryRecord = (QueryRecord) query;
+	                } else throw new ServiceException(
+	                    BasicException.Code.DEFAULT_DOMAIN,
+	                    BasicException.Code.BAD_QUERY_CRITERIA,
+	                    "Unsupported query obbject",
+	                    new BasicException.Parameter(
+	                        "supported", 
+	                        String.class.getName(), QueryRecord.class.getName(), URI.class.getName()
+	                    ),
+	                    new BasicException.Parameter(
+	                        "actual",
+	                        query == null ? null : query.getClass().getName()
+	                    )
+	                );
+	                Query cciQuery;
+	                if(queryRecord.getQuery() == null) {
+	                	cciQuery = RefRootPackage_1.this.refCreateQuery(
+                    		queryRecord.getQueryType(),
+    	                    true, // subclasses
+    	                    null // xmlQuery
+    	                );
+	                } else if (queryRecord.getQuery().startsWith("<?xml")) {
+	                	cciQuery = RefRootPackage_1.this.refCreateQuery(
+                    		queryRecord.getQueryType(),
+    	                    true, // subclasses
+    	                    (Filter) JavaBeans.fromXML(queryRecord.getQuery())
+    	                );
+	                } else {
+	                	cciQuery = RefRootPackage_1.this.refCreateQuery(
+                    		queryRecord.getQueryType(),
+    	                    true, // subclasses
+    	                    null // xmlQuery
+    	                );
+	                	org.openmdx.base.persistence.spi.Queries.applyStatements(
+	                		cciQuery, 
+	                		queryRecord.getQuery()
+	                	);
+	                }
+					if(queryRecord.getPath() != null) {
+						cciQuery.setCandidates(
+							RefRootPackage_1.this.refContainer(queryRecord.getPath(), null)
+						);
+					}
+	                return cciQuery;
+	            }  else {
+	                throw new ServiceException(
+	                    BasicException.Code.DEFAULT_DOMAIN,
+	                    BasicException.Code.BAD_QUERY_CRITERIA,
+	                    "Unsupported query language",
+	                    new BasicException.Parameter(
+	                        "supported", 
+	                        org.openmdx.base.persistence.cci.Queries.QUERY_LANGUAGE
+	                    ),
+	                    new BasicException.Parameter(
+	                        "actual",
+	                        language
+	                    )
+	                );
+	            }
+            } catch(ServiceException exception) {
+            	throw new JDOFatalUserException(
+            		exception.getCause().getDescription(),
+            		exception
+            	);
             }
         }
 
@@ -2122,7 +2189,10 @@ public class RefRootPackage_1
                                     (method.getReturnType() == void.class)
                                     // Note: The argument type is ignored for the moment 
                                 ){
-                                    method.invoke(jpaObject, source);
+                                    method.invoke(
+                                        jpaObject, 
+                                        reference ? stateAccessor.toObjectId((Path) source) : source
+                                     );
                                     break;
                                 }
                             }

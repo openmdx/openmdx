@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: TestPersistenceManagers.java,v 1.1 2009/09/29 16:12:03 hburger Exp $
  * Description: Test Persistence Manager Factory
- * Revision:    $Revision: 1.1 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/09/29 16:12:03 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

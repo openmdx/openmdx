@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: DelegatingStructure_1.java,v 1.4 2010/06/02 13:43:52 hburger Exp $
  * Description: Delegating Structure_1_0 Implementation
- * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/06/02 13:43:52 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

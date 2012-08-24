@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: PiggyBackCondition.java,v 1.8 2010/06/21 17:33:11 hburger Exp $
  * Description: Piggy-Back Condition
- * Revision:    $Revision: 1.8 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/06/21 17:33:11 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -99,7 +96,7 @@ public class PiggyBackCondition extends Condition {
      */
     @Override
     public PiggyBackCondition clone(
-    ) throws CloneNotSupportedException {
+    ){
         return new PiggyBackCondition(
             this.getFeature(), 
             this.getValue()

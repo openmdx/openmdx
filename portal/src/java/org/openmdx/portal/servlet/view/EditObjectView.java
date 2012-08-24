@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: EditObjectView.java,v 1.47 2011/08/11 11:58:29 wfro Exp $
  * Description: EditObjectView
- * Revision:    $Revision: 1.47 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/08/11 11:58:29 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -91,7 +88,8 @@ public class EditObjectView
         ApplicationContext application,
         Map<Path,Action> historyActions,
         String lookupType,
-        Map restrictToElements, 
+        String resourcePathPrefix,
+        String navigationTarget,
         ViewMode mode
     ) throws ServiceException {
         this(
@@ -103,9 +101,10 @@ public class EditObjectView
             application,
             historyActions,
             lookupType,
-            restrictToElements,       
-            null,
-            null,
+            null, // parent
+            null, // forReference
+            resourcePathPrefix,
+            navigationTarget,
             mode
         );
     }
@@ -133,9 +132,10 @@ public class EditObjectView
         ApplicationContext application,
         Map<Path,Action> historyActions,
         String lookupType,
-        Map restrictToElements,       
         RefObject_1_0 parent,
         String forReference,
+        String resourcePathPrefix,
+        String navigationTarget,
         ViewMode mode
     ) throws ServiceException {
         super(
@@ -145,7 +145,9 @@ public class EditObjectView
             application,
             historyActions,
             lookupType,
-            restrictToElements
+            resourcePathPrefix,
+            navigationTarget,
+            false // isReadOnly
         );
         this.editObjectIdentity = editObjectIdentity;    
         this.forReference = forReference;

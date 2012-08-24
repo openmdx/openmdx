@@ -2,11 +2,8 @@ package org.openmdx.portal.servlet.action;
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: CancelAction.java,v 1.2 2011/07/07 22:35:35 wfro Exp $
  * Description: EditObjectEventHandler 
- * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/07/07 22:35:35 $
  * ====================================================================
  *
  * This software is published under the BSD license

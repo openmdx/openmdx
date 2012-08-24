@@ -2,17 +2,17 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: QuickAccessDashlet.jsp,v 1.29 2011/09/16 10:41:12 wfro Exp $
+ * Name:        $Id: QuickAccessDashlet.jsp,v 1.34 2012/07/23 19:39:52 wfro Exp $
  * Description: QuickAccessDashlet.jsp
- * Revision:    $Revision: 1.29 $
+ * Revision:    $Revision: 1.34 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/09/16 10:41:12 $
+ * Date:        $Date: 2012/07/23 19:39:52 $
  * ====================================================================
  *
  * This software is published under the BSD license
  * as listed below.
  *
- * Copyright (c) 2004-2011, OMEX AG, Switzerland
+ * Copyright (c) 2004-2012, OMEX AG, Switzerland
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or
@@ -64,12 +64,13 @@ java.math.*,
 java.net.*,
 org.openmdx.base.naming.*,
 org.openmdx.kernel.exception.*,
+org.openmdx.kernel.id.*,
 org.openmdx.base.exception.*,
 org.openmdx.portal.servlet.*,
 org.openmdx.portal.servlet.view.*,
-org.openmdx.portal.servlet.texts.*,
 org.openmdx.portal.servlet.control.*,
 org.openmdx.portal.servlet.action.*,
+org.openmdx.base.text.conversion.*,
 org.openmdx.kernel.log.*
 " %>
 <%
@@ -187,8 +188,10 @@ org.openmdx.kernel.log.*
 											targetXri,
 											app,
 											new HashMap(),
-											(String)null,
-											Collections.emptyMap()
+											(String)null, // lookupType
+											(String)null, // resourcePathPrefix
+											(String)null, // navigationTarget
+											(Boolean)null // isReadOnly
 										);
 										if(function.startsWith("Operation.")) {
 											String operationName = function.substring(10);
@@ -405,8 +408,10 @@ org.openmdx.kernel.log.*
 									new Path(selectedTargetXri),
 									app,
 									new HashMap(),
-									(String)null,
-									Collections.emptyMap()
+									(String)null, // lookupType
+									(String)null, // resourcePathPrefix
+									(String)null, // navigationTarget
+									(Boolean)null // isReadOnly
 								);
 								// Operations
 								for(OperationPaneControl paneControl: targetView.getShowInspectorControl().getOperationPaneControl()) {
@@ -433,7 +438,7 @@ org.openmdx.kernel.log.*
 									}
 								}
 							}					
-				            String lookupId = org.openmdx.kernel.id.UUIDs.getGenerator().next().toString();	            
+				            String lookupId = UUIDConversion.toUID(UUIDs.newUUID());	            
 				            Action findObjectAction = view.getFindObjectAction(
 				                "org:openmdx:base:ContextCapable", 
 				                lookupId

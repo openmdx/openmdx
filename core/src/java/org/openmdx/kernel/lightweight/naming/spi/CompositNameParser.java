@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: CompositNameParser.java,v 1.1 2009/09/11 13:16:23 hburger Exp $
  * Description: CompositNameParser
- * Revision:    $Revision: 1.1 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/09/11 13:16:23 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

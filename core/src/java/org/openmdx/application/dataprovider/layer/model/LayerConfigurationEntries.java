@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: LayerConfigurationEntries.java,v 1.8 2011/09/09 17:33:44 hburger Exp $
  * Description: Model Layer Configuration
- * Revision:    $Revision: 1.8 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/09/09 17:33:44 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -71,10 +68,10 @@ public class LayerConfigurationEntries extends SharedConfigurationEntries {
 	 */
 	static public final String TRANSACTION_TIME_UNIQUE = "transactionTimeUnique";
 
-	/**
-	 * Tells whether the valid time is unique for object hosted by this
-	 * provider.
-	 */
-	static public final String VALID_TIME_UNIQUE = "transactionTimeUnique";
+    /**
+     * Tells whether the valid time is unique for object hosted by this
+     * provider.
+     */
+    static public final String VALID_TIME_UNIQUE = "validTimeUnique";
 
 }

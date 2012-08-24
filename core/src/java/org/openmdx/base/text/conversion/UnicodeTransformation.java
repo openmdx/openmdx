@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: UnicodeTransformation.java,v 1.7 2009/05/26 13:10:13 wfro Exp $
  * Description: openMDX Character Conversions: Unicode Transformation 
- * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/05/26 13:10:13 $
  * ====================================================================
  *
  * This software is published under the BSD license

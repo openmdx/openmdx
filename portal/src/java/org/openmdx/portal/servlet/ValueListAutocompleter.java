@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: ValueListAutocompleter.java,v 1.18 2011/12/03 15:32:04 wfro Exp $
  * Description: ListAutocompleteControl 
- * Revision:    $Revision: 1.18 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/12/03 15:32:04 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -118,7 +115,7 @@ public class ValueListAutocompleter
             }
             if(option instanceof ObjectReference) {
                 ObjectReference r = (ObjectReference)option;
-                p.write("  <option ", selectedModifier, " value=\"", r.refMofId(), "\">", r.getTitle());
+                p.write("  <option ", selectedModifier, " value=\"", r.getXRI(), "\">", r.getTitle());
             }
             else {
                 String optionEncoded = htmlEncoder.encode("" + option, false);

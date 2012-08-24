@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: CloseCallback.java,v 1.1 2009/09/07 15:25:09 hburger Exp $
  * Description: Close Callback
- * Revision:    $Revision: 1.1 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/09/07 15:25:09 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

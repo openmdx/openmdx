@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: RidOidQueryDatabase_1.java,v 1.7 2011/09/05 22:39:47 hburger Exp $
  * Description: Database plug-in supporting RID/OID queries
- * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/09/05 22:39:47 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -81,7 +78,7 @@ public class RidOidQueryDatabase_1 extends Database_1 {
      */
     @Override
     protected boolean isAspectBaseClass(String qualifiedClassName) {
-        return this.enableStateFilterSubstitution && super.isAspectBaseClass(qualifiedClassName);
+        return this.enableAspectFilterSubstitution && super.isAspectBaseClass(qualifiedClassName);
     }
 
 
@@ -91,7 +88,7 @@ public class RidOidQueryDatabase_1 extends Database_1 {
     @Override
     protected boolean isBaseClass(String qualifiedClassName) {
         return super.isBaseClass(qualifiedClassName) || (
-            !this.enableStateFilterSubstitution && super.isAspectBaseClass(qualifiedClassName)
+            !this.enableAspectFilterSubstitution && super.isAspectBaseClass(qualifiedClassName)
         );
     }
 

@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: WBXMLPlugIn.java,v 1.11 2010/07/08 16:22:05 wfro Exp $
  * Description: AirSync 
- * Revision:    $Revision: 1.11 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/07/08 16:22:05 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

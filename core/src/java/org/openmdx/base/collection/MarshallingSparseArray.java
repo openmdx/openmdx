@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: MarshallingSparseArray.java,v 1.7 2009/01/12 16:38:30 wfro Exp $
  * Description: SPICE Collections: Merging List
- * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/12 16:38:30 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

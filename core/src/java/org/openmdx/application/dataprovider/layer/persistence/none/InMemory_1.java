@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: InMemory_1.java,v 1.22 2012/01/07 01:38:04 hburger Exp $
  * Description: InMemory_1 class
- * Revision:    $Revision: 1.22 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2012/01/07 01:38:04 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

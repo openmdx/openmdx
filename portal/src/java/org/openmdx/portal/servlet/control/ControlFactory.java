@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.opencrx.org/
- * Name:        $Id: ControlFactory.java,v 1.32 2009/11/05 18:03:14 hburger Exp $
  * Description: ControlFactory
- * Revision:    $Revision: 1.32 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/11/05 18:03:14 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -63,12 +60,11 @@ import java.util.Map;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.text.conversion.UUIDConversion;
 import org.openmdx.kernel.id.UUIDs;
-import org.openmdx.kernel.id.cci.UUIDGenerator;
+import org.openmdx.portal.servlet.Texts;
 import org.openmdx.portal.servlet.UiContext;
 import org.openmdx.portal.servlet.attribute.AttributeValueFactory;
 import org.openmdx.portal.servlet.reports.ReportDefinition;
 import org.openmdx.portal.servlet.reports.ReportDefinitionFactory;
-import org.openmdx.portal.servlet.texts.TextsFactory;
 import org.openmdx.portal.servlet.wizards.WizardDefinition;
 import org.openmdx.portal.servlet.wizards.WizardDefinitionFactory;
 
@@ -78,12 +74,12 @@ public class ControlFactory
     //-------------------------------------------------------------------------
     public ControlFactory(
         UiContext uiContext,
-        TextsFactory textsFactory,        
+        Texts textsFactory,        
         WizardDefinitionFactory wizardFactory,
         ReportDefinitionFactory reportFactory
     ) {
         this.uiContext = uiContext;
-        this.textsFactory = textsFactory;
+        this.texts = textsFactory;
         this.wizardFactory = wizardFactory;
         this.reportFactory = reportFactory;
     }
@@ -450,9 +446,9 @@ public class ControlFactory
     }
     
     //-------------------------------------------------------------------------
-    public TextsFactory getTextsFactory(
+    public Texts getTextsFactory(
     ) {
-        return this.textsFactory;
+        return this.texts;
     }
     
     //-------------------------------------------------------------------------
@@ -467,7 +463,7 @@ public class ControlFactory
     private final UiContext uiContext;
     private final WizardDefinitionFactory wizardFactory;
     private final ReportDefinitionFactory reportFactory;    
-    private final TextsFactory textsFactory;
+    private final Texts texts;
     private Map<String,GridControl> gridControls = new HashMap<String,GridControl>();
     private Map<String,InspectorControl> inspectorControls = new HashMap<String,InspectorControl>();
     private AttributeValueFactory valueFactory = new AttributeValueFactory();

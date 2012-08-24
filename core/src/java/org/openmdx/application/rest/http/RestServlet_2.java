@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: RestServlet_2.java,v 1.89 2011/11/26 01:35:00 hburger Exp $
  * Description: REST Servlet 
- * Revision:    $Revision: 1.89 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/11/26 01:35:00 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -131,7 +128,6 @@ import org.xml.sax.InputSource;
  */
 public class RestServlet_2 extends HttpServlet {
 
-    private static final long serialVersionUID = -4403464830407956377L;
     private final static int DEFAULT_POSITION = 0;
     private final static int DEFAULT_SIZE = 25;
     
@@ -148,60 +144,73 @@ public class RestServlet_2 extends HttpServlet {
     private final static String DEFAULT_CHARACTER_ENCODING = "UTF-8";
     
     /**
+     * Implements <code>Serializable</code>
+     */
+    private static final long serialVersionUID = -4403464830407956377L;
+    
+    /**
      * The servlet's connection factory
      */
     protected ConnectionFactory connectionFactory;
 
     /**
-     * The explicit c
+     * The REST Servlet's default login configuration entry
      */
-    protected static final AppConfigurationEntry[] connectConfiguration = {
-    	new AppConfigurationEntry(
-    		TrustingLoginModule.class.getName(),
-    		LoginModuleControlFlag.REQUIRED,
-    		Collections.<String,Object>emptyMap()
-    	)
-    };
-
-    protected static final AppConfigurationEntry[] autoConnectConfiguration = {
-    	new AppConfigurationEntry(
-    		RemoteUserLoginModule.class.getName(),
-    		LoginModuleControlFlag.REQUIRED,
-    		Collections.<String,Object>emptyMap()
-    	)
-    };
+    protected static final AppConfigurationEntry REMOTE_USER_LOGIN_CONFIGURATION = new AppConfigurationEntry(
+        RemoteUserLoginModule.class.getName(),
+        LoginModuleControlFlag.REQUIRED,
+        Collections.<String,Object>emptyMap()
+    );
     
     /**
-     * Standard Login Configuration
+     * The REST Servlet's standard login configuration
      */
-    private final static Configuration standardLoginConfiguration = new Configuration() {
+    private final Configuration STANDARD_LOGIN_CONFIGURATION = new Configuration() {
 
+        /**
+         * Provide 
+         * 
+         * @param the application name, usually one of<ul>
+         * <li><code>"connect"</code>
+         * <li><code>"auto-connect"</code>
+         * </ul>
+         */
         @Override
-        public AppConfigurationEntry[] getAppConfigurationEntry(String name) {
-        	return "connect".equals(name) ? connectConfiguration : 
-        	"auto-connect".equals(name) ? autoConnectConfiguration :
-        	null;
+        public AppConfigurationEntry[] getAppConfigurationEntry(
+            String name
+        ) {
+        	return getLoginConfiguration(name);
         }
 
         @Override
         public void refresh() {
-           // nothin to do
+           // nothing to do
         }
 
      };    
     
+     /**
+      * Provide the REST Servlet's login configuration
+      * 
+      * @param name
+      * @return
+      */
+     protected AppConfigurationEntry[] getLoginConfiguration(
+         String name
+     ) {
+         return new AppConfigurationEntry[]{
+             REMOTE_USER_LOGIN_CONFIGURATION
+         };
+     }
+     
     /**
-     * Retrieve the login configuration 
+     * Provides the login configuration 
      * 
-     * @return the login configuration or <code>null</code> to trust the client by<ul>
-     * <li>either using its connect parameters
-     * <li>or the request's remote user property
-     * </ul>
+     * @return the login configuration to be used
      */
     protected Configuration getLoginConfiguration(){
-    	return standardLoginConfiguration;
+    	return STANDARD_LOGIN_CONFIGURATION;
     }
-
     
     /**
      * Tells whether the session is in auto-commit mode
@@ -238,7 +247,12 @@ public class RestServlet_2 extends HttpServlet {
     ) throws ResourceException {
     	try {
 	        Subject subject = new Subject();
-	        LoginContext loginContext = new LoginContext(configurationName, subject, callbackHandler, this.getLoginConfiguration());
+	        LoginContext loginContext = new LoginContext(
+	            configurationName, 
+	            subject, 
+	            callbackHandler, 
+	            getLoginConfiguration()
+	        );
 	        loginContext.login();
 	        for(ConnectionSpec connectionSpec : subject.getPublicCredentials(ConnectionSpec.class)) {
 	           return this.connectionFactory.getConnection(connectionSpec);

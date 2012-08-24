@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Security, http://www.openmdx.org/
- * Name:        $Id: CookieManager.java,v 1.3 2010/05/21 14:01:10 hburger Exp $
  * Description: Cookie Manager 
- * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/05/21 14:01:10 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: FindObjectsAutocompleter.java,v 1.36 2011/07/07 22:35:36 wfro Exp $
  * Description: ListAutocompleteControl 
- * Revision:    $Revision: 1.36 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/07/07 22:35:36 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -145,7 +142,7 @@ public class FindObjectsAutocompleter
                 )
             );
             // orderByByFeature
-            if(this.orderByFeature[i] != null) {            
+            if(this.orderByFeature[i] != null && !this.orderByFeature[i].isEmpty()) {            
                 parameters.add(
                     new Action.Parameter(
                         Action.PARAMETER_ORDER_BY_FEATURE,
@@ -219,7 +216,7 @@ public class FindObjectsAutocompleter
         p.write("  </ul>");                    
         p.write("</div>");       
         p.write("<div ", (inputFieldDivClass == null ? "" : inputFieldDivClass), "><input type=\"text\" ", (inputFieldClass == null ? "" : inputFieldClass), " id=\"", id, ".Title\" name=\"", id, ".Title\" tabindex=\"", Integer.toString(tabIndex), "\" value=\"", (objectReference == null ? "" : objectReference.getTitle(true)), "\" />", (imgTag == null ? "" : "&nbsp;" + imgTag) ,"</div>");
-        p.write("<input type=\"hidden\" class=\"valueLLocked\" id=\"", id, "\" name=\"", id, "\" readonly value=\"", (objectReference == null ? "" : objectReference.refMofId()), "\" />");
+        p.write("<input type=\"hidden\" class=\"valueLLocked\" id=\"", id, "\" name=\"", id, "\" readonly value=\"", (objectReference == null ? "" : objectReference.getXRI()), "\" />");
         if(tdTag != null) {
             p.write("</td>");
             p.write(tdTag);

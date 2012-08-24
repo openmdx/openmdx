@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: AnyTypePredicate.java,v 1.6 2010/06/21 17:43:30 hburger Exp $
  * Description: Any Type Predicate
- * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/06/21 17:43:30 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

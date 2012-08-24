@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: ZipURLConnection.java,v 1.9 2011/04/12 15:43:08 hburger Exp $
  * Description: Resource URL Connection
- * Revision:    $Revision: 1.9 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/04/12 15:43:08 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

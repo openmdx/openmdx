@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.opencrx.org/
- * Name:        $Id: ReferenceGrid.java,v 1.12 2011/11/28 13:35:19 wfro Exp $
  * Description: ReferenceGridControl
- * Revision:    $Revision: 1.12 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/11/28 13:35:19 $
  * ====================================================================
  *
  *
@@ -128,7 +125,7 @@ public class ReferenceGrid
                     SysLog.warning(
                         "Unable to retrieve object (more info at detail level)", 
                         Arrays.asList(
-                            this.view.getObjectReference().refMofId(), 
+                            this.view.getObjectReference().getXRI(), 
                             this.getGridControl().getObjectContainer().getReferenceName(), 
                             this.view.getApplicationContext().getLoginPrincipal(), 
                             e0.getMessage()

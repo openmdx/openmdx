@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: CodeResolution.java,v 1.2 2010/03/02 10:01:05 hburger Exp $
  * Description: Code Resolution 
- * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/03/02 10:01:05 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

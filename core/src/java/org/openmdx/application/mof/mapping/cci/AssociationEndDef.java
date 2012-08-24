@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: AssociationEndDef.java,v 1.5 2011/05/27 16:54:56 hburger Exp $
  * Description: VelocityClassDef class
- * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/05/27 16:54:56 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

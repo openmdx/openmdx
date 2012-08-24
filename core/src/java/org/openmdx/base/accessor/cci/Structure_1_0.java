@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Structure_1_0.java,v 1.1 2009/01/09 01:08:38 wfro Exp $
  * Description: SPICE Basic Accessor Object interface
- * Revision:    $Revision: 1.1 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/09 01:08:38 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

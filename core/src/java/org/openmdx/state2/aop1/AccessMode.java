@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: AccessMode.java,v 1.3 2010/07/09 13:52:41 hburger Exp $
  * Description: Access 
- * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/07/09 13:52:41 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

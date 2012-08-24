@@ -1,16 +1,13 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: PlugIn_1_0.java,v 1.1 2009/11/04 15:59:44 hburger Exp $
  * Description: Aspect Oriented View Manager Plug-In
- * Revision:    $Revision: 1.1 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/11/04 15:59:44 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2009, OMEX AG, Switzerland
+ * Copyright (c) 2009-2012, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -50,6 +47,9 @@
  */
 package org.openmdx.base.aop1;
 
+import javax.resource.cci.InteractionSpec;
+
+import org.openmdx.base.accessor.rest.DataObject_1;
 import org.openmdx.base.accessor.view.Interceptor_1;
 import org.openmdx.base.accessor.view.ObjectView_1_0;
 import org.openmdx.base.exception.ServiceException;
@@ -74,6 +74,39 @@ public interface PlugIn_1_0 {
     Interceptor_1 getInterceptor(
         ObjectView_1_0 view,
         Interceptor_1 next
+    ) throws ServiceException;
+    
+    /**
+     * Propgate the value before the view's initialization if necessary
+     * 
+     * @param object
+     * @param feature
+     * @param value 
+     * 
+     * @return <code>true</code> if the value has been propagated eagerly
+     */
+    boolean propagatedEagerly(
+        DataObject_1 object, 
+        String feature, 
+        Object value
+	) throws ServiceException;
+
+    /**
+     * Resolve an object class 
+     *  
+     * @param       objectClass
+     *              The model class of the object to be created
+     * @param       interactionSpec
+     *              the interaction specification   
+     *              
+     * @return the object class or a replacement, if necessary
+     *  
+     * @throws ServiceException if the object class is not acceptable for the 
+     * given interaction specification
+     */
+    String resolveObjectClass(
+        String objectClass, 
+        InteractionSpec interactionSpec
     ) throws ServiceException;
     
 }

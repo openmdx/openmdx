@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: DefaultDataBinding.java,v 1.7 2011/12/10 16:09:30 wfro Exp $
  * Description: DefaultDataBinding 
- * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/12/10 16:09:30 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -60,10 +57,8 @@ import javax.jmi.reflect.RefObject;
  * DefaultDataBinding
  *
  */
-public class DefaultDataBinding 
-    implements DataBinding_2_0 {
+public class DefaultDataBinding extends DataBinding {
 
-    //-------------------------------------------------------------------------
     @SuppressWarnings("unchecked")
     static protected Collection<Object> valueAsCollection(
     	Object value
@@ -74,6 +69,7 @@ public class DefaultDataBinding
     /* (non-Javadoc)
      * @see org.openmdx.portal.servlet.DataBinding_1_0#getValue(org.openmdx.base.accessor.jmi.cci.RefObject_1_0, java.lang.String)
      */
+    @Override
     public Object getValue(
         RefObject object, 
         String qualifiedFeatureName,
@@ -94,6 +90,7 @@ public class DefaultDataBinding
     /* (non-Javadoc)
      * @see org.openmdx.portal.servlet.DataBinding_1_0#setValue(org.openmdx.base.accessor.jmi.cci.RefObject_1_0, java.lang.String, java.lang.Object)
      */
+    @Override
     public void setValue(
         RefObject object, 
         String featureName, 

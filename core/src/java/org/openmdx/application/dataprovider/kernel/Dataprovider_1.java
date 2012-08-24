@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Dataprovider_1.java,v 1.19 2012/01/05 23:20:20 hburger Exp $
  * Description: The dataprovider kernel
- * Revision:    $Revision: 1.19 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2012/01/05 23:20:20 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -63,6 +60,7 @@ import org.openmdx.application.dataprovider.cci.Dataprovider_1_0;
 import org.openmdx.application.dataprovider.cci.ServiceHeader;
 import org.openmdx.application.dataprovider.cci.SharedConfigurationEntries;
 import org.openmdx.application.dataprovider.spi.Layer_1;
+import org.openmdx.base.collection.TreeSparseArray;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.loading.BeanFactory;
@@ -106,7 +104,10 @@ public class Dataprovider_1 implements Dataprovider_1_0 {
             //
             dataproviderConfiguration.values(
                 SharedConfigurationEntries.NAMESPACE_ID
-            ).put(0, namespace);
+            ).put(
+                0, 
+                namespace
+            );
             //
             // DATAPROVIDER_CONNECTION
             //
@@ -116,10 +117,12 @@ public class Dataprovider_1 implements Dataprovider_1_0 {
             //
             // Delegate
             //
-            String[] plugIns = kernelConfiguration.getValues("plugIn");
-            this.delegate = plugIns.length == 0 ? 
-                createDelegateFromLegacyConfiguration(dataproviderConfiguration, configurationProvider) :
-                createDelegate(dataproviderConfiguration, configurationProvider, plugIns);
+            if(kernelConfiguration.containsEntry(SharedConfigurationEntries.PLUG_IN)){
+                String[] plugIns = kernelConfiguration.getValues(SharedConfigurationEntries.PLUG_IN);
+                this.delegate = createDelegate(dataproviderConfiguration, configurationProvider, plugIns);
+            } else {
+                this.delegate = createDelegateFromLegacyConfiguration(dataproviderConfiguration, configurationProvider);
+            }
             SysLog.log(
                 Level.FINER,
                 "Kernel for namespace \"{0}\" created: {}",
@@ -199,6 +202,8 @@ public class Dataprovider_1 implements Dataprovider_1_0 {
         Map<String,Configuration> layerConfigurations = new HashMap<String, Configuration>();
         for(String layerName : LEGACY_LAYER_NAMES) {
             try {
+                SparseArray<Object> legacyConfiguration = new TreeSparseArray<Object>();
+                legacyConfiguration.put(Integer.valueOf(0), Boolean.TRUE);
                 Configuration layerConfiguration = configurationProvider.getConfiguration(
                     new String[]{layerName},
                     null
@@ -210,6 +215,7 @@ public class Dataprovider_1 implements Dataprovider_1_0 {
                         target.put(entry.getKey(), entry.getValue());
                     }
                 }
+                target.put(SharedConfigurationEntries.LEGACY_CONFIGURATION, legacyConfiguration);
                 layerConfigurations.put(layerName, layerConfiguration);
             } catch (Exception exception) {
                 throw new ServiceException(
@@ -224,16 +230,17 @@ public class Dataprovider_1 implements Dataprovider_1_0 {
         //
         // Activate
         //
-        short layerId =  0;
-        for(String layerName : LEGACY_LAYER_NAMES) {
+        short layerId = 0;
+        for(String layerName : LEGACY_LAYER_NAMES){
             Layer_1 current = layers.get(layerName);
             try {
                 current.activate(
-                    layerId++,
+                    layerId,
                     layerConfigurations.get(layerName),
                     layer
                 );
                 layer = current;
+                layerId++;
             } catch (Exception exception) {
                 String className = current.getClass().getName();
                 throw new ServiceException(
@@ -241,6 +248,7 @@ public class Dataprovider_1 implements Dataprovider_1_0 {
                     BasicException.Code.DEFAULT_DOMAIN,
                     BasicException.Code.ACTIVATION_FAILURE,
                     "Could not create " + layerName + " plugin " + className,
+                    new BasicException.Parameter("id", layerId),
                     new BasicException.Parameter("layer", layerName),
                     new BasicException.Parameter("class", className)
                 ).log();

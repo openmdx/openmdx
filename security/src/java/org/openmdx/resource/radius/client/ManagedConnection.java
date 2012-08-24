@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     opeMDX/Security, http://www.openmdx.org/
- * Name:        $Id: ManagedConnection.java,v 1.2 2010/08/03 14:27:24 hburger Exp $
  * Description: Managed RADIUS Connection 
- * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/08/03 14:27:24 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

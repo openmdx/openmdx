@@ -1,16 +1,13 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: StateCapable_1.java,v 1.10 2011/09/09 17:35:19 hburger Exp $
  * Description: org::openmdx::state2::StateCapable plug-in
- * Revision:    $Revision: 1.10 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/09/09 17:35:19 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2009, OMEX AG, Switzerland
+ * Copyright (c) 2009-2012, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -55,7 +52,6 @@ import org.openmdx.base.accessor.view.Interceptor_1;
 import org.openmdx.base.accessor.view.ObjectView_1_0;
 import org.openmdx.base.exception.ServiceException;
 
-
 /**
  * org::openmdx::state2::StateCapable plug-in
  */
@@ -66,23 +62,27 @@ public class StateCapable_1 extends Interceptor_1 {
      *
      * @param self
      * @param next
-     * @param validTimeUnique 
      * 
      * @throws ServiceException
      */
     public StateCapable_1(
         ObjectView_1_0 self, 
-        Interceptor_1 next, 
-        Boolean validTimeUnique
+        Interceptor_1 next
     ) throws ServiceException {
         super(self, next);
-        this.validTimeUnique = validTimeUnique;
     }
 
-    /**
-     * The value has already been determined
-     */
-    private final Boolean validTimeUnique;
+    private Integer stateVersionDefaultValue(){
+    	return Integer.valueOf(-1);
+    }
+    
+    protected Boolean transactionTimeUniqueDefaultValue(
+    ) throws ServiceException{
+    	return Boolean.valueOf(
+            super.getModel().isInstanceof(self, "org:openmdx:base:Aspect") && 
+            super.objGetValue("core") == null
+        );    	
+    }
     
     /* (non-Javadoc)
      * @see org.openmdx.base.aop1.Aspect_1#objGetValue(java.lang.String)
@@ -91,32 +91,15 @@ public class StateCapable_1 extends Interceptor_1 {
     public Object objGetValue(
         String feature
     ) throws ServiceException {
-        Object value = null;
-        boolean validTimeUniqueRequest = "validTimeUnique".equals(feature);
-        if(validTimeUniqueRequest) {
-        	value = this.validTimeUnique;
-        }
-    	if (value == null) {
-	        value = super.objGetValue(feature);
-    	}
+        Object value = super.objGetValue(feature);
         if(value == null) {
-        	if(validTimeUniqueRequest || "transactionTimeUnique".equals(feature)) {
-				value = Boolean.valueOf(
-                    super.getModel().isInstanceof(self, "org:openmdx:base:Aspect") && super.objGetValue("core") == null
-                ); 
-        	} else if("stateVersion".equals(feature)) {
-                value = Integer.valueOf(-1);
-            }
-    	}
+        	if("stateVersion".equals(feature)) {
+        		value = stateVersionDefaultValue();
+        	} else if ("transactionTimeUnique".equals(feature)) {
+        		value = transactionTimeUniqueDefaultValue();
+        	}
+        }
         return value;
-    }
-
-    /* (non-Javadoc)
-     * @see org.openmdx.base.accessor.view.Interceptor_1#jdoPreStore()
-     */
-    @Override
-    public void jdoPreStore() {
-        super.jdoPreStore();
     }
     
 }

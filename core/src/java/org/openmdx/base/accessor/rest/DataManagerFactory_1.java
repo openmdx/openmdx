@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: DataManagerFactory_1.java,v 1.28 2011/12/08 11:27:10 hburger Exp $
  * Description: Data Object Manager Factory
- * Revision:    $Revision: 1.28 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/12/08 11:27:10 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -77,8 +74,8 @@ import org.openmdx.base.accessor.rest.spi.BasicCache_2;
 import org.openmdx.base.accessor.rest.spi.DataStoreCache_2_0;
 import org.openmdx.base.accessor.rest.spi.PinningCache_2;
 import org.openmdx.base.accessor.rest.spi.Switch_2;
-import org.openmdx.base.aop0.UpdateAvoidance_1;
 import org.openmdx.base.aop0.PlugIn_1_0;
+import org.openmdx.base.aop0.UpdateAvoidance_1;
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.persistence.cci.ConfigurableProperty;
 import org.openmdx.base.persistence.spi.AbstractPersistenceManagerFactory;
@@ -173,7 +170,7 @@ public class DataManagerFactory_1 extends AbstractPersistenceManagerFactory<Data
                     supportsLocalTransaction,
                     TransactionAttributeType.REQUIRES_NEW
                 );
-                Map<String,Port> raw = new HashMap<String,Port>();
+                Map<String,Port> raw = new LinkedHashMap<String,Port>();
                 SparseArray<?> restPlugIns = persistenceManagerConfiguration.values(
                     "restPlugIn"
                 );
@@ -184,9 +181,9 @@ public class DataManagerFactory_1 extends AbstractPersistenceManagerFactory<Data
                     i.hasNext();
                 ){
                     int index = i.nextIndex();
-                    Port destination;
+                    String pattern = i.next().toString();
                     String restPlugIn = (String) restPlugIns.get(index);
-                    destination = raw.get(restPlugIn);
+                    Port destination = raw.get(restPlugIn);
                     if(destination == null){
                         Configuration plugInConfiguration = PropertiesConfigurationProvider.getConfiguration(
                             properties,
@@ -216,10 +213,14 @@ public class DataManagerFactory_1 extends AbstractPersistenceManagerFactory<Data
                         );
                     }
                     destinations.put(
-                        new Path(i.next().toString()),
+                        new Path(pattern),
                         destination
                     );
                 }
+                DataManagerPreferencesPort.discloseConfiguration(
+                    destinations, 
+                    raw
+                );
             }
         } catch (Exception exception) {
             throw BasicException.initHolder(
@@ -436,7 +437,7 @@ public class DataManagerFactory_1 extends AbstractPersistenceManagerFactory<Data
     /**
      * Retrieve the data store cache
      * 
-     * @param the data manager factory
+     * @param dataManagerFactory the data manager factory
      * 
      * @return the data store cache
      */

@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Preferences_1.java,v 1.10 2011/04/05 13:45:17 hburger Exp $
  * Description: Preferences_1 
- * Revision:    $Revision: 1.10 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/04/05 13:45:17 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -156,17 +153,6 @@ public class Preferences_1 extends Layer_1 {
             ).log();
         }
         return (ConnectionFactory<?,GeneralSecurityException>) connectionFactory;
-    }
-
-    /* (non-Javadoc)
-     * @see org.openmdx.compatibility.base.dataprovider.spi.Layer_1#deactivate()
-     */
-    @Override
-	public void deactivate(
-    ) throws Exception, ServiceException {
-        this.pkiContext = null;
-        this.pkiProviders = null;
-        super.deactivate();
     }
 
     

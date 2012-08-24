@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: UnitOfWork_1.java,v 1.1 2009/11/27 19:15:37 hburger Exp $
  * Description: Unit Of Work Interceptor
- * Revision:    $Revision: 1.1 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/11/27 19:15:37 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

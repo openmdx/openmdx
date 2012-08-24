@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: ObjectOutputStream.java,v 1.1 2010/03/19 12:32:54 hburger Exp $
  * Description: Object Output Stream 
- * Revision:    $Revision: 1.1 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/03/19 12:32:54 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

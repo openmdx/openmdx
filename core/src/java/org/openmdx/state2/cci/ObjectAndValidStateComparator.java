@@ -1,10 +1,7 @@
 /*
  * ====================================================================
- * Name:        $Id: ObjectAndValidStateComparator.java,v 1.9 2011/12/26 23:29:19 hburger Exp $
  * Description: A state-aware XML comparator
- * Revision:    $Revision: 1.9 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/12/26 23:29:19 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -356,7 +353,7 @@ public class ObjectAndValidStateComparator {
 					(expected ? aspects.expected : aspects.actual).add(object);
 				} else {
 					this.differences.add(
-						newDifference(e.getPath(), "An aspect has no core reference", null, object)
+						newDifference(e.getPath(), "An aspect has no core reference", (MappedRecord)null, object)
 					);
 				}
 			} else {
@@ -375,7 +372,7 @@ public class ObjectAndValidStateComparator {
 		while(e != null || a != null) {
 			while(a != null && (e == null || a.getPath().compareTo(e.getPath()) < 0 )) {
 				this.differences.add(
-					newDifference(a.getPath(), "Unexpected actual object", null, a.getValue())
+					newDifference(a.getPath(), "Unexpected actual object", (MappedRecord)null, a.getValue())
 				);
 				a = getNext(ai, true);
 			}
@@ -512,19 +509,31 @@ public class ObjectAndValidStateComparator {
 			features.addAll(actual.keySet());
 			for(String feature : features) {
 				ModelElement_1_0 featureDef = this.model.getFeatureDef(classifierDef, feature, false);
-				Object expectedValue = expected.get(feature);
-				Object actualValue = actual.get(feature);
-				String qualifiedName = (String) featureDef.objGetValue("qualifiedName"); 
-				MappedRecord difference = getFeatureComparator(
-					qualifiedName,
-					aspect
-				).compare(
-					xri, 
-					feature, 
-					ModelHelper.getMultiplicity(featureDef), 
-					expectedValue, 
-					actualValue
-				);
+                Object actualValue = actual.get(feature);
+				MappedRecord difference;
+				if(featureDef == null) {
+				    difference = ObjectAndValidStateComparator.newDifference(
+		                xri, 
+		                feature, 
+		                null, 
+		                "The attribute '" + feature + "' is not a modelled feature", 
+		                null, 
+		                actualValue
+		            );
+                } else {
+    				Object expectedValue = expected.get(feature);
+    				String qualifiedName = (String) featureDef.objGetValue("qualifiedName"); 
+    				difference = getFeatureComparator(
+    					qualifiedName,
+    					aspect
+    				).compare(
+    					xri, 
+    					feature, 
+    					ModelHelper.getMultiplicity(featureDef), 
+    					expectedValue, 
+    					actualValue
+    				);
+				}
 				if(difference != null){
 					this.differences.add(difference);
 				}
@@ -537,25 +546,40 @@ public class ObjectAndValidStateComparator {
 	}
 
 	/**
+     * Convert a value to a string. 
+     * <p>
+     * Its main function is to convert object ids to XRIs
+     * 
+     * @param value
+     * @param multiplicity
+     * 
+     * @return a string representation of the value
+     * @deprecated Use {@link #toString(Object)} instead
+     */
+    public static Object toString(
+    	Object value, 
+    	Multiplicity multiplicity
+    ){
+        return toString(value);
+    }
+
+    /**
 	 * Convert a value to a string. 
 	 * <p>
 	 * Its main function is to convert object ids to XRIs
 	 * 
 	 * @param value
-	 * @param multiplicity
-	 * 
 	 * @return a string representation of the value
 	 */
 	public static Object toString(
-		Object value, 
-		Multiplicity multiplicity
+		Object value
 	){
 		if(value instanceof Path) {
 			return ((Path)value).toXRI();
 		} else if(value instanceof Collection) {
 			Collection<Object> target = new ArrayList<Object>();
 			for(Object source : (Collection<?>)value) {
-				target.add(toString(source, multiplicity));
+				target.add(toString(source));
 			}
 			return target;
 		} else {
@@ -640,15 +664,27 @@ public class ObjectAndValidStateComparator {
 		Object expected,
 		Object actual
 	){
+	    boolean unknownFeature = multiplicity == null;
 		return Records.getRecordFactory().asMappedRecord(
 			id.toXRI() + '#' + feature,
 			text,
-			new Object[] {"multiplicity", "feature", "expected", "actual"},
-			new Object[]{
+			unknownFeature ? new Object[]{
+                "feature", 
+                "actual"
+			} : new Object[] {
+			    "multiplicity", 
+			    "feature", 
+			    "expected", 
+			    "actual"
+			},
+			unknownFeature ? new Object[]{
+                feature,
+                toString(actual)
+            } : new Object[]{
 				multiplicity,
 				feature,
-				toString(expected, multiplicity),
-				toString(actual, multiplicity)
+				toString(expected),
+				toString(actual)
 			}
 		);
 	}

@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: Mapping_1_0.java,v 1.5 2010/05/26 14:41:25 hburger Exp $
  * Description: Mapping_1_0 
- * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/05/26 14:41:25 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

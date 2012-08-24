@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: Action.java,v 1.42 2011/07/07 22:35:37 wfro Exp $
  * Description: Action
- * Revision:    $Revision: 1.42 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/07/07 22:35:37 $
  * ====================================================================
  *
  * This software is published under the BSD license

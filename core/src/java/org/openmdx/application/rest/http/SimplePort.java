@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: SimplePort.java,v 1.31 2011/04/27 21:32:04 hburger Exp $
  * Description: Simple Port 
- * Revision:    $Revision: 1.31 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/04/27 21:32:04 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

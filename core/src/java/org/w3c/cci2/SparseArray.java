@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: SparseArray.java,v 1.3 2009/04/22 09:03:30 hburger Exp $
  * Description: SparseArray 
- * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/04/22 09:03:30 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

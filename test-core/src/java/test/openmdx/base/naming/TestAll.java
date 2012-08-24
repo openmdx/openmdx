@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMEX, http://www.openmdx.org/
- * Name:        $Id: TestAll.java,v 1.1 2009/03/06 10:38:42 hburger Exp $
  * Description: Test All 
- * Revision:    $Revision: 1.1 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/03/06 10:38:42 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -73,7 +70,8 @@ public class TestAll
     /**
      * Constructor 
      */
-    public TestAll(
+    @SuppressWarnings("unchecked")
+	public TestAll(
     ){
        this(
           WildcardTest.class,

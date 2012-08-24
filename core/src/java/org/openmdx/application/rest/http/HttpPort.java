@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: HttpPort.java,v 1.4 2011/04/27 21:32:04 hburger Exp $
  * Description: Simple Port 
- * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/04/27 21:32:04 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -316,7 +313,7 @@ public class HttpPort implements Port {
             String userName
         ) throws ResourceException {
             StringBuilder query = new StringBuilder(
-                "RefInitializeOnCreate=false"
+                CallbackPrompts.BULK_LOAD + '=' + Boolean.FALSE
             );
             if(userName != null) {
                 query.append('&').append(newQueryArgument("UserName", userName));

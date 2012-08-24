@@ -1,16 +1,13 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: BasicCache_2.java,v 1.8 2011/11/26 01:34:57 hburger Exp $
  * Description: Virtual Object Port
- * Revision:    $Revision: 1.8 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/11/26 01:34:57 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2009-2011, OMEX AG, Switzerland
+ * Copyright (c) 2009-2012, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -111,7 +108,7 @@ public class BasicCache_2 implements Port, DataStoreCache_2_0  {
     final CacheLogger[] loggers = new CacheLogger[3];
     
     /**
-     * Catch Authorities and Providers by default
+     * Cache Authorities, Providers and openMDX Preferences by default
      */
     private Path[] sowAllPattern = {
         new Path("xri://@openmdx*($..)"),
@@ -650,6 +647,22 @@ public class BasicCache_2 implements Port, DataStoreCache_2_0  {
             }
         }
     }
+
+    /**
+     * Retrieve the cache key
+     * 
+     * @param connection
+     * 
+     * @return the (non-null) cache key
+     * 
+     * @throws ResourceException
+     */
+    private String getCacheKey(
+        Connection connection
+    ) throws ResourceException {
+        String userName = connection.getMetaData().getUserName();
+        return userName == null ? "" : userName;
+    }
     
     /**
      * Retrieve the connection specific cache
@@ -676,7 +689,7 @@ public class BasicCache_2 implements Port, DataStoreCache_2_0  {
                 }
             }
         }
-        String userName = connection.getMetaData().getUserName();
+        String userName = getCacheKey(connection);
         BasicConnectionCache cache = this.caches.get(userName);
         if(cache == null) {
             BasicConnectionCache concurrent = this.caches.putIfAbsent(

@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: TestDurationMarshaller.java,v 1.4 2011/03/10 12:57:48 hburger Exp $
  * Description: Duration Masrhaller Test
- * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/03/10 12:57:48 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

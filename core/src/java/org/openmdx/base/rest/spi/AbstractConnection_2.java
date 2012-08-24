@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: AbstractConnection_2.java,v 1.11 2010/09/13 16:19:31 hburger Exp $
  * Description: Abstract Connectoon
- * Revision:    $Revision: 1.11 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/09/13 16:19:31 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

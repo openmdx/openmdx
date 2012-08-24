@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: InspectorControl.java,v 1.15 2011/07/07 22:35:42 wfro Exp $
  * Description: View 
- * Revision:    $Revision: 1.15 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/07/07 22:35:42 $
  * ====================================================================
  *
  * This software is published under the BSD license

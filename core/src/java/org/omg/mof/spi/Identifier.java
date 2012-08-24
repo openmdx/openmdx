@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Identifier.java,v 1.5 2009/09/23 12:05:39 hburger Exp $
  * Description: Identifier 
- * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/09/23 12:05:39 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

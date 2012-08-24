@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: CodeUtility.java,v 1.24 2011/11/07 23:38:56 wfro Exp $
  * Description: CodeUtility
- * Revision:    $Revision: 1.24 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/11/07 23:38:56 $
  * ====================================================================
  *
  * This software is published under the BSD license

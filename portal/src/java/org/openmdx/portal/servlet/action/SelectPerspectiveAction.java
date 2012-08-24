@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: SelectPerspectiveAction.java,v 1.2 2011/07/07 22:35:36 wfro Exp $
  * Description: ShowObjectView 
- * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/07/07 22:35:36 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -89,26 +86,28 @@ public class SelectPerspectiveAction extends BoundAction {
     ) throws IOException, ServletException {
     	ObjectView nextView = currentView;
         ViewPort.Type nextViewPortType = null;
-        ApplicationContext application = currentView.getApplicationContext();
+        ApplicationContext app = currentView.getApplicationContext();
         try {
             String perspective = Action.getParameter(parameter, Action.PARAMETER_ID);
             SysLog.trace("Setting perspective", perspective);
-            application.setCurrentPerspective(Integer.valueOf(perspective));
+            app.setCurrentPerspective(Integer.valueOf(perspective));
             nextView = new ShowObjectView(
                 currentView.getId(),
                 currentView.getContainerElementId(),
                 currentView.getRefObject().refGetPath(),
-                application,
+                app,
                 currentView.getHistoryActions(),
                 currentView.getLookupType(),
-                currentView.getRestrictToElements()
+                null, // do not propagate resourcePathPrefix
+                null, // do not propagate navigationTarget
+                null // do not propagate isReadOnly
             );
         }
         catch (Exception e) {
             ServiceException e0 = new ServiceException(e);
             SysLog.warning(e0.getMessage(), e0.getCause());
-            application.addErrorMessage(
-                application.getTexts().getErrorTextCannotSetPerspective(),
+            app.addErrorMessage(
+                app.getTexts().getErrorTextCannotSetPerspective(),
                 new String[] { parameter, e.getMessage() });
         }
         return new ActionPerformResult(

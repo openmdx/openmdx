@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: DateStateViews.java,v 1.94 2011/12/02 15:06:41 hburger Exp $
  * Description: Date State Views
- * Revision:    $Revision: 1.94 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/12/02 15:06:41 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -95,6 +92,7 @@ import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.log.SysLog;
 import org.openmdx.state2.jmi1.BasicState;
 import org.openmdx.state2.jmi1.DateState;
+import org.openmdx.state2.jmi1.Legacy;
 import org.openmdx.state2.jmi1.StateCapable;
 import org.openmdx.state2.spi.DateStateViewContext;
 import org.openmdx.state2.spi.Order;
@@ -706,7 +704,7 @@ public class DateStateViews {
     ){
     	RefObject core = state.getCore();
         if(core == null) {
-            if(state instanceof StateCapable && ((StateCapable)state).isValidTimeUnique()) {
+            if(state instanceof Legacy && ((Legacy)state).isValidTimeUnique()) {
                 return state;
             }
         	if(JDOHelper.isDirty(state) && !JDOHelper.isTransactional(state)) {
@@ -1244,6 +1242,37 @@ public class DateStateViews {
         );
     }
     
+
+    /**
+     * Determine whether the propagation is idempotent or not
+     * 
+     * @param source
+     * @param validFrom
+     * @param validTo
+     * 
+     * @return <code>true</code> if the propagation is idempotent
+     */
+    private static boolean isPropagationIdempotent(
+        DateState source,
+        XMLGregorianCalendar validFrom,
+        XMLGregorianCalendar validTo
+    ) {
+        DateStateContext viewContext = DateStateViews.getContext(source);
+        if(viewContext.getViewKind() == ViewKind.TIME_POINT_VIEW && viewContext.getExistsAt() != null) {
+            return false;
+        } else {
+            int lowerFlag = Order.compareValidFrom(
+                source.getStateValidFrom(),
+                validFrom
+            ); 
+            int upperFlag = Order.compareValidTo(
+                source.getStateValidTo(),
+                validTo
+            );
+            return lowerFlag <= 0 && upperFlag >= 0;
+        }
+    }
+    
     /**
      * Retrieve a view for a given period.
      * <p>
@@ -1257,7 +1286,7 @@ public class DateStateViews {
      * @return a view to the given object
      * 
      * @throws IllegalArgumentException if source is deleted or if override is 
-     * false and the given range is not empty
+     * false and the given range is occupied by another state
      */
     @SuppressWarnings("unchecked")
     public static <T extends DateState> T getViewForPropagatedState(
@@ -1268,14 +1297,14 @@ public class DateStateViews {
     ){
         if(source == null) return null;
         if(JDOHelper.isDeleted(source)) {
-        	throw new IllegalArgumentException(
-	            "The source must not be deleted"
-	        );
+            throw new IllegalArgumentException(
+                "The source must not be deleted"
+            );
         }
         //
         // Compare source and view validity
         //
-        PersistenceManager targetManager = DateStateViews.getPersistenceManager(
+        PersistenceManager targetManager = getPersistenceManager(
             source,
             validFrom,
             validTo
@@ -1283,15 +1312,7 @@ public class DateStateViews {
         T target = (T) targetManager.getObjectById(
             JDOHelper.getTransactionalObjectId(source)
         );
-        final int lowerFlag = Order.compareValidFrom(
-            source.getStateValidFrom(),
-            validFrom
-        ); 
-        final int upperFlag = Order.compareValidTo(
-            source.getStateValidTo(),
-            validTo
-        );
-        if(lowerFlag > 0 || upperFlag < 0){
+        if(!isPropagationIdempotent(source, validFrom, validTo)){
             if(override || target == null) {
                 T state = (T) targetManager.getObjectById(
                     DateStateViews.getResourceIdentifierOfClone(source, DateStateViews.EXCLUDE_FROM_STATE_CLONING)
@@ -1305,27 +1326,58 @@ public class DateStateViews {
                 }
                 linkStateAndCore(state, (StateCapable) source);
             } else {
-                for(org.openmdx.state2.jmi1.DateState state : DateStateViews.getValidStates((StateCapable)source, validFrom, validTo)){
-                    if(source != state) {
-                        throw BasicException.initHolder(
-                            new IllegalArgumentException(
-                                "There is another valid state in the given period",
-                                BasicException.newEmbeddedExceptionStack(
-                                    BasicException.Code.DEFAULT_DOMAIN,
-                                    BasicException.Code.DUPLICATE,
-                                    ExceptionHelper.newObjectIdParameter("xri", source),
-                                    new BasicException.Parameter("override", override),
-                                    new BasicException.Parameter("viewContext", DateStateViews.getContext(target)),
-                                    new BasicException.Parameter("stateContext", DateStateViews.getContext(state))
-                                )
-                            )
-                        );
-                    	
-                    }
-                }
+                signalInterference(source, target);
             }
         }
         return target;            
+    }
+
+    /**
+     * Validate that the requested space is not blocked by another state
+     * 
+     * @param source
+     * @param target
+     * 
+     * @throws IllegalArgumentException if the given range is occupied by another state
+     */
+    private static void signalInterference(
+        DateState source,
+        DateState target
+    ) {
+        DateStateContext sourceContext = DateStateViews.getContext(source);
+        DateState compatibleState = null;
+        switch(sourceContext.getViewKind()) {
+            case TIME_RANGE_VIEW:
+                compatibleState = source;
+                break;
+            case TIME_POINT_VIEW:
+                if(sourceContext.getExistsAt() == null) {
+                    compatibleState = DateStateViews.<DateState,DateState>getViewForTimeRange(
+                        source, 
+                        source.getStateValidFrom(), 
+                        source.getStateValidTo()
+                    );
+                }
+                break;
+        }
+        DateStateContext targetContext = DateStateViews.getContext(target);
+        for(DateState state : DateStateViews.<DateState>getValidStates((StateCapable)source, targetContext.getValidFrom(), targetContext.getValidTo())){
+            if(state != compatibleState) {
+                throw BasicException.initHolder(
+                    new IllegalArgumentException(
+                        "There is another valid state in the given period",
+                        BasicException.newEmbeddedExceptionStack(
+                            BasicException.Code.DEFAULT_DOMAIN,
+                            BasicException.Code.DUPLICATE,
+                            ExceptionHelper.newObjectIdParameter("xri", source),
+                            new BasicException.Parameter("override", Boolean.FALSE),
+                            new BasicException.Parameter("viewContext", targetContext),
+                            new BasicException.Parameter("stateContext", DateStateViews.getContext(state))
+                        )
+                    )
+                );                      
+            }
+        }
     }
 
     /**
@@ -1911,7 +1963,7 @@ public class DateStateViews {
                         (StateCapable) refObject, 
                         context.getValidAt(), 
                         context.getValidAt(),
-                        null, // invalidated
+                        Boolean.valueOf(context.getExistsAt() != null), // invalidated
                         context.getExistsAt(), 
                         AccessMode.RAW
                     );

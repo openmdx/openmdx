@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: BinaryLargeObjects.java,v 1.19 2010/12/16 12:48:14 hburger Exp $
  * Description: Binary Large Object Factory 
- * Revision:    $Revision: 1.19 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/12/16 12:48:14 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

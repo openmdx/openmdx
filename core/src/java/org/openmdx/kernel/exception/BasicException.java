@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: BasicException.java,v 1.47 2011/06/21 22:33:00 hburger Exp $
  * Description: Basic Exception
- * Revision:    $Revision: 1.47 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/06/21 22:33:00 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -880,7 +877,7 @@ public final class BasicException extends Exception {
         int i = 0;
         for(Parameter parameter : this.getParameters()) {
             if(i == 0) {
-                out.append("\tParamaters:");
+                out.append("\tParameters:");
                 out.println();
             }
             out.append("\t    ").append(String.valueOf(i++)).append(":\t").append(parameter.toString());

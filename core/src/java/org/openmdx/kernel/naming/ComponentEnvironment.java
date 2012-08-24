@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: ComponentEnvironment.java,v 1.5 2010/10/16 18:14:31 hburger Exp $
  * Description: Component Environment 
- * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/10/16 18:14:31 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

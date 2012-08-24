@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Jmi1Package_1_0.java,v 1.16 2011/05/18 23:16:30 hburger Exp $
  * Description: JMI 1 Package Interface
- * Revision:    $Revision: 1.16 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/05/18 23:16:30 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

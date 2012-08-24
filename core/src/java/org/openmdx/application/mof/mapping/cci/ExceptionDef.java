@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: ExceptionDef.java,v 1.5 2011/03/25 14:16:24 hburger Exp $
  * Description: VelocityExceptionDef class
- * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/03/25 14:16:24 $
  * ====================================================================
  *
  * This software is published under the BSD license

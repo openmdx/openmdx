@@ -1,3 +1,59 @@
+REM Test test::openmdx::preferences2
+
+  DROP TABLE PREFERENCES2_SEGMENT ;
+  CREATE TABLE PREFERENCES2_SEGMENT (
+    OBJECT_RID VARCHAR2(200) NOT NULL ENABLE,
+	  OBJECT_OID VARCHAR2(200) NOT NULL ENABLE,
+	  OBJECT__CLASS VARCHAR2(200),
+	  DESCRIPTION VARCHAR2(200)
+  );
+  
+  DROP TABLE PREFERENCES2_ROOT;
+  CREATE TABLE PREFERENCES2_ROOT(
+    object_rid VARCHAR2(100) NOT NULL ENABLE,
+    object_oid VARCHAR2(200) NOT NULL ENABLE,
+    p$$object_parent__rid VARCHAR2(100) NULL, 
+    p$$object_parent__oid VARCHAR2(200) NULL,
+    object__class VARCHAR2(200) NOT NULL ENABLE ,
+    type VARCHAR2(10) NOT NULL ENABLE,
+    created_at TIMESTAMP (6) WITH TIME ZONE NULL,
+    modified_at TIMESTAMP (6) WITH TIME ZONE NULL,
+    modified_by_0 VARCHAR2(50) NULL ,
+    created_by_0 VARCHAR2(50) NULL
+  );
+
+  DROP TABLE PREFERENCES2_NODE;
+  CREATE TABLE PREFERENCES2_NODE(
+    object_rid VARCHAR2(100) NOT NULL ENABLE,
+    object_oid VARCHAR2(200) NOT NULL ENABLE,
+    p$$object_parent__rid VARCHAR2(100) NULL, 
+    p$$object_parent__oid VARCHAR2(200) NULL,
+    object__class VARCHAR2(200) NOT NULL ENABLE ,
+    parent VARCHAR2 (200) NULL ,
+    p$$parent__rid VARCHAR2 (200) NULL ,
+    p$$parent__oid VARCHAR2 (200) NULL ,
+    name VARCHAR2(100) NULL,
+    absolute_path VARCHAR2(1000) NOT NULL ENABLE,
+    created_at TIMESTAMP (6) WITH TIME ZONE NULL,
+    modified_at TIMESTAMP (6) WITH TIME ZONE NULL,
+    modified_by_0 VARCHAR2(50) NULL ,
+    created_by_0 VARCHAR2(50) NULL
+  );
+
+  DROP TABLE PREFERENCES2_ENTRY;
+  CREATE TABLE PREFERENCES2_ENTRY(
+    object_rid VARCHAR2(100) NOT NULL ENABLE,
+    object_oid VARCHAR2(200) NOT NULL ENABLE,
+    p$$object_parent__rid VARCHAR2(100) NULL, 
+    p$$object_parent__oid VARCHAR2(200) NULL,
+    object__class VARCHAR2(200) NOT NULL ENABLE,
+    value VARCHAR2(4000) NULL,
+    created_at TIMESTAMP (6) WITH TIME ZONE NULL,
+    modified_at TIMESTAMP (6) WITH TIME ZONE NULL,
+    modified_by_0 VARCHAR2(50) NULL ,
+    created_by_0 VARCHAR2(50) NULL
+  );
+  
 REM Test test::openmdx::app1
 
   DROP TABLE app1_Address;
@@ -74,7 +130,8 @@ REM Test test::openmdx::app1
     modified_at TIMESTAMP (6) WITH TIME ZONE NULL,
     created_by_0 VARCHAR2 (50) NULL ,
     modified_by_0 VARCHAR2 (50) NULL ,
-    INTERNATIONALPRODUCTGROUPID VARCHAR2 (100) NULL
+    INTERNATIONALPRODUCTGROUPID VARCHAR2 (100) NULL,
+    payment_period INTERVAL DAY(3) TO SECOND(0) NULL
   );
   
   DROP TABLE app1_InvoicePosition;

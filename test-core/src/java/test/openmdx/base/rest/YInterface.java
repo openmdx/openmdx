@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: YInterface.java,v 1.1 2009/09/15 16:37:57 hburger Exp $
  * Description: YInterface 
- * Revision:    $Revision: 1.1 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/09/15 16:37:57 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -55,11 +52,12 @@ package test.openmdx.base.rest;
 /**
  * YInterface
  */
+@SuppressWarnings("unchecked")
 public interface YInterface
     extends XInterface, YMarker
 {
 
-    java.util.List<java.sql.Date> getList();
+	java.util.List<java.sql.Date> getList();
     
     void operation() throws YException;
 

@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: UserObjects.java,v 1.11 2010/09/27 11:46:45 hburger Exp $
  * Description: UserObjects 
- * Revision:    $Revision: 1.11 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/09/27 11:46:45 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -146,4 +143,27 @@ public class UserObjects extends SharedObjects {
         return SharedObjects.sharedObjects(persistenceManager).getTenant();
     }
 
+    /**
+     * Set the bulk load flag
+     * 
+     * @param bulkLoad <code>true</code> in case of bulk load
+     */
+    public static void setBulkLoad(
+        PersistenceManager persistenceManager,
+        boolean bulkLoad
+    ){
+        SharedObjects.sharedObjects(persistenceManager).setBulkLoad(bulkLoad);
+    }
+    
+    /**
+     * Retrieve the bulk load flag value
+     * 
+     * @return <code>true</code> in case of bulk load
+     */
+    public static boolean isBulkLoad(
+        PersistenceManager persistenceManager
+    ){
+        return SharedObjects.sharedObjects(persistenceManager).isBulkLoad();
+    }
+    
 }

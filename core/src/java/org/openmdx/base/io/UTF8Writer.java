@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: UTF8Writer.java,v 1.3 2010/03/02 19:17:00 hburger Exp $
  * Description: UTF8 Writer 
- * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/03/02 19:17:00 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: DataStoreCache_2_0.java,v 1.1 2010/05/07 01:13:43 hburger Exp $
  * Description: Data Store Cache 2.0
- * Revision:    $Revision: 1.1 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/05/07 01:13:43 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

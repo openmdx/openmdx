@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: StandardXMLOutputFactory.java,v 1.7 2010/04/08 17:28:31 wfro Exp $
  * Description: Standard XML Output Factory 
- * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/04/08 17:28:31 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

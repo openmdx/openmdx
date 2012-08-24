@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: TestAspects.java,v 1.4 2009/09/15 14:01:20 hburger Exp $
  * Description: Test Aspects 
- * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/09/15 14:01:20 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: ImmutableDate.java,v 1.4 2011/10/11 16:20:57 hburger Exp $
  * Description: Date 
- * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/10/11 16:20:57 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

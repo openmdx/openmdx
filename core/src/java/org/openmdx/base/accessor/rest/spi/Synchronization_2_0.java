@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: Synchronization_2_0.java,v 1.4 2011/03/08 17:21:41 hburger Exp $
  * Description: Synchronization interface 
- * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/03/08 17:21:41 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
