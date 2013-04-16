@@ -77,18 +77,34 @@ class DatabasePreferences {
     private static final Path ENTRIES_PATTERN = NODES_PATTERN.getDescendant(":*", "entry").lock();
     
     @SuppressWarnings("unchecked")
-    private static ObjectRecord createNode(
+    private static ObjectRecord createRootNode(
         Path nodes
-    ) throws ResourceException {    
+    ) throws ResourceException {
         Object_2Facade node = Object_2Facade.newInstance(
-            nodes.getChild("-"),
+            nodes.getChild("+"),
+            "org:openmdx:preferences2:Node"
+        );
+        MappedRecord values = node.getValue();
+        values.put("name", "");
+        values.put("absolutePath", "/");
+        return node.getDelegate();
+    }
+
+    @SuppressWarnings("unchecked")
+    private static ObjectRecord createTopNode(
+        ObjectRecord parent
+    ) throws ResourceException {
+        Object_2Facade node = Object_2Facade.newInstance(
+            parent.getPath().getParent().getChild("-"),
             "org:openmdx:preferences2:Node"
         );
         MappedRecord values = node.getValue();
         values.put("name", "dbObject");
         values.put("absolutePath", "/dbObject");
+        values.put("parent", parent.getPath());
         return node.getDelegate();
     }
+    
     
     @SuppressWarnings("unchecked")
     private static ObjectRecord createNode(
@@ -151,11 +167,13 @@ class DatabasePreferences {
         try {
             int count = 0;
             if(xri.isLike(NODES_PATTERN)){
-                ObjectRecord parent = createNode(xri);
-                output.add(parent);
+                ObjectRecord rootNode = createRootNode(xri);
+                output.add(rootNode);
+                ObjectRecord topNode = createTopNode(rootNode);
+                output.add(topNode);
                 count++;
                 for(DbObjectConfiguration configuration : configurations) {
-                    output.add(createNode(parent, configuration));
+                    output.add(createNode(topNode, configuration));
                     count++;
                 }
             } else if (xri.isLike(ENTRIES_PATTERN)) {

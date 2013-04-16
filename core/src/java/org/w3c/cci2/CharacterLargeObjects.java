@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2006-2008, OMEX AG, Switzerland
+ * Copyright (c) 2006-2012, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -126,11 +126,27 @@ public class CharacterLargeObjects {
      * @param source
      * 
      * @return a <code>CharacterLargeObject</code> facade for the given file
+     * @deprecated Use {@link #valueOf(File,String)} instead
      */
     public static CharacterLargeObject valueOf(
         File source
     ){
-        return new FileLargeObject(source);
+        return valueOf(source, "UTF-8");
+    }
+
+    /**
+     * Create a <code>CharacterLargeObject</code> facade for the given file
+     * 
+     * @param source the file to be read
+     * @param encoding the file's the character encoding 
+     * 
+     * @return a <code>CharacterLargeObject</code> facade for the given file
+     */
+    public static CharacterLargeObject valueOf(
+        File source, 
+        String encoding
+    ){
+        return new FileLargeObject(source, encoding);
     }
     
     /**
@@ -162,6 +178,28 @@ public class CharacterLargeObjects {
     }
     
     /**
+     * Create a <code>CharacterLargeObject</code> copy of the given stream
+     * 
+     * @param source
+     * @param length
+     * 
+     * @return a <code>CharacterLargeObject</code> copy of the given stream
+     * 
+     * @throws IOException  
+     */
+    public static CharacterLargeObject copyOf(
+        Reader source,
+        Long length
+    ) throws IOException {
+        CharArrayWriter buffer = length == null ? new CharArrayWriter(
+        ) : new CharArrayWriter(
+            length.intValue()
+        );
+        streamCopy(source, 0, buffer);
+        return valueOf(buffer.toCharArray());
+    }
+    
+    /**
      * A negative length is converted to <code>null</code>.
      * 
      * @param length
@@ -176,6 +214,7 @@ public class CharacterLargeObjects {
 
     /**
      * Copy a reader's content to a writer
+     * 
      * @param source
      * @param position
      * @param target
@@ -484,12 +523,17 @@ public class CharacterLargeObjects {
         
         /**
          * Constructor 
-         *
-         * @param value
+         * 
+         * @param file the file to be read
+         * @param encoding the encoding to be used 
          */
-        public FileLargeObject(final File file) {
+        public FileLargeObject(
+            File file, 
+            String encoding
+        ) {
             super(null);
             this.file = file;
+            this.encoding = encoding;
         }
 
         /**
@@ -497,10 +541,16 @@ public class CharacterLargeObjects {
          */
         private static final long serialVersionUID = 2452652537639826230L;
 
+        
         /**
          * 
          */
         private transient File file;
+
+        /**
+         * The file's encoding
+         */
+        private transient String encoding;
         
         /* (non-Javadoc)
          * @see org.w3c.cci2.CharacterLargeObject#getContent()
@@ -509,7 +559,7 @@ public class CharacterLargeObjects {
         ) throws IOException {
             return this.file != null ? new InputStreamReader(
                 new FileInputStream(this.file),
-                "UTF-8"
+                encoding
             ) : this.newContent();
         }
 
@@ -533,7 +583,10 @@ public class CharacterLargeObjects {
         public StreamLargeObject(
             final Reader stream
         ){
-            this(stream, null);
+            this(
+                stream, 
+                getLength(stream)
+            );
         }
         
         /**
@@ -559,6 +612,20 @@ public class CharacterLargeObjects {
          */
         private transient Reader stream;
 
+        /**
+         * Determine the large objetc's size
+         * 
+         * @param stream
+         * 
+         * @return the large objetc's size
+         */
+        private static Long getLength(
+            Reader stream
+        ){
+            return null; // generally undeterminable
+        }
+        
+        
         /* (non-Javadoc)
          * @see org.w3c.cci2.BinaryLargeObject#getContent()
          */
@@ -575,4 +642,4 @@ public class CharacterLargeObjects {
 
     }
     
-}
+ }

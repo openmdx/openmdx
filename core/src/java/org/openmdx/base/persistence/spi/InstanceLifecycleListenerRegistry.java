@@ -47,9 +47,9 @@
  */
 package org.openmdx.base.persistence.spi;
 
-import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
-import java.util.List;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 import javax.jdo.PersistenceManager;
 import javax.jdo.listener.ClearLifecycleListener;
@@ -75,7 +75,7 @@ public class InstanceLifecycleListenerRegistry implements
     /**
      * 
      */
-    private List<Entry> entries = new ArrayList<Entry>();
+    private Collection<Entry> entries = new ConcurrentLinkedQueue<Entry>();
     
     /**
      * Close the registry

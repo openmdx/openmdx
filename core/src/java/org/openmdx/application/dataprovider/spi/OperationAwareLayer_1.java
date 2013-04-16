@@ -77,7 +77,7 @@ public abstract class OperationAwareLayer_1 extends Layer_1 {
     /**
      * Constructor 
      */
-    public OperationAwareLayer_1(
+    protected OperationAwareLayer_1(
     ) {
         super();
     }
@@ -125,11 +125,10 @@ public abstract class OperationAwareLayer_1 extends Layer_1 {
         int defaultValue
     ){
         Configuration configuration = getConfiguration();
-        return configuration.containsEntry(key) && !configuration.values(key).isEmpty() ?
-            configuration.values(key).get(0) instanceof Number ?
-                ((Number)configuration.values(key).get(0)).intValue() :
-                    Integer.valueOf(((String)configuration.values(key).get(0))) : 
-                defaultValue;
+        return configuration.containsEntry(key) && !configuration.values(key).isEmpty() ? (
+            configuration.values(key).get(0) instanceof Number ? ((Number)configuration.values(key).get(0)).intValue() :
+            Integer.valueOf(((String)configuration.values(key).get(0))) 
+        ) : defaultValue;
     }
 
     //-----------------------------------------------------------------------

@@ -55,6 +55,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import javax.jdo.FetchPlan;
+import javax.jdo.JDOHelper;
 import javax.jdo.PersistenceManager;
 import javax.jdo.spi.PersistenceCapable;
 import javax.jdo.spi.StateManager;
@@ -63,6 +64,7 @@ import javax.jmi.reflect.RefPackage;
 
 import org.oasisopen.jmi1.RefContainer;
 import org.openmdx.base.accessor.cci.Container_1_0;
+import org.openmdx.base.accessor.cci.DataObject_1_0;
 import org.openmdx.base.accessor.jmi.cci.JmiServiceException;
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
 import org.openmdx.base.accessor.jmi.cci.RefPackage_1_0;
@@ -231,8 +233,9 @@ public class RefContainer_1
      */
     private RefObject_1_0 get(String filter) {
         try {
-            return (RefObject_1_0) this.marshaller.marshal(
-                this.container.get(filter)
+            DataObject_1_0 viewObject = this.container.get(filter);
+            return viewObject == null || viewObject.objDoesNotExist() ? null : (RefObject_1_0) this.marshaller.marshal(
+            	 viewObject
             );
         } catch (ServiceException exception){
             if(exception.getExceptionCode() == BasicException.Code.NOT_FOUND) {
@@ -600,7 +603,11 @@ public class RefContainer_1
     public void refRemove(Object... arguments) {
         RefObject_1_0 object = this.get(RefContainer_1.toQualifier(arguments.length, arguments));
         if(object != null) {
-            object.refDelete();
+            if(JDOHelper.isPersistent(object)) {
+                object.refDelete();
+            } else {
+                this.remove(object);
+            }
         }
     }
 

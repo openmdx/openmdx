@@ -47,10 +47,7 @@
  */
 package org.openmdx.application.xml.spi;
 
-import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.Collections;
 import java.util.Iterator;
 
@@ -60,6 +57,7 @@ import javax.xml.parsers.SAXParserFactory;
 
 import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;
+import org.openmdx.base.wbxml.WBXMLReader;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.log.SysLog;
 import org.xml.sax.ErrorHandler;
@@ -72,14 +70,31 @@ import org.xml.sax.XMLReader;
  */
 public class ImportHelper {
 
+    /**
+     * Constructor 
+     * <p>
+     * Validation and schema validation are disabled
+     */
 	public ImportHelper(
 	) {		
+	    this(false);
 	}
 
+	/**
+	 * Constructor 
+	 *
+	 * @param xmlValidation tells whether validation and schema validation are enabled or disabled
+	 */
+    public ImportHelper(
+        boolean xmlValidation
+    ) {     
+        this.xmlValidation = xmlValidation;
+    }
+	
     /**
      * The schema validation flag
      */
-    private static boolean SCHEMA_VALIDATION = false;
+    private boolean xmlValidation;
 	
     /**
      * Create an XML reader
@@ -88,31 +103,43 @@ public class ImportHelper {
      * @param errorHandler
      * 
      * @return a new <code>XMLReader</code>
+     * 
      * @throws ServiceException
      */
-    private static XMLReader newReader(
+    private XMLReader newReader(
         ImportHandler importHandler, 
         ErrorHandler errorHandler
-    )
-        throws ServiceException {
+    ) throws ServiceException {
         try {
-            SAXParser parser = SAXParserFactory.newInstance().newSAXParser();
-            SysLog.detail("SAX Parser", parser.getClass().getName());
-            XMLReader reader = parser.getXMLReader();
+            XMLReader reader;
+            boolean xmlValidation;
+            if(importHandler.isBinary()) {
+                reader = new WBXMLReader();
+                xmlValidation = false;
+            } else {
+                SAXParser parser = SAXParserFactory.newInstance().newSAXParser();
+                SysLog.detail("SAX Parser", parser.getClass().getName());
+                reader = parser.getXMLReader();
+                xmlValidation = this.xmlValidation;
+            }
             SysLog.detail("XML Reader", reader.getClass().getName());
             //
             // Features
             //
-            setFeature(reader, "http://xml.org/sax/features/namespaces", true);
+            setFeature(
+                reader, 
+                "http://xml.org/sax/features/namespaces", 
+                true
+            );
             setFeature(
                 reader,
                 "http://xml.org/sax/features/validation",
-                SCHEMA_VALIDATION
+                xmlValidation
             );
             setFeature(
                 reader,
                 "http://apache.org/xml/features/validation/schema",
-                SCHEMA_VALIDATION
+                xmlValidation
             );
             // 
             // Handlers
@@ -137,32 +164,6 @@ public class ImportHelper {
         }
     }
 
-    /**
-     * Determine the document URL
-     * 
-     * @param source the <code>InputSource</code>
-     * 
-     * @return the document <code>URL</code>
-     */
-    private static URL getDocumentURL(
-        InputSource source
-    ){
-        String uri = source.getSystemId();
-        if (uri == null) {
-            return null;
-        } else {
-            try {
-                return new URL(uri);
-            } catch (MalformedURLException exception) {
-                try {
-                    return new File(uri).toURI().toURL();
-                } catch (MalformedURLException exception1) {
-                    return null;
-                }
-            }
-        }
-    }
-    
     /**
      * Set the value of a feature.
      * 
@@ -210,7 +211,7 @@ public class ImportHelper {
      * 
      * @throws ServiceException  
      */
-    public static void importObjects (
+    public void importObjects (
         ImportTarget target,
         Iterable<InputSource> sources,
         ErrorHandler errorHandler
@@ -223,7 +224,7 @@ public class ImportHelper {
                     newReader(
                         new ImportHandler(
                             target, 
-                            getDocumentURL(source)
+                            source
                         ), 
                         errorHandler
                     ).parse(

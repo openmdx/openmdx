@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2009, OMEX AG, Switzerland
+ * Copyright (c) 2009-2012, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -51,13 +51,13 @@ import javax.naming.NamingException;
 import javax.naming.Reference;
 import javax.resource.ResourceException;
 import javax.resource.cci.Connection;
-import javax.resource.cci.ConnectionFactory;
 import javax.resource.cci.ConnectionSpec;
 import javax.resource.cci.RecordFactory;
 import javax.resource.cci.ResourceAdapterMetaData;
 
 import org.openmdx.base.Version;
 import org.openmdx.base.resource.Records;
+import org.openmdx.base.resource.cci.ConnectionFactory;
 import org.openmdx.base.resource.spi.RestInteractionSpec;
 import org.openmdx.base.resource.spi.Port;
 import org.openmdx.base.rest.cci.RestConnectionSpec;
@@ -225,7 +225,7 @@ public class ConnectionFactoryAdapter implements ConnectionFactory {
     private final ResourceAdapterMetaData metaData;
     
     /* (non-Javadoc)
-     * @see javax.resource.cci.ConnectionFactory#getConnection()
+     * @see org.openmdx.base.resource.cci.ConnectionFactory#getConnection()
      */
     public Connection getConnection(
     ) throws ResourceException {
@@ -238,13 +238,13 @@ public class ConnectionFactoryAdapter implements ConnectionFactory {
     }
 
     /* (non-Javadoc)
-     * @see javax.resource.cci.ConnectionFactory#getConnection(javax.resource.cci.ConnectionSpec)
+     * @see org.openmdx.base.resource.cci.ConnectionFactory#getConnection(javax.resource.cci.ConnectionSpec)
      */
     public Connection getConnection(
         ConnectionSpec properties
     ) throws ResourceException {
         return ConnectionAdapter.newInstance(
-            this, 
+            getMetaData(), 
             properties, 
             this.transactionAttribute,
             this.port
@@ -252,7 +252,7 @@ public class ConnectionFactoryAdapter implements ConnectionFactory {
     }
 
     /* (non-Javadoc)
-     * @see javax.resource.cci.ConnectionFactory#getMetaData()
+     * @see org.openmdx.base.resource.cci.ConnectionFactory#getMetaData()
      */
     public ResourceAdapterMetaData getMetaData(
     ) throws ResourceException {
@@ -260,7 +260,7 @@ public class ConnectionFactoryAdapter implements ConnectionFactory {
     }
 
     /* (non-Javadoc)
-     * @see javax.resource.cci.ConnectionFactory#getRecordFactory()
+     * @see org.openmdx.base.resource.cci.ConnectionFactory#getRecordFactory()
      */
     public RecordFactory getRecordFactory(
     ) throws ResourceException {

@@ -96,9 +96,11 @@
 		<ant dir="${openmdx.home}/core" inheritAll="false" target="deliverables">
 			<property name="build.target.platform" value="${build.java.platform}"/>
 		</ant> 
-		<antcall target="-preprocess-jt-files-">
-			<param name="preprocess-jt.target" value="java"/>
-		</antcall>
+		<!-- There are no JT files at the moment
+			<antcall target="-preprocess-jt-files-">
+				<param name="preprocess-jt.target" value="java"/>
+			</antcall>
+		-->
 		<antcall target="-preprocess-model-files-"/>
 	</target>
 

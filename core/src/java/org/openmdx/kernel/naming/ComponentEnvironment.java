@@ -94,7 +94,8 @@ public class ComponentEnvironment {
             try {
                 Context context = new InitialContext();
                 try {
-                    return objectClass.cast(context.lookup(jndiName));
+                    Object object = context.lookup(jndiName);
+                    return objectClass.cast(object);
                 } finally {
                     context.close();
                 }

@@ -628,31 +628,67 @@ public class DatabaseConfiguration {
             segment.indexOf('/') > 0 &&
             !segment.startsWith("("); 
     }
-    
+
     //---------------------------------------------------------------------------
-    public DbObjectConfiguration getDbObjectConfiguration(
+    public List<DbObjectConfiguration> getDbObjectConfigurations(
         Path path
     ) throws ServiceException {
         this.load();        
-        Path objectPath = path.size() % 2 == 0 ? path.getChild(":*") : path;
+        Path objectPattern = path.size() % 2 == 0 ? path.getChild(":*") : path;
+        List<DbObjectConfiguration> replies = new ArrayList<DbObjectConfiguration>();
         for(DbObjectConfiguration dbObjectConfiguration: this.dbObjectConfigurations.values()) {
-            Path type = dbObjectConfiguration.getType();
-            boolean matches = 
-                ((objectPath.size() == 1) && (type.size() == 1)) ||
-                objectPath.isLike(type);
-            if(matches) {
-                return dbObjectConfiguration;
+            Path typePattern = dbObjectConfiguration.getType();
+            if(objectPattern.isLike(typePattern)) {
+                replies.add(dbObjectConfiguration);
             }
         }
-        throw new ServiceException(
-            BasicException.Code.DEFAULT_DOMAIN,
-            BasicException.Code.ASSERTION_FAILURE, 
-            "No type configuration found for path",
-            new BasicException.Parameter("path", objectPath),            
-            new BasicException.Parameter("configuration", this.dbObjectConfigurations)
-        );
+        if(replies.isEmpty()) {
+            Path objectSuffix = new Path(objectPattern.getSuffix(1));
+            for(DbObjectConfiguration dbObjectConfiguration: this.dbObjectConfigurations.values()) {
+                Path typeSuffix = new Path(dbObjectConfiguration.getType().getSuffix(1));
+                if(typeSuffix.isLike(objectSuffix)) {
+                    replies.add(dbObjectConfiguration);
+                }
+            }
+        }
+        return replies;
     }
 
+    /**
+     * Get a single DB object configuration
+     * 
+     * @param path
+     * 
+     * @return the DB object configuration for the given path
+     * 
+     * @throws ServiceException if the cardinality was not 1
+     */
+    public DbObjectConfiguration getDbObjectConfiguration(
+        Path path
+    ) throws ServiceException {
+        List<DbObjectConfiguration> replies = getDbObjectConfigurations(path);
+        switch(replies.size()) {
+            case 0:
+                throw new ServiceException(
+                    BasicException.Code.DEFAULT_DOMAIN,
+                    BasicException.Code.INVALID_CARDINALITY, 
+                    "No type configuration found for the given path",
+                    new BasicException.Parameter("path", path),            
+                    new BasicException.Parameter("mismatching", this.dbObjectConfigurations)
+                );
+            case 1:
+                return replies.get(0);
+            default:
+                throw new ServiceException(
+                    BasicException.Code.DEFAULT_DOMAIN,
+                    BasicException.Code.INVALID_CARDINALITY, 
+                    "There is more than one type for the given path (maybe by ignoring the authority)",
+                    new BasicException.Parameter("path", path),            
+                    new BasicException.Parameter("matching", replies)
+                ); 
+        } 
+    }
+    
     //---------------------------------------------------------------------------
     public DbObjectConfiguration getDbObjectConfiguration(
         String typeName

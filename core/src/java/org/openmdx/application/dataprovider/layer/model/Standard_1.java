@@ -191,7 +191,7 @@ public class Standard_1 extends Layer_1 {
         if(touchNonDerivedFeatures) {
             ModelElement_1_0 classDef = this.getClassDef(facade);
             if(classDef != null) {
-                for(Map.Entry<String,ModelElement_1_0> feature : ((Map<String,ModelElement_1_0>)classDef.objGetValue("allFeature")).entrySet()) {
+                for(Map.Entry<String,ModelElement_1_0> feature : ((Map<String,ModelElement_1_0>)classDef.objGetMap("allFeature")).entrySet()) {
                     ModelElement_1_0 featureDef = feature.getValue();
                     if(
                         ModelHelper.isStoredAsAttribute(featureDef) &&

@@ -2,17 +2,14 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: WorkspacesDashlet.jsp,v 1.9 2012/07/08 12:59:06 wfro Exp $
  * Description: WorkspacesDashlet.jsp
- * Revision:    $Revision: 1.9 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2012/07/08 12:59:06 $
  * ====================================================================
  *
  * This software is published under the BSD license
  * as listed below.
  *
- * Copyright (c) 2004-2011, OMEX AG, Switzerland
+ * Copyright (c) 2004-2013, OMEX AG, Switzerland
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or
@@ -68,7 +65,6 @@ org.openmdx.portal.servlet.*,
 org.openmdx.portal.servlet.attribute.*,
 org.openmdx.portal.servlet.view.*,
 org.openmdx.portal.servlet.control.*,
-org.openmdx.portal.servlet.reports.*,
 org.openmdx.portal.servlet.wizards.*,
 org.openmdx.base.naming.*
 " %><%
@@ -114,14 +110,14 @@ org.openmdx.base.naming.*
 			boolean actionSelect = COMMAND_SELECT.equals(command);
 			boolean actionEdit = COMMAND_EDIT.equals(command);
 			
-			Path userHomeAdminIdentity = app.getUserHomeIdentity() == null ?
-				null :
-					app.getUserHomeIdentityAsPath().getParent().getDescendant(
-						app.getPortalExtension().getAdminPrincipal(app.getCurrentSegment())
-					);
+			Path userHomeAdminIdentity = app.getUserHomeIdentity() == null 
+				? null 
+				: app.getUserHomeIdentityAsPath().getParent().getDescendant(
+					app.getPortalExtension().getAdminPrincipal(app.getCurrentSegment())
+				  );
 			boolean isAdmin = 
-				(app.getUserHomeIdentity() == null) || 
-				(app.getUserHomeIdentity().equals(userHomeAdminIdentity));
+				app.getUserHomeIdentity() == null ||
+				app.getUserHomeIdentityAsPath().equals(userHomeAdminIdentity);
 		
 			Properties settings = app.getSettings();
 			if(actionSelect) {
@@ -163,13 +159,13 @@ org.openmdx.base.naming.*
 			}
 %>
 			<div id="<%= dashletId %>Content" style="padding:5px;min-width:150px;">
-			<form id="<%= dashletId %>Form" name="<%= dashletId %>Form" />
+			<form id="<%= dashletId %>Form" name="<%= dashletId %>Form">
 				<input type="hidden" name="<%= Action.PARAMETER_REQUEST_ID %>" value="<%= requestId %>" />
 				<input id="<%= WebKeys.REQUEST_PARAMETER %>" name="<%= WebKeys.REQUEST_PARAMETER %>" type="hidden" value="<%= parameters %>" />				
 				<input type="hidden" name="<%= Action.PARAMETER_OBJECTXRI %>" value="<%= xri %>" />
 				<input type="hidden" id="<%= FIELD_NAME_COMMAND %>" name="<%= FIELD_NAME_COMMAND %>" value="" />
 				<input type="hidden" id="<%= FIELD_NAME_PARAM %>" name="<%= FIELD_NAME_PARAM %>" value="" />
-				<table cellspacing="8" class="tableLayout">
+				<table class="tableLayout">
 					<tr>
 						<td class="cellObject">
 							<div class="panel" id="panel<%= dashletId %>" style="display:block">

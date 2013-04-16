@@ -58,8 +58,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Map.Entry;
+import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -72,6 +72,7 @@ import org.openmdx.base.collection.TreeSparseArray;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.loading.Classes;
+import org.openmdx.kernel.loading.Resources;
 import org.w3c.cci2.SparseArray;
 
 /**
@@ -353,7 +354,7 @@ public class PropertiesConfigurationProvider implements ConfigurationProvider_1_
             String name = source.getProperty(Constants.PROPERTY_NAME);
             Configuration target = name == null ? new Configuration(
             ) : new PropertiesConfigurationProvider(
-                "xri://+resource/META-INF/" + name + ".properties",
+                Resources.toMetaInfXRI(name + ".properties"),
                 true // strict
             ).getConfiguration(
                 section, 

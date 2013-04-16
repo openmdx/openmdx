@@ -5,6 +5,45 @@
        
 
 ==============================================================================
+Version 2.11.0                                                      2013-04-15
+==============================================================================
+
+1.    NEW FEATURES
+
+      CR20020217
+      openmdx-client.jar
+
+      The Java archive openmdx-client.jar combines the client relevant 
+      content of
+      * openmdx-system.jar
+      * openmdx-base.jar
+      * openmdx-security.jar
+      
+2.    CHANGES  
+     
+2.0.  CHANGED FEATURES
+      none
+             
+2.1.  FIXED BUGS
+      
+      CR10010472
+      validate() fails for Password creation. Set model properties for Credential::id
+      as follows: isReadOnly=true, isDerived=false, multiplicity=0..1.  
+      
+
+2.2.  DEPRECATED FEATURES
+      none
+            
+2.3   REMOVED FEATURES
+
+      CR20020217
+      openmdx-client.jar
+
+      openMDX/Security's java client archive has been replaced by
+      openMDX/Client's java client archives.
+
+
+==============================================================================
 Version 2.9.1                                                       2012-01-22
 ==============================================================================
 

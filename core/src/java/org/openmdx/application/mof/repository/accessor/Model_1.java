@@ -48,7 +48,9 @@
 package org.openmdx.application.mof.repository.accessor;
 
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.Reader;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -73,6 +75,7 @@ import javax.xml.datatype.Duration;
 import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.omg.mof.spi.AbstractNames;
+import org.omg.mof.spi.Names;
 import org.openmdx.application.configuration.Configuration;
 import org.openmdx.application.dataprovider.cci.AttributeSelectors;
 import org.openmdx.application.dataprovider.cci.DataproviderRequestProcessor;
@@ -82,15 +85,17 @@ import org.openmdx.application.dataprovider.spi.Layer_1;
 import org.openmdx.application.mof.cci.ModelAttributes;
 import org.openmdx.application.mof.cci.ModelConstraints;
 import org.openmdx.application.mof.cci.ModelExceptions;
-import org.openmdx.application.mof.mapping.xmi.XMINames;
+import org.openmdx.application.mof.mapping.xmi.XMIMapper_1;
 import org.openmdx.application.xml.spi.DataproviderTarget;
 import org.openmdx.application.xml.spi.ImportHelper;
+import org.openmdx.application.xml.spi.MapTarget;
 import org.openmdx.base.accessor.cci.DataObject_1_0;
 import org.openmdx.base.accessor.cci.Structure_1_0;
 import org.openmdx.base.accessor.cci.SystemAttributes;
 import org.openmdx.base.collection.Maps;
 import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;
+import org.openmdx.base.marshalling.Marshaller;
 import org.openmdx.base.mof.cci.AggregationKind;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
 import org.openmdx.base.mof.cci.ModelHelper;
@@ -106,6 +111,7 @@ import org.openmdx.base.rest.spi.Facades;
 import org.openmdx.base.rest.spi.Object_2Facade;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.loading.Classes;
+import org.openmdx.kernel.loading.Resources;
 import org.openmdx.kernel.log.SysLog;
 import org.openmdx.kernel.url.protocol.XRI_2Protocols;
 import org.w3c.cci2.LargeObject;
@@ -118,33 +124,26 @@ import org.xml.sax.InputSource;
  */
 //---------------------------------------------------------------------------
 @SuppressWarnings({"rawtypes","unchecked"})
-public class Model_1 implements Model_1_0 {
+public class Model_1 implements Marshaller, Model_1_0 {
 
-    //-------------------------------------------------------------------------
-    public static Model_1_0 getInstance(
-    ) throws ServiceException {
-        return new Model_1();
-    }
-    
-    //-------------------------------------------------------------------------
-    public static Model_1_0 getInstance(
-        Dataprovider_1_0 repository,
-        boolean force
-    ) throws ServiceException {
-       return new Model_1(
-           repository, 
-           force
-       ); 
-    }
-    
-    //-------------------------------------------------------------------------
-    private Model_1(
+    /**
+     * This constructor is invoked reflectively 
+     *
+     * @throws ServiceException
+     */
+    public Model_1(
     ) throws ServiceException {
         this.repository = Model_1.createRepository(null);          
         this.setupRepository();
     }
 
-    //-------------------------------------------------------------------------
+    /**
+     * Constructor 
+     *
+     * @param repository
+     * @param force
+     * @throws ServiceException
+     */
     private Model_1(
         Dataprovider_1_0 repository,
         boolean force
@@ -154,6 +153,91 @@ public class Model_1 implements Model_1_0 {
         this.setupRepository();
     }
 
+    /* (non-Javadoc)
+     * @see org.openmdx.base.io.Externalizable#save(java.io.OutputStream, java.lang.String)
+     */
+    @Override
+    public void save(
+        OutputStream target, 
+        String mimeType
+    ) throws ServiceException {
+        new XMIMapper_1().externalizeRepository(
+            this,
+            target,
+            mimeType
+        );
+    }
+
+    /* (non-Javadoc)
+     * @see org.openmdx.base.io.Externalizable#load(java.io.InputStream)
+     */
+    @Override
+    public void load(
+        InputStream source
+    ) throws ServiceException {
+        Map<Path, MappedRecord> content = new HashMap<Path, MappedRecord>();
+        new ImportHelper().importObjects(
+            new MapTarget(content),
+            ImportHelper.asSource(new InputSource(source)), 
+            null // errorHandler
+        ); 
+        futureCache = new HashMap<String,ModelElement_1_0>();
+        for(Map.Entry<Path, MappedRecord> entry : content.entrySet()) {
+            if(!"org:omg:model1:Segment".equals(Object_2Facade.getObjectClass(entry.getValue()))){
+                futureCache.put(
+                    entry.getKey().getBase(),
+                    new ModelElement_1(entry.getValue(), this)
+                );
+            }
+        }
+        for(Map.Entry<String,ModelElement_1_0> entry : futureCache.entrySet()){
+            ModelElement_1_0 element = entry.getValue();
+            List<Object> objectInstanceOf = element.objGetList(SystemAttributes.OBJECT_INSTANCE_OF);
+            for(Object p : futureCache.get(element.objGetClass()).objGetList("allSupertype")) {
+                objectInstanceOf.add(((Path)p).getBase());
+            }
+        }
+        this.activatePreparedCache();
+        this.refreshAssociationDefs();
+        this.structuralFeatureDefMap.clear();
+        this.sharedAssociations.clear();
+    }
+
+    /* (non-Javadoc)
+     * @see org.openmdx.base.marshalling.Marshaller#marshal(java.lang.Object)
+     */
+    @Override
+    public Object marshal(
+        Object source
+    ) throws ServiceException {
+        return source instanceof Path ?
+           (this.futureCache == null ? this.cache : this.futureCache).get(((Path)source).getBase()) :
+            source;
+    }
+
+    /* (non-Javadoc)
+     * @see org.openmdx.base.marshalling.Marshaller#unmarshal(java.lang.Object)
+     */
+    @Override
+    public Object unmarshal(
+        Object source
+    ) throws ServiceException {
+        return source instanceof ModelElement_1_0 ? 
+            ((ModelElement_1_0)source).jdoGetObjectId() :
+            source;
+    }
+
+    //-------------------------------------------------------------------------
+    public static Model_1_0 getInstance(
+        Dataprovider_1_0 repository,
+        boolean force
+        ) throws ServiceException {
+        return new Model_1(
+            repository, 
+            force
+            ); 
+    }
+    
     //-------------------------------------------------------------------------
     private void setupRepository(
     ) throws ServiceException {
@@ -351,7 +435,8 @@ public class Model_1 implements Model_1_0 {
 
     //-------------------------------------------------------------------------
     private void loadModels(
-        Collection<String> qualifiedPackageNames
+        Collection<String> qualifiedPackageNames,
+        ImportHelper importHelper
     ) throws ServiceException {
 
         // get exclusive access to repository. Synchronize with
@@ -373,25 +458,18 @@ public class Model_1 implements Model_1_0 {
                     if(this.cache.get(qualifiedModelName) == null) {
                         if(!importing) {
                             // beginImport
-                            try {
-                                MessageRecord params = (MessageRecord) Records.getRecordFactory().createMappedRecord(MessageRecord.NAME);
-                                params.setPath(PROVIDER_ROOT_PATH.getDescendant("segment", "-", "beginImport"));
-                                params.setBody(null);
-                                this.channel.addOperationRequest(params);
-                            } catch (ResourceException e) {
-                                throw new ServiceException(e);
-                            }
+                            MessageRecord params = (MessageRecord) newMappedRecord(MessageRecord.NAME);
+                            params.setPath(PROVIDER_ROOT_PATH.getDescendant("segment", "-", "beginImport"));
+                            params.setBody(null);
+                            this.channel.addOperationRequest(params);
                             importing = true;
                         }        
                         // load model from XMI resource
-                        String xmlResource = XRI_2Protocols.RESOURCE_PREFIX + this.toJavaPackageName(
-                            qualifiedPackageName,
-                            XMINames.XMI_PACKAGE_SUFFIX
-                        ).replace('.', '/') + '/' + modelName + "_edit.xml";
+                        String xmlResource = getResourceURI(qualifiedPackageName, modelName);
                         SysLog.detail("loading model " + modelName + " from " + xmlResource);
                         // Avoid org.openmdx.application.xml.Importer references 
                         // for bootstrap dependency reasons!
-                        ImportHelper.importObjects(
+                        importHelper.importObjects(
                             new DataproviderTarget(this.channel),
                             ImportHelper.asSource(new InputSource(xmlResource)), 
                             null // errorHandler
@@ -405,15 +483,11 @@ public class Model_1 implements Model_1_0 {
             if(isDirty) {
                 if(importing) {
                     // endImport
-                    try {
-                        MessageRecord params = (MessageRecord) Records.getRecordFactory().createMappedRecord(MessageRecord.NAME);
-                        params.setPath(PROVIDER_ROOT_PATH.getDescendant("segment", "-", "endImport"));
-                        params.setBody(null);
-                        this.channel.addOperationRequest(params);
-                    }  catch (ResourceException e) {
-                        throw new ServiceException(e);
-                    }
-                }    
+                    MessageRecord params = (MessageRecord) newMappedRecord(MessageRecord.NAME);
+                    params.setPath(PROVIDER_ROOT_PATH.getDescendant("segment", "-", "endImport"));
+                    params.setBody(null);
+                    this.channel.addOperationRequest(params);
+                }
                 // retrieve imported and merged models and update cache    
                 this.refreshCache();
                 this.refreshAssociationDefs();
@@ -423,6 +497,33 @@ public class Model_1 implements Model_1_0 {
         }
     }
     //---------------------------------------------------------------------------
+
+    /**
+     * Retrieve the model URI<ol>
+     * <li>try to locate the WBXML resource URL
+     * <li>fall back to the XML resource XRI
+     * </ol>
+     * 
+     * @param qualifiedPackageName
+     * @param modelName
+     * 
+     * @return the model resource URI 
+     *   
+     * @throws ServiceException
+     */
+    private String getResourceURI(
+        String qualifiedPackageName, 
+        String modelName
+    ) throws ServiceException {
+        String resourcePath = this.toJavaPackageName(
+            qualifiedPackageName,
+            Names.XMI_PACKAGE_SUFFIX
+        ).replace('.', '/') + '/' + modelName;
+        URL resourceURL = Resources.getResource(resourcePath + ".wbxml");
+        return resourceURL == null ? (
+            XRI_2Protocols.RESOURCE_PREFIX + resourcePath + ".xml" 
+        ) : resourceURL.toExternalForm();  
+    }
 
     /**
      * Provides mappings for openMDX 1/2 model name changes.
@@ -463,31 +564,43 @@ public class Model_1 implements Model_1_0 {
              * Add only associations used in references to the list of AssociationDefs
              */
             if(elementDef.objGetClass().equals(ModelAttributes.REFERENCE)) {
-                Path referencedEndPath = (Path)elementDef.objGetValue("referencedEnd");
-                Path exposedEndPath = (Path)elementDef.objGetValue("exposedEnd");
-                String referenceName = (String)elementDef.objGetValue("name");
-                List<AssociationDef> associationDefs = null;
-                if((associationDefs = associationDefMap.get(referenceName)) == null) {
-                    associationDefMap.put(
-                        referenceName,
-                        associationDefs = new ArrayList<AssociationDef>()
-                    );
-                }
-                associationDefs.add(
-                    new AssociationDef(
-                        this.getDereferencedType(
-                            getElement(exposedEndPath).objGetValue("type")
-                        ),
-                        this.getDereferencedType(
-                            getElement(referencedEndPath).objGetValue("type")
-                        ),
-                        elementDef,
-                        this
-                    )
-                );
+                addAssociationDef(associationDefMap, elementDef);
             }
         }
         this.associationDefMap = associationDefMap;
+    }
+
+    /**
+     * @param associationDefMap
+     * @param elementDef
+     * @throws ServiceException
+     */
+    private void addAssociationDef(
+        Map<String, List<AssociationDef>> associationDefMap,
+        ModelElement_1_0 elementDef)
+        throws ServiceException {
+        Path referencedEndPath = (Path)elementDef.objGetValue("referencedEnd");
+        Path exposedEndPath = (Path)elementDef.objGetValue("exposedEnd");
+        String referenceName = (String)elementDef.objGetValue("name");
+        List<AssociationDef> associationDefs = associationDefMap.get(referenceName);
+        if(associationDefs == null) {
+            associationDefMap.put(
+                referenceName,
+                associationDefs = new ArrayList<AssociationDef>()
+            );
+        }
+        associationDefs.add(
+            new AssociationDef(
+                this.getDereferencedType(
+                    getElement(exposedEndPath).objGetValue("type")
+                ),
+                this.getDereferencedType(
+                    getElement(referencedEndPath).objGetValue("type")
+                ),
+                elementDef,
+                this
+            )
+        );
     }
 
     //---------------------------------------------------------------------------
@@ -905,7 +1018,8 @@ public class Model_1 implements Model_1_0 {
                     new BasicException.Parameter("context", validationContext)
                 );        
             }       
-            Map<String,ModelElement_1_0> fieldDefs = (Map<String,ModelElement_1_0>)typeDef.objGetValue("field");
+            @SuppressWarnings("cast")
+            Map<String,ModelElement_1_0> fieldDefs = (Map<String,ModelElement_1_0>)typeDef.objGetMap("field");
             // complete fieldNames with all required fields in case of includeRequired
             if((fieldDefs != null) && enforceRequired) {
                 for(
@@ -1153,6 +1267,15 @@ public class Model_1 implements Model_1_0 {
     // Model_1_0
     //-------------------------------------------------------------------------
 
+    private Map<String,ModelElement_1_0> newMappedRecord(
+        String type
+    ) throws ServiceException{
+        try {
+            return Records.getRecordFactory().createMappedRecord(type);
+        } catch (ResourceException exception) {
+            throw new ServiceException(exception);
+        }
+    }
     //-------------------------------------------------------------------------
     /**
      * Refreshes the element cache. In addition performs the following operations: 
@@ -1168,7 +1291,7 @@ public class Model_1 implements Model_1_0 {
 
         SysLog.trace("refreshing cache...");   
 
-        Map<String,ModelElement_1_0> cache = new HashMap<String,ModelElement_1_0>();
+        futureCache = new HashMap<String,ModelElement_1_0>();
 
         // get exclusive access to repository. synchronize
         // with possibly concurrent loaders
@@ -1200,21 +1323,21 @@ public class Model_1 implements Model_1_0 {
                     j.hasNext();
                 ) {
                     MappedRecord elementDef = j.next();
-                    cache.put(
+                    futureCache.put(
                         Object_2Facade.getPath(elementDef).getBase(),
                         new ModelElement_1(elementDef, this)
                     ); 
                 }
             }
         }
-        SysLog.detail("#elements in cache", new Integer(cache.size()));
+        SysLog.detail("#elements in cache", new Integer(futureCache.size()));
         /**
          * Complete attributes 'attribute' and 'reference' for class elements
          * and 'field' for structures. This improves performance when accessing
          * the features and fields of classes and structures.
          */
         for(
-            Iterator<ModelElement_1_0> i = cache.values().iterator();
+            Iterator<ModelElement_1_0> i = futureCache.values().iterator();
             i.hasNext();
         ) {
             ModelElement_1_0 element = i.next();
@@ -1228,16 +1351,16 @@ public class Model_1 implements Model_1_0 {
                 content = element.objGetList("feature");
             }
             if(content != null) {        
-                Map<String,ModelElement_1_0> attributes = new HashMap<String,ModelElement_1_0>();
-                Map<String,ModelElement_1_0> references = new HashMap<String,ModelElement_1_0>();
-                Map<String,ModelElement_1_0> fields = new HashMap<String,ModelElement_1_0>();
-                Map<String,ModelElement_1_0> operations = new HashMap<String,ModelElement_1_0>();
+                Map<String,ModelElement_1_0> attributes = element.objGetMap("attribute");
+                Map<String,ModelElement_1_0> references = element.objGetMap("reference");
+                Map<String,ModelElement_1_0> fields = element.objGetMap("field");
+                Map<String,ModelElement_1_0> operations = element.objGetMap("operation");
                 for(
                     Iterator<?> j = content.iterator();
                     j.hasNext();
                 ) {
                     Path contentElementPath = (Path)j.next();
-                    if(!cache.containsKey(contentElementPath.getBase())) {
+                    if(!futureCache.containsKey(contentElementPath.getBase())) {
                         throw new ServiceException (
                             BasicException.Code.DEFAULT_DOMAIN, 
                             BasicException.Code.NOT_FOUND, 
@@ -1246,7 +1369,7 @@ public class Model_1 implements Model_1_0 {
                             new BasicException.Parameter("element", contentElementPath.getBase())
                         );
                     }
-                    ModelElement_1_0 contentElement = cache.get(
+                    ModelElement_1_0 contentElement = futureCache.get(
                         contentElementPath.getBase()
                     );
                     if(contentElement.objGetClass().equals(ModelAttributes.ATTRIBUTE)) {
@@ -1267,7 +1390,7 @@ public class Model_1 implements Model_1_0 {
                             contentElement
                         );
                         // add references stored as attribute to the list of attributes
-                        if(this.referenceIsStoredAsAttribute(contentElement.jdoGetObjectId(), cache)) {
+                        if(this.referenceIsStoredAsAttribute(contentElement.jdoGetObjectId(), futureCache)) {
                             ModelElement_1_0 attribute = new ModelElement_1(
                                 contentElement
                             );
@@ -1278,7 +1401,7 @@ public class Model_1 implements Model_1_0 {
                             attribute.objSetValue(
                                 "isDerived",
                                 Boolean.valueOf(
-                                    this.referenceIsDerived(contentElement, cache)
+                                    this.referenceIsDerived(contentElement, futureCache)
                                 )
                             );
                             // Maximum length of path
@@ -1287,7 +1410,7 @@ public class Model_1 implements Model_1_0 {
                                 new Integer(1024)
                             );
                             // If reference has a qualifier --> multiplicity 0..n
-                            if(!this.getElement(contentElement.objGetValue("referencedEnd"), cache).objGetList("qualifierName").isEmpty()) {
+                            if(!this.getElement(contentElement.objGetValue("referencedEnd"), futureCache).objGetList("qualifierName").isEmpty()) {
                                 attribute.objSetValue("multiplicity", ModelHelper.UNBOUNDED);
                             }
                             SysLog.trace("referenceIsStoredAsAttribute", attribute.jdoGetObjectId());
@@ -1304,61 +1427,65 @@ public class Model_1 implements Model_1_0 {
                         );
                     }
                 }
-                element.objSetValue("attribute", attributes);
-                element.objSetValue("reference", references);
-                element.objSetValue("operation", operations);
-                element.objSetValue("field", fields);
             }
         }
         // Complete allFeature
         for(
-            Iterator<ModelElement_1_0> i = cache.values().iterator();
+            Iterator<ModelElement_1_0> i = futureCache.values().iterator();
             i.hasNext();
         ) {
-            ModelElement_1_0 classDef = i.next();      
+            ModelElement_1_0 classDef = i.next();
             if(classDef.objGetClass().equals(ModelAttributes.CLASS)) {
-                Map<String,ModelElement_1_0> allFeature = new HashMap<String,ModelElement_1_0>();
+                Map<String,ModelElement_1_0> allFeature = classDef.objGetMap("allFeature");
+                List<Object> allSupertypes = classDef.objGetList("allSupertype");
                 for(
-                    Iterator<?> j = classDef.objGetList("allSupertype").iterator();
+                    Iterator<?> j = allSupertypes.iterator();
                     j.hasNext();
                 ) {
                     ModelElement_1_0 supertype = this.getElement(
                         j.next(),
-                        cache
+                        futureCache
                     );
-                    allFeature.putAll((Map)supertype.objGetValue("attribute"));
-                    allFeature.putAll((Map)supertype.objGetValue("reference"));
-                    allFeature.putAll((Map)supertype.objGetValue("operation"));
+                    allFeature.putAll(supertype.objGetMap("attribute"));
+                    allFeature.putAll(supertype.objGetMap("reference"));
+                    allFeature.putAll(supertype.objGetMap("operation"));
                 }
-                classDef.objSetValue("allFeature", allFeature);
             }
         }
         // Complete allFeatureWithSubtype
         for(
-            Iterator<ModelElement_1_0> i = cache.values().iterator();
+            Iterator<ModelElement_1_0> i = futureCache.values().iterator();
             i.hasNext();
         ) {
             ModelElement_1_0 classDef = i.next();      
             if(classDef.objGetClass().equals(ModelAttributes.CLASS)) {
-                Map<String,ModelElement_1_0> allFeatureWithSubtype = new HashMap<String,ModelElement_1_0>((Map)classDef.objGetValue("allFeature"));
+                Map<String,ModelElement_1_0> allFeatureWithSubtype = classDef.objGetMap("allFeatureWithSubtype");
+                allFeatureWithSubtype.putAll(classDef.objGetMap("allFeature"));
                 for(
                     Iterator<?> j = classDef.objGetList("allSubtype").iterator();
                     j.hasNext();
                 ) {
                     ModelElement_1_0 subtype = this.getElement(
                         j.next(), 
-                        cache
+                        futureCache
                     );
-                    allFeatureWithSubtype.putAll((Map)subtype.objGetValue("attribute"));
-                    allFeatureWithSubtype.putAll((Map)subtype.objGetValue("reference"));        
-                    allFeatureWithSubtype.putAll((Map)subtype.objGetValue("operation"));        
+                    allFeatureWithSubtype.putAll(subtype.objGetMap("attribute"));
+                    allFeatureWithSubtype.putAll(subtype.objGetMap("reference"));        
+                    allFeatureWithSubtype.putAll(subtype.objGetMap("operation"));        
                 }
-                classDef.objSetValue("allFeatureWithSubtype", allFeatureWithSubtype);
             }
         }
 
-        this.cache = cache; // activate the new cache
+        activatePreparedCache();
         SysLog.trace("done refreshing cache");
+    }
+
+    /**
+     * Activate the new cache
+     */
+    private void activatePreparedCache() {
+        this.cache = futureCache; 
+        futureCache = null;
     }
 
     //-------------------------------------------------------------------------
@@ -1366,7 +1493,22 @@ public class Model_1 implements Model_1_0 {
         Collection<String> qualifiedPackageNames
     ) throws ServiceException {
         this.loadModels(
-            qualifiedPackageNames
+            qualifiedPackageNames,
+            new ImportHelper()
+        );
+    }
+    
+    /* (non-Javadoc)
+     * @see org.openmdx.base.mof.cci.Model_1_0#addModels(java.util.Collection, boolean)
+     */
+    @Override
+    public void addModels(
+        Collection<String> qualifiedModelNames,
+        boolean schemaValidation
+    ) throws ServiceException {
+        this.loadModels(
+            qualifiedModelNames,
+            new ImportHelper(schemaValidation)
         );
     }
 
@@ -1494,7 +1636,7 @@ public class Model_1 implements Model_1_0 {
 
         // Structure
         if(this.isStructureType(classifierDef)) {
-            if((featureDef = (ModelElement_1_0)((Map<?,?>)classifierDef.objGetValue("field")).get(feature)) != null) {
+            if((featureDef = (ModelElement_1_0)classifierDef.objGetMap("field").get(feature)) != null) {
                 return featureDef;
             }
         }
@@ -1503,14 +1645,14 @@ public class Model_1 implements Model_1_0 {
             if(includeSubtypes) {
                 // references stored as attributes are in maps allReference and allAttribute. 
                 // give allReference priority in case feature is a reference
-                if((featureDef = (ModelElement_1_0)((Map<?,?>)classifierDef.objGetValue("allFeatureWithSubtype")).get(feature)) != null) {
+                if((featureDef = (ModelElement_1_0)classifierDef.objGetMap("allFeatureWithSubtype").get(feature)) != null) {
                     return featureDef;
                 }
             }
             else {
                 // references stored as attributes are in maps allReference and allAttribute. 
                 // give allReference priority in case feature is a reference
-                if((featureDef = (ModelElement_1_0)((Map<?,?>)classifierDef.objGetValue("allFeature")).get(feature)) != null) {
+                if((featureDef = (ModelElement_1_0)classifierDef.objGetMap("allFeature").get(feature)) != null) {
                     return featureDef;
                 }
             }
@@ -1585,7 +1727,7 @@ public class Model_1 implements Model_1_0 {
                     );
                     for(int kk = 0; kk < 2; kk++) {
                         boolean bAttributesOnly = kk == 0; 
-                        Map<String,ModelElement_1_0> featureDefs = (Map<String,ModelElement_1_0>)classDef.objGetValue(
+                        Map<String,ModelElement_1_0> featureDefs = classDef.objGetMap(
                             bIncludeSubtypes ? "allFeatureWithSubtype" : "allFeature"
                         );
                         Map<String,ModelElement_1_0> structuralFeatureDefs = new HashMap<String,ModelElement_1_0>();
@@ -2278,7 +2420,7 @@ public class Model_1 implements Model_1_0 {
         );
         return pattern;
     }
-
+    
     //-------------------------------------------------------------------------
     // Members
     //-------------------------------------------------------------------------
@@ -2297,6 +2439,7 @@ public class Model_1 implements Model_1_0 {
     private volatile Map<String,List<AssociationDef>> associationDefMap = new HashMap<String,List<AssociationDef>>();
     private volatile ConcurrentMap<Path,Map<Boolean,Map<Boolean,Map<Boolean,Map<String,ModelElement_1_0>>>>> structuralFeatureDefMap = new ConcurrentHashMap<Path,Map<Boolean,Map<Boolean,Map<Boolean,Map<String,ModelElement_1_0>>>>>();
     private volatile Map<String,ModelElement_1_0> cache = new HashMap<String,ModelElement_1_0>();
+    private volatile Map<String,ModelElement_1_0> futureCache = null;
     private volatile ConcurrentMap<Path,Boolean> sharedAssociations = new ConcurrentHashMap<Path,Boolean>();
 
     /**
@@ -2304,7 +2447,7 @@ public class Model_1 implements Model_1_0 {
      * 
      * @see Model_1#TO_MODEL_PACKAGE_NAMES
      */
-    private static String[] FROM_MODEL_PACKAGE_NAMES = {
+    private final static String[] FROM_MODEL_PACKAGE_NAMES = {
         "org:oasis_open",
         "org:omg:primitiveTypes"   
     };
@@ -2315,7 +2458,7 @@ public class Model_1 implements Model_1_0 {
      * 
      * @see Model_1#FROM_MODEL_PACKAGE_NAMES
      */
-    private static String[] TO_MODEL_PACKAGE_NAMES = {
+    private final static String[] TO_MODEL_PACKAGE_NAMES = {
         "org:oasis-open",
         "org:omg:PrimitiveTypes"
     };

@@ -3,6 +3,9 @@ package test.openmdx.base.text.conversion;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.xml.datatype.DatatypeConstants;
 
@@ -79,9 +82,28 @@ public class TestXMLGregorianCalendar {
         "</java>", 
     };
 
+   private Map<?,String> parse(String line) {
+       line = line.trim();
+       if(line.startsWith("<") && line.endsWith(">")){
+           Map<Object,String> map = new HashMap<Object, String>();
+           int i = 0;
+           for(String entry : line.substring(1, line.length() - 1).split("\\s+")){
+               int e = entry.indexOf('=');
+               if(e < 0) {
+                   map.put(Integer.valueOf(++i), entry);
+               } else {
+                   map.put(entry.substring(0, e), entry.substring(e + 1));
+               }
+           }
+           return map;       
+       } else {
+           return Collections.singletonMap(Integer.valueOf(0), line);
+       }
+   }
+   
     /**
      * Validate everything except the java version
-     * 
+     * Hash
      * @param query
      * @throws IOException
      */
@@ -96,7 +118,7 @@ public class TestXMLGregorianCalendar {
             line1.startsWith("<java version=\"") && line1.endsWith("\" class=\"java.beans.XMLDecoder\">")
         );
         for(int i = 2; i < expected.length; i++) {
-            Assert.assertEquals("Line " + i, expected[i], actual.readLine().trim());
+            Assert.assertEquals("Line " + i, parse(expected[i]), parse(actual.readLine()));
         }
     }
     

@@ -52,18 +52,30 @@
  */
 package org.openmdx.base.text.conversion;
 
+import java.util.Arrays;
+import java.util.List;
+
+/**
+ * HtmlEncoder
+ *
+ */
 public class HtmlEncoder {
 
-    //-----------------------------------------------------------------------
+    /**
+     * Constructor 
+     *
+     */
     private HtmlEncoder(
     ) {
         super();
     }
 
-    //-----------------------------------------------------------------------
     /**
      * Html encodes the given string. xssChars and unknown html tags are escaped.
      * 
+     * @param s
+     * @param forEditing
+     * @return
      */
     public static String encode(
         String s,
@@ -104,19 +116,17 @@ public class HtmlEncoder {
                 int k = c - '"';
                 if(
                     (k >= 0) && 
-                    (k < XSS_CHARS.length) && 
-                    (XSS_CHARS[k] != null) && 
+                    (k < XSS_CHARS.size()) && 
+                    (XSS_CHARS.get(k) != null) && 
                     !s.startsWith("&#", i)
                 ) {
-                    target.append(XSS_CHARS[k]);
-                } 
-                else if(c >= 128) {            
+                    target.append(XSS_CHARS.get(k));
+                } else if(c >= 128) {
                     target
                     .append("&#")
                     .append(Integer.toString(c))
                     .append(";");                                
-                }
-                else {
+                } else {
                     target.append(c);
                 }
                 i++;
@@ -126,14 +136,49 @@ public class HtmlEncoder {
         return t;
     }
 
+    /**
+     * Return true if string contains well-known HTML tags. XSS_CHARs are ignored.
+     * 
+     * @param s
+     * @return
+     */
+    public static boolean containsHtml(
+        String s
+    )  {
+        for(String knownTag: KNOWN_TAGS) {
+            if(s.indexOf(knownTag) >= 0 && !XSS_CHARS.contains(knownTag)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Return true if string value is Wiki formatted.
+     * 
+     * @param s
+     * @return
+     */
+    public static boolean containsWiki(
+        String s
+    ) {
+        return
+            s.indexOf("\n= ") >= 0 || s.startsWith("= ") ||
+            s.indexOf("\n== ") >= 0 || s.startsWith("== ") ||
+            s.indexOf("\n=== ") >= 0 || s.startsWith("=== ") ||
+            s.indexOf("\n[") >= 0 || s.startsWith("[") ||
+            s.indexOf("\n* ") >= 0 || s.startsWith("* ") ||
+            (s.indexOf("[%") >= 0 && s.indexOf("%]") > 0);
+    }
+
     //-----------------------------------------------------------------------
     // Members
     //-----------------------------------------------------------------------
-    private static final String XSS_CHARS[] = {
+    private static final List<String> XSS_CHARS = Arrays.asList(
         "&quot;", null, null, null, "&amp;", "&#39;", null, null, null, null,
         null, null, null, null, null, null, null, null, null, null,
         null, null, null, null, null, "&#59;", "&lt;", null, "&gt;", null, "&#64;"
-    };
+    );
     private static final String KNOWN_TAGS[] = {
         "&nbsp;", "&quot;", "&amp;", "&lt;", "&gt;",
         "<b>", "</b>", "<i>", "</i>", "<u>", "</u>", "<big>", "</big>",

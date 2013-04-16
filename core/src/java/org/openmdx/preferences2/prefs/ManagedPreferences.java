@@ -52,9 +52,11 @@ import java.util.List;
 import java.util.prefs.AbstractPreferences;
 import java.util.prefs.BackingStoreException;
 
-import javax.jdo.JDOHelper;
 import javax.jdo.PersistenceManager;
 
+import org.openmdx.base.persistence.cci.PersistenceHelper;
+import org.openmdx.base.persistence.cci.UnitOfWork;
+import org.openmdx.kernel.jdo.ReducedJDOHelper;
 import org.openmdx.preferences2.cci2.NodeQuery;
 import org.openmdx.preferences2.jmi1.Entry;
 import org.openmdx.preferences2.jmi1.Node;
@@ -62,7 +64,7 @@ import org.openmdx.preferences2.jmi1.Node;
 /**
  * Standard Preferences
  */
-class ManagedPreferences extends AbstractPreferences {
+class ManagedPreferences extends AbstractPreferences implements Retrievable {
 
     /**
      * Constructor 
@@ -101,7 +103,16 @@ class ManagedPreferences extends AbstractPreferences {
      * @return the persistence manager associated with the root node
      */
     protected PersistenceManager jmiEntityManager(){
-        return JDOHelper.getPersistenceManager(this.node);
+        return ReducedJDOHelper.getPersistenceManager(this.node);
+    }
+
+    /**
+     * Retrieve the unit of work associated with the root node
+     * 
+     * @return the unit of work associated with the root node
+     */
+    protected UnitOfWork currentUnitOfWork(){
+        return PersistenceHelper.currentUnitOfWork(jmiEntityManager());
     }
     
     /* (non-Javadoc)
@@ -242,7 +253,7 @@ class ManagedPreferences extends AbstractPreferences {
     public void sync(
     ) throws BackingStoreException {
         flush();
-        super.sync();
+        PersistenceHelper.retrieveAllDescendants(this.node);
     }
 
     /* (non-Javadoc)
@@ -251,13 +262,7 @@ class ManagedPreferences extends AbstractPreferences {
     @Override
     protected void syncSpi(
     ) throws BackingStoreException {
-        try {
-            PersistenceManager entityManager = jmiEntityManager();
-            entityManager.refresh(this.node);
-            entityManager.refreshAll(this.node.getEntry());
-        } catch (RuntimeException exception) {
-            throw new BackingStoreException(exception);
-        }
+        // We did override sync() instead
     }
     
     /* (non-Javadoc)
@@ -280,6 +285,20 @@ class ManagedPreferences extends AbstractPreferences {
     protected void flushSpi(
     ) throws BackingStoreException {
         // We did override flush() instead
+    }
+
+    /* (non-Javadoc)
+     * @see org.openmdx.preferences2.prefs.Retrievable#retrieve()
+     */
+//  @Override
+    public void retrieveAll() {
+        PersistenceHelper.retrieveAllDescendants(
+            ReducedJDOHelper.getPersistenceManager(
+                this.node
+            ).getObjectById(
+                this.node.refGetPath().getPrefix(7)
+            )
+        );
     }
 
 }

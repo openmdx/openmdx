@@ -171,7 +171,7 @@ public class SimplePort extends HttpPort {
     ) throws ResourceException {
         return new SimpleInteraction(
             connection, 
-            this.getConnectionURL(), 
+            this, 
             this.newCookieHandler()
         );
     }
@@ -220,10 +220,10 @@ public class SimplePort extends HttpPort {
          */
         protected SimpleInteraction(
             Connection connection,
-            String contextURL,
+            HttpContext httpContext,
             CookieHandler cookieHandler
         ) throws ResourceException {
-            super(connection, contextURL);
+            super(connection, httpContext);
             this.cookieHandler = cookieHandler;
             try {
                 this.cookieURI = new URI(contextURL);
@@ -247,7 +247,7 @@ public class SimplePort extends HttpPort {
          * @see org.openmdx.application.rest.http.HttpPort.PlainVanillaInteraction#getResponseCode(java.net.HttpURLConnection)
          */
         @Override
-        protected int getStatus(
+        public int getStatus(
             HttpURLConnection urlConnection
         ) throws IOException {
             int status = super.getStatus(urlConnection);

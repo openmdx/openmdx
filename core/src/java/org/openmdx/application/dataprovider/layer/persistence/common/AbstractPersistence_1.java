@@ -73,8 +73,12 @@ import org.openmdx.base.naming.Path;
 
 abstract public class AbstractPersistence_1 extends OperationAwareLayer_1 {
 
-    public AbstractPersistence_1(
+    /**
+     * Constructor 
+     */
+    protected AbstractPersistence_1(
     ) {
+        super();
     }
     
     /* (non-Javadoc)

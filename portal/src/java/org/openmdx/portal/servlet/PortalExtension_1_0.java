@@ -74,7 +74,8 @@ import org.openmdx.ui1.jmi1.ValuedField;
 public interface PortalExtension_1_0 {
 
     /**
-     * Evaluates the title obj the object refObj.
+     * Evaluates the object title of the given object.
+     * If used in HTML the title must be encoded. 
      * 
      * @param refObj object to evaluate the title
      * @param locale locale index. Can be used to lookup code texts
@@ -84,7 +85,7 @@ public interface PortalExtension_1_0 {
      * @return evaluated object title
      */
     String getTitle(
-        RefObject_1_0 refObj,
+        RefObject_1_0 obj,
         short locale,
         String localeAsString,
         boolean asShortTitle,
@@ -92,7 +93,8 @@ public interface PortalExtension_1_0 {
     );
 
     /**
-     * Evaluates the title for a given action and locale.
+     * Evaluates the title for a given action and locale. 
+     * If used in HTML the title must be encoded.
      * 
      * @param obj title is evaluated for action for given object.
      * @param action action id

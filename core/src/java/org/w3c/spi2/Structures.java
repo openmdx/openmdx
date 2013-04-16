@@ -75,9 +75,9 @@ import java.util.SortedMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-import javax.jdo.JDOHelper;
 import javax.jdo.PersistenceManager;
 import javax.jdo.spi.PersistenceCapable;
+import javax.jmi.reflect.RefStruct;
 import javax.resource.cci.IndexedRecord;
 import javax.resource.cci.MappedRecord;
 import javax.resource.cci.Record;
@@ -89,6 +89,7 @@ import org.openmdx.base.collection.Maps;
 import org.openmdx.base.collection.TreeSparseArray;
 import org.openmdx.base.resource.Records;
 import org.openmdx.kernel.collection.ArraysExtension;
+import org.openmdx.kernel.jdo.ReducedJDOHelper;
 import org.openmdx.kernel.loading.Classes;
 import org.w3c.cci2.SortedMaps;
 import org.w3c.cci2.SparseArray;
@@ -107,7 +108,7 @@ public class Structures {
 
     /**
      * Create a structure proxy instance
-     * 
+     * @param persistenceManager TODO
      * @param structureClass
      *            the structure's interface
      * @param values
@@ -118,12 +119,12 @@ public class Structures {
      * @throws IllegalArgumentException
      */
     private static <S> S create(
-        Class<S> structureClass, 
-        MetaData metaData,
-        Object... values
+        PersistenceManager persistenceManager, 
+        Class<S> structureClass,
+        MetaData metaData, Object... values
     ) {
         return Classes.<S>newProxyInstance(
-            new ProxyHandler(metaData, values), 
+            new ProxyHandler(persistenceManager, metaData, values), 
             structureClass, PersistenceAware.class
         );
     }
@@ -146,8 +147,9 @@ public class Structures {
     ) {
         MetaData metaData = MetaData.getInstance(structureClass);
         return create(
+            null, // persistenceManager
             structureClass,
-            metaData,
+            metaData, 
             values
         );
     }
@@ -170,8 +172,9 @@ public class Structures {
     ) {
         MetaData metaData = MetaData.getInstance(structureClass);
         return create(
+            null, // persistenceManager
             structureClass,
-            metaData,
+            metaData, 
             metaData.toValues(members)
         );
     }
@@ -194,8 +197,9 @@ public class Structures {
     ) {
         MetaData metaData = MetaData.getInstance(structureClass);
         return create(
+            null, // persistenceManager
             structureClass,
-            metaData,
+            metaData, 
             metaData.toValues(members)
         );
     }
@@ -220,8 +224,9 @@ public class Structures {
     ){
         MetaData metaData = MetaData.getInstance(structureClass);
         return create(
+            persistenceManager,
             structureClass,
-            metaData,
+            metaData, 
             metaData.toValues(persistenceManager, content)
         );
     }
@@ -282,8 +287,9 @@ public class Structures {
         } else {
             MetaData metaData = MetaData.getInstance(structureClass);
             return create(
+                persistenceManager,
                 structureClass,
-                metaData,
+                metaData, 
                 metaData.fromJavaBean(persistenceManager, javaBean)
             );
         }
@@ -471,10 +477,15 @@ public class Structures {
         /**
          * Constructor
          * 
-         * @param nameClass
+         * @param persistenceManager the (optional) PersistenceManager
          * @param values
+         * @param nameClass
          */
-        ProxyHandler(MetaData metaData, Object... values) {
+        ProxyHandler(
+            PersistenceManager persistenceManager, 
+            MetaData metaData, 
+            Object... values
+        ) {
             this.metaData = metaData;
             this.values = toNestedArrays(values);
         }
@@ -486,8 +497,12 @@ public class Structures {
 
         private final Object[] values;
 
+        private transient PersistenceManager persistenceManager;
+        
         private transient Iterable<?>[] collections;
 
+//        private transient Iterable<?>[] collections;
+        
         private transient Class<?> structureClass;
 
         private transient MetaData metaData;
@@ -654,6 +669,12 @@ public class Structures {
                 } else throw new IllegalArgumentException(
                     "Members of type '" + t.getName() + "' are not yet supported by " + Structures.class.getName()
                 );
+            } else if (RefStruct.class.isAssignableFrom(t) && v instanceof Map<?,?>) {
+                return Structures.create(
+                    this.persistenceManager,
+                    t,
+                    (Map<?,?>)v
+                );
             } else {
                 return v;
             }
@@ -677,7 +698,9 @@ public class Structures {
                     target[slot] = null;
                 } else {
                     Class<?> memberType = this.metaData.memberTypes[slot];
-                    if(List.class == memberType || Set.class == memberType) {
+                    if(RefStruct_1_0.class.isAssignableFrom(memberType)) {
+                        target[slot] = ((RefStruct_1_0)value).refDelegate();
+                    } else if(List.class == memberType || Set.class == memberType) {
                         if (source == target) {
                             target = new Object[source.length];
                             System.arraycopy(source, 0, target, 0, slot);
@@ -860,10 +883,10 @@ public class Structures {
             for(int i = 0; i < target.length; i++) {
                 Object value = source.get(i);
                 if(value instanceof PersistenceCapable) {
-                    if(JDOHelper.isPersistent(value)) {
-                        target[i] = JDOHelper.getObjectId(value);
+                    if(ReducedJDOHelper.isPersistent(value)) {
+                        target[i] = ReducedJDOHelper.getObjectId(value);
                     } else {
-                        target[i] = JDOHelper.getTransactionalObjectId(value);
+                        target[i] = ReducedJDOHelper.getTransactionalObjectId(value);
                     }
                 } else {
                     target[i] = value;
@@ -880,8 +903,8 @@ public class Structures {
             int slot = 0;
             for(Object v : structureValues) {
                 if(v instanceof PersistenceCapable) {
-                    if(JDOHelper.isPersistent(v)) {
-                        recordValues[slot++] = JDOHelper.getObjectId(v);
+                    if(ReducedJDOHelper.isPersistent(v)) {
+                        recordValues[slot++] = ReducedJDOHelper.getObjectId(v);
                     } else throw new IllegalStateException(
                         "Transient object's can't be used as value of a structure member"
                     );

@@ -153,6 +153,7 @@ CREATE SEQUENCE test_ref_seq
     modified_by_0 VARCHAR (200) NULL ,
     description VARCHAR (100) NULL ,
     content bytea NULL ,
+    text text NULL ,    
     keyword VARCHAR (32) NULL
   );
   

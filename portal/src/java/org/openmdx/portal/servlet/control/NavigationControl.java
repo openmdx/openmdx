@@ -300,7 +300,7 @@ public class NavigationControl
                 HtmlEncoder_1_0 htmlEncoder = p.getApplicationContext().getHtmlEncoder();
                 ShowObjectView view = (ShowObjectView)p.getView();
                 if((view.getLookupType() != null) && view.getObjectReference().isInstanceof(view.getLookupType())) {
-                    p.write("<span class=\"lookupSelector\"><input type=\"checkbox\" name=\"objselect\" value=\"obj\" onclick=\"OF.selectAndClose('", view.getObjectReference().getXRI(), "', '", htmlEncoder.encode(view.getObjectReference().getTitleEscapeQuote(), false), "', '", view.getId(), "', window);\" /></span>");
+                    p.write("<span class=\"lookupSelector\"><input type=\"checkbox\" name=\"objselect\" value=\"obj\" onclick=\"OF.selectAndClose('", view.getObjectReference().getXRI(), "', '", htmlEncoder.encode(view.getObjectReference().getTitleAsJavascriptArg(), false), "', '", view.getId(), "', window);\" /></span>");
                 }
                 if(p.getViewPortType() == ViewPort.Type.MOBILE) {
                     p.write("<a href=\"#\" onmouseover=\"javascript:window.location.href=", p.getEvalHRef(view.getObjectReference().getReloadAction()), ";\" title=\"", texts.getReloadText(), "\">", p.getImg("src=\"", p.getResourcePath("images/"), view.getObjectReference().getIconKey(), "\" border=\"0\" align=\"top\" alt=\"o\" title=\"\""), "&nbsp;&nbsp;</a>");

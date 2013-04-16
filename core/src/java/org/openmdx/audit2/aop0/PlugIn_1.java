@@ -117,7 +117,7 @@ public class PlugIn_1 implements Configuration, PlugIn_1_0 {
 
     private static final Path SEGMENT_PATTERN = new Path(
         "xri://@openmdx*($..)/provider/($..)/segment/($..)"
-    );
+    ).lock();
 
     /**
      * Maps the data paths to audit paths
@@ -518,7 +518,11 @@ public class PlugIn_1 implements Configuration, PlugIn_1_0 {
                     //
                     DataObject_1 beforeImage = candidate.getBeforeImage(); // do not in-line!
                     if(beforeImage != null && !beforeImage.jdoIsPersistent()) {
-                        if(candidate.jdoIsDeleted() || candidate.objIsModified() || !unitOfWork.isUpdateAvoidanceEnabled()){
+                        if(
+                        	candidate.jdoIsDeleted() || 
+                        	candidate.thereRemainDirtyFeaturesAfterRemovingTheUnmodifiedOnes() || 
+                        	!unitOfWork.isUpdateAvoidanceEnabled()
+                        ){
                             auditBeforeImages.put(
                                 Qualifiers.getAudit2BeforeImageId(
                                     this,

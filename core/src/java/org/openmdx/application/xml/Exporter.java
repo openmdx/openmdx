@@ -60,14 +60,13 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.NoSuchElementException;
 import java.util.SortedMap;
 import java.util.StringTokenizer;
 import java.util.TreeMap;
-import java.util.Map.Entry;
 import java.util.zip.ZipOutputStream;
 
-import javax.jdo.JDOHelper;
 import javax.jdo.PersistenceManager;
 import javax.jmi.model.AggregationKind;
 import javax.jmi.model.AggregationKindEnum;
@@ -87,6 +86,7 @@ import org.openmdx.base.mof.spi.Model_1Factory;
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.persistence.cci.PersistenceHelper;
 import org.openmdx.kernel.exception.BasicException;
+import org.openmdx.kernel.jdo.ReducedJDOHelper;
 import org.openmdx.kernel.log.SysLog;
 import org.openmdx.state2.cci2.DateStateQuery;
 import org.openmdx.state2.jmi1.DateState;
@@ -208,7 +208,7 @@ public class Exporter {
     private static Object toValue(
         Object object
     ){
-       return object instanceof RefObject ? JDOHelper.getObjectId(object) : object; 
+       return object instanceof RefObject ? ReducedJDOHelper.getObjectId(object) : object; 
     }
     
     /**
@@ -455,7 +455,7 @@ public class Exporter {
         String itemMimeType
     ) throws ServiceException {
         List<Path> startingPoints = new ArrayList<Path>();
-        startingPoints.add((Path) JDOHelper.getObjectId(startFrom));
+        startingPoints.add((Path) ReducedJDOHelper.getObjectId(startFrom));
         //
         // Starting identities are separated from the export filter by '$'
         //
@@ -489,7 +489,7 @@ public class Exporter {
         //
         export(
             target,
-            JDOHelper.getPersistenceManager(startFrom),
+            ReducedJDOHelper.getPersistenceManager(startFrom),
             newFilter(filter),
             startingPoints.toArray(new Path[startingPoints.size()])
         );
@@ -757,7 +757,7 @@ public class Exporter {
         public RefObject getObjectbyId(
             Path objectId
         ) {
-            return (RefObject) JDOHelper.getPersistenceManager(
+            return (RefObject) ReducedJDOHelper.getPersistenceManager(
                 getPending().getValue()
             ).getObjectById(
                 objectId)
@@ -832,7 +832,7 @@ public class Exporter {
             RefObject refObject,
             int distance
         ) throws ServiceException {
-            Path refId = (Path) JDOHelper.getObjectId(refObject);
+            Path refId = (Path) ReducedJDOHelper.getObjectId(refObject);
             if(population.containsKey(refId) ? population.get(refId) == null : !this.exportFilter.exclude(refId)) {
                 visit(refId, refObject, distance);
             }
@@ -849,7 +849,9 @@ public class Exporter {
          * 
          * @throws ServiceException
          */
-        @SuppressWarnings("unchecked")
+        @SuppressWarnings({
+            "unchecked", "cast"
+        })
         private boolean visit(
             Path refId,
             RefObject current,
@@ -858,7 +860,7 @@ public class Exporter {
             population.put(refId, current);
             boolean pending = false;
             String objectType = current.refClass().refMofId();
-            Map<String, ModelElement_1_0> references = (Map<String, ModelElement_1_0>) model.getElement(objectType).objGetValue("reference");
+            Map<String, ModelElement_1_0> references = (Map<String, ModelElement_1_0>) model.getElement(objectType).objGetMap("reference");
             for (ModelElement_1_0 featureDef : references.values()) {
                 ModelElement_1_0 referencedEnd = model.getElement(featureDef.objGetValue("referencedEnd"));
                 AggregationKind aggregationKind = AggregationKindEnum.forName((String) referencedEnd.objGetValue("aggregation"));
@@ -896,7 +898,7 @@ public class Exporter {
                             }
                         }
                         if(stated) {
-                        	DateStateQuery query = (DateStateQuery) JDOHelper.getPersistenceManager(current).newQuery(DateState.class);
+                        	DateStateQuery query = (DateStateQuery) ReducedJDOHelper.getPersistenceManager(current).newQuery(DateState.class);
                             for(RefObject referenced : container.getAll(query)) {
                                 probe(referenced, distance);
                             }

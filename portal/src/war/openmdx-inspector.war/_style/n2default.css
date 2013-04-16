@@ -177,6 +177,44 @@ html>body #footer {
   position:relative;
   display:none;
 }
+#OperationDialogHolder{
+  position: absolute;
+  background-color: #EEEEEE;
+  display: none;
+  left: 10%;
+  width: 80%;
+  margin: 10px;
+  padding-right: 10px;  
+  padding-left: 20px;  
+  z-index: 5000;
+  box-shadow: 8px 10px 10px rgba(0,0,0,0.5),inset 8px 10px 10px rgba(255,255,255,0.75);
+  -o-box-shadow: 8px 10px 10px rgba(0,0,0,0.5),inset 8px 10px 10px rgba(255,255,255,0.75);
+  -webkit-box-shadow: 8px 10px 10px rgba(0,0,0,0.5),inset 8px 10px 10px rgba(255,255,255,0.75);
+  -moz-box-shadow: 8px 10px 10px rgba(0,0,0,0.5),inset 8px 10px 10px rgba(255,255,255,0.75);   
+}
+.OperationDialogTitle {
+  text-align: left;
+  text-decoration: none;
+  font-size: 11px;
+  padding: 4px;
+  color: white;
+  background-color: #555555;  
+}
+#OperationDialogEmbedder{
+  float: right;
+  z-index: 5001;
+  cursor: pointer;
+}
+#OperationDialog{
+  width: 100%;
+  clear: both;
+}
+#OperationDialogResponse{
+  display: none;
+}
+.dragged {
+  background-color: #EEEEEE;
+}
 
 /*------------------------------------------------------------------------------
 |  general layout
@@ -539,11 +577,10 @@ img {
   height:30px;
 }
 .wait {
-  background-color:#FFFFFF;
   position:relative;
-	background-image:url('../images/wait.gif');
-	background-position:10px 5px;
-	background-repeat:no-repeat;
+  background-image:url('../images/wait.gif');
+  background-position:10px 5px;
+  background-repeat:no-repeat;
 }
 .loading .gridTable, .loading .gridTableFull,
 .loading .gridTableHeader td, .loading .gridTableHeaderFull td, .loading .gridTableHeaderFullEdit td,
@@ -1047,8 +1084,6 @@ input.selimgsubmithover { /* IE :hover workaround */
 }
 
 .panelResult {
-  border: 1px #ccc solid;
-  background-color: #ccc;
   width: 99%;
   padding-left: 4px;
   padding-right: 4px;

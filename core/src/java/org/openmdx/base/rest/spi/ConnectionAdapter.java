@@ -1,6 +1,6 @@
 /*
  * ====================================================================
- * Project:     openMDX, http://www.openmdx.org/
+ * Project:     openMDX/Core, http://www.openmdx.org/
  * Description: REST Connection Adapter
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
  * ====================================================================
@@ -49,17 +49,16 @@ package org.openmdx.base.rest.spi;
 
 import javax.resource.ResourceException;
 import javax.resource.cci.Connection;
-import javax.resource.cci.ConnectionFactory;
 import javax.resource.cci.ConnectionSpec;
 import javax.resource.cci.IndexedRecord;
 import javax.resource.cci.Interaction;
 import javax.resource.cci.InteractionSpec;
+import javax.resource.cci.LocalTransaction;
 import javax.resource.cci.MappedRecord;
 import javax.resource.cci.Record;
 import javax.resource.cci.ResourceAdapterMetaData;
+import javax.resource.spi.EISSystemException;
 import javax.resource.spi.LocalTransactionException;
-import javax.transaction.Transaction;
-import javax.transaction.TransactionManager;
 
 import org.openmdx.base.accessor.rest.spi.CacheAccessor_2_0;
 import org.openmdx.base.accessor.rest.spi.DataStoreCache_2_0;
@@ -68,20 +67,19 @@ import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.resource.InteractionSpecs;
 import org.openmdx.base.resource.Records;
+import org.openmdx.base.resource.cci.ConnectionFactory;
 import org.openmdx.base.resource.spi.AbstractInteraction;
-import org.openmdx.base.resource.spi.LocalTransactions;
 import org.openmdx.base.resource.spi.Port;
-import org.openmdx.base.resource.spi.UserTransactions;
 import org.openmdx.base.rest.cci.MessageRecord;
 import org.openmdx.base.rest.cci.RestConnectionSpec;
 import org.openmdx.base.transaction.TransactionAttributeType;
 import org.openmdx.kernel.exception.BasicException;
-import org.openmdx.kernel.exception.Throwables;
-import org.openmdx.kernel.log.SysLog;
-import org.openmdx.kernel.naming.ComponentEnvironment;
+import org.openmdx.kernel.loading.Classes;
 
 /**
  * Wraps a REST Port into a JCA Connection
+ * <p>
+ * This class does not supports the transaction attribute REQUIRES_NEW.
  */
 public class ConnectionAdapter 
     extends AbstractConnection 
@@ -91,43 +89,25 @@ public class ConnectionAdapter
 	/**
 	 * Constructor 
 	 *
-	 * @param metaData
+	 * @param useLocalTransactionDemarcation
 	 * @param connectionSpec
 	 * @param transactionAttributeType 
 	 * @param delegate
 	 * 
 	 * @throws ResourceException
 	 */
-    private ConnectionAdapter(
-    	ResourceAdapterMetaData metaData,
+    protected ConnectionAdapter(
+    	boolean useLocalTransactionDemarcation,
         RestConnectionSpec connectionSpec,
         TransactionAttributeType transactionAttribute, 
         Port delegate
     ) throws ResourceException{
         super(connectionSpec);
         this.restPlugIn = delegate;
-        switch(this.transactionAttribute = transactionAttribute) {
-            case REQUIRES_NEW:
-                if(metaData != null && metaData.supportsLocalTransactionDemarcation()) {
-                    this.transactionManager = null;
-                    this.transactionProxy = LocalTransactions.getLocalTransaction(
-                        this.getLocalTransaction()
-                    );
-                } else {
-                    this.transactionManager = ConnectionAdapter.getTransactionManager(); 
-                    this.transactionProxy = this.transactionManager == null ? LocalTransactions.getLocalTransaction(
-                        UserTransactions.getUserTransaction()
-                    ) : LocalTransactions.getLocalTransaction(
-                        this.transactionManager
-                    );
-                }
-                break;
-            default:
-                this.transactionManager = null;
-                this.transactionProxy = null;
-        }
+        this.transactionAttribute = transactionAttribute;
+        this.transactionProxy = newTransactionProxy(useLocalTransactionDemarcation);
     }
-
+    
     /**
      * The REST interaction
      */
@@ -141,29 +121,50 @@ public class ConnectionAdapter
     /**
      * 
      */
-    private final TransactionManager transactionManager;
-
-    /**
-     * The local transaction
-     */
-    protected final javax.resource.spi.LocalTransaction transactionProxy;
-
+    private final LocalTransaction transactionProxy;
+    
     /**
      * The transaction attribute
      */
     protected final TransactionAttributeType transactionAttribute;
     
     /**
-     * The local transaction instance
+     * Uses the transaction manager
      */
-    protected javax.resource.cci.LocalTransaction localTransaction;
+    private static ConnectionAdapterFactory connectionAdapterFactory;
     
     /**
      * Virtual Transaction Object Id Reference 
      */
     protected static final Path TRANSACTION_OBJECTS = new Path(
         "xri://@openmdx*org.openmdx.kernel/transaction"
-    );
+    ).lock();
+
+    protected LocalTransaction newTransactionProxy(
+        boolean localTransactionDemarcation
+    ){
+        return localTransactionDemarcation ?
+            new LocalTransactionAdapter() : 
+            new NoTransactionAdapter();
+    }
+
+    private static ConnectionAdapterFactory getConnectionAdapterFactory(
+    ) throws ResourceException {
+        if(connectionAdapterFactory == null) {
+            try {
+                connectionAdapterFactory = Classes.newApplicationInstance(
+                    ConnectionAdapterFactory.class, 
+                    "org.openmdx.application.rest.adapter.JTAConnectionAdapterFactory"
+                );
+            } catch (Exception exception) {
+                throw new EISSystemException(
+                    "Unable to acquire the ConnectionAdapterFactory",
+                    exception
+                );
+            }
+        }
+        return connectionAdapterFactory;
+    }
     
     /* (non-Javadoc)
      * @see org.openmdx.base.rest.spi.AbstractConnection#getConnectionSpec()
@@ -171,65 +172,6 @@ public class ConnectionAdapter
     @Override
     public RestConnectionSpec getConnectionSpec() {
         return super.getConnectionSpec();
-    }
-
-    /**
-     * Acquire the <code>TransactionManager</code>
-     * 
-     * @return the <code>TransactionManager</code>
-     */
-    private static TransactionManager getTransactionManager(
-    ){
-        try {
-            return ComponentEnvironment.lookup(TransactionManager.class);
-        } catch (BasicException exception) {
-            SysLog.error(
-                "REQUIRES_NEW requires a TransactionManager which could not be acquired",
-                exception
-            );
-            return null;
-        }
-    };
-    
-    /**
-     * Suspend the current transaction and return it
-     * 
-     * @return the suspended transaction
-     * 
-     * @throws LocalTransactionException 
-     */
-    protected Transaction suspendCurrentTransaction(
-    ) throws LocalTransactionException{
-    	if(this.transactionManager == null) {
-            return null;
-    	} else try {
-            return this.transactionManager.suspend();
-        } catch(Exception exception) {
-            throw new LocalTransactionException(
-                "Transaction could not be suspended",
-                exception
-            );
-        }
-    }
-    
-    /**
-     * Resume the suspended transaction
-     * 
-     * @param transaction
-     * 
-     * @throws ResourceException
-     */
-    protected void resumeSuspendedTransaction(
-        Transaction transaction
-    ) throws ResourceException {
-        if(transaction != null) try {
-            this.transactionManager.resume(transaction);
-        } catch(Exception exception) {
-            throw new LocalTransactionException(
-                "Transaction could not be resumed",
-                exception
-            );
-        }
     }
     
     /**
@@ -250,14 +192,72 @@ public class ConnectionAdapter
         TransactionAttributeType transactionAttribute,
         Port delegate
     ) throws ResourceException{
-        return new ConnectionAdapter(
+        return newInstance(
         	connectionFactory == null ? null : connectionFactory.getMetaData(),
-            (RestConnectionSpec) connectionSpec,
+            connectionSpec,
             transactionAttribute,
             delegate
         );
     }
 
+    /**
+     * Create a connection using the given port
+     * 
+     * @param connectionFactory 
+     * @param connectionSpec 
+     * @param transactionAttribute
+     * @param delegate the REST plug-in 
+     * 
+     * @return the corresponding JCA connection
+     * 
+     * @throws ResourceException  
+     */
+    public static Connection newInstance(
+        ResourceAdapterMetaData metaData, 
+        ConnectionSpec connectionSpec, 
+        TransactionAttributeType transactionAttribute,
+        Port delegate
+    ) throws ResourceException {
+        return newInstance(
+            metaData != null && metaData.supportsLocalTransactionDemarcation(),
+            (RestConnectionSpec)connectionSpec,
+            transactionAttribute,
+            delegate
+        );
+    }
+
+    /**
+     * Create a connection using the given port
+     * 
+     * @param connectionFactory 
+     * @param connectionSpec 
+     * @param transactionAttribute
+     * @param delegate the REST plug-in 
+     * 
+     * @return the corresponding JCA connection
+     * 
+     * @throws ResourceException  
+     */
+    public static Connection newInstance (
+        boolean useLocalTransactionDemarcation, 
+        RestConnectionSpec connectionSpec, 
+        TransactionAttributeType transactionAttribute,
+        Port delegate
+    ) throws ResourceException {
+        return (
+            !useLocalTransactionDemarcation && 
+            transactionAttribute == TransactionAttributeType.REQUIRES_NEW
+        ) ? getConnectionAdapterFactory().newSyspendingConnectionAdapter(
+            connectionSpec, 
+            delegate
+        ) : new ConnectionAdapter(
+            useLocalTransactionDemarcation,
+            connectionSpec,
+            transactionAttribute,
+            delegate
+        );
+    }
+    
     /* (non-Javadoc)
      * @see javax.resource.cci.Connection#close()
      */
@@ -276,7 +276,7 @@ public class ConnectionAdapter
      * 
      * @throws ResourceException
      */
-    private Interaction getDelegate(
+    protected Interaction getDelegate(
     ) throws ResourceException {
         if(this.interaction == null) {
             this.interaction = this.restPlugIn.getInteraction(this);
@@ -287,6 +287,7 @@ public class ConnectionAdapter
     /* (non-Javadoc)
      * @see javax.resource.cci.Connection#createInteraction()
      */
+    @Override
     public Interaction createInteraction(
     ) throws ResourceException {
         this.assertOpen();
@@ -296,12 +297,9 @@ public class ConnectionAdapter
     /* (non-Javadoc)
      * @see javax.resource.cci.Connection#getLocalTransaction()
      */
-    public javax.resource.cci.LocalTransaction getLocalTransaction(
+    public LocalTransaction getLocalTransaction(
     ) throws ResourceException {
-        if(this.localTransaction == null) {
-            this.localTransaction = new TransactionAdapter();
-        }
-        return this.localTransaction;
+        return this.transactionProxy;
     }
 
     
@@ -331,7 +329,7 @@ public class ConnectionAdapter
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.rest.spi.CacheAccessor_2_0#getDataStoreCache()
      */
-//  @Override
+    @Override
     public DataStoreCache_2_0 getDataStoreCache(
     ) throws ServiceException {
         return this.getCacheAccessor().getDataStoreCache();
@@ -340,25 +338,21 @@ public class ConnectionAdapter
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.rest.spi.CacheProvider_2_0#getCache()
      */
-//  @Override
+    @Override
     public ManagedConnectionCache_2_0 getManagedConnectionCache(
     ) throws ServiceException {
         return this.getCacheAccessor().getManagedConnectionCache();
     }
 
-    static {
-        ComponentEnvironment.register(new TransactionManagerFactory());
-    }
-
 
     //------------------------------------------------------------------------
-    // Class TransactionAdapter
+    // Class LocalTransactionAdapter
     //------------------------------------------------------------------------
     
     /**
-     * Transaction Adapter
+     * Local Transaction Adapter
      */
-    class TransactionAdapter implements javax.resource.cci.LocalTransaction {
+    class LocalTransactionAdapter implements LocalTransaction {
 
         /**
          * The current transaction object
@@ -424,7 +418,46 @@ public class ConnectionAdapter
         }
         
     }
+
     
+    //------------------------------------------------------------------------
+    // Class NoTransactionAdapter
+    //------------------------------------------------------------------------
+    
+    /**
+     * No Transaction Adapter
+     */
+    static class NoTransactionAdapter implements LocalTransaction {
+
+        /* (non-Javadoc)
+         * @see javax.resource.spi.LocalTransaction#begin()
+         */
+        @Override
+        public void begin(
+        ) throws ResourceException {
+            // nothing to do
+        }
+
+        /* (non-Javadoc)
+         * @see javax.resource.spi.LocalTransaction#commit()
+         */
+        @Override
+        public void commit(
+        ) throws ResourceException {
+            // nothing to do
+        }
+
+        /* (non-Javadoc)
+         * @see javax.resource.spi.LocalTransaction#rollback()
+         */
+        @Override
+        public void rollback(
+        ) throws ResourceException {
+            // nothing to do
+        }
+
+    }
+
     
     //------------------------------------------------------------------------
     // Class InteractionAdapter
@@ -433,7 +466,7 @@ public class ConnectionAdapter
     /**
      * Interaction Adapter
      */
-    class InteractionAdapter extends AbstractInteraction<Connection> {
+    private class InteractionAdapter extends AbstractInteraction<Connection> {
 
         /**
          * Constructor 
@@ -455,50 +488,43 @@ public class ConnectionAdapter
         /* (non-Javadoc)
          * @see javax.resource.cci.Interaction#execute(javax.resource.cci.InteractionSpec, javax.resource.cci.Record)
          */
+        private <T> T execute(
+            Class<T> returnType,
+            InteractionSpec ispec, 
+            Record input,
+            Record output
+        ) throws ResourceException {
+            this.assertOpened();
+            try {
+                return returnType.cast(
+                    Boolean.class == returnType ? Boolean.valueOf(
+                        this.delegate.execute(ispec, input, output)
+                    ) : this.delegate.execute(ispec, input)
+                );
+            } catch (RuntimeException exception) {
+                throw new EISSystemException(
+                    "Runtime exception lead to JCA request abort",
+                    exception
+                );
+            }
+        }
+        
+        /* (non-Javadoc)
+         * @see javax.resource.cci.Interaction#execute(javax.resource.cci.InteractionSpec, javax.resource.cci.Record)
+         */
         @Override
         public Record execute(
             InteractionSpec ispec, 
             Record input
         ) throws ResourceException {
-            this.assertOpened();
-            switch(ConnectionAdapter.this.transactionAttribute){
-                case REQUIRES_NEW:
-                    Transaction suspendedTransaction = ConnectionAdapter.this.suspendCurrentTransaction();
-                    try {
-                        RuntimeException error = null;
-                        ResourceException failure = null;
-                        Record reply = null;
-                        ConnectionAdapter.this.transactionProxy.begin();
-                        try {
-                            reply = this.delegate.execute(ispec, input);
-                        } catch (ResourceException exception){
-                            failure = exception;
-                        } catch (RuntimeException exception) {
-                            error = exception;
-                        }
-                        try {
-                            if(error == null) {
-                                ConnectionAdapter.this.transactionProxy.commit();
-                            } else {
-                                ConnectionAdapter.this.transactionProxy.rollback();
-                            }
-                        } catch (Exception exception) {
-                            Throwables.log(exception);
-                        }
-                        if(failure == null) {
-                            return reply;
-                        } else {
-                            throw failure;
-                        }
-                    } finally {
-                        resumeSuspendedTransaction(suspendedTransaction);
-                    }
-                default:
-                    return this.delegate.execute(ispec, input);
-            }
+            return execute(
+                Record.class,
+                ispec,
+                input,
+                null
+            );
         }
 
-        
         /* (non-Javadoc)
          * @see org.openmdx.base.resource.spi.AbstractInteraction#execute(javax.resource.cci.InteractionSpec, javax.resource.cci.Record, javax.resource.cci.Record)
          */
@@ -508,42 +534,12 @@ public class ConnectionAdapter
             Record input,
             Record output
         ) throws ResourceException {
-            this.assertOpened();
-            switch(ConnectionAdapter.this.transactionAttribute){
-                case REQUIRES_NEW:
-                    Transaction suspendedTransaction = ConnectionAdapter.this.suspendCurrentTransaction();
-                    try {
-                        RuntimeException error = null;
-                        ResourceException failure = null;
-                        Boolean reply = null;
-                        ConnectionAdapter.this.transactionProxy.begin();
-                        try {
-                            reply = Boolean.valueOf(this.delegate.execute(ispec, input, output));
-                        } catch (ResourceException exception){
-                            failure = exception;
-                        } catch (RuntimeException exception) {
-                            error = exception;
-                        }
-                        try {
-                            if(error == null) {
-                                ConnectionAdapter.this.transactionProxy.commit();
-                            } else {
-                                ConnectionAdapter.this.transactionProxy.rollback();
-                            }
-                        } catch (Exception exception) {
-                            Throwables.log(exception);
-                        }
-                        if(failure == null) {
-                            return reply.booleanValue();
-                        } else {
-                            throw failure;
-                        }
-                    } finally {
-                        ConnectionAdapter.this.resumeSuspendedTransaction(suspendedTransaction);
-                    }
-                default:
-                    return this.delegate.execute(ispec, input, output);
-            }
+            return execute(
+                Boolean.class,
+                ispec,
+                input,
+                output
+            ).booleanValue();
         }
 
     }

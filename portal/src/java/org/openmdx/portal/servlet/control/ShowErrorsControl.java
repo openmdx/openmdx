@@ -89,7 +89,7 @@ public class ShowErrorsControl
     ) throws ServiceException {
     	SysLog.detail("> paint");        
         ApplicationContext app = p.getApplicationContext();
-        if(app.getErrorMessages().size() > 0) {
+        if(!app.getErrorMessages().isEmpty()) {
            p.write("<table class=\"tableError\">");
            SimpleDateFormat dateTimeFormat = DateValue.getLocalizedDateTimeFormatter(
                null, 

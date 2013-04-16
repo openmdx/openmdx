@@ -58,7 +58,6 @@ import java.util.Stack;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
-import javax.jdo.JDOHelper;
 import javax.jmi.reflect.RefObject;
 import javax.xml.datatype.XMLGregorianCalendar;
 
@@ -72,6 +71,7 @@ import org.openmdx.base.naming.Path;
 import org.openmdx.base.text.conversion.Base64;
 import org.openmdx.base.text.conversion.XMLEncoder;
 import org.openmdx.kernel.exception.BasicException;
+import org.openmdx.kernel.jdo.ReducedJDOHelper;
 import org.w3c.format.DateTimeFormat;
 
 /**
@@ -188,7 +188,7 @@ public class XMLTarget implements ExportTarget {
     ) throws ServiceException {
         String qualifierName = getQualifierName(refObject);
         String qualifiedTypeName = refObject.refClass().refMofId();
-        Path objectId = (Path) JDOHelper.getObjectId(refObject);
+        Path objectId = (Path) ReducedJDOHelper.getObjectId(refObject);
         Map<String, String> atts = new LinkedHashMap<String,String>();
         String qualifierValue = objectId.getBase();
         atts.put(qualifierName, qualifierValue);

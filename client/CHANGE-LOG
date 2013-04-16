@@ -1,0 +1,35 @@
+
+                    =====================================
+                             CHANGE LOG openMDX
+                    =====================================
+
+==============================================================================
+Version 2.11.0                                                      2013-04-15
+==============================================================================
+
+0.    KNOWN ISSUES
+      none
+      
+1.    NEW FEATURES
+
+      CR20020217
+      Separation of client and server packages
+      
+      This sub-project offers two different client archives:
+      * openmdx-client.jar (for Standard Java clients)
+      * openmdx-dalvik.jar (for Dalvik clients)
+      
+2.    CHANGES  
+     
+2.0.  CHANGED FEATURES
+      none
+
+2.1.  FIXED BUGS
+      none
+          
+2.2.  DEPRECATED FEATURES
+      none
+
+2.3.  REMOVED FEATURES
+      none
+        

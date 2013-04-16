@@ -51,8 +51,7 @@ package org.openmdx.preferences2.prefs;
 import java.util.prefs.AbstractPreferences;
 import java.util.prefs.BackingStoreException;
 
-import javax.jdo.Transaction;
-
+import org.openmdx.base.persistence.cci.UnitOfWork;
 import org.openmdx.preferences2.jmi1.Node;
 
 
@@ -91,10 +90,10 @@ public class AutocommittingPreferences extends ManagedPreferences {
      */
     @Override
     protected void putSpi(String key, String value) {
-        Transaction currentTransaction = jmiEntityManager().currentTransaction();
-        currentTransaction.begin();
+        UnitOfWork unitOfWork = currentUnitOfWork();
+        unitOfWork.begin();
         super.putSpi(key, value);
-        currentTransaction.commit();
+        unitOfWork.commit();
     }
 
     /* (non-Javadoc)
@@ -102,10 +101,10 @@ public class AutocommittingPreferences extends ManagedPreferences {
      */
     @Override
     protected void removeSpi(String key) {
-        Transaction currentTransaction = jmiEntityManager().currentTransaction();
-        currentTransaction.begin();
+        UnitOfWork unitOfWork = currentUnitOfWork();
+        unitOfWork.begin();
         super.removeSpi(key);
-        currentTransaction.commit();
+        unitOfWork.commit();
     }
 
     /* (non-Javadoc)
@@ -115,10 +114,10 @@ public class AutocommittingPreferences extends ManagedPreferences {
     protected void removeNodeSpi(
     ) throws BackingStoreException {
         try {
-            Transaction currentTransaction = jmiEntityManager().currentTransaction();
-            currentTransaction.begin();
+            UnitOfWork unitOfWork = currentUnitOfWork();
+            unitOfWork.begin();
             super.removeNodeSpi();
-            currentTransaction.commit();
+            unitOfWork.commit();
         } catch (RuntimeException exception) {
             throw new BackingStoreException(exception);
         }
@@ -141,10 +140,10 @@ public class AutocommittingPreferences extends ManagedPreferences {
     protected Node newChildNode(
         String name
      ) {
-        Transaction currentTransaction = jmiEntityManager().currentTransaction();
-        currentTransaction.begin();
+    	UnitOfWork unitOfWork = currentUnitOfWork();
+    	unitOfWork.begin();
         Node child = super.newChildNode(name);
-        currentTransaction.commit();
+        unitOfWork.commit();
         return child;
     }
 

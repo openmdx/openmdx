@@ -56,6 +56,7 @@ import javax.resource.cci.IndexedRecord;
 import javax.resource.cci.InteractionSpec;
 import javax.resource.cci.Record;
 
+import org.openmdx.application.rest.http.spi.Message;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.resource.cci.RestFunction;
@@ -64,8 +65,8 @@ import org.openmdx.base.rest.cci.MessageRecord;
 import org.openmdx.base.rest.spi.AbstractRestInteraction;
 import org.openmdx.base.rest.spi.Object_2Facade;
 import org.openmdx.base.rest.spi.Query_2Facade;
-import org.openmdx.base.rest.spi.RestFormat;
-import org.openmdx.base.rest.spi.RestFormat.Target;
+import org.openmdx.base.rest.spi.RestParser;
+import org.openmdx.base.rest.stream.RestFormatter;
 import org.openmdx.base.text.conversion.URITransformation;
 import org.openmdx.kernel.exception.BasicException;
 
@@ -120,7 +121,7 @@ public abstract class AbstractHttpInteraction extends AbstractRestInteraction {
     /**
      * The path to create (virtual) connection objects
      */
-    protected static final Path CONNECT_XRI = new Path("xri://@openmdx*org.openmdx.kernel/connection");
+    protected static final Path CONNECT_XRI = new Path("xri://@openmdx*org.openmdx.kernel/connection").lock();
     
     /**
      * Retrieve the connection's user name
@@ -183,7 +184,7 @@ public abstract class AbstractHttpInteraction extends AbstractRestInteraction {
         IndexedRecord output
     ) throws ServiceException {
         Message message = newMessage(interactionSpec, xri);
-        RestFormat.format(message.getRequestBody(), input);
+        RestFormatter.format(message.getRequestBody(), input);
         return process(message, output);
     }
 
@@ -204,7 +205,7 @@ public abstract class AbstractHttpInteraction extends AbstractRestInteraction {
         IndexedRecord output
     ) throws ServiceException {
         Message message = newMessage(interactionSpec, input.getPath());
-        RestFormat.format(message.getRequestBody(), input);
+        RestFormatter.format(message.getRequestBody(), input);
         return process(message, output);
     }
     
@@ -224,7 +225,7 @@ public abstract class AbstractHttpInteraction extends AbstractRestInteraction {
     ) throws ServiceException {
         int status = message.execute();
         if(status == HttpURLConnection.HTTP_OK){
-            RestFormat.parseResponse(
+            RestParser.parseResponse(
                 output,
                 message.getResponseBody()
             );
@@ -232,7 +233,7 @@ public abstract class AbstractHttpInteraction extends AbstractRestInteraction {
         	BasicException remote;
         	BasicException local;
             try {
-                remote = RestFormat.parseException(message.getResponseBody());
+                remote = RestParser.parseException(message.getResponseBody());
                 local = null;
             } catch (ServiceException exception) {
                 remote = null;
@@ -362,7 +363,7 @@ public abstract class AbstractHttpInteraction extends AbstractRestInteraction {
         MessageRecord output
     ) throws ServiceException {
         Message message = newMessage(interactionSpec, input.getPath());
-        RestFormat.format(message.getRequestBody(), input);
+        RestFormatter.format(message.getRequestBody(), "in", input);
         return process(message, output);
     }
 
@@ -401,66 +402,6 @@ public abstract class AbstractHttpInteraction extends AbstractRestInteraction {
         IndexedRecord output
     ) throws ServiceException {
         return process(interactionSpec, input.getPath(), input, output);
-    }
-
-    
-    //------------------------------------------------------------------------
-    // Class Message
-    //------------------------------------------------------------------------
-    
-    /**
-     * HTTP Message
-     */
-    public interface Message {
-
-        /**
-         * Retrieve the request entity body accessor
-         * 
-         * @return the request entity body accessor
-         */
-        Target getRequestBody(
-        ) throws ServiceException;
-        
-        /**
-         * Set a request or entity header field
-         * 
-         * @param key the field name
-         * @param value the field value
-         */
-        void setRequestField(
-            String key,
-            String value
-        );
-
-        /**
-         * Execute the request
-         * 
-         * @return the status
-         * 
-         * @exception ServiceException
-         */
-        int execute(
-        ) throws ServiceException;
-        
-        /**
-         * Retrieve the response entity body accessor
-         * 
-         * @return the response entity body accessor
-         */
-        RestFormat.Source getResponseBody(
-        ) throws ServiceException;
-        
-        /**
-         * Retrieve a response or entity header field
-         * 
-         * @param key the field name
-         * 
-         * @return the requested response or entity header field value
-         */
-        String getResponseField(
-            String key
-        );
-        
     }
 
 }

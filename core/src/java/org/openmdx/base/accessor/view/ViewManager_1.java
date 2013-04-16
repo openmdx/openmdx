@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2011, OMEX AG, Switzerland
+ * Copyright (c) 2004-2012, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -64,7 +64,6 @@ import javax.jdo.FetchPlan;
 import javax.jdo.JDODataStoreException;
 import javax.jdo.JDOException;
 import javax.jdo.JDOFatalUserException;
-import javax.jdo.JDOHelper;
 import javax.jdo.JDOObjectNotFoundException;
 import javax.jdo.JDOUserException;
 import javax.jdo.ObjectState;
@@ -80,7 +79,7 @@ import javax.resource.cci.InteractionSpec;
 import org.openmdx.application.mof.cci.ModelAttributes;
 import org.openmdx.base.accessor.cci.DataObjectManager_1_0;
 import org.openmdx.base.accessor.cci.DataObject_1_0;
-import org.openmdx.base.accessor.spi.AbstractTransaction_1;
+import org.openmdx.base.accessor.spi.AbstractUnitOfWork_1;
 import org.openmdx.base.aop1.PlugIn_1_0;
 import org.openmdx.base.collection.ConcurrentWeakRegistry;
 import org.openmdx.base.collection.Maps;
@@ -95,10 +94,13 @@ import org.openmdx.base.mof.cci.ModelElement_1_0;
 import org.openmdx.base.mof.cci.Model_1_0;
 import org.openmdx.base.mof.spi.Model_1Factory;
 import org.openmdx.base.naming.Path;
+import org.openmdx.base.persistence.spi.UnitOfWork;
 import org.openmdx.base.persistence.spi.MarshallingInstanceLifecycleListener;
+import org.openmdx.base.persistence.spi.Transactions;
 import org.openmdx.base.persistence.spi.TransientContainerId;
 import org.openmdx.base.resource.InteractionSpecs;
 import org.openmdx.kernel.exception.BasicException;
+import org.openmdx.kernel.jdo.ReducedJDOHelper;
 import org.openmdx.state2.cci.StateContext;
 import org.openmdx.state2.cci.ViewKind;
 
@@ -121,7 +123,7 @@ public class ViewManager_1
      * @param plugIns
      * @param objectFactories
      * @param interactionSpec
-     * @param transaction
+     * @param unitOfWork
      */
     private ViewManager_1(
         PersistenceManagerFactory factory, 
@@ -129,26 +131,26 @@ public class ViewManager_1
         PlugIn_1_0[] plugIns,
         ConcurrentMap<InteractionSpec, ViewManager_1> objectFactories,
         InteractionSpec interactionSpec,
-        Transaction transaction
+        UnitOfWork unitOfWork
     ){
         this.factory = factory;
         this.connection = connection;
         this.plugIns = plugIns;
         this.objectFactories = objectFactories;
         this.interactionSpec = interactionSpec;
-        this.transaction =  transaction == null ? new AbstractTransaction_1(){
+        this.unitOfWork =  unitOfWork == null ? new AbstractUnitOfWork_1(){
 
             @Override
-            protected Transaction getDelegate() {
-                return ViewManager_1.this.connection.currentTransaction();
+            protected UnitOfWork getDelegate() {
+                return ViewManager_1.this.connection.currentUnitOfWork();
             }
 
-        //  @Override
+            @Override
             public PersistenceManager getPersistenceManager() {
                 return ViewManager_1.this;
             }
             
-        } : transaction;
+        } : unitOfWork;
         this.registry = new ConcurrentWeakRegistry<DataObject_1_0,ObjectView_1>();
         this.instanceLifecycleListener = new MarshallingInstanceLifecycleListener(
             this.registry,
@@ -217,9 +219,14 @@ public class ViewManager_1
     private ConcurrentMap<InteractionSpec, ViewManager_1> objectFactories;
     
     /**
-     * The transaction view
+     * The unit of work
      */
-    private final Transaction transaction;
+    private final UnitOfWork unitOfWork;
+    
+    /**
+     * The JDO transaction
+     */
+    private transient Transaction transaction;
     
     /**
      * 
@@ -294,7 +301,7 @@ public class ViewManager_1
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.generic.cci.ObjectFactory_1_4#getObjectFactory(javax.resource.cci.InteractionSpec)
      */
-//  @Override
+    @Override
     public ViewManager_1 getPersistenceManager(
         InteractionSpec interactionSpec
     ) {
@@ -309,7 +316,7 @@ public class ViewManager_1
                 this.plugIns,
                 this.objectFactories,
                 interactionSpec,
-                this.transaction
+                this.unitOfWork
             )
         ) : objectFactory;
     }
@@ -322,7 +329,7 @@ public class ViewManager_1
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.spi.PersistenceManager_1_0#lock(java.security.PrivilegedExceptionAction)
      */
-//  @Override
+    @Override
     public <T> T lock(PrivilegedExceptionAction<T> action) {
         throw new UnsupportedOperationException();
     }
@@ -330,7 +337,7 @@ public class ViewManager_1
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.spi.PersistenceManager_1_0#getFeatureReplacingObjectById(java.lang.Object, java.lang.String)
      */
-//  @Override
+    @Override
     public Object getFeatureReplacingObjectById(
         UUID transientObjectId,
         String featureName
@@ -443,7 +450,7 @@ public class ViewManager_1
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.spi.PersistenceManager_1_0#isLoaded(java.util.UUID, java.lang.String)
      */
-//  @Override
+    @Override
     public boolean isLoaded(
         UUID transientObjectId, 
         String fieldName
@@ -465,7 +472,7 @@ public class ViewManager_1
      * After the close method completes, all methods on the ObjectFactory_1_0
      * instance except isClosed throw a ILLEGAL_STATE RuntimeServiceException.
      */
-//  @Override
+    @Override
     public void close(
     ) {
         if (!isClosed()) {
@@ -482,7 +489,7 @@ public class ViewManager_1
      * 
      * @return <code>true</code> if the object factory has been closed
      */
-//  @Override
+    @Override
     public boolean isClosed(
     ){
         return this.connection == null;
@@ -504,7 +511,7 @@ public class ViewManager_1
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#getObjectById(java.lang.Object)
      */
-//  @Override
+    @Override
     public Object getObjectById(Object oid) {
         return getObjectById(oid, true);
     }
@@ -512,7 +519,7 @@ public class ViewManager_1
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#getObjectById(java.lang.Object, boolean)
      */
-//  @Override
+    @Override
     public Object getObjectById(
         Object oid, 
         boolean validate
@@ -565,7 +572,7 @@ public class ViewManager_1
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.cci.DataObjectManager_1_0#getOptimalFetchSize(int)
      */
-//  @Override
+    @Override
     public int getOptimalFetchSize() {
         throw new UnsupportedOperationException("Unsupported operation by manager");
     }
@@ -573,7 +580,7 @@ public class ViewManager_1
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.cci.DataObjectManager_1_0#getCacheThreshold()
      */
-//  @Override
+    @Override
     public int getCacheThreshold() {
         throw new UnsupportedOperationException("Unsupported operation by manager");
     }
@@ -592,23 +599,34 @@ public class ViewManager_1
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#checkConsistency()
      */
-//  @Override
+    @Override
     public void checkConsistency() {
+    }
+
+    /* (non-Javadoc)
+     * @see org.openmdx.base.accessor.spi.PersistenceManager_1_0#currentUnitOfWork()
+     */
+    @Override
+    public UnitOfWork currentUnitOfWork() {
+        return this.unitOfWork;
     }
 
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#currentTransaction()
      */
-//  @Override
+    @Override
     public Transaction currentTransaction(
     ) {
+        if(this.transaction == null) {
+            this.transaction = Transactions.toTransaction(currentUnitOfWork());
+        }
         return this.transaction;
     }
 
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#deletePersistent(java.lang.Object)
      */
-//  @Override
+    @Override
     public void deletePersistent(
         Object pc
     ) {
@@ -627,7 +645,7 @@ public class ViewManager_1
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#deletePersistentAll(java.lang.Object[])
      */
-//  @Override
+    @Override
     public void deletePersistentAll(Object... pcs) {
         for(Object pc : pcs){
             deletePersistent(pc);
@@ -646,7 +664,7 @@ public class ViewManager_1
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#detachCopy(java.lang.Object)
      */
-//  @Override
+    @Override
     public <T> T detachCopy(T pc) {
         throw new UnsupportedOperationException("Unsupported operation by manager");
     }
@@ -654,7 +672,7 @@ public class ViewManager_1
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#detachCopyAll(java.util.Collection)
      */
-//  @Override
+    @Override
     public <T> Collection<T> detachCopyAll(Collection<T> pcs) {
         throw new UnsupportedOperationException("Unsupported operation by manager");
     }
@@ -662,7 +680,7 @@ public class ViewManager_1
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#detachCopyAll(java.lang.Object[])
      */
-//  @Override
+    @Override
     public <T> T[] detachCopyAll(T... pcs) {
         throw new UnsupportedOperationException("Unsupported operation by manager");
     }
@@ -670,7 +688,7 @@ public class ViewManager_1
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#evict(java.lang.Object)
      */
-//  @Override
+    @Override
     public void evict(Object pc) {
         getConnection().evict(toDataObject(pc));
     }
@@ -678,7 +696,7 @@ public class ViewManager_1
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#evictAll(java.lang.Object[])
      */
-//  @Override
+    @Override
     public void evictAll(Object... pcs) {
         getConnection().evictAll(toDataObjects(pcs));
     }
@@ -693,7 +711,7 @@ public class ViewManager_1
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#flush()
      */
-//  @Override
+    @Override
     public void flush() {
         getConnection().flush();
     }
@@ -708,7 +726,7 @@ public class ViewManager_1
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#getCopyOnAttach()
      */
-//  @Override
+    @Override
     public boolean getCopyOnAttach() {
         throw new UnsupportedOperationException("Unsupported operation by manager");
     }
@@ -723,7 +741,7 @@ public class ViewManager_1
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#getManagedObjects()
      */
-//  @Override
+    @Override
     public Set<?> getManagedObjects() {
         return this.registry.values();
     }
@@ -759,7 +777,7 @@ public class ViewManager_1
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#getObjectsById(boolean, java.lang.Object[])
      */
-//  @Override
+    @Override
     public Object[] getObjectsById(boolean validate, Object... oids) {
         throw new UnsupportedOperationException("Unsupported operation by manager");
     }
@@ -767,7 +785,7 @@ public class ViewManager_1
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#getServerDate()
      */
-//  @Override
+    @Override
     public Date getServerDate() {
         throw new UnsupportedOperationException("Unsupported operation by manager");
     }
@@ -775,7 +793,7 @@ public class ViewManager_1
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#makeTransientAll(boolean, java.lang.Object[])
      */
-//  @Override
+    @Override
     public void makeTransientAll(boolean useFetchPlan, Object... pcs) {
         for(Object pc : pcs){
             makeTransient(pc, useFetchPlan);
@@ -785,7 +803,7 @@ public class ViewManager_1
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#retrieveAll(boolean, java.lang.Object[])
      */
-//  @Override
+    @Override
     public void retrieveAll(boolean useFetchPlan, Object... pcs) {
         throw new UnsupportedOperationException("Unsupported operation by manager");
     }
@@ -793,7 +811,7 @@ public class ViewManager_1
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#setCopyOnAttach(boolean)
      */
-//  @Override
+    @Override
     public void setCopyOnAttach(boolean flag) {
         throw new UnsupportedOperationException("Unsupported operation by manager");
     }
@@ -801,7 +819,7 @@ public class ViewManager_1
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#getDataStoreConnection()
      */
-//  @Override
+    @Override
     public JDOConnection getDataStoreConnection() {
         throw new UnsupportedOperationException("Unsupported operation by manager");
     }
@@ -809,7 +827,7 @@ public class ViewManager_1
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#getDetachAllOnCommit()
      */
-//  @Override
+    @Override
     public boolean getDetachAllOnCommit() {
         return this.connection.getDetachAllOnCommit();
     }
@@ -817,7 +835,7 @@ public class ViewManager_1
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#getExtent(java.lang.Class)
      */
-//  @Override
+    @Override
     public <T> Extent<T> getExtent(Class<T> persistenceCapableClass) {
         throw new UnsupportedOperationException("Unsupported operation by manager");
     }
@@ -825,7 +843,7 @@ public class ViewManager_1
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#getExtent(java.lang.Class, boolean)
      */
-//  @Override
+    @Override
     public <T> Extent<T> getExtent(
         Class<T> persistenceCapableClass,
         boolean subclasses
@@ -836,7 +854,7 @@ public class ViewManager_1
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#getFetchPlan()
      */
-//  @Override
+    @Override
     public FetchPlan getFetchPlan() {
         return this.connection.getFetchPlan();
     }
@@ -844,7 +862,7 @@ public class ViewManager_1
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#getIgnoreCache()
      */
-//  @Override
+    @Override
     public boolean getIgnoreCache() {
         return connection.getIgnoreCache();
     }
@@ -852,7 +870,7 @@ public class ViewManager_1
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#getObjectById(java.lang.Class, java.lang.Object)
      */
-//  @Override
+    @Override
     public <T> T getObjectById(Class<T> cls, Object key) {
         throw new UnsupportedOperationException("Unsupported operation by manager");
     }
@@ -860,7 +878,7 @@ public class ViewManager_1
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#getObjectId(java.lang.Object)
      */
-//  @Override
+    @Override
     public Object getObjectId(Object pc) {
         throw new UnsupportedOperationException("Unsupported operation by manager");
     }
@@ -882,7 +900,7 @@ public class ViewManager_1
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#getObjectsById(java.lang.Object[])
      */
-//  @Override
+    @Override
     public Object[] getObjectsById(Object... oids) {
         throw new UnsupportedOperationException("Unsupported operation by manager");
     }
@@ -897,7 +915,7 @@ public class ViewManager_1
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#getObjectsById(java.lang.Object[], boolean)
      */
-//  @Override
+    @Override
     public Object[] getObjectsById(Object[] oids, boolean validate) {
         throw new UnsupportedOperationException("Unsupported operation by manager");
     }
@@ -905,7 +923,7 @@ public class ViewManager_1
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#getPersistenceManagerFactory()
      */
-//  @Override
+    @Override
     public PersistenceManagerFactory getPersistenceManagerFactory(
     ) {
         if(this.interactionSpec == null) { 
@@ -921,7 +939,7 @@ public class ViewManager_1
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#getSequence(java.lang.String)
      */
-//  @Override
+    @Override
     public Sequence getSequence(String name) {
         throw new UnsupportedOperationException("Unsupported operation by manager");
     }
@@ -929,7 +947,7 @@ public class ViewManager_1
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#getTransactionalObjectId(java.lang.Object)
      */
-//  @Override
+    @Override
     public Object getTransactionalObjectId(Object pc) {
         throw new UnsupportedOperationException("Unsupported operation by manager");
     }
@@ -937,7 +955,7 @@ public class ViewManager_1
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#getUserObject()
      */
-//  @Override
+    @Override
     public Object getUserObject() {
         throw new UnsupportedOperationException("Unsupported operation by manager");
     }
@@ -945,7 +963,7 @@ public class ViewManager_1
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#getUserObject(java.lang.Object)
      */
-//  @Override
+    @Override
     public Object getUserObject(Object key) {
         return this.connection.getUserObject(key);
     }
@@ -953,7 +971,7 @@ public class ViewManager_1
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#makeNontransactional(java.lang.Object)
      */
-//  @Override
+    @Override
     public void makeNontransactional(Object pc) {
         throw new UnsupportedOperationException("Unsupported operation by manager");
     }
@@ -961,7 +979,7 @@ public class ViewManager_1
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#makeNontransactionalAll(java.lang.Object[])
      */
-//  @Override
+    @Override
     public void makeNontransactionalAll(Object... pcs) {
         throw new UnsupportedOperationException("Unsupported operation by manager");
     }
@@ -976,7 +994,7 @@ public class ViewManager_1
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#makePersistent(java.lang.Object)
      */
-//  @Override
+    @Override
     public <T> T makePersistent(T pc) {
         return this.connection.makePersistent(pc);
     }
@@ -984,7 +1002,7 @@ public class ViewManager_1
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#makePersistentAll(java.lang.Object[])
      */
-//  @Override
+    @Override
     public <T> T[] makePersistentAll(T... pcs) {
         return this.connection.makePersistentAll(pcs);
     }
@@ -992,7 +1010,7 @@ public class ViewManager_1
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#makePersistentAll(java.util.Collection)
      */
-//  @Override
+    @Override
     public <T> Collection<T> makePersistentAll(Collection<T> pcs) {
         return this.connection.makePersistentAll(pcs);
     }
@@ -1000,7 +1018,7 @@ public class ViewManager_1
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#makeTransactional(java.lang.Object)
      */
-//  @Override
+    @Override
     public void makeTransactional(Object pc) {
         getConnection().makeTransactional(toDataObject(pc));
     }
@@ -1008,7 +1026,7 @@ public class ViewManager_1
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#makeTransactionalAll(java.lang.Object[])
      */
-//  @Override
+    @Override
     public void makeTransactionalAll(Object... pcs) {
         getConnection().makeTransactionalAll(toDataObjects(pcs));
     }
@@ -1023,7 +1041,7 @@ public class ViewManager_1
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#makeTransient(java.lang.Object)
      */
-//  @Override
+    @Override
     public void makeTransient(Object pc) {
         getConnection().makeTransient(toDataObject(pc));
     }
@@ -1031,7 +1049,7 @@ public class ViewManager_1
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#makeTransient(java.lang.Object, boolean)
      */
-//  @Override
+    @Override
     public void makeTransient(Object pc, boolean useFetchPlan) {
         getConnection().makeTransient(toDataObject(pc),useFetchPlan);
     }
@@ -1039,7 +1057,7 @@ public class ViewManager_1
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#makeTransientAll(java.lang.Object[])
      */
-//  @Override
+    @Override
     public void makeTransientAll(Object... pcs) {
         getConnection().makeTransientAll(toDataObjects(pcs));
     }
@@ -1054,7 +1072,7 @@ public class ViewManager_1
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#makeTransientAll(java.lang.Object[], boolean)
      */
-//  @Override
+    @Override
     public void makeTransientAll(Object[] pcs, boolean useFetchPlan) {
         getConnection().makeTransientAll(useFetchPlan, toDataObjects(pcs));
     }
@@ -1069,7 +1087,7 @@ public class ViewManager_1
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#newInstance(java.lang.Class)
      */
-//  @Override
+    @Override
     public <T> T newInstance(Class<T> pcClass) {
         throw new UnsupportedOperationException("Unsupported operation by manager");
     }
@@ -1091,7 +1109,7 @@ public class ViewManager_1
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#newQuery()
      */
-//  @Override
+    @Override
     public Query newQuery() {
         throw new UnsupportedOperationException("Unsupported operation by manager");
     }
@@ -1099,7 +1117,7 @@ public class ViewManager_1
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#newQuery(java.lang.Object)
      */
-//  @Override
+    @Override
     public Query newQuery(Object compiled) {
         throw new UnsupportedOperationException("Unsupported operation by manager");
     }
@@ -1107,7 +1125,7 @@ public class ViewManager_1
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#newQuery(java.lang.String)
      */
-//  @Override
+    @Override
     public Query newQuery(String query) {
         throw new UnsupportedOperationException("Unsupported operation by manager");
     }
@@ -1129,7 +1147,7 @@ public class ViewManager_1
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#newQuery(java.lang.String, java.lang.Object)
      */
-//  @Override
+    @Override
     public Query newQuery(String language, Object query) {
         throw new UnsupportedOperationException("Unsupported operation by manager");
     }
@@ -1165,7 +1183,7 @@ public class ViewManager_1
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#putUserObject(java.lang.Object, java.lang.Object)
      */
-//  @Override
+    @Override
     public Object putUserObject(Object key, Object val) {
         throw new UnsupportedOperationException("Unsupported operation by manager");
     }
@@ -1173,7 +1191,7 @@ public class ViewManager_1
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#refresh(java.lang.Object)
      */
-//  @Override
+    @Override
     public void refresh(
         Object pc
     ) {
@@ -1194,7 +1212,7 @@ public class ViewManager_1
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#refreshAll()
      */
-//  @Override
+    @Override
     public void refreshAll() {
         getConnection().refreshAll();
     }
@@ -1202,7 +1220,7 @@ public class ViewManager_1
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#refreshAll(java.lang.Object[])
      */
-//  @Override
+    @Override
     public void refreshAll(Object... pcs) {
         getConnection().refreshAll(toDataObjects(pcs));
     }
@@ -1217,7 +1235,7 @@ public class ViewManager_1
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#refreshAll(javax.jdo.JDOException)
      */
-//  @Override
+    @Override
     public void refreshAll(JDOException jdoe) {
         throw new UnsupportedOperationException("Unsupported operation by manager");
     }
@@ -1225,7 +1243,7 @@ public class ViewManager_1
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#removeInstanceLifecycleListener(javax.jdo.listener.InstanceLifecycleListener)
      */
-//  @Override
+    @Override
     public void removeInstanceLifecycleListener(
         InstanceLifecycleListener listener
     ) {
@@ -1235,7 +1253,7 @@ public class ViewManager_1
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#removeUserObject(java.lang.Object)
      */
-//  @Override
+    @Override
     public Object removeUserObject(Object key) {
         throw new UnsupportedOperationException("Unsupported operation by manager");
     }
@@ -1243,7 +1261,7 @@ public class ViewManager_1
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#retrieve(java.lang.Object)
      */
-//  @Override
+    @Override
     public void retrieve(Object pc) {
         retrieve(pc, false);
     }
@@ -1251,7 +1269,7 @@ public class ViewManager_1
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#retrieve(java.lang.Object, boolean)
      */
-//  @Override
+    @Override
     public void retrieve(Object pc, boolean useFetchPlan) {
         getConnection().retrieve(toDataObject(pc), useFetchPlan);
     }
@@ -1266,7 +1284,7 @@ public class ViewManager_1
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#retrieveAll(java.lang.Object[])
      */
-//  @Override
+    @Override
     public void retrieveAll(Object... pcs) {
         retrieveAll(false,pcs);
     }
@@ -1281,7 +1299,7 @@ public class ViewManager_1
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#retrieveAll(java.lang.Object[], boolean)
      */
-//  @Override
+    @Override
     public void retrieveAll(Object[] pcs, boolean useFetchPlan) {
         getConnection().retrieveAll(useFetchPlan, toDataObjects(pcs));
     }
@@ -1289,7 +1307,7 @@ public class ViewManager_1
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#setDetachAllOnCommit(boolean)
      */
-//  @Override
+    @Override
     public void setDetachAllOnCommit(boolean flag) {
         this.connection.setDetachAllOnCommit(flag);
     }
@@ -1297,7 +1315,7 @@ public class ViewManager_1
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#setIgnoreCache(boolean)
      */
-//  @Override
+    @Override
     public void setIgnoreCache(boolean flag) {
         this.connection.setIgnoreCache(flag);
     }
@@ -1305,7 +1323,7 @@ public class ViewManager_1
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#setMultithreaded(boolean)
      */
-//  @Override
+    @Override
     public void setMultithreaded(boolean flag) {
         this.connection.setMultithreaded(flag);
     }
@@ -1313,7 +1331,7 @@ public class ViewManager_1
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#setUserObject(java.lang.Object)
      */
-//  @Override
+    @Override
     public void setUserObject(Object o) {
         throw new UnsupportedOperationException("Unsupported operation by manager");
     }
@@ -1326,7 +1344,7 @@ public class ViewManager_1
      *
       * @return      an object
      */
-//  @Override
+    @Override
     public DataObject_1_0 newInstance(
         String objectClass, 
         UUID transientObjectId
@@ -1346,7 +1364,7 @@ public class ViewManager_1
      * 
      * @return <code> true</code> if the the persistence manager is multithreaded 
      */
-//  @Override
+    @Override
     public boolean getMultithreaded(
     ) {
         return this.connection.getMultithreaded();
@@ -1355,7 +1373,7 @@ public class ViewManager_1
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.generic.cci.ObjectFactory_1_3#evict()
      */
-//  @Override
+    @Override
     public void evictAll(
     ) {
         this.connection.evictAll();
@@ -1364,7 +1382,7 @@ public class ViewManager_1
     /* (non-Javadoc)
 	 * @see org.openmdx.base.accessor.spi.PersistenceManager_1_0#getLastXRISegment(java.lang.Object)
 	 */
-//  @Override
+    @Override
 	public String getLastXRISegment(
 		Object pc
 	) {
@@ -1376,7 +1394,7 @@ public class ViewManager_1
 	/* (non-Javadoc)
 	 * @see org.openmdx.base.accessor.spi.PersistenceManager_1_0#getTransientIdOfTheObjectsContainer(java.lang.Object)
 	 */
-//  @Override
+    @Override
 	public TransientContainerId getContainerId(Object pc) {
 		return pc instanceof ObjectView_1 ? 
 			this.connection.getContainerId(((ObjectView_1)pc).objGetDelegate()) : 
@@ -1398,7 +1416,7 @@ public class ViewManager_1
      * @exception        ServiceException 
      *                   Object can't be marshalled
      */
-//  @Override
+    @Override
     public Object marshal (
         Object source
     ) throws ServiceException{
@@ -1460,7 +1478,7 @@ public class ViewManager_1
      * @exception       ServiceException
      *                  Object can't be unmarshalled
      */
-//  @Override
+    @Override
     public Object unmarshal (
         Object source
     ) throws ServiceException {
@@ -1547,7 +1565,7 @@ public class ViewManager_1
         public Object marshal(
             Object source
         ) throws ServiceException {
-            return JDOHelper.getObjectId(source);
+            return ReducedJDOHelper.getObjectId(source);
         }
 
         /* (non-Javadoc)

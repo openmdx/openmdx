@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2009, OMEX AG, Switzerland
+ * Copyright (c) 2009-2012, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without 
@@ -57,10 +57,14 @@ import javax.naming.spi.ObjectFactory;
 import javax.transaction.TransactionManager;
 
 import org.openmdx.kernel.exception.BasicException;
+import org.openmdx.kernel.lightweight.transaction.LightweightTransactionManager;
 import org.openmdx.kernel.naming.ComponentEnvironment;
 
 /**
- * jdbc URL Context Factory
+ * jdbc URL Context Factory supoporting the following two formats:<ul>
+ * <li>jdbc:oracle:thin:@localhost:1521:XE?user=scott&password=tiger&driver=oracle.jdbc.OracleDriver
+ * <li>jdbc:XADataSource:oracle.jdbc.xa.client.OracleXADataSource?URL=jdbc:oracle:thin:@localhost:1521:XE&user=scott&password=tiger
+ * </ul>
  */
 public class jdbcURLContextFactory implements ObjectFactory {
 
@@ -108,9 +112,12 @@ public class jdbcURLContextFactory implements ObjectFactory {
     private synchronized void initialize(
     ) throws BasicException {
         if(dataSourceContext == null) {
-            dataSourceContext = new DataSourceContext(
-                ComponentEnvironment.lookup(TransactionManager.class)
-            );
+            TransactionManager transactionManager = ComponentEnvironment.lookup(TransactionManager.class);
+            if(transactionManager instanceof LightweightTransactionManager) {
+                dataSourceContext = new LightweightDataSourceContext(transactionManager);
+            } else {
+                dataSourceContext = new XADataSourceContext();
+            }
         }
     }
     

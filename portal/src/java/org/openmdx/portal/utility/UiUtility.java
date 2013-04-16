@@ -77,7 +77,6 @@ import org.openmdx.application.xml.Importer;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.rest.spi.Object_2Facade;
-import org.openmdx.portal.text.conversion.XMLWriter;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;

@@ -5,10 +5,9 @@
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
  * ====================================================================
  *
- * This software is published under the BSD license
- * as listed below.
+ * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2009, OMEX AG, Switzerland
+ * Copyright (c) 2009-2012, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -52,7 +51,6 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.ListIterator;
@@ -62,16 +60,14 @@ import java.util.Properties;
 import javax.jdo.Constants;
 import javax.jdo.JDODataStoreException;
 import javax.jdo.JDOFatalDataStoreException;
-import javax.jdo.JDOHelper;
 import javax.jdo.JDOUserException;
 import javax.jdo.PersistenceManager;
 import javax.jdo.PersistenceManagerFactory;
 import javax.jdo.datastore.DataStoreCache;
-import javax.naming.InitialContext;
 
 import org.openmdx.application.configuration.Configuration;
 import org.openmdx.application.spi.PropertiesConfigurationProvider;
-import org.openmdx.base.accessor.rest.DataManagerFactory_1;
+import org.openmdx.base.accessor.rest.spi.ConnectionCacheProvider_2_0;
 import org.openmdx.base.accessor.rest.spi.DataStoreCache_2_0;
 import org.openmdx.base.accessor.spi.PersistenceManager_1_0;
 import org.openmdx.base.accessor.view.ViewManagerFactory_1;
@@ -83,9 +79,10 @@ import org.openmdx.base.persistence.cci.ConfigurableProperty;
 import org.openmdx.base.persistence.spi.AbstractPersistenceManagerFactory;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.exception.BasicException.Parameter;
+import org.openmdx.kernel.jdo.ReducedJDOHelper;
 import org.openmdx.kernel.loading.BeanFactory;
-import org.openmdx.kernel.loading.Classes;
 import org.openmdx.kernel.loading.Factory;
+import org.openmdx.kernel.loading.Resources;
 import org.openmdx.kernel.log.SysLog;
 import org.w3c.cci2.SparseArray;
 
@@ -132,13 +129,12 @@ public class EntityManagerFactory_1
             String dataManagerFactoryName = super.getConnectionFactoryName();
             if(dataManagerFactoryName != null) try {
                 if(dataManagerFactoryName.startsWith("jdo:")) {
-                    dataManagerFactory = JDOHelper.getPersistenceManagerFactory(
+                    dataManagerFactory = ReducedJDOHelper.getPersistenceManagerFactory(
                         this.overrides,
                         dataManagerFactoryName.substring(4)
                     );
                 } else {
-                    dataManagerFactory = (PersistenceManagerFactory) new InitialContext(
-                    ).lookup(
+                    dataManagerFactory = (PersistenceManagerFactory) getConnectionFactoryByName(
                         dataManagerFactoryName
                     );
                 }
@@ -200,7 +196,9 @@ public class EntityManagerFactory_1
                 )
             );
         } else {
-            this.dataStoreCache = DataManagerFactory_1.getDataStoreCache(dataManagerFactory);
+            this.dataStoreCache = dataManagerFactory instanceof ConnectionCacheProvider_2_0 ?
+                ((ConnectionCacheProvider_2_0)dataManagerFactory).getConnectionCache() :
+                null;
         }
         //
         // Plug-In Configurations
@@ -295,7 +293,7 @@ public class EntityManagerFactory_1
             );
         }
     }
-    
+
     /**
      * Provide a configuration entry's section
      * 
@@ -308,7 +306,7 @@ public class EntityManagerFactory_1
     ){
         return ((String)name).split("\\.");
     }
-    
+
     /**
      * The shared user objects
      */
@@ -387,11 +385,7 @@ public class EntityManagerFactory_1
         try {
             String entityManagerName = (String)props.get(ConfigurableProperty.Name.qualifiedName());
             if(entityManagerName != null) {
-                for(
-                    Enumeration<URL> resources = Classes.getResources("META-INF/" + entityManagerName + ".properties");
-                    resources.hasMoreElements();
-                ) {
-                    URL resource = resources.nextElement();
+                for(URL resource : Resources.getMetaInfResources(entityManagerName + ".properties")) {
                     Properties properties = new Properties();
                     properties.load(resource.openStream());
                     configuration.putAll(properties);

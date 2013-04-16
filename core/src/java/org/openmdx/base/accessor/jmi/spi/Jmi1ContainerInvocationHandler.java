@@ -56,7 +56,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.logging.Level;
 
-import javax.jdo.JDOHelper;
 import javax.jdo.spi.PersistenceCapable;
 import javax.jmi.reflect.InvalidCallException;
 import javax.jmi.reflect.RefBaseObject;
@@ -70,6 +69,7 @@ import org.openmdx.base.marshalling.Marshaller;
 import org.openmdx.base.naming.Path;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.exception.Throwables;
+import org.openmdx.kernel.jdo.ReducedJDOHelper;
 import org.openmdx.kernel.log.SysLog;
 import org.w3c.cci2.AnyTypePredicate;
 import org.w3c.cci2.Container;
@@ -139,14 +139,14 @@ public class Jmi1ContainerInvocationHandler
         try {
             if(declaringClass == Object.class) {
                 if("hashCode".equals(methodName)) {
-                    return JDOHelper.getTransactionalObjectId(proxy).hashCode();
+                    return ReducedJDOHelper.getTransactionalObjectId(proxy).hashCode();
                 } else if ("equals".equals(methodName)) {
                     return
-                        JDOHelper.getPersistenceManager(proxy).equals(JDOHelper.getPersistenceManager(args[0])) &&
-                        JDOHelper.getTransactionalObjectId(proxy).equals(JDOHelper.getTransactionalObjectId(args[0]));
+                        ReducedJDOHelper.getPersistenceManager(proxy).equals(ReducedJDOHelper.getPersistenceManager(args[0])) &&
+                        ReducedJDOHelper.getTransactionalObjectId(proxy).equals(ReducedJDOHelper.getTransactionalObjectId(args[0]));
                 } else if ("toString".equals(methodName)) {
                     return proxy.getClass().getInterfaces()[0].getName() + ": " + (
-                        JDOHelper.isPersistent(proxy) ? ((Path)JDOHelper.getObjectId(proxy)).toXRI() : JDOHelper.getTransactionalObjectId(proxy)
+                        ReducedJDOHelper.isPersistent(proxy) ? ((Path)ReducedJDOHelper.getObjectId(proxy)).toXRI() : ReducedJDOHelper.getTransactionalObjectId(proxy)
                     );
                 } else throw new JmiServiceException(
                     null,
@@ -237,7 +237,7 @@ public class Jmi1ContainerInvocationHandler
                         if(this.cciDelegate instanceof RefBaseObject) {
                             return ((RefBaseObject)this.cciDelegate).refMofId();
                         } else {
-                            Object xri = JDOHelper.getObjectId(this.cciDelegate);
+                            Object xri = ReducedJDOHelper.getObjectId(this.cciDelegate);
                             return xri instanceof Path ? ((Path)xri).toXRI() : null;
                         }
                     } else throw new UnsupportedOperationException(

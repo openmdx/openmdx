@@ -47,8 +47,10 @@
  */
 package org.openmdx.application.xml.spi;
 
+import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 import java.text.ParseException;
@@ -98,10 +100,11 @@ public class ImportHandler extends DefaultHandler {
      */
     public ImportHandler(
          ImportTarget target, 
-         URL documentURL
+         InputSource source
     ){
         this.target = target;
-        this.url = documentURL;
+        this.url = getDocumentURL(source);
+        this.binary = isBinary(source);
     }
 
     /**
@@ -149,6 +152,8 @@ public class ImportHandler extends DefaultHandler {
 
     private int currentAttributePosition = -1;
 
+    private String currentAttributeKey = null;
+
     private String currentAttributeMultiplicity = null;
 
     private String currentAttributeOperation = null;
@@ -160,6 +165,11 @@ public class ImportHandler extends DefaultHandler {
     private final ImportTarget target;
 
     private final URL url;
+    
+    /**
+     * <code>true</code> in case of a WBXML input
+     */
+    private final boolean binary;
 
     // cached type definitions (global in classloader)
     private static final Set<String> loadedSchemas = new HashSet<String>();
@@ -182,6 +192,68 @@ public class ImportHandler extends DefaultHandler {
         "+00", "-00",
         "+00:00", "-00:00"
     };
+
+    /**
+     * Determine the document URL
+     * 
+     * @param source the <code>InputSource</code>
+     * 
+     * @return the document <code>URL</code>
+     */
+    private static URL getDocumentURL(
+        InputSource source
+    ){
+        String uri = source.getSystemId();
+        if (uri == null) {
+            return null;
+        } else {
+            try {
+                return new URL(uri);
+            } catch (MalformedURLException exception) {
+                try {
+                    return new File(uri).toURI().toURL();
+                } catch (MalformedURLException exception1) {
+                    return null;
+                }
+            }
+        }
+    }
+
+    /**
+     * Determine the document is binary
+     * 
+     * @param source the <code>InputSource</code>
+     * 
+     * @return <code>true</code> in case of WBXML input
+     */
+    private static boolean isBinary(
+        InputSource source
+    ){
+        if(source.getCharacterStream() != null) {
+            return false;
+        }
+        String uri = source.getSystemId();
+        if(uri != null) {
+            uri = uri.toLowerCase();
+            if(uri.endsWith(".wbxml")) {
+                return true;
+            }
+            if(uri.endsWith(".xml")) {
+                return false;
+            }
+        }
+        String encoding = source.getEncoding();
+        return encoding == null;
+    }
+    
+    /**
+     * Tells whether we are reading an XML or a WBXML source
+     * 
+     * @return <code>true</code> in case of a WBXML source
+     */
+    public boolean isBinary(){
+        return this.binary;
+    }
     
     
     // -----------------------------------------------------------------------
@@ -555,6 +627,7 @@ public class ImportHandler extends DefaultHandler {
                 attributes.getValue("_position")
             );
             this.currentAttributePosition = position == -1 ? this.currentAttributePosition + 1 : position;
+            this.currentAttributeKey = attributes.getValue("_key");
         } else if (
             Multiplicity.SET.toString().equals(attributeMultiplicity) ||
             Multiplicity.LIST.toString().equals(attributeMultiplicity) ||
@@ -576,6 +649,26 @@ public class ImportHandler extends DefaultHandler {
                 Facades.asObject(
                     this.currentObject
                 ).attributeValuesAsList(
+                    this.currentAttributeName
+                ).clear();
+            } catch (ServiceException exception) {
+                throw new SAXException(exception);
+            }
+        } else if (
+            Multiplicity.MAP.toString().equals(attributeMultiplicity)
+        ) {
+            try {
+                // multi-valued attribute with attributes 'offset', 'multiplicity' last
+                // component of the element is the unqualified element name
+                String featureName = element.get(element.size() - 1);
+                this.currentPath = this.currentPath.getChild(featureName);
+                this.currentAttributeName = localpart;
+                this.currentAttributeOffset = 0; // no offset for maps
+                this.currentAttributeMultiplicity = attributeMultiplicity;
+                this.currentAttributePosition = -1; // no position for maps
+                Facades.asObject(
+                    this.currentObject
+                ).attributeValuesAsMap(
                     this.currentAttributeName
                 ).clear();
             } catch (ServiceException exception) {
@@ -769,9 +862,7 @@ public class ImportHandler extends DefaultHandler {
                             value = this.currentAttributeValue.toString();
                         }
                         //
-                        // Set values according to multiplicity and
-                        // operation TBD: replace SparseList by proper
-                        // Collection class when migrating to Object_1_0
+                        // Set values according to multiplicity and operation
                         //
                         boolean notSupported = false;
                         int absolutePosition = this.currentAttributeOffset + this.currentAttributePosition;
@@ -832,6 +923,20 @@ public class ImportHandler extends DefaultHandler {
                             } else {
                                 notSupported = true;
                             }
+                        } else if (
+                            Multiplicity.MAP.toString().equalsIgnoreCase(this.currentAttributeMultiplicity)
+                        ) {
+                            Map<String, Object> values = facade.attributeValuesAsMap(attributeName);
+                            if(this.currentAttributeKey == null) {
+                                throw new ServiceException(
+                                    BasicException.Code.DEFAULT_DOMAIN,
+                                    BasicException.Code.ASSERTION_FAILURE,
+                                    "Map items need a _key",
+                                    new BasicException.Parameter("object",this.currentObject),
+                                    new BasicException.Parameter("_multiplicity",this.currentAttributeMultiplicity)
+                                );
+                            }
+                            values.put(this.currentAttributeKey, value);
                         } else {
                             // unsupported multiplicity
                             notSupported = true;
@@ -873,7 +978,10 @@ public class ImportHandler extends DefaultHandler {
                 // </item> is the end tag for a value of a multi-valued attribute.
                 // Leave currentPath unchanged.
                 this.currentPath = this.currentPath.getParent();
-            }
+                if(Multiplicity.MAP.toString().equals(this.currentAttributeMultiplicity)) {
+                    this.currentAttributeMultiplicity = null;
+                }
+             }
             this.currentAttributeValue = null;
             this.previousElementEnded = true;
         } catch (ServiceException exception) {

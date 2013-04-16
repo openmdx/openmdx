@@ -8,7 +8,7 @@
  * This software is published under the BSD license
  * as listed below.
  * 
- * Copyright (c) 2004-2007, OMEX AG, Switzerland
+ * Copyright (c) 2004-2013, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -64,11 +64,22 @@ import org.openmdx.portal.servlet.ViewPort;
 import org.openmdx.portal.servlet.WebKeys;
 import org.openmdx.portal.servlet.control.EditObjectControl;
 
+/**
+ * BooleanValue
+ *
+ */
 public class BooleanValue
     extends AttributeValue
     implements Serializable {
   
-    //-------------------------------------------------------------------------
+    /**
+     * Create boolean value.
+     * 
+     * @param object
+     * @param fieldDef
+     * @param application
+     * @return
+     */
     public static AttributeValue createBooleanValue(
         Object object,
         FieldDef fieldDef,
@@ -93,7 +104,13 @@ public class BooleanValue
               );        
     }
     
-    //-------------------------------------------------------------------------
+    /**
+     * Constructor. 
+     *
+     * @param object
+     * @param fieldDef
+     * @param application
+     */
     protected BooleanValue(
         Object object,
         FieldDef fieldDef,
@@ -109,10 +126,10 @@ public class BooleanValue
             : new Boolean(fieldDef.defaultValue);
     }
 
-    //-------------------------------------------------------------------------
-    /**
-     * Prepares a single stringified Value to append.
+    /* (non-Javadoc)
+     * @see org.openmdx.portal.servlet.attribute.AttributeValue#getStringifiedValueInternal(org.openmdx.portal.servlet.ViewPort, java.lang.Object, boolean, boolean, boolean)
      */
+    @Override
     protected String getStringifiedValueInternal(
         ViewPort p, 
         Object v,
@@ -128,21 +145,25 @@ public class BooleanValue
                 forEditing,
                 shortFormat
             );          
-        }
-        else {
+        } else {
             return ((Boolean)v).booleanValue() 
                 ? app.getTexts().getTrueText() 
                 : app.getTexts().getFalseText();
         }
     }
 
-    //-------------------------------------------------------------------------
+    /* (non-Javadoc)
+     * @see org.openmdx.portal.servlet.attribute.AttributeValue#getDefaultValue()
+     */
+    @Override
     public Object getDefaultValue(
     ) {
         return this.defaultValue;
     }
   
-    //-------------------------------------------------------------------------
+    /* (non-Javadoc)
+     * @see org.openmdx.portal.servlet.attribute.AttributeValue#paint(org.openmdx.portal.servlet.attribute.Attribute, org.openmdx.portal.servlet.ViewPort, java.lang.String, java.lang.String, org.openmdx.base.accessor.jmi.cci.RefObject_1_0, int, int, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, boolean)
+     */
     @Override
     public void paint(
         Attribute attribute,
@@ -164,36 +185,51 @@ public class BooleanValue
         HtmlEncoder_1_0 htmlEncoder = p.getApplicationContext().getHtmlEncoder();     
         label = this.getLabel(attribute, p, label);
         String title = this.getTitle(attribute, label);
-        if(forEditing && readonlyModifier.isEmpty()) {
+        String boolImages = "";
+        Collection values = this.getValues(false);
+        for(Iterator e = values.iterator(); e.hasNext(); ) {
+            if(Boolean.TRUE.equals(e.next())) {
+            	boolImages += p.getImg("src=\"", p.getResourcePath("images/checked"), p.getImgType(), "\" alt=\"checked\"");
+            } else {
+            	boolImages += p.getImg("src=\"", p.getResourcePath("images/notchecked"), p.getImgType(), "\" alt=\"not checked\"");
+            }
+        }
+        if(forEditing) {
             String feature = this.getName();
             id = (id == null) || (id.length() == 0)            
                 ? feature + "[" + Integer.toString(tabIndex) + "]"
-                : id;            
+                : id;
             p.write("<td class=\"label\" title=\"", (title == null ? "" : htmlEncoder.encode(title, false)), "\"><span class=\"nw\">", htmlEncoder.encode(label, false), "</span></td>");            
             if(this.isSingleValued()) {                
                 // if checked sends (true,false). If not checked sends (false). The hidden field
                 // guarantees that always a value is sent.
                 String checkedModifier = "true".equals(stringifiedValue) ? "checked" : "";
                 p.write("<td ", rowSpanModifier, ">");
-                p.write("  <input id=\"", id, ".false\" name=\"", id, ".false\" type=\"hidden\" class=\"valueL", lockedModifier, "\" value=\"false\">");
-                p.write("  <input id=\"", id, ".true\" name=\"", id, ".true\" type=\"checkbox\" ", checkedModifier, " ", (readonlyModifier.isEmpty() ? "" : "disabled"), " tabindex=\"" + tabIndex, "\" value=\"true\"");
-                p.writeEventHandlers("    ", attribute.getEventHandler());
-                p.write("  >");
+                if(readonlyModifier.isEmpty()) {
+	                p.write("  <input id=\"", id, ".false\" name=\"", id, ".false\" type=\"hidden\" class=\"valueL", lockedModifier, "\" value=\"false\">");
+	                p.write("  <input id=\"", id, ".true\" name=\"", id, ".true\" type=\"checkbox\" ", checkedModifier, " ", (readonlyModifier.isEmpty() ? "" : "disabled"), " tabindex=\"" + tabIndex, "\" value=\"true\"");
+	                p.writeEventHandlers("    ", attribute.getEventHandler());
+	                p.write("  >");
+                } else {
+                	p.write(boolImages);
+                }
                 p.write("</td>");
                 p.write("<td class=\"addon\" ", rowSpanModifier, "></td>");
-            }
-            else {
+            } else {
                 p.write("<td ", rowSpanModifier, ">");
-                p.write("  <textarea id=\"", id, "\" name=\"", id, "\" class=\"multiStringLocked\" rows=\"", Integer.toString(attribute.getSpanRow()), "\" cols=\"20\" readonly tabindex=\"" + tabIndex, "\">", stringifiedValue, "</textarea>");
+                if(readonlyModifier.isEmpty()) {
+                	p.write("  <textarea id=\"", id, "\" name=\"", id, "\" class=\"multiStringLocked\" rows=\"", Integer.toString(attribute.getSpanRow()), "\" cols=\"20\" readonly tabindex=\"" + tabIndex, "\">", stringifiedValue, "</textarea>");
+                } else {
+                	p.write(boolImages);                	
+                }
                 p.write("</td>");
                 p.write("<td class=\"addon\" ", rowSpanModifier, ">");
                 if(this.isChangeable()) {
                     p.write("    ", p.getImg("class=\"popUpButton\" id=\"", id, ".popup\" border=\"0\" alt=\"Click to edit\" src=\"", p.getResourcePath("images/edit"), p.getImgType(), "\" onclick=\"javascript:multiValuedHigh=", this.getUpperBound("1..10"), "; popup_", EditObjectControl.EDIT_BOOLEANS, " = ", EditObjectControl.EDIT_BOOLEANS, "_showPopup(event, this.id, popup_", EditObjectControl.EDIT_BOOLEANS, ", 'popup_", EditObjectControl.EDIT_BOOLEANS, "', $('", id, "'), new Array());\""));
                 }
                 p.write("</td>");
-            }            
-        }
-        else {
+            }
+        } else {
             if(stringifiedValue.isEmpty() || WebKeys.LOCKED_VALUE.equals(stringifiedValue)) {
                 super.paint(
                     attribute,
@@ -212,28 +248,16 @@ public class BooleanValue
                     stringifiedValue,
                     forEditing
                 );
-            }
-            else {                                                        
-                String images = "";
-                Collection values = this.getValues(false);
-                for(Iterator e = values.iterator(); e.hasNext(); ) {
-                    if(Boolean.TRUE.equals(e.next())) {
-                    	images += p.getImg("src=\"", p.getResourcePath("images/checked"), p.getImgType(), "\" alt=\"checked\"");
-                    }
-                    else {
-                    	images += p.getImg("src=\"", p.getResourcePath("images/notchecked"), p.getImgType(), "\" alt=\"not checked\"");
-                    }
-                }
+            } else {
                 styleModifier += "\"";
                 if(p.getViewPortType() == ViewPort.Type.MOBILE) {
                 	p.write("		<label>",  htmlEncoder.encode(label, false), "</label>");                	
-                	p.write("       <div class=\"valueL\" title=\"", stringifiedValue, "\">", images, "</div>");
-                }
-                else {
+                	p.write("       <div class=\"valueL\" title=\"", stringifiedValue, "\">", boolImages, "</div>");
+                } else {
 	                p.debug("<!-- BooleanValue -->");
 	                p.write(gapModifier);
 	                p.write("<td class=\"label\" title=\"", (title == null ? "" : htmlEncoder.encode(title, false)), "\"><span class=\"nw\">", htmlEncoder.encode(label, false), "</span></td>");
-	                p.write("<td ",  rowSpanModifier, " class=\"valueL\" ",  widthModifier, " ",  styleModifier, "><div class=\"field\" title=\"", stringifiedValue, "\">",  images, "</div></td>");
+	                p.write("<td ",  rowSpanModifier, " class=\"valueL\" ",  widthModifier, " ",  styleModifier, "><div class=\"field\" title=\"", stringifiedValue, "\">",  boolImages, "</div></td>");
                 }
             }
         }

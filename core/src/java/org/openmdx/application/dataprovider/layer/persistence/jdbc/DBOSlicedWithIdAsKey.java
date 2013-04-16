@@ -54,6 +54,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import javax.resource.cci.MappedRecord;
 
@@ -354,15 +355,19 @@ extends SlicedDbObject
                         Boolean.toString(databaseProductName.startsWith("PostgreSQL"))
                     );
                     String ridAsString = rid.toString();
-                    if(Boolean.valueOf(useLikeForOidMatching).booleanValue()) {    		
+                    if(Boolean.valueOf(useLikeForOidMatching)) {    		
                         statement = "DELETE FROM " + dbObject + " WHERE " + this.database.OBJECT_ID + " LIKE ?"; 
-                        statementParameters.add(ridAsString.endsWith("%") ? ridAsString : ridAsString + "%");
-                    }
-                    else {
+                        statementParameters.add(
+                            ridAsString.endsWith("/%") 
+                                ? ridAsString 
+                                : ridAsString.endsWith("/")
+                                    ? ridAsString + "%"
+                                    : ridAsString + "/%"
+                        );
+                    } else {
                         if(ridAsString.endsWith("/%")) {
                             ridAsString = ridAsString.substring(0, ridAsString.length() - 2);
-                        }
-                        else if(ridAsString.endsWith("/")) {
+                        } else if(ridAsString.endsWith("/")) {
                             ridAsString = ridAsString.substring(0, ridAsString.length() - 1);
                         }
                         statement = "DELETE FROM " + dbObject + " WHERE (" + this.database.OBJECT_ID + " > ?) AND (" + this.database.OBJECT_ID + " < ?)";                       
@@ -495,19 +500,27 @@ extends SlicedDbObject
                 );
             }
             // Add id for all attributes with values of type path
-            if(pathNormalizeLevel > 1) {    
-                for(
-                    Iterator<String> i = facade.getValue().keySet().iterator();
-                    i.hasNext();
-                ) {
-                    String attributeName = i.next();
+            if(pathNormalizeLevel > 1) {  
+                Set<String> attributeNames = facade.getValue().keySet();
+                for(String attributeName: attributeNames) {
                     List<Object> values = facade.attributeValuesAsList(attributeName);
-                    if((values.size() > 0) && (values.get(0) instanceof Path)) {
-                        for(
-                            Iterator<Object> j = values.iterator();
-                            j.hasNext();
-                        ) {
-                            Object v = j.next();
+                    int posNull = values.indexOf(null);
+                    if(posNull >= 0) {
+                        for(int i = posNull + 1; i < values.size(); i++) {
+                            if(values.get(i) != null) {
+                                throw new ServiceException(
+                                    BasicException.Code.DEFAULT_DOMAIN,
+                                    BasicException.Code.ASSERTION_FAILURE, 
+                                    "Collection type attribute contains nulls",
+                                    new BasicException.Parameter("attribute", attributeName),
+                                    new BasicException.Parameter("value class", values.getClass().getName()),
+                                    new BasicException.Parameter("value", values)
+                                );
+                            }
+                        }
+                    }
+                    if(!values.isEmpty() && (values.get(0) instanceof Path)) {
+                        for(Object v: values) {
                             if(!(v instanceof Path)) {
                                 throw new ServiceException(
                                     BasicException.Code.DEFAULT_DOMAIN,
@@ -526,8 +539,7 @@ extends SlicedDbObject
                                     true
                                 ) + "/" + objectPath.getBase()
                             );
-
-                            // add parent id of path value
+                            // Add parent id of path value
                             if(pathNormalizeLevel > 2) {
                                 Path parentPath = objectPath.getPrefix(objectPath.size()-2);
                                 if(parentPath.size() >= 5) {

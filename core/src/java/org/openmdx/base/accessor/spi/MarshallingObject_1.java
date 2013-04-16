@@ -48,10 +48,10 @@
 package org.openmdx.base.accessor.spi;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
 
-import javax.jdo.JDOHelper;
 import javax.jdo.JDOUserException;
 import javax.jdo.PersistenceManager;
 
@@ -59,6 +59,7 @@ import org.openmdx.base.accessor.cci.Container_1_0;
 import org.openmdx.base.accessor.cci.DataObjectManager_1_0;
 import org.openmdx.base.accessor.cci.DataObject_1_0;
 import org.openmdx.base.collection.MarshallingList;
+import org.openmdx.base.collection.MarshallingMap;
 import org.openmdx.base.collection.MarshallingSet;
 import org.openmdx.base.collection.MarshallingSortedMap;
 import org.openmdx.base.exception.ServiceException;
@@ -66,6 +67,7 @@ import org.openmdx.base.marshalling.ExceptionListenerMarshaller;
 import org.openmdx.base.marshalling.Marshaller;
 import org.openmdx.base.persistence.spi.TransientContainerId;
 import org.openmdx.kernel.exception.BasicException;
+import org.openmdx.kernel.jdo.ReducedJDOHelper;
 
 /**
  * A marshalling object
@@ -263,6 +265,37 @@ public abstract class MarshallingObject_1<M extends Marshaller>
     }
 
     /**
+     * Get a Map attribute.
+     * <p> 
+     * This method never returns <code>null</code> as an instance of the
+     * requested class is created on demand if it hasn't been set yet.
+     *
+     * @param       feature
+     *              The feature's name.
+     *
+     * @return      a map which may be empty but never null.
+     *
+     * @exception   ServiceException ILLEGAL_STATE
+     *              if the object is deleted
+     * @exception   ServiceException BAD_MEMBER_NAME
+     *              if the object has no such feature
+     * @exception   ClassCastException
+     *              if the feature's value is not a set
+     */
+    @SuppressWarnings({
+        "unchecked", "rawtypes"
+    })
+    @Override
+    public Map objGetMap(
+        String feature
+    ) throws ServiceException {
+        return new MarshallingMap<String,Object>(
+            this.getMarshaller(),
+            this.getDelegate().objGetMap(feature)
+        );
+    }
+
+    /**
      * Get a reference feature.
      * <p> 
      * This method never returns <code>null</code> as an instance of the
@@ -432,7 +465,7 @@ public abstract class MarshallingObject_1<M extends Marshaller>
                 //
                 // Manager has changed, e.g. in case of context switch
                 //
-                TransientContainerId containerId = (TransientContainerId) JDOHelper.getTransactionalObjectId(getDelegate());
+                TransientContainerId containerId = (TransientContainerId) ReducedJDOHelper.getTransactionalObjectId(getDelegate());
                 container = (MarshallingContainer)((DataObject_1_0)((DataObjectManager_1_0)actualMarshaller).getObjectById(
                     containerId.getParent()
                 )).objGetContainer(

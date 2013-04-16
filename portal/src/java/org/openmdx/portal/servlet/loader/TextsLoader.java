@@ -8,7 +8,7 @@
  * This software is published under the BSD license
  * as listed below.
  * 
- * Copyright (c) 2004-2007, OMEX AG, Switzerland
+ * Copyright (c) 2004-2013, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -58,12 +58,11 @@ import java.io.SequenceInputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.PropertyResourceBundle;
 import java.util.ResourceBundle;
 import java.util.Set;
+import java.util.TreeSet;
 
 import javax.jdo.PersistenceManagerFactory;
 import javax.servlet.ServletContext;
@@ -82,7 +81,7 @@ import org.openmdx.portal.servlet.Texts.TextsBundle;
 public class TextsLoader extends Loader {
 
 	/**
-	 * Constructor 
+	 * Constructor.
 	 *
 	 * @param context
 	 * @param portalExtension
@@ -103,6 +102,7 @@ public class TextsLoader extends Loader {
 
 	/**
 	 * Get default texts bundles.
+	 * 
 	 * @param locale
 	 * @param context
 	 * @return
@@ -112,15 +112,15 @@ public class TextsLoader extends Loader {
 		String[] locale,
 		ServletContext context
 	) throws ServiceException {
-		// 2-dim list: first index=locale, second index = input stream
 		List<ResourceBundle> textsBundles = new ArrayList<ResourceBundle>();
 		int fallbackLocaleIndex = 0;
 		for(int i = 0; i < locale.length; i++) {
-			Set localeTextsPaths = new HashSet();
+			// Overloading requires sorting of text files by name
+			Set<String> textsPaths = new TreeSet<String>();
 			if(locale[i] != null) {
 				fallbackLocaleIndex = 0;
-				localeTextsPaths = context.getResourcePaths("/WEB-INF/config/texts/" + locale[i]);
-				if(localeTextsPaths == null) {
+				Set<String> resourcePaths = context.getResourcePaths("/WEB-INF/config/texts/" + locale[i]);
+				if(resourcePaths == null) {
 					for(int j = i-1; j >= 0; j--) {
 						if((locale[j] != null) && locale[i].substring(0,2).equals(locale[j].substring(0,2))) {
 							fallbackLocaleIndex = j;
@@ -128,12 +128,12 @@ public class TextsLoader extends Loader {
 						}
 					}
 					SysLog.info(locale[i] + " not found. Fallback to " + locale[fallbackLocaleIndex]);
-					localeTextsPaths = context.getResourcePaths("/WEB-INF/config/texts/" + locale[fallbackLocaleIndex]);
+					resourcePaths = context.getResourcePaths("/WEB-INF/config/texts/" + locale[fallbackLocaleIndex]);
 				}
+				textsPaths.addAll(resourcePaths);
 			}
 			List<InputStream> textsStreams = new ArrayList<InputStream>();
-			for(Iterator j = localeTextsPaths.iterator(); j.hasNext(); ) {
-				String path = (String)j.next();
+			for(String path: textsPaths) {
 				if(!path.endsWith("/")) {            
 					SysLog.info("Loading " + path);
 					textsStreams.add(
@@ -159,6 +159,7 @@ public class TextsLoader extends Loader {
 
 	/**
 	 * Load texts resources for given locales.
+	 * 
 	 * @param locale
 	 * @return
 	 * @throws ServiceException
@@ -191,5 +192,3 @@ public class TextsLoader extends Loader {
     private final Path codeSegmentIdentity;
 
 }
-
-//--- End of File -----------------------------------------------------------

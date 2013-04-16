@@ -445,7 +445,7 @@ public class XMISchemaMapper {
   public void writeSchemaFooter(
   ) {
     this.pw.println("</xsd:schema>");
-    this.pw.flush();
+    this.pw.close();
   }
 
   //---------------------------------------------------------------------------

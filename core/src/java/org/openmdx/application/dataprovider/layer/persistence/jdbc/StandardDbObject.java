@@ -503,7 +503,7 @@ public abstract class StandardDbObject extends DbObject {
         new FilterProperty(
             p.quantor(),
             this.database.getFeatureName(
-                (String)this.getObjectIdColumn().get(0)
+                this.getObjectIdColumn().get(0)
             ),
             p.operator(),
             (Object[])filterValues

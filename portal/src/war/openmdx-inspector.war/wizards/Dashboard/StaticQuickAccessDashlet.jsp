@@ -1,23 +1,20 @@
 <%@page contentType="text/html;charset=UTF-8" language="java" pageEncoding="UTF-8"%><%
 /*
  * ====================================================================
- * Project:     openCRX/SERV, http://www.opencrx.org/
- * Name:        $Id: StaticQuickAccessDashlet.jsp,v 1.7 2012/07/08 12:59:06 wfro Exp $
- * Description: StaticQuickAccessDashlet
- * Revision:    $Revision: 1.7 $
- * Owner:       CRIXP Corp., Switzerland, http://www.crixp.com
- * Date:        $Date: 2012/07/08 12:59:06 $
+ * Project:     openMDX/Portal, http://www.openmdx.org/
+ * Description: WorkspacesDashlet.jsp
+ * Owner:       OMEX AG, Switzerland, http://www.omex.ch
  * ====================================================================
  *
  * This software is published under the BSD license
  * as listed below.
  *
- * Copyright (c) 2012, CRIXP Corp., Switzerland
+ * Copyright (c) 2004-2013, OMEX AG, Switzerland
  * All rights reserved.
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ * Redistribution and use in source and binary forms, with or
+ * without modification, are permitted provided that the following
+ * conditions are met:
  *
  * * Redistributions of source code must retain the above copyright
  * notice, this list of conditions and the following disclaimer.
@@ -27,10 +24,9 @@
  * the documentation and/or other materials provided with the
  * distribution.
  *
- * * Neither the name of CRIXP Corp. nor the names of the contributors
- * to openCRX may be used to endorse or promote products derived
- * from this software without specific prior written permission
- *
+ * * Neither the name of the openMDX team nor the names of its
+ * contributors may be used to endorse or promote products derived
+ * from this software without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
  * CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
@@ -51,8 +47,9 @@
  * This product includes software developed by the Apache Software
  * Foundation (http://www.apache.org/).
  *
- * This product includes software developed by contributors to
- * openMDX (http://www.openmdx.org/)
+ * This product includes software developed by Mihai Bazon
+ * (http://dynarch.com/mishoo/calendar.epl) published with an LGPL
+ * license.
  */
 %>
 <%@ page session="true" import="
@@ -172,45 +169,65 @@ org.openmdx.kernel.log.*
 										if(!objects.isEmpty()) {
 											Path targetXri = new Path(objects.iterator().next().refMofId());
 											String function = menuEntry.substring(pos + 3);
-											ShowObjectView targetView = new ShowObjectView(
-												view.getId(),
-												(String)null,
-												targetXri,
-												app,
-												new HashMap(),
-												(String)null, // lookupType
-												(String)null, // resourcePathPrefix
-												(String)null, // navigationTarget
-												(Boolean)null // isReadOnly
-											);
-											if(function.startsWith("Operation.")) {
-												String operationName = function.substring(10);
-												List<OperationPaneControl> operationPaneControls = new ArrayList<OperationPaneControl>();
-												// Operations
-												for(OperationPaneControl paneControl: targetView.getShowInspectorControl().getOperationPaneControl()) {
-													for(OperationTabControl tabControl: paneControl.getOperationTabControl()) {
-														if(tabControl.getQualifiedOperationName().equals(operationName)) {
-															String tabId = Integer.toString(tabControl.getTabId());
-															Action action = null;
-															String target = "";
-															if(tabControl instanceof WizardTabControl) {
-																WizardTabControl wizardTabControl = (WizardTabControl)tabControl;
-																if(wizardTabControl.isInplace()) {
-																	String script = "$('UserDialogWait').className='loading udwait';new Ajax.Updater('UserDialog', '." + tabControl.getName() + "?requestId=REQUEST_ID&xri=" + targetXri + "', {evalScripts: true});";
-																	action = new Action(
-																		MacroAction.EVENT_ID,
-																		new Action.Parameter[]{
-																			  new Action.Parameter(Action.PARAMETER_OBJECTXRI, targetXri.toXri()),
-																			  new Action.Parameter(Action.PARAMETER_NAME, org.openmdx.base.text.conversion.Base64.encode(script.getBytes("UTF-8"))),
-																			  new Action.Parameter(Action.PARAMETER_TYPE, Integer.toString(Action.MACRO_TYPE_JAVASCRIPT))                    
-																		},
-																		tabControl.getToolTip(),
-																		tabControl.getToolTip(),
-																		true
-																	);
+											ShowObjectView targetView = null;
+											try {
+												targetView = new ShowObjectView(
+													view.getId(),
+													(String)null,
+													targetXri,
+													app,
+													new HashMap(),
+													(String)null, // lookupType
+													(String)null, // resourcePathPrefix
+													(String)null, // navigationTarget
+													(Boolean)null // isReadOnly
+												);
+											} catch(Exception ignore) {}
+											if(targetView != null) {
+												if(function.startsWith("Operation.")) {
+													String operationName = function.substring(10);
+													List<OperationPaneControl> operationPaneControls = new ArrayList<OperationPaneControl>();
+													// Operations
+													for(OperationPaneControl paneControl: targetView.getShowInspectorControl().getOperationPaneControl()) {
+														for(OperationTabControl tabControl: paneControl.getOperationTabControl()) {
+															if(tabControl.getQualifiedOperationName().equals(operationName)) {
+																String tabId = Integer.toString(tabControl.getTabId());
+																Action action = null;
+																String target = "";
+																if(tabControl instanceof WizardTabControl) {
+																	WizardTabControl wizardTabControl = (WizardTabControl)tabControl;
+																	if(wizardTabControl.isInplace()) {
+																		String script = "$('UserDialogWait').className='loading udwait';new Ajax.Updater('UserDialog', '." + tabControl.getName() + "?requestId=REQUEST_ID&xri=" + targetXri + "', {evalScripts: true});";
+																		action = new Action(
+																			MacroAction.EVENT_ID,
+																			new Action.Parameter[]{
+																				  new Action.Parameter(Action.PARAMETER_OBJECTXRI, targetXri.toXri()),
+																				  new Action.Parameter(Action.PARAMETER_NAME, org.openmdx.base.text.conversion.Base64.encode(script.getBytes("UTF-8"))),
+																				  new Action.Parameter(Action.PARAMETER_TYPE, Integer.toString(Action.MACRO_TYPE_JAVASCRIPT))                    
+																			},
+																			tabControl.getToolTip(),
+																			tabControl.getToolTip(),
+																			true
+																		);
+																	}
+																	else {
+																		String script = "window.location.href=$('op" + tabId + "').href;";
+																		action = new Action(
+																			MacroAction.EVENT_ID,
+																			new Action.Parameter[]{
+																				  new Action.Parameter(Action.PARAMETER_OBJECTXRI, targetXri.toXri()),
+																				  new Action.Parameter(Action.PARAMETER_NAME, org.openmdx.base.text.conversion.Base64.encode(script.getBytes("UTF-8"))),
+																				  new Action.Parameter(Action.PARAMETER_TYPE, Integer.toString(Action.MACRO_TYPE_JAVASCRIPT))                    
+																			},
+																			tabControl.getToolTip(),
+																			tabControl.getToolTip(),
+																			true
+																		);
+																		target = "_blank".equals(wizardTabControl.getWizardDefinition().getTargetType()) ? "target=\"_blank\"" : "target=\"_self\"";
+																	}
 																}
 																else {
-																	String script = "window.location.href=$('op" + tabId + "Trigger').href;";
+																	String script = "$('op" + tabId + "').onclick();";
 																	action = new Action(
 																		MacroAction.EVENT_ID,
 																		new Action.Parameter[]{
@@ -218,15 +235,26 @@ org.openmdx.kernel.log.*
 																			  new Action.Parameter(Action.PARAMETER_NAME, org.openmdx.base.text.conversion.Base64.encode(script.getBytes("UTF-8"))),
 																			  new Action.Parameter(Action.PARAMETER_TYPE, Integer.toString(Action.MACRO_TYPE_JAVASCRIPT))                    
 																		},
-																		tabControl.getToolTip(),
+																		tabControl.getName(),
 																		tabControl.getToolTip(),
 																		true
 																	);
-																	target = "_blank".equals(wizardTabControl.getWizardDefinition().getTargetType()) ? "target=\"_blank\"" : "target=\"_self\"";
 																}
+%>
+																<div>								                    		                    	
+												          			&nbsp;&nbsp;&raquo;&nbsp;<a <%= target %> href="#" onmouseover="javascript:this.href=<%= view.getEvalHRef(action) %>;onmouseover=function(){};" style="font-size:90%;"><%= action.getTitle().replace(" ", "&nbsp;") %></a>
+												          		</div>
+<%
 															}
-															else {
-																String script = "eval($('op" + tabId + "Trigger').getAttribute('onclick'));";
+														}
+													}
+													// Wizards
+													for(WizardTabControl tabControl: targetView.getShowInspectorControl().getWizardControl().getWizardTabControls()) {
+														String tabId = Integer.toString(tabControl.getTabId());
+														if(tabControl.getQualifiedOperationName().equals(operationName)) {
+															Action action = null;
+															if(tabControl.isInplace()) {
+																String script = "$('UserDialogWait').className='loading udwait';new Ajax.Updater('UserDialog', '." + tabControl.getName() + "?requestId=REQUEST_ID&xri=" + targetXri + "', {evalScripts: true});";
 																action = new Action(
 																	MacroAction.EVENT_ID,
 																	new Action.Parameter[]{
@@ -234,85 +262,59 @@ org.openmdx.kernel.log.*
 																		  new Action.Parameter(Action.PARAMETER_NAME, org.openmdx.base.text.conversion.Base64.encode(script.getBytes("UTF-8"))),
 																		  new Action.Parameter(Action.PARAMETER_TYPE, Integer.toString(Action.MACRO_TYPE_JAVASCRIPT))                    
 																	},
-																	tabControl.getName(),
+																	tabControl.getToolTip(),
 																	tabControl.getToolTip(),
 																	true
 																);
 															}
+															else {
+																String script = "window.location.href=$('op" + tabId + "').href;";
+																action = new Action(
+																	MacroAction.EVENT_ID,
+																	new Action.Parameter[]{
+																		  new Action.Parameter(Action.PARAMETER_OBJECTXRI, targetXri.toXri()),
+																		  new Action.Parameter(Action.PARAMETER_NAME, org.openmdx.base.text.conversion.Base64.encode(script.getBytes("UTF-8"))),
+																		  new Action.Parameter(Action.PARAMETER_TYPE, Integer.toString(Action.MACRO_TYPE_JAVASCRIPT))                    
+																	},
+																	tabControl.getToolTip(),
+																	tabControl.getToolTip(),
+																	true
+																);
+															}
+%>								                    
+															<div>	                    	
+<%
+																String target = "_blank".equals(tabControl.getWizardDefinition().getTargetType()) ? "target=\"_blank\"" : "target=\"_self\"";
 %>
-															<div>								                    		                    	
-											          			&nbsp;&nbsp;&raquo;&nbsp;<a <%= target %> href="#" onmouseover="javascript:this.href=<%= view.getEvalHRef(action) %>;onmouseover=function(){};" style="font-size:90%;"><%= action.getTitle().replace(" ", "&nbsp;") %></a>
+											          			&nbsp;&nbsp;&raquo;&nbsp;<a href="#" <%= target %> onmouseover="javascript:this.href=<%= view.getEvalHRef(action) %>;onmouseover=function(){};" style="font-size:90%;"><%= action.getTitle().replace(" ", "&nbsp;") %></a>
 											          		</div>
 <%
 														}
 													}
 												}
-												// Wizards
-												for(WizardTabControl tabControl: targetView.getShowInspectorControl().getWizardControl().getWizardTabControls()) {
-													String tabId = Integer.toString(tabControl.getTabId());
-													if(tabControl.getQualifiedOperationName().equals(operationName)) {
-														Action action = null;
-														if(tabControl.isInplace()) {
-															String script = "$('UserDialogWait').className='loading udwait';new Ajax.Updater('UserDialog', '." + tabControl.getName() + "?requestId=REQUEST_ID&xri=" + targetXri + "', {evalScripts: true});";
-															action = new Action(
-																MacroAction.EVENT_ID,
-																new Action.Parameter[]{
-																	  new Action.Parameter(Action.PARAMETER_OBJECTXRI, targetXri.toXri()),
-																	  new Action.Parameter(Action.PARAMETER_NAME, org.openmdx.base.text.conversion.Base64.encode(script.getBytes("UTF-8"))),
-																	  new Action.Parameter(Action.PARAMETER_TYPE, Integer.toString(Action.MACRO_TYPE_JAVASCRIPT))                    
-																},
-																tabControl.getToolTip(),
-																tabControl.getToolTip(),
-																true
-															);
+												else if(function.startsWith("Reference.")) {
+													String referenceName = function.substring(10);
+													for(ReferencePane pane: targetView.getReferencePane()) {
+														for(Action action: pane.getReferencePaneControl().getSelectReferenceAction()) {
+															if(referenceName.equals(action.getParameter(Action.PARAMETER_REFERENCE_NAME))) {
+																List<Action.Parameter> actionParams = new ArrayList<Action.Parameter>(Arrays.asList(action.getParameters()));
+																actionParams.add(
+																	new Action.Parameter(Action.PARAMETER_OBJECTXRI, targetXri.toXri())
+																);
+																Action selectObjectAndReferenceAction = new Action(
+																	SelectObjectAction.EVENT_ID,
+																	actionParams.toArray(new Action.Parameter[actionParams.size()]),
+																	action.getTitle(),
+																	action.getIconKey(),
+																	action.isEnabled()
+																);
+	%>
+																<div>									                    	                    	
+												                		&nbsp;&nbsp;&raquo;&nbsp;<a href="#" onmouseover="javascript:this.href=<%= view.getEvalHRef(selectObjectAndReferenceAction) %>;onmouseover=function(){};" style="font-size:90%;"><%= (action.getTitle().startsWith(WebKeys.TAB_GROUPING_CHARACTER) ? action.getTitle().substring(1).replace(" ", "&nbsp;") : action.getTitle().replace(" ", "&nbsp;")) %></a>
+												                	</div>
+	<%
+															}						
 														}
-														else {
-															String script = "window.location.href=$('op" + tabId + "Trigger').href;";
-															action = new Action(
-																MacroAction.EVENT_ID,
-																new Action.Parameter[]{
-																	  new Action.Parameter(Action.PARAMETER_OBJECTXRI, targetXri.toXri()),
-																	  new Action.Parameter(Action.PARAMETER_NAME, org.openmdx.base.text.conversion.Base64.encode(script.getBytes("UTF-8"))),
-																	  new Action.Parameter(Action.PARAMETER_TYPE, Integer.toString(Action.MACRO_TYPE_JAVASCRIPT))                    
-																},
-																tabControl.getToolTip(),
-																tabControl.getToolTip(),
-																true
-															);
-														}
-%>								                    
-														<div>	                    	
-<%
-															String target = "_blank".equals(tabControl.getWizardDefinition().getTargetType()) ? "target=\"_blank\"" : "target=\"_self\"";
-%>
-										          			&nbsp;&nbsp;&raquo;&nbsp;<a href="#" <%= target %> onmouseover="javascript:this.href=<%= view.getEvalHRef(action) %>;onmouseover=function(){};" style="font-size:90%;"><%= action.getTitle().replace(" ", "&nbsp;") %></a>
-										          		</div>
-<%
-													}
-												}
-											}
-											else if(function.startsWith("Reference.")) {
-												String referenceName = function.substring(10);
-												for(ReferencePane pane: targetView.getReferencePane()) {
-													for(Action action: pane.getReferencePaneControl().getSelectReferenceAction()) {
-														if(referenceName.equals(action.getParameter(Action.PARAMETER_REFERENCE_NAME))) {
-															List<Action.Parameter> actionParams = new ArrayList<Action.Parameter>(Arrays.asList(action.getParameters()));
-															actionParams.add(
-																new Action.Parameter(Action.PARAMETER_OBJECTXRI, targetXri.toXri())
-															);
-															Action selectObjectAndReferenceAction = new Action(
-																SelectObjectAction.EVENT_ID,
-																actionParams.toArray(new Action.Parameter[actionParams.size()]),
-																action.getTitle(),
-																action.getIconKey(),
-																action.isEnabled()
-															);
-%>
-															<div>									                    	                    	
-										                  		&nbsp;&nbsp;&raquo;&nbsp;<a href="#" onmouseover="javascript:this.href=<%= view.getEvalHRef(selectObjectAndReferenceAction) %>;onmouseover=function(){};" style="font-size:90%;"><%= (action.getTitle().startsWith(WebKeys.TAB_GROUPING_CHARACTER) ? action.getTitle().substring(1).replace(" ", "&nbsp;") : action.getTitle().replace(" ", "&nbsp;")) %></a>
-										                  	</div>
-<%
-														}						
 													}
 												}
 											}

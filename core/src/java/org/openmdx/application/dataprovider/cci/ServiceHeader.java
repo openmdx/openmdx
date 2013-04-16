@@ -71,9 +71,76 @@ public final class ServiceHeader
 {
 
     /**
-     * 
-     */
-    private static final long serialVersionUID = 3546359530901812277L;
+     * Constructor
+     *
+     * @param       principalChain
+     *              The request is processed on behalf of principalChain.
+     * @param       requestedAt
+     *              Defines the time point for queries of stateful objects
+     * @param preferringNotFoundException Tells whether a NOT_FOUND exception 
+     * shall be thrown rather than returning an empty result set in case a 
+     * requested object does not exist.
+     */ 
+    private ServiceHeader(
+        List<String> principalChain,
+        String requestedAt,
+        boolean preferringNotFoundException
+    ){
+        this.principalChain = new ArrayList<String>(principalChain);
+        this.requestedAt = requestedAt;
+        this.preferringNotFoundException = preferringNotFoundException;
+    }
+
+    /**
+     * Constructor
+     *
+     * @param       principal
+     *              The request is processed on behalf of principal.
+     * @param       requestedAt
+     *              Defines the time point for queries of stateful objects
+     * @param preferringNotFoundException Tells whether a NOT_FOUND exception 
+     * shall be thrown rather than returning an empty result set in case a 
+     * requested object does not exist.
+     */ 
+    public ServiceHeader(
+        String principal,
+        String requestedAt,
+        boolean preferringNotFoundException
+    ){
+        this(
+            principal == null ? NO_PRINCIPALS : Collections.singletonList(principal), 
+            requestedAt ,
+            preferringNotFoundException
+        );
+    }
+
+    
+    /**
+     * Constructor
+     *
+     * @param       principal
+     *              The request is processed on behalf of principal.
+     * @param       correlationId
+     * @param       trace
+     *              Define, whether the request should be traced
+     *              over all the tiers.
+     * @param       qualityOfService
+     *              The requested quality of service
+     * @param       requestedAt
+     *              Defines the time point for queries of stateful objects
+     * @param       requestedFor
+     *              Defines the time point for the data of stateful objects
+     */ 
+    public ServiceHeader(
+        String principal,
+        String requestedAt
+    ){
+        this(
+            principal, 
+            requestedAt,
+            false
+        );
+    }
 
     /**
      * Constructor
@@ -98,72 +165,35 @@ public final class ServiceHeader
 
     /**
      * Constructor
-     *
-     * @param       principal
-     *              The request is processed on behalf of principal.
-     * @param       correlationId
-     * @param       trace
-     *              Define, whether the request should be traced
-     *              over all the tiers.
-     * @param       qualityOfService
-     *              The requested quality of service
-     * @param       requestedAt
-     *              Defines the time point for queries of stateful objects
-     * @param       requestedFor
-     *              Defines the time point for the data of stateful objects
-     */ 
-    public ServiceHeader(
-        String principal,
-        String requestedAt
-    ){
-        this(
-            principal == null ? 
-                NO_PRINCIPALS : 
-                Collections.singletonList(principal), 
-            requestedAt 
-        );
-    }
-
-    /**
-     * Constructor for marshallers.
-     *
-     * @param       principalChain
-     *              The request is processed on behalf of principalChain.
-     * @param       correlationId
-     * @param       trace
-     *              Define, whether the request should be traced
-     *              over all the tiers.
-     * @param       qualityOfService
-     *              The requested quality of service
-     * @param       requestedAt
-     *              Defines the time point for queries of stateful objects
-     * @param       requestedFor
-     *              Defines the time point for the data of stateful objects
-     */ 
-    private ServiceHeader(
-        List<String> principalChain,
-        String requestedAt
-    ){
-        this.principalChain = new ArrayList<String>(principalChain);
-        this.requestedAt = requestedAt;
-    }
-    
-    /**
-     * Default constructor
+     * <p>
+     * Leads to exception preference.
      */
     public ServiceHeader(
     ){
         this(
             NO_PRINCIPALS, // principalChain
-            null // requestedAt
+            null, // requestedAt
+            true // preferringNotFoundException
         );
     }
+
+    
+    /**
+     * Implements <code>Serializable</code>
+     */
+    private static final long serialVersionUID = 3546359530901812277L;
 
     /**
      * The request is processed on behalf of principalChain.
      */
     private final List<String> principalChain;
 
+    /**
+     * Tells whether a NOT_FOUND exception shall be thrown rather than 
+     * returning an empty result set in case a requested object does not exist.
+     */
+    private final boolean preferringNotFoundException;
+    
     /**
      * 
      */
@@ -175,7 +205,17 @@ public final class ServiceHeader
     private final static String[] TO_STRING_CONTENT = {
         "principalChain",
         "requestedAt",
+        "preferringNotFoundException"
     };
+
+    /**
+     * Retrieve preferringNotFoundException.
+     *
+     * @return Returns the preferringNotFoundException.
+     */
+    public boolean isPreferringNotFoundException() {
+        return this.preferringNotFoundException;
+    }
 
     public List<String> getPrincipalChain(){
         return Collections.unmodifiableList(this.principalChain);
@@ -218,7 +258,8 @@ public final class ServiceHeader
     ) throws CloneNotSupportedException {        
         return new ServiceHeader(
              this.principalChain,
-             this.requestedAt
+             this.requestedAt,
+             this.preferringNotFoundException
         );
     }
 
@@ -268,6 +309,8 @@ public final class ServiceHeader
      * @param subject
      * 
      * @return a new service header
+     * 
+     * @deprecated
      */
     public static ServiceHeader toServiceHeader(
         Subject subject
@@ -287,6 +330,8 @@ public final class ServiceHeader
      * @param connectionPassword the correlation id
      * 
      * @return a principal array
+     * 
+     * @deprecated
      */
     public static ServiceHeader toServiceHeader(
         String connectionUsername, 
@@ -294,9 +339,35 @@ public final class ServiceHeader
     ){
         return new ServiceHeader(
             Arrays.asList(toPrincipalArray(connectionUsername)),
-            null // requestedAt
+            null, // requestedAt
+            false // referringNotFoundException
         );
     }
+
+    /**
+     * Create a service header populated with a principal list encoded as 
+     * user name.
+     * 
+     * @param connectionUsername a principal or the stringified principal list 
+     * @param connectionPassword the correlation id
+     * @param preferringNotFoundException Tells whether a NOT_FOUND exception 
+     * shall be thrown rather than returning an empty result set in case a 
+     * requested object does not exist.
+     * 
+     * @return a principal array
+     */
+    public static ServiceHeader toServiceHeader(
+        String connectionUsername, 
+        String connectionPassword,
+        boolean referringNotFoundException
+    ){
+        return new ServiceHeader(
+            Arrays.asList(toPrincipalArray(connectionUsername)),
+            null, // requestedAt
+            referringNotFoundException
+        );
+    }
+    
     
     //------------------------------------------------------------------------
     // Extends Object
@@ -314,7 +385,8 @@ public final class ServiceHeader
 		    TO_STRING_CONTENT,
 		    new Object[]{
 		        this.principalChain,
-		        this.requestedAt
+		        this.requestedAt,
+		        Boolean.valueOf(this.preferringNotFoundException)
 		    }
 		).toString();
     }

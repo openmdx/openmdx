@@ -63,7 +63,6 @@ import java.util.logging.Level;
 
 import javax.jdo.Extent;
 import javax.jdo.FetchPlan;
-import javax.jdo.JDOHelper;
 import javax.jdo.JDOUserException;
 import javax.jdo.PersistenceManager;
 import javax.jdo.Query;
@@ -101,6 +100,7 @@ import org.openmdx.base.query.OrderSpecifier;
 import org.openmdx.base.query.Quantifier;
 import org.openmdx.base.query.SortOrder;
 import org.openmdx.kernel.exception.BasicException;
+import org.openmdx.kernel.jdo.ReducedJDOHelper;
 import org.openmdx.kernel.log.SysLog;
 import org.w3c.cci2.AnyTypePredicate;
 import org.w3c.cci2.BooleanTypePredicate;
@@ -1433,9 +1433,9 @@ public class RefQuery_1 implements RefQuery_1_0 {
                             if(
                                 model.isSubtypeOf(objectClass, "org:openmdx:base:ExtentCapable") &&
                                 model.isSubtypeOf(objectClass, "org:openmdx:state2:BasicState") &&
-                                JDOHelper.isPersistent(e) &&
-                                !JDOHelper.isNew(e) &&
-                                !JDOHelper.isDeleted(e)
+                                ReducedJDOHelper.isPersistent(e) &&
+                                !ReducedJDOHelper.isNew(e) &&
+                                !ReducedJDOHelper.isDeleted(e)
                             ) try {
                                 values.add(new Path((String)e.refGetValue(SystemAttributes.OBJECT_IDENTITY)));
                             } catch (Exception exception) {
@@ -1860,7 +1860,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
         // JDO implementations shall ignore unsupported extensions
         //
         if(Queries.QUERY_EXTENSION.equals(key)) {
-            this.filter.setExtension((Extension) value);
+            this.filter.getExtension().add((Extension)value);
         }
     }
 
@@ -2099,10 +2099,8 @@ public class RefQuery_1 implements RefQuery_1_0 {
         Map extensions
     ) {
         this.assertModifiable();
-        this.filter.setExtension(
-            //
-            // JDO implementations shall ignore unsupported extensions
-            //
+        // JDO implementations shall ignore unsupported extensions
+        this.filter.getExtension().add(
             (Extension) extensions.get(Queries.QUERY_EXTENSION)
         );
     }

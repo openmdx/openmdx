@@ -64,7 +64,6 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.jdo.FetchPlan;
-import javax.jdo.JDOHelper;
 import javax.jdo.PersistenceManager;
 import javax.jdo.spi.PersistenceCapable;
 import javax.jdo.spi.StateManager;
@@ -92,6 +91,7 @@ import org.openmdx.base.query.IsInstanceOfCondition;
 import org.openmdx.base.query.OrderSpecifier;
 import org.openmdx.base.query.Quantifier;
 import org.openmdx.kernel.exception.BasicException;
+import org.openmdx.kernel.jdo.ReducedJDOHelper;
 import org.openmdx.state2.cci.DateStateContext;
 import org.openmdx.state2.cci.DateTimeStateContext;
 import org.openmdx.state2.cci.ViewKind;
@@ -120,7 +120,7 @@ public class StateCapableContainer_1
 		this.selection = container.subMap(
 			getFilter(
 				parent, 
-		        container == null ? null : (Path) JDOHelper.getObjectId(container), 
+		        container == null ? null : (Path) ReducedJDOHelper.getObjectId(container), 
 		        type
 		    )
 		);

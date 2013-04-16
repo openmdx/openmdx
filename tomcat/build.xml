@@ -80,6 +80,9 @@
 	<patternset id="catalina-openmdx.jar.content">
 		<include name="org/openmdx/catalina/**"/>
 	</patternset>	
+	<patternset id="project.junit.test.case">
+		<patternset refid="null.pattern"/>
+	</patternset>	
 	<!-- ******************************************************************* -->
 	<!-- * generate -->
 	<!-- ******************************************************************* -->

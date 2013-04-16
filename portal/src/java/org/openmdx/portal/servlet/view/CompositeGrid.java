@@ -8,7 +8,7 @@
  * This software is published under the BSD license
  * as listed below.
  * 
- * Copyright (c) 2004-2007, OMEX AG, Switzerland
+ * Copyright (c) 2004-2013, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -62,17 +62,26 @@ import javax.jdo.PersistenceManager;
 
 import org.oasisopen.jmi1.RefContainer;
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
+import org.openmdx.base.accessor.jmi.cci.RefQuery_1_0;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.log.SysLog;
 import org.openmdx.portal.servlet.Filter;
 import org.openmdx.portal.servlet.control.GridControl;
 
-public class CompositeGrid 
-extends Grid
-implements Serializable {
+/**
+ * CompositeGrid
+ *
+ */
+public class CompositeGrid extends Grid implements Serializable {
 
-    //-------------------------------------------------------------------------
+    /**
+     * Constructor 
+     *
+     * @param gridControl
+     * @param view
+     * @param lookupType
+     */
     public CompositeGrid(
         GridControl gridControl,
         ObjectView view,
@@ -85,28 +94,10 @@ implements Serializable {
         );
     }
 
-    //-------------------------------------------------------------------------
-    @SuppressWarnings("unchecked")
+    /* (non-Javadoc)
+     * @see org.openmdx.portal.servlet.view.Grid#refresh(boolean)
+     */
     @Override
-    public Collection<RefObject_1_0> getAllObjects(
-    	PersistenceManager pm
-    ) {
-    	Collection<RefObject_1_0> allObjects = null;
-    	RefObject_1_0 parent = (RefObject_1_0)pm.getObjectById(
-    		this.view.getObjectReference().getObject().refGetPath()
-    	);
-        allObjects = (Collection<RefObject_1_0>)this.dataBinding.getValue(
-            parent, 
-            this.getGridControl().getObjectContainer().getReferenceName(),
-            this.view.getApplicationContext()
-        );    		
-    	if(allObjects == null) {
-    		allObjects = Collections.emptyList();
-    	}
-    	return allObjects;
-    }
-
-    //-------------------------------------------------------------------------
     public void refresh(
         boolean refreshData
     ) {
@@ -115,54 +106,64 @@ implements Serializable {
         );
     }
 
-    //-------------------------------------------------------------------------
+    /* (non-Javadoc)
+     * @see org.openmdx.portal.servlet.view.Grid#getFilteredObjects(javax.jdo.PersistenceManager, org.openmdx.portal.servlet.Filter)
+     */
     @SuppressWarnings("unchecked")
     @Override
     public List<RefObject_1_0> getFilteredObjects(
     	PersistenceManager pm,
         Filter filter
     ) {
-        Collection allObjects = this.getAllObjects(pm);
         List<RefObject_1_0> filteredObjects = null;
-        if(filter == null) {
-            filteredObjects = allObjects instanceof RefContainer ?
-            	((RefContainer)allObjects).refGetAll(null) :
-            	allObjects instanceof List ?
-            		(List)allObjects :
-            		Collections.EMPTY_LIST;
+        try {
+	    	RefObject_1_0 parent = (RefObject_1_0)pm.getObjectById(
+	    		this.view.getObjectReference().getObject().refGetPath()
+	    	);
+	        Object allObjects = this.dataBinding.getValue(
+	            parent, 
+	            this.getGridControl().getObjectContainer().getReferenceName(),
+	            this.view.getApplicationContext()
+	        );
+	    	if(allObjects instanceof RefContainer) {
+    			filteredObjects = ((RefContainer)allObjects).refGetAll(filter);
+	    	} else if(
+	    		allObjects instanceof Object[] && 
+	    		((Object[])allObjects).length == 2 && 
+	    		((Object[])allObjects)[0] instanceof RefContainer    		
+	    	) {
+				RefContainer container = (RefContainer)((Object[])allObjects)[0];
+				org.openmdx.base.query.Filter query = ((RefQuery_1_0)((Object[])allObjects)[1]).refGetFilter();
+				if(filter != null) {
+					// Order specifiers not allowed in data binding
+					query.getOrderSpecifier().clear();
+					query.getCondition().addAll(filter.getCondition());
+					query.getOrderSpecifier().addAll(filter.getOrderSpecifier());
+					query.getExtension().addAll(filter.getExtension());
+				}
+				filteredObjects = container.refGetAll(query);
+	    	} else if(allObjects instanceof List) {
+	    		filteredObjects = (List<RefObject_1_0>)allObjects;
+	    	} else if(allObjects instanceof Collection) {
+	    		filteredObjects = new ArrayList<RefObject_1_0>((Collection)allObjects);
+	    	} else {
+	    		filteredObjects = Collections.emptyList();
+	    	}
+        } catch(Exception e) {
+            filteredObjects = Collections.emptyList();
+            ServiceException e0 = new ServiceException(
+                e,
+                BasicException.Code.DEFAULT_DOMAIN,
+                BasicException.Code.PROCESSING_FAILURE,
+                "error getting filtered objects",
+                new BasicException.Parameter("object", this.view.getObject()),
+                new BasicException.Parameter("reference", this.getGridControl().getQualifiedReferenceName()),
+                new BasicException.Parameter("filter", filter),
+                new BasicException.Parameter("principal", this.view.getApplicationContext().getLoginPrincipal())
+            );
+            SysLog.warning(e0.getMessage(), e0.getCause());        	
         }
-        else {
-            try {
-                try {
-                    filteredObjects = allObjects instanceof RefContainer ?
-                    	((RefContainer)allObjects).refGetAll(filter) :
-                    	allObjects instanceof List ?
-                    		(List)allObjects :
-                    		Collections.EMPTY_LIST;
-                }
-                catch(UnsupportedOperationException e) {}
-                if(filteredObjects == null) {
-                    filteredObjects = new ArrayList(
-                    	((RefContainer)allObjects).refGetAll(filter)
-                    );
-                }
-            }
-            catch(Exception e) {
-                filteredObjects = Collections.EMPTY_LIST;
-                ServiceException e0 = new ServiceException(
-                    e,
-                    BasicException.Code.DEFAULT_DOMAIN,
-                    BasicException.Code.PROCESSING_FAILURE,
-                    "error getting filtered objects",
-                    new BasicException.Parameter("object", this.view.getObject()),
-                    new BasicException.Parameter("reference", this.getGridControl().getQualifiedReferenceName()),
-                    new BasicException.Parameter("filter", filter),
-                    new BasicException.Parameter("principal", this.view.getApplicationContext().getLoginPrincipal())
-                );
-                SysLog.warning(e0.getMessage(), e0.getCause());
-            }
-        }
-        return filteredObjects;
+    	return filteredObjects;
     }
 
     //-------------------------------------------------------------------------

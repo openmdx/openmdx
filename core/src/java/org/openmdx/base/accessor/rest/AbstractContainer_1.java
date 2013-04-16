@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2009-2012, OMEX AG, Switzerland
+ * Copyright (c) 2009-2013, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -58,6 +58,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.EnumSet;
+import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
@@ -65,10 +66,11 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.logging.Level;
 
 import javax.jdo.FetchPlan;
-import javax.jdo.JDOHelper;
 import javax.jdo.JDOUserException;
 import javax.jdo.ObjectState;
 import javax.jdo.PersistenceManager;
@@ -87,15 +89,20 @@ import org.openmdx.base.aop0.PlugIn_1_0;
 import org.openmdx.base.collection.Maps;
 import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;
+import org.openmdx.base.mof.cci.ModelElement_1_0;
+import org.openmdx.base.mof.cci.Model_1_0;
+import org.openmdx.base.mof.spi.Model_1Factory;
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.persistence.spi.PersistenceCapableCollection;
 import org.openmdx.base.persistence.spi.StandardFetchPlan;
 import org.openmdx.base.persistence.spi.TransientContainerId;
 import org.openmdx.base.query.AnyTypeCondition;
 import org.openmdx.base.query.Condition;
+import org.openmdx.base.query.ConditionType;
 import org.openmdx.base.query.Extension;
 import org.openmdx.base.query.Filter;
 import org.openmdx.base.query.OrderSpecifier;
+import org.openmdx.base.query.Quantifier;
 import org.openmdx.base.query.Selector;
 import org.openmdx.base.query.SortOrder;
 import org.openmdx.base.rest.cci.ResultRecord;
@@ -103,6 +110,7 @@ import org.openmdx.base.rest.spi.Query_2Facade;
 import org.openmdx.base.text.conversion.JavaBeans;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.exception.Throwables;
+import org.openmdx.kernel.jdo.ReducedJDOHelper;
 import org.openmdx.kernel.log.SysLog;
 import org.w3c.cci2.ImmutableDatatype;
 import org.w3c.spi.DatatypeFactories;
@@ -118,6 +126,7 @@ abstract class AbstractContainer_1 implements Container_1_0 {
      */
     protected AbstractContainer_1(
     ){
+        super();
     }
 
     /**
@@ -166,6 +175,12 @@ abstract class AbstractContainer_1 implements Container_1_0 {
     protected static final int INITIAL_SLICE_CACHE_SIZE = 8;
 
     /**
+     * Do not build a new cache if the container is already retrieved
+     */
+    static final ConcurrentMap<String, DataObject_1_0> NO_CACHE = new ConcurrentHashMap<String, DataObject_1_0>(1);
+
+    
+    /**
      * The conditions in case of a sub-map
      * 
      * @return the conditions
@@ -177,7 +192,7 @@ abstract class AbstractContainer_1 implements Container_1_0 {
      * 
      * @return the extension
      */
-    protected abstract Extension getExtension();
+    protected abstract List<Extension> getExtensions();
     
     /**
      * Tells whether the cache must be ignored
@@ -193,28 +208,37 @@ abstract class AbstractContainer_1 implements Container_1_0 {
      */
     protected abstract ObjectFilter getFilter();
 
+    /**
+     * No need to provide caches for new objects
+     */
+    protected static final EnumSet<ObjectState> EMPTY_CACHE_CANDIDATES = EnumSet.of(
+        ObjectState.HOLLOW_PERSISTENT_NONTRANSACTIONAL,
+        ObjectState.PERSISTENT_CLEAN, 
+        ObjectState.PERSISTENT_DIRTY
+    );
+
     /* (non-Javadoc)
      * @see org.openmdx.base.persistence.spi.PersistenceCapableCollection#openmdxjdoGetPersistenceManager()
      */
-//  @Override
+    @Override
     public abstract DataObjectManager_1 openmdxjdoGetDataObjectManager();
 
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.cci.Container_1_0#container()
      */
-//  @Override
+    @Override
     public abstract Container_1 container();
 
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.cci.Container_1_0#isRetrieved()
      */
-//  @Override
+    @Override
     public abstract boolean isRetrieved();
 
     /* (non-Javadoc)
      * @see java.util.Map#clear()
      */
-//  @Override
+    @Override
     public void clear() {
         this.entrySet().clear();
     }
@@ -222,7 +246,7 @@ abstract class AbstractContainer_1 implements Container_1_0 {
     /* (non-Javadoc)
      * @see java.util.Map#entrySet()
      */
-//  @Override
+    @Override
     public Set<Entry<String, DataObject_1_0>> entrySet() {
         if(this.entries == null) {
             this.entries = new EntrySet();
@@ -230,6 +254,14 @@ abstract class AbstractContainer_1 implements Container_1_0 {
         return this.entries;
     }
 
+    protected boolean isExtent(){
+        return false;
+    }
+
+    protected boolean isPlainExtent(){
+        return isExtent();
+    }
+    
 	/**
 	 * Determine whether the members are administered by the proxified container
 	 * 
@@ -242,7 +274,7 @@ abstract class AbstractContainer_1 implements Container_1_0 {
     /* (non-Javadoc)
      * @see java.util.Map#isEmpty()
      */
-//  @Override
+    @Override
     public boolean isEmpty() {
         ConcurrentMap<String, DataObject_1_0> cache = container().getCache();
         if(cache == null) { 
@@ -264,7 +296,7 @@ abstract class AbstractContainer_1 implements Container_1_0 {
     /* (non-Javadoc)
      * @see java.util.Map#keySet()
      */
-//  @Override
+    @Override
     public Set<String> keySet() {
         if(this.keys == null) {
             this.keys = new KeySet(this);
@@ -275,7 +307,7 @@ abstract class AbstractContainer_1 implements Container_1_0 {
     /* (non-Javadoc)
      * @see java.util.Map#putAll(java.util.Map)
      */
-//  @Override
+    @Override
     public void putAll(Map<? extends String, ? extends DataObject_1_0> m) {
         for(Map.Entry<? extends String, ? extends DataObject_1_0> e : m.entrySet()) {
             put(e.getKey(), e.getValue());
@@ -285,7 +317,7 @@ abstract class AbstractContainer_1 implements Container_1_0 {
     /* (non-Javadoc)
      * @see java.util.Map#remove(java.lang.Object)
      */
-//  @Override
+    @Override
     public DataObject_1_0 remove(Object key) {
         DataObject_1_0 value = get(key);
         if(value != null) {
@@ -301,7 +333,7 @@ abstract class AbstractContainer_1 implements Container_1_0 {
     /* (non-Javadoc)
      * @see java.util.Map#size()
      */
-//  @Override
+    @Override
     public int size() {
         ConcurrentMap<String, DataObject_1_0> cache = container().getCache();
         if(cache == null) { 
@@ -324,7 +356,7 @@ abstract class AbstractContainer_1 implements Container_1_0 {
     /* (non-Javadoc)
      * @see java.util.Map#values()
      */
-//  @Override
+    @Override
     public Collection<DataObject_1_0> values() {
         if(this.values == null) {
             this.values = new UnorderedValues(this);
@@ -332,7 +364,7 @@ abstract class AbstractContainer_1 implements Container_1_0 {
         return this.values;
     }
     
-//  @Override
+    @Override
     public List<DataObject_1_0> values(
         FetchPlan fetchPlan, 
         OrderSpecifier... criteria
@@ -346,9 +378,9 @@ abstract class AbstractContainer_1 implements Container_1_0 {
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.cci.Container_1_0#subMap(org.openmdx.base.query.Filter)
      */
-//  @Override
+    @Override
     public Container_1_0 subMap(Filter filter) {
-        ObjectFilter objectFilter = ObjectFilter.getInstance(this.getFilter(), filter);
+        ObjectFilter objectFilter = ObjectFilter.getInstance(this.getFilter(), filter, isExtent());
 		return objectFilter == null ? this : new Selection_1(this, objectFilter);
     }
 
@@ -376,6 +408,19 @@ abstract class AbstractContainer_1 implements Container_1_0 {
                 ((DataObject_1)candidate).evict();
             }
         }
+    }
+
+    /**
+     * Determines whether an object belongs to the container or extent
+     * 
+     * @param candidate
+     * 
+     * @return <code>true</code> if the object belongs to the container or extent
+     */
+    protected boolean isInContainerOrExtent(
+        Object candidate
+    ){
+        return container().containsObject(candidate);
     }
 
     /**
@@ -414,14 +459,14 @@ abstract class AbstractContainer_1 implements Container_1_0 {
     ){
         final OrderSpecifier[] order = comparator == null ? null : comparator.getDelegate();
         List<Condition> conditions = getConditions();
-        Extension extension = getExtension();
+        List<Extension> extensions = getExtensions();
         
         String query;
         String key;
         if(
             (conditions == null || conditions.isEmpty()) && 
             (order == null || order.length == 0) &&
-            extension == null
+            (extensions == null || extensions.isEmpty()) 
         ) {
             query = null;
             key = "";
@@ -430,7 +475,7 @@ abstract class AbstractContainer_1 implements Container_1_0 {
                 new Filter(
                     conditions, 
                     order == null ? null : Arrays.asList(order), 
-                    extension
+                    extensions
                 )
             );
         } catch (ServiceException exception) {
@@ -467,7 +512,7 @@ abstract class AbstractContainer_1 implements Container_1_0 {
      */
     void synchronize(){
         if(isProxy()) try {
-            if(openmdxjdoGetDataObjectManager().currentTransaction().synchronize() && this.persistent != null) {
+            if(openmdxjdoGetDataObjectManager().currentUnitOfWork().synchronize() && this.persistent != null) {
                 ((BatchingList)this.persistent).evict();
             }
         } catch (ServiceException exception) {
@@ -497,22 +542,82 @@ abstract class AbstractContainer_1 implements Container_1_0 {
     /* (non-Javadoc)
      * @see org.openmdx.base.persistence.spi.PersistenceCapableCollection#openmdxjdoRefresh()
      */
-//  @Override
+    @Override
     public void openmdxjdoRefresh(
     ) {
         PersistenceManager persistenceManager = this.openmdxjdoGetDataObjectManager();
-        for(DataObject_1 candidate : this.openmdxjdoGetDataObjectManager().currentTransaction().getMembers()) {
+        for(DataObject_1 candidate : this.openmdxjdoGetDataObjectManager().currentUnitOfWork().getMembers()) {
             if(this.containsValue(candidate)) {
                 persistenceManager.refresh(candidate);
             }
         }
     }
 
+    /**
+     * Create and populate cache for persistent objects
+     * 
+     * @param caches
+     * @param object
+     */
+    static void addToCache(
+        Map<Container_1_0,ConcurrentMap<String, DataObject_1_0>> caches,
+        DataObject_1_0 object
+    ){
+        Container_1_0 container = object.getContainer(false);
+        if(container != null) {
+            ConcurrentMap<String, DataObject_1_0> cache = caches.get(container);
+            if(cache == null) {
+                caches.put(
+                    container,
+                    cache = container.isRetrieved() || !container.jdoIsPersistent() ? NO_CACHE : new ConcurrentHashMap<String,DataObject_1_0>()
+                );
+            }
+            if(cache != NO_CACHE) {
+                if(object.jdoIsPersistent()) {
+                    //
+                    // That's what we expect
+                    //
+                    cache.put(
+                        object.jdoGetObjectId().getBase(),
+                        object
+                    );
+                } else {
+                    //
+                    // Try to recover from unexpected situation
+                    //
+                    SysLog.log(
+                        Level.WARNING,
+                        "Trying to add transient object {0} to persistent container {1}, discarding cache!",
+                        object.jdoGetTransactionalObjectId(),
+                        container.jdoGetObjectId()
+                    );
+                    caches.put(container, NO_CACHE);
+                }
+            }
+        }
+    }
+    
+    static void addEmptyCache(
+        Map<Container_1_0,ConcurrentMap<String, DataObject_1_0>> caches,
+        DataObject_1_0 parent,
+        String feature
+    ) throws ServiceException {
+        Container_1_0 container = parent.objGetContainer(feature);
+        if(!container.isRetrieved()) {
+            ConcurrentMap<String, DataObject_1_0> cache = caches.get(container);
+            if(cache == null) {
+                caches.put(
+                    container,
+                    new ConcurrentHashMap<String,DataObject_1_0>()
+                );
+            }
+        }
+    }
     
     /* (non-Javadoc)
      * @see javax.jdo.spi.PersistenceCapable#jdoReplaceStateManager(javax.jdo.spi.StateManager)
      */
-//  @Override
+    @Override
     public void jdoReplaceStateManager(
         StateManager sm
     ) throws SecurityException {
@@ -522,7 +627,7 @@ abstract class AbstractContainer_1 implements Container_1_0 {
     /* (non-Javadoc)
      * @see javax.jdo.spi.PersistenceCapable#jdoProvideField(int)
      */
-//  @Override
+    @Override
     public void jdoProvideField(int fieldNumber) {
         throw new UnsupportedOperationException("Not supported by persistence capable collections");
     }
@@ -530,7 +635,7 @@ abstract class AbstractContainer_1 implements Container_1_0 {
     /* (non-Javadoc)
      * @see javax.jdo.spi.PersistenceCapable#jdoProvideFields(int[])
      */
-//  @Override
+    @Override
     public void jdoProvideFields(int[] fieldNumbers) {
         throw new UnsupportedOperationException("Not supported by persistence capable collections");
     }
@@ -538,7 +643,7 @@ abstract class AbstractContainer_1 implements Container_1_0 {
     /* (non-Javadoc)
      * @see javax.jdo.spi.PersistenceCapable#jdoReplaceField(int)
      */
-//  @Override
+    @Override
     public void jdoReplaceField(int fieldNumber) {
         throw new UnsupportedOperationException("Not supported by persistence capable collections");
     }
@@ -546,7 +651,7 @@ abstract class AbstractContainer_1 implements Container_1_0 {
     /* (non-Javadoc)
      * @see javax.jdo.spi.PersistenceCapable#jdoReplaceFields(int[])
      */
-//  @Override
+    @Override
     public void jdoReplaceFields(int[] fieldNumbers) {
         throw new UnsupportedOperationException("Not supported by persistence capable collections");
     }
@@ -554,7 +659,7 @@ abstract class AbstractContainer_1 implements Container_1_0 {
     /* (non-Javadoc)
      * @see javax.jdo.spi.PersistenceCapable#jdoReplaceFlags()
      */
-//  @Override
+    @Override
     public void jdoReplaceFlags() {
         throw new UnsupportedOperationException("Not supported by persistence capable collections");
     }
@@ -562,7 +667,7 @@ abstract class AbstractContainer_1 implements Container_1_0 {
     /* (non-Javadoc)
      * @see javax.jdo.spi.PersistenceCapable#jdoCopyFields(java.lang.Object, int[])
      */
-//  @Override
+    @Override
     public void jdoCopyFields(Object other, int[] fieldNumbers) {
         throw new UnsupportedOperationException("Not supported by persistence capable collections");
     }
@@ -570,7 +675,7 @@ abstract class AbstractContainer_1 implements Container_1_0 {
     /* (non-Javadoc)
      * @see javax.jdo.spi.PersistenceCapable#jdoMakeDirty(java.lang.String)
      */
-//  @Override
+    @Override
     public void jdoMakeDirty(String fieldName) {
         throw new UnsupportedOperationException("Not supported by persistence capable collections");
     }
@@ -578,7 +683,7 @@ abstract class AbstractContainer_1 implements Container_1_0 {
     /* (non-Javadoc)
      * @see javax.jdo.spi.PersistenceCapable#jdoGetVersion()
      */
-//  @Override
+    @Override
     public Object jdoGetVersion() {
         throw new UnsupportedOperationException("Not supported by persistence capable collections");
     }
@@ -586,7 +691,7 @@ abstract class AbstractContainer_1 implements Container_1_0 {
     /* (non-Javadoc)
      * @see javax.jdo.spi.PersistenceCapable#jdoIsDirty()
      */
-//  @Override
+    @Override
     public boolean jdoIsDirty() {
         throw new UnsupportedOperationException("Not supported by persistence capable collections");
     }
@@ -594,7 +699,7 @@ abstract class AbstractContainer_1 implements Container_1_0 {
     /* (non-Javadoc)
      * @see javax.jdo.spi.PersistenceCapable#jdoIsTransactional()
      */
-//  @Override
+    @Override
     public boolean jdoIsTransactional() {
         throw new UnsupportedOperationException("Not supported by persistence capable collections");
     }
@@ -602,7 +707,7 @@ abstract class AbstractContainer_1 implements Container_1_0 {
     /* (non-Javadoc)
      * @see javax.jdo.spi.PersistenceCapable#jdoIsNew()
      */
-//  @Override
+    @Override
     public boolean jdoIsNew() {
         throw new UnsupportedOperationException("Not supported by persistence capable collections");
     }
@@ -610,7 +715,7 @@ abstract class AbstractContainer_1 implements Container_1_0 {
     /* (non-Javadoc)
      * @see javax.jdo.spi.PersistenceCapable#jdoIsDeleted()
      */
-//  @Override
+    @Override
     public boolean jdoIsDeleted() {
         throw new UnsupportedOperationException("Not supported by persistence capable collections");
     }
@@ -618,7 +723,7 @@ abstract class AbstractContainer_1 implements Container_1_0 {
     /* (non-Javadoc)
      * @see javax.jdo.spi.PersistenceCapable#jdoIsDetached()
      */
-//  @Override
+    @Override
     public boolean jdoIsDetached() {
         throw new UnsupportedOperationException("Not supported by persistence capable collections");
     }
@@ -626,7 +731,7 @@ abstract class AbstractContainer_1 implements Container_1_0 {
     /* (non-Javadoc)
      * @see javax.jdo.spi.PersistenceCapable#jdoNewInstance(javax.jdo.spi.StateManager)
      */
-//  @Override
+    @Override
     public PersistenceCapable jdoNewInstance(StateManager sm) {
         throw new UnsupportedOperationException("Not supported by persistence capable collections");
     }
@@ -634,7 +739,7 @@ abstract class AbstractContainer_1 implements Container_1_0 {
     /* (non-Javadoc)
      * @see javax.jdo.spi.PersistenceCapable#jdoNewInstance(javax.jdo.spi.StateManager, java.lang.Object)
      */
-//  @Override
+    @Override
     public PersistenceCapable jdoNewInstance(StateManager sm, Object oid) {
         throw new UnsupportedOperationException("Not supported by persistence capable collections");
     }
@@ -642,7 +747,7 @@ abstract class AbstractContainer_1 implements Container_1_0 {
     /* (non-Javadoc)
      * @see javax.jdo.spi.PersistenceCapable#jdoNewObjectIdInstance()
      */
-//  @Override
+    @Override
     public Object jdoNewObjectIdInstance() {
         throw new UnsupportedOperationException("Not supported by persistence capable collections");
     }
@@ -650,7 +755,7 @@ abstract class AbstractContainer_1 implements Container_1_0 {
     /* (non-Javadoc)
      * @see javax.jdo.spi.PersistenceCapable#jdoNewObjectIdInstance(java.lang.Object)
      */
-//  @Override
+    @Override
     public Object jdoNewObjectIdInstance(Object o) {
         throw new UnsupportedOperationException("Not supported by persistence capable collections");
     }
@@ -658,7 +763,7 @@ abstract class AbstractContainer_1 implements Container_1_0 {
     /* (non-Javadoc)
      * @see javax.jdo.spi.PersistenceCapable#jdoCopyKeyFieldsToObjectId(java.lang.Object)
      */
-//  @Override
+    @Override
     public void jdoCopyKeyFieldsToObjectId(Object oid) {
         throw new UnsupportedOperationException("Not supported by persistence capable collections");
     }
@@ -666,7 +771,7 @@ abstract class AbstractContainer_1 implements Container_1_0 {
     /* (non-Javadoc)
      * @see javax.jdo.spi.PersistenceCapable#jdoCopyKeyFieldsToObjectId(javax.jdo.spi.PersistenceCapable.ObjectIdFieldSupplier, java.lang.Object)
      */
-//  @Override
+    @Override
     public void jdoCopyKeyFieldsToObjectId(ObjectIdFieldSupplier fm, Object oid) {
         throw new UnsupportedOperationException("Not supported by persistence capable collections");
     }
@@ -674,7 +779,7 @@ abstract class AbstractContainer_1 implements Container_1_0 {
     /* (non-Javadoc)
      * @see javax.jdo.spi.PersistenceCapable#jdoCopyKeyFieldsFromObjectId(javax.jdo.spi.PersistenceCapable.ObjectIdFieldConsumer, java.lang.Object)
      */
-//  @Override
+    @Override
     public void jdoCopyKeyFieldsFromObjectId(
         ObjectIdFieldConsumer fm,
         Object oid
@@ -714,7 +819,7 @@ abstract class AbstractContainer_1 implements Container_1_0 {
         private final ObjectComparator comparator;
         protected final FetchPlan fetchPlan;
         
-        private List<DataObject_1_0> persistent;
+        private BatchingCollection persistent;
         private BatchingList stored;
         
         @SuppressWarnings("unchecked")
@@ -728,7 +833,7 @@ abstract class AbstractContainer_1 implements Container_1_0 {
             return this.stored;
         }
         
-        private List<DataObject_1_0> getPersistent(){
+        private BatchingCollection getPersistent(){
             synchronize();
             if(this.persistent == null) {
                 this.persistent = this.comparator == null ? new ChainingList(
@@ -775,8 +880,8 @@ abstract class AbstractContainer_1 implements Container_1_0 {
             } else {
                 List<DataObject_1_0> persistent = getPersistent();
                 return new ValueIterator(
-                    persistent instanceof ChainingList ? 
-                        ((ChainingList)persistent).listIterator(index, this.fetchPlan) : 
+                    persistent instanceof BatchingCollection ? 
+                        ((BatchingCollection)persistent).listIterator(index, this.fetchPlan) : 
                         persistent.listIterator(index),
                     false
                 );
@@ -787,7 +892,7 @@ abstract class AbstractContainer_1 implements Container_1_0 {
         public int size() {
             final ConcurrentMap<String, DataObject_1_0> cache = container().getCache();
             if(cache == null || AbstractContainer_1.this.isIgnoreCache()) {
-                return this.getPersistent().size();
+                return this.getPersistent().size(fetchPlan);
             } else {
                 int count = 0;
                 for(DataObject_1_0 candidate : cache.values()) {
@@ -819,7 +924,7 @@ abstract class AbstractContainer_1 implements Container_1_0 {
         /* (non-Javadoc)
          * @see org.openmdx.base.persistence.spi.PersistenceCapableCollection#openmdxjdoEvict(boolean)
          */
-//      @Override
+        @Override
         public void openmdxjdoEvict(
             boolean allMembers, boolean allSubSets
          ) {
@@ -832,7 +937,7 @@ abstract class AbstractContainer_1 implements Container_1_0 {
         /* (non-Javadoc)
          * @see org.openmdx.base.persistence.spi.PersistenceCapableCollection#openmdxjdoGetContainerId()
          */
-//      @Override
+        @Override
         public Path jdoGetObjectId() {
             return (Path) AbstractContainer_1.this.jdoGetObjectId();
         }
@@ -840,7 +945,7 @@ abstract class AbstractContainer_1 implements Container_1_0 {
         /* (non-Javadoc)
          * @see org.openmdx.base.persistence.spi.PersistenceCapableCollection#openmdxjdoGetPersistenceManager()
          */
-//      @Override
+        @Override
         public PersistenceManager openmdxjdoGetDataObjectManager() {
             return AbstractContainer_1.this.openmdxjdoGetDataObjectManager();
         }
@@ -848,7 +953,7 @@ abstract class AbstractContainer_1 implements Container_1_0 {
         /* (non-Javadoc)
          * @see org.openmdx.base.persistence.spi.PersistenceCapableContainer#openmdxjdoGetPersistenceManager()
          */
-    //  @Override
+        @Override
         public PersistenceManager jdoGetPersistenceManager(){
         	return AbstractContainer_1.this.jdoGetPersistenceManager();
         }
@@ -856,7 +961,7 @@ abstract class AbstractContainer_1 implements Container_1_0 {
         /* (non-Javadoc)
          * @see org.openmdx.base.persistence.spi.PersistenceCapableCollection#openmdxjdoGetTransientContainerId()
          */
-//      @Override
+        @Override
         public TransientContainerId jdoGetTransactionalObjectId() {
             return (TransientContainerId) AbstractContainer_1.this.jdoGetTransactionalObjectId();
         }
@@ -864,7 +969,7 @@ abstract class AbstractContainer_1 implements Container_1_0 {
         /* (non-Javadoc)
          * @see org.openmdx.base.persistence.spi.PersistenceCapableCollection#openmdxjdoIsPersistent()
          */
-//      @Override
+        @Override
         public boolean jdoIsPersistent() {
             return AbstractContainer_1.this.jdoIsPersistent();
         }
@@ -872,7 +977,7 @@ abstract class AbstractContainer_1 implements Container_1_0 {
         /* (non-Javadoc)
          * @see org.openmdx.base.persistence.spi.PersistenceCapableCollection#openmdxjdoRefresh()
          */
-//      @Override
+        @Override
         public void openmdxjdoRefresh() {
             if(this.stored != null) {
                 this.stored.evict();
@@ -883,7 +988,7 @@ abstract class AbstractContainer_1 implements Container_1_0 {
         /* (non-Javadoc)
          * @see org.openmdx.base.persistence.spi.PersistenceCapableCollection#openmdxjdoRetrieve(javax.jdo.FetchPlan)
          */
-//      @Override
+        @Override
         public void openmdxjdoRetrieve(FetchPlan fetchPlan) {
             AbstractContainer_1.this.openmdxjdoRetrieve(fetchPlan);
         }
@@ -918,7 +1023,7 @@ abstract class AbstractContainer_1 implements Container_1_0 {
         /* (non-Javadoc)
          * @see javax.jdo.spi.PersistenceCapable#jdoReplaceStateManager(javax.jdo.spi.StateManager)
          */
-//      @Override
+        @Override
         public void jdoReplaceStateManager(
             StateManager sm
         ) throws SecurityException {
@@ -928,7 +1033,7 @@ abstract class AbstractContainer_1 implements Container_1_0 {
         /* (non-Javadoc)
          * @see javax.jdo.spi.PersistenceCapable#jdoProvideField(int)
          */
-//      @Override
+        @Override
         public void jdoProvideField(int fieldNumber) {
             throw new UnsupportedOperationException("Not supported by persistence capable collections");
         }
@@ -936,7 +1041,7 @@ abstract class AbstractContainer_1 implements Container_1_0 {
         /* (non-Javadoc)
          * @see javax.jdo.spi.PersistenceCapable#jdoProvideFields(int[])
          */
-//      @Override
+        @Override
         public void jdoProvideFields(int[] fieldNumbers) {
             throw new UnsupportedOperationException("Not supported by persistence capable collections");
         }
@@ -944,7 +1049,7 @@ abstract class AbstractContainer_1 implements Container_1_0 {
         /* (non-Javadoc)
          * @see javax.jdo.spi.PersistenceCapable#jdoReplaceField(int)
          */
-//      @Override
+        @Override
         public void jdoReplaceField(int fieldNumber) {
             throw new UnsupportedOperationException("Not supported by persistence capable collections");
         }
@@ -952,7 +1057,7 @@ abstract class AbstractContainer_1 implements Container_1_0 {
         /* (non-Javadoc)
          * @see javax.jdo.spi.PersistenceCapable#jdoReplaceFields(int[])
          */
-//      @Override
+        @Override
         public void jdoReplaceFields(int[] fieldNumbers) {
             throw new UnsupportedOperationException("Not supported by persistence capable collections");
         }
@@ -960,7 +1065,7 @@ abstract class AbstractContainer_1 implements Container_1_0 {
         /* (non-Javadoc)
          * @see javax.jdo.spi.PersistenceCapable#jdoReplaceFlags()
          */
-//      @Override
+        @Override
         public void jdoReplaceFlags() {
             throw new UnsupportedOperationException("Not supported by persistence capable collections");
         }
@@ -968,7 +1073,7 @@ abstract class AbstractContainer_1 implements Container_1_0 {
         /* (non-Javadoc)
          * @see javax.jdo.spi.PersistenceCapable#jdoCopyFields(java.lang.Object, int[])
          */
-//      @Override
+        @Override
         public void jdoCopyFields(Object other, int[] fieldNumbers) {
             throw new UnsupportedOperationException("Not supported by persistence capable collections");
         }
@@ -976,7 +1081,7 @@ abstract class AbstractContainer_1 implements Container_1_0 {
         /* (non-Javadoc)
          * @see javax.jdo.spi.PersistenceCapable#jdoMakeDirty(java.lang.String)
          */
-//      @Override
+        @Override
         public void jdoMakeDirty(String fieldName) {
             throw new UnsupportedOperationException("Not supported by persistence capable collections");
         }
@@ -984,7 +1089,7 @@ abstract class AbstractContainer_1 implements Container_1_0 {
         /* (non-Javadoc)
          * @see javax.jdo.spi.PersistenceCapable#jdoGetVersion()
          */
-//      @Override
+        @Override
         public Object jdoGetVersion() {
             throw new UnsupportedOperationException("Not supported by persistence capable collections");
         }
@@ -992,7 +1097,7 @@ abstract class AbstractContainer_1 implements Container_1_0 {
         /* (non-Javadoc)
          * @see javax.jdo.spi.PersistenceCapable#jdoIsDirty()
          */
-//      @Override
+        @Override
         public boolean jdoIsDirty() {
             throw new UnsupportedOperationException("Not supported by persistence capable collections");
         }
@@ -1000,7 +1105,7 @@ abstract class AbstractContainer_1 implements Container_1_0 {
         /* (non-Javadoc)
          * @see javax.jdo.spi.PersistenceCapable#jdoIsTransactional()
          */
-//      @Override
+        @Override
         public boolean jdoIsTransactional() {
             throw new UnsupportedOperationException("Not supported by persistence capable collections");
         }
@@ -1008,7 +1113,7 @@ abstract class AbstractContainer_1 implements Container_1_0 {
         /* (non-Javadoc)
          * @see javax.jdo.spi.PersistenceCapable#jdoIsNew()
          */
-//      @Override
+        @Override
         public boolean jdoIsNew() {
             throw new UnsupportedOperationException("Not supported by persistence capable collections");
         }
@@ -1016,7 +1121,7 @@ abstract class AbstractContainer_1 implements Container_1_0 {
         /* (non-Javadoc)
          * @see javax.jdo.spi.PersistenceCapable#jdoIsDeleted()
          */
-//      @Override
+        @Override
         public boolean jdoIsDeleted() {
             throw new UnsupportedOperationException("Not supported by persistence capable collections");
         }
@@ -1024,7 +1129,7 @@ abstract class AbstractContainer_1 implements Container_1_0 {
         /* (non-Javadoc)
          * @see javax.jdo.spi.PersistenceCapable#jdoIsDetached()
          */
-//      @Override
+        @Override
         public boolean jdoIsDetached() {
             throw new UnsupportedOperationException("Not supported by persistence capable collections");
         }
@@ -1032,7 +1137,7 @@ abstract class AbstractContainer_1 implements Container_1_0 {
         /* (non-Javadoc)
          * @see javax.jdo.spi.PersistenceCapable#jdoNewInstance(javax.jdo.spi.StateManager)
          */
-//      @Override
+        @Override
         public PersistenceCapable jdoNewInstance(StateManager sm) {
             throw new UnsupportedOperationException("Not supported by persistence capable collections");
         }
@@ -1040,7 +1145,7 @@ abstract class AbstractContainer_1 implements Container_1_0 {
         /* (non-Javadoc)
          * @see javax.jdo.spi.PersistenceCapable#jdoNewInstance(javax.jdo.spi.StateManager, java.lang.Object)
          */
-//      @Override
+        @Override
         public PersistenceCapable jdoNewInstance(StateManager sm, Object oid) {
             throw new UnsupportedOperationException("Not supported by persistence capable collections");
         }
@@ -1048,7 +1153,7 @@ abstract class AbstractContainer_1 implements Container_1_0 {
         /* (non-Javadoc)
          * @see javax.jdo.spi.PersistenceCapable#jdoNewObjectIdInstance()
          */
-//      @Override
+        @Override
         public Object jdoNewObjectIdInstance() {
             throw new UnsupportedOperationException("Not supported by persistence capable collections");
         }
@@ -1056,7 +1161,7 @@ abstract class AbstractContainer_1 implements Container_1_0 {
         /* (non-Javadoc)
          * @see javax.jdo.spi.PersistenceCapable#jdoNewObjectIdInstance(java.lang.Object)
          */
-//      @Override
+        @Override
         public Object jdoNewObjectIdInstance(Object o) {
             throw new UnsupportedOperationException("Not supported by persistence capable collections");
         }
@@ -1064,7 +1169,7 @@ abstract class AbstractContainer_1 implements Container_1_0 {
         /* (non-Javadoc)
          * @see javax.jdo.spi.PersistenceCapable#jdoCopyKeyFieldsToObjectId(java.lang.Object)
          */
-//      @Override
+        @Override
         public void jdoCopyKeyFieldsToObjectId(Object oid) {
             throw new UnsupportedOperationException("Not supported by persistence capable collections");
         }
@@ -1072,7 +1177,7 @@ abstract class AbstractContainer_1 implements Container_1_0 {
         /* (non-Javadoc)
          * @see javax.jdo.spi.PersistenceCapable#jdoCopyKeyFieldsToObjectId(javax.jdo.spi.PersistenceCapable.ObjectIdFieldSupplier, java.lang.Object)
          */
-//      @Override
+        @Override
         public void jdoCopyKeyFieldsToObjectId(ObjectIdFieldSupplier fm, Object oid) {
             throw new UnsupportedOperationException("Not supported by persistence capable collections");
         }
@@ -1080,7 +1185,7 @@ abstract class AbstractContainer_1 implements Container_1_0 {
         /* (non-Javadoc)
          * @see javax.jdo.spi.PersistenceCapable#jdoCopyKeyFieldsFromObjectId(javax.jdo.spi.PersistenceCapable.ObjectIdFieldConsumer, java.lang.Object)
          */
-//      @Override
+        @Override
         public void jdoCopyKeyFieldsFromObjectId(
             ObjectIdFieldConsumer fm,
             Object oid
@@ -1119,44 +1224,44 @@ abstract class AbstractContainer_1 implements Container_1_0 {
             private DataObject_1_0 current = null;
 
 
-        //  @Override
+            @Override
             public void add(DataObject_1_0 o) {
 
 
                 throw new UnsupportedOperationException("Query result is unmodifiable");
             }
 
-        //  @Override
+            @Override
             public boolean hasNext() {
                 return this.delegate.hasNext();
             }
 
-        //  @Override
+            @Override
             public boolean hasPrevious() {
                 return this.delegate.hasPrevious();
             }
 
-        //  @Override
+            @Override
             public DataObject_1_0 next() {
                 return this.current = this.delegate.next();
             }
 
-        //  @Override
+            @Override
             public int nextIndex() {
                 return this.delegate.nextIndex();
             }
 
-        //  @Override
+            @Override
             public DataObject_1_0 previous() {
                 return this.current = this.delegate.previous();
             }
 
-        //  @Override
+            @Override
             public int previousIndex() {
                 return this.delegate.previousIndex();
             }
 
-        //  @Override
+            @Override
             public void remove() {
                 if(this.updateDelegate) {
                     this.delegate.remove();
@@ -1168,13 +1273,49 @@ abstract class AbstractContainer_1 implements Container_1_0 {
                 }
             }
 
-        //  @Override
+            @Override
             public void set(DataObject_1_0 o) {
                 throw new UnsupportedOperationException("Query result is unmodifiable");
             }
 
         };
 
+    }
+
+
+    //------------------------------------------------------------------------
+    // Interface Batching Iterable
+    //------------------------------------------------------------------------
+        
+    /**
+     * Batching Iterable
+     */
+    static interface BatchingCollection extends List<DataObject_1_0> {
+
+        /**
+         * Create a list iterator using the given fetch plan
+         * 
+         * @param index
+         * @param fetchPlan
+         * 
+         * @return a list iterator 
+         */
+        ListIterator<DataObject_1_0> listIterator(
+            int index,
+            FetchPlan fetchPlan
+        );
+        
+        /**
+         * Determine the collection's size
+         * 
+         * @param fetchPlan
+         * 
+         * @return the collection's size 
+         */
+        int size(
+            FetchPlan fetchPlan
+        );
+        
     }
 
     
@@ -1274,7 +1415,7 @@ abstract class AbstractContainer_1 implements Container_1_0 {
 		 */
 		public boolean remove(Object o) {
 			if(this.contains(o)) {
-	            if(JDOHelper.isPersistent(o)) {
+	            if(ReducedJDOHelper.isPersistent(o)) {
 	            	this.delegate.openmdxjdoGetDataObjectManager().deletePersistent(o);
 	                return true;
 	            } else {
@@ -1402,7 +1543,7 @@ abstract class AbstractContainer_1 implements Container_1_0 {
 	        /* (non-Javadoc)
 	         * @see java.util.Iterator#hasNext()
 	         */
-	    //  @Override
+	        @Override
 	        public boolean hasNext() {
 	            return this.delegate.hasNext();
 	        }
@@ -1410,7 +1551,7 @@ abstract class AbstractContainer_1 implements Container_1_0 {
 	        /* (non-Javadoc)
 	         * @see java.util.Iterator#next()
 	         */
-	    //  @Override
+	        @Override
 	        public DataObject_1_0 next() {
 	            return this.delegate.next().getValue();
 	        }
@@ -1418,7 +1559,7 @@ abstract class AbstractContainer_1 implements Container_1_0 {
 	        /* (non-Javadoc)
 	         * @see java.util.Iterator#remove()
 	         */
-	    //  @Override
+	        @Override
 	        public void remove() {
 	            this.delegate.remove();
 	        }
@@ -1543,7 +1684,7 @@ abstract class AbstractContainer_1 implements Container_1_0 {
             /* (non-Javadoc)
              * @see java.util.Iterator#hasNext()
              */
-        //  @Override
+            @Override
             public boolean hasNext() {
                 return this.delegate.hasNext();
             }
@@ -1551,7 +1692,7 @@ abstract class AbstractContainer_1 implements Container_1_0 {
             /* (non-Javadoc)
              * @see java.util.Iterator#next()
              */
-        //  @Override
+            @Override
             public String next() {
                 return this.delegate.next().getKey();
             }
@@ -1559,7 +1700,7 @@ abstract class AbstractContainer_1 implements Container_1_0 {
             /* (non-Javadoc)
              * @see java.util.Iterator#remove()
              */
-        //  @Override
+            @Override
             public void remove() {
                 this.delegate.remove();
             }
@@ -1586,7 +1727,7 @@ abstract class AbstractContainer_1 implements Container_1_0 {
         	super();
         }
 
-    //  @Override
+        @Override
         public Iterator<java.util.Map.Entry<String, DataObject_1_0>> iterator(
         ) {
             ConcurrentMap<String, DataObject_1_0> cache = container().getCache();
@@ -1597,29 +1738,29 @@ abstract class AbstractContainer_1 implements Container_1_0 {
             );
         }
 
-    //  @Override
+        @Override
         public int size() {
             return AbstractContainer_1.this.size();
         }
 
-    //  @Override
+        @Override
         public boolean isEmpty() {
             return AbstractContainer_1.this.isEmpty();
         }
 
-    //  @Override
+        @Override
         public boolean add(java.util.Map.Entry<String, DataObject_1_0> o) {
             throw new UnsupportedOperationException();
         }
 
-    //  @Override
+        @Override
         public boolean addAll(
             Collection<? extends java.util.Map.Entry<String, DataObject_1_0>> c
         ) {
             throw new UnsupportedOperationException();
         }
 
-    //  @Override
+        @Override
         public void clear() {
             for(
                 Iterator<Map.Entry<String, DataObject_1_0>> i = this.iterator();
@@ -1630,37 +1771,37 @@ abstract class AbstractContainer_1 implements Container_1_0 {
             }
         }
 
-    //  @Override
+        @Override
         public boolean contains(Object o) {
             throw new UnsupportedOperationException();
         }
 
-    //  @Override
+        @Override
         public boolean containsAll(Collection<?> c) {
             throw new UnsupportedOperationException();
         }
 
-    //  @Override
+        @Override
         public boolean remove(Object o) {
             throw new UnsupportedOperationException();
         }
 
-    //  @Override
+        @Override
         public boolean removeAll(Collection<?> c) {
             throw new UnsupportedOperationException();
         }
 
-    //  @Override
+        @Override
         public boolean retainAll(Collection<?> c) {
             throw new UnsupportedOperationException();
         }
 
-    //  @Override
+        @Override
         public Object[] toArray() {
             throw new UnsupportedOperationException();
         }
 
-    //  @Override
+        @Override
         public <T> T[] toArray(T[] a) {
             throw new UnsupportedOperationException();
         }
@@ -1702,7 +1843,7 @@ abstract class AbstractContainer_1 implements Container_1_0 {
             	return false;
             }
             
-        //  @Override
+            @Override
             public boolean hasNext() {
                 while(this.preFetched == null && this.delegate.hasNext()) try {
                     Map.Entry<String, DataObject_1_0> candidate = this.delegate.next();
@@ -1719,7 +1860,7 @@ abstract class AbstractContainer_1 implements Container_1_0 {
                 return this.preFetched != null;
             }
 
-        //  @Override
+            @Override
             public java.util.Map.Entry<String, DataObject_1_0> next() {
                 if(this.hasNext()) {
                     this.current = this.preFetched;
@@ -1730,7 +1871,7 @@ abstract class AbstractContainer_1 implements Container_1_0 {
                 }
             }
 
-        //  @Override
+            @Override
             public void remove() {
                 if(this.current == null) {
                     throw new IllegalStateException("No current element");
@@ -1782,27 +1923,27 @@ abstract class AbstractContainer_1 implements Container_1_0 {
              */
             DataObject_1_0 current;
 
-        //  @Override
+            @Override
             public boolean hasNext() {
                 return this.delegate.hasNext();
             }
 
-        //  @Override
+            @Override
             public Entry<String, DataObject_1_0> next() {
                 this.current = this.delegate.next();
                 return new Map.Entry<String, DataObject_1_0>(){
 
-                //  @Override
+                    @Override
                     public String getKey() {
                         return DatastoreIterator.this.current.jdoGetObjectId().getBase();
                     }
 
-                //  @Override
+                    @Override
                     public DataObject_1_0 getValue() {
                         return DatastoreIterator.this.current;
                     }
 
-                //  @Override
+                    @Override
                     public DataObject_1_0 setValue(DataObject_1_0 value) {
                         throw new UnsupportedOperationException("An object can't be replaced");
                     }
@@ -1810,7 +1951,7 @@ abstract class AbstractContainer_1 implements Container_1_0 {
                 };
             }
 
-        //  @Override
+            @Override
             public void remove() {
                 if(this.current == null) {
                     throw new IllegalStateException("No current element");
@@ -1833,10 +1974,10 @@ abstract class AbstractContainer_1 implements Container_1_0 {
      */
     class BatchingList 
         extends AbstractSequentialList<DataObject_1_0>
+        implements BatchingCollection
     {
 
         /**
-         * 
          * Constructor 
          *
          * @param queryType
@@ -1861,6 +2002,8 @@ abstract class AbstractContainer_1 implements Container_1_0 {
         private Integer total = null;
         private List<DataObject_1_0> selectionCache;
 
+        
+        
         Integer getTotal(
         ) {
             return this.total; 
@@ -1871,28 +2014,125 @@ abstract class AbstractContainer_1 implements Container_1_0 {
         ) {
             this.total = total;
         }
+
+        /**
+         * Populate extent caches
+         * 
+         * @param fetchPlan
+         * @throws ServiceException 
+         */
+        private void populateCaches(
+            FetchPlan fetchPlan
+        ) throws ServiceException {
+            Map<Container_1_0,ConcurrentMap<String, DataObject_1_0>> caches = new IdentityHashMap<Container_1_0, ConcurrentMap<String, DataObject_1_0>>();
+            buildCachesForNonEmptyContainers(caches, fetchPlan);
+            buildCachesForEmptyContainers(caches);
+            deployCaches(caches);            
+        }
+
+        /**
+         * Deploy Caches
+         * 
+         * @param caches
+         */
+        private void deployCaches(
+            Map<Container_1_0, ConcurrentMap<String, DataObject_1_0>> caches
+        ) {
+            for(Map.Entry<Container_1_0,ConcurrentMap<String, DataObject_1_0>> entry : caches.entrySet()) {
+                ConcurrentMap<String, DataObject_1_0> cache = entry.getValue();
+                if(cache != NO_CACHE){
+                    Container_1_0 container = entry.getKey();
+                    if(!container.isRetrieved() && container instanceof Container_1){
+                        ((Container_1)container).amendAndDeployCache(cache);
+                    }
+                }
+            }
+        }
+
+        /**
+         * Build caches for non-empty container
+         * 
+         * @param caches
+         * @param fetchPlan
+         */
+        private void buildCachesForNonEmptyContainers(
+            Map<Container_1_0, ConcurrentMap<String, DataObject_1_0>> caches,
+            FetchPlan fetchPlan
+        ) {
+            for(
+                Iterator<DataObject_1_0> i = this.listIterator(0, fetchPlan);
+                i.hasNext();
+            ){
+                DataObject_1_0 object = i.next();
+                if(!object.jdoIsDeleted()) {
+                    addToCache(caches, object);
+                }                    
+            }
+        }
+
+        /**
+         * Build caches for non-empty container
+         * 
+         * @param fetchPlan
+         * @param caches
+         * @throws ServiceException 
+         */
+        private void buildCachesForEmptyContainers(
+            Map<Container_1_0, ConcurrentMap<String, DataObject_1_0>> caches
+        ) throws ServiceException {
+            Path memberPattern = getFilter().getIdentityPattern();
+            Path parentPattern = memberPattern.getPrefix(memberPattern.size() - 2);
+            String feature = memberPattern.get(parentPattern.size());
+            Model_1_0 model = Model_1Factory.getModel();
+            for(Object c : AbstractContainer_1.this.openmdxjdoGetDataObjectManager().getManagedObjects(EMPTY_CACHE_CANDIDATES)){
+                DataObject_1_0 candidate = (DataObject_1_0) c;
+                if(candidate.jdoGetObjectId().isLike(parentPattern)) {
+                    ModelElement_1_0 classifierDef = model.getElement(candidate.objGetClass());
+                    ModelElement_1_0 referenceDef = model.getFeatureDef(classifierDef, feature, false);
+                    if(referenceDef != null && referenceDef.isReferenceType()) {
+                        addEmptyCache(caches, candidate, feature);
+                    }
+                }
+            }
+        }
+       
+        /**
+         * Populate non-extent cache
+         * 
+         * @param fetchPlan
+         */
+        private void populateCache(
+            FetchPlan fetchPlan
+        ) {
+            List<DataObject_1_0> allCache = new ArrayList<DataObject_1_0>();
+            for(
+                Iterator<DataObject_1_0> i = this.listIterator(0, fetchPlan);
+                i.hasNext();
+            ){
+                allCache.add(i.next());
+            }
+            this.selectionCache = allCache;
+            this.evictSliceCache();
+        }
         
         /**
          * Retrieve the collection
          * 
          * @param fetchPlan 
+         * @throws ServiceException  
          */
         synchronized void retrieveAll(
             FetchPlan fetchPlan
-        ){
+        ) throws ServiceException {
             if(!this.isRetrieved()) {
-                List<DataObject_1_0> allCache = new ArrayList<DataObject_1_0>();
-                for(
-                    Iterator<DataObject_1_0> i = this.listIterator(0, fetchPlan);
-                    i.hasNext();
-                ){
-                    allCache.add(i.next());
+                if(isPlainExtent()) {
+                    populateCaches(fetchPlan);
+                } else {
+                    populateCache(fetchPlan);
                 }
-                this.selectionCache = allCache;
-                this.evictSliceCache();
             }
         }
-        
+
         boolean isRetrieved(
         ){
             return this.selectionCache != null;
@@ -1978,9 +2218,11 @@ abstract class AbstractContainer_1 implements Container_1_0 {
         ) {
             return this.isRetrieved() ? 
                 this.selectionCache.listIterator(index) : 
-                this.listIterator(index, null);
+                this.listIterator(index, null); // no fetch plan specified
         }
 
+        @Override
+        public
         ListIterator<DataObject_1_0> listIterator(
             int index,
             FetchPlan fetchPlan
@@ -1988,12 +2230,14 @@ abstract class AbstractContainer_1 implements Container_1_0 {
            return new BatchingIterator(index, fetchPlan);  
         }
         
+        /* (non-Javadoc)
+         * @see org.openmdx.base.accessor.rest.AbstractContainer_1.BatchingCollection#size(javax.jdo.FetchPlan)
+         */
         @Override
-        public int size(
-        ) {
+        public int size(FetchPlan fetchPlan) {
             Integer total = this.getTotal();
             if(total == null) {
-                ListIterator<?> i = this.listIterator(0);
+                ListIterator<?> i = this.listIterator(0, fetchPlan);
                 int count = 0; 
                 while(i.hasNext()){
                     total = this.getTotal();
@@ -2007,6 +2251,12 @@ abstract class AbstractContainer_1 implements Container_1_0 {
             } else {
                 return total.intValue();
             }
+        }
+
+        @Override
+        public int size(
+        ) {
+            return size(null);
         }
         
         boolean isSmallerThanCacheThreshold(
@@ -2148,7 +2398,7 @@ abstract class AbstractContainer_1 implements Container_1_0 {
                 return this.slice.get(index - this.slice.offset);
             }
 
-        //  @Override
+            @Override
             public void add(
                 DataObject_1_0 o
             ) {
@@ -2219,7 +2469,7 @@ abstract class AbstractContainer_1 implements Container_1_0 {
                 }                
             }
 
-        //  @Override
+            @Override
             public boolean hasNext(
             ) {
                 try {
@@ -2234,13 +2484,13 @@ abstract class AbstractContainer_1 implements Container_1_0 {
                 }
             }
 
-        //  @Override
+            @Override
             public boolean hasPrevious(
             ) {
                 return this.previousIndex >= 0;
             }
 
-        //  @Override
+            @Override
             public DataObject_1_0 next(
             ) {
                 if(this.hasNext()) {
@@ -2254,13 +2504,13 @@ abstract class AbstractContainer_1 implements Container_1_0 {
                 );
             }
 
-        //  @Override
+            @Override
             public int nextIndex(
             ) {
                 return this.nextIndex;
             }
 
-        //  @Override
+            @Override
             public DataObject_1_0 previous(
             ) {
                 if(this.hasPrevious()) {
@@ -2274,19 +2524,19 @@ abstract class AbstractContainer_1 implements Container_1_0 {
                 );
             }
 
-        //  @Override
+            @Override
             public int previousIndex(
             ) {
                 return this.previousIndex;
             }
 
-        //  @Override
+            @Override
             public void remove(
             ) {
                 throw new UnsupportedOperationException("A list proxy is unmodifiable");
             }
 
-        //  @Override
+            @Override
             public void set(
                 DataObject_1_0 o
             ) {
@@ -2365,7 +2615,7 @@ abstract class AbstractContainer_1 implements Container_1_0 {
         
         /**
          * Tells whether the collection refers to the whole container or a sub-set
-         * 
+         *
          * @return <code>true</code> if the collection refers to the whole container
          */
         protected final boolean isPlain(){
@@ -2375,7 +2625,7 @@ abstract class AbstractContainer_1 implements Container_1_0 {
         @Override
         protected List<? extends DataObject_1_0> getSource(
         ){
-            return AbstractContainer_1.this.openmdxjdoGetDataObjectManager().currentTransaction().getMembers();
+            return AbstractContainer_1.this.openmdxjdoGetDataObjectManager().currentUnitOfWork().getMembers();
         }
 
         /**
@@ -2417,14 +2667,14 @@ abstract class AbstractContainer_1 implements Container_1_0 {
         protected final boolean handles(
             Object candidate
         ){
-            return this.isPlain() ? JDOHelper.isDeleted(candidate) : JDOHelper.isDirty(candidate);
+            return this.isPlain() ? ReducedJDOHelper.isDeleted(candidate) : ReducedJDOHelper.isDirty(candidate);
         }
-        
+
         @Override
         protected final boolean accept(
             Object candidate
         ) {
-            return handles(candidate) && !JDOHelper.isNew(candidate) && container().containsObject(candidate);
+            return handles(candidate) && !ReducedJDOHelper.isNew(candidate) && isInContainerOrExtent(candidate);
         }
 
     }
@@ -2460,7 +2710,7 @@ abstract class AbstractContainer_1 implements Container_1_0 {
         protected final boolean handles(
             Object candidate
         ){
-            return this.isPlain() ? JDOHelper.isNew(candidate) : JDOHelper.isDirty(candidate);
+            return this.isPlain() ? ReducedJDOHelper.isNew(candidate) : ReducedJDOHelper.isDirty(candidate);
         }
 
         @Override
@@ -2519,7 +2769,7 @@ abstract class AbstractContainer_1 implements Container_1_0 {
          * @param o
          * @see java.util.ListIterator#add(java.lang.Object)
          */
-    //  @Override
+        @Override
         public void add(DataObject_1_0 o) {
             throw new UnsupportedOperationException();
         }
@@ -2528,7 +2778,7 @@ abstract class AbstractContainer_1 implements Container_1_0 {
          * @return
          * @see java.util.ListIterator#hasNext()
          */
-    //  @Override
+        @Override
         public boolean hasNext() {
             while(this.prefetched == null && this.delegate.hasNext()) {
                 DataObject_1_0 candidate = this.delegate.next();
@@ -2543,7 +2793,7 @@ abstract class AbstractContainer_1 implements Container_1_0 {
          * @return
          * @see java.util.ListIterator#hasPrevious()
          */
-    //  @Override
+        @Override
         public boolean hasPrevious() {
             return this.previousIndex >= 0;
         }
@@ -2552,7 +2802,7 @@ abstract class AbstractContainer_1 implements Container_1_0 {
          * @return
          * @see java.util.ListIterator#next()
          */
-    //  @Override
+        @Override
         public DataObject_1_0 next() {
             if(this.hasNext()) {
                 this.previousIndex = this.nextIndex++;
@@ -2568,7 +2818,7 @@ abstract class AbstractContainer_1 implements Container_1_0 {
          * @return
          * @see java.util.ListIterator#nextIndex()
          */
-    //  @Override
+        @Override
         public int nextIndex() {
             return this.nextIndex;
         }
@@ -2577,7 +2827,7 @@ abstract class AbstractContainer_1 implements Container_1_0 {
          * @return
          * @see java.util.ListIterator#previous()
          */
-    //  @Override
+        @Override
         public DataObject_1_0 previous() {
             if(this.hasPrevious()) {
                 DataObject_1_0 candidate = this.delegate.previous();
@@ -2595,7 +2845,7 @@ abstract class AbstractContainer_1 implements Container_1_0 {
          * @return
          * @see java.util.ListIterator#previousIndex()
          */
-    //  @Override
+        @Override
         public int previousIndex() {
             return this.previousIndex;
         }
@@ -2604,7 +2854,7 @@ abstract class AbstractContainer_1 implements Container_1_0 {
          * 
          * @see java.util.ListIterator#remove()
          */
-    //  @Override
+        @Override
         public void remove() {
             this.delegate.remove();
         }
@@ -2613,7 +2863,7 @@ abstract class AbstractContainer_1 implements Container_1_0 {
          * @param o
          * @see java.util.ListIterator#set(java.lang.Object)
          */
-    //  @Override
+        @Override
         public void set(DataObject_1_0 o) {
             throw new UnsupportedOperationException();
         }
@@ -2681,7 +2931,7 @@ abstract class AbstractContainer_1 implements Container_1_0 {
             }
         }
         
-    //  @Override
+        @Override
         public int compare(
             DataObject_1_0 ox, 
             DataObject_1_0 oy
@@ -2689,8 +2939,8 @@ abstract class AbstractContainer_1 implements Container_1_0 {
             if(this.order == null){
                 if(ox.jdoIsPersistent()) {
                     if(oy.jdoIsPersistent()) {
-                        Path ix = (Path) JDOHelper.getObjectId(ox); 
-                        Path iy = (Path) JDOHelper.getObjectId(oy); 
+                        Path ix = (Path) ReducedJDOHelper.getObjectId(ox); 
+                        Path iy = (Path) ReducedJDOHelper.getObjectId(oy); 
                         return ix.compareTo(iy);
                     } else {
                         return +1;
@@ -2699,8 +2949,8 @@ abstract class AbstractContainer_1 implements Container_1_0 {
                     if(oy.jdoIsPersistent()) {
                         return -1;
                     } else {
-                        UUID ix = (UUID) JDOHelper.getTransactionalObjectId(ox);
-                        UUID iy = (UUID) JDOHelper.getTransactionalObjectId(oy);
+                        UUID ix = (UUID) ReducedJDOHelper.getTransactionalObjectId(ox);
+                        UUID iy = (UUID) ReducedJDOHelper.getTransactionalObjectId(oy);
                         return ix.compareTo(iy);
                     }
                 }
@@ -2752,8 +3002,11 @@ abstract class AbstractContainer_1 implements Container_1_0 {
         
         /**
          * Constructor for a sub-class aware filter
+         *
+         * @param superFilter
          * @param filter
-         * 
+         * @param extentQuery
+         *
          * @exception   IllegalArgumentException
          *              in case of an invalid filter property set
          * @exception   NullPointerException
@@ -2761,16 +3014,18 @@ abstract class AbstractContainer_1 implements Container_1_0 {
          */
         private ObjectFilter(
             ObjectFilter superFilter,
-            Filter filter
+            Filter filter, 
+            boolean extentQuery
         ){
             super(filter.getCondition());
             this.superFilter = superFilter;
-            Extension extension = filter.getExtension();
-            this.extension = 
-                extension != null ? extension : // the super filter's extension is superseded
-                superFilter != null ? superFilter.getExtension() : 
+            List<Extension> extensions = filter.getExtension();
+            this.extensions =
+                extensions != null ? extensions : // the super filter's extension is superseded
+                superFilter != null ? superFilter.getExtensions() : 
                 null;
             this.evaluateSuperFilterFirst = ObjectFilter.isSuperFilterEvaluatedFirst(this.filter);
+            this.extentQuery = extentQuery && isIdentityCondition(this.filter[1]);
         }
 
         /**
@@ -2796,33 +3051,59 @@ abstract class AbstractContainer_1 implements Container_1_0 {
         /**
          * 
          */
-        private final Extension extension;
+        private final List<Extension> extensions;
+ 
+        /**
+         * 
+         */
+        private final boolean extentQuery;
         
+        
+        /* (non-Javadoc)
+         * @see org.openmdx.base.accessor.rest.ModelAwareFilter#meetsCondition(java.lang.Object, int, org.openmdx.base.query.Condition)
+         */
+        @Override
+        protected boolean meetsCondition(
+            Object candidate,
+            int conditionIndex,
+            Condition condition
+        ) {
+            if(this.extentQuery && conditionIndex == 1){
+                return true; // Condition handled by containment test
+            } else {
+            	return super.meetsCondition(candidate, conditionIndex, condition);
+            }
+        }
+
         /**
          * Object filter factory
          * 
          * @param superFilter
          * @param subFilter
+         * @param extentQuery 
          * 
          * @return a new object filter
          */
         static final ObjectFilter getInstance (
             ObjectFilter superFilter,
-            Filter subFilter
+            Filter subFilter, 
+            boolean extentQuery
         ){
             if(subFilter == null) {
                 return null;
             }
             List<Condition> conditions = subFilter.getCondition();
+            List<Extension> extensions = subFilter.getExtension();
             if(
                 (conditions == null || conditions.isEmpty()) && // TODO detect idempotent conditions
-                subFilter.getExtension() == null
+                (extensions == null || extensions.isEmpty())
             ){
                 return null;
             }
             return new ObjectFilter(
                 superFilter,
-                subFilter
+                subFilter,
+                extentQuery
             );
         }
 
@@ -2846,7 +3127,7 @@ abstract class AbstractContainer_1 implements Container_1_0 {
          */
         @Override
         protected AbstractFilter newFilter(Filter delegate) {
-            return getInstance(null, delegate);
+            return getInstance(null, delegate, this.extentQuery);
         }
 
         private List<Condition> buildDelegate(
@@ -2895,7 +3176,7 @@ abstract class AbstractContainer_1 implements Container_1_0 {
             for(Object value : source) {
                 if(value instanceof UUID) {
                     Object object = persistenceManager.getObjectById(value);
-                    target[i++] = JDOHelper.isPersistent(object) ? JDOHelper.getObjectId(object) : new Path((UUID)value);
+                    target[i++] = ReducedJDOHelper.isPersistent(object) ? ReducedJDOHelper.getObjectId(object) : new Path((UUID)value);
                 } else {
                     target[i++] = value;
                 }
@@ -2931,8 +3212,9 @@ abstract class AbstractContainer_1 implements Container_1_0 {
          * 
          * @return the extension
          */
-        protected Extension getExtension(){
-            return this.extension;
+        protected List<Extension> getExtensions(
+        ){
+            return this.extensions;
         }
         
         @Override
@@ -2958,13 +3240,13 @@ abstract class AbstractContainer_1 implements Container_1_0 {
                 return true;
             } else if(candidate instanceof DataObject_1_0) {
                 if(value instanceof UUID) {
-                    return value.equals(JDOHelper.getTransactionalObjectId(candidate));
+                    return value.equals(ReducedJDOHelper.getTransactionalObjectId(candidate));
                 } else if(value instanceof Path) {
                     Path oid = (Path)value;
                     if(oid.isTransientObjectId()) {
-                        return oid.toUUID().equals(JDOHelper.getTransactionalObjectId(candidate));
+                        return oid.toUUID().equals(ReducedJDOHelper.getTransactionalObjectId(candidate));
                     } else {
-                        return oid.equals(JDOHelper.getObjectId(candidate));
+                        return oid.equals(ReducedJDOHelper.getObjectId(candidate));
                     }
                 } else {
                     return false;
@@ -2972,6 +3254,61 @@ abstract class AbstractContainer_1 implements Container_1_0 {
             } else {
                 return super.equal(candidate, value);
             }
+        }
+        
+        /**
+         * Retrieve the model class corresponding to the pattern
+         * 
+         * @param pattern
+         * 
+         * @return the qualified model class name
+         */
+        private String getType(Path pattern) {
+            try {
+                return (String)Model_1Factory.getModel().getTypes(pattern)[2].objGetValue("qualifiedName") ;
+            } catch (ServiceException exception) {
+                return "";
+            }
+        }
+
+        private boolean isInstanceOfCondition(
+            Condition condition
+        ){
+            return 
+                SystemAttributes.OBJECT_INSTANCE_OF.equals(condition.getFeature()) &&
+                condition.getQuantifier() == Quantifier.THERE_EXISTS &&
+                condition.getType() == ConditionType.IS_IN &&
+                condition.getValue().length == 1; 
+        }
+        
+        private boolean isInstanceOfCondition(
+            Condition condition,
+            String type
+        ){
+            return 
+                isInstanceOfCondition(condition) &&
+                condition.getValue()[0].equals(type); 
+        }
+
+        private boolean isIdentityCondition(
+            Condition condition
+        ){
+            return 
+                SystemAttributes.OBJECT_IDENTITY.equals(condition.getFeature()) &&
+                condition.getQuantifier() == Quantifier.THERE_EXISTS &&
+                condition.getType() == ConditionType.IS_LIKE &&
+                condition.getValue().length == 1;
+        }
+        
+        protected Path getIdentityPattern(){
+            return new Path((String)this.filter[1].getValue()[0]);
+        }
+        
+        boolean isPlainExtent(){
+            return
+                this.filter.length == 2 && 
+                isIdentityCondition(this.filter[1]) &&
+                isInstanceOfCondition(this.filter[0], getType(getIdentityPattern()));
         }
         
     }
@@ -3026,11 +3363,11 @@ abstract class AbstractContainer_1 implements Container_1_0 {
         ) {
            return this.stored;
         }
-                
-        @Override
+         
         public int size(
-        ) {
-            int storedSize = this.stored.size();
+            FetchPlan fetchPlan 
+        ){
+            int storedSize = this.stored.size(fetchPlan);
             if(storedSize != Integer.MAX_VALUE) {
                 if(storedSize == 0 && this.included.isEmpty()) {
                     return 0;
@@ -3047,6 +3384,12 @@ abstract class AbstractContainer_1 implements Container_1_0 {
                 }
             }
             return total;
+        }
+        
+        @Override
+        public int size(
+        ) {
+            return size(null);
         }
 
         @Override
@@ -3120,7 +3463,7 @@ abstract class AbstractContainer_1 implements Container_1_0 {
     /**
      * Chaining List
      */
-    static final class ChainingList extends JoiningList {
+    static final class ChainingList extends JoiningList implements BatchingCollection {
 
         /**
          * Constructor 
@@ -3144,6 +3487,7 @@ abstract class AbstractContainer_1 implements Container_1_0 {
             return listIterator(index, null);
         }
 
+        @Override
         public ListIterator<DataObject_1_0> listIterator(
             int index,
             FetchPlan fetchPlan
@@ -3207,12 +3551,12 @@ abstract class AbstractContainer_1 implements Container_1_0 {
                 }
             }
 
-        //  @Override
+            @Override
             public boolean hasNext() {
                 return this.getIterator(this.nextIndex).hasNext();
             }
 
-        //  @Override
+            @Override
             public DataObject_1_0 next(
             ) {
                 DataObject_1_0 current = (this.currentIterator = this.getIterator(this.nextIndex)).next();
@@ -3220,29 +3564,29 @@ abstract class AbstractContainer_1 implements Container_1_0 {
                 return current;
             }
 
-        //  @Override
+            @Override
             public boolean hasPrevious() {
                 return this.getIterator(this.previousIndex).hasPrevious();
             }
 
-        //  @Override
+            @Override
             public DataObject_1_0 previous() {
                 DataObject_1_0 current = (this.currentIterator = this.getIterator(this.previousIndex)).previous();
                 this.nextIndex = this.previousIndex--;
                 return current;
             }
 
-        //  @Override
+            @Override
             public int nextIndex() {
                 return this.nextIndex;
             }
 
-        //  @Override
+            @Override
             public int previousIndex() {
                 return this.previousIndex;
             }
 
-        //  @Override
+            @Override
             public void remove() {
                 this.currentIterator.remove();
                 if(this.currentIterator == this.dirtyIterator) {
@@ -3250,12 +3594,12 @@ abstract class AbstractContainer_1 implements Container_1_0 {
                 }
             }
 
-        //  @Override
+            @Override
             public void set(DataObject_1_0 object) {
                 throw new UnsupportedOperationException();
             }
 
-        //  @Override
+            @Override
             public void add(DataObject_1_0 object) {
                 throw new UnsupportedOperationException();
             }
@@ -3409,7 +3753,7 @@ abstract class AbstractContainer_1 implements Container_1_0 {
             private int readAheadCount = 0;        
             private boolean readAheadReady = false;
 
-        //  @Override
+            @Override
             public boolean hasNext() {
                 while(!this.readAheadReady && this.iterator.hasNext()) {
                     this.readAheadElement = this.iterator.next(); 
@@ -3419,7 +3763,7 @@ abstract class AbstractContainer_1 implements Container_1_0 {
                 return this.readAheadReady;
             }
 
-        //  @Override
+            @Override
             public DataObject_1_0 next() {
                 if(!this.hasNext()) {
                     throw new NoSuchElementException(
@@ -3430,12 +3774,12 @@ abstract class AbstractContainer_1 implements Container_1_0 {
                 return this.current = this.readAheadFlush();
             }
 
-        //  @Override
+            @Override
             public boolean hasPrevious() {
                 return this.previousIndex >= 0;
             }
 
-        //  @Override
+            @Override
             public DataObject_1_0 previous(
             ){
                 if(!this.hasPrevious()) throw new NoSuchElementException(
@@ -3451,18 +3795,18 @@ abstract class AbstractContainer_1 implements Container_1_0 {
                 return this.current = candidate;
             }
 
-        //  @Override
+            @Override
             public int nextIndex(
             ) {
                 return this.nextIndex;
             }
 
-        //  @Override
+            @Override
             public int previousIndex() {
                 return this.previousIndex;
             }
 
-        //  @Override
+            @Override
             public void remove() {
                 if(this.current == null) {
                     throw new IllegalStateException(
@@ -3477,12 +3821,12 @@ abstract class AbstractContainer_1 implements Container_1_0 {
                 }
             }
 
-        //  @Override
+            @Override
             public void set(DataObject_1_0 object) {
                 throw new UnsupportedOperationException("Query result is unmodifiable");
             }
 
-        //  @Override
+            @Override
             public void add(DataObject_1_0 object) {
                 throw new UnsupportedOperationException("Query result is unmodifiable");
             }
@@ -3588,49 +3932,49 @@ abstract class AbstractContainer_1 implements Container_1_0 {
              */
             private DataObject_1_0 current = null;
 
-        //  @Override
+            @Override
             public void add(DataObject_1_0 e) {
                 throw new UnsupportedOperationException("Query results are unmodifiable");
             }
 
-        //  @Override
+            @Override
             public boolean hasNext() {
                 return this.delegate.hasNext();
             }
 
-        //  @Override
+            @Override
             public boolean hasPrevious() {
                 return this.delegate.hasPrevious();
             }
 
-        //  @Override
+            @Override
             public DataObject_1_0 next() {
                 return this.current = this.delegate.next();
             }
 
-        //  @Override
+            @Override
             public int nextIndex() {
                 return this.delegate.nextIndex();
             }
 
-        //  @Override
+            @Override
             public DataObject_1_0 previous() {
                 return this.current = this.delegate.previous();
             }
 
-        //  @Override
+            @Override
             public int previousIndex() {
                 return this.delegate.previousIndex();
             }
 
-        //  @Override
+            @Override
             public void remove() {
                 this.delegate.remove();
-                JDOHelper.getPersistenceManager(this.current).deletePersistent(this.current);
+                ReducedJDOHelper.getPersistenceManager(this.current).deletePersistent(this.current);
                 this.current = null;
             }
 
-        //  @Override
+            @Override
             public void set(DataObject_1_0 e) {
                 throw new UnsupportedOperationException("Query results are unmodifiable");
             }
@@ -3647,7 +3991,7 @@ abstract class AbstractContainer_1 implements Container_1_0 {
     /**
      * Merging List
      */
-    private static final class MergingList extends JoiningList {
+    private static final class MergingList extends JoiningList implements BatchingCollection {
 
         /**
          * Constructor 
@@ -3668,7 +4012,18 @@ abstract class AbstractContainer_1 implements Container_1_0 {
         public ListIterator<DataObject_1_0> listIterator(
             int index
         ) {
-            return new MergingIterator(index);
+            return listIterator(index, null);
+        }
+
+        /* (non-Javadoc)
+         * @see org.openmdx.base.accessor.rest.AbstractContainer_1.BatchingIterable#listIterator(int, javax.jdo.FetchPlan)
+         */
+        @Override
+        public ListIterator<DataObject_1_0> listIterator(
+            int index,
+            FetchPlan fetchPlan
+        ) {
+            return new MergingIterator(index, fetchPlan);
         }
 
         /**
@@ -3680,9 +4035,11 @@ abstract class AbstractContainer_1 implements Container_1_0 {
              * Constructor 
              *
              * @param index
+             * @param fetchPlan the (optional) fetch plan
              */
             MergingIterator (
-                int index
+                int index, 
+                FetchPlan fetchPlan
             ) {
                 this.nextIndex = index;
                 this.previousIndex = index - 1;
@@ -3693,10 +4050,11 @@ abstract class AbstractContainer_1 implements Container_1_0 {
                     !MergingList.this.getExcluded().isEmpty()
                 ) {
                     this.cleanIterator = MergingList.this.getExcluded().isEmpty() ? MergingList.this.getStored().listIterator(
-                        0
+                        0,
+                        fetchPlan
                     ) : new CleanIterator(
                         MergingList.this.getExcluded(),
-                        MergingList.this.getStored().listIterator(0),
+                        MergingList.this.getStored().listIterator(0, fetchPlan),
                         0
                     );
                     for(int i = index; i > 0; i--) {
@@ -3719,7 +4077,7 @@ abstract class AbstractContainer_1 implements Container_1_0 {
                 }
                 // Use list iterator in case there are no dirty elements
                 else {
-                    this.cleanIterator = MergingList.this.getStored().listIterator(index); 
+                    this.cleanIterator = MergingList.this.getStored().listIterator(index, fetchPlan); 
                 }
             }
             
@@ -3735,7 +4093,7 @@ abstract class AbstractContainer_1 implements Container_1_0 {
             private DataObject_1_0 previousClean = null;
             private boolean useDirty;            
 
-        //  @Override
+            @Override
             public boolean hasNext(
             ) {
                 return 
@@ -3745,7 +4103,7 @@ abstract class AbstractContainer_1 implements Container_1_0 {
                     this.cleanIterator.hasNext();
             }
 
-        //  @Override
+            @Override
             public DataObject_1_0 next(
             ) {
                 if(this.nextDirty == null && this.dirtyIterator.hasNext()) {
@@ -3773,12 +4131,12 @@ abstract class AbstractContainer_1 implements Container_1_0 {
                 return current;
             }
 
-        //  @Override
+            @Override
             public boolean hasPrevious() {
                 return this.previousIndex > 0;
             }
 
-        //  @Override
+            @Override
             public DataObject_1_0 previous(
             ) {
                 if(this.previousDirty == null && this.dirtyIterator.hasPrevious()) {
@@ -3807,32 +4165,32 @@ abstract class AbstractContainer_1 implements Container_1_0 {
                 return current;
             }
 
-        //  @Override
+            @Override
             public int nextIndex(
             ) {
                 return this.nextIndex;
             }
 
-        //  @Override
+            @Override
             public int previousIndex(
             ) {
                 return this.previousIndex;
             }
 
-        //  @Override
+            @Override
             public void remove(
             ) {
                 (this.useDirty ? this.dirtyIterator : this.cleanIterator).remove();
             }
 
-        //  @Override
+            @Override
             public void set(
                 DataObject_1_0 object
             ) {
                 throw new UnsupportedOperationException();
             }
 
-        //  @Override
+            @Override
             public void add(
                 DataObject_1_0 object
             ) {

@@ -113,6 +113,7 @@ public class GridMoveUpObjectAction extends BoundAction {
                         String feature = Action.getParameter(parameter, Action.PARAMETER_REFERENCE);
                         PersistenceManager pm = app.getNewPmData();
                         RefObject_1_0 target = (RefObject_1_0)pm.getObjectById(currentView.getRefObject().refGetPath());
+                        @SuppressWarnings({"unchecked"})
                         Collection<RefObject_1_0> unorderedValues = (Collection<RefObject_1_0>)target.refGetValue(feature);
                         if(unorderedValues instanceof List) {
                         	List<RefObject_1_0> values = (List<RefObject_1_0>)unorderedValues;

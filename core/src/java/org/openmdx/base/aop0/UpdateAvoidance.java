@@ -1,13 +1,13 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Description: Configuration 
+ * Description: Update Avoidance Plug-In Configuration 
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2011, OMEX AG, Switzerland
+ * Copyright (c) 2011-2012, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -47,10 +47,10 @@
  */
 package org.openmdx.base.aop0;
 
-import javax.jdo.Transaction;
+import javax.jdo.PersistenceManager;
 
 /**
- * Plug-in configuration
+ * Update Avoidance Plug-In Configuration
  */
 public interface UpdateAvoidance {
 
@@ -59,7 +59,7 @@ public interface UpdateAvoidance {
 	 * shall be disabled in given current unit of work.
 	 */
 	void touchAllDirtyObjects(
-		Transaction transaction
+		PersistenceManager persistenceManager
 	);
 	
 }

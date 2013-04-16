@@ -47,23 +47,12 @@
  */
 package org.openmdx.application.rest.http;
 
-import javax.security.auth.callback.NameCallback;
-import javax.security.auth.callback.PasswordCallback;
 
 /**
  * Remote User Login Module
+ * 
+ * @deprecated use org.openmdx.application.rest.http.servlet.RemoteUserLoginModule
  */
-public class RemoteUserLoginModule extends BasicLoginModule {
-    
-    /**
-     * Constructor 
-     */
-    public RemoteUserLoginModule(
-    ) {
-        super(
-            new NameCallback(CallbackPrompts.REMOTE_USER), 
-            new PasswordCallback(CallbackPrompts.SESSION_ID, false)
-        );
-    }
-
+@Deprecated
+public class RemoteUserLoginModule extends org.openmdx.application.rest.http.servlet.RemoteUserLoginModule {
 }

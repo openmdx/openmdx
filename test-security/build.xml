@@ -1,16 +1,14 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <!--
 =======================================================================
-= Name:        $Id: build.xml,v 1.6 2010/06/07 15:45:47 hburger Exp $
-= Description: openMDX/Test-Security Build File
-= Revision:    $Revision: 1.6 $
-= Date:        $Date: 2010/06/07 15:45:47 $
-= Copyright:   (c) 2003-2004 OMEX AG
+= Project:     openMDX/Test Security, http://www.openmdx.org/
+= Description: Build File
+= Owner:       OMEX AG, Switzerland, http://www.omex.ch
 =======================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2010, OMEX AG, Switzerland
+ * Copyright (c) 2004-2013, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without 
@@ -71,13 +69,14 @@
 
 
 	<path id="project.lib.classpath">
-        <path refid="java2.enterprise.lib"/>
-        <path refid="java2.extension.lib"/>
+	    <path refid="osgi.enterprise.lib"/>
+	    <path refid="osgi.extension.lib"/>
 		<path refid="openmdx.core.lib"/>
 		<pathelement location="../${build.target.platform}/ejb/lib/openmdx-ejb.jar"/>
 		<path refid="microsoft.sql-server.lib"/>
 		<path refid="oracle.jdbc.lib"/>
 		<pathelement location="${openmdx.home}/security/build/${build.java.platform}/bin"/>
+		<pathelement location="${openmdx.home}/opt/radius/TinyRadius-1/lib/tiny-radius.jar"/>
 	</path>
 	<path id="project.bin.classpath">
 		<path refid="project.lib.classpath"/>

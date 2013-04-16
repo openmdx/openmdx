@@ -54,7 +54,6 @@ import java.util.Map;
 
 import javax.jdo.JDOUserException;
 import javax.jdo.PersistenceManager;
-import javax.jdo.Transaction;
 import javax.jmi.reflect.RefObject;
 import javax.resource.cci.MappedRecord;
 
@@ -63,6 +62,8 @@ import org.openmdx.application.xml.spi.ImportMode;
 import org.openmdx.application.xml.spi.ImportTarget;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.naming.Path;
+import org.openmdx.base.persistence.cci.PersistenceHelper;
+import org.openmdx.base.persistence.cci.UnitOfWork;
 import org.openmdx.base.rest.spi.Object_2Facade;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.exception.Throwables;
@@ -115,6 +116,10 @@ public class PersistenceManagerTarget implements ImportTarget {
      * Tells whether the import spawns an implicit transaction or participates in a running transaction.
      */
     private boolean autoCommit;
+    
+    protected UnitOfWork currentUnitOfWork(){
+        return PersistenceHelper.currentUnitOfWork(this.persistenceManager);
+    }
     
     /* (non-Javadoc)
      * @see org.openmdx.application.xml.spi.ImportTarget#importObject(org.openmdx.application.xml.spi.ImportTarget.Mode, javax.resource.cci.MappedRecord)
@@ -178,7 +183,7 @@ public class PersistenceManagerTarget implements ImportTarget {
                 );
             }
         } catch (RuntimeException exception) {
-            this.persistenceManager.currentTransaction().setRollbackOnly();
+            currentUnitOfWork().setRollbackOnly();
             Throwables.log(exception);
             throw exception;
         }
@@ -197,16 +202,16 @@ public class PersistenceManagerTarget implements ImportTarget {
             if(success){
                 try {
                     prepareUnitOfWork();
-                    this.persistenceManager.currentTransaction().commit();
+                    currentUnitOfWork().commit();
                 } catch (ServiceException exception) {
-                    this.persistenceManager.currentTransaction().rollback();
+                    currentUnitOfWork().rollback();
                     throw exception;
                 } catch (JDOUserException exception) {
                     throw new ServiceException(exception);
                 }
             } else {
                 try {
-                    this.persistenceManager.currentTransaction().rollback();
+                    currentUnitOfWork().rollback();
                 } catch (JDOUserException exception) {
                     throw new ServiceException(exception);
                 }
@@ -215,16 +220,16 @@ public class PersistenceManagerTarget implements ImportTarget {
             //
             // Participating in a running transaction
             //
-            if(!this.persistenceManager.currentTransaction().getRollbackOnly()){
+            if(!currentUnitOfWork().getRollbackOnly()){
                 if(success) { 
                     try {
                         prepareUnitOfWork();
                     } catch (ServiceException exception) {
-                        this.persistenceManager.currentTransaction().setRollbackOnly();
+                        currentUnitOfWork().setRollbackOnly();
                         throw exception;
                     }
                 } else {
-                    this.persistenceManager.currentTransaction().setRollbackOnly();
+                    currentUnitOfWork().setRollbackOnly();
                 }
             }
         }
@@ -243,7 +248,7 @@ public class PersistenceManagerTarget implements ImportTarget {
         //
         // Transaction management
         //
-        Transaction transaction = this.persistenceManager.currentTransaction();
+        UnitOfWork transaction = currentUnitOfWork();
         this.autoCommit = !transaction.isActive();
         if(this.autoCommit) {
             transaction.begin();

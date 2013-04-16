@@ -1,14 +1,13 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
- * Description: XMIExternalizer_1
+ * Project:     openMDX, http://www.openmdx.org/
+ * Description: XMI Mapper
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
  * ====================================================================
  *
- * This software is published under the BSD license
- * as listed below.
+ * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2006, OMEX AG, Switzerland
+ * Copyright (c) 2004-2013, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -49,122 +48,144 @@
 package org.openmdx.application.mof.mapping.xmi;
 
 import java.io.ByteArrayOutputStream;
+import java.io.OutputStream;
 import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.StringTokenizer;
 import java.util.zip.ZipOutputStream;
 
 import org.omg.mof.cci.VisibilityKind;
+import org.omg.mof.spi.Names;
 import org.openmdx.application.mof.cci.ModelAttributes;
 import org.openmdx.application.mof.mapping.spi.AbstractMapper_1;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.AggregationKind;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
 import org.openmdx.base.mof.cci.Model_1_0;
+import org.openmdx.base.naming.Path;
+import org.openmdx.base.wbxml.cci.StringTable;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.log.SysLog;
 
-//---------------------------------------------------------------------------
+/**
+ * XMI Mapper
+ */
 @SuppressWarnings({"rawtypes","unchecked"})
-public class XMIMapper_1
-extends AbstractMapper_1 {
+public class XMIMapper_1 extends AbstractMapper_1 {
 
-    //---------------------------------------------------------------------------
+    /**
+     * Constructor 
+     */
     public XMIMapper_1(
     ) {
-        super(
-            XMINames.XMI_PACKAGE_SUFFIX
-        );
+        super(Names.XMI_PACKAGE_SUFFIX);
     }
 
-    //---------------------------------------------------------------------------
+    /**
+     * The model1 schema location
+     */
+    private final static String MODEL1_XSD = "xri://+resource/org/omg/model1/" + Names.XMI_PACKAGE_SUFFIX + "/model1.xsd";
+
+    /**
+     * For multi-package export
+     */
+    private final static String DEFAULT_PROVIDER_NAME = "Mof";
+    
+    /**
+     * 
+     */
     public void externalize(
         String qualifiedPackageName,
         Model_1_0 model, 
         ZipOutputStream zip
     ) throws ServiceException {
-
-        SysLog.trace("> externalize");
-
+        SysLog.trace("> Externalize");
         this.model = model;
-        List packagesToExport = this.getMatchingPackages(qualifiedPackageName);
-
-        // export all matching packages
-        for(
-                Iterator pkgs = packagesToExport.iterator();
-                pkgs.hasNext();
-        ) {
-            ModelElement_1_0 currentPackage = (ModelElement_1_0)pkgs.next();
+        List<ModelElement_1_0> packagesToExport = this.getMatchingPackages(qualifiedPackageName);
+        // Export all matching packages
+        for(ModelElement_1_0 currentPackage: packagesToExport) {
             String currentPackageName = (String)currentPackage.objGetValue("qualifiedName");
-
-            // model as XML with all model features
-            ByteArrayOutputStream bs;
-            PrintWriter pw =  new PrintWriter(bs = new ByteArrayOutputStream());
-            this.createXMIModel(
-                currentPackageName, 
-                pw, 
-                true
-            );
-            pw.flush();
-            this.addToZip(
-                zip, 
-                bs, 
-                this.model.getElement(currentPackageName), 
-                ".xml"
-            );
-
-            // model as XML with edit features
-            pw =  new PrintWriter(bs = new ByteArrayOutputStream());
-            this.createXMIModel(
-                currentPackageName, 
-                pw, 
-                false
-            );
-            pw.flush();
-            this.addToZip(
-                zip, 
-                bs, 
-                this.model.getElement(currentPackageName), 
-                "_edit.xml"
-            );
-
-            // model as XSD with all features
-            pw =  new PrintWriter(bs = new ByteArrayOutputStream());
-            this.createXMISchema(
-                currentPackageName, 
-                pw, 
-                true
-            );
-            pw.flush();
-            this.addToZip(
-                zip, 
-                bs, 
-                this.model.getElement(currentPackageName), 
-                ".xsd"
-            );
-
-            // model as XSD with edit features
-            pw =  new PrintWriter(bs = new ByteArrayOutputStream());
-            this.createXMISchema(
-                currentPackageName, 
-                pw, 
-                false
-            );
-            pw.flush();
-            this.addToZip(
-                zip, 
-                bs, 
-                this.model.getElement(currentPackageName), 
-                "_edit.xsd"
-            );
+            // Model as text/xml
+            try {
+                ByteArrayOutputStream bs = new ByteArrayOutputStream();
+                this.createXMIModel(
+                    currentPackageName, 
+                    bs, 
+                    "text/xml"
+                );
+                this.addToZip(zip, bs, this.model.getElement(currentPackageName), ".xml");
+            } catch(Exception e) {
+                throw new ServiceException(e);
+            }
+            // Model as application/vnd.openmdx-xmi.wbxml
+            try {
+                ByteArrayOutputStream bs = new ByteArrayOutputStream();
+                this.createXMIModel(
+                    currentPackageName, 
+                    bs, 
+                    "application/vnd.openmdx-xmi.wbxml" 
+                );
+                this.addToZip(zip, bs, this.model.getElement(currentPackageName), ".wbxml");
+            } catch(Exception e) {
+                throw new ServiceException(e);
+            }
+            // Model as schema
+            try {
+                ByteArrayOutputStream bs;
+                PrintWriter pw =  new PrintWriter(bs = new ByteArrayOutputStream());
+                this.createXMISchema(
+                    currentPackageName, 
+                    pw, 
+                    true
+                );
+                this.addToZip(zip, bs, this.model.getElement(currentPackageName), ".xsd");
+            } catch(Exception e) {
+                throw new ServiceException(e);
+            }
         }
-
     }
 
-    //---------------------------------------------------------------------------
+    /**
+     * Externalize the model repository
+     * 
+     * @param model
+     * @param bs
+     * @param mimeType
+     * @throws ServiceException
+     */
+    public void externalizeRepository(
+        Model_1_0 model, 
+        OutputStream bs,
+        String mimeType
+    ) throws ServiceException {
+        SysLog.trace("> Externalize Repository");
+        this.model = model;
+        List<String> packagesToExport = new ArrayList<String>();
+        for(ModelElement_1_0 packageToExport :  this.getMatchingPackages("%")) {
+            packagesToExport.add(
+                (String)packageToExport.objGetValue("qualifiedName")
+            );
+        }
+        this.createXMIModel(
+            packagesToExport, 
+            bs, 
+            mimeType, 
+            true // allFeatures
+        );
+    }
+    
+    /**
+     * Create an XMI Schema
+     * 
+     * @param packageName
+     * @param outputStream
+     * @param allFeatures
+     * @throws ServiceException
+     */
     private void createXMISchema(
         String packageName,
         PrintWriter outputStream,
@@ -354,105 +375,170 @@ extends AbstractMapper_1 {
         XMISchemaWriter.writeSchemaFooter();
     }
 
-    //---------------------------------------------------------------------------
-    private static CharSequence getPathPrefix(
-        String forPackage
-    ){
-        if(XMINames.XMI_PACKAGE_SUFFIX.length() == 4) {
-            return "xri://+resource/";          
+    /**
+     * Externalize a single model element
+     * 
+     * @param XMIModelWriter
+     * @param elementDef
+     * @throws ServiceException
+     */
+    private void writeElement(
+        XMIModelMapper XMIModelWriter,
+        ModelElement_1_0 elementDef
+    ) throws ServiceException {
+        if(elementDef.objGetClass().equals(ModelAttributes.CLASS)) {
+            XMIModelWriter.writeClass(elementDef);
+        } else if(elementDef.objGetClass().equals(ModelAttributes.ATTRIBUTE)) {
+            XMIModelWriter.writeAttribute(elementDef);
+        } else if(elementDef.objGetClass().equals(ModelAttributes.ASSOCIATION)) {
+            XMIModelWriter.writeAssociation(elementDef);
+        } else if(elementDef.objGetClass().equals(ModelAttributes.ASSOCIATION_END)) {
+            XMIModelWriter.writeAssociationEnd(elementDef);
+        } else if(elementDef.objGetClass().equals(ModelAttributes.REFERENCE)) {
+            XMIModelWriter.writeReference(elementDef);
+        } else if(elementDef.objGetClass().equals(ModelAttributes.OPERATION)) {
+            XMIModelWriter.writeOperation(elementDef);
+        } else if(elementDef.objGetClass().equals(ModelAttributes.EXCEPTION)) {
+            XMIModelWriter.writeException(elementDef);
+        } else if(elementDef.objGetClass().equals(ModelAttributes.PARAMETER)) {
+            XMIModelWriter.writeParameter(elementDef);
+        } else if(elementDef.objGetClass().equals(ModelAttributes.PACKAGE)) {
+            XMIModelWriter.writePackage(elementDef);
+        } else if(elementDef.objGetClass().equals(ModelAttributes.PRIMITIVE_TYPE)) {
+            XMIModelWriter.writePrimitiveType(elementDef);
+        } else if(elementDef.objGetClass().equals(ModelAttributes.STRUCTURE_TYPE)) {
+            XMIModelWriter.writeStructureType(elementDef);
+        } else if(elementDef.objGetClass().equals(ModelAttributes.STRUCTURE_FIELD)) {
+            XMIModelWriter.writeStructureField(elementDef);
+        } else if(elementDef.objGetClass().equals(ModelAttributes.ALIAS_TYPE)) {
+            XMIModelWriter.writeAliasType(elementDef);
+        } else if(elementDef.objGetClass().equals(ModelAttributes.CONSTRAINT)) {
+            // not exported in this version
         } else {
-            StringTokenizer tokenizer = new StringTokenizer(forPackage, ":");
-            StringBuffer pathPrefix = new StringBuffer("../");
-            for(int i = 0; i < tokenizer.countTokens()-1; i++) {
-                pathPrefix.append("../");
-            }
-            return pathPrefix;
+            throw new ServiceException(
+                BasicException.Code.DEFAULT_DOMAIN,
+                BasicException.Code.ASSERTION_FAILURE, 
+                "can not export model element. Unsupported type",
+                new BasicException.Parameter("element", elementDef)
+            );
         }
     }
 
-    //---------------------------------------------------------------------------
-    private void createXMIModel(
-        String forPackage,
-        PrintWriter outputStream,
-        boolean allFeatures
-    ) throws ServiceException {
-
-        SysLog.trace("> createXMIModel");
-        XMIModelMapper XMIModelWriter = new XMIModelMapper(
-            outputStream,
-            allFeatures
-        );
-        XMIModelWriter.writeModelHeader(
-            this.model.getElement(forPackage).jdoGetObjectId().get(2), 
-            this.model.getElement(forPackage).jdoGetObjectId().get(4), 
-            getPathPrefix(forPackage) + "org/omg/model1/" + XMINames.XMI_PACKAGE_SUFFIX + "/model1" + 
-            (allFeatures ? ".xsd" : "_edit.xsd")
-        );
-        for(
-            Iterator iterator = this.model.getContent().iterator();
-            iterator.hasNext();
-        ) {
-            ModelElement_1_0 elementDef = (ModelElement_1_0)iterator.next();
-            SysLog.trace("modelElement=" + elementDef.jdoGetObjectId());
-
-            // only write model elements contained in the defining model (segment name)
-            // @see CR0001066 
-            if(forPackage.startsWith(elementDef.jdoGetObjectId().get(4))) {
-                if(elementDef.objGetClass().equals(ModelAttributes.CLASS)) {
-                    XMIModelWriter.writeClass(elementDef);
-                }
-                else if(elementDef.objGetClass().equals(ModelAttributes.ATTRIBUTE)) {
-                    XMIModelWriter.writeAttribute(elementDef);
-                }
-                else if(elementDef.objGetClass().equals(ModelAttributes.ASSOCIATION)) {
-                    XMIModelWriter.writeAssociation(elementDef);
-                }
-                else if(elementDef.objGetClass().equals(ModelAttributes.ASSOCIATION_END)) {
-                    XMIModelWriter.writeAssociationEnd(elementDef);
-                }
-                else if(elementDef.objGetClass().equals(ModelAttributes.REFERENCE)) {
-                    XMIModelWriter.writeReference(elementDef);
-                }
-                else if(elementDef.objGetClass().equals(ModelAttributes.OPERATION)) {
-                    XMIModelWriter.writeOperation(elementDef);
-                }
-                else if(elementDef.objGetClass().equals(ModelAttributes.EXCEPTION)) {
-                    XMIModelWriter.writeException(elementDef);
-                }
-                else if(elementDef.objGetClass().equals(ModelAttributes.PARAMETER)) {
-                    XMIModelWriter.writeParameter(elementDef);
-                }
-                else if(elementDef.objGetClass().equals(ModelAttributes.PACKAGE)) {
-                    XMIModelWriter.writePackage(elementDef);
-                }
-                else if(elementDef.objGetClass().equals(ModelAttributes.PRIMITIVE_TYPE)) {
-                    XMIModelWriter.writePrimitiveType(elementDef);
-                }
-                else if(elementDef.objGetClass().equals(ModelAttributes.STRUCTURE_TYPE)) {
-                    XMIModelWriter.writeStructureType(elementDef);
-                }
-                else if(elementDef.objGetClass().equals(ModelAttributes.STRUCTURE_FIELD)) {
-                    XMIModelWriter.writeStructureField(elementDef);
-                }
-                else if(elementDef.objGetClass().equals(ModelAttributes.ALIAS_TYPE)) {
-                    XMIModelWriter.writeAliasType(elementDef);
-                }
-                else if(elementDef.objGetClass().equals(ModelAttributes.CONSTRAINT)) {
-                    // not exported in this version
-                }
-                else {
-                    throw new ServiceException(
-                        BasicException.Code.DEFAULT_DOMAIN,
-                        BasicException.Code.ASSERTION_FAILURE, 
-                        "can not export model element. Unsupported type",
-                        new BasicException.Parameter("element", elementDef)
-                    );
-                }
+    /**
+     * Externalize a single model package
+     * 
+     * @param forPackage
+     * @param XMIModelWriter
+     * @throws ServiceException
+     */
+    private void writePackage(String forPackage, XMIModelMapper XMIModelWriter)
+        throws ServiceException {
+        String segmentName = this.model.getElement(forPackage).jdoGetObjectId().get(4);
+        XMIModelWriter.writeSegmentHeader(segmentName);
+        for(ModelElement_1_0 elementDef : this.model.getContent()){
+            SysLog.trace("modelElement", elementDef.jdoGetObjectId());
+            // CR0001066; only write model elements contained in the defining model (segment name)
+            if(segmentName.equals(elementDef.jdoGetObjectId().get(4))) {
+                writeElement(XMIModelWriter, elementDef);
             }
         }    
-        XMIModelWriter.writeModelFooter();
+        XMIModelWriter.writeSegmentFooter();
+    }
+
+    /**
+     * Externalize a single model package
+     * 
+     * @param forPackage
+     * @param out
+     * @param mimeType
+     * 
+     * @throws ServiceException
+     */
+    private void createXMIModel(
+        String forPackage,
+        OutputStream out,
+        String mimeType
+    ) throws ServiceException {
+        createXMIModel(
+            Collections.singletonList(forPackage), 
+            out, 
+            mimeType, 
+            false // allFeatires
+         );
+    }
+    
+    
+    /**
+     * Determine th eprovider name
+     * 
+     * @param forPackages
+     * @return
+     * @throws ServiceException
+     */
+    private String getProviderName(
+        List<String> forPackages
+    ) throws ServiceException {
+        if(forPackages.size() == 1) {
+            return this.model.getElement(forPackages.get(0)).jdoGetObjectId().get(2);
+        } else {
+            return DEFAULT_PROVIDER_NAME;
+        }
+    }
+    
+    private void populateStringTable(
+        StringTable target,
+        List<String> source
+    ) throws ServiceException{
+        List<String> segmentNames = new ArrayList<String>();
+        for(String packageName : source) {
+            String segmentName = packageName.substring(0, packageName.lastIndexOf(':'));
+            target.addString(segmentName);
+            segmentNames.add(segmentName);
+        }
+        for(ModelElement_1_0 candidate : this.model.getContent()) {
+            Path xri = candidate.jdoGetObjectId();
+            String segmentName  = xri.get(4);
+            if(segmentNames.contains(segmentName)) {
+                target.addString(xri.toXRI());
+            }
+        }
+    }
+    
+    /**
+     * Externalize a set of model packages
+     * 
+     * @param forPackages
+     * @param out
+     * @param mimeType
+     * @param allFeatures
+     * 
+     * @throws ServiceException
+     */
+    private void createXMIModel(
+        List<String> forPackages,
+        OutputStream out,
+        String mimeType, 
+        boolean allFeatures
+    ) throws ServiceException {
+        SysLog.trace("> createXMIModel", forPackages);
+        System.out.println("INFO:    Model export as " + mimeType + " includes " + forPackages);
+        XMIModelMapper xmiModelMapper = new XMIModelMapper(
+            out,
+            mimeType, 
+            allFeatures
+        );
+        if(xmiModelMapper.isStringTablePopulatedExplicitely()) {
+            populateStringTable(xmiModelMapper, forPackages);
+        }
+        xmiModelMapper.writeModelHeader(
+            getProviderName(forPackages), 
+            MODEL1_XSD
+        );
+        for(String forPackage : forPackages) {
+            writePackage(forPackage, xmiModelMapper);
+        }
+        xmiModelMapper.writeModelFooter();
     }
 
 }
 
-//---------------------------------------------------------------------------

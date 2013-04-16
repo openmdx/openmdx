@@ -1,11 +1,9 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <!--
 =======================================================================
-= Name:        $Id: jre-1.7-properties.xml,v 1.1 2011/11/02 14:20:07 wfro Exp $
-= Description: openMDX/Core jre-1.6 Platform Properties
-= Revision:    $Revision: 1.1 $
-= Date:        $Date: 2011/11/02 14:20:07 $
-= Copyright:   (c) 2003-2011 OMEX AG
+= Project:     openMDX/Core, http://www.openmdx.org/
+= Description: JRE 7 Platform Properties
+= Owner:       OMEX AG, Switzerland, http://www.omex.ch
 =======================================================================
 =
 = This software is published under the BSD license as listed below.

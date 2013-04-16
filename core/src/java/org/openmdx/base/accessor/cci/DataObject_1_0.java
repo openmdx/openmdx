@@ -48,11 +48,14 @@
 package org.openmdx.base.accessor.cci;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.UUID;
 
+import javax.jdo.PersistenceManager;
 import javax.jdo.spi.PersistenceCapable;
+import javax.resource.NotSupportedException;
 import javax.resource.ResourceException;
 import javax.resource.cci.InteractionSpec;
 import javax.resource.cci.Record;
@@ -105,7 +108,7 @@ import org.openmdx.base.naming.Path;
  *   be able to introspect on Data Object metadata, which exposes the data model for 
  *   the Data Objects. The object class of a Data Object allows to retrieve the
  *   object's metadata from a <code>MOF</code> repository.
- * </ul>
+ * </ul>N
  * <p>
  * A <code>DataObject_1_0</code> extends from the <code>javax.jdo.spi.PersistenceCapable</code>.
  * As a consequence, a <code>DataObject_1_0</code> offers the semantics as a <code>JDO 
@@ -321,6 +324,29 @@ public interface DataObject_1_0
     SortedMap<Integer,Object> objGetSparseArray(
         String feature
     ) throws ServiceException;
+
+    /**
+     * Get a Map attribute.
+     * <p> 
+     * This method never returns <code>null</code> as an instance of the
+     * requested class is created on demand if it hasn't been set yet.
+     *
+     * @param       feature
+     *              The feature's name.
+     *
+     * @return      a map which may be empty but never null.
+     *
+     * @exception   ServiceException ILLEGAL_STATE
+     *              if the object is deleted
+     * @exception   ServiceException BAD_MEMBER_NAME
+     *              if the object has no such feature
+     * @exception   ClassCastException
+     *              if the feature's value is not a set
+     */
+    @SuppressWarnings("rawtypes")
+    Map objGetMap(
+        String feature
+    ) throws ServiceException;
     
     /**
      * Get a reference feature.
@@ -411,6 +437,14 @@ public interface DataObject_1_0
     boolean objIsInaccessible(
     );
 
+    /**
+     * Tells whether retrieving the object did fail with a not found exception
+     *
+     * @return  true if the object does not exists
+     */
+    boolean objDoesNotExist(
+    );
+    
     /**
      * Retrieve the inaccessibility reason.
      *

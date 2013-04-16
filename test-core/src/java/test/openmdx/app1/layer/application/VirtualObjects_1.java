@@ -322,13 +322,13 @@ public class VirtualObjects_1 extends HardWiredObjects_1 {
             "productGroup",
             ":*"
         }
-    );
+    ).lock();
     private static final Path PRODUCT_PATTERN = PRODUCT_GROUP_PATTERN.getDescendant(
         new String[]{
             "product",
             ":*"
         }
-    );
+    ).lock();
 
     private final Logger logger = Logger.getLogger(VirtualObjects_1.class.getName());
 

@@ -93,13 +93,13 @@ implements Serializable {
         Integer[] order,
         List<Condition> condition,
         List<OrderSpecifier> orderSpecifier,
-        Extension extension,
+        List<Extension> extensions,
         Object... context
     ) {
         super(
             condition,
             Filter.removeDuplicateOrderSpecifiers(name, orderSpecifier, context),
-            extension
+            extensions
         );
         this.name = name;
         this.labels = labels;

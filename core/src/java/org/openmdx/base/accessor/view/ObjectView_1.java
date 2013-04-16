@@ -51,7 +51,6 @@ import java.io.Serializable;
 import java.util.UUID;
 
 import javax.jdo.JDODataStoreException;
-import javax.jdo.JDOHelper;
 import javax.jdo.listener.ClearCallback;
 import javax.jdo.listener.DeleteCallback;
 import javax.jdo.listener.StoreCallback;
@@ -77,6 +76,7 @@ import org.openmdx.base.mof.cci.Multiplicity;
 import org.openmdx.base.mof.spi.Model_1Factory;
 import org.openmdx.base.naming.Path;
 import org.openmdx.kernel.exception.BasicException;
+import org.openmdx.kernel.jdo.ReducedJDOHelper;
 import org.w3c.cci2.SortedMaps;
 
 /**
@@ -150,9 +150,9 @@ class ObjectView_1
         switch(multiplicity) {
 	        case SINGLE_VALUE: case OPTIONAL: {
 	            Object pc = getDelegate().objGetValue(feature); 
-	            return JDOHelper.isPersistent(pc) ?
-	                JDOHelper.getObjectId(pc) :
-	                JDOHelper.getTransactionalObjectId(pc);
+	            return ReducedJDOHelper.isPersistent(pc) ?
+	                ReducedJDOHelper.getObjectId(pc) :
+	                ReducedJDOHelper.getTransactionalObjectId(pc);
 	        }
 	        case LIST:
 	            return new MarshallingList<Object>(
@@ -299,7 +299,7 @@ class ObjectView_1
     @Override
     public void objMakeTransactional(
     ) throws ServiceException {
-        JDOHelper.getPersistenceManager(this.dataObject).makeTransactional(this.dataObject);
+        ReducedJDOHelper.getPersistenceManager(this.dataObject).makeTransactional(this.dataObject);
     }
      
     /**
@@ -316,7 +316,7 @@ class ObjectView_1
     @Override
     public void objMakeNontransactional(
     ) throws ServiceException {
-        JDOHelper.getPersistenceManager(this.dataObject).makeNontransactional(this.dataObject);
+        ReducedJDOHelper.getPersistenceManager(this.dataObject).makeNontransactional(this.dataObject);
     }
 
     //--------------------------------------------------------------------------
@@ -368,9 +368,18 @@ class ObjectView_1
         return this.dataObject.objIsContained();
     }
     
+    
     //--------------------------------------------------------------------------
     // Implements Object_1_0
     //--------------------------------------------------------------------------
+
+    /* (non-Javadoc)
+     * @see org.openmdx.base.accessor.spi.DelegatingObject_1#objDoesNotExist()
+     */
+    @Override
+    public boolean objDoesNotExist() {
+        return this.dataObject.objDoesNotExist();
+    }
 
     /**
      * Returns the object's identity.

@@ -84,7 +84,6 @@ import java.util.logging.Level;
 import javax.jdo.FetchPlan;
 import javax.jdo.JDOException;
 import javax.jdo.JDOFatalInternalException;
-import javax.jdo.JDOHelper;
 import javax.jdo.JDOUserException;
 import javax.jdo.listener.AttachLifecycleListener;
 import javax.jdo.listener.ClearLifecycleListener;
@@ -105,10 +104,10 @@ import javax.resource.cci.InteractionSpec;
 import javax.resource.cci.MappedRecord;
 import javax.resource.cci.Record;
 
-import org.openmdx.application.dataprovider.layer.persistence.jdbc.LockAssertions;
 import org.openmdx.base.accessor.cci.Container_1_0;
 import org.openmdx.base.accessor.cci.DataObject_1_0;
 import org.openmdx.base.accessor.cci.SystemAttributes;
+import org.openmdx.base.accessor.rest.spi.LockAssertions;
 import org.openmdx.base.accessor.rest.spi.ManagedConnectionCache_2_0;
 import org.openmdx.base.accessor.rest.spi.ManagedConnectionCache_2_0.Mode;
 import org.openmdx.base.accessor.spi.AbstractDataObject_1;
@@ -122,6 +121,7 @@ import org.openmdx.base.accessor.spi.ShortMarshaller;
 import org.openmdx.base.aop0.PlugIn_1_0;
 import org.openmdx.base.collection.Maps;
 import org.openmdx.base.collection.MarshallingList;
+import org.openmdx.base.collection.MarshallingMap;
 import org.openmdx.base.collection.MarshallingSet;
 import org.openmdx.base.collection.MarshallingSortedMap;
 import org.openmdx.base.collection.PopulationMap;
@@ -152,12 +152,13 @@ import org.openmdx.base.resource.Records;
 import org.openmdx.base.resource.spi.MethodInvocationSpec;
 import org.openmdx.base.resource.spi.ResourceExceptions;
 import org.openmdx.base.rest.cci.MessageRecord;
-import org.openmdx.base.rest.spi.Facades;
 import org.openmdx.base.rest.spi.Object_2Facade;
 import org.openmdx.base.rest.spi.Query_2Facade;
 import org.openmdx.base.text.conversion.JavaBeans;
+import org.openmdx.base.transaction.Status;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.id.UUIDs;
+import org.openmdx.kernel.jdo.ReducedJDOHelper;
 import org.openmdx.kernel.log.SysLog;
 import org.openmdx.kernel.text.format.IndentingFormatter;
 import org.w3c.cci2.BinaryLargeObject;
@@ -254,7 +255,13 @@ public class DataObject_1
         this.digest = null;
         Set<String> notToBeCloned = Sets.asSet(exclude);
         if(that.jdoIsPersistent() && !that.jdoIsNew()) {
-		    that.objRetrieve(false, null, null, beforeImage);
+		    that.objRetrieve(
+		        false, 
+		        null, 
+		        null, 
+		        beforeImage, 
+                true // throwNotFoundException
+		     );
 		}
 		this.persistentValues = newRecord(this.transactionalValuesRecordName);
         if(!that.objIsHollow()) {
@@ -444,6 +451,11 @@ public class DataObject_1
     protected Object lock = null;
     
     /**
+     * The id of the non-existing object
+     */
+    private transient String notFound = null;
+    
+    /**
      * Such an object cant't leave its hollow state
      */
     private transient ServiceException inaccessabilityReason = null;
@@ -482,6 +494,8 @@ public class DataObject_1
      * Map a data types's qualified name to its marshaller
      */
     static final Map<String,Marshaller> dataTypeMarshaller = new HashMap<String,Marshaller>();
+
+    private static final String ANONYMOUS_XRI = "";
     
     /**
      * Valdidate the object's state and retrieve its class
@@ -664,7 +678,8 @@ public class DataObject_1
                     false, // reload
                     this.dataObjectManager.getFetchPlan(), 
                     null, // features
-                    false // beforeImage
+                    false, // beforeImage
+                    true // throwNotFoundException
                 );
                 this.transactionalValuesRecordName = this.persistentValues.getRecordName();
             } catch (NullPointerException exception){
@@ -739,7 +754,7 @@ public class DataObject_1
         	return null;
         } else try {
         	this.loadLock = true;
-            Object_2Facade facade = Facades.asObject(objectHolder);
+            Object_2Facade facade = Object_2Facade.newInstance(objectHolder);
             if(this.identity == null || this.identity.equals(facade.getPath())) {
                 //
                 // Composite & Transient
@@ -773,6 +788,8 @@ public class DataObject_1
                 );
                 return composite.postLoad(objectHolder);
             }
+        } catch (ResourceException exception) {
+            throw new ServiceException(exception);
         } finally {
         	this.loadLock = false;
         }
@@ -805,15 +822,17 @@ public class DataObject_1
      * @param features 
      * @param refresh tells whether the (remote) object shall be 
      * refreshed before answering the query
+     * @param throwNotFoundException 
      */
     @SuppressWarnings("unchecked")
     DataObject_1 unconditionalLoad(
         FetchPlan fetchPlan, 
         Set<String> features, 
-        boolean refresh
+        boolean refresh, 
+        boolean throwNotFoundException
     ) throws ServiceException {
         try {
-            Query_2Facade query = Facades.newQuery(this);
+            Query_2Facade query = Query_2Facade.forObjectId(this);
             if(fetchPlan != null) {
                 query.setGroups(fetchPlan.getGroups());
             }
@@ -821,17 +840,26 @@ public class DataObject_1
                 query.setFeatures(features);
             }
             query.setRefresh(refresh);
+            query.setSize(Integer.valueOf(1));
             IndexedRecord reply = (IndexedRecord) this.dataObjectManager.getInteraction().execute(
                 this.dataObjectManager.getInteractionSpecs().GET,
                 query.getDelegate()
             );
-            DataObject_1 composite = postLoad((MappedRecord) reply.get(0));
-            this.inaccessabilityReason = null;
-            return composite;
+            if(reply.isEmpty()) {
+                this.setNotFound(jdoGetObjectId());
+            } else {
+                this.setFound();
+                return postLoad((MappedRecord) reply.get(0));
+            }
         } catch (ResourceException exception) {
-            throw this.setInaccessibilityReason(new ServiceException(exception));
+            this.setInaccessibilityReason(new ServiceException(exception));
         } catch (ServiceException exception){      
-            throw setInaccessibilityReason(exception);
+            setInaccessibilityReason(exception);
+        }
+        if(throwNotFoundException || this.notFound == null){
+            throw getInaccessibilityReason(); // inaccessable
+        } else {
+            return null; // not found
         }
     }
 
@@ -842,15 +870,36 @@ public class DataObject_1
      * 
      * @return the inaccessibility reason
      */
-    public ServiceException setInaccessibilityReason(
+    private void setInaccessibilityReason(
         ServiceException inaccessabilityReason
     ){
         this.inaccessabilityReason = inaccessabilityReason;
+        this.notFound = (inaccessabilityReason.getExceptionCode() == BasicException.Code.NOT_FOUND) ? ANONYMOUS_XRI : null;
+        makeInaccessable();
+    }
+    
+    private void setNotFound(
+        Path xri
+    ){
+        this.notFound = xri == null ? ANONYMOUS_XRI : xri.toXRI();
+        this.inaccessabilityReason = null; // lazily initialised
+        makeInaccessable();
+    }
+
+    private void setFound(){
+        this.notFound = null;
+        this.inaccessabilityReason = null;
+    }
+    
+    /**
+     * @param inaccessabilityReason
+     */
+    private void makeInaccessable() {
         if(this.dataObjectManager == null) {
             this.invalidate(
                 false // makeNonTransactional
             );
-        } else if(inaccessabilityReason.getExceptionCode() != BasicException.Code.NOT_FOUND) {
+        } else if(this.notFound == null) {
             this.invalidate(
                 true // makeNonTransactional
             );
@@ -862,7 +911,6 @@ public class DataObject_1
         } catch (ServiceException exception) {
             exception.log();
         }
-        return inaccessabilityReason;
     }
 
     /**
@@ -890,7 +938,8 @@ public class DataObject_1
         this.unconditionalLoad(
     		this.dataObjectManager.getFetchPlan(), 
     		null, // features
-    		true // refresh
+    		true, // refresh
+    		true // throwNotFoundException
         );
         evictReadLock();
     }
@@ -1005,7 +1054,7 @@ public class DataObject_1
                 )
             );  
         }
-        return this.dataObjectManager.currentTransaction();
+        return this.dataObjectManager.currentUnitOfWork();
     }
 
     /**
@@ -1081,7 +1130,8 @@ public class DataObject_1
                     false, // reload
                     this.dataObjectManager.getFetchPlan(), 
                     null, // features
-                    false // beforeImage
+                    false, // beforeImage
+                    true // throwNotFoundException
                 );
             } else {
                 unitOfWork.getState(this,false).setValues(this.transientValues);
@@ -1184,8 +1234,8 @@ public class DataObject_1
                 BasicException.Code.ILLEGAL_STATE,
                 "Attempt to move a persistent object",
                 ExceptionHelper.newObjectIdParameter("id", this),
-                new BasicException.Parameter("old", JDOHelper.getTransactionalObjectId(this.getContainer(true))),
-                new BasicException.Parameter("new", JDOHelper.getTransactionalObjectId(there.container()))
+                new BasicException.Parameter("old", ReducedJDOHelper.getTransactionalObjectId(this.getContainer(true))),
+                new BasicException.Parameter("new", ReducedJDOHelper.getTransactionalObjectId(there.container()))
             );
         }
         this.container = (Container_1) there.container();
@@ -1215,7 +1265,7 @@ public class DataObject_1
                     state.setLifeCycleEventPending(true);
                     this.identity = identity;
                     this.created = true;
-                    this.dataObjectManager.currentTransaction().flush(false);
+                    this.dataObjectManager.currentUnitOfWork().flush(false);
                     flushed = true;
                     qualifier = identity.getBase();
                 } else {
@@ -1435,7 +1485,7 @@ public class DataObject_1
         } else {
             CascadeDelete: for(PlugIn_1_0 plugIn : this.dataObjectManager.getPlugIns()) {
                 if(plugIn.requiresCallbackOnCascadedDelete(this)) {
-                    for(Map.Entry<String, ModelElement_1_0> e : ((Map<String, ModelElement_1_0>)getClassifier().objGetValue("allFeature")).entrySet()){
+                    for(Map.Entry<String, ModelElement_1_0> e : ((Map<String, ModelElement_1_0>)getClassifier().objGetMap("allFeature")).entrySet()){
                         ModelElement_1_0 featureDef = e.getValue();
                         if(model.isReferenceType(featureDef)) {
                             if(AggregationKind.COMPOSITE.equals(model.getElement(featureDef.objGetValue("referencedEnd")).objGetValue("aggregation"))){
@@ -1931,25 +1981,23 @@ public class DataObject_1
      * 
      * @throws ServiceException
      */
-    public boolean objIsModified() throws ServiceException{
+    public boolean thereRemainDirtyFeaturesAfterRemovingTheUnmodifiedOnes() throws ServiceException{
         TransactionalState_1 state = this.getState(false);
         Map<String,ModelElement_1_0> attributes = getAttributes();
-        boolean modified = state.isTouched();
+        boolean dirty = state.isTouched();
         Set<String> dirtyFeatures = state.dirtyFeatures(true); 
         for(
             Iterator<String> i = dirtyFeatures.iterator(); 
             i.hasNext();
         ){
             ModelElement_1_0 attribute = attributes.get(i.next());
-            if(!Boolean.TRUE.equals(attribute.objGetValue("isDerived"))){
-                if(this.isFeatureModified(attribute)) {
-                    modified = true;
-                } else {
-                    i.remove();
-                }
+            if(!this.isFeatureModified(attribute)) {
+                i.remove();
+            } else if(!ModelHelper.isDerived(attribute)) {
+                dirty = true;
             }
         }
-        return modified;
+        return dirty;
     }
 
     /**
@@ -2036,15 +2084,15 @@ public class DataObject_1
     public void makePersistentCleanWhenUnmodified(
     ) throws ServiceException{
         getBeforeImage(); // prerequisite for objIsModified()
-        objIsModified(); // this invocation removes idempotent modifications
+        thereRemainDirtyFeaturesAfterRemovingTheUnmodifiedOnes(); // this invocation removes idempotent modifications
         evictBeforeImage(); // free memory
     }
     
     void afterCompletion(
-        int status
+        Status status
     ) throws ServiceException {
         switch(status) {
-            case javax.transaction.Status.STATUS_COMMITTED:
+            case STATUS_COMMITTED:
                 if(this.jdoIsDeleted()){
                     if(this.jdoIsPersistent()) {
                         this.dataObjectManager.invalidate(
@@ -2056,7 +2104,7 @@ public class DataObject_1
                     this.identity = null;
                 }
                 break;
-            case javax.transaction.Status.STATUS_ROLLEDBACK:
+            case STATUS_ROLLEDBACK:
                 this.getState(false).setLifeCycleEventPending(false);
                 if(this.jdoIsDeleted()){
                     this.deleted = false;
@@ -2314,7 +2362,25 @@ public class DataObject_1
      */
     public boolean objIsInaccessible(
     ){
-        return this.inaccessabilityReason != null;
+        return this.notFound != null || this.inaccessabilityReason != null;
+    }
+    
+    /* (non-Javadoc)
+     * @see org.openmdx.base.accessor.cci.DataObject_1_0#objDoesNotExist()
+     */
+    public boolean objDoesNotExist() {
+        if(this.jdoIsPersistent() && objIsHollow()) try {
+            this.objRetrieve(
+                false, // reload
+                this.dataObjectManager.getFetchPlan(), 
+                null, // features
+                false, // beforeImage
+                false // throwNotFoundException
+            );
+        } catch (ServiceException exception) {
+            return exception.getExceptionCode() == BasicException.Code.NOT_FOUND;
+        }
+        return this.notFound != null;
     }
 
     /**
@@ -2323,6 +2389,14 @@ public class DataObject_1
      * @return Returns the inaccessibility reason
      */
     public ServiceException getInaccessibilityReason() {
+        if(this.notFound != null && this.inaccessabilityReason == null) {
+            this.inaccessabilityReason = new ServiceException(
+                BasicException.Code.DEFAULT_DOMAIN,
+                BasicException.Code.NOT_FOUND,
+                "No object found with the given id",
+                new BasicException.Parameter("object", this.jdoGetTransactionalObjectId(), this.notFound)
+            );
+        }
         return this.inaccessabilityReason;
     }
     
@@ -2333,34 +2407,45 @@ public class DataObject_1
      * @param fetchPlan
      * @param features 
      * @param beforeImage load the complete before image
-     * @exception   ServiceException    ILLEGAL_STATE
-     *                  if the object is deleted
+     * @param throwNotFoundException if <code>false</code> return <code>null</code>
+     * instead of throwing an exception if the object does not exist 
+     * 
+     * @return the retrieved object
+     * 
+     * @exception ServiceException<ul>
+     * <li>ILLEGAL_STATE if the object is deleted
+     * <li>NOT_FOUND if the object does not exist and throwNotFoundException is <code>true</code>
+     * </ul>
      */
     @SuppressWarnings("unchecked")
     DataObject_1 objRetrieve(
         boolean reload, 
         FetchPlan fetchPlan, 
         Set<String> features, 
-        boolean beforeImage
+        boolean beforeImage, 
+        boolean throwNotFoundException
     ) throws ServiceException {
         if(this.objIsInaccessible()){
-            throw new ServiceException(
-                this.getInaccessibilityReason()
-            );
+            if(throwNotFoundException || notFound == null){
+                throw this.getInaccessibilityReason();
+            } else {
+                return null;
+            }
         } else if(reload || this.objIsHollow()) {
             if(this.isProxy() && !isVirtual()) {
-                UnitOfWork_1 unitOfWork = this.dataObjectManager.currentTransaction();
-                unitOfWork.synchronize();
+                this.dataObjectManager.currentUnitOfWork().synchronize();
                 return this.unconditionalLoad(
                 	fetchPlan, 
                 	features, 
-                	false // refresh
+                	false, // refresh
+                    throwNotFoundException
                 );
             } else if (jdoIsPersistent() && !jdoIsNew()) {
                 return this.unconditionalLoad(
                 	fetchPlan, 
                 	features, 
-                	false // refresh
+                	false, // refresh
+                	throwNotFoundException
                 );
             } else {
                 return this;
@@ -2394,7 +2479,7 @@ public class DataObject_1
                         new OrderSpecifier(feature, SortOrder.UNSORTED)
                     );
                 }
-                Query_2Facade input = Facades.newQuery(this);
+                Query_2Facade input = Query_2Facade.forObjectId(this);
                 input.setQuery(
                     JavaBeans.toXML(
                         new Filter(
@@ -2415,7 +2500,7 @@ public class DataObject_1
                     ExceptionHelper.newObjectIdParameter("id", this),
                     new BasicException.Parameter("feature", missing)
                 );
-                Object_2Facade output = Facades.asObject(
+                Object_2Facade output = Object_2Facade.newInstance(
                     (MappedRecord)indexedRecord.get(0)
                 );                
                 persistentValues.putAll(
@@ -2448,7 +2533,9 @@ public class DataObject_1
             this. objRetrieve(
                 false, // reload
                 this.dataObjectManager.getFetchPlan(), 
-                Collections.singleton(name), false
+                Collections.singleton(name), 
+                false, 
+                true // throwNotFoundException
             );
             return true;
         } else if (this.isProxy() && Boolean.TRUE.equals(this.getFeature(name).objGetValue("isDerived"))) {
@@ -2460,7 +2547,9 @@ public class DataObject_1
             this.objRetrieve(
                 true, // reload
                 this.dataObjectManager.getFetchPlan(), 
-                Collections.singleton(name), false
+                Collections.singleton(name), 
+                false, 
+                true // throwNotFoundException
             );
             return true;
         } else {
@@ -2507,7 +2596,7 @@ public class DataObject_1
                         ),
                         null // extension
                     );
-                    Query_2Facade input = Facades.newQuery(this);
+                    Query_2Facade input = Query_2Facade.forObjectId(this);
                     input.setQuery(JavaBeans.toXML(attributeSpecifier));
                     IndexedRecord indexedRecord = (IndexedRecord) this.dataObjectManager.getInteraction().execute(
                         this.dataObjectManager.getInteractionSpecs().GET,
@@ -2520,7 +2609,7 @@ public class DataObject_1
                         ExceptionHelper.newObjectIdParameter("id", this),
                         new BasicException.Parameter("feature", name)
                     );
-                    Object_2Facade output = Facades.asObject(
+                    Object_2Facade output = Object_2Facade.newInstance(
                         (MappedRecord)indexedRecord.get(0)
                     );                
                     persistentValues.putAll(
@@ -2692,7 +2781,9 @@ public class DataObject_1
         if(PrimitiveTypes.BINARY.equals(type)) {
             InputStream value;
             Long length;
-            if(persistentValue instanceof InputStream) {
+            if(persistentValue == null) {
+                return null;
+            } else if(persistentValue instanceof InputStream) {
                 //
                 // Compatibility Mode
                 //
@@ -2744,7 +2835,9 @@ public class DataObject_1
         } else if (PrimitiveTypes.STRING.equals(type)) {
             Reader value;
             Long length;
-            if(persistentValue instanceof Reader) {
+            if(persistentValue == null) {
+                return null;
+            } else if(persistentValue instanceof Reader) {
                 //
                 // Compatibility Mode
                 //
@@ -2892,7 +2985,6 @@ public class DataObject_1
      * 
      * @param feature
      * @param type
-     * @param value
      * 
      * @return the value
      * @throws ServiceException if the value is not of the given type
@@ -3018,6 +3110,39 @@ public class DataObject_1
     }
 
     /**
+     * Get a Map attribute.
+     * <p> 
+     * This method never returns <code>null</code> as an instance of the
+     * requested class is created on demand if it hasn't been set yet.
+     *
+     * @param       feature
+     *              The feature's name.
+     *
+     * @return      a map which may be empty but never null.
+     *
+     * @exception   ServiceException ILLEGAL_STATE
+     *              if the object is deleted
+     * @exception   ServiceException BAD_MEMBER_NAME
+     *              if the object has no such feature
+     * @exception   ClassCastException
+     *              if the feature's value is not a set
+     */
+    @SuppressWarnings("unchecked")
+    public Map<String, Object> objGetMap(
+        String feature
+    ) throws ServiceException {
+        Map<String,Object> flushable = getFlushable(feature, Map.class);
+        return flushable == null ? (Map<String,Object>) Maps.putUnlessPresent(
+            this.flushableValues,
+            feature,
+            new ManagedMap(
+                feature,
+                this.getMarshaller(feature)
+            )
+        ) : flushable;
+    }
+
+    /**
      * Get a reference feature.
      * <p>
      * This method never returns <code>null</code> as an instance of the
@@ -3115,7 +3240,7 @@ public class DataObject_1
     public String toString(
     ){
         if(this.objIsInaccessible()) {
-            return AbstractDataObject_1.toString(this, null);
+            return AbstractDataObject_1.toString(this, this.notFound == null ? null : "No object found for '" + this.notFound + "'");
         } else {
             try {
                 Map<Object,Object> content = new HashMap<Object,Object>();
@@ -3239,15 +3364,18 @@ public class DataObject_1
         this.dataObjectManager.putUnlessPresent(this.identity, this);
     }
 
-    @SuppressWarnings("unchecked")
-    private final ModelElement_1_0 getFeature(
+    @SuppressWarnings({
+        "unchecked", "cast"
+    })
+    private final ModelElement_1_0 getAttribute(
         String featured,
-        String kind, 
         String feature
     ) throws ServiceException{
         Map<String,ModelElement_1_0> features = (Map<String, ModelElement_1_0>)getModel().getElement(
             featured
-        ).objGetValue(kind);
+        ).objGetMap(
+            "attribute"
+        );
         return features == null ? null : features.get(feature);
     }
 
@@ -3270,24 +3398,6 @@ public class DataObject_1
     }
 
     /**
-     * Determine the marshaller to be used
-     * 
-     * @param kind 
-     * @param feature
-     * @param feature
-     * 
-     * @return an object or datatype marshaller
-     * @throws ServiceException 
-     */
-    final Marshaller getMarshaller(
-        String featured,
-        String kind, 
-        String feature
-    ) throws ServiceException{
-        return this.getMarshaller(getFeature(featured, kind, feature));
-    }
-
-    /**
      * Retrieve the model element for a given object feature
      * 
      * @param feature
@@ -3301,16 +3411,17 @@ public class DataObject_1
     ) throws ServiceException {
         int i = feature.lastIndexOf(':');
         if(i < 0) {
-            return this.getFeature(
+            return this.getAttribute(
                 objGetClass(), 
-                "attribute", 
                 feature
             );
         } else {
             this.objRetrieve(
                 false, // reload
                 this.dataObjectManager.getFetchPlan(), 
-                Collections.singleton(feature), false
+                Collections.singleton(feature), 
+                false, 
+                true // throwNotFoundException
             );
             Object raw = this.persistentValues.get(
                 feature.substring(0, ++i) + SystemAttributes.OBJECT_CLASS
@@ -3319,9 +3430,8 @@ public class DataObject_1
                 (String) ((List<?>)raw).get(0) :
                 (String)raw;
             String embeddedFeature = feature.substring(i);
-            return SystemAttributes.OBJECT_CLASS.equals(embeddedFeature) ? null : this.getFeature(
+            return SystemAttributes.OBJECT_CLASS.equals(embeddedFeature) ? null : this.getAttribute(
                 embeddedClass, 
-                "attribute",
                 embeddedFeature
             );
         }
@@ -4346,7 +4456,7 @@ public class DataObject_1
         }
 
         /**
-         * 
+         * Set Iterator
          */
         class SetIterator implements Iterator<Object> {
 
@@ -4394,13 +4504,11 @@ public class DataObject_1
             ) {
                 if(this.transactional) {
                     this.delegate.remove();
-                } 
-                else if(this.current == null){
+                } else if(this.current == null){
                     throw new IllegalStateException(
                         "There is no current element to be removed"
                     );
-                } 
-                else {
+                } else {
                     ManagedSet.this.getDelegate(true, false).remove(this.current);
                     this.current = null;
                 }
@@ -4410,6 +4518,365 @@ public class DataObject_1
 
     }
     
+
+    //--------------------------------------------------------------------------
+    // Class ManagedMap
+    //--------------------------------------------------------------------------
+
+    /**
+     * The managed map delegates<ul>
+     * <li>to a unit of work local copy if the object is transactional
+     * <li>to the persistent values if the object is non-transactional
+     * </ul>
+     */
+    final class ManagedMap
+        implements Map<String,Object>, Flushable
+    {
+
+        /**
+         * Constructor 
+         *
+         * @param feature
+         * @param marshaller 
+         * 
+         * @throws ServiceException
+         */
+        ManagedMap(
+            final String feature,
+            Marshaller marshaller
+        ) throws ServiceException {
+            this.feature = feature;
+            this.nonTransactional = new NonTransactional(marshaller);
+        }        
+        
+        /**
+         * 
+         */
+        final String feature;
+
+        /**
+         * 
+         */
+        private final Map<String,Object> nonTransactional;
+
+        private final Set<Map.Entry<String,Object>> entries = new AbstractSet<Map.Entry<String,Object>>(){
+
+            @Override
+            public Iterator<Map.Entry<String, Object>> iterator() {
+                return new EntryIterator();
+            }
+
+            @Override
+            public int size() {
+                return getDelegate(false,false).size();
+            }
+            
+        };
+        
+        @SuppressWarnings("unchecked")
+        protected Map<String,Object> getDelegate(
+            boolean makeDirty, 
+            boolean clear
+        ){
+            try {
+                UnitOfWork_1 unitOfWork = DataObject_1.this.getUnitOfWorkIfTransactional(makeDirty ? this.feature : null);
+                if(unitOfWork == null) {
+                    if(DataObject_1.this.transientValues != null) {
+                        Map<String,Object> transientValue = (Map<String,Object>) transientValues.get(this.feature);
+                        if(makeDirty && transientValue == null) {
+                            DataObject_1.this.transientValues.put(
+                                this.feature,
+                                transientValue = new HashMap<String,Object>()
+                            );
+                            return transientValue;
+                        }
+                        if(transientValue != null) {
+                            if(clear) {
+                                transientValue.clear();
+                            }
+                            return transientValue;
+                        }
+                    }
+                    if(clear) {
+                        this.nonTransactional.clear();
+                    }
+                    return this.nonTransactional;
+                } else {
+                    Map<String,Object> transactionalValues = unitOfWork.getState(DataObject_1.this, false).values(false); 
+                    Map<String,Object> transactionalValue = (Map<String, Object>)transactionalValues.get(this.feature);
+                    if(transactionalValue == null) {
+                        transactionalValues.put(
+                            this.feature,
+                            transactionalValue = clear ? new HashMap<String,Object>() : new HashMap<String,Object>(this.nonTransactional)
+                        );
+                    } else if (clear) {
+                        transactionalValue.clear();
+                    }
+                    return transactionalValue;
+                }
+            } catch (ServiceException exception) {
+                throw new RuntimeServiceException(exception);
+            }
+        }
+        
+        /* (non-Javadoc)
+         * @see java.io.Flushable#flush()
+         */
+        public void flush() throws IOException {
+            Map<String,Object> source = ManagedMap.this.getDelegate(false, false);
+            if(source != this.nonTransactional) {
+                this.nonTransactional.clear();
+                this.nonTransactional.putAll(source);
+            }
+        }
+
+        /* (non-Javadoc)
+         * @see java.util.AbstractMap#entrySet()
+         */
+        public Set<java.util.Map.Entry<String, Object>> entrySet() {
+            return this.entries;
+        }
+
+        /* (non-Javadoc)
+         * @see java.util.AbstractMap#clear()
+         */
+        public void clear() {
+            ManagedMap.this.getDelegate(true,true);
+        }
+
+        /* (non-Javadoc)
+         * @see java.util.AbstractMap#containsKey(java.lang.Object)
+         */
+        public boolean containsKey(Object key) {
+            return ManagedMap.this.getDelegate(false,false).containsKey(key);
+        }
+
+        /* (non-Javadoc)
+         * @see java.util.AbstractMap#containsValue(java.lang.Object)
+         */
+        public boolean containsValue(Object value) {
+            return ManagedMap.this.getDelegate(false,false).containsValue(value);
+        }
+
+        /* (non-Javadoc)
+         * @see java.util.AbstractMap#get(java.lang.Object)
+         */
+        public Object get(Object key) {
+            return ManagedMap.this.getDelegate(false,false).get(key);
+        }
+
+        /* (non-Javadoc)
+         * @see java.util.AbstractMap#isEmpty()
+         */
+        public boolean isEmpty() {
+            return ManagedMap.this.getDelegate(false,false).isEmpty();
+        }
+
+        /* (non-Javadoc)
+         * @see java.util.AbstractMap#keySet()
+         */
+        public Set<String> keySet() {
+            return ManagedMap.this.getDelegate(false,false).keySet(); // TODO make it modifiable
+        }
+
+        /* (non-Javadoc)
+         * @see java.util.AbstractMap#put(java.lang.Object, java.lang.Object)
+         */
+        public Object put(String key, Object value) {
+            return ManagedMap.this.getDelegate(true,false).put(key, value);
+        }
+
+        /* (non-Javadoc)
+         * @see java.util.AbstractMap#putAll(java.util.Map)
+         */
+        public void putAll(Map<? extends String, ? extends Object> t) {
+            ManagedMap.this.getDelegate(true,false).putAll(t);
+        }
+
+        /* (non-Javadoc)
+         * @see java.util.AbstractMap#remove(java.lang.Object)
+         */
+        public Object remove(Object key) {
+            return ManagedMap.this.getDelegate(true,false).remove(key);
+        }
+
+        /* (non-Javadoc)
+         * @see java.util.AbstractMap#size()
+         */
+        public int size() {
+            return ManagedMap.this.getDelegate(false,false).size();
+        }
+
+        /* (non-Javadoc)
+         * @see java.util.AbstractMap#values()
+         */
+        public Collection<Object> values() {
+            return ManagedMap.this.getDelegate(false,false).values();
+        }
+
+        /* (non-Javadoc)
+         * @see java.lang.Object#equals(java.lang.Object)
+         */
+        @Override
+        public boolean equals(Object obj) {
+            return ManagedMap.this.getDelegate(false,false).equals(obj);
+        }
+
+        /* (non-Javadoc)
+         * @see java.lang.Object#hashCode()
+         */
+        @Override
+        public int hashCode() {
+            return ManagedMap.this.getDelegate(false,false).hashCode();
+        }
+
+        /* (non-Javadoc)
+         * @see java.lang.Object#toString()
+         */
+        @Override
+        public String toString() {
+            return ManagedMap.this.getDelegate(false,false).toString();
+        }
+
+        /**
+         * Entry Iterator
+         */
+        class EntryIterator implements Iterator<Map.Entry<String, Object>> {
+            
+            private Map<String,Object> readOnly = ManagedMap.this.getDelegate(false,false);
+            
+            private Iterator<Map.Entry<String, Object>> delegate = readOnly.entrySet().iterator();
+
+            protected Map.Entry<String, Object> current = null;
+            
+            protected void makeDirty(){
+                if(this.readOnly != null) {
+                    Map<String,Object> forUpdate = ManagedMap.this.getDelegate(true,false);
+                    Map<String,Object> readOnly = this.readOnly;
+                    this.readOnly = null;
+                    if(forUpdate != readOnly) {
+                        this.delegate = forUpdate.entrySet().iterator();
+                        while(this.delegate.hasNext()){
+                            Map.Entry<String, Object> candidate = this.delegate.next();
+                            if(this.current.getKey().equals(candidate.getKey())) {
+                                this.current = candidate;
+                                return;
+                            }
+                        }
+                        throw new ConcurrentModificationException(
+                            "The read-only iterators key can't be reached by the for-update iterator: " + this.current.getKey()
+                        );
+                    }
+                }
+            }
+            
+            /* (non-Javadoc)
+             * @see java.util.Iterator#hasNext()
+             */
+            public boolean hasNext() {
+                return this.delegate.hasNext();
+            }
+
+            /* (non-Javadoc)
+             * @see java.util.Iterator#next()
+             */
+            public Map.Entry<String, Object> next() {
+                this.current = this.delegate.next();
+                return new Map.Entry<String, Object>() {
+
+                    public String getKey() {
+                        return EntryIterator.this.current.getKey();
+                    }
+
+                    public Object getValue() {
+                        return EntryIterator.this.current.getValue();
+                    }
+
+                    public Object setValue(Object value) {
+                        EntryIterator.this.makeDirty();
+                        return EntryIterator.this.current.setValue(value);
+                    }
+                    
+                };
+            }
+
+            /* (non-Javadoc)
+             * @see java.util.Iterator#remove()
+             */
+            public void remove() {
+                EntryIterator.this.makeDirty();
+                this.delegate.remove();
+            }
+        
+        }
+        
+        /**
+         * Persistent Values Accessor
+         */
+        class NonTransactional extends MarshallingMap<String,Object> {
+
+            /**
+             * Constructor 
+             * 
+             * @param marshaller 
+             *
+             * @throws ServiceException 
+             */
+            NonTransactional(
+                Marshaller marshaller
+            ) throws ServiceException {
+                super(
+                    marshaller, 
+                    null // delegate provided by getDelegate() method
+                );
+            }
+
+            /**
+             * Implements <code>Serializable</code>
+             */
+            private static final long serialVersionUID = 4281239775781185351L;
+            
+            /* (non-Javadoc)
+             * @see org.openmdx.base.collection.MarshallingMap#getDelegate()
+             */
+            @SuppressWarnings("unchecked")
+            @Override
+            protected Map<String, Object> getDelegate() {
+                try {
+                    return (Map<String, Object> )DataObject_1.this.getPersistentAttribute(
+                        ManagedMap.this.feature, 
+                        false,
+                        Multiplicity.MAP,
+                        false
+                    );
+                } catch(ServiceException e) {
+                    throw new RuntimeServiceException(e);
+                }
+            }
+
+
+            /* (non-Javadoc)
+             * @see org.openmdx.base.collection.MarshallingList#clear()
+             */
+            @Override
+            public void clear(
+            ) {
+                try {
+                    DataObject_1.this.getPersistentAttribute(
+                        ManagedMap.this.feature, 
+                        false,
+                        Multiplicity.MAP,
+                        true
+                    );
+                } catch(ServiceException e) {
+                    throw new RuntimeServiceException(e);
+                }
+            }
+
+        }
+
+    }
+
 
     //------------------------------------------------------------------------
     // Class ManagedSortedMap

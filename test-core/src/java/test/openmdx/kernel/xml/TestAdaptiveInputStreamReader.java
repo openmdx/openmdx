@@ -52,7 +52,6 @@ import static org.junit.Assert.assertEquals;
 import java.io.IOException;
 
 import org.junit.Test;
-import org.openmdx.kernel.loading.Classes;
 import org.openmdx.kernel.xml.AdaptiveInputStreamReader;
 
 /**
@@ -74,8 +73,7 @@ public class TestAdaptiveInputStreamReader {
         String xmlDeclaration
     ) throws IOException { 
         AdaptiveInputStreamReader r = new AdaptiveInputStreamReader(
-            Classes.getPackageResource(
-                TestAdaptiveInputStreamReader.class,
+            TestAdaptiveInputStreamReader.class.getResource(
                 file
             ).openStream(),
             null, // encoding

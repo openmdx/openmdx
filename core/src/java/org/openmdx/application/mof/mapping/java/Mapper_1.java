@@ -88,7 +88,7 @@ import org.openmdx.base.mof.cci.Multiplicity;
 import org.openmdx.base.mof.cci.PrimitiveTypes;
 import org.openmdx.base.naming.Path;
 import org.openmdx.kernel.exception.BasicException;
-import org.openmdx.kernel.loading.Classes;
+import org.openmdx.kernel.loading.Resources;
 import org.openmdx.kernel.log.SysLog;
 
 // ---------------------------------------------------------------------------
@@ -1672,7 +1672,7 @@ public class Mapper_1
      */
     private static boolean artifactIsInArchive(CharSequence iri) {
         String uri = iri.toString();
-        URL url = Classes.getApplicationResource(uri);
+        URL url = Resources.getResource(uri);
         SysLog.detail(uri, url);
         return url != null && "jar".equals(url.getProtocol());
     }

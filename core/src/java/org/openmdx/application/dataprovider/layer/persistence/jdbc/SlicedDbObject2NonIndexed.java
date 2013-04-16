@@ -1,13 +1,13 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Description: Slicde DB Object 2 Without Index
+ * Description: Sliced DB Object 2 Without Index
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2011, OMEX AG, Switzerland
+ * Copyright (c) 2011-2013, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -50,68 +50,110 @@ package org.openmdx.application.dataprovider.layer.persistence.jdbc;
 import java.sql.Connection;
 import java.sql.SQLException;
 
+import javax.resource.cci.MappedRecord;
+
+import org.openmdx.base.accessor.cci.SystemAttributes;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.naming.Path;
+import org.openmdx.base.rest.spi.Object_2Facade;
+import org.openmdx.kernel.exception.BasicException;
 
 /**
  * This class implements a non-indexed sliced db object. If indexing
  * is not required then this type may improve performance on queries
  * dramatically. This is often the case with user-defined views.
  */
-public class SlicedDbObject2NonIndexed 
-  extends SlicedDbObject2 {
+public class SlicedDbObject2NonIndexed extends SlicedDbObject2 {
 
-//-------------------------------------------------------------------------
-  public SlicedDbObject2NonIndexed(
-    AbstractDatabase_1 database, 
-    Connection conn,
-    DbObjectConfiguration dbObjectConfiguratioin, 
-    Path accessPath,
-    boolean isExtent,
-    boolean isQuery
-  ) throws ServiceException {
-    super(
-      database, 
-      conn, 
-      dbObjectConfiguratioin, 
-      accessPath, 
-      isExtent,
-      isQuery
-    );
-    // non index column for non-indexed sliced DB objects
-    this.indexColumn = null;
-    this.excludeAttributes.add("objectIdx");
-  }
+    /**
+     * Constructor 
+     *
+     * @param database
+     * @param conn
+     * @param dbObjectConfiguratioin
+     * @param accessPath
+     * @param isExtent
+     * @param isQuery
+     * @throws ServiceException
+     */
+    public SlicedDbObject2NonIndexed(
+        AbstractDatabase_1 database, 
+        Connection conn,
+        DbObjectConfiguration dbObjectConfiguratioin, 
+        Path accessPath,
+        boolean isExtent,
+        boolean isQuery
+        ) throws ServiceException {
+        super(
+            database, 
+            conn, 
+            dbObjectConfiguratioin, 
+            accessPath, 
+            isExtent,
+            isQuery
+        );
+        // no index column for non-indexed sliced DB objects
+        this.indexColumn = null;
+        this.excludeAttributes.add("objectIdx");
+    }
 
-  //-------------------------------------------------------------------------
-  public SlicedDbObject2NonIndexed(
-    AbstractDatabase_1 database, 
-    Connection conn,
-    DbObjectConfiguration dbObjectConfiguration
-  ) throws ServiceException {
-    super(
-      database,
-      conn, 
-      dbObjectConfiguration
-    );
-    // non index column for non-indexed sliced DB objects
-    this.indexColumn = null;
-    this.excludeAttributes.add("objectIdx");
-  }
-  
-  //-------------------------------------------------------------------------
-  @Override
-  public int getIndex(
-    FastResultSet frs
-  ) throws SQLException {
-      return 0;
-  }
+    /**
+     * Constructor 
+     *
+     * @param database
+     * @param conn
+     * @param dbObjectConfiguration
+     * @throws ServiceException
+     */
+    public SlicedDbObject2NonIndexed(
+        AbstractDatabase_1 database, 
+        Connection conn,
+        DbObjectConfiguration dbObjectConfiguration
+    ) throws ServiceException {
+        super(
+            database,
+            conn, 
+            dbObjectConfiguration
+        );
+        // no index column for non-indexed sliced DB objects
+        this.indexColumn = null;
+        this.excludeAttributes.add("objectIdx");
+    }
 
-  //-------------------------------------------------------------------------
-  // Members
-  //-------------------------------------------------------------------------
-  private static final long serialVersionUID = 3257849870223226167L;
-  
+    /**
+     * Implements <code>Serializable</code>
+     */
+    private static final long serialVersionUID = 3257849870223226167L;
+
+    /* (non-Javadoc)
+     * @see org.openmdx.application.dataprovider.layer.persistence.jdbc.SlicedDbObject#createObjectSlice(int, java.lang.String, javax.resource.cci.MappedRecord)
+     */
+    @Override
+    public void createObjectSlice(
+        int index,
+        String objectClass,
+        MappedRecord object
+    ) throws ServiceException {
+        if(index == 0) {
+            super.createObjectSlice(index, objectClass, object);
+        } else {
+            throw new ServiceException(
+                BasicException.Code.DEFAULT_DOMAIN,
+                BasicException.Code.INVALID_CARDINALITY,
+                "TRY_TO_FORGET: Indexed row erroneously requested from " + getClass().getName(),
+                new BasicException.Parameter("index", index),
+                new BasicException.Parameter(SystemAttributes.OBJECT_CLASS, objectClass),
+                new BasicException.Parameter("value", Object_2Facade.getValue(object))
+                
+            );
+        }
+    }
+
+    @Override
+    public int getIndex(
+        FastResultSet frs
+    ) throws SQLException {
+        return 0;
+    }
+
 }
-
-//--- End of File -----------------------------------------------------------

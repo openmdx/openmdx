@@ -158,7 +158,7 @@ public class SlicedDbObject2ParentRidOnly extends SlicedDbObject2 {
     private static final long serialVersionUID = 3257566196189706291L;
     private static final Path INVOLVEMENT_REFERENCE_PATTERN = new Path(
         "xri://@openmdx*org.openmdx.audit2/provider/($..)/segment/($..)/unitOfWork/($..)/involvement"
-    );
+    ).lock();
     private final String columnNameParentRid;
     private final String columnNameParentOid;
     

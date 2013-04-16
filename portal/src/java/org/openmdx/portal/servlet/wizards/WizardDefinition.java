@@ -8,7 +8,7 @@
  * This software is published under the BSD license
  * as listed below.
  * 
- * Copyright (c) 2004-2007, OMEX AG, Switzerland
+ * Copyright (c) 2004-2013, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -50,7 +50,6 @@
  * (License - based on BSD).
  *
  */
-
 package org.openmdx.portal.servlet.wizards;
 
 import java.io.InputStream;
@@ -60,10 +59,21 @@ import java.util.List;
 
 import org.openmdx.base.exception.ServiceException;
 
-public class WizardDefinition
-    implements Serializable {
+/**
+ * WizardDefinition
+ *
+ */
+public class WizardDefinition implements Serializable {
     
-    //-----------------------------------------------------------------------
+    /**
+     * Constructor 
+     *
+     * @param name
+     * @param locale
+     * @param index
+     * @param is
+     * @throws ServiceException
+     */
     public WizardDefinition(
         String name,
         String locale,
@@ -94,55 +104,91 @@ public class WizardDefinition
         this.order.add("0");
     }
     
-    //-----------------------------------------------------------------------
+    /**
+     * Get locale as index.
+     * 
+     * @return
+     */
     public short getLocaleIndex(
     ) {
         return this.index;
     }
   
-    //-----------------------------------------------------------------------
+    /**
+     * Get locale as string.
+     * 
+     * @return
+     */
     public String getLocale(
     ) {
         return this.locale;
     }
       
-    //-----------------------------------------------------------------------
+    /**
+     * Get wizard name.
+     * 
+     * @return
+     */
     public String getName(
     ) {
         return this.name;
     }
 
-    //-----------------------------------------------------------------------
+    /**
+     * Get list of registered classes.
+     * 
+     * @return
+     */
     public List getForClass(
     ) {
         return this.forClass;
     }
 
-    //-----------------------------------------------------------------------
+    /**
+     * Get wizard target type.
+     * 
+     * @return
+     */
     public String getTargetType(
     ) {
         return this.targetType;
     }
 
-    //-----------------------------------------------------------------------
+    /**
+     * Get wizard label.
+     * 
+     * @return
+     */
     public String getLabel(
     ) {
         return this.label;
     }
 
-    //-----------------------------------------------------------------------
+    /**
+     * Get wizard tooltip.
+     * 
+     * @return
+     */
     public String getToolTip(
     ) {
         return this.toolTip;
     }
 
-    //-----------------------------------------------------------------------
+    /**
+     * Get wizard order.
+     * 
+     * @return
+     */
     public List getOrder(
     ) {
         return this.order;
     }
 
-    //-----------------------------------------------------------------------
+    /**
+     * Parameters are added to the wizard invocation URL.
+     * 
+     * @return
+     */
     public String getOpenParameter(
     ) {
         return this.openParameter;

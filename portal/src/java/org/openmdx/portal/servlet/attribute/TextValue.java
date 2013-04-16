@@ -8,7 +8,7 @@
  * This software is published under the BSD license
  * as listed below.
  * 
- * Copyright (c) 2004-2007, OMEX AG, Switzerland
+ * Copyright (c) 2004-2012, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -57,11 +57,22 @@ import java.io.Serializable;
 import org.openmdx.portal.servlet.ApplicationContext;
 import org.openmdx.portal.servlet.ViewPort;
 
-public class TextValue
-    extends AttributeValue
-    implements Serializable {
-  
-    //-------------------------------------------------------------------------
+/**
+ * TextValue
+ *
+ */
+public class TextValue extends AttributeValue implements Serializable {
+
+    /**
+     * Create text value.
+     * 
+     * @param object
+     * @param fieldDef
+     * @param isPassword
+     * @param maxLength
+     * @param app
+     * @return
+     */
     public static AttributeValue createTextValue(
         Object object,
         FieldDef fieldDef,
@@ -71,17 +82,15 @@ public class TextValue
     ) {
         // Return user defined attribute value class or TextValue as default
         String valueClassName = (String)app.getMimeTypeImpls().get(fieldDef.mimeType);
-        AttributeValue attributeValue = valueClassName == null
-            ? null
-            : AttributeValue.createAttributeValue(
+        AttributeValue attributeValue = valueClassName == null ? null : 
+        	AttributeValue.createAttributeValue(
                 valueClassName,
                 object,
                 fieldDef,
                 app
-              );
-        return attributeValue != null
-            ? attributeValue
-            : new TextValue(
+        	);
+        return attributeValue != null ? attributeValue : 
+        	new TextValue(
                 object,
                 fieldDef,
                 isPassword,
@@ -90,7 +99,15 @@ public class TextValue
             );
     }
     
-    //-------------------------------------------------------------------------
+    /**
+     * Constructor 
+     *
+     * @param object
+     * @param fieldDef
+     * @param isPassword
+     * @param maxLength
+     * @param application
+     */
     protected TextValue(
         Object object,
         FieldDef fieldDef,
@@ -107,38 +124,50 @@ public class TextValue
         this.maxLength = maxLength;
     }
 
-    //-------------------------------------------------------------------------
+    /**
+     * Return true if text field is a password field.
+     * 
+     * @return
+     */
     public boolean isPassword(
     ) {
         return this.isPassword;
     }
 
-    //-------------------------------------------------------------------------
+    /* (non-Javadoc)
+     * @see org.openmdx.portal.servlet.attribute.AttributeValue#getDefaultValue()
+     */
+    @Override
     public Object getDefaultValue(
     ) {      
         return this.fieldDef.defaultValue;
     }
-  
-    //-------------------------------------------------------------------------
+
+    /**
+     * Get configured max length.
+     * 
+     * @return
+     */
     public int getMaxLength(
     ) {      
         return this.maxLength;
     }
-  
-    //-------------------------------------------------------------------------
-    /**
-     * Prepares a single stringified Value to append.
+
+    /* (non-Javadoc)
+     * @see org.openmdx.portal.servlet.attribute.AttributeValue#getStringifiedValueInternal(org.openmdx.portal.servlet.ViewPort, java.lang.Object, boolean, boolean, boolean)
      */
+    @Override
     protected String getStringifiedValueInternal(
         ViewPort p, 
         Object v,
         boolean multiLine,
         boolean forEditing,
         boolean shortFormat
-    ) {            
-        return this.app.getHtmlEncoder().encode(v.toString().trim(), forEditing);
+    ) {
+    	String raw = v.toString().trim();
+        return this.app.getHtmlEncoder().encode(raw, forEditing);
     }
-  
+
     //-------------------------------------------------------------------------
     // Members
     //-------------------------------------------------------------------------
@@ -146,7 +175,7 @@ public class TextValue
 
     private final boolean isPassword;
     private final int maxLength;
-  
+
 }
 
 //--- End of File -----------------------------------------------------------

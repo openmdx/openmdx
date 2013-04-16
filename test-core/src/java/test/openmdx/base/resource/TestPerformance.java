@@ -64,8 +64,6 @@ import javax.resource.ResourceException;
 import javax.resource.cci.IndexedRecord;
 import javax.resource.cci.MappedRecord;
 import javax.xml.datatype.XMLGregorianCalendar;
-import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamWriter;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -75,8 +73,13 @@ import org.openmdx.base.naming.Path;
 import org.openmdx.base.resource.Records;
 import org.openmdx.base.rest.cci.ResultRecord;
 import org.openmdx.base.rest.spi.Object_2Facade;
-import org.openmdx.base.rest.spi.RestFormat;
+import org.openmdx.base.rest.spi.RestParser;
+import org.openmdx.base.rest.spi.RestSource;
+import org.openmdx.base.rest.stream.RestFormatter;
+import org.openmdx.base.rest.stream.RestTarget;
 import org.openmdx.base.text.conversion.UUIDConversion;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamWriter;
 import org.openmdx.kernel.collection.ArraysExtension;
 import org.openmdx.kernel.id.UUIDs;
 import org.openmdx.state2.cci.DateStateViews;
@@ -87,7 +90,7 @@ public class TestPerformance {
     static IndexedRecord testData;
     private static final int SIZE = 100;
     private static final int LOOP = 100;
-    protected static final Path BASE = new Path("xri://@openmdx*test.app1/segment/JUnit");
+    protected static final Path BASE = new Path("xri://@openmdx*test.app1/segment/JUnit").lock();
     protected static final String URI = "xri://+test/REST";
     protected static final boolean WBXML = false;
 
@@ -172,9 +175,9 @@ public class TestPerformance {
              */
             @Override
             public void deserialize() throws Exception {
-                RestFormat.Source source = sink.asSource();
+                RestSource source = sink.asSource();
                 IndexedRecord resultSet = Records.getRecordFactory().createIndexedRecord(ResultRecord.NAME);
-                RestFormat.parseResponse(resultSet, source);
+                RestParser.parseResponse(resultSet, source);
             }
 
             /* (non-Javadoc)
@@ -183,7 +186,7 @@ public class TestPerformance {
             @Override
             public int serialize(IndexedRecord resultSet) throws Exception {
                 this.sink.reset();
-                RestFormat.format(sink, BASE, resultSet);
+                RestFormatter.format(sink, BASE, resultSet);
                 return sink.size();
             }
 
@@ -197,9 +200,9 @@ public class TestPerformance {
              */
             @Override
             public void deserialize() throws Exception {
-                RestFormat.Source source = this.sink.asSource();
+                RestSource source = this.sink.asSource();
                 IndexedRecord resultSet = Records.getRecordFactory().createIndexedRecord(ResultRecord.NAME);
-                RestFormat.parseResponse(resultSet, source);
+                RestParser.parseResponse(resultSet, source);
             }
 
             /* (non-Javadoc)
@@ -208,7 +211,7 @@ public class TestPerformance {
             @Override
             public int serialize(IndexedRecord resultSet) throws Exception {
                 this.sink.reset();
-                RestFormat.format(sink, BASE, resultSet);
+                RestFormatter.format(sink, BASE, resultSet);
                 return this.sink.size();
             }
 
@@ -349,7 +352,7 @@ public class TestPerformance {
 
     }
 
-    static class WBXMLSink extends RestFormat.Target {
+    static class WBXMLSink extends RestTarget {
 
         /**
          * Constructor 
@@ -368,7 +371,7 @@ public class TestPerformance {
         @Override
         protected XMLStreamWriter newWriter(
         ) throws XMLStreamException {
-            return RestFormat.getOutputFactory(MIME_TYPE).createXMLStreamWriter(sink);
+            return RestFormatter.getOutputFactory(MIME_TYPE).createXMLStreamWriter(sink);
         }
 
         @Override
@@ -377,8 +380,8 @@ public class TestPerformance {
             this.sink.reset();
         }
 
-        RestFormat.Source asSource(){
-            return new RestFormat.Source(
+        RestSource asSource(){
+            return new RestSource(
                 getBase(),
                 new InputSource(sink.asSource()),
                 MIME_TYPE, 
@@ -392,7 +395,7 @@ public class TestPerformance {
 
     }
 
-    static class UTF16Sink extends RestFormat.Target {
+    static class UTF16Sink extends RestTarget {
 
         /**
          * Constructor 
@@ -411,7 +414,7 @@ public class TestPerformance {
         @Override
         protected XMLStreamWriter newWriter(
         ) throws XMLStreamException {
-            return RestFormat.getOutputFactory(MIME_TYPE).createXMLStreamWriter(sink);
+            return RestFormatter.getOutputFactory(MIME_TYPE).createXMLStreamWriter(sink);
         }
 
         @Override
@@ -420,8 +423,8 @@ public class TestPerformance {
             this.sink.getBuffer().setLength(0);
         }
 
-        RestFormat.Source asSource(){
-            return new RestFormat.Source(
+        RestSource asSource(){
+            return new RestSource(
                 getBase(),
                 new InputSource(
                     new StringReader(sink.getBuffer().toString())
@@ -437,7 +440,7 @@ public class TestPerformance {
 
     }
 
-    static class UTF8Sink extends RestFormat.Target {
+    static class UTF8Sink extends RestTarget {
 
         /**
          * Constructor 
@@ -456,7 +459,7 @@ public class TestPerformance {
         @Override
         protected XMLStreamWriter newWriter(
         ) throws XMLStreamException {
-            return RestFormat.getOutputFactory(MIME_TYPE).createXMLStreamWriter(
+            return RestFormatter.getOutputFactory(MIME_TYPE).createXMLStreamWriter(
                 new UTF8Writer(sink)
             );
         }
@@ -467,10 +470,10 @@ public class TestPerformance {
             this.sink.reset();
         }
 
-        RestFormat.Source asSource(){
+        RestSource asSource(){
             InputSource source = new InputSource(this.sink.asSource());
             source.setEncoding("UTF-8");
-            return new RestFormat.Source(
+            return new RestSource(
                 getBase(),
                 source,
                 MIME_TYPE, 

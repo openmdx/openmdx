@@ -51,13 +51,12 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.Map;
 
-import javax.jdo.JDOHelper;
-
 import org.openmdx.base.accessor.cci.DataObject_1_0;
 import org.openmdx.base.accessor.view.Interceptor_1;
 import org.openmdx.base.accessor.view.ObjectView_1_0;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.persistence.cci.PersistenceHelper;
+import org.openmdx.kernel.jdo.ReducedJDOHelper;
 import org.openmdx.state2.cci.DateTimeStateContext;
 import org.openmdx.state2.spi.Order;
 
@@ -167,7 +166,7 @@ public class DateTimeState_1 extends BasicState_1<DateTimeStateContext> {
             //
             // Replace states
             //
-            JDOHelper.getPersistenceManager(source).deletePersistent(source);
+            ReducedJDOHelper.getPersistenceManager(source).deletePersistent(source);
         }
     }
 

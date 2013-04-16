@@ -55,7 +55,6 @@ import java.util.List;
 import java.util.ListIterator;
 
 import javax.jdo.FetchPlan;
-import javax.jdo.JDOHelper;
 import javax.jdo.PersistenceManager;
 import javax.jdo.spi.PersistenceCapable;
 import javax.jdo.spi.StateManager;
@@ -66,6 +65,7 @@ import org.openmdx.base.marshalling.ExceptionListenerMarshaller;
 import org.openmdx.base.marshalling.Marshaller;
 import org.openmdx.base.persistence.spi.PersistenceCapableCollection;
 import org.openmdx.kernel.exception.BasicException;
+import org.openmdx.kernel.jdo.ReducedJDOHelper;
 
 /**
  * A Marshalling Sequential List
@@ -358,7 +358,7 @@ public class MarshallingSequentialList<E>
 //  @Override
     public Object jdoGetObjectId(
     ) {
-        return JDOHelper.getObjectId(this.list);
+        return ReducedJDOHelper.getObjectId(this.list);
     }
 
     /* (non-Javadoc)
@@ -367,7 +367,7 @@ public class MarshallingSequentialList<E>
 //  @Override
     public Object jdoGetTransactionalObjectId(
     ) {
-        return JDOHelper.getTransactionalObjectId(this.list);
+        return ReducedJDOHelper.getTransactionalObjectId(this.list);
     }
 
     /* (non-Javadoc)
@@ -376,7 +376,7 @@ public class MarshallingSequentialList<E>
 //  @Override
     public boolean jdoIsPersistent(
     ) {
-        return JDOHelper.isPersistent(this.list);
+        return ReducedJDOHelper.isPersistent(this.list);
     }
     
     /* (non-Javadoc)

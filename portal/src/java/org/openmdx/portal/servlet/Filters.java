@@ -245,23 +245,13 @@ public class Filters
                           orderedFeatures.add(orderSpecifier.getFeature());
                       }
                   }
-                  // Combine extensions of base filter and f                  
-                  org.openmdx.base.query.Extension extension = baseFilter.getExtension();
-                  if(extension == null) {
-                	  extension = f.getExtension();                  
-                  } 
-                  else if(f.getExtension() != null) {
-                	  org.openmdx.base.query.Extension ef = f.getExtension();
-                	  extension = extension.clone(); // Create new extension. Do not modify original
-                	  extension.setClause(
-                		  extension.getClause() + " AND " + ef.getClause()
-                	  );
-                	  extension.getStringParam().addAll(ef.getStringParam());
-                	  extension.getBooleanParam().addAll(ef.getBooleanParam());
-                	  extension.getDateTimeParam().addAll(ef.getDateTimeParam());
-                	  extension.getDateParam().addAll(ef.getDateParam());
-                	  extension.getDecimalParam().addAll(ef.getDecimalParam());
-                	  extension.getIntegerParam().addAll(ef.getIntegerParam());
+                  // Combine extensions of base filter and f
+                  List<org.openmdx.base.query.Extension> extensions = new ArrayList<org.openmdx.base.query.Extension>();
+                  if(baseFilter.getExtension() != null) {
+                	  extensions.addAll(baseFilter.getExtension());
+                  }
+                  if(!f.getExtension().isEmpty()) {
+                	  extensions.addAll(f.getExtension());
                   }
                   preparedFilter = new Filter(
                       f.getName(),
@@ -271,7 +261,7 @@ public class Filters
                       f.getOrder(),
                       preparedConditions,
                       orderSpecifiers,
-                      extension,
+                      extensions,
                       this.getClass().getName()
                   );
               }

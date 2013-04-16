@@ -50,12 +50,12 @@ package org.openmdx.kernel.exception;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-import java.util.Enumeration;
 import java.util.IdentityHashMap;
 import java.util.Map;
 import java.util.Properties;
 import java.util.logging.Level;
 
+import org.openmdx.kernel.loading.Resources;
 import org.openmdx.kernel.log.SysLog;
 
 /**
@@ -68,36 +68,27 @@ class Mappers implements BasicException.Mapper {
      */
     Mappers(){
         Properties configuration = new Properties();
-        ClassLoader classLoader = BasicException.class.getClassLoader();
-        try {
-            for(
-                Enumeration<URL> urls = classLoader.getResources("META-INF/openmdxExceptionMapper.properties");
-                urls.hasMoreElements();
-            ) {
-                URL url = urls.nextElement();
-                try {
-                    InputStream source = url.openStream();       
-                    configuration.load(source);
-                    source.close();
-                } catch (IOException exception) {
-                    SysLog.warning("Exception mapper configuration failure: " + url, exception);
-                }
+        for(URL url : Resources.getMetaInfResources(BasicException.class.getClassLoader(), "openmdx-exception-mapper.properties")) {
+            try {
+                InputStream source = url.openStream();       
+                configuration.load(source);
+                source.close();
+            } catch (IOException exception) {
+                SysLog.warning("Exception mapper configuration failure: " + url, exception);
             }
-        } catch (IOException exception) {
-            SysLog.error("Exception mapper configuration failure", exception);
         }
         for(Map.Entry<?, ?> entry : configuration.entrySet()) {
             try {
                 Class<?> exceptionClass = Class.forName(
                     entry.getKey().toString(),
                     false,
-                    classLoader
+                    BasicException.class.getClassLoader()
                 );
                 if(Throwable.class.isAssignableFrom(exceptionClass)) {
                     Class<?> mapperClass = Class.forName(
                         entry.getValue().toString(),
                         false,
-                        classLoader
+                        BasicException.class.getClassLoader()
                     );
                     if(BasicException.Mapper.class.isAssignableFrom(mapperClass)) {
                         try {
@@ -125,9 +116,9 @@ class Mappers implements BasicException.Mapper {
                     );
                 }
             } catch (NoClassDefFoundError error) {
-                SysLog.warning("Exception mapper registration failure: " + entry, error);
+                SysLog.info("Exception mapper not available", entry);
             } catch (ClassNotFoundException exception) {
-                SysLog.warning("Exception mapper registration failure: " + entry, exception);
+                SysLog.info("Exception mapper not available", entry);
             }
         }
        

@@ -213,7 +213,7 @@ public abstract class InspectorControl
         Map to,
         ModelElement_1_0 structDef
     ) throws ServiceException {
-        for(Iterator i = ((Map)structDef.objGetValue("field")).values().iterator(); i.hasNext(); ) {
+        for(Iterator i = structDef.objGetMap("field").values().iterator(); i.hasNext(); ) {
           ModelElement_1_0 field = (ModelElement_1_0)i.next();
           String fieldName = (String)field.objGetValue("qualifiedName");
           try {

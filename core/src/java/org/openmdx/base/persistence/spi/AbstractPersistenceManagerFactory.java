@@ -1,13 +1,13 @@
 /*
  * ====================================================================
- * Project:     openMDX, http://www.openmdx.org/
- * Description: Abstract Manager Factory
+ * Project:     openMDX/Core, http://www.openmdx.org/
+ * Description: Abstract Persistence Manager Factory
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2005-2009, OMEX AG, Switzerland
+ * Copyright (c) 2005-2012, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -61,6 +61,7 @@ import java.util.WeakHashMap;
 
 import javax.jdo.Constants;
 import javax.jdo.FetchGroup;
+import javax.jdo.JDOFatalDataStoreException;
 import javax.jdo.JDOFatalUserException;
 import javax.jdo.JDOUserException;
 import javax.jdo.PersistenceManager;
@@ -69,9 +70,13 @@ import javax.jdo.datastore.DataStoreCache;
 import javax.jdo.listener.InstanceLifecycleListener;
 
 import org.openmdx.base.collection.MapBackedSet;
+import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.persistence.cci.ConfigurableProperty;
 import org.openmdx.base.persistence.cci.NonConfigurableProperty;
+import org.openmdx.base.persistence.cci.PersistenceHelper;
 import org.openmdx.base.Version;
+import org.openmdx.kernel.loading.Classes;
+import org.openmdx.kernel.loading.Factory;
 import org.openmdx.kernel.resource.spi.CloseCallback;
 
 /**
@@ -85,7 +90,7 @@ public abstract class AbstractPersistenceManagerFactory<P extends PersistenceMan
 {
 
     /**
-     * Constructor 
+     * Constructor connectionFactoryFinder
      *
      * @param configuration
      */
@@ -219,6 +224,11 @@ public abstract class AbstractPersistenceManagerFactory<P extends PersistenceMan
      * The listeners to be propagated to the children
      */
     private final InstanceLifecycleListenerRegistry instanceLifecycleListenerRegistry = new InstanceLifecycleListenerRegistry();
+
+    /**
+     * The lazily retrieved connection factory finder
+     */
+    private transient Factory<?> connectionFactoryFinder = null;
     
     /**
      * Return <code>true</code> if the property's value is
@@ -309,7 +319,7 @@ public abstract class AbstractPersistenceManagerFactory<P extends PersistenceMan
         if(!this.isClosed()) {
             List<JDOUserException> exceptions = new ArrayList<JDOUserException>();
             for(PersistenceManager p : this.persistenceManagers){
-                if(p.currentTransaction().isActive()) exceptions.add(
+                if(PersistenceHelper.currentUnitOfWork(p).isActive()) exceptions.add(
                     new JDOUserException("PersistenceManager has active transaction", p)
                 );
             }
@@ -979,6 +989,33 @@ public abstract class AbstractPersistenceManagerFactory<P extends PersistenceMan
 	    	((AbstractPersistenceManagerFactory<?>)persistenceManagerFactory).getContainerManaged();
     }
     
+    /**
+     * Acquire the connection factory by its JNDI name
+     * 
+     * @param connectionFactoryName the connection factory's JNDI name
+     * 
+     * @return the connection factory
+     * 
+     * @throws JDOFatalDataStoreException in case of lookup failure
+     * @throws ServiceException in case of factory finder invocation failure
+     */
+    protected Object getConnectionFactoryByName(
+        String connectionFactoryName
+    ) throws ServiceException {
+        try {
+            if(connectionFactoryFinder == null) {
+                connectionFactoryFinder = Classes.newApplicationInstance(
+                    Factory.class,
+                    "org.openmdx.application.naming.JNDIAccessor",
+                    connectionFactoryName,
+                    Object.class
+                );
+            }
+            return connectionFactoryFinder.instantiate();
+        } catch (Exception exception) {
+            throw new ServiceException(exception);
+        }        
+    }
     
     static {
         AbstractPersistenceManagerFactory.NON_CONFIGURABLE_PROPERTIES.setProperty(

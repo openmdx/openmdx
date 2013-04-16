@@ -70,12 +70,16 @@ import org.junit.Test;
 import org.openmdx.base.collection.Sets;
 import org.openmdx.base.jmi1.Authority;
 import org.openmdx.base.jmi1.Provider;
+import org.openmdx.base.persistence.cci.PersistenceHelper;
 import org.openmdx.kernel.lightweight.naming.NonManagedInitialContextFactoryBuilder;
 import org.openmdx.preferences2.jmi1.Entry;
 import org.openmdx.preferences2.jmi1.Node;
 import org.openmdx.preferences2.jmi1.Preferences2Package;
 import org.openmdx.preferences2.jmi1.Segment;
 import org.openmdx.preferences2.prefs.AutocommittingPreferencesFactory;
+import org.openmdx.preferences2.prefs.Retrievable;
+
+import test.openmdx.application.dataprovider.layer.persistence.jdbc.RidOidQueryDatabase_1;
 
 /**
  * Class Loading Test
@@ -226,7 +230,7 @@ public class TestPreferences {
         }
         assertEquals("Number of children", 1, children);
     }
-    
+
     /**
      * Create Preferences through the JDK API
      * 
@@ -275,6 +279,11 @@ public class TestPreferences {
         }
     }
 
+    private void jmiReadPreferences(Segment segment, String kind) {
+        org.openmdx.preferences2.jmi1.Preferences preferences = segment.getPreferences(kind);
+        PersistenceHelper.retrieveAllDescendants(preferences);
+    }
+    
     /**
      * Read Preferences through the JMI API
      * 
@@ -284,7 +293,80 @@ public class TestPreferences {
     @Test
     public void jmiReadPreferences(
     ) throws BackingStoreException, ResourceException{
-        retrieveSegment(JDK_SEGMENT_NAME);
+        Segment segment = retrieveSegment(JDK_SEGMENT_NAME);
+        jmiReadPreferences(segment, "System");
+        jmiReadPreferences(segment, System.getProperty("user.name"));
+    }
+    
+    /**
+     * Reads and writes the preferences through the JDK API
+     * 
+     * @param node the preferences to be touched
+     * @param touch 
+     * 
+     * @throws BackingStoreException 
+     * @throws ResourceException 
+     */
+    private void jdkTraversePreferences(
+        Preferences node, 
+        boolean touch
+    ) throws ResourceException, BackingStoreException {
+        for(String key : node.keys()) {
+            String value = node.get(key, null);
+            if(touch) {
+                node.put(key, value);
+            } else {
+                System.out.println(node.name() + "." + key + "=" + value);
+            }
+        }
+        for(String childName : node.childrenNames()) {
+            jdkTraversePreferences(node.node(childName), touch);
+        }
+    }
+    
+    /**
+     * @param root
+     * @param touch 
+     * @throws ResourceException
+     * @throws BackingStoreException
+     */
+    private void jdkLoadAndTraversePreferences(
+        Preferences root, 
+        boolean touch
+    ) throws ResourceException, BackingStoreException {
+        ((Retrievable)root).retrieveAll();
+        int expectedCount = touch ? RidOidQueryDatabase_1.getUpdateCount() : RidOidQueryDatabase_1.getQueryCount(); 
+        jdkTraversePreferences(root, touch);
+        int actualCount = touch ? RidOidQueryDatabase_1.getUpdateCount() : RidOidQueryDatabase_1.getQueryCount(); 
+        assertEquals("No DB access necessary", expectedCount, actualCount);
+    }
+
+    /**
+     * Reads and writes the preferences through the JDK API
+     * 
+     * @throws BackingStoreException 
+     * @throws ResourceException 
+     */
+    @Test
+    public void jdkTouchPreferences(
+    ) throws ResourceException, BackingStoreException {
+        PreferencesFactory testee = new EmbeddedPreferencesFactory(JDK_SEGMENT_NAME);
+        jdkLoadAndTraversePreferences(testee.systemRoot(), true);
+        jdkLoadAndTraversePreferences(testee.userRoot(), true);
+    }
+
+    /**
+     * Reads and writes the preferences through the JDK API
+     * 
+     * @throws BackingStoreException 
+     * @throws ResourceException 
+     */
+    @Test
+    public void jdkDumpPreferences(
+    ) throws ResourceException, BackingStoreException {
+        PreferencesFactory testee = new EmbeddedPreferencesFactory(JDK_SEGMENT_NAME);
+        jdkLoadAndTraversePreferences(testee.systemRoot(), false);
+        jdkLoadAndTraversePreferences(testee.userRoot(), false);
     }
     
     @BeforeClass

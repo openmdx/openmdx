@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2011, OMEX AG, Switzerland
+ * Copyright (c) 2011-2012, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -47,10 +47,10 @@
  */
 package org.openmdx.base.rest.spi;
 
+
 import javax.resource.ResourceException;
 import javax.resource.cci.MappedRecord;
 
-import org.openmdx.base.accessor.cci.DataObject_1_0;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.naming.Path;
 
@@ -133,6 +133,29 @@ public class Facades {
      * Wrap a MappedRecord into a query facade
      * 
      * @param query a query record
+     * @param preferringNotFoundException Tells whether a NOT_FOUND exception 
+     * shall be thrown rather than returning an empty result set in case a 
+     * requested object does not exist.
+     * 
+     * @return the facade wrapping the given query record
+     * 
+     * @throws ServiceException
+     */
+    public static Query_2Facade asQuery(
+        MappedRecord query,
+        boolean preferringNotFoundException
+    ) throws ServiceException {
+        try {
+            return Query_2Facade.newInstance(query, preferringNotFoundException);
+        } catch (ResourceException exception) {
+            throw new ServiceException(exception);
+        }
+    }
+
+    /**
+     * Wrap a MappedRecord into a query facade
+     * 
+     * @param query a query record
      * 
      * @return the facade wrapping the given query record
      * 
@@ -141,31 +164,27 @@ public class Facades {
     public static Query_2Facade asQuery(
         MappedRecord query
     ) throws ServiceException {
-        try {
-            return Query_2Facade.newInstance(query);
-        } catch (ResourceException exception) {
-            throw new ServiceException(exception);
-        }
+        return asQuery(query, false);
     }
-	
+    
     /**
-     * Create a query facade for the given object's id
+     * Create a query facade for the given object id
      * 
-     * @param object a data object
+     * @param ojectId a data object's id
+     * @param preferringNotFoundException Tells whether a NOT_FOUND exception 
+     * shall be thrown rather than returning an empty result set in case a 
+     * requested object does not exist.
      * 
-     * @return a query facade for the given object's id
+     * @return a query facade for the given object id
      * 
      * @throws ResourceException
      */
     public static Query_2Facade newQuery(
-        DataObject_1_0 object
+        Path ojectId,
+        boolean preferringNotFoundException
     ) throws ServiceException {
-    	try {
-			return object.jdoIsPersistent() ? Query_2Facade.newInstance(
-			    object.jdoGetObjectId()
-			 ) : Query_2Facade.newInstance(
-			    object.jdoGetTransactionalObjectId()
-			 );
+        try {
+            return Query_2Facade.newInstance(ojectId, preferringNotFoundException);
         } catch (ResourceException exception) {
             throw new ServiceException(exception);
         }
@@ -183,11 +202,7 @@ public class Facades {
     public static Query_2Facade newQuery(
         Path ojectId
     ) throws ServiceException {
-    	try {
-			return Query_2Facade.newInstance(ojectId);
-        } catch (ResourceException exception) {
-            throw new ServiceException(exception);
-        }
+        return newQuery(ojectId, false);
     }
 
 }

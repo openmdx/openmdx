@@ -109,6 +109,7 @@ REM Test test::openmdx::app1
     modified_by_0 VARCHAR2 (50) NULL ,
     description VARCHAR2 (100) NULL ,
     content BLOB NULL ,
+    text CLOB NULL ,
     keyword VARCHAR2 (32) NULL
   );
   

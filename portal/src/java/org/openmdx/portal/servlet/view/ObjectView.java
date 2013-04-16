@@ -177,7 +177,7 @@ public abstract class ObjectView
     	boolean mapObjects
     ) throws ServiceException {
     	PersistenceManager pm = JDOHelper.getPersistenceManager(this.getObjectReference().getObject());
-    	for(Iterator i = ((Map)structDef.objGetValue("field")).values().iterator(); i.hasNext(); ) {
+    	for(Iterator i = structDef.objGetMap("field").values().iterator(); i.hasNext(); ) {
     		ModelElement_1_0 field = (ModelElement_1_0)i.next();
     		String fieldName = (String)field.objGetValue("qualifiedName");
     		try {
@@ -195,13 +195,12 @@ public abstract class ObjectView
     					value
     				);        		  
     			}
-    		}
-    		catch(Exception e) {
+    		} catch(Exception e) {
     			to.put(fieldName, null);
     		}
     	}
     }
-    
+
     //-------------------------------------------------------------------------
     public Action[] getSelectParentAction(
     ) {
@@ -221,8 +220,8 @@ public abstract class ObjectView
                     if(parentReference != null) {
                         selectParentActions.add(
                             reference.getSelectParentAction(
-                                parentReference.getTitleEscapeQuote().length() > 0
-                                    ? parentReference.getTitleEscapeQuote()
+                                parentReference.getTitleAsJavascriptArg().length() > 0
+                                    ? parentReference.getTitleAsJavascriptArg()
                                     : parentReference.getLabel()
                             )
                         );

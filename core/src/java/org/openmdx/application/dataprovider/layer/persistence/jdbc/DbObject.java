@@ -59,6 +59,7 @@ import javax.resource.cci.MappedRecord;
 
 import org.openmdx.application.dataprovider.cci.FilterProperty;
 import org.openmdx.base.accessor.cci.SystemAttributes;
+import org.openmdx.base.accessor.rest.spi.LockAssertion;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.Model_1_0;
 import org.openmdx.base.naming.Path;
@@ -255,7 +256,7 @@ public abstract class DbObject implements Serializable {
 	}
 
 	//---------------------------------------------------------------------------  
-	public List getObjectIdColumn(
+	public List<String> getObjectIdColumn(
 	) {
 		return this.objectIdColumn;
 	}

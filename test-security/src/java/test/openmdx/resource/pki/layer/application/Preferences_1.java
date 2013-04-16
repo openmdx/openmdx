@@ -97,11 +97,11 @@ public class Preferences_1 extends Layer_1 {
     
     protected static final Path PKI_SEGMENT_PATTERN = new Path(
         "xri:@openmdx*org:openmdx:preferences1/provider/PKI/segment/:*"
-    );
+    ).lock();
 
     protected static final Path PKI_PREFERENCES_PATTERN = new Path(
         "xri:@openmdx*org:openmdx:preferences1/provider/PKI/segment/:*/preferences/:*"
-    );
+    ).lock();
 
     /* (non-Javadoc)
 	 * @see org.openmdx.application.dataprovider.spi.Layer_1#getInteraction(javax.resource.cci.Connection)

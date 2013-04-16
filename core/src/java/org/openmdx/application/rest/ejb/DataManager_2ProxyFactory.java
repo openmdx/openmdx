@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2009, OMEX AG, Switzerland
+ * Copyright (c) 2009-2012, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -52,16 +52,15 @@ import java.util.HashMap;
 import java.util.Map;
 
 import javax.jdo.PersistenceManagerFactory;
-import javax.resource.cci.ConnectionFactory;
 
-import org.openmdx.application.rest.spi.EntityManagerProxyFactory_2;
 import org.openmdx.base.exception.ServiceException;
+import org.openmdx.base.resource.cci.ConnectionFactory;
 import org.openmdx.base.resource.spi.Port;
+import org.openmdx.base.rest.connector.EntityManagerProxyFactory_2;
 
 /**
  * Data Manager Proxy Factory
  */
-@SuppressWarnings({"rawtypes","unchecked"})
 public class DataManager_2ProxyFactory extends EntityManagerProxyFactory_2 {
 
     /**
@@ -90,7 +89,7 @@ public class DataManager_2ProxyFactory extends EntityManagerProxyFactory_2 {
      * @return a new <code>PersistenceManagerFactory</code>
      */
     public static PersistenceManagerFactory getPersistenceManagerFactory (
-        Map props
+        Map<?,?> props
     ){
         return getPersistenceManagerFactory(
             Collections.EMPTY_MAP,
@@ -109,8 +108,8 @@ public class DataManager_2ProxyFactory extends EntityManagerProxyFactory_2 {
      * @return a new <code>PersistenceManagerFactory</code>
      */
     public static PersistenceManagerFactory getPersistenceManagerFactory (
-        Map overrides, 
-        Map props
+        Map<?,?> overrides, 
+        Map<?,?> props
     ){
         Map<Object,Object> configuration = new HashMap<Object,Object>(DEFAULT_CONFIGURATION);
         configuration.putAll(props);

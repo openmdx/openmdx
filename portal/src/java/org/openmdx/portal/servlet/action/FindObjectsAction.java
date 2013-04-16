@@ -83,17 +83,23 @@ import org.openmdx.portal.servlet.Action;
 import org.openmdx.portal.servlet.ApplicationContext;
 import org.openmdx.portal.servlet.WebKeys;
 
+/**
+ * FindObjectsAction
+ *
+ */
 public class FindObjectsAction extends UnboundAction {
     
     public final static int EVENT_ID = 40;
 
-	//-----------------------------------------------------------------------
+    /* (non-Javadoc)
+     * @see org.openmdx.portal.servlet.action.UnboundAction#perform(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, org.openmdx.portal.servlet.ApplicationContext, java.lang.String, java.util.Map)
+     */
     @SuppressWarnings("unchecked")
     @Override
     public ActionPerformResult perform(
         HttpServletRequest request,
         HttpServletResponse response,
-        ApplicationContext application,
+        ApplicationContext app,
         String parameter,
         Map<String,String[]> requestParameters
     ) throws IOException {
@@ -128,11 +134,11 @@ public class FindObjectsAction extends UnboundAction {
         PersistenceManager pm = null;
         try {
             Path objectIdentity = new Path(objectXri);
-            pm = application.getNewPmData();
+            pm = app.getNewPmData();
             RefObject_1_0 parent = (RefObject_1_0)pm.getObjectById(objectIdentity);
             List<Condition> conditions = new ArrayList<Condition>(
-                application.getPortalExtension().getFindObjectsBaseFilter(
-                    application, 
+                app.getPortalExtension().getFindObjectsBaseFilter(
+                    app, 
                     parent,
                     referenceName
                 )
@@ -151,11 +157,10 @@ public class FindObjectsAction extends UnboundAction {
                 (filterByFeature != null) && (filterByFeature.length() > 0) &&
                 (filterValues != null) && (filterValues.length > 0)
             ) {
-                Model_1_0 model = application.getModel();
+                Model_1_0 model = app.getModel();
                 // Is filter feature numeric?
                 ModelElement_1_0 parentDef = ((RefMetaObject_1)parent.refMetaObject()).getElementDef();                
-                ModelElement_1_0 referenceDef = 
-                    (ModelElement_1_0)((Map)parentDef.objGetValue("reference")).get(referenceName);
+                ModelElement_1_0 referenceDef = (ModelElement_1_0)parentDef.objGetMap("reference").get(referenceName);
                 if(referenceDef != null) {
                     ModelElement_1_0 referencedType = model.getElement(referenceDef.objGetValue("type"));
                     ModelElement_1_0 filterFeatureDef = model.getFeatureDef(referencedType, filterByFeature, true);
@@ -198,8 +203,7 @@ public class FindObjectsAction extends UnboundAction {
                         null // extension
                     )
                 );
-            }
-            catch(UnsupportedOperationException e) {
+            } catch(UnsupportedOperationException e) {
                 filteredObjects = new ArrayList(
                     ((RefContainer)allObjects).refGetAll(null)
                 );
@@ -213,22 +217,19 @@ public class FindObjectsAction extends UnboundAction {
             ) {
                 RefObject_1_0 obj = (RefObject_1_0)i.next();
                 pw.write("<li>");
-                String title = application.getPortalExtension().getTitle(
+                String title = app.getPortalExtension().getTitle(
                     obj, 
-                    application.getCurrentLocaleAsIndex(), 
-                    application.getCurrentLocaleAsString(), 
+                    app.getCurrentLocaleAsIndex(), 
+                    app.getCurrentLocaleAsString(), 
                     false, // asShortTitle
-                    application
+                    app
                 );
-                if(filterByFeature.length() > 0) {
+                if(!filterByFeature.isEmpty()) {
                     try {
                         title += " [" + obj.refGetValue(filterByFeature) + "]";
-                    } 
-                    catch(Exception e) {}
+                    } catch(Exception e) {}
                 }
-                pw.write(
-                    application.getHtmlEncoder().encode(title, false)
-                );
+                pw.write(app.getHtmlEncoder().encode(title, false));
                 // Mark non-primary fields as informal 
                 pw.write("<span class=\"informal\">");
                 pw.write("<div style=\"display:none\">");

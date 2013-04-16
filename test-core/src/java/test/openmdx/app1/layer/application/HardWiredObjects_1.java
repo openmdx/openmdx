@@ -159,12 +159,16 @@ public class HardWiredObjects_1 extends Standard_1 {
     ) throws ServiceException {
         MappedRecord original = formats.get(objectId.getBase());
         if(original == null) {
-            throw new ServiceException(
-                BasicException.Code.DEFAULT_DOMAIN,
-                BasicException.Code.NOT_FOUND, 
-                "Format not found",
-                new BasicException.Parameter("path", objectId)
-            );        
+            if("CR20020187".equals(objectId.getBase())) {
+                throw new RuntimeException("CR20020187");
+            } else {
+                throw new ServiceException(
+                    BasicException.Code.DEFAULT_DOMAIN,
+                    BasicException.Code.NOT_FOUND, 
+                    "Format not found",
+                    new BasicException.Parameter("path", objectId)
+                );        
+            }
         }
         Object_2Facade facade;
         facade = Facades.newObject(objectId);

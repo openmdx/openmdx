@@ -47,10 +47,7 @@
  */
 package org.openmdx.application.rest.http;
 
-import java.io.Closeable;
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
@@ -58,24 +55,15 @@ import java.net.URLEncoder;
 import javax.resource.ResourceException;
 import javax.resource.cci.Connection;
 import javax.resource.cci.Interaction;
-import javax.resource.cci.InteractionSpec;
-import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamWriter;
 
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.base.naming.Path;
 import org.openmdx.base.resource.spi.Port;
-import org.openmdx.base.resource.spi.RestInteractionSpec;
-import org.openmdx.base.rest.spi.RestFormat;
-import org.openmdx.base.rest.spi.RestFormat.Source;
-import org.openmdx.base.rest.spi.RestFormat.Target;
 import org.openmdx.kernel.exception.BasicException;
-import org.xml.sax.InputSource;
 
 /**
  * The abstract port depends on the JDK's URL functionality only
  */
-public class HttpPort implements Port {
+public class HttpPort implements HttpContext, Port {
 
     /**
      * Constructor 
@@ -123,6 +111,7 @@ public class HttpPort implements Port {
      *
      * @return Returns the mimeType.
      */
+    @Override
     public String getMimeType() {
         return this.mimeType;
     }
@@ -132,7 +121,8 @@ public class HttpPort implements Port {
      *
      * @return Returns the content type.
      */
-    protected String getContentType(){
+    @Override
+    public String getContentType(){
         if(this.contentType == null) {
             this.contentType = this.mimeType + ";charset=" + STANDARD_ENCODING; 
         }
@@ -159,6 +149,7 @@ public class HttpPort implements Port {
      *
      * @return Returns the uri.
      */
+    @Override
     public String getConnectionURL() {
         return this.contextURL;
     }
@@ -179,14 +170,14 @@ public class HttpPort implements Port {
     /* (non-Javadoc)
      * @see org.openmdx.base.resource.spi.Port#getInteraction(javax.resource.cci.Connection)
      */
-//  @Override
+    @Override
     public Interaction getInteraction(
         Connection connection
     ) throws ResourceException {
-        return new PlainVanillaInteraction(connection, this.contextURL);
+        return new PlainVanillaInteraction(connection, this);
     }
 
-    protected String newQueryArgument(
+    protected static String newQueryArgument(
         String name,
         String value
     )throws ResourceException {
@@ -206,7 +197,8 @@ public class HttpPort implements Port {
      * @return the message's URL 
      * @throws ServiceException 
      */
-    protected URL newURL(
+    @Override
+    public URL newURL(
         String path, 
         String query
     ) throws ServiceException{
@@ -224,329 +216,6 @@ public class HttpPort implements Port {
                 new BasicException.Parameter("query", query)
             );
         } 
-    }
-    
-    
-    //------------------------------------------------------------------------
-    // Class StandardInteraction
-    //------------------------------------------------------------------------
-    
-    /**
-     * The plain-vanilla interaction does nothing about authentication and cookies
-     */
-    protected class PlainVanillaInteraction extends AbstractHttpInteraction {
-
-        /**
-         * Constructor 
-         *
-         * @param connection
-         * @param contextURL
-         * 
-         * @throws ResourceException 
-         */
-        protected PlainVanillaInteraction(
-            Connection connection,
-            String contextURL
-        ) throws ResourceException {
-            super(connection, contextURL);
-        }
-        
-        /**
-         * Retrieve the response code
-         * 
-         * @param urlConnection the URL connection
-         * 
-         * @return the response code
-         * 
-         * @throws ServiceException
-         */
-        protected int getStatus(
-            HttpURLConnection urlConnection
-        ) throws IOException{
-            return urlConnection.getResponseCode();
-        }
-
-        /* (non-Javadoc)
-         * @see org.openmdx.application.rest.http.AbstractHttpInteraction#newMessage(org.openmdx.base.resource.spi.RestInteractionSpec, org.openmdx.base.naming.Path)
-         */
-        @Override
-        protected Message newMessage(
-            RestInteractionSpec ispec, 
-            Path xri
-        ) throws ServiceException {
-            return new HttpMessage(
-                ispec, 
-                xri, 
-                ispec == DELETE_SPEC ? "FunctionName=DELETE" : null
-            );     
-        }
-
-        
-        /* (non-Javadoc)
-         * @see org.openmdx.base.resource.spi.AbstractInteraction#open()
-         */
-        @Override
-        protected void open(
-        ) throws ResourceException {
-            String userName = getConnectionUserName();
-            try {
-                new HttpMessage(
-                    CONNECT_SPEC, 
-                    CONNECT_XRI,
-                    toQuery(userName)
-                ).execute();
-            } catch (ServiceException exception) {
-                throw new ResourceException(exception);
-            }
-        }
-
-        /**
-         * Create the query part
-         * 
-         * @param userName
-         * 
-         * @return the query part
-         * 
-         * @throws ResourceException
-         */
-        private String toQuery(
-            String userName
-        ) throws ResourceException {
-            StringBuilder query = new StringBuilder(
-                CallbackPrompts.BULK_LOAD + '=' + Boolean.FALSE
-            );
-            if(userName != null) {
-                query.append('&').append(newQueryArgument("UserName", userName));
-            }
-            return query.toString();
-        }
-        
-        /**
-         * Create connection for the given URL
-         * 
-         * @param uri
-         * 
-         * @throws ServiceException
-         */
-        protected HttpURLConnection newConnection(
-            URL url,
-            RestInteractionSpec interactionSpec
-        ) throws ServiceException {
-            try {
-                HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
-                urlConnection.setRequestMethod(
-                    interactionSpec.getFunctionName()
-                );
-                urlConnection.setRequestProperty(
-                    "Accept",
-                    getContentType()
-                );
-                urlConnection.setRequestProperty(
-                    "interaction-verb", 
-                    Integer.toString(interactionSpec.getInteractionVerb())
-                );
-                return urlConnection;
-            } catch (ClassCastException exception) {
-                throw new ServiceException(
-                    exception,
-                    BasicException.Code.DEFAULT_DOMAIN,
-                    BasicException.Code.NOT_SUPPORTED,
-                    "Unexpected URL connection",
-                    new BasicException.Parameter("url", url),
-                    new BasicException.Parameter("expected", HttpURLConnection.class.getName())
-                );
-            } catch (IOException exception) {
-                throw new ServiceException(
-                    BasicException.Code.DEFAULT_DOMAIN,
-                    BasicException.Code.BAD_PARAMETER,
-                    "Can't open a connection for the given URL",
-                    new BasicException.Parameter("url", url)
-                );
-            } 
-        }
-
-        
-        //--------------------------------------------------------------------
-        // Class AbstractMessage
-        //--------------------------------------------------------------------
-        
-        /**
-         * Abstract Message
-         */
-        private class HttpMessage implements Message, Closeable {
-    
-            /**
-             * Constructor 
-             *
-             * @param interactionSpec
-             * @param xri
-             * @param uri 
-             */
-            protected HttpMessage(
-                RestInteractionSpec interactionSpec, 
-                Path xri,
-                String query
-            ) throws ServiceException {
-                this.urlConnection = newConnection(
-                    newURL(PlainVanillaInteraction.this.toRequestURL(xri), query),
-                    interactionSpec
-                );
-                this.urlConnection.setDoOutput(
-                    interactionSpec.getInteractionVerb() != InteractionSpec.SYNC_RECEIVE
-                );
-            }
-    
-            /**
-             * The lazily created URL connection
-             */
-            protected HttpURLConnection urlConnection;
-            
-            /**
-             * The lazily created request body 
-             */
-            private Target requestBody = null;
-            
-            /**
-             * The lazily created response body 
-             */
-            private Source responseBody = null;
-
-            /**
-             * Create a request body
-             * 
-             * @return a new request body
-             */
-            protected Target newRequestBody(
-            ) throws IOException {
-                return new Target(
-                    getConnectionURL()
-                ){
-                   
-                    /* (non-Javadoc)
-                     * @see org.openmdx.application.rest.http.RestFormat.Target#newWriter()
-                     */
-                    @Override
-                    protected XMLStreamWriter newWriter(
-                    ) throws XMLStreamException {
-                        String contentType = getContentType();
-                        setRequestField(
-                            "Content-Type",
-                            contentType
-                        );
-                        try {
-                            return RestFormat.getOutputFactory(
-                                getMimeType()
-                            ).createXMLStreamWriter(
-                                HttpMessage.this.urlConnection.getOutputStream()
-                            );
-                        } catch (IOException exception) {
-                            throw toXMLStreamException(exception);
-                        }
-                    }
-                    
-                };
-            }
-            
-            /**
-             * Create a response body
-             * 
-             * @return a new response body
-             */
-            protected Source newResponseBody(
-            ) throws IOException {
-                return new Source(
-                    getConnectionURL(),
-                    new InputSource(this.urlConnection.getInputStream()),
-                    getMimeType(), 
-                    this
-                );                    
-            }
-
-            /* (non-Javadoc)
-             * @see org.openmdx.application.rest.http.AbstractHttpInteraction.Message#execute()
-             */
-        //  @Override
-            public int execute(
-            ) throws ServiceException {
-                if(this.requestBody != null) try {
-                    this.requestBody.close();
-                } catch (XMLStreamException exception) {
-                    throw new ServiceException (
-                        exception,
-                        BasicException.Code.DEFAULT_DOMAIN,
-                        BasicException.Code.PROCESSING_FAILURE,
-                        "Could not submit REST request"
-                    );
-                }
-                try {
-                    return getStatus(this.urlConnection);
-                } catch (IOException exception) {
-                    throw new ServiceException (
-                        exception,
-                        BasicException.Code.DEFAULT_DOMAIN,
-                        BasicException.Code.PROCESSING_FAILURE,
-                        "Could not process REST request"
-                    );
-                }
-            }
-            
-            /* (non-Javadoc)
-             * @see org.openmdx.application.rest.http.AbstractHttpInteraction.Message#getRequestBody()
-             */
-        //  @Override
-            public final Target getRequestBody(
-            ) throws ServiceException {
-                if(this.requestBody == null) try {
-                    this.requestBody = newRequestBody();
-                } catch (IOException exception) {
-                    throw new ServiceException(exception);
-                }
-                return this.requestBody;
-            }
-
-            /* (non-Javadoc)
-             * @see org.openmdx.application.rest.http.AbstractHttpInteraction.Message#getResponseBody()
-             */
-        //  @Override
-            public final Source getResponseBody(
-            ) throws ServiceException {
-                if(this.responseBody == null) try {
-                    this.responseBody = newResponseBody();
-                } catch (IOException exception) {
-                    throw new ServiceException(exception);
-                }
-                return this.responseBody;
-            }
-
-            /* (non-Javadoc)
-             * @see org.openmdx.application.rest.http.AbstractHttpInteraction.Message#getResponseField(java.lang.String)
-             */
-        //  @Override
-            public final String getResponseField(String key) {
-                return this.urlConnection.getHeaderField(key);
-            }
-    
-            /* (non-Javadoc)
-             * @see org.openmdx.application.rest.http.AbstractHttpInteraction.Message#setRequestField(java.lang.String, java.lang.String)
-             */
-        //  @Override
-            public final void setRequestField(String key, String value) {
-                this.urlConnection.setRequestProperty(key, value);
-            }
-
-            /* (non-Javadoc)
-             * @see java.io.Closeable#close()
-             */
-        //  @Override
-            public void close(
-            ) throws IOException {
-                if(this.urlConnection != null) {
-                    this.urlConnection.disconnect();
-                }
-            }
-            
-        }
-
     }
 
 }

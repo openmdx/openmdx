@@ -67,6 +67,7 @@ import org.openmdx.base.accessor.jmi.cci.JmiServiceException;
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.Multiplicity;
+import org.openmdx.base.text.conversion.HtmlEncoder;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.loading.Classes;
 import org.openmdx.kernel.log.SysLog;
@@ -77,10 +78,17 @@ import org.openmdx.portal.servlet.HtmlEncoder_1_0;
 import org.openmdx.portal.servlet.ViewPort;
 import org.openmdx.portal.servlet.WebKeys;
 
-public abstract class AttributeValue
-implements Serializable {
+public abstract class AttributeValue implements Serializable {
 
-    //-------------------------------------------------------------------------
+    /**
+     * Create attribute value.
+     * 
+     * @param valueClassName
+     * @param object
+     * @param fieldDef
+     * @param app
+     * @return
+     */
     @SuppressWarnings("unchecked")
     public static AttributeValue createAttributeValue(
         String valueClassName,
@@ -134,7 +142,13 @@ implements Serializable {
         return null;
     }
 
-    //-------------------------------------------------------------------------
+    /**
+     * Constructor 
+     *
+     * @param object
+     * @param fieldDef
+     * @param application
+     */
     public AttributeValue(
         Object object,
         FieldDef fieldDef,
@@ -145,22 +159,30 @@ implements Serializable {
         this.app = application;
     }
 
-    //-------------------------------------------------------------------------
     /**
-     * refresh attribute value, i.e. if value is cached the current value must
-     * be retieved from object.
+     * Refresh attribute value, i.e. if value is cached the current value must
+     * be retrieved from object.
      */
     public void refresh(
     ) {    
     }
 
-    //-------------------------------------------------------------------------
+    /**
+     * Get field attribute's field definition.
+     * 
+     * @return
+     */
     public FieldDef getFieldDef(
     ) {
         return this.fieldDef;
     }
 
-    //-------------------------------------------------------------------------
+    /**
+     * Return true if multiplicity is single valued, i.e. Multiplicity.SINGLE_VALUE, 
+     * Multiplicity.OPTIONAL, Multiplicity.STREAM.
+     * 
+     * @return
+     */
     public boolean isSingleValued(
     ) {
         String multiplicity = this.fieldDef.multiplicity;
@@ -170,44 +192,73 @@ implements Serializable {
         	Multiplicity.STREAM.toString().equals(multiplicity);
     }
 
-    //-------------------------------------------------------------------------
+    /**
+     * Return true if multiplicity is Multiplicity.OPTIONAL (0..1)
+     * 
+     * @return
+     */
     public boolean isOptionalValued(
     ) {
         String multiplicity = this.fieldDef.multiplicity;
         return Multiplicity.OPTIONAL.toString().equals(multiplicity);
     }
 
-    //-------------------------------------------------------------------------
+    /**
+     * Return true if attribute is mandatory.
+     * 
+     * @return
+     */
     public boolean isMandatory(
     ) {
         return this.fieldDef.isMandatory;
     }
     
-    //-------------------------------------------------------------------------
+    /**
+     * Get attribute multiplicity.
+     * 
+     * @return
+     */
     public String getMultiplicity(
     ) {
         return this.fieldDef.multiplicity;
     }
 
-    //-------------------------------------------------------------------------
+    /**
+     * Get object.
+     * 
+     * @return
+     */
     public Object getObject(
     ) {
         return this.object;
     }
 
-    //-------------------------------------------------------------------------
+    /**
+     * Get qualified feature name.
+     * 
+     * @return
+     */
     public String getName(
     ) {
         return this.fieldDef.qualifiedFeatureName;
     }
 
-    //-------------------------------------------------------------------------
+    /**
+     * Return true if attribute is changeable.
+     * 
+     * @return
+     */
     public boolean isChangeable(
     ) {
         return this.fieldDef.isChangeable;
     }
 
-    //-------------------------------------------------------------------------
+    /**
+     * Test whether user has permission for given action for attribute on object.
+     * 
+     * @param action
+     * @return
+     */
     public boolean hasPermission(
     	String action
     ) {
@@ -221,7 +272,13 @@ implements Serializable {
 	    		action == null || action.isEmpty() || action.startsWith(WebKeys.GRANT_PREFIX);
     }
 
-    //-------------------------------------------------------------------------
+    /**
+     * Get feature value.
+     * 
+     * @param feature
+     * @param shortFormat
+     * @return
+     */
     protected Object getValue(
         String feature,
         boolean shortFormat
@@ -248,40 +305,38 @@ implements Serializable {
                     )
                 ) {
                     return defaultValue;
-                }
-                else {
+                } else {
                     return value;
                 }
-            }
-            catch(JmiServiceException e) {
+            } catch(JmiServiceException e) {
                 if(
                     (e.getExceptionCode() == BasicException.Code.NOT_FOUND) ||
                     (e.getExceptionCode() == BasicException.Code.AUTHORIZATION_FAILURE)
                 ) {
                     return e.getCause();
-                }
-                else {
+                } else {
                 	SysLog.detail("can not get feature " + feature + " of object ", ((RefObject_1_0)this.object).refMofId() + ". Reason see log");
                 	SysLog.detail(e.getMessage(), e.getCause());
                     return null;
                 }
-            }
-            catch(Exception e) {
+            } catch(Exception e) {
             	SysLog.detail("can not get feature " + feature + " of object ", ((RefObject_1_0)this.object).refMofId() + ". Reason see log");
                 ServiceException e0 = new ServiceException(e);
                 SysLog.detail(e0.getMessage(), e0.getCause());
                 return null;
             }
-        }
-        else {
+        } else {
             Object value = ((Map)this.object).get(feature);
-            return value == null
-                ? this.getDefaultValue()
-                : value;
+            return value == null ? this.getDefaultValue() : value;
         }
     }
 
-    //-------------------------------------------------------------------------
+    /**
+     * Get attribute value in short format.
+     * 
+     * @param shortFormat
+     * @return
+     */
     public Object getValue(
         boolean shortFormat
     ) {
@@ -291,7 +346,12 @@ implements Serializable {
         );
     }
 
-    //-------------------------------------------------------------------------
+    /**
+     * Get attribute value as collection.
+     * 
+     * @param shortFormat
+     * @return
+     */
     @SuppressWarnings("unchecked")
     protected Collection getValues(
         boolean shortFormat
@@ -310,7 +370,12 @@ implements Serializable {
         return values;
     }
 
-    //-------------------------------------------------------------------------
+    /**
+     * Get label.
+     * 
+     * @param attribute
+     * @return
+     */
     protected String getLabel(
         Attribute attribute
     ) {
@@ -319,10 +384,20 @@ implements Serializable {
         return label;
     }
 
-    //-------------------------------------------------------------------------
+    /**
+     * Get default value. Must be implemented by subclasses.
+     * 
+     * @return
+     */
     public abstract Object getDefaultValue();
 
-    //-------------------------------------------------------------------------
+    /**
+     * Get feature value as string.
+     * 
+     * @param feature
+     * @param shortFormat
+     * @return
+     */
     public String getString(
         String feature,
         boolean shortFormat
@@ -334,24 +409,24 @@ implements Serializable {
         if(value instanceof Collection) {
             if(((Collection)value).size() > 0) {
                 Object v = ((Collection)value).iterator().next();
-                return v == null
-                ? null
-                    : v.toString();
-            }
-            else {
+                return v == null ? null : v.toString();
+            } else {
                 return null;
             }
         }
         else {
-            return value == null
-            ? null
-                : value.toString();
+            return value == null ? null : value.toString();
         }
     }
 
-    //-------------------------------------------------------------------------
     /** 
-     * Returns stringified attribute value. 
+     * Returns stringified attribute value.
+     *  
+     * @param p
+     * @param multiLine
+     * @param forEditing
+     * @param shortFormat
+     * @return
      */
     public String getStringifiedValue(
         ViewPort p,
@@ -369,8 +444,7 @@ implements Serializable {
                 Object v = null;
                 try {
                     v = i.next();
-                }
-                catch(Exception e) {
+                } catch(Exception e) {
                     ServiceException e0 = new ServiceException(e);
                     SysLog.detail(e0.getMessage(), e0.getCause());
                 }
@@ -380,8 +454,7 @@ implements Serializable {
                         if(stringifiedValue.length() > 0) {
                             stringifiedValue.append("\n");
                         }
-                    }
-                    else if(multiLine)  {
+                    } else if(multiLine)  {
                         stringifiedValue.append("<div>");
                         hasDivTag = true;
                     }
@@ -410,8 +483,7 @@ implements Serializable {
                     }                
                 }
             }
-        }
-        else {
+        } else {
             if(value != null) {
                 stringifiedValue = new StringBuilder(
                     this.getStringifiedValueInternal(
@@ -423,34 +495,19 @@ implements Serializable {
                     )
                 );
             }
-        }    
+        }
         return stringifiedValue.toString();
     }
-    
-    //-------------------------------------------------------------------------
-    public static boolean isWikiText(
-    	String value
-    ) {
-        boolean isWikiText =
-        	value.indexOf("\n= ") >= 0 || value.startsWith("= ") ||
-        	value.indexOf("\n== ") >= 0 || value.startsWith("== ") ||
-        	value.indexOf("\n=== ") >= 0 || value.startsWith("=== ") ||
-        	value.indexOf("\n[") >= 0 || value.startsWith("[") ||
-        	value.indexOf("\n* ") >= 0 || value.startsWith("* ") ||
-        	(value.indexOf("[%") >= 0 && value.indexOf("%]") > 0);
-        return isWikiText;
-    }
-    
-    //-------------------------------------------------------------------------
-    public static boolean isHtmlText(
-    	String value
-    ) {
-    	return value.startsWith("<");
-    }
-    
-    //-------------------------------------------------------------------------
+
     /**
      * Prepares a single stringified Value to append.
+     * 
+     * @param p
+     * @param v
+     * @param multiLine
+     * @param forEditing
+     * @param shortFormat
+     * @return
      */
     protected String getStringifiedValueInternal(
         ViewPort p, 
@@ -462,7 +519,10 @@ implements Serializable {
         return v.toString().trim();
     }
 
-    //-------------------------------------------------------------------------
+    /* (non-Javadoc)
+     * @see java.lang.Object#toString()
+     */
+    @Override
     public String toString(
     ) {
         Object value = this.getValue(false);
@@ -471,55 +531,71 @@ implements Serializable {
             : value.toString();
     }
 
-    //-------------------------------------------------------------------------
     /**
      * Returns the background color of the field/value as W3C CSS color, 
      * null if not defined.
+     * 
+     * @return
      */
     public String getBackColor(
     ) {
         return this.fieldDef.backColor;
     }
 
-    //-------------------------------------------------------------------------
     /**
      * Returns the color of the field/value as W3C CSS color, null if not
      * defined.
+     * 
+     * @return
      */
     public String getColor(
     ) {
         return this.fieldDef.color;
     }
 
-    //-------------------------------------------------------------------------
     /**
      * Returns icon key.
+     * 
+     * @return
      */
     public String getIconKey(
     ) {
         return this.fieldDef.iconKey;
     }
 
-    //-------------------------------------------------------------------------
+    /**
+     * Get configured data binding.
+     * 
+     * @return
+     */
     public DataBinding getDataBinding(
     ) {
         return fieldDef.dataBinding;
     }
 
-    //-------------------------------------------------------------------------
+    /**
+     * Get auto completer.
+     * 
+     * @param target
+     * @return
+     */
     public Autocompleter_1_0 getAutocompleter(
         RefObject_1_0 target
     ) {
-        return target == null
-        ? null
-            : this.app.getPortalExtension().getAutocompleter(
+        return target == null ? null : 
+        	this.app.getPortalExtension().getAutocompleter(
                 this.app,
                 target,
                 this.fieldDef.qualifiedFeatureName
             );
     }
 
-    //-------------------------------------------------------------------------
+    /**
+     * Get upper bound for given multiplicity.
+     * 
+     * @param defaultMultiplicity
+     * @return
+     */
     protected String getUpperBound(
         String defaultMultiplicity
     ) {
@@ -541,7 +617,14 @@ implements Serializable {
         return upperBound;        
     }
 
-    //-------------------------------------------------------------------------
+    /**
+     * Get label.
+     * 
+     * @param attribute
+     * @param p
+     * @param label
+     * @return
+     */
     protected String getLabel(
     	Attribute attribute,
     	ViewPort p,
@@ -559,7 +642,13 @@ implements Serializable {
         return label;
     }
     
-    //-------------------------------------------------------------------------
+    /**
+     * Get title.
+     * 
+     * @param attribute
+     * @param label
+     * @return
+     */
     protected String getTitle(
     	Attribute attribute,
     	String label
@@ -569,7 +658,6 @@ implements Serializable {
     	return label.startsWith(title) ? null : title;
     }
     
-    //-------------------------------------------------------------------------
     /**
      * Paints the attribute to p.
      * 
@@ -730,15 +818,15 @@ implements Serializable {
                     id = (id == null) || id.isEmpty() ? 
                         feature + "[" + Integer.toString(tabIndex) + "]" : 
                         id;
-                    boolean isWikiText = AttributeValue.isWikiText(stringifiedValue);
-                    boolean isHtmlText = AttributeValue.isHtmlText(stringifiedValue);
+                    boolean containsWiki = HtmlEncoder.containsWiki(stringifiedValue);
+                    boolean containsHtml = HtmlEncoder.containsHtml(stringifiedValue);
                     if(attribute.getSpanRow() > 1) {
                         if(nCols == 1) {
                             styleModifier += "\"";
                         	if(p.getViewPortType() != ViewPort.Type.MOBILE) {
                         		p.write("<td ", rowSpanModifier, " class=\"valueL\" ", widthModifier, " ", (styleModifier.length() == 0 ? "" : styleModifier), ">");
                         	}
-                            if(isWikiText) {
+                            if(containsWiki) {
 	                            p.write("<div id=\"", id, "Value\" style='display:none'>");
 	                            this.app.getPortalExtension().renderTextValue(
 	                            	p, 
@@ -753,13 +841,13 @@ implements Serializable {
                         	else {                            
                         		p.write("<div class=\"fieldSpannedFull\" id=\"", id, "\" ", (styleModifier.length() == 0 ? "" : styleModifier), ">");
                         	}
-                            if(isWikiText) {
+                            if(containsWiki) {
                             	p.write("<script language=\"javascript\" type=\"text/javascript\">try{var w=Wiky.toHtml($('", id, "Value').innerHTML);if(w.startsWith('<p>')){w=w.substring(3);};if(w.endsWith('</p>')){w=w.substring(0,w.length-4);};w=w.strip();$('", id, "').update(w);}catch(e){$('", id, "').update($('", id, "Value').innerHTML);};</script>");                            	
                             }
                             else {
 	                            this.app.getPortalExtension().renderTextValue(
 	                            	p, 
-	                            	isHtmlText ? stringifiedValue : stringifiedValue.replaceAll("\n", "<br />"), 
+	                            	containsHtml ? stringifiedValue : stringifiedValue.replaceAll("\n", "<br />"), 
 	                            	false
 	                            );
                             }
@@ -770,7 +858,7 @@ implements Serializable {
                         	if(p.getViewPortType() != ViewPort.Type.MOBILE) {
                         		p.write("<td ", rowSpanModifier, " class=\"valueL\" ", widthModifier, " ",  styleModifier, ">");
                         	}
-                            if(isWikiText) {
+                            if(containsWiki) {
 	                            p.write("<div id=\"", id, "Value\" style='display:none'>");
 	                            this.app.getPortalExtension().renderTextValue(
 	                            	p, 
@@ -785,13 +873,13 @@ implements Serializable {
                         	else {
                         		p.write("<div class=\"fieldSpanned\" id=\"", id, "\" ", styleModifier, ">");
                         	}
-                            if(isWikiText) {
+                            if(containsWiki) {
                             	p.write("<script language=\"javascript\" type=\"text/javascript\">try{var w=Wiky.toHtml($('", id, "Value').innerHTML);if(w.startsWith('<p>')){w=w.substring(3);};if(w.endsWith('</p>')){w=w.substring(0,w.length-4);};w=w.strip();$('", id, "').update(w);}catch(e){$('", id, "').update($('", id, "Value').innerHTML);};</script>");
                             }
                             else {
 	                            this.app.getPortalExtension().renderTextValue(
 	                            	p, 
-	                            	isHtmlText ? stringifiedValue : stringifiedValue.replaceAll("\n", "<br />"), 
+	                            	containsHtml ? stringifiedValue : stringifiedValue.replaceAll("\n", "<br />"), 
 	                            	false
 	                            );                            	
                             }
@@ -807,7 +895,7 @@ implements Serializable {
                         	p.write("<td ",  rowSpanModifier, " class=\"valueL\" ", widthModifier, " ", styleModifier, ">");
                         }
                         if(attribute.getValue() instanceof TextValue) {
-                        	if(isWikiText) {
+                        	if(containsWiki) {
 		                        p.write("<div id=\"", id, "Value\" style='display:none'>");
 		                        this.app.getPortalExtension().renderTextValue(
 		                        	p, 
@@ -822,7 +910,7 @@ implements Serializable {
                         	else {
                         		p.write("<div class=\"field\" id=\"", id, "\">", iconTag);
                         	}
-	                        if(isWikiText) {
+	                        if(containsWiki) {
 	                        	p.write("<script language=\"javascript\" type=\"text/javascript\">try{var w=Wiky.toHtml($('", id, "Value').innerHTML);if(w.startsWith('<p>')){w=w.substring(3);};if(w.endsWith('</p>')){w=w.substring(0,w.length-4);};w=w.strip();$('", id, "').update(w);}catch(e){$('", id, "').update($('", id, "Value').innerHTML);};</script>");
 	                        }
 	                        else {
@@ -843,7 +931,7 @@ implements Serializable {
                         	}
 	                        this.app.getPortalExtension().renderTextValue(
 	                        	p, 
-	                        	isHtmlText ? stringifiedValue : stringifiedValue.replaceAll("\n", "<br />"), 
+	                        	containsHtml ? stringifiedValue : stringifiedValue.replaceAll("\n", "<br />"), 
 	                        	false
 	                        );
 	                        p.write("</div>");                        	

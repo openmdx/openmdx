@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2012, OMEX AG, Switzerland
+ * Copyright (c) 2004-2013, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -65,42 +65,34 @@ import javax.jdo.JDOUserCallbackException;
 import javax.jdo.JDOUserException;
 import javax.jdo.PersistenceManager;
 import javax.jdo.PersistenceManagerFactory;
-import javax.jdo.Transaction;
 import javax.resource.ResourceException;
 import javax.resource.cci.Connection;
 import javax.resource.cci.Interaction;
-import javax.resource.spi.LocalTransaction;
-import javax.transaction.Status;
-import javax.transaction.Synchronization;
-import javax.transaction.SystemException;
-import javax.transaction.TransactionSynchronizationRegistry;
-import javax.transaction.UserTransaction;
 
-import org.openmdx.base.accessor.rest.DataObjectManager_1;
 import org.openmdx.base.accessor.rest.spi.DataStoreCache_2_0;
-import org.openmdx.base.accessor.rest.spi.Synchronization_2_0;
+import org.openmdx.base.accessor.rest.spi.LocalUserTransactionAdapters;
 import org.openmdx.base.aop0.PlugIn_1_0;
 import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.naming.Path;
-import org.openmdx.base.persistence.cci.UnitOfWork;
+import org.openmdx.base.persistence.cci.Synchronization;
+import org.openmdx.base.persistence.spi.UnitOfWork;
 import org.openmdx.base.persistence.cci.UserObjects;
 import org.openmdx.base.persistence.spi.AbstractPersistenceManagerFactory;
 import org.openmdx.base.persistence.spi.SharedObjects;
-import org.openmdx.base.resource.spi.LocalTransactions;
-import org.openmdx.base.resource.spi.UserTransactions;
 import org.openmdx.base.text.conversion.UUIDConversion;
+import org.openmdx.base.transaction.LocalUserTransaction;
+import org.openmdx.base.transaction.Status;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.exception.Throwables;
 import org.openmdx.kernel.id.UUIDs;
 import org.openmdx.kernel.loading.Factory;
 import org.openmdx.kernel.log.SysLog;
-import org.openmdx.kernel.naming.ComponentEnvironment;
 
 /**
  * Unit Of Work
  */
-public class UnitOfWork_1 implements Serializable, Transaction, UnitOfWork, Synchronization_2_0 {
+public class UnitOfWork_1 implements Serializable, UnitOfWork {
 
     /**
      * Constructor 
@@ -120,33 +112,15 @@ public class UnitOfWork_1 implements Serializable, Transaction, UnitOfWork, Sync
         this.connection = connection;
         this.aspectSpecificContexts = aspectSpecificContexts;
         PersistenceManagerFactory persistenceManagerFactory = persistenceManager.getPersistenceManagerFactory();
-		this.optimistic = persistenceManagerFactory.getOptimistic();
-        try {
-            String transactionType = persistenceManagerFactory.getTransactionType();
-            if(Constants.RESOURCE_LOCAL.equals(transactionType)) {
-                this.userTransaction = null;
-                this.localTransaction = LocalTransactions.getLocalTransaction( 
-                    this.dataObjectManager.connection.getLocalTransaction()
-                ); 
-            } else if (this.isContainerManaged()) {
-                this.userTransaction = null;
-                this.localTransaction = null; 
-            } else {
-                this.userTransaction = UserTransactions.getUserTransaction();
-                this.localTransaction = LocalTransactions.getLocalTransaction(this.userTransaction); 
-            }
-        } catch (ResourceException exception) {
-            throw new JDODataStoreException(
-                "Unit of work could not be acquired",
-                BasicException.newEmbeddedExceptionStack(
-                    exception,
-                    BasicException.Code.DEFAULT_DOMAIN,
-                    BasicException.Code.TRANSACTION_FAILURE
-                )
-            );
-        }
+        this.optimistic = persistenceManagerFactory.getOptimistic();
+        this.containerManaged = AbstractPersistenceManagerFactory.isTransactionContainerManaged(
+            persistenceManagerFactory
+        );
+        this.resourceLocalTransaction = Constants.RESOURCE_LOCAL.equals(
+            persistenceManagerFactory.getTransactionType()
+        );
         this.setIsolationLevel(
-        	persistenceManagerFactory.getTransactionIsolationLevel()
+            persistenceManagerFactory.getTransactionIsolationLevel()
         );
     }
 
@@ -159,6 +133,16 @@ public class UnitOfWork_1 implements Serializable, Transaction, UnitOfWork, Sync
      * 
      */
     private final Connection connection;
+
+    /**
+     * 
+     */
+    private final boolean containerManaged;
+    
+    /**
+     * Tells whether we use a resource local transaction or not
+     */
+    private final boolean resourceLocalTransaction;
     
     /**
      * Implements <code>Serializable</code>
@@ -175,7 +159,7 @@ public class UnitOfWork_1 implements Serializable, Transaction, UnitOfWork, Sync
      */
     protected final Map<DataObject_1,TransactionalState_1> states = 
         new IdentityHashMap<DataObject_1,TransactionalState_1>();
-
+        
     /**
      * The transactional interaction
      */
@@ -192,9 +176,9 @@ public class UnitOfWork_1 implements Serializable, Transaction, UnitOfWork, Sync
     private boolean forgetOnly = false;
 
     /**
-     * 
+     * Remembers whether the unit of work has beeen flushed
      */
-    private boolean forgettable = false;
+    private boolean flushed = false;
     
     /**
      * 
@@ -233,20 +217,10 @@ public class UnitOfWork_1 implements Serializable, Transaction, UnitOfWork, Sync
     private final DataObjectManager_1.AspectObjectDispatcher aspectSpecificContexts;
 
     /**
-     * The delegate in case of an optimistic transaction
+     * The user transaction object
      */
-    private final LocalTransaction localTransaction;
-    
-    /**
-     * The optional user transaction object
-     */
-    private final UserTransaction userTransaction;
+    private LocalUserTransaction  userTransaction;
 
-    /**
-     * The optional transaction synchronization registry
-     */
-    private static TransactionSynchronizationRegistry transactionSynchronizationRegistry;
-    
     /**
      * Tells whether the transaction is optimistic or pessimistic
      */
@@ -272,6 +246,83 @@ public class UnitOfWork_1 implements Serializable, Transaction, UnitOfWork, Sync
      * The requested transaction isolation level
      */
     private String isolationLevel;
+    
+    /**
+     * Determines whether the unit of work has been flushed.
+     *
+     * @return Returns the forgettable.
+     */
+    final boolean isFlushed() {
+        return this.flushed;
+    }
+
+    /**
+     * Use its path to find the failed object
+     * 
+     * @param initialCause
+     * 
+     * @return the failed object, or <code>null</code> if its acquisition fails
+     */
+    private Object getFailedObject(BasicException initialCause) {
+        try {
+            return this.getPersistenceManager().getObjectById(new Path(initialCause.getParameter("path")), false);
+        } catch (RuntimeException ignored) {
+            return null; // Must no prevent us from creating a fatal data store exception
+        }
+    } 
+
+    /**
+     * Create a fatal data store exception
+     * 
+     * @param cause the cause for the before completion or commit failure 
+     * 
+     * @return a generic fatal data store exception or a specific optimistic verification exception
+     */
+    private JDOFatalDataStoreException toFatalDataStoreException(
+        BasicException cause
+    ) {
+        BasicException initialCause = cause.getCause(null);
+        return initialCause.getExceptionCode() == BasicException.Code.CONCURRENT_ACCESS_FAILURE ? new JDOOptimisticVerificationException(
+            cause.getDescription(),
+            new JDOOptimisticVerificationException[]{
+                BasicException.initHolder(
+                    new JDOOptimisticVerificationException(
+                        initialCause.getDescription(),
+                        BasicException.newEmbeddedExceptionStack(cause),
+                        getFailedObject(initialCause) 
+                    )
+                )
+            }
+        ) : BasicException.initHolder(
+            new JDOFatalDataStoreException(
+                cause.getDescription(),
+                BasicException.newEmbeddedExceptionStack(cause)
+            )
+        );
+    }
+    
+    /*
+     * Determines whether the unit of work is forgettable.
+     *
+     * @return Returns the forgettable.
+     */
+    private final boolean isForgettable() {
+        return this.optimistic && !this.flushed;
+    }
+    
+    private LocalUserTransaction getUserTransaction(
+    ) throws ResourceException {
+        if(this.userTransaction == null) {
+            if(this.resourceLocalTransaction) {
+                this.userTransaction = LocalUserTransactionAdapters.getResourceLocalUserTransactionAdapter(this.getPersistenceManager());
+            } else if (this.containerManaged) { 
+                this.userTransaction = LocalUserTransactionAdapters.getContainerManagedUserTransactionAdapter();
+            } else {
+                this.userTransaction = LocalUserTransactionAdapters.getJTAUserTransactionAdapter();
+            }
+        }
+        return this.userTransaction;
+    }
 
     /**
      * Flush the unit of work to the data store
@@ -291,7 +342,7 @@ public class UnitOfWork_1 implements Serializable, Transaction, UnitOfWork, Sync
            );
        }
        if(this.isActive() && !this.flushing) try {
-           this.forgettable = false;
+           this.flushed = true;
            this.flushing = true;
            if(!this.enlisted) {
                this.enlist(true);
@@ -398,7 +449,7 @@ public class UnitOfWork_1 implements Serializable, Transaction, UnitOfWork, Sync
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.rest.spi.Synchronization_2_0#clear()
      */
-//  @Override
+    @Override
     public void clear() {
         this.members.clear();
         this.states.clear();
@@ -417,7 +468,7 @@ public class UnitOfWork_1 implements Serializable, Transaction, UnitOfWork, Sync
      * @return the members of the given unit of work
      */
     final List<DataObject_1> getMembers(){
-    	return this.members;
+        return this.members;
     }
 
     /**
@@ -426,16 +477,16 @@ public class UnitOfWork_1 implements Serializable, Transaction, UnitOfWork, Sync
      * @throws ServiceException 
      */
     boolean synchronize() throws ServiceException{
-    	boolean outOfSync = false;
+        boolean outOfSync = false;
         Members: for(DataObject_1 member : this.members) {
             if(outOfSync |= member.isOutOfSync()) {
                 break Members;
             }
         }
-    	if(outOfSync) {
-        	this.flush(false);
-    	}
-    	return outOfSync;
+        if(outOfSync) {
+            this.flush(false);
+        }
+        return outOfSync;
     }
 
     /**
@@ -469,24 +520,6 @@ public class UnitOfWork_1 implements Serializable, Transaction, UnitOfWork, Sync
     // Implements Synchronization_2_0      
     //------------------------------------------------------------------------
 
-    /**
-     * Retrieve the <code>TransactionSynchronizationRegistry</code> lazily
-     * 
-     * @return the <code>TransactionSynchronizationRegistry</code>
-     */
-    private TransactionSynchronizationRegistry getTransactionSynchronizationRegistry(
-    ){
-        if(UnitOfWork_1.transactionSynchronizationRegistry == null) try {
-            UnitOfWork_1.transactionSynchronizationRegistry = ComponentEnvironment.lookup(TransactionSynchronizationRegistry.class);
-        } catch (BasicException exception) {                        
-            throw new JDOFatalDataStoreException(
-                "Transaction synchronization registry acquisition failure",
-                BasicException.newEmbeddedExceptionStack(exception)
-            );
-        }
-        return UnitOfWork_1.transactionSynchronizationRegistry;
-    }
-    
     /* (non-Javadoc)
      * @see javax.jdo.Transaction#getRollbackOnly()
      */
@@ -498,18 +531,12 @@ public class UnitOfWork_1 implements Serializable, Transaction, UnitOfWork, Sync
             return true;
         } else if(this.optimistic) {
             return false;
-        } else if (this.userTransaction == null){
-            return getTransactionSynchronizationRegistry().getRollbackOnly();
         } else try {
-            return this.userTransaction.getStatus() == Status.STATUS_MARKED_ROLLBACK;
-        } catch (SystemException exception) {
+            return getUserTransaction().isRollbackOnly();
+        } catch (ResourceException exception) {
             throw new JDODataStoreException(
-                "Rollback-only query failed",
-                BasicException.newEmbeddedExceptionStack(
-                    exception,
-                    BasicException.Code.DEFAULT_DOMAIN,
-                    BasicException.Code.TRANSACTION_FAILURE
-                )
+                "Rollback only query failure",
+                exception
             );
         }
     }
@@ -531,27 +558,12 @@ public class UnitOfWork_1 implements Serializable, Transaction, UnitOfWork, Sync
             );
         }
         if(!this.optimistic) {
-            if(this.userTransaction == null) {
-                getTransactionSynchronizationRegistry().setRollbackOnly();
-            } else try {
-                this.userTransaction.setRollbackOnly();
-            } catch (IllegalStateException exception) {
+            try {
+                getUserTransaction().setRollbackOnly();
+            } catch (ResourceException exception) {
                 throw new JDODataStoreException(
-                    "Could not set the transaction into rollback-only mode",
-                    BasicException.newEmbeddedExceptionStack(
-                        exception,
-                        BasicException.Code.DEFAULT_DOMAIN,
-                        BasicException.Code.ILLEGAL_STATE
-                    )
-                );
-            } catch (SystemException exception) {
-                throw new JDODataStoreException(
-                    "Could not set the transaction into rollback-only mode",
-                    BasicException.newEmbeddedExceptionStack(
-                        exception,
-                        BasicException.Code.DEFAULT_DOMAIN,
-                        BasicException.Code.TRANSACTION_FAILURE
-                    )
+                    "Unable to set rollback only",
+                    exception
                 );
             }
         }
@@ -561,7 +573,7 @@ public class UnitOfWork_1 implements Serializable, Transaction, UnitOfWork, Sync
     ){
         this.rollbackOnly = false;
         this.forgetOnly = false;
-        this.forgettable = this.optimistic;
+        this.flushed = false;
         this.members.clear();
         this.unitOfWorkId = UUIDConversion.toUID(UUIDs.newUUID());
         this.taskId = this.systemObjects.newTaskIdentifier();
@@ -593,20 +605,20 @@ public class UnitOfWork_1 implements Serializable, Transaction, UnitOfWork, Sync
     public void begin(
     ) {
         if(this.isActive()) {
-        	throw BasicException.initHolder(
-        		new JDOUserException(
-    				"Unit of work is active",
-    				BasicException.newEmbeddedExceptionStack(
+            throw BasicException.initHolder(
+                new JDOUserException(
+                    "Unit of work is active",
+                    BasicException.newEmbeddedExceptionStack(
                         BasicException.Code.DEFAULT_DOMAIN,
                         BasicException.Code.ILLEGAL_STATE
                     )
-    			)
+                )
             );
         } else {
             this.start();
             if(!this.optimistic) {
                 try {
-                    this.enlist(this.localTransaction != null);
+                    this.enlist(!containerManaged);
                 } catch (ResourceException exception) {
                     throw BasicException.initHolder(
                         new JDODataStoreException(
@@ -635,7 +647,7 @@ public class UnitOfWork_1 implements Serializable, Transaction, UnitOfWork, Sync
     ) throws ResourceException {
         this.interaction = this.dataObjectManager.newInteraction(this.connection);
         if(beginTransaction) {
-            this.localTransaction.begin();
+            getUserTransaction().begin();
         }
         this.enlisted = true;
         SysLog.detail(
@@ -643,6 +655,22 @@ public class UnitOfWork_1 implements Serializable, Transaction, UnitOfWork, Sync
             this.unitOfWorkId
         );
     }
+    
+    /**
+     * Close the interaction
+     */
+    private void closeInteraction(
+        ) {
+        if(this.interaction != null) {
+            try {
+                this.interaction.close();
+            } catch (ResourceException exception) {
+                Throwables.log(exception);
+            } finally {
+                this.interaction = null;
+            } 
+        }
+    } 
     
     /** 
      * Commit the current unit of work.
@@ -653,7 +681,7 @@ public class UnitOfWork_1 implements Serializable, Transaction, UnitOfWork, Sync
     ) {
         if(this.isActive()) {
             if(this.rollbackOnly) {
-                this.afterCompletion(javax.transaction.Status.STATUS_ROLLEDBACK);
+                this.afterCompletion(Status.STATUS_ROLLEDBACK);
                 throw BasicException.initHolder(
                     new JDOUserException(
                         "The unit of work has been marked for rollback only",
@@ -679,7 +707,7 @@ public class UnitOfWork_1 implements Serializable, Transaction, UnitOfWork, Sync
                 }
                 if(commitException == null) {
                     try {
-                        this.localTransaction.commit();
+                        getUserTransaction().commit();
                     } catch (ResourceException exception) {
                         commitException = BasicException.newStandAloneExceptionStack(
                             exception,
@@ -690,7 +718,7 @@ public class UnitOfWork_1 implements Serializable, Transaction, UnitOfWork, Sync
                     }
                 } else if (this.enlisted) {
                     try {
-                        this.localTransaction.rollback();
+                        getUserTransaction().rollback();
                     } catch (ResourceException exception) {
                         BasicException rollbackException = BasicException.newStandAloneExceptionStack(
                             exception,
@@ -702,38 +730,13 @@ public class UnitOfWork_1 implements Serializable, Transaction, UnitOfWork, Sync
                         commitException = rollbackException;
                     }
                 }
-                if(this.interaction != null) {
-                    try {
-                        this.interaction.close();
-                    } catch (ResourceException exception) {
-                        Throwables.log(exception);
-                    } finally {
-                        this.interaction = null;
-                    } 
-                }
+                closeInteraction();
                 this.enlisted = false;
                 if(commitException == null) {
-                    this.afterCompletion(javax.transaction.Status.STATUS_COMMITTED);
+                    this.afterCompletion(Status.STATUS_COMMITTED);
                 } else {
-                    this.afterCompletion(javax.transaction.Status.STATUS_ROLLEDBACK);
-                    BasicException initialCause = commitException.getCause(null);
-                    throw initialCause.getExceptionCode() == BasicException.Code.CONCURRENT_ACCESS_FAILURE ? new JDOOptimisticVerificationException(
-                        commitException.getDescription(),
-                        new JDOOptimisticVerificationException[]{
-                            BasicException.initHolder(
-                                new JDOOptimisticVerificationException(
-                                    initialCause.getDescription(),
-                                    BasicException.newEmbeddedExceptionStack(commitException),
-                                    this.getPersistenceManager().getObjectById(new Path(initialCause.getParameter("path")), false) 
-                                )
-                            )
-                        }
-                    ) : BasicException.initHolder(
-                        new JDOFatalDataStoreException(
-                            commitException.getDescription(),
-                            BasicException.newEmbeddedExceptionStack(commitException)
-                        )
-                    );
+                    this.afterCompletion(Status.STATUS_ROLLEDBACK);
+                    throw toFatalDataStoreException(commitException);
                 }
             }
         } else {
@@ -747,7 +750,7 @@ public class UnitOfWork_1 implements Serializable, Transaction, UnitOfWork, Sync
                 )
             );
         }
-    } 
+    }
 
     /**
      * Roll back the current unit of work.
@@ -758,7 +761,7 @@ public class UnitOfWork_1 implements Serializable, Transaction, UnitOfWork, Sync
     ) {
         if(isActive()) {
             if(this.enlisted) try {
-                this.localTransaction.rollback();
+                getUserTransaction().rollback();
             } catch (ResourceException exception) {
                 throw BasicException.initHolder(
                     new JDOUserException(
@@ -770,9 +773,10 @@ public class UnitOfWork_1 implements Serializable, Transaction, UnitOfWork, Sync
                     )
                 );
             } finally {
+                closeInteraction();
                 this.enlisted = false;
             }
-            this.afterCompletion(javax.transaction.Status.STATUS_ROLLEDBACK);
+            this.afterCompletion(Status.STATUS_ROLLEDBACK);
         } else {
             throw BasicException.initHolder(
                 new JDOUserException(
@@ -784,7 +788,7 @@ public class UnitOfWork_1 implements Serializable, Transaction, UnitOfWork, Sync
                 )
             );
         }
-    }       
+    }
 
     /* (non-Javadoc)
      * @see javax.jdo.Transaction#getNontransactionalRead()
@@ -837,7 +841,7 @@ public class UnitOfWork_1 implements Serializable, Transaction, UnitOfWork, Sync
      * @see javax.jdo.Transaction#setIsolationLevel(java.lang.String)
      */
     public void setIsolationLevel(String isolationLevel) {
-    	this.isolationLevel = isolationLevel;
+        this.isolationLevel = isolationLevel;
     }
     
     /* (non-Javadoc)
@@ -904,6 +908,7 @@ public class UnitOfWork_1 implements Serializable, Transaction, UnitOfWork, Sync
     /* (non-Javadoc)
      * @see javax.jdo.Transaction#setSynchronization(javax.transaction.Synchronization)
      */
+    @Override
     public void setSynchronization(
         Synchronization sync
     ) {
@@ -929,18 +934,6 @@ public class UnitOfWork_1 implements Serializable, Transaction, UnitOfWork, Sync
     ){
         return this.optimistic;
     }
-
-    /**
-     * Container managed unit's of work don't handle commit or rollback
-     *
-     * @return the value of the ContainerManaged property.
-     */
-    private final boolean isContainerManaged(
-    ){
-        return AbstractPersistenceManagerFactory.isTransactionContainerManaged(
-            this.dataObjectManager.getPersistenceManagerFactory()
-        );
-    }
     
     /* (non-Javadoc)
      * @see org.openmdx.base.transaction.UnitOfWork_1_0#getSynchronization()
@@ -958,7 +951,7 @@ public class UnitOfWork_1 implements Serializable, Transaction, UnitOfWork, Sync
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.rest.spi.Synchronization_2_0#afterBegin()
      */
-//  @Override
+    @Override
     public void afterBegin(
     ) {
         this.start();
@@ -978,11 +971,11 @@ public class UnitOfWork_1 implements Serializable, Transaction, UnitOfWork, Sync
     //------------------------------------------------------------------------
 
     /* (non-Javadoc)
-	 * @see org.openmdx.base.persistence.cci.UnitOfWork#setForgetOnly()
-	 */
-//  @Override
-	public void setForgetOnly() {
-	    if(!this.optimistic) {
+     * @see org.openmdx.base.persistence.cci.UnitOfWork#setForgetOnly()
+     */
+    @Override
+    public void setForgetOnly() {
+        if(!this.optimistic) {
             throw new JDODataStoreException(
                 "Only an optimistic unit of work may be set into forget-only mode",
                 BasicException.newEmbeddedExceptionStack(
@@ -990,7 +983,7 @@ public class UnitOfWork_1 implements Serializable, Transaction, UnitOfWork, Sync
                     BasicException.Code.NOT_SUPPORTED
                 )
             );
-	    }
+        }
         if(!this.isActive()){
             throw new JDODataStoreException(
                 "There is no active unit of work to be set into forget-only mode",
@@ -1000,7 +993,7 @@ public class UnitOfWork_1 implements Serializable, Transaction, UnitOfWork, Sync
                 )
             );
         }
-        if(!this.forgettable){
+        if(!isForgettable()){
             throw new JDODataStoreException(
                 "An optimistic unit of work becomes non-optimistic after flushing",
                 BasicException.newEmbeddedExceptionStack(
@@ -1009,16 +1002,16 @@ public class UnitOfWork_1 implements Serializable, Transaction, UnitOfWork, Sync
                 )
             );
         }
-	    this.forgetOnly = true;
-	}
+        this.forgetOnly = true;
+    }
 
-	/* (non-Javadoc)
-	 * @see org.openmdx.base.persistence.cci.UnitOfWork#isForgetOnly()
-	 */
-	public boolean isForgetOnly() {
-	    return this.forgetOnly;
-	}
-	
+    /* (non-Javadoc)
+     * @see org.openmdx.base.persistence.cci.UnitOfWork#isForgetOnly()
+     */
+    public boolean isForgetOnly() {
+        return this.forgetOnly;
+    }
+    
     
     //------------------------------------------------------------------------
     // Implements Synchronization    
@@ -1028,35 +1021,37 @@ public class UnitOfWork_1 implements Serializable, Transaction, UnitOfWork, Sync
      * The beforeCompletion method notifies a provider or plug-in that a
      * unit of work is about to be committed.
      */
-//  @Override
+    @Override
     public void beforeCompletion(
     ) {
         try {
-        	if(this.rollbackOnly) {
-	            SysLog.detail(
-	                "Unit of work is set to rollback only, no flushing takes place", 
-	                this.unitOfWorkId
-	            );
-        	} else if(this.forgetOnly) {
+            if(this.rollbackOnly) {
+                SysLog.detail(
+                    "Unit of work is set to rollback only, no flushing takes place", 
+                    this.unitOfWorkId
+                );
+            } else if(this.forgetOnly) {
                 SysLog.detail(
                     "Unit of work is set to forget only, no flushing takes place", 
                     this.unitOfWorkId
                 );
-        	} else {
-	            SysLog.detail(
-	                "Unit of work flushing", 
-	                this.unitOfWorkId
-	            );
-	            this.flush(true);
-        	}
+            } else {
+                SysLog.detail(
+                    "Unit of work flushing", 
+                    this.unitOfWorkId
+                );
+                this.flush(true);
+            }
         } catch (ServiceException exception) {
             this.setRollbackOnly();
-            throw BasicException.initHolder(
-                new JDOFatalDataStoreException(
-                    "Unable to flush unit of work",
-                    BasicException.newEmbeddedExceptionStack(exception)
+            throw toFatalDataStoreException(
+                BasicException.newStandAloneExceptionStack(
+                    exception,
+                    BasicException.Code.DEFAULT_DOMAIN,
+                    BasicException.Code.ROLLBACK,
+                    "Unable to flush unit of work"
                 )
-            );                        
+            );
         }
     } 
 
@@ -1067,12 +1062,12 @@ public class UnitOfWork_1 implements Serializable, Transaction, UnitOfWork, Sync
      * <p>
      * This method must not throw an exception.
      */
-//  @Override
+    @Override
     synchronized public void afterCompletion(
-        int status
+        Status status
     ) {
         try {
-        	this.updateAvoidanceDisabled = false; // reset the flag
+            this.updateAvoidanceDisabled = false; // reset the flag
             this.unitOfWorkId = null;
             this.notifyAll();
             while(!this.members.isEmpty()) {
@@ -1085,7 +1080,7 @@ public class UnitOfWork_1 implements Serializable, Transaction, UnitOfWork, Sync
             this.transactionTime = null;
             this.taskId = null;
             this.aspectSpecificContexts.clear();
-            if(status == javax.transaction.Status.STATUS_COMMITTED) {
+            if(status == Status.STATUS_COMMITTED) {
                 SharedObjects.getPlugInObject(this.dataObjectManager, DataStoreCache_2_0.class).evictAll();
             }
             if(!this.dataObjectManager.isRetainValues()) {
@@ -1101,7 +1096,7 @@ public class UnitOfWork_1 implements Serializable, Transaction, UnitOfWork, Sync
                 BasicException.Code.SYSTEM_EXCEPTION,
                 "afterCompletion() failure",
                 new BasicException.Parameter(
-                    "status", UserTransactions.getStatus(status)
+                    "status", status
                 )
             ).log();
         }
@@ -1110,38 +1105,38 @@ public class UnitOfWork_1 implements Serializable, Transaction, UnitOfWork, Sync
     /**
      * Disables the update avoidance for the current unit of work
      */
-	public void disableUpdateAvoidance() {
-		this.updateAvoidanceDisabled = true;
-	}
-	
-	/**
-	 * @return the updateAvoidanceDisabled
-	 */
-	public boolean isUpdateAvoidanceEnabled() {
-		return !this.updateAvoidanceDisabled;
-	}
-	
-	/**
+    public void disableUpdateAvoidance() {
+        this.updateAvoidanceDisabled = true;
+    }
+    
+    /**
+     * @return the updateAvoidanceDisabled
+     */
+    public boolean isUpdateAvoidanceEnabled() {
+        return !this.updateAvoidanceDisabled;
+    }
+    
+    /**
      * If read lock is required then a concurrent modification exception shall
      * be thrown if the object is<ul>
-	 *     <li>either updated by both this unit of work and another unit of
-	 *         work concurrently
-	 *     <li>or made transactional in this unit of work and
-	 *         updated by another unit of work concurrently
-	 *     </ul>
-	 * </ul>
-	 * @return <code>true</code>
-	 */
-	public boolean isReadLockRequired(){
-		return Constants.TX_REPEATABLE_READ.equals(this.isolationLevel);
-	}
+     *     <li>either updated by both this unit of work and another unit of
+     *         work concurrently
+     *     <li>or made transactional in this unit of work and
+     *         updated by another unit of work concurrently
+     *     </ul>
+     * </ul>
+     * @return <code>true</code>
+     */
+    public boolean isReadLockRequired(){
+        return Constants.TX_REPEATABLE_READ.equals(this.isolationLevel);
+    }
 
-	
+    
     //------------------------------------------------------------------------
     // Class SystemObjects
     //------------------------------------------------------------------------
 
-	/**
+    /**
      * System Objects
      */
     class SystemObjects extends SharedObjects {

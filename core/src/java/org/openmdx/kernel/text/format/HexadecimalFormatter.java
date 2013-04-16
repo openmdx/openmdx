@@ -188,7 +188,7 @@ public class HexadecimalFormatter {
     /**
      * Converts a long value to a hexadciemal String.
      *
-     * @param value a long to format
+     * @param _value a long to format
      * @param digits the number of digits
      * 
      * @return the hex formatted value with leading zeroes

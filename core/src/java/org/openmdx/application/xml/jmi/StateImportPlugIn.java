@@ -52,7 +52,6 @@ import java.util.Collection;
 import java.util.Map;
 
 import javax.jdo.JDOException;
-import javax.jdo.JDOHelper;
 import javax.jdo.JDOObjectNotFoundException;
 import javax.jdo.PersistenceManager;
 import javax.jmi.reflect.JmiException;
@@ -71,6 +70,7 @@ import org.openmdx.base.naming.Path;
 import org.openmdx.base.rest.spi.Facades;
 import org.openmdx.base.rest.spi.Object_2Facade;
 import org.openmdx.kernel.exception.BasicException;
+import org.openmdx.kernel.jdo.ReducedJDOHelper;
 import org.openmdx.state2.cci.DateStateViews;
 import org.openmdx.state2.jmi1.DateState;
 import org.openmdx.state2.jmi1.Legacy;
@@ -325,7 +325,7 @@ public class StateImportPlugIn implements ImportPlugIn {
 		        StateImportPlugIn.IGNORABLE_FEATURES_FOR_STATE_CAPABLE_INSTANCES, 
 		        !Parameters.STRICT_QUERY
 		    );
-		    if(!JDOHelper.isPersistent(refObject)){
+		    if(!ReducedJDOHelper.isPersistent(refObject)){
 		        Path objectId = (Path)Facades.asObject(objectHolder).attributeValue("core");
 	            if(objectId == null) {
 	                throw new ServiceException(

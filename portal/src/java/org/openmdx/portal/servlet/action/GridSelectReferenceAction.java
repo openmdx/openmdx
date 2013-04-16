@@ -65,7 +65,6 @@ import org.openmdx.portal.servlet.Action;
 import org.openmdx.portal.servlet.ViewPort;
 import org.openmdx.portal.servlet.ViewPortFactory;
 import org.openmdx.portal.servlet.ViewsCache;
-import org.openmdx.portal.servlet.WebKeys;
 import org.openmdx.portal.servlet.control.ReferencePaneControl;
 import org.openmdx.portal.servlet.view.Grid;
 import org.openmdx.portal.servlet.view.ObjectView;

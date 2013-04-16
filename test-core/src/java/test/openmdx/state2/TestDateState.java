@@ -270,7 +270,7 @@ public class TestDateState {
 //  
 //  private static final String PROVIDER_NAME = "Standard";
 //
-//  private static final Path TRANSACTIONAL_PATTERN = new Path("xri:@openmdx:!($t*uuid*($.))");
+//  private static final Path TRANSACTIONAL_PATTERN = new Path("xri:@openmdx:!($t*uuid*($.))").lock();
 //  
 //  protected static Provider provider;
 //      

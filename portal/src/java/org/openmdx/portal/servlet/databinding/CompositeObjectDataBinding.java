@@ -65,7 +65,6 @@ import javax.jdo.JDOHelper;
 import javax.jdo.PersistenceManager;
 import javax.jdo.Query;
 import javax.jmi.reflect.RefObject;
-import javax.jmi.reflect.RefPackage;
 import javax.xml.datatype.Duration;
 import javax.xml.datatype.XMLGregorianCalendar;
 
@@ -93,7 +92,7 @@ public class CompositeObjectDataBinding extends DataBinding {
     }
     
     /**
-     * Constructor 
+     * Constructor.
      *
      * @param parameterString
      */
@@ -111,6 +110,7 @@ public class CompositeObjectDataBinding extends DataBinding {
     
     /**
      * Get query parameters.
+     * 
      * @param parameterMode
      * @return
      */
@@ -146,6 +146,7 @@ public class CompositeObjectDataBinding extends DataBinding {
 
     /**
      * Get UUID.
+     * 
      * @return
      */
     protected String uuidAsString(
@@ -155,6 +156,7 @@ public class CompositeObjectDataBinding extends DataBinding {
     
     /**
      * Map string value to typed value.
+     * 
      * @param value
      * @return
      */
@@ -199,16 +201,16 @@ public class CompositeObjectDataBinding extends DataBinding {
     
     /**
      * Map parameter mode to query.
+     * 
      * @param refPackage
      * @param parameterMode
      * @param pm
      * @return
      */
     protected Query newQuery(
-        RefPackage refPackage,
         ParameterMode parameterMode,
         PersistenceManager pm
-    ) {        
+    ) {
         Query query = null;
         Map<String,String> queryParameters = this.getQueryParameters(parameterMode);
         String queryType = queryParameters.get("type").replace('.', ':');
@@ -265,9 +267,10 @@ public class CompositeObjectDataBinding extends DataBinding {
         }
         return query;
     }
-        
+
     /**
      * Find composite.
+     * 
      * @param object
      * @param qualifiedFeatureName
      * @param parameterMode
@@ -299,7 +302,6 @@ public class CompositeObjectDataBinding extends DataBinding {
             }
             else {
                 Query query = this.newQuery(
-                    object.refOutermostPackage(),
                     parameterMode,
                     JDOHelper.getPersistenceManager(object) 
                 );
@@ -318,6 +320,7 @@ public class CompositeObjectDataBinding extends DataBinding {
 
     /**
      * Init object.
+     * 
      * @param object
      * @param parameterMode
      */

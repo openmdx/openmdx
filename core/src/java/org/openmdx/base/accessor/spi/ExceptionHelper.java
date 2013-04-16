@@ -48,10 +48,10 @@
 
 package org.openmdx.base.accessor.spi;
 
-import javax.jdo.JDOHelper;
 
 import org.openmdx.base.naming.Path;
 import org.openmdx.kernel.exception.BasicException;
+import org.openmdx.kernel.jdo.ReducedJDOHelper;
 
 
 /**
@@ -82,13 +82,13 @@ public class ExceptionHelper {
         return 
             object == null ? new BasicException.Parameter(
                 label
-            ) : JDOHelper.isPersistent(object) ? new BasicException.Parameter(
+            ) : ReducedJDOHelper.isPersistent(object) ? new BasicException.Parameter(
                 label,
-                JDOHelper.getTransactionalObjectId(object), 
-                ((Path)JDOHelper.getObjectId(object)).toXRI() 
+                ReducedJDOHelper.getTransactionalObjectId(object), 
+                ((Path)ReducedJDOHelper.getObjectId(object)).toXRI() 
             ) : new BasicException.Parameter(
                 label,
-                JDOHelper.getTransactionalObjectId(object)
+                ReducedJDOHelper.getTransactionalObjectId(object)
             );
     }
 

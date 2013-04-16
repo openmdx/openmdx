@@ -2,17 +2,14 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: show-Default.jsp,v 1.100 2012/07/07 08:09:45 wfro Exp $
  * Description: Default.jsp
- * Revision:    $Revision: 1.100 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2012/07/07 08:09:45 $
  * ====================================================================
  *
  * This software is published under the BSD license
  * as listed below.
  *
- * Copyright (c) 2004-2011, OMEX AG, Switzerland
+ * Copyright (c) 2004-2013, OMEX AG, Switzerland
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or
@@ -97,15 +94,6 @@ org.openmdx.portal.servlet.view.*
 			PageEpilogControl.class
 		);
 
-		// Operation parameters
-		PanelControl operationParams = (PanelControl)view.createControl(
-			"PARAMS",
-			PanelControl.class
-		);
-		operationParams.setLayout(PanelControl.LAYOUT_NONE);
-		operationParams.addControl(inspectorControl.getOperationPaneControl(), OperationPaneControl.FRAME_PARAMETERS);
-		operationParams.addControl(inspectorControl.getReportControl(), OperationPaneControl.FRAME_PARAMETERS);
-
 		// North
 		Control north = view.createControl(
 			"north",
@@ -147,21 +135,12 @@ org.openmdx.portal.servlet.view.*
 		menuOps.setHasPrintOption(true);
 		menuOps.addControl(inspectorControl.getOperationPaneControl());
 		menuOps.addControl(inspectorControl.getWizardControl());
-		menuOps.addControl(inspectorControl.getReportControl());
 
 		// Search
 		Control search = view.createControl(
 			"search",
 			ScriptControl.class
 		);
-
-		// Operation results
-		PanelControl operationResults = (PanelControl)view.createControl(
-			"PARAMS",
-			PanelControl.class
-		);
-		operationResults.setLayout(PanelControl.LAYOUT_NONE);
-		operationResults.addControl(inspectorControl.getOperationPaneControl(), OperationPaneControl.FRAME_RESULTS);
 
 		// Errors
 		Control errors = view.createControl(null, ShowErrorsControl.class);
@@ -256,7 +235,6 @@ org.openmdx.portal.servlet.view.*
 <iframe class="popUpFrame" id="DivShim" src="blank.html" scrolling="no" frameborder="0" style="position:absolute; top:0px; left:0px; display:none;"></iframe>
 <%
 		EditObjectControl.paintEditPopups(p);
-		operationParams.paint(p, false);
 		p.flush();
 %>
 <div id="container">
@@ -290,6 +268,13 @@ org.openmdx.portal.servlet.view.*
 			menuOps.paint(p, false);
 			p.flush();
 %>
+			<div id="OperationDialogHolder">
+				<div id="OperationDialogEmbedder" onClick="javascript:try{var ud=$('UserDialog');var od=$('OperationDialog');ud.parentNode.insertBefore(od,ud);$('OperationDialogHolder').innerHTML='';od.className='dragged';window.scrollBy(0,-999999);}catch(e){};">
+					<img src='images/show_content.gif' alt='' />
+				</div>
+				<div id="OperationDialog"></div>
+			</div>
+			<iframe name="OperationDialogResponse" id="OperationDialogResponse" onload="javascript:var t=this.contentDocument.body.innerHTML;if(t){$('OperationDialog').innerHTML=t;};"></iframe>
 		</div> <!-- header -->
 		<div id="content-wrap">
 <%
@@ -309,14 +294,15 @@ org.openmdx.portal.servlet.view.*
 <%
 				}
 				errors.paint(p, false);
-				operationResults.paint(p, false);
 				// No dashboards in lookup mode
 				if(view.getLookupType() == null) {
 					dashboard.paint(p, false);
 				}
 				p.flush();
 %>
+				<iframe name="UserDialogResponse" id="UserDialogResponse" style="display:none;" onload="javascript:var t=this.contentDocument.body.innerHTML;if(t){$('UserDialog').innerHTML=t;};"></iframe>
 				<div id="UserDialog"><div id="UserDialogWait" class="hidden" /></div></div>
+				<script language="javascript" type="text/javascript">try {if($('header')){$('OperationDialogEmbedder').click();}}catch(e){};</script>
 				<div id="aPanel">
 <%
 					attributes.paint(p, false);
@@ -391,32 +377,31 @@ org.openmdx.portal.servlet.view.*
   <style type="text/css" media="screen">@import "./_style/mobile/opencrx-iui.css";</style>
   <script type="text/javascript" src="javascript/portal-all.js"></script>
   <script type="application/x-javascript">      
-      addEventListener(
-	"load", 
-	function() {
-	  setTimeout(updateLayout, 0);
-	}, 
-	false
-      );  
-      function updateLayout(
-      ) {
-	window.scrollTo(0, 1);
-      }      
+    addEventListener(
+      "load", 
+      function() {
+        setTimeout(updateLayout, 0);
+      }, 
+      false
+    );  
+    function updateLayout() {
+      window.scrollTo(0, 1);
+    } 
   </script>
 </head>
 <body orient="landscape">
     <div class="toolbar" style="font-size:17px;font-weight:bold;color:#dddddd;">
       <div style="width:90%">
 <%
-		NavigationControl.paintBreadcrum(
-		  p,
-		  false
-		);
-		NavigationControl.paintToggleViewPort(
-		  p,
-		  false
-		);
-		p.flush();
+        NavigationControl.paintBreadcrum(
+          p,
+          false
+        );
+        NavigationControl.paintToggleViewPort(
+          p,
+          false
+        );
+        p.flush();
 %>
       </div>
     </div>
@@ -425,11 +410,11 @@ org.openmdx.portal.servlet.view.*
     p.flush();
     ReferencePaneControl[] referencePaneControls = inspectorControl.getReferencePaneControl();
     for(int i = 0; i < referencePaneControls.length; i++) {
-		referencePaneControls[i].paint(
-		    p,
-		    ReferencePaneControl.FRAME_VIEW,
-		    false // forEditing
-		);
+      referencePaneControls[i].paint(
+        p,
+        ReferencePaneControl.FRAME_VIEW,
+        false // forEditing
+      );
     }
     p.flush();
 %>

@@ -49,7 +49,6 @@ package org.openmdx.base.aop2;
 
 import java.util.UUID;
 
-import javax.jdo.JDOHelper;
 import javax.jdo.PersistenceManager;
 import javax.jmi.reflect.RefObject;
 import javax.jmi.reflect.RefPackage;
@@ -57,6 +56,7 @@ import javax.jmi.reflect.RefPackage;
 import org.openmdx.base.jmi1.BasePackage;
 import org.openmdx.base.jmi1.Void;
 import org.openmdx.base.persistence.spi.SharedObjects;
+import org.openmdx.kernel.jdo.ReducedJDOHelper;
 
 /**
  * Abstract Object
@@ -121,7 +121,7 @@ public abstract class AbstractObject<S extends RefObject, N, C> {
 	protected final <T extends RefObject> T toSame(
     	RefObject next 
     ){
-    	return next == null ? null : (T) sameManager().getObjectById(JDOHelper.getTransactionalObjectId(next));
+    	return next == null ? null : (T) sameManager().getObjectById(ReducedJDOHelper.getTransactionalObjectId(next));
     }
 
     /**
@@ -135,7 +135,7 @@ public abstract class AbstractObject<S extends RefObject, N, C> {
 	protected final <T extends RefObject> T toNext(
     	RefObject same 
     ){
-    	return same == null ? null : (T) nextManager().getObjectById(JDOHelper.getTransactionalObjectId(same));
+    	return same == null ? null : (T) nextManager().getObjectById(ReducedJDOHelper.getTransactionalObjectId(same));
     }
     
     
@@ -160,7 +160,7 @@ public abstract class AbstractObject<S extends RefObject, N, C> {
      * @return the same layer's persistence manager
      */
     protected final PersistenceManager sameManager(){
-        return JDOHelper.getPersistenceManager(this.same);
+        return ReducedJDOHelper.getPersistenceManager(this.same);
     }
 
     /**
@@ -169,7 +169,7 @@ public abstract class AbstractObject<S extends RefObject, N, C> {
      * @return the same layer's persistence manager
      */
     protected final PersistenceManager nextManager(){
-        return JDOHelper.getPersistenceManager(this.next);
+        return ReducedJDOHelper.getPersistenceManager(this.next);
     }
 
     
@@ -186,7 +186,7 @@ public abstract class AbstractObject<S extends RefObject, N, C> {
     protected C thisContext(
     ){
         SharedObjects.Aspects contexts = SharedObjects.aspectObjects(sameManager());
-        UUID id = (UUID) JDOHelper.getTransactionalObjectId(sameObject());
+        UUID id = (UUID) ReducedJDOHelper.getTransactionalObjectId(sameObject());
         Class<?> aspect = getClass();
         Object context = contexts.get(id, aspect);
         if(context ==  null) {
@@ -214,7 +214,7 @@ public abstract class AbstractObject<S extends RefObject, N, C> {
     protected void evictContext(
     ){
         SharedObjects.aspectObjects(sameManager()).remove(
-            (UUID) JDOHelper.getTransactionalObjectId(sameObject()),
+            (UUID) ReducedJDOHelper.getTransactionalObjectId(sameObject()),
             getClass() // aspect
         );
     }

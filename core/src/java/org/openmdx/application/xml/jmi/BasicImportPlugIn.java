@@ -50,7 +50,6 @@ package org.openmdx.application.xml.jmi;
 import java.util.Map;
 
 import javax.jdo.JDOException;
-import javax.jdo.JDOHelper;
 import javax.jdo.JDOObjectNotFoundException;
 import javax.jdo.PersistenceManager;
 import javax.jmi.reflect.JmiException;
@@ -66,6 +65,7 @@ import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.rest.spi.Object_2Facade;
 import org.openmdx.kernel.exception.BasicException;
+import org.openmdx.kernel.jdo.ReducedJDOHelper;
 
 
 /**
@@ -169,7 +169,7 @@ public class BasicImportPlugIn implements ImportPlugIn {
         //
         // Make transient instances persistent
         //
-        if(!JDOHelper.isPersistent(refObject)) {
+        if(!ReducedJDOHelper.isPersistent(refObject)) {
             Path containerId = objectId.getParent();
             String qualifier = objectId.getBase();
             RefContainer<?> refContainer = (RefContainer<?>) persistenceManager.getObjectById(containerId);

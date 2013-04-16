@@ -50,13 +50,13 @@ package org.openmdx.base.wbxml;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-import java.util.Enumeration;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.loading.Classes;
+import org.openmdx.kernel.loading.Resources;
 import org.openmdx.kernel.log.SysLog;
 
 /**
@@ -143,23 +143,14 @@ public class WBXMLPlugIns {
     }
 
     static {
-        ClassLoader classLoader = WBXMLPlugIns.class.getClassLoader();
-        try {
-            for(
-                Enumeration<URL> urls = classLoader.getResources("META-INF/openmdx-wbxml-plugin.properties");
-                urls.hasMoreElements();
-            ) {
-                URL url = urls.nextElement();
-                try {
-                    InputStream source = url.openStream();       
-                    configuration.load(source);
-                    source.close();
-                } catch (IOException exception) {
-                    SysLog.warning("WBXML plug-in configuration failure: " + url, exception);
-                }
+        for(URL url : Resources.getMetaInfResources(WBXMLPlugIns.class.getClassLoader(), "openmdx-wbxml-plugin.properties")) {
+            try {
+                InputStream source = url.openStream();       
+                configuration.load(source);
+                source.close();
+            } catch (IOException exception) {
+                SysLog.warning("WBXML plug-in configuration failure: " + url, exception);
             }
-        } catch (IOException exception) {
-            SysLog.error("WBXML plug-in configuration failure", exception);
         }
     }
     

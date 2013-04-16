@@ -4,6 +4,33 @@
                     =====================================
 
 ==============================================================================
+Version 2.11.0                                                      2013-04-15
+==============================================================================
+
+1.    NEW FEATURES
+      
+      CR20020327
+      Allow "Java Server Faces" wizards (.jsf or .xhtml). The WizardDefinitionFactory
+      now also supports "Java Server Faces" wizards.
+
+2.    CHANGES  
+     
+2.0.  CHANGED FEATURES
+      none
+            
+2.1.  FIXED BUGS
+      none      
+      
+2.2.  DEPRECATED FEATURES
+      
+      CR20020254
+      Portal: deprecate reports. Reports are replaced by wizards.
+      
+            
+2.3   REMOVED FEATURES
+      none
+
+==============================================================================
 Version 2.10.0                                                      2012-08-24
 ==============================================================================
 

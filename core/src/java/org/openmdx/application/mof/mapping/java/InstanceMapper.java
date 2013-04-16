@@ -83,7 +83,9 @@ public class InstanceMapper
 extends AbstractClassMapper {
 
     //-----------------------------------------------------------------------
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({
+        "unchecked", "cast"
+    })
     public InstanceMapper(
         ModelElement_1_0 classDef,
         Writer writer,
@@ -103,7 +105,7 @@ extends AbstractClassMapper {
         );
         this.pwSlice = writerJdoSlice == null ? null : new PrintWriter(writerJdoSlice);
         this.localFeatures = new HashMap<String,ModelElement_1_0>(
-            (Map<String,ModelElement_1_0>)classDef.objGetValue("allFeature")
+            (Map<String,ModelElement_1_0>)classDef.objGetMap("allFeature")
         );
         if(isBaseClass()) {            
             this.superFeatures = Collections.emptyMap();
@@ -111,7 +113,7 @@ extends AbstractClassMapper {
         else {
             this.superFeatures = (Map<String,ModelElement_1_0>)model.getElement(
                 this.extendsClassDef.getQualifiedName()
-            ).objGetValue("allFeature"); 
+            ).objGetMap("allFeature"); 
             this.localFeatures.keySet().removeAll(superFeatures.keySet());                
         }
     }

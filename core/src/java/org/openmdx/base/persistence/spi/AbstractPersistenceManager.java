@@ -119,6 +119,11 @@ public abstract class AbstractPersistenceManager implements PersistenceManager {
     private ConcurrentMap<Object,Object> userObjects = new ConcurrentHashMap<Object,Object>();
 
     /* (non-Javadoc)
+     * @see org.openmdx.base.accessor.spi.PersistenceManager_1_0#currentUnitOfWork()
+     */
+    protected abstract UnitOfWork currentUnitOfWork();
+    
+    /* (non-Javadoc)
      * @see org.openmdx.kernel.persistence.resource.Connection_2#setPersistenceManagerFactory(javax.jdo.PersistenceManagerFactory)
      */
     public void setPersistenceManagerFactory(
@@ -165,7 +170,7 @@ public abstract class AbstractPersistenceManager implements PersistenceManager {
      */
 //  @Override
     public void close() {
-        if(!this.isTransactionContainerManaged() && this.currentTransaction().isActive()) throw new JDOUserException(
+        if(!this.isTransactionContainerManaged() && this.currentUnitOfWork().isActive()) throw new JDOUserException(
             "Persistence manager with an active unit of work can't be closed unless they are container managed"
         );
         this.instanceLifecycleListener.close();

@@ -53,7 +53,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
 
-import javax.jdo.JDOHelper;
 import javax.jdo.PersistenceManager;
 import javax.jdo.PersistenceManagerFactory;
 import javax.naming.NamingException;
@@ -63,6 +62,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.openmdx.base.jmi1.Authority;
 import org.openmdx.base.jmi1.Provider;
+import org.openmdx.kernel.jdo.ReducedJDOHelper;
 import org.openmdx.kernel.lightweight.naming.NonManagedInitialContextFactoryBuilder;
 import org.openmdx.kernel.log.SysLog;
 import org.openmdx.preferences1.jmi1.Preferences;
@@ -125,7 +125,7 @@ public class TestKeyStoreResources {
     @Test
     public void testKeyStoreResources(
     ) throws Throwable {
-    	PersistenceManagerFactory persistenceManagerFactory = JDOHelper.getPersistenceManagerFactory(
+    	PersistenceManagerFactory persistenceManagerFactory = ReducedJDOHelper.getPersistenceManagerFactory(
 			"test-PKI-EntityManagerFactory"
     	);
         PersistenceManager persistenceManager = persistenceManagerFactory.getPersistenceManager();

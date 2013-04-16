@@ -1,15 +1,13 @@
 <!--
 =======================================================================
-= Name:        $Id: build.xml,v 1.68 2010/09/01 15:08:17 hburger Exp $
-= Description: openMDX/Security Ant Build File
-= Revision:    $Revision: 1.68 $
-= Date:        $Date: 2010/09/01 15:08:17 $
-= Copyright:   (c) 2003-2010 OMEX AG
+= Project:     openMDX, http://www.openmdx.org/
+= Description: openMDX/Security Build File
+= Owner:       OMEX AG, Switzerland, http://www.omex.ch
 =======================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2003-2010, OMEX AG, Switzerland
+ * Copyright (c) 2003-2013, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without 
@@ -75,7 +73,7 @@
 	<patternset id="project.junit.test.case">
 		<include name="org/openmdx/test/**/Test*.java" />
 	</patternset>
-	<patternset id="openmdx-security.jar.content">
+	<patternset id="openmdx-security.content">
 		<include name="org/openmdx/security/**" />
 		<include name="org/openmdx/uses/layout/*" />
 		<include name="META-INF/orm.xml" />
@@ -84,15 +82,15 @@
 		<exclude name="org/openmdx/security/auth/passcode/**" />
 		<exclude name="org/openmdx/security/radius/**"/>
 	</patternset>
-	<patternset id="openmdx-authentication.jar.content">
+	<patternset id="openmdx-authentication.content">
 		<include name="org/openmdx/security/auth/callback/**" />
 		<include name="org/openmdx/security/auth/passcode/**" />
 	</patternset>
-	<patternset id="openmdx-resource.jar.content">
+	<patternset id="openmdx-resource.content">
 		<include name="org/openmdx/resource/cci/**" />
 		<include name="org/openmdx/resource/spi/**" />
 	</patternset>
-	<patternset id="openmdx-radius.jar.content">
+	<patternset id="openmdx-radius.content">
 		<include name="org/openmdx/kernel/collection/**" />
 		<include name="org/openmdx/kernel/text/**" />
 		<include name="org/openmdx/resource/radius/**" />
@@ -101,13 +99,13 @@
 		<include name="org/openmdx/uses/org/apache/commons/collections/**" />
 		<include name="org/openmdx/uses/org/apache/commons/pool/**" />
 	</patternset>
-	<patternset id="openmdx-ldap.jar.content">
+	<patternset id="openmdx-ldap.content">
 		<include name="org/openmdx/resource/ldap/**" />
 	</patternset>
-	<patternset id="openmdx-pki.jar.content">
+	<patternset id="openmdx-pki.content">
 		<include name="org/openmdx/resource/pki/**" />
 	</patternset>
-
+	
 	<!-- ******************************************************************* -->
 	<!-- * generate -->
 	<!-- ******************************************************************* -->
@@ -133,7 +131,11 @@
 	<!-- ******************************************************************* -->
 	<!-- * deliverables -->
 	<!-- ******************************************************************* -->
-	<target name="deliverables" description="Populate the project's deliverables directory" depends="deliverables-init,java-archives,source-archives" />
+	<target 
+		name="deliverables" 
+		description="Populate the project's deliverables directory" 
+		depends="deliverables-init,java-archives,source-archives" 
+	/>
 
 	<!-- ******************************************************************* -->
 	<!-- * distribution -->
@@ -186,13 +188,13 @@
 				<attribute name="Implementation-Title" value="openmdx-ldap for ${build.target.platform}" />
 			</openmdx:archivemanifest>
 			<openmdx:archivefileset dir="${build.dir}/bin">
-				<patternset refid="openmdx-ldap.jar.content" />
+				<patternset refid="openmdx-ldap.content" />
 			</openmdx:archivefileset>
 			<openmdx:archivefileset dir="${basedir}/src/resource" whenmissing="skip">
-				<patternset refid="openmdx-ldap.jar.content" />
+				<patternset refid="openmdx-ldap.content" />
 			</openmdx:archivefileset>
 			<openmdx:archivefileset dir="${build.dir}/src/resource" whenmissing="skip">
-				<patternset refid="openmdx-ldap.jar.content" />
+				<patternset refid="openmdx-ldap.content" />
 			</openmdx:archivefileset>
 		</openmdx:archive>
 	</target>
@@ -204,16 +206,16 @@
 				<attribute name="Implementation-Title" value="openmdx-security for ${build.target.platform}" />
 			</openmdx:archivemanifest>
 			<openmdx:archivefileset dir="${build.dir}/bin">
-				<patternset refid="openmdx-security.jar.content" />
+				<patternset refid="openmdx-security.content" />
 			</openmdx:archivefileset>
 			<openmdx:archivefileset src="${build.dir}/model/${ant.project.name}.openmdx-xmi.zip">
-				<patternset refid="openmdx-security.jar.content" />
+				<patternset refid="openmdx-security.content" />
 			</openmdx:archivefileset>
 			<openmdx:archivefileset dir="${basedir}/src/resource">
-				<patternset refid="openmdx-security.jar.content" />
+				<patternset refid="openmdx-security.content" />
 			</openmdx:archivefileset>
 			<openmdx:archivefileset dir="${build.dir}/src/resource" whenmissing="skip">
-				<patternset refid="openmdx-security.jar.content" />
+				<patternset refid="openmdx-security.content" />
 			</openmdx:archivefileset>
 		</openmdx:archive>
 		<openmdx:archive destfile="${deliver.dir}/lib/openmdx-resource.jar" format="jar" duplicate="preserve">
@@ -223,13 +225,13 @@
 				<attribute name="Implementation-Title" value="openmdx-resource for ${build.target.platform}" />
 			</openmdx:archivemanifest>
 			<openmdx:archivefileset dir="${build.dir}/bin">
-				<patternset refid="openmdx-resource.jar.content" />
+				<patternset refid="openmdx-resource.content" />
 			</openmdx:archivefileset>
 			<openmdx:archivefileset dir="${basedir}/src/resource">
-				<patternset refid="openmdx-resource.jar.content" />
+				<patternset refid="openmdx-resource.content" />
 			</openmdx:archivefileset>
 			<openmdx:archivefileset dir="${build.dir}/src/resource" whenmissing="skip">
-				<patternset refid="openmdx-resource.jar.content" />
+				<patternset refid="openmdx-resource.content" />
 			</openmdx:archivefileset>
 		</openmdx:archive>
 		<openmdx:archive destfile="${deliver.dir}/lib/openmdx-radius.jar" format="jar">
@@ -239,10 +241,10 @@
 				<attribute name="Implementation-Title" value="openmdx-radius for ${build.target.platform}" />
 			</openmdx:archivemanifest>
 			<openmdx:archivefileset dir="${build.dir}/bin">
-				<patternset refid="openmdx-radius.jar.content" />
+				<patternset refid="openmdx-radius.content" />
 			</openmdx:archivefileset>
 			<openmdx:archivefileset src="${project.home}/${build.target.platform}/core/lib/openmdx-base.jar">
-				<patternset refid="openmdx-radius.jar.content" />
+				<patternset refid="openmdx-radius.content" />
 			</openmdx:archivefileset>
 		</openmdx:archive>
 		<openmdx:archive destfile="${deliver.dir}/lib/openmdx-pki.jar" format="jar">
@@ -252,7 +254,7 @@
 				<attribute name="Implementation-Title" value="openmdx-pki for ${build.target.platform}" />
 			</openmdx:archivemanifest>
 			<openmdx:archivefileset dir="${build.dir}/bin">
-				<patternset refid="openmdx-pki.jar.content" />
+				<patternset refid="openmdx-pki.content" />
 			</openmdx:archivefileset>
 		</openmdx:archive>
 		<openmdx:archive destfile="${deliver.dir}/lib/openmdx-authentication.jar" format="jar">
@@ -262,7 +264,7 @@
 				<attribute name="Implementation-Title" value="openmdx-authentication for ${build.target.platform}" />
 			</openmdx:archivemanifest>
 			<openmdx:archivefileset dir="${build.dir}/bin">
-				<patternset refid="openmdx-authentication.jar.content" />
+				<patternset refid="openmdx-authentication.content" />
 			</openmdx:archivefileset>
 		</openmdx:archive>
 	</target>

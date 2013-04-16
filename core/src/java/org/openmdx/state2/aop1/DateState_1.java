@@ -63,7 +63,6 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-import javax.jdo.JDOHelper;
 import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.openmdx.base.accessor.cci.DataObject_1_0;
@@ -77,6 +76,7 @@ import org.openmdx.base.mof.cci.Model_1_0;
 import org.openmdx.base.mof.cci.Multiplicity;
 import org.openmdx.base.persistence.cci.PersistenceHelper;
 import org.openmdx.kernel.exception.BasicException;
+import org.openmdx.kernel.jdo.ReducedJDOHelper;
 import org.openmdx.state2.cci.DateStateContext;
 import org.openmdx.state2.cci.ViewKind;
 import org.openmdx.state2.spi.Order;
@@ -235,7 +235,7 @@ public class DateState_1
         DataObject_1_0 state
     ) throws ServiceException{
         if(state.jdoIsNew()) {
-            JDOHelper.getPersistenceManager(state).deletePersistent(state);
+            ReducedJDOHelper.getPersistenceManager(state).deletePersistent(state);
         } else {
             state.objSetValue(REMOVED_AT, IN_THE_FUTURE);
         }
@@ -450,7 +450,7 @@ public class DateState_1
         Set<String> leftFetched = left.objDefaultFetchGroup();
         Set<String> rightFetched = right.objDefaultFetchGroup();
         Collection<String> ignorable = ignorableAttributes();
-        for(Map.Entry<String,ModelElement_1_0> feature : ((Map<String,ModelElement_1_0>)classifier.objGetValue("allFeature")).entrySet()){
+        for(Map.Entry<String,ModelElement_1_0> feature : ((Map<String,ModelElement_1_0>)classifier.objGetMap("allFeature")).entrySet()){
             ModelElement_1_0 featureDef = feature.getValue();
             String featureName = feature.getKey();
             if(!ignorable.contains(featureName) && this.isAttribute(featureDef) && !ModelHelper.isDerived(featureDef)) {

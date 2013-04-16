@@ -72,7 +72,7 @@ import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 import javax.swing.SpringLayout;
 
-import org.openmdx.kernel.loading.Classes;
+import org.openmdx.kernel.loading.Resources;
 import org.openmdx.uses.layout.SpringUtilities;
 
 /**
@@ -212,7 +212,7 @@ public class SwingCallbackPanel extends JPanel
     		!"LOGIN_IMAGE".equals(name)
     	){
 	        JPanel pane = new JPanel();
-	        URL url = Classes.getApplicationResource(name);
+	        URL url = Resources.getResource(name);
 			JLabel image = new JLabel(
 				new ImageIcon(
 					url

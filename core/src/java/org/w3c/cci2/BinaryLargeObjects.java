@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2006-2007, OMEX AG, Switzerland
+ * Copyright (c) 2006-2012, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -168,6 +168,28 @@ public class BinaryLargeObjects {
         Long length
     ){
         return new StreamLargeObject(source, length);
+    }
+
+    /**
+     * Create a <code>BinaryLargeObject</code> copy of the given stream
+     * 
+     * @param source
+     * @param length
+     * 
+     * @return a <code>BinaryLargeObject</code> copy of the given stream
+     * 
+     * @throws IOException  
+     */
+    public static BinaryLargeObject copyOf(
+        InputStream source,
+        Long length
+    ) throws IOException {
+        ByteArrayOutputStream buffer = length == null ? new ByteArrayOutputStream(
+        ) : new ByteArrayOutputStream(
+            length.intValue()
+        );
+        streamCopy(source, 0, buffer);
+        return valueOf(buffer.toByteArray());
     }
     
     /**
@@ -395,7 +417,7 @@ public class BinaryLargeObjects {
         /**
          * Constructor 
          *
-         * @param value
+         * @param url
          */
         public URLLargeObject(final URL url) {
             super(null);
@@ -469,7 +491,7 @@ public class BinaryLargeObjects {
         /**
          * Constructor 
          *
-         * @param value
+         * @param file
          */
         public FileLargeObject(
             final File file

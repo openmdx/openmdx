@@ -66,11 +66,21 @@ import org.openmdx.portal.servlet.action.SelectAndNewObjectAction;
 import org.openmdx.portal.servlet.action.SelectObjectAction;
 import org.openmdx.portal.servlet.view.ObjectView;
 
+/**
+ * RootMenuControl
+ *
+ */
 public class RootMenuControl
     extends Control
     implements Serializable {
 
-	//-------------------------------------------------------------------------
+    /**
+     * Constructor 
+     *
+     * @param id
+     * @param locale
+     * @param localeAsIndex
+     */
     public RootMenuControl(
         String id,
         String locale,
@@ -83,7 +93,12 @@ public class RootMenuControl
         );
     }
     
-    //-------------------------------------------------------------------------
+    /**
+     * Pain quick accessors.
+     * 
+     * @param p
+     * @throws ServiceException
+     */
     public static void paintQuickAccessors(
         ViewPort p
     ) throws ServiceException {
@@ -113,7 +128,12 @@ public class RootMenuControl
         }
     }
     
-    //-------------------------------------------------------------------------
+    /**
+     * Paint top navigation.
+     * 
+     * @param p
+     * @throws ServiceException
+     */
     public static void paintTopNavigation(
         ViewPort p
     ) throws ServiceException {
@@ -148,7 +168,7 @@ public class RootMenuControl
             // Get state of root object
             if(currentItemLevel == 0) {
                 stateItemLevel0 = app.getSettings().getProperty(
-                	UserSettings.ROOT_OBJECT_STATE + (currentPerspective == 0 ? "" : "[" + Integer.toString(currentPerspective) + "]") + "." + indexItemLevel0 + ".State", 
+                	UserSettings.ROOT_OBJECT_STATE.getName() + (currentPerspective == 0 ? "" : "[" + Integer.toString(currentPerspective) + "]") + "." + indexItemLevel0 + ".State", 
                 	"1"
                 );
                 if("1".equals(stateItemLevel0)) nItemsLevel0++;
@@ -219,7 +239,7 @@ public class RootMenuControl
                 Action action = selectRootObjectAction[i];
                 if((action.getEvent() == SelectObjectAction.EVENT_ID) && (action.getParameter(Action.PARAMETER_REFERENCE).length() == 0)) {                
                     stateItemLevel0 = app.getSettings().getProperty(
-                    	UserSettings.ROOT_OBJECT_STATE + (currentPerspective == 0 ? "" : "[" + Integer.toString(currentPerspective) + "]") + "." + indexItemLevel0 + ".State", 
+                    	UserSettings.ROOT_OBJECT_STATE.getName() + (currentPerspective == 0 ? "" : "[" + Integer.toString(currentPerspective) + "]") + "." + indexItemLevel0 + ".State", 
                     	"1"
                     );
                     indexItemLevel0++;
@@ -241,7 +261,12 @@ public class RootMenuControl
         }
     }
          
-    //-------------------------------------------------------------------------
+    /**
+     * Paint fly-in menu.
+     * 
+     * @param p
+     * @throws ServiceException
+     */
     public static void paintMenuFlyIn(
     	ViewPort p
     ) throws ServiceException {

@@ -142,26 +142,20 @@ import org.openmdx.ui1.jmi1.ValuedField;
 public class DefaultPortalExtension implements PortalExtension_1_0, Serializable {
   
     /**
-     * obj.toString(). In case of collections return toString() of first element.
+     * Return toString() of the given object. If object is a collection 
+     * return toString() of first element.
+     * 
      * @param obj
      * @return
      */
-    protected String toS(
+    public String toPlain(
         Object obj
     ) {
-		return obj == null ? "" : (obj instanceof Collection)
-		    && !((Collection) obj).isEmpty() ? ((Collection) obj).iterator().next().toString() : obj.toString();
-    }
-
-    /**
-     * Replace blank with &nbsp;
-     * @param obj
-     * @return
-     */
-    protected String toNbspS(
-        Object obj
-    ) {
-        return this.toS(obj).replace(" ", "&nbsp;");
+        String s = obj == null ? "" : 
+    		(obj instanceof Collection) && !((Collection<?>)obj).isEmpty() ? 
+    			((Collection<?>)obj).iterator().next().toString() : 
+    				obj.toString();
+    	return s;
     }
     
 	/* (non-Javadoc)
@@ -206,60 +200,54 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
      */
     @Override
     public String getTitle(
-        RefObject_1_0 refObj, 
-        short locale,
-        String localeAsString,
-        boolean asShortTitle,
-        ApplicationContext application
-    ) {
-      if(refObj == null) {
-        return "#NULL";
-      }
-      if(JDOHelper.isNew(refObj) || !JDOHelper.isPersistent(refObj)) {
-        return "Untitled";
-      }
-      Path p = refObj.refGetPath();
-      Model_1_0 model = ((RefPackage_1_0)refObj.refOutermostPackage()).refModel();
-      String objectClass = refObj.refClass().refMofId();
-      
-      try {
-          ModelElement_1_0 classDef = model.getElement(objectClass);
-          Map attributeDefs = model.getAttributeDefs(classDef, false, true);
-          if(
-            attributeDefs.keySet().contains("fullName") &&
-            (refObj.refGetValue("fullName") != null)
-          ) {
-            return this.toS(refObj.refGetValue("fullName"));
-          }
-          else if(
-            attributeDefs.keySet().contains("title") &&
-            (refObj.refGetValue("title") != null)
-          ) {
-            return this.toS(refObj.refGetValue("title"));
-          }
-          else if(
-            attributeDefs.keySet().contains("name") &&
-            (refObj.refGetValue("name") != null) 
-          ) {
-            return this.toS(refObj.refGetValue("name"));
-          }
-          else if(
-            attributeDefs.keySet().contains("description") &&
-            (refObj.refGetValue("description") != null)
-          ) {
-            return this.toS(refObj.refGetValue("description"));
-          }
-          else {
-            return p.getBase();
-          }    
-      }
-      catch(ServiceException e) {
-          e.log();
-          SysLog.warning("can not evaluate. object", refObj.refMofId());
-          return "#ERR (" + e.getMessage() + ")";
-      }
+    	RefObject_1_0 refObj, 
+    	short locale,
+    	String localeAsString,
+    	boolean asShortTitle,
+    	ApplicationContext application
+    	) {
+    	if(refObj == null) {
+    		return this.toPlain("#NULL");
+    	}
+    	if(JDOHelper.isNew(refObj) || !JDOHelper.isPersistent(refObj)) {
+    		return this.toPlain("Untitled");
+    	}
+    	Path p = refObj.refGetPath();
+    	Model_1_0 model = ((RefPackage_1_0)refObj.refOutermostPackage()).refModel();
+    	String objectClass = refObj.refClass().refMofId();
+    	try {
+    		ModelElement_1_0 classDef = model.getElement(objectClass);
+    		Map attributeDefs = model.getAttributeDefs(classDef, false, true);
+    		if(
+    			attributeDefs.keySet().contains("fullName") &&
+    			(refObj.refGetValue("fullName") != null)
+    		) {
+    			return this.toPlain(refObj.refGetValue("fullName"));
+    		} else if(
+    			attributeDefs.keySet().contains("title") &&
+    			(refObj.refGetValue("title") != null)
+    		) {
+    			return this.toPlain(refObj.refGetValue("title"));
+    		} else if(
+    			attributeDefs.keySet().contains("name") &&
+    			(refObj.refGetValue("name") != null) 
+    		) {
+    			return this.toPlain(refObj.refGetValue("name"));
+    		} else if(
+    			attributeDefs.keySet().contains("description") &&
+    			(refObj.refGetValue("description") != null)
+    		) {
+    			return this.toPlain(refObj.refGetValue("description"));
+    		} else {
+    			return p.getBase();
+    		}
+    	} catch(ServiceException e) {
+    		e.log();
+    		SysLog.warning("can not evaluate. object", refObj.refMofId());
+    		return "#ERR (" + e.getMessage() + ")";
+    	}
     }
-  
+
     /* (non-Javadoc)
      * @see org.openmdx.portal.servlet.PortalExtension_1_0#hasPermission(java.lang.String, org.openmdx.base.accessor.jmi.cci.RefObject_1_0, java.util.Set, org.openmdx.portal.servlet.ApplicationContext)
      */

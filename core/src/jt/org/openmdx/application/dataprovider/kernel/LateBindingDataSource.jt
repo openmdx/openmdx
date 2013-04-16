@@ -101,7 +101,7 @@ class LateBindingDataSource implements DataSource {
      */
     private synchronized DataSource getDelegate(
     ) throws SQLException {
-        if (this.delegate == null) synchronized(this) { 
+        if (this.delegate == null){ 
         	try {
 	            SysLog.detail(
 	                "Acquire Connection Pool",

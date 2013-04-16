@@ -53,7 +53,6 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 
-import javax.jdo.JDOHelper;
 import javax.jdo.spi.PersistenceCapable;
 
 import org.openmdx.base.exception.RuntimeServiceException;
@@ -62,6 +61,7 @@ import org.openmdx.base.marshalling.ExceptionListenerMarshaller;
 import org.openmdx.base.marshalling.Marshaller;
 import org.openmdx.base.marshalling.ReluctantUnmarshalling;
 import org.openmdx.kernel.exception.BasicException;
+import org.openmdx.kernel.jdo.ReducedJDOHelper;
 
 /**
  * A Marshalling Map
@@ -220,7 +220,7 @@ public class MarshallingMap<K,V>
         Object key
     ) {
         Object value = getDelegate().get(key); 
-        if(value instanceof PersistenceCapable && JDOHelper.getPersistenceManager(value) == null) {
+        if(value instanceof PersistenceCapable && ReducedJDOHelper.getPersistenceManager(value) == null) {
             return null;
         } else if(this.marshaller instanceof ExceptionListenerMarshaller) {
             ExceptionListenerMarshaller marshaller = (ExceptionListenerMarshaller) this.marshaller;

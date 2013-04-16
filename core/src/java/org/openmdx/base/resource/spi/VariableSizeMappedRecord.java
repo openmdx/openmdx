@@ -141,31 +141,35 @@ class VariableSizeMappedRecord
             return ((String)key).intern();
         } else if (key instanceof Integer) {
             Integer i = ((Integer) key).intValue();
-            if(i < -128 || i > 127) throw BasicException.initHolder(
+            Integer integerKey = Integer.valueOf(i);
+            if(integerKey != Integer.valueOf(i)) {
+                throw BasicException.initHolder(
+                    new IllegalArgumentException(
+                        "Inappropriate key value, the supported key range is implementation and configuration dependent",
+                        BasicException.newEmbeddedExceptionStack(
+                            BasicException.Code.DEFAULT_DOMAIN,
+                            BasicException.Code.BAD_PARAMETER,
+                            new BasicException.Parameter("actual-value", i)
+                        )
+                    ) 
+                );
+            }
+            return integerKey;
+        } else {
+            throw key == null ? new NullPointerException(
+                "Null keys are not allowed"
+            ) : BasicException.initHolder(
                 new IllegalArgumentException(
-                    "Inappropriate key value",
+                    "Inappropriate key class",
                     BasicException.newEmbeddedExceptionStack(
                         BasicException.Code.DEFAULT_DOMAIN,
                         BasicException.Code.BAD_PARAMETER,
-                        new BasicException.Parameter("supported-range", -128, 127),
-                        new BasicException.Parameter("actual-value", i)
+                        new BasicException.Parameter("supported", String.class.getName(), Integer.class.getName()),
+                        new BasicException.Parameter("actual", key == null ? null : key.getClass().getName())
                     )
-                ) 
-            );
-            return Integer.valueOf(i);
-        } else throw key == null ? new NullPointerException(
-            "Null keys are not allowed"
-        ) : BasicException.initHolder(
-            new IllegalArgumentException(
-                "Inappropriate key class",
-                BasicException.newEmbeddedExceptionStack(
-                    BasicException.Code.DEFAULT_DOMAIN,
-                    BasicException.Code.BAD_PARAMETER,
-                    new BasicException.Parameter("supported", String.class.getName(), Integer.class.getName()),
-                    new BasicException.Parameter("actual", key == null ? null : key.getClass().getName())
                 )
-            )
-        );
+            );
+        }
     }
     
     

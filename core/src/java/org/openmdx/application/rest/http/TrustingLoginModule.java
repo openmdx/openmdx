@@ -47,23 +47,12 @@
  */
 package org.openmdx.application.rest.http;
 
-import javax.security.auth.callback.NameCallback;
-import javax.security.auth.callback.PasswordCallback;
 
 /**
  * Trusting Login Module
+ * 
+ * @deprecated use org.openmdx.application.rest.http.servlet.TrustingLoginModule
  */
-public class TrustingLoginModule extends BasicLoginModule {
-
-    /**
-     * Constructor 
-     */
-    public TrustingLoginModule(
-    ) {
-        super(
-            new NameCallback(CallbackPrompts.CONNECTION_USER), 
-            new PasswordCallback(CallbackPrompts.CONNECTION_PASSWORD, false)
-        );
-    }
-
+@Deprecated
+public class TrustingLoginModule extends org.openmdx.application.rest.http.servlet.TrustingLoginModule {
 }

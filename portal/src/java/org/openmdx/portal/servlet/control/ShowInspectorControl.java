@@ -1,14 +1,14 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Description: ShowObjectView 
+ * Description: ShowInspectorControl 
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
  * ====================================================================
  *
  * This software is published under the BSD license
  * as listed below.
  * 
- * Copyright (c) 2004-2007, OMEX AG, Switzerland
+ * Copyright (c) 2004-2012, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -62,15 +62,26 @@ import org.openmdx.base.exception.ServiceException;
 import org.openmdx.kernel.log.SysLog;
 import org.openmdx.portal.servlet.ViewPort;
 import org.openmdx.portal.servlet.WebKeys;
-import org.openmdx.portal.servlet.reports.ReportDefinitionFactory;
 import org.openmdx.portal.servlet.wizards.WizardDefinitionFactory;
 
-// ---------------------------------------------------------------------------
-public class ShowInspectorControl 
-    extends InspectorControl 
-    implements Serializable {
+/**
+ * ShowInspectorControl
+ *
+ */
+public class ShowInspectorControl extends InspectorControl implements Serializable {
 
-    // -------------------------------------------------------------------------
+    /**
+     * Constructor 
+     *
+     * @param id
+     * @param perspective
+     * @param locale
+     * @param localeAsIndex
+     * @param controlFactory
+     * @param wizardFactory
+     * @param inspector
+     * @param forClass
+     */
     public ShowInspectorControl(
         String id, 
         int perspective,
@@ -78,7 +89,6 @@ public class ShowInspectorControl
         int localeAsIndex,
         ControlFactory controlFactory,
         WizardDefinitionFactory wizardFactory,
-        ReportDefinitionFactory reportFactory,
         org.openmdx.ui1.jmi1.Inspector inspector,
         String forClass
     ) {
@@ -89,7 +99,6 @@ public class ShowInspectorControl
             controlFactory,
             inspector
         );
-
         SysLog.detail("Preparing operation and reference panes");
         List<Object> paneOp = new ArrayList<Object>();
         List<Object> paneRef = new ArrayList<Object>();
@@ -106,7 +115,6 @@ public class ShowInspectorControl
         }
         this.paneOp = (org.openmdx.ui1.jmi1.OperationPane[])paneOp.toArray(new org.openmdx.ui1.jmi1.OperationPane[paneOp.size()]);
         this.paneRef = (org.openmdx.ui1.jmi1.ReferencePane[])paneRef.toArray(new org.openmdx.ui1.jmi1.ReferencePane[paneRef.size()]);
-
         // Operation pane
         SysLog.detail("Preparing operation panes");
         List<OperationPaneControl> operationPaneControls = new ArrayList<OperationPaneControl>();
@@ -126,7 +134,6 @@ public class ShowInspectorControl
         this.operationPaneControl = (OperationPaneControl[])operationPaneControls.toArray(
             new OperationPaneControl[operationPaneControls.size()]
         );
-
         // Reference pane
         SysLog.detail("Preparing reference panes");
         this.referencePaneControl = new ReferencePaneControl[this.paneRef.length];
@@ -141,17 +148,6 @@ public class ShowInspectorControl
                 forClass
             );
         }
-
-        // Reports
-        SysLog.detail("Preparing reports");
-        this.reportControl = controlFactory.createReportControl(
-            null, 
-            locale,
-            localeAsIndex,
-            reportFactory.findReportDefinitions(forClass, locale, null)
-        );
-        SysLog.detail("Preparing reports done");
-
         // Wizards
         SysLog.detail("Preparing wizards");
         this.wizardControl = controlFactory.createWizardControl(
@@ -163,7 +159,12 @@ public class ShowInspectorControl
         SysLog.detail("Preparing wizards done");
     }
 
-    // -------------------------------------------------------------------------
+    /**
+     * Get page size.
+     * 
+     * @param parameterMap
+     * @return
+     */
     public int getPageSizeParameter(
         Map parameterMap
     ) {
@@ -172,38 +173,51 @@ public class ShowInspectorControl
         return pageSize == null ? -1 : Integer.parseInt(pageSize);
     }
 
-    // -------------------------------------------------------------------------
+    /**
+     * Get operation panes.
+     * 
+     * @return
+     */
     public OperationPaneControl[] getOperationPaneControl(
     ) {
         return this.operationPaneControl;
     }
 
-    // -------------------------------------------------------------------------
+    /**
+     * Get reference panes.
+     * 
+     * @return
+     */
     public ReferencePaneControl[] getReferencePaneControl(
     ) {
         return this.referencePaneControl;
     }
 
-    // -------------------------------------------------------------------------
-    public ReportControl getReportControl(
-    ) {
-        return this.reportControl;
-    }
-
-    // -------------------------------------------------------------------------
+    /**
+     * Get wizard control.
+     * 
+     * @return
+     */
     public WizardControl getWizardControl(
     ) {
         return this.wizardControl;
     }
 
-    // -------------------------------------------------------------------------
+    /**
+     * Select filter.
+     * 
+     * @param filterName
+     * @param filterValues
+     */
     public void selectFilter(
         String filterName, 
         String filterValues
     ) {
     }
 
-    //-------------------------------------------------------------------------
+    /* (non-Javadoc)
+     * @see org.openmdx.portal.servlet.control.Control#paint(org.openmdx.portal.servlet.ViewPort, java.lang.String, boolean)
+     */
     @Override
     public void paint(
         ViewPort p,
@@ -220,7 +234,6 @@ public class ShowInspectorControl
     
     protected OperationPaneControl[] operationPaneControl = null;
     protected ReferencePaneControl[] referencePaneControl = null;
-    protected ReportControl reportControl = null;
     protected WizardControl wizardControl = null;
     protected org.openmdx.ui1.jmi1.OperationPane[] paneOp = null;
     protected org.openmdx.ui1.jmi1.ReferencePane[] paneRef = null;

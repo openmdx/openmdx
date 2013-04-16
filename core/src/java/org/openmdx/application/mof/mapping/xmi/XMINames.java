@@ -61,9 +61,4 @@ public class XMINames {
         super();
     }
 
-    /**
-     * The XMI package suffix
-     */
-    public static String XMI_PACKAGE_SUFFIX = "xmi1";
-
 }

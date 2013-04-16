@@ -1,13 +1,13 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Description: User Profile Service
+ * Description: Layer
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2011, OMEX AG, Switzerland
+ * Copyright (c) 2004-2012, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -51,7 +51,6 @@ import java.util.List;
 
 import javax.resource.ResourceException;
 import javax.resource.cci.Connection;
-import javax.resource.cci.ConnectionFactory;
 import javax.resource.cci.ConnectionMetaData;
 import javax.resource.cci.IndexedRecord;
 import javax.resource.cci.Interaction;
@@ -73,6 +72,7 @@ import org.openmdx.base.mof.cci.Model_1_0;
 import org.openmdx.base.mof.spi.Model_1Factory;
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.resource.Records;
+import org.openmdx.base.resource.cci.ConnectionFactory;
 import org.openmdx.base.resource.spi.Port;
 import org.openmdx.base.resource.spi.ResourceExceptions;
 import org.openmdx.base.resource.spi.RestInteractionSpec;
@@ -88,7 +88,7 @@ import org.openmdx.kernel.log.SysLog;
 import org.w3c.cci2.SparseArray;
 
 /**
- * A delegating rest interaction.
+ * An abstract Dataprovider Layer
  */
 public abstract class Layer_1 implements Dataprovider_1_0, Port {
 
@@ -235,7 +235,11 @@ public abstract class Layer_1 implements Dataprovider_1_0, Port {
             Connection connection
         ) throws ResourceException {
             super(connection);
-            this.serviceHeader = ServiceHeader.toServiceHeader(connection.getMetaData().getUserName(), null);            
+            this.serviceHeader = ServiceHeader.toServiceHeader(
+                connection.getMetaData().getUserName(), 
+                null, // connectionPassword
+                isPreferringNotFoundException()
+            );            
         }
     
         public ServiceHeader getServiceHeader(
@@ -514,7 +518,7 @@ public abstract class Layer_1 implements Dataprovider_1_0, Port {
                     case DataproviderOperations.OBJECT_RETRIEVAL: {
                         interaction.get(
                             request.getInteractionSpec(), 
-                            Facades.asQuery(request.object()), 
+                            Facades.asQuery(request.object(), header.isPreferringNotFoundException()), 
                             reply.getResult()
                         );
                         break;
@@ -522,7 +526,7 @@ public abstract class Layer_1 implements Dataprovider_1_0, Port {
                     case DataproviderOperations.ITERATION_START: {
                         interaction.find(
                             request.getInteractionSpec(), 
-                            Facades.asQuery(request.object()), 
+                            Facades.asQuery(request.object(), header.isPreferringNotFoundException()), 
                             reply.getResult()
                         );
                         break;
@@ -546,7 +550,7 @@ public abstract class Layer_1 implements Dataprovider_1_0, Port {
                     case DataproviderOperations.OBJECT_REMOVAL: {
                         interaction.delete(
                             request.getInteractionSpec(), 
-                            Facades.asQuery(request.object()), 
+                            Facades.asQuery(request.object(), header.isPreferringNotFoundException()), 
                             reply.getResult()
                         );
                         break;

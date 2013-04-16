@@ -210,6 +210,7 @@ public class ExternalIdentifiers {
         REGISTERED.put(0x1204, "-//NOKIA//DTD LANDMARKS 1.0//EN"); // The document is used for delivering location information between mobile devices or network servers. A landmark object is a waypoint or a point-of-interest. The use of binary format allows for compact transmission through narrow-band bearers (e.g. GSM SMS).", // 0x0 A landmark object may contain the following information: the name of landmark, textual description of the landmark, the geographical coordinates of the location, like latitude and longitude.
         REGISTERED.put(0x1207, "-//OMA//DTD DRMREL 1.0//EN"); //  We intend to create wbxml to send drm message
         PRIVATE.put(0x104F52, "-//openMDX//REST 2.0//EN"); // openMDX REST 2.0 data with dynamic code pages
+        PRIVATE.put(0x104F58, "-//openMDX//XMI 1.0//EN"); // openMDX XMI 1.0 data 
     }
 
 }

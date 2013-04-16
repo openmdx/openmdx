@@ -73,6 +73,10 @@ import org.openmdx.portal.servlet.ObjectReference;
 import org.openmdx.portal.servlet.ViewPort;
 import org.openmdx.portal.servlet.view.View;
 
+/**
+ * ObjectReferenceValue
+ *
+ */
 public class ObjectReferenceValue
 extends AttributeValue
 implements Serializable {
@@ -137,7 +141,9 @@ implements Serializable {
         }
     }
 
-    //-------------------------------------------------------------------------
+    /* (non-Javadoc)
+     * @see org.openmdx.portal.servlet.attribute.AttributeValue#getValue(boolean)
+     */
     @SuppressWarnings("unchecked")
     @Override
     public Object getValue(
@@ -151,34 +157,29 @@ implements Serializable {
          */
         Object value = 
             this.object instanceof RefObject_1_0 && 
-            this.fieldDef.qualifiedFeatureName.equals("org:openmdx:base:ExtentCapable:identity")
-            ? this.object
-                : super.getValue(shortFormat);
+            this.fieldDef.qualifiedFeatureName.equals("org:openmdx:base:ExtentCapable:identity") ? this.object
+            	: super.getValue(shortFormat);
         if(value == null) {
             return new ObjectReference(
                 (RefObject_1_0)null,
                 this.app
             );
-        }
-        else if(value instanceof Exception) {
+        } else if(value instanceof Exception) {
             return new ObjectReference(
                 new ServiceException((Exception)value),
                 this.app
             );        
-        }
-        else if(value instanceof Collection) {
+        } else if(value instanceof Collection) {
             return new MarshallingCollection(
                 this.objectReferenceMarshaller,
                 (Collection)value
             );
-        }
-        else if(value instanceof RefObject_1_0) {
+        } else if(value instanceof RefObject_1_0) {
             return new ObjectReference(
                 (RefObject_1_0)value,
                 this.app
             );
-        }
-        else {
+        } else {
         	SysLog.warning("Reference is of type String instead RefObject or Collection. Retrieving object with new persistence manager");
             Path objectIdentity = new Path(value.toString());
             return new ObjectReference(
@@ -214,7 +215,10 @@ implements Serializable {
         return null;
     }
 
-    //-------------------------------------------------------------------------
+    /* (non-Javadoc)
+     * @see org.openmdx.portal.servlet.attribute.AttributeValue#toString()
+     */
+    @Override
     public String toString(
     ) {
         Object value = this.getValue(false);
@@ -236,7 +240,6 @@ implements Serializable {
         }
     }
 
-    //-------------------------------------------------------------------------
     /**
      * Prepares a single stringified value to append.
      */
@@ -255,8 +258,7 @@ implements Serializable {
                 forEditing,
                 shortFormat
             );
-        }
-        else {
+        } else {        	
             Action action = ((ObjectReference)v).getSelectObjectAction();
             String encodedTitle = (action.getTitle().startsWith("<") ? 
             	action.getTitle() : 
@@ -269,8 +271,7 @@ implements Serializable {
     }
 
     //-------------------------------------------------------------------------
-    public static class ObjectReferenceMarshaller
-    implements Marshaller, Serializable {
+    public static class ObjectReferenceMarshaller implements Marshaller, Serializable {
 
         public ObjectReferenceMarshaller(
             ApplicationContext app
@@ -314,7 +315,9 @@ implements Serializable {
         private final ApplicationContext app;
     }
 
-    //-------------------------------------------------------------------------
+    /* (non-Javadoc)
+     * @see org.openmdx.portal.servlet.attribute.AttributeValue#paint(org.openmdx.portal.servlet.attribute.Attribute, org.openmdx.portal.servlet.ViewPort, java.lang.String, java.lang.String, org.openmdx.base.accessor.jmi.cci.RefObject_1_0, int, int, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, boolean)
+     */
     @Override
     public void paint(
         Attribute attribute,

@@ -47,12 +47,12 @@
  */
 package org.openmdx.state2.aop1;
 
-import javax.jdo.JDOHelper;
 import javax.jdo.spi.PersistenceCapable;
 
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.naming.Path;
 import org.openmdx.kernel.exception.BasicException;
+import org.openmdx.kernel.jdo.ReducedJDOHelper;
 
 /**
  * Unique
@@ -87,9 +87,9 @@ final class UniqueValue<T> {
         Object value
     ){
         if(value instanceof PersistenceCapable) {
-            return JDOHelper.isPersistent(value) ? 
-        		((Path)JDOHelper.getObjectId(value)).toXRI() : 
-    		    JDOHelper.getTransactionalObjectId(value);
+            return ReducedJDOHelper.isPersistent(value) ? 
+        		((Path)ReducedJDOHelper.getObjectId(value)).toXRI() : 
+    		    ReducedJDOHelper.getTransactionalObjectId(value);
         } else {
             return value;
         }

@@ -47,14 +47,14 @@
  */
 package org.openmdx.base.query;
 
-import static org.openmdx.application.dataprovider.layer.persistence.jdbc.Database_1_Attributes.QUERY_FILTER_BOOLEAN_PARAM;
-import static org.openmdx.application.dataprovider.layer.persistence.jdbc.Database_1_Attributes.QUERY_FILTER_CLASS;
-import static org.openmdx.application.dataprovider.layer.persistence.jdbc.Database_1_Attributes.QUERY_FILTER_CLAUSE;
-import static org.openmdx.application.dataprovider.layer.persistence.jdbc.Database_1_Attributes.QUERY_FILTER_DATETIME_PARAM;
-import static org.openmdx.application.dataprovider.layer.persistence.jdbc.Database_1_Attributes.QUERY_FILTER_DATE_PARAM;
-import static org.openmdx.application.dataprovider.layer.persistence.jdbc.Database_1_Attributes.QUERY_FILTER_DECIMAL_PARAM;
-import static org.openmdx.application.dataprovider.layer.persistence.jdbc.Database_1_Attributes.QUERY_FILTER_INTEGER_PARAM;
-import static org.openmdx.application.dataprovider.layer.persistence.jdbc.Database_1_Attributes.QUERY_FILTER_STRING_PARAM;
+import static org.openmdx.application.dataprovider.layer.persistence.jdbc.Database_1_Attributes.QUERY_EXTENSION_BOOLEAN_PARAM;
+import static org.openmdx.application.dataprovider.layer.persistence.jdbc.Database_1_Attributes.QUERY_EXTENSION_CLASS;
+import static org.openmdx.application.dataprovider.layer.persistence.jdbc.Database_1_Attributes.QUERY_EXTENSION_CLAUSE;
+import static org.openmdx.application.dataprovider.layer.persistence.jdbc.Database_1_Attributes.QUERY_EXTENSION_DATETIME_PARAM;
+import static org.openmdx.application.dataprovider.layer.persistence.jdbc.Database_1_Attributes.QUERY_EXTENSION_DATE_PARAM;
+import static org.openmdx.application.dataprovider.layer.persistence.jdbc.Database_1_Attributes.QUERY_EXTENSION_DECIMAL_PARAM;
+import static org.openmdx.application.dataprovider.layer.persistence.jdbc.Database_1_Attributes.QUERY_EXTENSION_INTEGER_PARAM;
+import static org.openmdx.application.dataprovider.layer.persistence.jdbc.Database_1_Attributes.QUERY_EXTENSION_STRING_PARAM;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -79,12 +79,16 @@ import org.w3c.cci2.AnyTypePredicate;
  * The Filter class is bean-compliant. Hence, it can be externalized
  * with the XMLDecoder.
  * 
- * @see java.beans.XMLDecoder
- * @see java.beans.XMLEncoder
+ * @see org.openmdx.base.text.conversion.JavaBeans
  */
 public class Filter
     implements Serializable, AnyTypePredicate {
 
+    /**
+     * Constructor 
+     *
+     * @param that
+     */
     private Filter(
         Filter that
     ){
@@ -96,9 +100,12 @@ public class Filter
         for(OrderSpecifier orderSpecifier : this.orderSpecifiers) {
             this.orderSpecifiers.add(orderSpecifier.clone());
         }
-        this.extension = extension == null ? null : extension.clone();
+        this.extensions = new ArrayList<Extension>(that.extensions.size());
+        for(Extension extension : that.extensions) {
+            this.extensions.add(extension.clone());
+        }
     }
-    
+
     /**
      * Constructs a filter with the specified conditions and
      * order specifiers.
@@ -106,11 +113,11 @@ public class Filter
     public Filter(
         List<Condition> conditions,
         List<OrderSpecifier> orderSpecifiers,
-        Extension extension
+        List<Extension> extensions
     ) {
         this.conditions = conditions == null ? new ArrayList<Condition>() : new ArrayList<Condition>(conditions);
         this.orderSpecifiers = orderSpecifiers == null ? new ArrayList<OrderSpecifier>() : new ArrayList<OrderSpecifier>(orderSpecifiers);
-        this.extension = extension;
+        this.extensions = extensions == null ? new ArrayList<Extension>() :  new ArrayList<Extension>(extensions); 
     }
 
     /**
@@ -168,7 +175,7 @@ public class Filter
     /**
      * The query extension
      */
-    private Extension extension;
+    private List<Extension> extensions;
     
     /**
      * The fields for the toString() method
@@ -271,11 +278,8 @@ public class Filter
                         piggyBackFeature != null &&
                         piggyBackFeature.startsWith(SystemAttributes.CONTEXT_PREFIX) &&
                         piggyBackFeature.endsWith(SystemAttributes.OBJECT_CLASS) &&
-                        QUERY_FILTER_CLASS.equals(Filter.getFirstValue(candidateCondition))
+                        QUERY_EXTENSION_CLASS.equals(Filter.getFirstValue(candidateCondition))
                     ){
-                        if(this.extension != null) throw new IllegalArgumentException(
-                            "Can't process a piggy-back condition when an extension is already set"
-                        );
                         String piggyBackNamespace = piggyBackFeature.substring(
                             0, 
                             piggyBackFeature.length() - SystemAttributes.OBJECT_CLASS.length()
@@ -285,29 +289,29 @@ public class Filter
                             String feature = condition.getFeature();
                             if(feature.startsWith(piggyBackNamespace)) {
                                 piggyBackFeature = feature.substring(piggyBackNamespace.length());
-                                if(QUERY_FILTER_CLAUSE.equals(piggyBackFeature)) {
+                                if(QUERY_EXTENSION_CLAUSE.equals(piggyBackFeature)) {
                                     extension.setClause(Filter.getFirstValue(condition));
-                                } else if (QUERY_FILTER_BOOLEAN_PARAM.equals(piggyBackFeature)) {
+                                } else if (QUERY_EXTENSION_BOOLEAN_PARAM.equals(piggyBackFeature)) {
                                     extension.setBooleanParam(
                                         Filter.getValues(Boolean.class, condition)
                                     );
-                                } else if (QUERY_FILTER_DATE_PARAM.equals(piggyBackFeature)) {
+                                } else if (QUERY_EXTENSION_DATE_PARAM.equals(piggyBackFeature)) {
                                     extension.setDateParam(
                                         Filter.getValues(XMLGregorianCalendar.class, condition)
                                     );
-                                } else if (QUERY_FILTER_DATETIME_PARAM.equals(piggyBackFeature)) {
+                                } else if (QUERY_EXTENSION_DATETIME_PARAM.equals(piggyBackFeature)) {
                                     extension.setDateTimeParam(
                                         Filter.getValues(Date.class, condition)
                                     );
-                                } else if (QUERY_FILTER_DECIMAL_PARAM.equals(piggyBackFeature)) {
+                                } else if (QUERY_EXTENSION_DECIMAL_PARAM.equals(piggyBackFeature)) {
                                     extension.setDecimalParam(
                                         Filter.getValues(BigDecimal.class, condition)
                                     );
-                                } else if (QUERY_FILTER_INTEGER_PARAM.equals(piggyBackFeature)) {
+                                } else if (QUERY_EXTENSION_INTEGER_PARAM.equals(piggyBackFeature)) {
                                     extension.setIntegerParam(
                                         Filter.getValues(Integer.class, condition)
                                     );
-                                } else if (QUERY_FILTER_STRING_PARAM.equals(piggyBackFeature)) {
+                                } else if (QUERY_EXTENSION_STRING_PARAM.equals(piggyBackFeature)) {
                                     extension.setStringParam(
                                         Filter.getValues(String.class, condition)
                                     );
@@ -316,7 +320,7 @@ public class Filter
                                 this.conditions.add(condition);
                             }
                         }
-                        this.setExtension(extension);
+                        this.getExtension().add(extension);
                         return;
                     }
                 }
@@ -399,19 +403,56 @@ public class Filter
      *
      * @return Returns the extension.
      */
-    public Extension getExtension() {
-        return this.extension;
+    public List<Extension> getExtension(
+    ) {
+        return this.extensions;
     }
-    
+
     /**
-     * Set extension.
+     * Set extensions.
      * 
      * @param extension The extension to set.
      */
-    public void setExtension(Extension extension) {
-        this.extension = extension;
+    public void setExtension(
+        Extension[] extensions
+    ) {
+        this.extensions.clear();
+        this.extensions.addAll(
+            Arrays.asList(extensions)
+        );        
     }
 
+    /**
+     * Set extension at index.
+     * 
+     * @param index
+     * @param extension
+     */
+    public void setExtension(
+        int index, 
+        Extension extension
+    ) {
+        this.extensions.set(
+            index, 
+            extension
+        );
+    }
+
+    /**
+     * Set extensions.
+     * 
+     * @param extension
+     */
+    public void setExtension(
+        List<Extension> extension
+    ) {
+        this.extensions.clear();
+        this.extensions.addAll(extension);
+    }
+
+    /* (non-Javadoc)
+     * @see java.lang.Object#toString()
+     */
     @Override
     public String toString(
     ) {
@@ -421,8 +462,8 @@ public class Filter
 		    Filter.TO_STRING_FIELDS, 
 		    new Object[]{
 		        this.conditions,
-		        this.orderSpecifiers,
-		        this.extension
+		        this.orderSpecifiers,		        
+		        this.extensions
 		    }
 		).toString();
     }
@@ -505,7 +546,7 @@ public class Filter
             return 
                 Filter.areEquivalent(this.conditions, that.conditions) && 
                 Filter.areEquivalent(this.orderSpecifiers, that.orderSpecifiers) &&
-                (this.extension == null ? that.extension == null : this.extension.equals(that.extension));
+                Filter.areEquivalent(this.extensions, that.extensions); 
         } else {
             return false;
         }

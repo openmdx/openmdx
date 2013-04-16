@@ -64,9 +64,7 @@ import java.util.SortedMap;
 import java.util.logging.Level;
 
 import javax.jdo.JDOException;
-import javax.jdo.JDOHelper;
 import javax.jdo.JDOUserException;
-import javax.jdo.PersistenceManager;
 import javax.jdo.spi.PersistenceCapable;
 import javax.jdo.spi.StateManager;
 import javax.jmi.reflect.JmiException;
@@ -93,6 +91,7 @@ import org.openmdx.base.accessor.spi.DecimalMarshaller;
 import org.openmdx.base.accessor.spi.DurationMarshaller;
 import org.openmdx.base.accessor.spi.IntegerMarshaller;
 import org.openmdx.base.accessor.spi.LongMarshaller;
+import org.openmdx.base.accessor.spi.PersistenceManager_1_0;
 import org.openmdx.base.accessor.spi.ShortMarshaller;
 import org.openmdx.base.accessor.spi.URIMarshaller;
 import org.openmdx.base.accessor.view.ObjectView_1_0;
@@ -118,6 +117,7 @@ import org.openmdx.base.query.IsInCondition;
 import org.openmdx.base.query.Quantifier;
 import org.openmdx.base.resource.InteractionSpecs;
 import org.openmdx.kernel.exception.BasicException;
+import org.openmdx.kernel.jdo.ReducedJDOHelper;
 import org.openmdx.kernel.log.SysLog;
 import org.w3c.cci2.BinaryLargeObject;
 import org.w3c.cci2.BinaryLargeObjects;
@@ -980,7 +980,7 @@ class RefObject_1
     private int getInteractionVerb(
         boolean query
     ) {
-        return !query && this.jdoGetPersistenceManager().currentTransaction().getOptimistic() ? 
+        return !query && this.jdoGetPersistenceManager().currentUnitOfWork().getOptimistic() ? 
             InteractionSpec.SYNC_SEND :
             InteractionSpec.SYNC_SEND_RECEIVE;
     }
@@ -1373,7 +1373,7 @@ class RefObject_1
     final public void refDelete(
     ) {
         try {
-            JDOHelper.getPersistenceManager(this.object).deletePersistent(this.object);
+            ReducedJDOHelper.getPersistenceManager(this.object).deletePersistent(this.object);
         } 
         catch(Exception e) {
             throw new JmiServiceException(e);
@@ -1661,7 +1661,7 @@ class RefObject_1
         try {
             ModelElement_1_0 elementDef = ((RefMetaObject_1)this.refMetaObject()).getElementDef();
             for (
-                Iterator<ModelElement_1_0> i = ((Map) elementDef.objGetValue("allFeature")).values().iterator(); 
+                Iterator<ModelElement_1_0> i = elementDef.objGetMap("allFeature").values().iterator(); 
                 i.hasNext();
             ) {
                 ModelElement_1_0 featureDef = i.next();
@@ -1760,7 +1760,7 @@ class RefObject_1
         try {
             ModelElement_1_0 elementDef = ((RefMetaObject_1) this.refMetaObject()).getElementDef();
             for (
-                Iterator<ModelElement_1_0> i = ((Map) elementDef.objGetValue("allFeature")).values().iterator(); 
+                Iterator<ModelElement_1_0> i = elementDef.objGetMap("allFeature").values().iterator(); 
                 i.hasNext();
             ) {
                 ModelElement_1_0 featureDef = i.next();
@@ -2016,7 +2016,7 @@ class RefObject_1
      * @see javax.jdo.spi.PersistenceCapable#jdoGetPersistenceManager()
      */
 //  @Override
-    public PersistenceManager jdoGetPersistenceManager(
+    public PersistenceManager_1_0 jdoGetPersistenceManager(
     ) {
         return refOutermostPackage().refPersistenceManager();
     }

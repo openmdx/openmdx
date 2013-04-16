@@ -50,11 +50,11 @@ package org.openmdx.application.airsync;
 
 import java.io.OutputStream;
 
+
+import org.openmdx.base.wbxml.stream.WBXMLStreamWriter;
+import org.openmdx.base.xml.stream.AbstractXMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
-
-import org.openmdx.base.wbxml.WBXMLStreamWriter;
-import org.openmdx.base.xml.stream.AbstractXMLOutputFactory;
 
 /**
  * WBXML Output Factory

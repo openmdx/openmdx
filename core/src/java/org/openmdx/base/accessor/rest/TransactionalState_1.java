@@ -255,16 +255,16 @@ public final class TransactionalState_1 {
     /**
      * The dirty features
      * 
-     * @param readOnly 
+     * @param nonGrowing if <code>true</code> we may remove an element but not add a new one
      * 
      * @return the set of dirty features
      */
     public final Set<String> dirtyFeatures(
-        boolean readOnly
+        boolean nonGrowing
     ){
         if(this.dirtyFeatures != null) {
         	return this.dirtyFeatures ;
-        } else if (readOnly) {
+        } else if (nonGrowing) {
         	return Collections.<String>emptySet();
         } else {
         	return this.dirtyFeatures = new HashSet<String>();

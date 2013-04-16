@@ -63,7 +63,8 @@ public interface OptionalFeaturePredicate {
     void isNonNull();
     
     /**
-     * This method is deprecated to avoid its erroneous use..
+     * This method is deprecated in order to avoid its erroneous use in lieu of
+     * equalTo().
      * 
      * @deprecated to avoid erroneous use 
      * 

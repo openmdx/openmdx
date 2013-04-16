@@ -64,12 +64,14 @@ import javax.transaction.UserTransaction;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.openmdx.application.transaction.UserTransactions;
 import org.openmdx.base.jmi1.Authority;
 import org.openmdx.base.jmi1.Provider;
-import org.openmdx.base.resource.spi.UserTransactions;
+import org.openmdx.base.transaction.Status;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.lightweight.naming.NonManagedInitialContextFactoryBuilder;
 import org.openmdx.kernel.log.SysLog;
+
 import test.openmdx.app1.jmi1.App1Package;
 import test.openmdx.app1.jmi1.MessageTemplate;
 import test.openmdx.app1.jmi1.Segment;
@@ -101,7 +103,7 @@ public class TestTransaction {
         return new Synchronization(){
 
             public void afterCompletion(int status) {
-                SysLog.info("Synchorization.aterCompletion()", UserTransactions.getStatus(status));
+                SysLog.info("Synchorization.aterCompletion()", Status.valueOf(status));
             }
 
             public void beforeCompletion() {

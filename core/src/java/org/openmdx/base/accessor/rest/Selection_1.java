@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2009-2011, OMEX AG, Switzerland
+ * Copyright (c) 2009-2013, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -50,14 +50,17 @@ package org.openmdx.base.accessor.rest;
 import java.util.List;
 
 import javax.jdo.FetchPlan;
+import javax.jdo.JDODataStoreException;
 import javax.jdo.PersistenceManager;
 
 import org.openmdx.base.accessor.cci.Container_1_0;
 import org.openmdx.base.accessor.cci.DataObject_1_0;
+import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.persistence.spi.TransientContainerId;
 import org.openmdx.base.query.Condition;
 import org.openmdx.base.query.Extension;
+import org.openmdx.kernel.jdo.ReducedJDOHelper;
 
 /**
  * Sub-Map
@@ -134,8 +137,8 @@ final class Selection_1 extends AbstractContainer_1 {
      * @see org.openmdx.base.accessor.rest.AbstractContainer_1#getExtension()
      */
     @Override
-    protected Extension getExtension() {
-        return objectFilter.getExtension();
+    protected List<Extension> getExtensions() {
+        return objectFilter.getExtensions();
     }
     
     /* (non-Javadoc)
@@ -143,9 +146,11 @@ final class Selection_1 extends AbstractContainer_1 {
      */
     @Override
     protected boolean isIgnoreCache() {
-        return this.container.isIgnoreCache() || this.getExtension() != null;
+        return 
+            this.container.isIgnoreCache() || 
+            (this.getExtensions() != null && !this.getExtensions().isEmpty());
     }
-    
+
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.rest.AbstractContainer_1#isRetrieved()
      */
@@ -197,6 +202,40 @@ final class Selection_1 extends AbstractContainer_1 {
     public boolean jdoIsPersistent() {
         return this.container.jdoIsPersistent();
     }
+
+    
+    /* (non-Javadoc)
+     * @see org.openmdx.base.accessor.rest.AbstractContainer_1#isExtent()
+     */
+    @Override
+    protected boolean isExtent() {
+        return container().isExtent();
+    }
+
+    
+    /* (non-Javadoc)
+     * @see org.openmdx.base.accessor.rest.AbstractContainer_1#isPlainExtent()
+     */
+    @Override
+    protected boolean isPlainExtent() {
+        return isExtent() && this.objectFilter.isPlainExtent();
+    }
+
+    /**
+     * Determines whether an object belongs to the container or extent
+     * 
+     * @param candidate
+     * 
+     * @return <code>true</code> if the object belongs to the container or extent
+     */
+    @Override
+    protected boolean isInContainerOrExtent(
+        Object candidate
+    ){
+        return isExtent() ? 
+            ((Path) ReducedJDOHelper.getObjectId(candidate)).isLike(getFilter().getIdentityPattern()) :
+            super.isInContainerOrExtent(candidate);
+    }
     
     /* (non-Javadoc)
      * @see org.openmdx.base.persistence.spi.PersistenceCapableCollection#openmdxjdoRetrieve(javax.jdo.FetchPlan)
@@ -205,8 +244,10 @@ final class Selection_1 extends AbstractContainer_1 {
     public void openmdxjdoRetrieve(
         FetchPlan fetchPlan
     ) {
-      if(!this.isRetrieved()) {
+      if(!this.isRetrieved()) try {
           this.getStored().retrieveAll(fetchPlan);
+      } catch (ServiceException exception) {
+          throw new JDODataStoreException("retrieveAll() failure", exception);
       }
     }
     
@@ -225,10 +266,11 @@ final class Selection_1 extends AbstractContainer_1 {
 //  @Override
     public boolean containsValue(Object value) {
         return 
-        	this.container.containsValue(value) &&    
+            this.isInContainerOrExtent(value) &&
+            !ReducedJDOHelper.isDeleted(value) &&
             this.objectFilter.accept(value);
     }
-    
+
     /* (non-Javadoc)
      * @see java.util.Map#get(java.lang.Object)
      */

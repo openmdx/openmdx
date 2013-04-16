@@ -1,8 +1,8 @@
 /*
- * ==================================================================== Project:
- * openMDX/Core, http://www.openmdx.org/ Name: $Id: DynamicPlugIn.java,v 1.8 2011/07/01 11:15:51 hburger Exp $ Description: Dynamic
- * Plug-In Revision: $Revision: 1.8 $ Owner: OMEX AG, Switzerland,
- * http://www.omex.ch Date: $Date: 2011/07/01 11:15:51 $
+ * ==================================================================== 
+ * Project: openMDX/Core, http://www.openmdx.org/ 
+ * Description: Dynamic Plug-In 
+ * Owner: OMEX AG, Switzerland, http://www.omex.ch
  * ====================================================================
  * 
  * This software is published under the BSD license as listed below.
@@ -128,7 +128,7 @@ public class DynamicPlugIn extends AbstractPlugIn {
      */
     protected static void addTo(Page page0, CodeSpace codeSpace, String value) {
         String[] target = page0.get(codeSpace);
-        int index = Math.abs(value.hashCode() % target.length);
+        int index = getIndex(value);
         if (target[index] == null) {
             target[index] = value;
             SysLog.log(
@@ -180,7 +180,7 @@ public class DynamicPlugIn extends AbstractPlugIn {
         return stringTable;
     }
 
-    private final int getIndex(
+    private static final int getIndex(
         String value
     ){
         return Math.abs(value.hashCode() % Page.SIZE);
@@ -307,23 +307,31 @@ public class DynamicPlugIn extends AbstractPlugIn {
             false
         ) : null;
     }
+    
+    /* (non-Javadoc)
+     * @see org.openmdx.base.wbxml.PlugIn#findStringToken(java.lang.String)
+     */
+    @Override
+    public StringToken findStringToken(String value) {
+        Integer oldIndex = this.stringSink.get(value);
+        return oldIndex == null ? null : new StringToken(oldIndex.intValue(), false);
+    }
 
     /*
      * (non-Javadoc)
      * 
      * @see
-     * org.openmdx.base.xml.wbxml.spi.AbstractPlugIn#getStringToken(java.lang
-     * .String)
+     * org.openmdx.base.xml.wbxml.spi.AbstractPlugIn#getStringToken(java.lang.String)
      */
     @Override
     public StringToken getStringToken(String value) {
-        Integer oldiIndex = this.stringSink.get(value);
-        if (oldiIndex != null) {
-            return new StringToken(oldiIndex.intValue(), false);
-        } else {
+        StringToken token = findStringToken(value);
+        if(token == null) {
             int newIndex = this.stringSinkSize;
             this.stringSinkSize += 2 * (value.length() + 1);
             return new StringToken(newIndex, true);
+        } else {
+            return token;
         }
     }
 
@@ -720,7 +728,8 @@ public class DynamicPlugIn extends AbstractPlugIn {
             int page,
             int index,
             int length,
-            boolean created) {
+            boolean created
+        ) {
             return new CodeToken(
                 page << 8 | index + 5 | this.pattern,
                 length,

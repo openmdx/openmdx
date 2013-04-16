@@ -64,8 +64,7 @@ import org.openmdx.base.resource.Records;
  * This class is bean-compliant. Hence, it can be externalized
  * with the XMLDecoder.
  * 
- * @see java.beans.XMLDecoder
- * @see java.beans.XMLEncoder
+ * @see org.openmdx.base.text.conversion.JavaBeans
  */
 public class QueryExtension implements Extension {
 

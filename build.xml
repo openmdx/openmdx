@@ -12,7 +12,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2011, OMEX AG, Switzerland
+ * Copyright (c) 2004-2013, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without 
@@ -52,7 +52,7 @@
 >
 	<description>Builds the openMDX projects</description>
 	
-	<target name="all" depends="-all,-ant,-core,-security,-portal,-tomcat,-test-core" description="Cleans, builds and makes distributions for all projects"/>	
+	<target name="all" depends="-all,-ant,-core,-client,-security,-portal,-tomcat,-test-core" description="Cleans, builds and makes distributions for all projects"/>	
 	
 	<!-- ******************************************************************* -->
 	<!-- * -projecthelp -->
@@ -95,6 +95,9 @@
 		<condition property="include.security">
 			<available file="build.xml" filepath="security"/>
 		</condition>
+		<condition property="include.client">
+			<available file="build.xml" filepath="client"/>
+		</condition>
 		<condition property="include.portal">
 			<available file="build.xml" filepath="portal"/>
 		</condition>
@@ -120,6 +123,9 @@
 	</target>
 	<target name="-security" depends="-init" if="include.security">
 		<ant inheritAll="false" dir="security" target="${ant.target}"/>
+	</target>
+	<target name="-client" depends="-init" if="include.client">
+		<ant inheritAll="false" dir="client" target="${ant.target}"/>
 	</target>
 	<target name="-portal" depends="-init" if="include.portal">
 		<ant inheritAll="false" dir="portal" target="${ant.target}"/>

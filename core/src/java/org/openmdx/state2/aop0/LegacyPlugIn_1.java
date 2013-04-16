@@ -89,7 +89,7 @@ public class LegacyPlugIn_1 extends ColonPlugIn_1 implements LegacyConfiguration
     /**
      * Defines where the valid time of state capable objects is unique
      * 
-     * @param value the object id patterns
+     * @param values the object id patterns
      */
     public void setValidTimeUniquePattern(
         String[] values

@@ -146,11 +146,9 @@ import org.openmdx.portal.servlet.loader.CodesLoader;
 import org.openmdx.portal.servlet.loader.DataLoader;
 import org.openmdx.portal.servlet.loader.FilterLoader;
 import org.openmdx.portal.servlet.loader.LayoutLoader;
-import org.openmdx.portal.servlet.loader.ReportsLoader;
 import org.openmdx.portal.servlet.loader.TextsLoader;
 import org.openmdx.portal.servlet.loader.UiLoader;
 import org.openmdx.portal.servlet.loader.WizardsLoader;
-import org.openmdx.portal.servlet.reports.ReportDefinitionFactory;
 import org.openmdx.portal.servlet.view.EditObjectView;
 import org.openmdx.portal.servlet.view.LayoutFactory;
 import org.openmdx.portal.servlet.view.ObjectView;
@@ -239,7 +237,7 @@ public class ObjectInspectorServlet
         System.out.println();
         System.out.println();
         System.out.println(messagePrefix + "Starting web application \"" + conf.getServletContext().getContextPath() + "\"");
-        System.out.println(messagePrefix + "Driven by openMDX/Portal. Revision: $Revision: 1.130 $");
+        System.out.println(messagePrefix + "Driven by openMDX/Portal");
         System.out.println(messagePrefix + "For more information see http://www.openmdx.org");
         System.out.println(messagePrefix + "Loading... (see log for more information)");
         
@@ -331,21 +329,6 @@ public class ObjectInspectorServlet
         catch(ServiceException e) {
             this.log("loading layouts failed");
         }      
-        // Get reports
-        try {
-            this.reportsLoader = new ReportsLoader(
-                this.getServletContext(),
-                this.portalExtension
-            );
-            this.reportFactory = this.reportsLoader.loadReportDefinitions(
-                context,
-                this.locales,
-                model
-            );
-        }
-        catch(ServiceException e) {
-            this.log("loading reports failed", e);
-        }      
         // Get wizards
         try {
             this.wizardsLoader = new WizardsLoader(
@@ -392,8 +375,7 @@ public class ObjectInspectorServlet
         this.controlFactory = new ControlFactory(
             this.uiContext,
             this.texts,
-            this.wizardFactory,
-            this.reportFactory
+            this.wizardFactory
         );      
         // User home
         this.userHomeIdentity = null;
@@ -830,61 +812,47 @@ public class ObjectInspectorServlet
                         }
                     }
                 }
-            }
-            catch(FileUploadException e) {
+            } catch(FileUploadException e) {
                 ServiceException e0 = new ServiceException(e);
                 SysLog.detail(e.getMessage(), e0);
                 SysLog.warning("Can not upload file", Arrays.asList(e.getMessage(), app.getCurrentUserRole()));
             }
-        }    
+        }
         // requestId. The form field has priority over referrer
-        String requestId = 
-          this.getParameter(parameterMap, WebKeys.REQUEST_ID + ".submit") == null ? 
-              this.getParameter(parameterMap, WebKeys.REQUEST_ID) == null ? 
-                  null :                       
-                  this.getParameter(parameterMap, WebKeys.REQUEST_ID) : 
-              this.getParameter(parameterMap, WebKeys.REQUEST_ID + ".submit");
+        String requestId = this.getParameter(parameterMap, WebKeys.REQUEST_ID + ".submit") == null 
+          	? this.getParameter(parameterMap, WebKeys.REQUEST_ID) == null
+          		? null
+          		: this.getParameter(parameterMap, WebKeys.REQUEST_ID)
+          	: this.getParameter(parameterMap, WebKeys.REQUEST_ID + ".submit");
         SysLog.detail(WebKeys.REQUEST_ID, requestId);    
         // event. The form field has priority over referer
         short event = Action.EVENT_NONE;
         try {
-            event = 
-                this.getParameter(parameterMap, WebKeys.REQUEST_EVENT + ".submit") == null ? 
-                    this.getParameter(parameterMap, WebKeys.REQUEST_EVENT) == null ? 
-                        Action.EVENT_NONE : 
-                        Short.parseShort(this.getParameter(parameterMap, WebKeys.REQUEST_EVENT)) : 
-                    Short.parseShort(this.getParameter(parameterMap, WebKeys.REQUEST_EVENT + ".submit"));
-        }
-        catch(Exception e) {}
+            event = this.getParameter(parameterMap, WebKeys.REQUEST_EVENT + ".submit") == null 
+            	? this.getParameter(parameterMap, WebKeys.REQUEST_EVENT) == null 
+            		? Action.EVENT_NONE 
+            		: Short.parseShort(this.getParameter(parameterMap, WebKeys.REQUEST_EVENT)) 
+            	: Short.parseShort(this.getParameter(parameterMap, WebKeys.REQUEST_EVENT + ".submit"));
+        } catch(Exception e) {}
         SysLog.detail("event", event);    
         // Get name of pressed button (if any)
         String buttonName = "";
-        for(Iterator i = parameterMap.keySet().iterator(); i.hasNext(); ) {
-            String name = (String)i.next();
+        for(String name: parameterMap.keySet()) {
             if(name.endsWith(".x")) {
                 buttonName = name.substring(0, name.lastIndexOf(".x"));
                 break;
             }
-        }  
-        // Get parameter (either parameter or name of pressed button)
-        String parameter = null;
-        if(this.getParameter(parameterMap, WebKeys.REQUEST_PARAMETER) != null) {
-            parameter = this.getParameter(parameterMap, WebKeys.REQUEST_PARAMETER);
         }
-        else if(this.getParameter(parameterMap, WebKeys.REQUEST_PARAMETER_ENC) != null) {
-            parameter = 
-                URLDecoder.decode(
-                    this.getParameter(parameterMap, WebKeys.REQUEST_PARAMETER_ENC), 
-                    "UTF-8"
-                );
-        }
-        else if(this.getParameter(parameterMap, WebKeys.REQUEST_PARAMETER_LIST) != null) {
-            // parameter must be parsed and decoded by specific event handler
-            parameter = this.getParameter(parameterMap, WebKeys.REQUEST_PARAMETER_LIST);
-        }
-        else {
-            parameter = buttonName;
-        }
+        // Get parameter
+        String parameter = this.getParameter(parameterMap, WebKeys.REQUEST_PARAMETER + ".submit") != null
+        	? this.getParameter(parameterMap, WebKeys.REQUEST_PARAMETER + ".submit")
+        	: this.getParameter(parameterMap, WebKeys.REQUEST_PARAMETER) != null
+            	? this.getParameter(parameterMap, WebKeys.REQUEST_PARAMETER) 
+            	: this.getParameter(parameterMap, WebKeys.REQUEST_PARAMETER_ENC) != null
+            		? URLDecoder.decode(this.getParameter(parameterMap, WebKeys.REQUEST_PARAMETER_ENC), "UTF-8")
+            		: this.getParameter(parameterMap, WebKeys.REQUEST_PARAMETER_LIST) != null 
+            			? this.getParameter(parameterMap, WebKeys.REQUEST_PARAMETER_LIST)
+            			: buttonName;
         SysLog.detail(WebKeys.REQUEST_PARAMETER, parameter);        
         // Views
         Long viewsCachedSince = (Long)session.getAttribute(WebKeys.VIEW_CACHE_CACHED_SINCE);
@@ -1230,7 +1198,7 @@ public class ObjectInspectorServlet
                 catch(Exception e) {
                 	SysLog.warning("handleEvent throws exception", e.getMessage());
                     new ServiceException(e).log();
-                }    
+                }
                 // PERFORMANCE
                 t1 = System.currentTimeMillis();
                 SysLog.detail("time (ms) to handle event", (t1-t0));
@@ -1357,7 +1325,6 @@ public class ObjectInspectorServlet
     private Codes codes = null;
     private Texts texts = null;
     private LayoutFactory layoutFactory = null;
-    private ReportDefinitionFactory reportFactory = null;
     private WizardDefinitionFactory wizardFactory = null;
     private ControlFactory controlFactory = null;
     // In-memory threshold for multi-part forms 
@@ -1376,7 +1343,6 @@ public class ObjectInspectorServlet
     private UiLoader uiLoader;
     private FilterLoader filterLoader;
     private LayoutLoader layoutLoader;
-    private ReportsLoader reportsLoader;
     private WizardsLoader wizardsLoader;
 
 }

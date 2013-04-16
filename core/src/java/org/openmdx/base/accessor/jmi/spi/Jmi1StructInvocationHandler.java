@@ -123,7 +123,7 @@ public class Jmi1StructInvocationHandler implements InvocationHandler, Marshalle
         ModelElement_1_0 fieldDef = fields.get(methodName);
         if(fieldDef == null) {
             ModelElement_1_0 structDef = Model_1Factory.getModel().getElement(structName);
-            for(Map.Entry<String,ModelElement_1_0> field: ((Map<String,ModelElement_1_0>)structDef.objGetValue("field")).entrySet()) {
+            for(Map.Entry<String,ModelElement_1_0> field: ((Map<String,ModelElement_1_0>)structDef.objGetMap("field")).entrySet()) {
                 fields.putIfAbsent(
                     Identifier.OPERATION_NAME.toIdentifier(
                         AbstractNames.openmdx2AccessorName(
@@ -183,7 +183,7 @@ public class Jmi1StructInvocationHandler implements InvocationHandler, Marshalle
                 return getValue(                    
                     fieldName.indexOf(":") > 0 ?
                         model.getElement(fieldName) :
-                        ((Map<String,ModelElement_1_0>)model.getElement(this.delegate.getRecordName()).objGetValue("field")).get(fieldName)
+                        ((Map<String,ModelElement_1_0>)model.getElement(this.delegate.getRecordName()).objGetMap("field")).get(fieldName)
                 );
             } 
             else if ("refTypeName".equals(methodName)) {
@@ -266,8 +266,9 @@ public class Jmi1StructInvocationHandler implements InvocationHandler, Marshalle
      * @see org.openmdx.base.persistence.spi.Marshaller#marshal(java.lang.Object)
      */
     public Object marshal(Object source) {
-        return source instanceof Path ?
-            refPackage.refObject((Path)source) :
+        return 
+            source instanceof Path ? refPackage.refObject((Path)source) :
+            source instanceof MappedRecord ? refPackage.refCreateStruct((MappedRecord)source) :
             source;    
     }
 

@@ -47,7 +47,6 @@
  */
 package org.openmdx.base.accessor.view;
 
-import javax.jdo.JDOHelper;
 import javax.jdo.PersistenceManager;
 import javax.jdo.listener.ClearCallback;
 import javax.jdo.listener.DeleteCallback;
@@ -57,6 +56,7 @@ import org.openmdx.base.accessor.cci.DataObject_1_0;
 import org.openmdx.base.accessor.spi.DelegatingObject_1;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.Model_1_0;
+import org.openmdx.kernel.jdo.ReducedJDOHelper;
 
 /**
  * Object Interceptor
@@ -143,7 +143,7 @@ public class Interceptor_1
         if(delegate instanceof Interceptor_1) {
             ((Interceptor_1)delegate).objDelete();
         } else {
-            JDOHelper.getPersistenceManager(delegate).deletePersistent(delegate);
+            ReducedJDOHelper.getPersistenceManager(delegate).deletePersistent(delegate);
         }
     }
     
@@ -153,7 +153,7 @@ public class Interceptor_1
         if(delegate instanceof Interceptor_1) {
             ((Interceptor_1)delegate).objRefresh();
         } else {
-            JDOHelper.getPersistenceManager(delegate).refresh(delegate);
+            ReducedJDOHelper.getPersistenceManager(delegate).refresh(delegate);
         }
     }
     

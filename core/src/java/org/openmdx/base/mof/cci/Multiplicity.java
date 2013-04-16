@@ -81,7 +81,7 @@ public enum Multiplicity {
 	SPARSEARRAY("sparsearray"),
 	
 	/**
-	 * An unbounded sparse map
+	 * An unbounded map
 	 */
 	MAP("map"),
 

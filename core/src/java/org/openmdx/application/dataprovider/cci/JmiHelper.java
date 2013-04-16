@@ -57,7 +57,6 @@ import java.util.ListIterator;
 import java.util.Map;
 import java.util.Set;
 
-import javax.jdo.JDOHelper;
 import javax.jdo.PersistenceManager;
 import javax.jmi.reflect.RefObject;
 import javax.resource.cci.MappedRecord;
@@ -81,6 +80,7 @@ import org.openmdx.base.query.LenientPathComparator;
 import org.openmdx.base.rest.spi.Facades;
 import org.openmdx.base.rest.spi.Object_2Facade;
 import org.openmdx.kernel.exception.BasicException;
+import org.openmdx.kernel.jdo.ReducedJDOHelper;
 import org.w3c.cci2.SparseArray;
 import org.w3c.spi2.Datatypes;
 
@@ -119,15 +119,15 @@ public class JmiHelper {
                 } else if(source instanceof Path) {
                     if(this.objectCache.containsKey(source)) {
                         Object object = this.objectCache.get(source);
-                        return JDOHelper.getPersistenceManager(object) == this.pm ? object : this.pm.getObjectById(
-                            JDOHelper.getTransactionalObjectId(object)
+                        return ReducedJDOHelper.getPersistenceManager(object) == this.pm ? object : this.pm.getObjectById(
+                            ReducedJDOHelper.getTransactionalObjectId(object)
                         );
                     } else {
                         return this.pm.getObjectById(source);
                     }
                 } else {
-                    return JDOHelper.getPersistenceManager(source) == this.pm ? source : this.pm.getObjectById(
-                        JDOHelper.getObjectId(source)
+                    return ReducedJDOHelper.getPersistenceManager(source) == this.pm ? source : this.pm.getObjectById(
+                        ReducedJDOHelper.getObjectId(source)
                     );
                 }
             } else if(PrimitiveTypes.DATETIME.equals(this.typeName)) {
@@ -255,7 +255,7 @@ public class JmiHelper {
         Collection<String> ignorableFeatures, 
         boolean compareWithBeforeImage
     ) throws ServiceException {
-        PersistenceManager pm = JDOHelper.getPersistenceManager(target);
+        PersistenceManager pm = ReducedJDOHelper.getPersistenceManager(target);
         String typeName = Object_2Facade.getObjectClass(source);
         Object_2Facade facade = Facades.asObject(source);
         Model_1_0 model = ((RefPackage_1_0)target.refImmediatePackage()).refModel();

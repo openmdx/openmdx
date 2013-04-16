@@ -59,14 +59,12 @@ import java.util.concurrent.ConcurrentMap;
 import javax.jdo.FetchPlan;
 import javax.jdo.JDOException;
 import javax.jdo.JDOFatalUserException;
-import javax.jdo.JDOHelper;
 import javax.jdo.JDOObjectNotFoundException;
 import javax.jdo.JDOUserException;
 import javax.jdo.PersistenceManager;
 
 import org.openmdx.base.accessor.cci.Container_1_0;
 import org.openmdx.base.accessor.cci.DataObject_1_0;
-import org.openmdx.base.accessor.cci.SystemAttributes;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.AggregationKind;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
@@ -76,6 +74,7 @@ import org.openmdx.base.persistence.spi.TransientContainerId;
 import org.openmdx.base.query.Condition;
 import org.openmdx.base.query.Extension;
 import org.openmdx.kernel.exception.BasicException;
+import org.openmdx.kernel.jdo.ReducedJDOHelper;
 
 /**
  * Container
@@ -171,7 +170,9 @@ class Container_1
      */
     private boolean isComposite(
     ){
-        try {
+        if(this.owner.objDoesNotExist()) {
+            return false;
+        } else try {
             Model_1_0 model = this.openmdxjdoGetDataObjectManager().getModel();
             ModelElement_1_0 classDef = model.getElement(this.owner.objGetClass());
             ModelElement_1_0 reference = model.getFeatureDef(classDef, this.transientContainerId.getFeature(), true);
@@ -215,9 +216,9 @@ class Container_1
     }
 
     /**
-     * Add an object to the cache
+     * Remove an object from the cache
+     * 
      * @param key
-     * @param value
      */
     void removeFromChache(
         String key
@@ -289,7 +290,7 @@ class Container_1
      * @see org.openmdx.base.accessor.rest.AbstractContainer_1#getExtension()
      */
     @Override
-    protected Extension getExtension() {
+    protected List<Extension> getExtensions() {
         return null;
     }
 
@@ -314,7 +315,7 @@ class Container_1
             //
             // Test whether lookup for this object has already failed in the same unit of work.
             //
-            UnitOfWork_1 unitOfWork = this.openmdxjdoGetDataObjectManager().currentTransaction();
+            UnitOfWork_1 unitOfWork = this.openmdxjdoGetDataObjectManager().currentUnitOfWork();
             if(unitOfWork.isActive()) {
                 TransactionalState_1 state = unitOfWork.getState(this.owner, true);
                 if(state != null) {
@@ -368,9 +369,9 @@ class Container_1
             } else try {
                 DataObject_1_0 candidate = this.openmdxjdoGetDataObjectManager().getObjectById(
                     this.jdoGetObjectId().getChild((String)key), 
-                    true
+                    false
                 );
-                return candidate != null && !candidate.jdoIsDeleted();
+                return candidate != null && !candidate.objDoesNotExist() && !candidate.jdoIsDeleted();
             } catch (JDOObjectNotFoundException exception) {
                 return false;
             }
@@ -437,7 +438,7 @@ class Container_1
     public boolean containsValue(
         Object value
     ) {
-        return containsObject(value) && !JDOHelper.isDeleted(value);
+        return containsObject(value) && !ReducedJDOHelper.isDeleted(value);
     }
 
 //  @Override
@@ -476,48 +477,70 @@ class Container_1
         }
     }
 
-//   @Override
-    public void openmdxjdoRetrieve(
-        FetchPlan fetchPlan
+    /**
+     * Add the included objects to the cache
+     */
+    void amendAndDeployCache(
+        ConcurrentMap<String,DataObject_1_0> cache
+    ){
+        for(DataObject_1_0 object : this.getIncluded()) {
+            cache.put(
+                object.jdoGetObjectId().getBase(),
+                object
+            );
+        }
+        this.cache = cache;
+    }
+    
+    private void populateCache(
     ) {
-        if(!this.isRetrieved() && this.isStored()) {
-            ConcurrentMap<String,DataObject_1_0> cache = new ConcurrentHashMap<String,DataObject_1_0>();
-            for(DataObject_1_0 object : this.getStored()){
-                if(!object.jdoIsDeleted()) {
-                    cache.put(
-                        object.jdoGetObjectId().getBase(),
-                        object
-                    );
-                }                    
-            }
-            for(DataObject_1_0 object : this.getIncluded()) {
+        ConcurrentMap<String,DataObject_1_0> cache = new ConcurrentHashMap<String,DataObject_1_0>();
+        for(DataObject_1_0 object : this.getStored()){
+            if(!object.jdoIsDeleted()) {
                 cache.put(
                     object.jdoGetObjectId().getBase(),
                     object
                 );
-            }
-            this.cache = cache;
+            }                    
         }
+        amendAndDeployCache(cache);
     }
+    
+    //  @Override
+   public void openmdxjdoRetrieve(
+       FetchPlan fetchPlan
+   ) {
+       if(!this.isRetrieved() && this.isStored() && !isExtent()) {
+           populateCache();
+       }
+   }
 
-    @Override
-    public Set<Entry<String, DataObject_1_0>> entrySet() {
+   @Override
+    protected boolean isExtent(){
         if(this.extent == null) {
             this.extent = Boolean.valueOf(
                 this.jdoIsPersistent() && 
                 this.jdoGetObjectId().isLike(EXTENT_REFERENCES)
             ); 
         }
-        if(this.extent.booleanValue()) throw BasicException.initHolder(
-            new JDOFatalUserException(
-                "Operation not supported for extent",
-                BasicException.newEmbeddedExceptionStack(
-                    BasicException.Code.DEFAULT_DOMAIN,
-                    BasicException.Code.NOT_SUPPORTED
+        return this.extent.booleanValue();
+    }
+    
+    @Override
+    public Set<Entry<String, DataObject_1_0>> entrySet() {
+        if(isExtent()) { 
+            throw BasicException.initHolder(
+                new JDOFatalUserException(
+                    "Operation not supported for extent",
+                    BasicException.newEmbeddedExceptionStack(
+                        BasicException.Code.DEFAULT_DOMAIN,
+                        BasicException.Code.NOT_SUPPORTED
+                    )
                 )
-            )
-        );
-        return super.entrySet();
+            );
+        } else {
+            return super.entrySet();
+        }
     }
 
 //  @Override
@@ -612,21 +635,6 @@ class Container_1
     public void flush(
     ) throws IOException {
         // Nothing to do in this implementation
-    }
-
-    protected static boolean isSuperFilterEvaluatedFirst(
-        Condition[] conditions
-    ){
-        for(Condition condition : conditions) {
-            String name = condition.getFeature(); 
-            if(
-                SystemAttributes.OBJECT_CLASS.equals(name) ||
-                SystemAttributes.OBJECT_INSTANCE_OF.equals(name)
-            ) {
-                return false;
-            }
-        }
-        return true;
     }
 
 }

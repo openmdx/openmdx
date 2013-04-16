@@ -1,11 +1,9 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <!--
 =======================================================================
-= Name:        $Id: jre-1.7-properties.xml,v 1.5 2012/07/08 12:39:33 wfro Exp $
+= Project:     openMDX/Ant, http://www.openmdx.org/
 = Description: JRE 7 Platform Properties
-= Revision:    $Revision: 1.5 $
-= Date:        $Date: 2012/07/08 12:39:33 $
-= Copyright:   (c) 2011 OMEX AG
+= Owner:       OMEX AG, Switzerland, http://www.omex.ch
 =======================================================================
 =
 = This software is published under the BSD license as listed below.
@@ -79,6 +77,9 @@
 		<exclude name="${project.build.exclude.15}" if="project.build.exclude.15"/>
 		<exclude name="${project.build.exclude.16}" if="project.build.exclude.16"/>
 	</patternset>
+    <path id="java.bootstrap.lib">
+		<pathelement location="${build.target.jre}/lib/rt.jar"/>
+    </path>
 	<path id="java.standard.lib">
 		<pathelement location="${build.target.jre}/lib/jce.jar"/>
 		<pathelement location="${build.target.jre}/lib/jsse.jar"/>
@@ -114,6 +115,8 @@
 	<!-- JPA -->
 	<path id="jpa.ant.lib">
 		<path refid="osgi.extension.lib"/>
+		<path refid="osgi.enterprise.lib"/>
+		<pathelement location="${openmdx.home}/osgi/${build.java.platform}/extension/lib/asm.jar"/>
 		<pathelement location="${openmdx.home}/${build.java.platform}/ant/lib/openmdx-ant.jar"/>
 	</path>
 	<path id="jpa.ant.bin">
@@ -123,7 +126,6 @@
 	<path id="openmdx.core.lib">
 		<pathelement location="${openmdx.home}/${build.java.platform}/core/lib/openmdx-system.jar"/>
 		<pathelement location="${openmdx.home}/${build.java.platform}/core/lib/openmdx-base.jar"/>
-		<pathelement location="${openmdx.home}/${build.java.platform}/core/lib/openmdx-application.jar"/>
 	</path>
 	<path id="microsoft.sql-server.lib">
 		<pathelement location="${openmdx.home}/opt/microsoft/${build.java.platform}/sql-server-2005/lib/sqljdbc.jar"/>

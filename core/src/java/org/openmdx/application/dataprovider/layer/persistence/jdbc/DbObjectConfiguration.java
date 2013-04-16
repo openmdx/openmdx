@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2011, OMEX AG, Switzerland
+ * Copyright (c) 2004-2013, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -262,6 +262,14 @@ public class DbObjectConfiguration {
     public String getDbObjectForQuery2(
     ) {
         return this.dbObjectForQuery2;
+    }
+
+    //---------------------------------------------------------------------------
+    public boolean hasDbObject2(
+    ){
+        return 
+            getDbObjectForQuery2() != null ||
+            getDbObjectForUpdate2() != null;
     }
 
     //---------------------------------------------------------------------------

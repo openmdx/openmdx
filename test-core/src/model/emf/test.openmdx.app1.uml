@@ -437,7 +437,7 @@
             <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_qk7BY97CEdmkJO73lqONhA"/>
           </ownedAttribute>
         </packagedElement>
-        <packagedElement xmi:type="uml:Class" xmi:id="_3C7B8A60016D3F1E678C025D" name="Document">
+        <packagedElement xmi:type="uml:Class" xmi:id="_3C7B8A60016D3F1E678C025D" name="AbstractDocument" isAbstract="true">
           <generalization xmi:id="_3C7B8A60016D3FF14CA902A2">
             <general xmi:type="uml:Class" href="../openMDX%202%20~%20Core%20(EMF)/org.openmdx.base.uml#_3C7B8A60016D3FB3D6450214"/>
           </generalization>
@@ -451,12 +451,6 @@
               <details xmi:id="_qkotht7CEdmkJO73lqONhA" key="set"/>
             </eAnnotations>
             <type xmi:type="uml:PrimitiveType" href="../openMDX%202%20~%20Core%20(EMF)/org.w3c.uml#_3C7B8A60016D3C8B62E40010"/>
-          </ownedAttribute>
-          <ownedAttribute xmi:id="_3C7B8A60016D3F1E67F801B8" name="content">
-            <eAnnotations xmi:id="_qkotiN7CEdmkJO73lqONhA" source="http://www.eclipse.org/uml2/2.0.0/UML">
-              <details xmi:id="_qkotid7CEdmkJO73lqONhA" key="stream"/>
-            </eAnnotations>
-            <type xmi:type="uml:PrimitiveType" href="../openMDX%202%20~%20Core%20(EMF)/org.w3c.uml#_3C7B8A60016D3E0F6F8900AB"/>
           </ownedAttribute>
         </packagedElement>
         <packagedElement xmi:type="uml:Class" xmi:id="_3C7B8A60016D3F6EA80C01F9" name="Product">
@@ -792,6 +786,27 @@
             <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_qlBIFt7CEdmkJO73lqONhA" value="1"/>
             <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_qlBIFd7CEdmkJO73lqONhA" value="1"/>
           </ownedEnd>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Class" xmi:id="_SB2DgCIJEeKwev0EnESdDQ" name="Document">
+          <generalization xmi:id="_6P8fICIJEeKwev0EnESdDQ" general="_3C7B8A60016D3F1E678C025D"/>
+          <ownedAttribute xmi:id="_3C7B8A60016D3F1E67F801B8" name="content">
+            <eAnnotations xmi:id="_qkotiN7CEdmkJO73lqONhA" source="http://www.eclipse.org/uml2/2.0.0/UML">
+              <details xmi:id="_qkotid7CEdmkJO73lqONhA" key="stream"/>
+            </eAnnotations>
+            <type xmi:type="uml:PrimitiveType" href="../openMDX%202%20~%20Core%20(EMF)/org.w3c.uml#_3C7B8A60016D3E0F6F8900AB"/>
+            <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_unKWYCakEeKm7PDse3NFUw"/>
+          </ownedAttribute>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Class" xmi:id="_aKygkCIJEeKwev0EnESdDQ" name="TextDocument">
+          <generalization xmi:id="_DSW60CIKEeKwev0EnESdDQ" general="_3C7B8A60016D3F1E678C025D"/>
+          <ownedAttribute xmi:id="_eI8tUCILEeKwev0EnESdDQ" name="text">
+            <eAnnotations xmi:id="_eI8tUSILEeKwev0EnESdDQ" source="http://www.eclipse.org/uml2/2.0.0/UML">
+              <details xmi:id="_eI8tUiILEeKwev0EnESdDQ" key="stream"/>
+            </eAnnotations>
+            <type xmi:type="uml:PrimitiveType" href="../openMDX%202%20~%20Core%20(EMF)/org.w3c.uml#_3C7B8A60016D3C8B62E40010"/>
+            <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_vqLSkCakEeKm7PDse3NFUw"/>
+            <defaultValue xmi:type="uml:LiteralString" xmi:id="_vsuQQCakEeKm7PDse3NFUw" value=""/>
+          </ownedAttribute>
         </packagedElement>
       </packagedElement>
     </packagedElement>

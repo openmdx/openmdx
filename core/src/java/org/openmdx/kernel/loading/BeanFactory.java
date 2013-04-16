@@ -47,7 +47,6 @@
  */
 package org.openmdx.kernel.loading;
 
-import java.beans.PropertyDescriptor;
 import java.lang.reflect.Array;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -58,7 +57,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.openmdx.kernel.exception.BasicException;
-
 
 /**
  * Bean Factory
@@ -84,8 +82,6 @@ public class BeanFactory<T> implements Factory<T> {
      *
      * @param beanClassKey
      * @param properties
-     * 
-     * @throws ServiceException 
      */
     public BeanFactory(
         String beanClassKey,
@@ -133,6 +129,14 @@ public class BeanFactory<T> implements Factory<T> {
      * 
      */
     private final Map<String,?> properties;
+
+    /**
+     * The lazily acquired Java bean introspector
+     */
+    private static final BeanIntrospector introspector = Classes.newPlatformInstance(
+        "org.openmdx.base.beans.StandardBeanIntrospector",
+        BeanIntrospector.class
+    );
 
     /**
      * Create a factory for the given class
@@ -214,27 +218,13 @@ public class BeanFactory<T> implements Factory<T> {
         try {
             T instance = this.beanClass.newInstance();
             for(Map.Entry<String, ?> e: this.properties.entrySet()) {
-                PropertyDescriptor propertyDescriptor = new PropertyDescriptor(
-                    e.getKey(),
-                    this.beanClass
-                );
-                Method setter = propertyDescriptor.getWriteMethod();
-                if(setter == null) {
-                    throw BasicException.newStandAloneExceptionStack(
-                        BasicException.Code.DEFAULT_DOMAIN,
-                        BasicException.Code.BAD_MEMBER_NAME,
-                        "Could not set property",
-                        new BasicException.Parameter("propertyName", e.getKey()),
-                        new BasicException.Parameter("propertyValue", e.getValue())
-                   );
-                }
+                Method setter = introspector.getPropertyModifier(this.beanClass, e.getKey()); 
                 Object value = e.getValue();
                 if(setter.getParameterTypes()[0].isArray()) {
-                    Collection<?> values = value instanceof Collection<?> ?
-                        (Collection<?>)value :
-                            value instanceof Map<?,?> ?
-                                ((Map<?,?>)value).values() :
-                                    Collections.singleton(value);
+                    Collection<?> values = 
+                        value instanceof Collection<?> ? (Collection<?>)value :
+                        value instanceof Map<?,?> ? ((Map<?,?>)value).values() :
+                        Collections.singleton(value);
                     value = Array.newInstance(
                         setter.getParameterTypes()[0].getComponentType(),
                         values.size()

@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2010-2011, OMEX AG, Switzerland
+ * Copyright (c) 2010-2012, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -47,97 +47,22 @@
  */
 package org.openmdx.application.rest.http;
 
-import java.io.IOException;
-
-import javax.security.auth.callback.Callback;
-import javax.security.auth.callback.CallbackHandler;
-import javax.security.auth.callback.NameCallback;
-import javax.security.auth.callback.PasswordCallback;
-import javax.security.auth.callback.UnsupportedCallbackException;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
 
 /**
  * HTTP Request Callback Handler
+ * 
+ * @deprecated use org.openmdx.application.rest.http.servlet.RequestCallbackHandler
  */
-public class RequestCallbackHandler implements CallbackHandler {
+@Deprecated
+public class RequestCallbackHandler extends org.openmdx.application.rest.http.servlet.RequestCallbackHandler {
 
-	/**
-	 * Constructor
-	 * 
-	 * @param request the HTTP servlet request
-	 */
-	public RequestCallbackHandler(
-		HttpServletRequest request 
-	) {
-		this.request  = request;
-	}
-
-	/**
-	 * The HTTP request's user principal
-	 */
-	private final HttpServletRequest request;
-	
-	/**
-	 * Handle the callbacks
-	 * 
-	 * @param callbacks
-	 */
-	public final void handle(
-		Callback[] callbacks
-	) throws IOException, UnsupportedCallbackException {
-		for (Callback callback : callbacks) {
-			if (!handle(callback)) {
-				throw new UnsupportedCallbackException(callback);
-			}
-		}
-	}
-
-	/**
-	 * Handle a single callback
-	 * 
-	 * @param callback
-	 * 
-	 * @return <code>true</code> if the callback could be handled
-	 */
-	protected boolean handle(Callback callback) {
-		if (callback instanceof NameCallback) {
-			NameCallback nameCallback = (NameCallback) callback;
-			String prompt = nameCallback.getPrompt();
-			if (CallbackPrompts.REMOTE_USER.equals(prompt)) {
-				nameCallback.setName(this.request.getRemoteUser());
-				return true;
-			}
-			if (CallbackPrompts.CONNECTION_USER.equals(prompt)) {
-				nameCallback.setName(this.request.getParameter("UserName"));
-				return true;
-			}
-		} else if (callback instanceof PasswordCallback) {
-			PasswordCallback passwordCallback = (PasswordCallback) callback;
-			String prompt = passwordCallback.getPrompt();
-			if (CallbackPrompts.CONNECTION_PASSWORD.equals(prompt)) {
-				String password = this.request.getParameter("Password");
-				passwordCallback.setPassword(password == null ? null : password.toCharArray());
-				return true;
-			}
-			if (CallbackPrompts.SESSION_ID.equals(prompt)) {
-				HttpSession session = this.request.getSession();
-				String sessionId = session == null ? null : session.getId();
-				passwordCallback.setPassword(sessionId == null ? null : sessionId.toCharArray());
-				return true;
-			}
-		} else if (callback instanceof BooleanCallback) {
-            BooleanCallback booleanCallback = (BooleanCallback) callback;
-            String prompt = booleanCallback.getPrompt();
-            if (CallbackPrompts.BULK_LOAD.equals(prompt)) {
-                String bulkLoad = this.request.getParameter(prompt);
-                if(bulkLoad != null) {
-                    booleanCallback.setValue(Boolean.valueOf(bulkLoad));
-                }
-                return true;
-            }
-        }
-		return false;
-	}
-
+    /**
+     * Constructor 
+     *
+     * @param request
+     */
+    public RequestCallbackHandler(HttpServletRequest request) {
+        super(request);
+    }
 }

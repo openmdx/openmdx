@@ -51,8 +51,9 @@ package org.openmdx.preferences2.prefs;
 import java.util.prefs.Preferences;
 
 import javax.jdo.PersistenceManager;
-import javax.jdo.Transaction;
 
+import org.openmdx.base.persistence.cci.PersistenceHelper;
+import org.openmdx.base.persistence.cci.UnitOfWork;
 import org.openmdx.preferences2.jmi1.Node;
 import org.openmdx.preferences2.jmi1.Root;
 import org.openmdx.preferences2.jmi1.Segment;
@@ -98,10 +99,10 @@ public class AutocommittingPreferencesFactory extends ManagedPreferencesFactory 
         String type,
         String name
     ) {
-        Transaction currentTransaction = jmiEntityManager.currentTransaction();
-        currentTransaction.begin();
+    	UnitOfWork unitOfWork = PersistenceHelper.currentUnitOfWork(jmiEntityManager);
+    	unitOfWork.begin();
         Node rootNode = super.newRootNode(segment, preferences, type, name);
-        currentTransaction.commit();
+        unitOfWork.commit();
         return rootNode;
     }
 

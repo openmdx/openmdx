@@ -50,13 +50,14 @@ package org.openmdx.base.aop0;
 import java.util.EnumSet;
 
 import javax.jdo.ObjectState;
-import javax.jdo.Transaction;
+import javax.jdo.PersistenceManager;
+import javax.jdo.listener.InstanceLifecycleEvent;
 
-import org.openmdx.base.accessor.rest.DataObjectManager_1;
 import org.openmdx.base.accessor.rest.DataObject_1;
 import org.openmdx.base.accessor.rest.UnitOfWork_1;
-import org.openmdx.base.accessor.spi.AbstractTransaction_1;
+import org.openmdx.base.accessor.spi.AbstractUnitOfWork_1;
 import org.openmdx.base.exception.ServiceException;
+import org.openmdx.base.persistence.cci.PersistenceHelper;
 
 
 /**
@@ -67,7 +68,7 @@ public class UpdateAvoidance_1 extends PlugIn_1 {
     /**
      * States of objects involved in a unit of work 
      */
-    private static final EnumSet<ObjectState> cleanUpCandidates = EnumSet.of(
+    private static final EnumSet<ObjectState> CLEANUP_CANDIDATES = EnumSet.of(
         ObjectState.PERSISTENT_DIRTY
     );
     
@@ -76,20 +77,23 @@ public class UpdateAvoidance_1 extends PlugIn_1 {
      */
     public static final UpdateAvoidance plugInObject = new UpdateAvoidance() {
 		
-		public void touchAllDirtyObjects(Transaction transaction) {
-			AbstractTransaction_1.getDelegate(UnitOfWork_1.class, transaction).disableUpdateAvoidance();
+		public void touchAllDirtyObjects(PersistenceManager persistenceManager) {
+			AbstractUnitOfWork_1.getDelegate(
+			    UnitOfWork_1.class, 
+			    PersistenceHelper.currentUnitOfWork(persistenceManager)
+			).disableUpdateAvoidance();
 		}
 		
 	};
 
     /* (non-Javadoc)
-     * @see org.openmdx.base.aop0.PlugIn_1#flush(org.openmdx.base.accessor.rest.UnitOfWork_1, boolean)
+     * @see org.openmdx.base.aop0.PlugIn_1#preStore(javax.jdo.listener.InstanceLifecycleEvent)
      */
     @Override
-    public void flush(UnitOfWork_1 unitOfWork, boolean beforeCompletion) {
-    	if(unitOfWork.isUpdateAvoidanceEnabled()) try {
-            DataObjectManager_1 persistenceManager = (DataObjectManager_1) unitOfWork.getPersistenceManager();
-            for (Object managedObject : persistenceManager.getManagedObjects(cleanUpCandidates)) {
+    public void preStore(InstanceLifecycleEvent event) {
+        DataObject_1 dataObject = (DataObject_1) event.getPersistentInstance();
+        if(dataObject.getUnitOfWork().isUpdateAvoidanceEnabled()) try {
+            for (Object managedObject : dataObject.jdoGetPersistenceManager().getManagedObjects(CLEANUP_CANDIDATES)) {
                 DataObject_1 candidate = (DataObject_1) managedObject;
                 candidate.makePersistentCleanWhenUnmodified();
             }
@@ -98,8 +102,8 @@ public class UpdateAvoidance_1 extends PlugIn_1 {
                 "Update avoidance failure",
                 exception
             );
-    	}
-        super.flush(unitOfWork, beforeCompletion);
+        }
+        super.preStore(event);
     }
 
 	/* (non-Javadoc)

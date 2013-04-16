@@ -78,7 +78,7 @@ import org.openmdx.application.mof.mapping.java.metadata.JoinMetaData;
 import org.openmdx.application.mof.mapping.java.metadata.MetaData_2_0;
 import org.openmdx.application.mof.mapping.java.metadata.PackageMetaData;
 import org.openmdx.application.mof.mapping.java.metadata.Visibility;
-import org.openmdx.kernel.loading.Classes;
+import org.openmdx.kernel.loading.Resources;
 import org.openmdx.kernel.log.SysLog;
 import org.openmdx.kernel.url.protocol.XRI_2Protocols;
 import org.openmdx.kernel.xml.EntityMapper;
@@ -389,7 +389,7 @@ public class MetaData_2 implements MetaData_1_0, MetaData_2_0 {
                     }
                     if(documentSource == null) {
                         String documentPath = name.replace('.', '/') + "/package.openmdxjdo"; 
-                        URL documentURL = Classes.getApplicationResource(documentPath);
+                        URL documentURL = Resources.getResource(documentPath);
                         if(documentURL != null) try {
                             documentSource = documentURL.openStream();
                         } catch (IOException ignrore) {
@@ -527,7 +527,7 @@ public class MetaData_2 implements MetaData_1_0, MetaData_2_0 {
                     }
                     if(documentSource == null) {
                         String documentPath = Package.this.name.replace('.', '/') + '/' + name + ".openmdxjdo"; 
-                        URL documentURL = Classes.getApplicationResource(documentPath);
+                        URL documentURL = Resources.getResource(documentPath);
                         if(documentURL != null) try {
                             documentSource = documentURL.openStream();
                         } catch (IOException ignrore) {

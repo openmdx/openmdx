@@ -1,2 +1,0 @@
-Manifest-Version: 1.0
-Imlementation-URL: ../../../../jre-1.3/core/lib/openmdx-base.jar/openmdx-application.jar

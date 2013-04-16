@@ -47,13 +47,14 @@
  */
 package org.openmdx.base.accessor.spi;
 
-import javax.jdo.JDOHelper;
 import javax.jdo.ObjectState;
 
 import org.openmdx.base.accessor.cci.DataObject_1_0;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.resource.Records;
+import org.openmdx.kernel.exception.BasicException;
+import org.openmdx.kernel.jdo.ReducedJDOHelper;
 
 /**
  * Abstract Object_1_0 implementation
@@ -89,6 +90,8 @@ public abstract class AbstractDataObject_1
      */
     private transient ServiceException inaccessibilityReason;
     
+    private transient boolean notFound;
+    
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.generic.cci.Object_1_2#getInaccessabilityReason()
      */
@@ -96,13 +99,17 @@ public abstract class AbstractDataObject_1
     ) throws ServiceException {
         return this.inaccessibilityReason;
     }
+    
+    public boolean objDoesNotExist(){
+        return notFound;
+    }
 
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.generic.cci.Object_1_2#objIsInaccessible()
      */
     public boolean objIsInaccessible(
     ){
-        return this.inaccessibilityReason != null;
+        return this.notFound || this.inaccessibilityReason != null;
     }
 
     /**
@@ -114,6 +121,7 @@ public abstract class AbstractDataObject_1
     protected void setInaccessibilityReason(
         ServiceException inaccessibilityReason
     ){
+        this.notFound = inaccessibilityReason != null && inaccessibilityReason.getExceptionCode() == BasicException.Code.NOT_FOUND;
         this.inaccessibilityReason = inaccessibilityReason;
     }
     
@@ -125,7 +133,7 @@ public abstract class AbstractDataObject_1
     protected static ObjectState stateToString(
         DataObject_1_0 source
     ){
-        return JDOHelper.getObjectState(source);
+        return ReducedJDOHelper.getObjectState(source);
     }
 
     protected static Object defaultFetchGroupToString(
@@ -154,18 +162,32 @@ public abstract class AbstractDataObject_1
         try {
             DataObject_1_0 object = source;
             if(object.objIsInaccessible()) {
-                ServiceException reason = object.getInaccessibilityReason();
-                return Records.getRecordFactory().asMappedRecord(
-                    source.getClass().getName(), // recordName
-                    reason.getMessage(), // recordShortDescription
-                    INACCESSIBLE_KEYES, // keys, 
-                    new Object[]{
-                        object.jdoGetObjectId(),
-                        object.jdoGetTransactionalObjectId(),
-                        reason.getExceptionDomain(),
-                        reason.getExceptionCode()
-                    }
-                ).toString();
+                if(source.objDoesNotExist()) {
+                    return Records.getRecordFactory().asMappedRecord(
+                        source.getClass().getName(), // recordName
+                        description == null ? "No object found for the given id" : description,
+                        INACCESSIBLE_KEYES, // keys, 
+                        new Object[]{
+                            object.jdoGetObjectId(),
+                            object.jdoGetTransactionalObjectId(),
+                            BasicException.Code.DEFAULT_DOMAIN,
+                            BasicException.Code.NOT_FOUND
+                        }
+                    ).toString();
+                } else {
+                    ServiceException reason = object.getInaccessibilityReason();
+                    return Records.getRecordFactory().asMappedRecord(
+                        source.getClass().getName(), // recordName
+                        reason.getMessage(), // recordShortDescription
+                        INACCESSIBLE_KEYES, // keys, 
+                        new Object[]{
+                            object.jdoGetObjectId(),
+                            object.jdoGetTransactionalObjectId(),
+                            reason.getExceptionDomain(),
+                            reason.getExceptionCode()
+                        }
+                    ).toString();
+                }
             }
             else {
                 return toString(
@@ -209,7 +231,7 @@ public abstract class AbstractDataObject_1
 		    new Object[]{
 		        objectId,
 		        objectClass,
-		        JDOHelper.getObjectState(source),
+		        ReducedJDOHelper.getObjectState(source),
 		        defaultFetchGroupToString(source)
 		    }
 		).toString();

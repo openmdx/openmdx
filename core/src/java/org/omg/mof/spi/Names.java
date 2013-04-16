@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2006-2009, OMEX AG, Switzerland
+ * Copyright (c) 2006-2012, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -159,13 +159,18 @@ public class Names extends AbstractNames {
     public static final String SPI2_PACKAGE_SUFFIX = "spi2";
 
     /**
-     * openmdx 2 JMI package suffix
+     * openMDX 2 JMI package suffix
      */ 
     public static final String JMI1_PACKAGE_SUFFIX = "jmi1";
 
     /**
-     * openmdx 2 JPA package suffix
+     * openMDX 2 JPA package suffix
      */ 
     public static final String JPA3_PACKAGE_SUFFIX = "jpa3";
+
+    /**
+     * The XMI package suffix
+     */
+    public static String XMI_PACKAGE_SUFFIX = "xmi1";
 
 }

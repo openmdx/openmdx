@@ -66,21 +66,21 @@ public class ControlObjects_2 {
      */
     private static final Path TRANSACTION_OBJECT_PATTERN = new Path(
         "xri://@openmdx*org.openmdx.kernel/transaction/($..)"
-    );
+    ).lock();
 
     /**
      * Virtual Transaction Object Id Pattern
      */
     private static final Path TRANSACTION_COMMIT_PATTERN = new Path(
         "xri://@openmdx*org.openmdx.kernel/transaction/($..)/commit/($..)"
-    );
+    ).lock();
 
     /**
      * Virtual Connection Object Id Pattern
      */
     protected static final Path CONNECTION_OBJECT_PATTERN = new Path(
         "xri://@openmdx*org.openmdx.kernel/connection/($..)"
-    );
+    ).lock();
     
     /**
      * Tests whether the candidate is a control object 

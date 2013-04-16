@@ -63,6 +63,7 @@ import java.util.Set;
 
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.exception.Throwables;
+import org.openmdx.kernel.platform.Platform;
 
 /**
  * Generic class loader access
@@ -273,7 +274,10 @@ public class Classes {
      *            or <code>null</code> if the resource could not be found or
      *            the caller doesn't have adequate privileges to get the
      *            resource.
+     *            
+     * @deprecated use {@link org.openmdx.kernel.loading.Resources#getResource(String)}           
      */
+    @Deprecated
     public static URL getSystemResource(
         String name
     ){
@@ -290,7 +294,10 @@ public class Classes {
      *            or <code>null</code> if the resource could not be found or
      *            the caller doesn't have adequate privileges to get the
      *            resource.
+     *            
+     * @deprecated use {@link org.openmdx.kernel.loading.Resources#getResource(String)}           
      */
+    @Deprecated
     public static URL getKernelResource(
         String name
     ){
@@ -308,12 +315,14 @@ public class Classes {
      *            or <code>null</code> if the resource could not be found or
      *            the caller doesn't have adequate privileges to get the
      *            resource.
+     *            
+     * @deprecated use {@link org.openmdx.kernel.loading.Resources#getResource(String)}           
      */
+    @Deprecated
     public static URL getApplicationResource(
         String name
     ){
-        URL resource = getClassLoader().getResource(name);
-        return resource == null ? getKernelResource(name) : resource;
+        return Resources.getResource(name);
     }
     
     /**
@@ -327,11 +336,15 @@ public class Classes {
      *            the caller doesn't have adequate privileges to get the
      *            resource.
      * @throws IOException 
+     *            
+     * @deprecated use {@link org.openmdx.kernel.loading.Resources#getResource(String)}
+     * and assert the existence by the caller
      */
+    @Deprecated
     public static URL getRequiredResource(
         String name
     ) throws IOException{
-        URL resource = getApplicationResource(name);
+        URL resource = Resources.getResource(name);
         if(resource == null) {
     	    throw Throwables.initCause(
     	    	new FileNotFoundException("Could not locate resource " + name),
@@ -345,10 +358,8 @@ public class Classes {
         		)
     		);
         }
-        return resource == null ? getKernelResource(name) : resource;
+        return resource;
     }
-
-    
 
     /**
      * Load a package local resource
@@ -362,15 +373,15 @@ public class Classes {
      *            or <code>null</code> if the resource could not be found or
      *            the caller doesn't have adequate privileges to get the
      *            resource.
+     *            
+     * @deprecated use {@link java.lang.Class#getResource(String)}           
      */
+    @Deprecated 
     public static URL getPackageResource(
     	Class<?> sibling,
         String simpleName
     ){
-    	String qualifiedClassName = sibling.getName();
-    	return getApplicationResource(
-    		qualifiedClassName.substring(0, qualifiedClassName.length() - sibling.getSimpleName().length()).replace('.', '/') + simpleName
-    	);
+        return sibling.getResource(simpleName);
     }
     
     /**
@@ -507,6 +518,101 @@ public class Classes {
         } else {
             throw new ClassCastException (
                 className + " is not an instance of " + interfaceClass.getName()
+            );
+        }
+    }
+
+    /**
+     * Create a platform specific instance 
+     * 
+     * @param interfaceClass
+     * @param arguments
+     * 
+     * @return a new platform specific instance, or <code>null</code> in case of failure 
+     */
+    public static <T> T newPlatformInstance(
+        Class<T> interfaceClass,
+        Object... arguments
+    ){
+        String interfaceName = interfaceClass.getName();
+        String className = Platform.getProperty(interfaceName).trim();
+        if(className == null || className.isEmpty()) {
+            throw BasicException.initHolder(
+                new RuntimeException(
+                    "Missing platform configuration entry " + interfaceName,
+                    BasicException.newEmbeddedExceptionStack(
+                        BasicException.Code.DEFAULT_DOMAIN,
+                        BasicException.Code.NO_RESOURCE,
+                        new BasicException.Parameter("interfaceName", interfaceName),
+                        new BasicException.Parameter("className", className),
+                        new BasicException.Parameter("arguments", arguments)
+                    )
+                )
+            );
+        }
+        try {
+            return newApplicationInstance(
+                interfaceClass,
+                className,
+                arguments
+            );
+        } catch (Exception exception) {
+            throw BasicException.initHolder(
+                new RuntimeException(
+                    "Unable to acquire an " + interfaceName + " instance",
+                    BasicException.newEmbeddedExceptionStack(
+                        exception,
+                        BasicException.Code.DEFAULT_DOMAIN,
+                        BasicException.Code.NO_RESOURCE,
+                        new BasicException.Parameter("interfaceName", interfaceName),
+                        new BasicException.Parameter("className", className),
+                        new BasicException.Parameter("arguments", arguments)
+                    )
+                )
+            );
+        }
+    }
+
+    /**
+     * Create a platform specific instance 
+     * 
+     * @param  defaultClassName
+     * @param interfaceClass
+     * @param arguments
+     * 
+     * @return a new platform specific instance
+     * 
+     * @return a new platform specific instance
+     * 
+     * @exception RuntimeException in case of failure
+     */
+    public static <T> T newPlatformInstance(
+        String defaultClassName,
+        Class<T> interfaceClass,
+        Object... arguments
+    ){
+        String interfaceName = interfaceClass.getName();
+        String className = Platform.getProperty(interfaceName, defaultClassName).trim();
+        try {
+            return newApplicationInstance(
+                interfaceClass,
+                className,
+                arguments
+            );
+        } catch (Exception exception) {
+            throw BasicException.initHolder(
+                new RuntimeException(
+                    "Unable to acquire an " + interfaceName + " instance",
+                    BasicException.newEmbeddedExceptionStack(
+                        exception,
+                        BasicException.Code.DEFAULT_DOMAIN,
+                        BasicException.Code.NO_RESOURCE,
+                        new BasicException.Parameter("defaultClassName", defaultClassName),
+                        new BasicException.Parameter("interfaceName", interfaceName),
+                        new BasicException.Parameter("className", className),
+                        new BasicException.Parameter("arguments", arguments)
+                    )
+                )
             );
         }
     }

@@ -100,7 +100,7 @@ public final class CodeToken {
     private final int length;
 
     /**
-     * The length of the value
+     * Tells whether the corresponding entry has been newly created
      */
     private final boolean created;
     

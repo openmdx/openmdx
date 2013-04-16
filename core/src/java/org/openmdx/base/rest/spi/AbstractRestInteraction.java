@@ -93,6 +93,19 @@ public class AbstractRestInteraction extends AbstractInteraction<Connection> {
     }
 
     /**
+     * Tells whether an object retrieval request shall throw a NOT_FOUND 
+     * exception rather than returning and empty collection when a requested
+     * object does not exist
+     * 
+     * @return <code>true</code> if an object retrieval request shall throw a NOT_FOUND 
+     * exception rather than returning and empty collection when a requested
+     * object does not exist
+     */
+    protected boolean isPreferringNotFoundException(){
+        return false;
+    }
+    
+    /**
      * Provide a request path by appending a UUID
      * 
      * @param target
@@ -421,7 +434,7 @@ public class AbstractRestInteraction extends AbstractInteraction<Connection> {
             )
         );
     }
-    
+
     /* (non-Javadoc)
      * @see javax.resource.cci.Interaction#execute(javax.resource.cci.InteractionSpec, javax.resource.cci.Record, javax.resource.cci.Record)
      */
@@ -467,11 +480,10 @@ public class AbstractRestInteraction extends AbstractInteraction<Connection> {
                         true
                     );
                     if(Query_2Facade.isDelegate(inputRecord)){
-                        Query_2Facade facade = Query_2Facade.newInstance(inputRecord);
-                        Path objectId = facade.getPath();
+                        Query_2Facade facade = Query_2Facade.newInstance(inputRecord, isPreferringNotFoundException());
                         switch(interactionSpec.getFunction()) {
                             case GET:
-                                return objectId.size() % 2 == 0 || objectId.containsWildcard() ? find(
+                                return facade.isFindRequest() ? find(
                                     interactionSpec, 
                                     facade, 
                                     outputRecord

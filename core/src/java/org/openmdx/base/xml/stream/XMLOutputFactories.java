@@ -50,16 +50,15 @@ package org.openmdx.base.xml.stream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-import java.util.Enumeration;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
-
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.loading.Classes;
+import org.openmdx.kernel.loading.Resources;
 import org.openmdx.kernel.log.SysLog;
 
 /**
@@ -82,7 +81,7 @@ public class XMLOutputFactories {
     /**
      * The configuration
      */
-    private static final Properties configuration = new Properties();
+    private static final Properties configuration = getConfiguration();
     
     /**
      * The lazily fetched classes
@@ -97,7 +96,7 @@ public class XMLOutputFactories {
     public static boolean isSupported(
         String mimeType
     ){
-        return XMLOutputFactories.configuration.containsKey(mimeType);
+        return configuration.containsKey(mimeType);
     }
         
     /**
@@ -114,7 +113,7 @@ public class XMLOutputFactories {
     ) throws XMLStreamException {
         Class<? extends XMLOutputFactory> factoryClass = XMLOutputFactories.classes.get(mimeType);
         if(factoryClass == null) {
-            String factoryName = XMLOutputFactories.configuration.getProperty(mimeType);
+            String factoryName = configuration.getProperty(mimeType);
             if(factoryName == null) {
                 throw BasicException.initHolder(
                     new XMLStreamException(
@@ -169,25 +168,24 @@ public class XMLOutputFactories {
         }
     }
 
-    static {
-        ClassLoader classLoader = XMLOutputFactories.class.getClassLoader();
-        try {
-            for(
-                Enumeration<URL> urls = classLoader.getResources("META-INF/openmdx-xml-outputfactory.properties");
-                urls.hasMoreElements();
-            ) {
-                URL url = urls.nextElement();
-                try {
-                    InputStream source = url.openStream();       
-                    configuration.load(source);
-                    source.close();
-                } catch (IOException exception) {
-                    SysLog.warning("XML output factory configuration failure: " + url, exception);
-                }
+    /**
+     * Retrieve the configuration
+     */
+    private static Properties getConfiguration() {
+        Properties configuration = new Properties();
+        for(URL url : Resources.getMetaInfResources(XMLOutputFactories.class.getClassLoader(), "openmdx-xml-outputfactory.properties")) { 
+            try {
+                InputStream source = url.openStream();       
+                configuration.load(source);
+                source.close();
+            } catch (IOException exception) {
+                SysLog.warning("XML output factory configuration failure: " + url, exception);
             }
-        } catch (IOException exception) {
-            SysLog.error("XML output factory configuration failure", exception);
         }
+        if(configuration.isEmpty()) {
+            SysLog.warning("Empty XML output factory configuration");
+        }
+        return configuration;
     }
 
 }

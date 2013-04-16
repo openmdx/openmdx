@@ -62,7 +62,7 @@
 	<import file="etc/ant/build-library.xml"/>
 
 	<!-- Slash separated platform list, the last entry being the default -->
-	<property name="project.platform.list" value="jre-1.5/jre-1.6"/>
+	<property name="project.platform.list" value="jre-1.6"/>
 
 	<!-- Override the default settings -->
 	<property name="build.include.ant.runtime" value="true"/>
@@ -72,12 +72,16 @@
 
 	<path id="project.lib.classpath">
 		<pathelement location="${openmdx.home}/apache/${build.target.platform}/ant/lib/ant.jar"/>
+		<pathelement location="${openmdx.home}/osgi/${build.target.platform}/extension/lib/junit.jar"/>
 	</path>
 	<path id="project.bin.classpath">
 		<path refid="project.lib.classpath"/>
 		<pathelement location="${build.dir}/bin"/>
 		<pathelement location="${basedir}/src/resource"/>
 	</path>
+	<patternset id="project.junit.test.case">
+		<patternset refid="null.pattern"/>
+	</patternset>
 
 	<!-- ******************************************************************* -->
 	<!-- * generate -->

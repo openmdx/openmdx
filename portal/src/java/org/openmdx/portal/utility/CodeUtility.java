@@ -8,7 +8,7 @@
  * This software is published under the BSD license
  * as listed below.
  * 
- * Copyright (c) 2004-2011, OMEX AG, Switzerland
+ * Copyright (c) 2004-2012, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without 
@@ -52,6 +52,7 @@
  *
  */
 package org.openmdx.portal.utility;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -80,7 +81,6 @@ import org.openmdx.application.xml.Importer;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.rest.spi.Object_2Facade;
-import org.openmdx.portal.text.conversion.XMLWriter;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
@@ -96,12 +96,19 @@ import org.xml.sax.SAXException;
 @SuppressWarnings("unchecked")
 public class CodeUtility {
     
-  //-------------------------------------------------------------------------    
-  private Map lookupCode(
-      Document document,
-      String lookupContainerName,
-      String lookupCode
-  ) {
+	/**
+	 * Lookup code.
+	 * 
+	 * @param document
+	 * @param lookupContainerName
+	 * @param lookupCode
+	 * @return
+	 */
+	private Map lookupCode(
+		Document document,
+		String lookupContainerName,
+		String lookupCode
+	) {
       Map codeEntry = new HashMap();
       NodeList containerNodes = document.getElementsByTagName("CodeValueContainer");
       for(int i = 0; i < containerNodes.getLength();  i++) {
@@ -147,12 +154,19 @@ public class CodeUtility {
       return codeEntry;
   }
   
-  //-------------------------------------------------------------------------    
-  protected void split(
-      List locale,
-      File sourceDir,
-      File targetDir
-  ) throws ServiceException {
+	/**
+	 * Split merged code files per locale.
+	 * 
+	 * @param locale
+	 * @param sourceDir
+	 * @param targetDir
+	 * @throws ServiceException
+	 */
+	protected void split(
+		List locale,
+		File sourceDir,
+		File targetDir
+	) throws ServiceException {
       String en_US_Dir =  targetDir.getAbsolutePath() + File.separatorChar + "en_US";
       System.out.println("sourceDir=" + sourceDir.getAbsolutePath());
       File[] en_US_files = new File(en_US_Dir).listFiles();
@@ -345,15 +359,12 @@ public class CodeUtility {
 	                      "  </_content>\n" +
 	                      "</org.openmdx.base.Authority>\n";
 	                  w.write(s, 0, s.length());
-	                  w.close();
-	              }
-	              catch(FileNotFoundException e) {
+	                  fw.close();
+	              } catch(FileNotFoundException e) {
 	                  System.err.println("Can not create file " + outFileName);
-	              }
-	              catch(UnsupportedEncodingException e) {
+	              } catch(UnsupportedEncodingException e) {
 	                  System.err.println("Can not create file with encoding UTF-8 " + outFileName);
-	              }
-	              catch(IOException e) {
+	              } catch(IOException e) {
 	                  System.err.println("Error writing to file " + outFileName);
 	              }
 	          }
@@ -365,13 +376,19 @@ public class CodeUtility {
       }
   }
   
-  //-------------------------------------------------------------------------    
-  protected void merge(
-      List locale,
-      File sourceDir,
-      File targetDir
-  ) throws ServiceException {
-
+	/**
+	 * Merge code files.
+	 * 
+	 * @param locale
+	 * @param sourceDir
+	 * @param targetDir
+	 * @throws ServiceException
+	 */
+	protected void merge(
+		List locale,
+		File sourceDir,
+		File targetDir
+	) throws ServiceException {
       String en_US_Dir =  sourceDir.getAbsolutePath() + File.separatorChar + "en_US";
       System.out.println("sourceDir=" + sourceDir.getAbsolutePath());      
       File[] en_US_files = new File(en_US_Dir).listFiles();
@@ -547,24 +564,26 @@ public class CodeUtility {
               }
               s = "</CodeValueContainers>\n";         
               w.write(s, 0, s.length());
-              w.close();
-          }
-          catch(FileNotFoundException e) {
+              fw.close();
+          } catch(FileNotFoundException e) {
               System.err.println("can not create file " + outFileName);
-          }
-          catch(UnsupportedEncodingException e) {
+          } catch(UnsupportedEncodingException e) {
               System.err.println("can not create file with encoding UTF-8 " + outFileName);
-          }
-          catch(IOException e) {
+          } catch(IOException e) {
               System.err.println("error writing to file " + outFileName);
           }
       }
   }
   
-  //-------------------------------------------------------------------------    
-  protected void run(
-	  String[] args
-  ) throws ServiceException {
+	/**
+	 * Run code utility.
+	 * 
+	 * @param args
+	 * @throws ServiceException
+	 */
+	protected void run(
+		String[] args
+	) throws ServiceException {
       this.locales = new ArrayList();
       this.sourceDir = new File(".");
       this.targetDir = new File(".");
@@ -605,21 +624,26 @@ public class CodeUtility {
         	  this.targetDir
           );
       }
-  }
+	}
 
-  //-------------------------------------------------------------------------    
-  public static void main(
-    String[] args
-  ) throws ServiceException {
+	/**
+	 * Main code utility.
+	 * 
+	 * @param args
+	 * @throws ServiceException
+	 */
+	public static void main(
+		String[] args
+	) throws ServiceException {
 	  new CodeUtility().run(args);
-  }
+	}
   
-  //-------------------------------------------------------------------------
-  // Variables    
-  //-------------------------------------------------------------------------    
-  private List locales = null;
-  private File sourceDir = null;
-  private File targetDir = null;
+	//-------------------------------------------------------------------------
+	// Members    
+	//-------------------------------------------------------------------------    
+	private List locales = null;
+	private File sourceDir = null;
+	private File targetDir = null;
   
 }
 

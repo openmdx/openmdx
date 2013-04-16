@@ -47,7 +47,6 @@
  */
 package org.openmdx.audit2.aop1;
 
-import javax.jdo.JDOHelper;
 import javax.resource.cci.InteractionSpec;
 
 import org.openmdx.audit2.spi.Configuration;
@@ -58,6 +57,7 @@ import org.openmdx.base.accessor.view.ObjectView_1_0;
 import org.openmdx.base.aop1.PlugIn_1_0;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.naming.Path;
+import org.openmdx.kernel.jdo.ReducedJDOHelper;
 
 /**
  * Audit Plug-in
@@ -80,7 +80,7 @@ public class PlugIn_1 implements PlugIn_1_0 {
         DataObject_1_0 context
     ){
         if(this.configuration == null) {
-            this.configuration = (Configuration) JDOHelper.getPersistenceManager(
+            this.configuration = (Configuration) ReducedJDOHelper.getPersistenceManager(
                 context
             ).getUserObject(
                 Configuration.class

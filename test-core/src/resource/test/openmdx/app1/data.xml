@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- edited with XMLSPY v5 rel. 3 U (http://www.xmlspy.com) by Werner Froidevaux (private) -->
-<org.openmdx.base.Authority name="test:openmdx:app1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="xri://+resource/test/openmdx/app1/xmi1/app1_edit.xsd">
+<org.openmdx.base.Authority name="test:openmdx:app1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="xri://+resource/test/openmdx/app1/xmi1/app1.xsd">
 	<_object/>
 	<_content>
 		<provider>

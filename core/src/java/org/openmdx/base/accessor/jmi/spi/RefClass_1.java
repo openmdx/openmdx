@@ -507,7 +507,7 @@ public Object refInvokeOperation(
     //-------------------------------------------------------------------------
     // Variables
     //-------------------------------------------------------------------------
-    private static final Path BASE = new Path("xri://@openmdx*org.openmdx.base");
+    private static final Path BASE = new Path("xri://@openmdx*org.openmdx.base").lock();
     
     /**
      * Imlements <code>Serializable</code>

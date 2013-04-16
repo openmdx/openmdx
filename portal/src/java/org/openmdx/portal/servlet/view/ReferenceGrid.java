@@ -88,7 +88,6 @@ public class ReferenceGrid
 
     //-------------------------------------------------------------------------
     @SuppressWarnings("unchecked")
-    @Override
     public Collection<RefObject_1_0> getAllObjects(
     	PersistenceManager pm
     ) {

@@ -63,28 +63,35 @@ import org.openmdx.kernel.id.UUIDs;
 import org.openmdx.portal.servlet.Texts;
 import org.openmdx.portal.servlet.UiContext;
 import org.openmdx.portal.servlet.attribute.AttributeValueFactory;
-import org.openmdx.portal.servlet.reports.ReportDefinition;
-import org.openmdx.portal.servlet.reports.ReportDefinitionFactory;
 import org.openmdx.portal.servlet.wizards.WizardDefinition;
 import org.openmdx.portal.servlet.wizards.WizardDefinitionFactory;
 
-public class ControlFactory
-    implements Serializable {
+/**
+ * ControlFactory
+ *
+ */
+public class ControlFactory implements Serializable {
     
-    //-------------------------------------------------------------------------
+    /**
+     * Constructor 
+     *
+     * @param uiContext
+     * @param textsFactory
+     * @param wizardFactory
+     */
     public ControlFactory(
         UiContext uiContext,
         Texts textsFactory,        
-        WizardDefinitionFactory wizardFactory,
-        ReportDefinitionFactory reportFactory
+        WizardDefinitionFactory wizardFactory
     ) {
         this.uiContext = uiContext;
         this.texts = textsFactory;
         this.wizardFactory = wizardFactory;
-        this.reportFactory = reportFactory;
     }
     
-    //-------------------------------------------------------------------------
+    /**
+     * Reset controls cache.
+     */
     public synchronized void reset(
     ) {
         this.gridControls.clear();
@@ -92,13 +99,28 @@ public class ControlFactory
         this.valueFactory.reset();
     }
     
-    //-------------------------------------------------------------------------
+    /**
+     * Return UUID.
+     * 
+     * @return
+     */
     private String uuidAsString(
     ) {
         return UUIDConversion.toUID(UUIDs.newUUID());
     }
     
-    //-------------------------------------------------------------------------
+    /**
+     * Create grid control.
+     * 
+     * @param id
+     * @param perspective
+     * @param locale
+     * @param localeAsIndex
+     * @param tab
+     * @param paneIndex
+     * @param containerClass
+     * @return
+     */
     public synchronized GridControl createGridControl(
         String id,
         int perspective,
@@ -132,7 +154,15 @@ public class ControlFactory
         return gridControl;
     }
 
-    //-------------------------------------------------------------------------
+    /**
+     * Create field group control.
+     * 
+     * @param id
+     * @param locale
+     * @param localeAsIndex
+     * @param fieldGroup
+     * @return
+     */
     public synchronized FieldGroupControl createFieldGroupControl(
         String id,
         String locale,
@@ -147,7 +177,17 @@ public class ControlFactory
         );
     }
 
-    //-------------------------------------------------------------------------
+    /**
+     * Create operation control.
+     * 
+     * @param id
+     * @param locale
+     * @param localeAsIndex
+     * @param pane
+     * @param paneIndex
+     * @param forClass
+     * @return
+     */
     public synchronized OperationPaneControl createOperationPaneControl(
         String id,
         String locale,
@@ -163,14 +203,23 @@ public class ControlFactory
             this,
             pane,
             this.wizardFactory,
-            this.reportFactory,
             this.valueFactory,
             paneIndex,
             forClass
         );
     }
 
-    //-------------------------------------------------------------------------
+    /**
+     * Create operation tab control.
+     * 
+     * @param id
+     * @param locale
+     * @param localeAsIndex
+     * @param tab
+     * @param paneIndex
+     * @param tabIndex
+     * @return
+     */
     public synchronized OperationTabControl createOperationTabControl(
         String id,
         String locale,
@@ -190,7 +239,16 @@ public class ControlFactory
         );
     }
     
-    //-------------------------------------------------------------------------
+    /**
+     * Create attribute tab control.
+     * 
+     * @param id
+     * @param locale
+     * @param localeAsIndex
+     * @param tab
+     * @param tabIndex
+     * @return
+     */
     public synchronized AttributeTabControl createAttributeTabControl(
         String id,
         String locale,
@@ -208,7 +266,16 @@ public class ControlFactory
         );
     }
     
-    //-------------------------------------------------------------------------
+    /**
+     * Create attribute pane control.
+     * 
+     * @param id
+     * @param locale
+     * @param localeAsIndex
+     * @param pane
+     * @param paneIndex
+     * @return
+     */
     public synchronized AttributePaneControl createAttributePaneControl(
         String id,
         String locale,
@@ -226,7 +293,18 @@ public class ControlFactory
         );
     }
     
-    //-------------------------------------------------------------------------
+    /**
+     * Create reference pane control.
+     * 
+     * @param id
+     * @param perspective
+     * @param locale
+     * @param localeAsIndex
+     * @param pane
+     * @param paneIndex
+     * @param forClass
+     * @return
+     */
     public synchronized ReferencePaneControl createReferencePaneControl(
         String id,
         int perspective,
@@ -248,7 +326,17 @@ public class ControlFactory
         );        
     }
 
-    //-------------------------------------------------------------------------
+    /**
+     * Create show object control.
+     * 
+     * @param id
+     * @param perspective
+     * @param locale
+     * @param localeAsIndex
+     * @param inspector
+     * @param forClass
+     * @return
+     */
     public synchronized ShowInspectorControl createShowInspectorControl(
         String id,
         int perspective,
@@ -267,7 +355,6 @@ public class ControlFactory
                 localeAsIndex,
                 this,
                 this.wizardFactory,
-                this.reportFactory,
                 inspector,
                 forClass
             );
@@ -279,7 +366,17 @@ public class ControlFactory
         return inspectorControl;
     }
 
-    //-------------------------------------------------------------------------
+    /**
+     * Create edit object control.
+     * 
+     * @param id
+     * @param perspective
+     * @param locale
+     * @param localeAsIndex
+     * @param inspector
+     * @param forClass
+     * @return
+     */
     public synchronized EditInspectorControl createEditInspectorControl(
         String id,
         int perspective,
@@ -306,43 +403,15 @@ public class ControlFactory
         return inspectorControl;
     }
 
-    //-------------------------------------------------------------------------
-    public synchronized ReportControl createReportControl(
-        String id,
-        String locale,
-        int localeAsIndex,
-        ReportDefinition[] reports
-    ) {
-        return new ReportControl(
-            id == null ? this.uuidAsString() : id,
-            locale,
-            localeAsIndex,
-            this,
-            reports
-        );
-    }
-
-    //-------------------------------------------------------------------------
-    public synchronized ReportTabControl createReportTabControl(
-        String id,
-        String locale,
-        int localeAsIndex,
-        ReportDefinition reportDefinition,
-        int paneIndex,
-        int tabIndex
-    ) {
-        return new ReportTabControl(
-            id == null ? this.uuidAsString() : id,
-            locale,
-            localeAsIndex,
-            this,
-            reportDefinition,
-            paneIndex,
-            tabIndex
-        );
-    }
-
-    //-------------------------------------------------------------------------
+    /**
+     * Create wizard control.
+     * 
+     * @param id
+     * @param locale
+     * @param localeAsIndex
+     * @param reports
+     * @return
+     */
     public synchronized WizardControl createWizardControl(
         String id,
         String locale,
@@ -358,7 +427,18 @@ public class ControlFactory
         );
     }
 
-    //-------------------------------------------------------------------------
+    /**
+     * Create wizard tab control.
+     * 
+     * @param id
+     * @param locale
+     * @param localeAsIndex
+     * @param tab
+     * @param wizardDefinition
+     * @param paneIndex
+     * @param tabIndex
+     * @return
+     */
     public synchronized WizardTabControl createWizardTabControl(
         String id,
         String locale,
@@ -380,12 +460,21 @@ public class ControlFactory
         );
     }
 
-    //-------------------------------------------------------------------------
+    /**
+     * Create control of given type.
+     * 
+     * @param id
+     * @param locale
+     * @param localeAsIndex
+     * @param controlClass
+     * @return
+     * @throws ServiceException
+     */
     public synchronized Control createControl(
         String id,
         String locale,
         int localeAsIndex,
-        Class controlClass
+        Class<?> controlClass
     ) throws ServiceException {
         try {
             Constructor cons = controlClass.getConstructor(
@@ -397,23 +486,34 @@ public class ControlFactory
             );
             return (Control)cons.newInstance(
                 new Object[]{
-                    id == null ? this.uuidAsString() : id,
+                    id == null 
+                    	? this.uuidAsString() 
+                    	: id,
                     locale,
                     new Integer(localeAsIndex)
                 }
             );
-        }
-        catch(Exception e) {
+        } catch(Exception e) {
             throw new ServiceException(e);
         }       
     }
     
-    //-------------------------------------------------------------------------
+    /**
+     * Create control of given type.
+     * 
+     * @param id
+     * @param locale
+     * @param localeAsIndex
+     * @param controlClass
+     * @param parameter
+     * @return
+     * @throws ServiceException
+     */
     public synchronized Control createControl(
         String id,
         String locale,
         int localeAsIndex,
-        Class controlClass,
+        Class<?> controlClass,
         Object[] parameter
     ) throws ServiceException {
         try {
@@ -433,36 +533,48 @@ public class ControlFactory
                     parameter
                 }
             );
-        }
-        catch(Exception e) {
+        } catch(Exception e) {
             throw new ServiceException(e);
         }
     }
-      
-    //-------------------------------------------------------------------------
+
+    /**
+     * Get attribute value factory.
+     * 
+     * @return
+     */
     public AttributeValueFactory getAttributeValueFactory(
     ) {
         return this.valueFactory;
     }
     
-    //-------------------------------------------------------------------------
+    /**
+     * Get texts factory.
+     * 
+     * @return
+     */
     public Texts getTextsFactory(
     ) {
         return this.texts;
     }
     
-    //-------------------------------------------------------------------------
+    /**
+     * Get ui context.
+     * 
+     * @return
+     */
     public UiContext getUiContext(
     ) {
         return this.uiContext;
     }
     
     //-------------------------------------------------------------------------
+    // Members
+    //-------------------------------------------------------------------------
     private static final long serialVersionUID = -1451986642508901552L;
     
     private final UiContext uiContext;
     private final WizardDefinitionFactory wizardFactory;
-    private final ReportDefinitionFactory reportFactory;    
     private final Texts texts;
     private Map<String,GridControl> gridControls = new HashMap<String,GridControl>();
     private Map<String,InspectorControl> inspectorControls = new HashMap<String,InspectorControl>();

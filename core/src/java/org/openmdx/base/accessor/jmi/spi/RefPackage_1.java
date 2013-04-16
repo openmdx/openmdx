@@ -53,7 +53,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.jdo.JDOHelper;
 import javax.jdo.PersistenceManager;
 import javax.jdo.PersistenceManagerFactory;
 import javax.jdo.spi.PersistenceCapable;
@@ -84,6 +83,7 @@ import org.openmdx.base.naming.Path;
 import org.openmdx.base.query.Filter;
 import org.openmdx.base.resource.Records;
 import org.openmdx.kernel.exception.BasicException;
+import org.openmdx.kernel.jdo.ReducedJDOHelper;
 import org.w3c.cci2.SparseArray;
 
 //---------------------------------------------------------------------------
@@ -269,7 +269,7 @@ public class RefPackage_1 implements Jmi1Package_1_0, Serializable {
             return target;
             
         } else if(source instanceof PersistenceCapable) {
-            return JDOHelper.isPersistent(source) ? JDOHelper.getObjectId(source) : JDOHelper.getTransactionalObjectId(source);
+            return ReducedJDOHelper.isPersistent(source) ? ReducedJDOHelper.getObjectId(source) : ReducedJDOHelper.getTransactionalObjectId(source);
         } else {
             return source;
         }

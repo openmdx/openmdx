@@ -1,4 +1,3 @@
-package org.openmdx.portal.servlet.action;
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
@@ -9,7 +8,7 @@ package org.openmdx.portal.servlet.action;
  * This software is published under the BSD license
  * as listed below.
  * 
- * Copyright (c) 2004-2008, OMEX AG, Switzerland
+ * Copyright (c) 2004-2012, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -51,7 +50,7 @@ package org.openmdx.portal.servlet.action;
  * (License - based on BSD).
  *
  */
-
+package org.openmdx.portal.servlet.action;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -67,19 +66,24 @@ import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.persistence.cci.PersistenceHelper;
 import org.openmdx.kernel.log.SysLog;
 import org.openmdx.portal.servlet.ApplicationContext;
-import org.openmdx.portal.servlet.ObjectReference;
 import org.openmdx.portal.servlet.ViewPort;
 import org.openmdx.portal.servlet.ViewsCache;
 import org.openmdx.portal.servlet.view.EditObjectView;
-import org.openmdx.portal.servlet.view.ObjectCreationResult;
 import org.openmdx.portal.servlet.view.ObjectView;
 import org.openmdx.portal.servlet.view.ShowObjectView;
 import org.openmdx.portal.servlet.view.ViewMode;
 
+/**
+ * SaveAction
+ *
+ */
 public class SaveAction extends BoundAction {
 
     public final static int EVENT_ID = 8;
 
+	/* (non-Javadoc)
+	 * @see org.openmdx.portal.servlet.action.BoundAction#perform(org.openmdx.portal.servlet.view.ObjectView, javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, java.lang.String, javax.servlet.http.HttpSession, java.util.Map, org.openmdx.portal.servlet.ViewsCache, org.openmdx.portal.servlet.ViewsCache)
+	 */
 	@SuppressWarnings("unchecked")
 	@Override
     public ActionPerformResult perform(
@@ -157,33 +161,14 @@ public class SaveAction extends BoundAction {
 	                    nextView = editView.getPreviousView(null);
 	                }
 	            }
+	            // Object is saved
 	            else {
-	                nextView = editView.getPreviousView(showViewsCache);
-	                if(nextView instanceof ShowObjectView) {
-	                    if(!editView.isEditMode()) {
-	                        // Set created object as result if next view is ShowObjectView
-	                        // This shows the reference to the newly created object the same
-	                        // way as an operation result
-	                        ObjectReference createdObject =
-	                            new ObjectReference(
-	                                editView.getRefObject(),
-	                                application
-	                            );                    
-	                        ((ShowObjectView)nextView).setCreateObjectResult(
-	                            new ObjectCreationResult(
-	                                editView.getRefObject().refGetPath().toXRI(),
-	                                createdObject.getLabel(),
-	                                createdObject.getTitle(),
-	                                createdObject.getIconKey()
-	                            )
-	                        );
-	                    }
-	                	try {
-	                		nextView.refresh(true, true);
-	                	} catch(Exception e) {
-	                		new ServiceException(e).log();
-	                	}                    	
-	                }
+	            	nextView = editView.getPreviousView(showViewsCache);
+                	try {
+                		nextView.refresh(true, true);
+                	} catch(Exception e) {
+                		new ServiceException(e).log();
+                	}
 	                // Object is saved. EditObjectView is not required any more. Remove 
 	                // it from the set of open EditObjectViews.
 	                editViewsCache.removeView(
@@ -206,5 +191,5 @@ public class SaveAction extends BoundAction {
             nextViewPortType
         );
     }
-    
+
 }

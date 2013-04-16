@@ -54,6 +54,8 @@ import org.openmdx.application.cci.ConfigurationSpecifier;
 import org.openmdx.application.configuration.Configuration;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.kernel.exception.BasicException;
+import org.openmdx.kernel.loading.Classes;
+import org.openmdx.kernel.loading.Resources;
 
 /**
  * Standard Configuration Provider
@@ -81,15 +83,21 @@ public class StandardConfigurationProvider implements ConfigurationProvider_1_0 
             //
             // Use JNDI context and properties
             //
-            this.secondary = new NamingConfigurationProvider(
-                url, 
-                false // strict
-            );
+            try {
+                this.secondary = Classes.newApplicationInstance(
+                    ConfigurationProvider_1_0.class, 
+                    "org.openmdx.application.naming.NamingConfigurationProvider",  
+                    url, 
+                    Boolean.FALSE // strict
+                );
+            } catch (Exception exception) {
+                throw new ServiceException(exception);
+            }
             this.primary = "java:comp/env".equals(url) ? new PropertiesConfigurationProvider(
-                "xri://+resource/META-INF/openmdxcontext.properties",
+            	Resources.toMetaInfXRI("openmdxcontext.properties"),
                 false // strict
             ) : new PropertiesConfigurationProvider(
-                "xri://+resource/META-INF/" + url.substring(14).replace('/', '.') + ".properties",
+            		Resources.toMetaInfXRI(url.substring(14).replace('/', '.') + ".properties"),
                 false // strict
             );
         } else {
@@ -112,7 +120,7 @@ public class StandardConfigurationProvider implements ConfigurationProvider_1_0 
     /**
      * The naming configuration provider is used mainly in an EJB context
      */
-    private final NamingConfigurationProvider secondary;
+    private final ConfigurationProvider_1_0 secondary;
         
     /* (non-Javadoc)
      * @see org.openmdx.application.cci.ConfigurationProvider_1_0#getConfiguration(java.lang.String[], java.util.Map)

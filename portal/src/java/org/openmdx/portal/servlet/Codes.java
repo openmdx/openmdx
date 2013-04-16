@@ -204,98 +204,96 @@ public final class Codes implements Serializable {
 	 * @param pmf
 	 * @param codes
 	 */
-	public static void storeCodes(
-		PersistenceManager pm,
-		Map<Path,MappedRecord> codes
-	) throws ServiceException {
+    public static void storeCodes(
+    	PersistenceManager pm,
+    	Map<Path,MappedRecord> codes
+    	) throws ServiceException {
     	String messagePrefix = new Date() + "  ";
-        SysLog.info("Storing " + codes.size() + " code entries");
-        System.out.println(messagePrefix + "Storing " + codes.size() + " code entries");
-        // Load objects in multiple runs in order to resolve object dependencies.
-        Map<Path,RefObject> loadedObjects = new HashMap<Path,RefObject>(); 
-        for(int run = 0; run < 5; run++) {
-            boolean hasNewObjects = false;
-            pm.currentTransaction().begin();
-            for(
-                Iterator<MappedRecord> j = codes.values().iterator(); 
-                j.hasNext(); 
-            ) {
-              MappedRecord entry = j.next();
-              Path entryPath = Object_2Facade.getPath(entry);
-              // create new entries, update existing
-              try {
-                RefObject_1_0 existing = null;
-                try {
-                  existing = (RefObject_1_0)pm.getObjectById(
-                	  entryPath
-                  );
-                }
-                catch(Exception e) {}
-                if(existing != null) {
-                    loadedObjects.put(
-                    	entryPath, 
-                        existing
-                    );
-                    // Object exists: if it was created on first run it does not have to be updated 
-                    // on subsequent runs. If it was updated on first run do not update it again.
-                    if(run == 0) {
-                        JmiHelper.toRefObject(
-                            entry,
-                            existing,
-                            loadedObjects, // object cache
-                            null, // ignorable features
-                            true // compareWithBeforeImage
-                        );
-                    }
-                }
-                else {
-                    String qualifiedClassName = Object_2Facade.getObjectClass(entry);
-                    String packageName = qualifiedClassName.substring(0, qualifiedClassName.lastIndexOf(':'));
-                    RefObject_1_0 newEntry = (RefObject_1_0)pm.getObjectById(
-                        Authority.class,
-                        "xri://@openmdx*" + packageName.replace(":", ".")
-                    ).refImmediatePackage().refClass(qualifiedClassName).refCreateInstance(null);
-                    newEntry.refInitialize(false, false);
-                    JmiHelper.toRefObject(
-                        entry,
-                        newEntry,
-                        loadedObjects, // object cache
-                        null, // ignorable features
-                        true // compareWithBeforeImage
-                    );
-                    Path parentIdentity = entryPath.getParent().getParent();
-                    RefObject_1_0 parent = null;
-                    try {
-                        parent = loadedObjects.containsKey(parentIdentity) ? 
-                        	(RefObject_1_0)loadedObjects.get(parentIdentity) : 
-                        		(RefObject_1_0)pm.getObjectById(parentIdentity);
-                    } catch(Exception e) {}
-                    if(parent != null) {
-                        RefContainer container = (RefContainer)parent.refGetValue(
-                        	entryPath.get(entryPath.size() - 2)
-                        );
-                        container.refAdd(
-                            QualifierType.REASSIGNABLE,
-                            entryPath.get(entryPath.size() - 1),
-                            newEntry
-                        );
-                    }
-                    loadedObjects.put(
-                    	entryPath, 
-                        newEntry
-                    );
-                    hasNewObjects = true;
-                }
-              }
-              catch(Exception e) {
-            	  new ServiceException(e).log();
-            	  System.out.println(messagePrefix + "STATUS: " + e.getMessage() + " (for more info see log)");
-              }
-            }
-            pm.currentTransaction().commit();
-            if(!hasNewObjects) break;
-        }
-	}
+    	SysLog.info("Storing " + codes.size() + " code entries");
+    	System.out.println(messagePrefix + "Storing " + codes.size() + " code entries");
+    	// Load objects in multiple runs in order to resolve object dependencies.
+    	Map<Path,RefObject> loadedObjects = new HashMap<Path,RefObject>(); 
+    	for(int run = 0; run < 5; run++) {
+    		boolean hasNewObjects = false;
+    		for(
+    			Iterator<MappedRecord> j = codes.values().iterator(); 
+    			j.hasNext(); 
+    		) {
+    			MappedRecord entry = j.next();
+    			Path entryPath = Object_2Facade.getPath(entry);
+    			// Create new entries, update existing
+				RefObject_1_0 existing = null;
+				try {
+					existing = (RefObject_1_0)pm.getObjectById(entryPath);
+				} catch(Exception ignore) {}
+				try {
+					pm.currentTransaction().begin();
+    				if(existing != null) {
+    					loadedObjects.put(
+    						entryPath, 
+    						existing
+    					);
+    					// Object exists: if it was created on first run it does not have to be updated 
+    					// on subsequent runs. If it was updated on first run do not update it again.
+    					if(run == 0) {
+    						JmiHelper.toRefObject(
+    							entry,
+    							existing,
+    							loadedObjects, // object cache
+    							null, // ignorable features
+    							true // compareWithBeforeImage
+    						);
+    					}
+    				} else {
+    					String qualifiedClassName = Object_2Facade.getObjectClass(entry);
+    					String packageName = qualifiedClassName.substring(0, qualifiedClassName.lastIndexOf(':'));
+    					RefObject_1_0 newEntry = (RefObject_1_0)pm.getObjectById(
+    						Authority.class,
+    						"xri://@openmdx*" + packageName.replace(":", ".")
+    					).refImmediatePackage().refClass(qualifiedClassName).refCreateInstance(null);
+    					newEntry.refInitialize(false, false);
+    					JmiHelper.toRefObject(
+    						entry,
+    						newEntry,
+    						loadedObjects, // object cache
+    						null, // ignorable features
+    						true // compareWithBeforeImage
+    					);
+    					Path parentIdentity = entryPath.getParent().getParent();
+    					RefObject_1_0 parent = null;
+    					try {
+    						parent = loadedObjects.containsKey(parentIdentity) 
+    							? (RefObject_1_0)loadedObjects.get(parentIdentity) 
+    							: (RefObject_1_0)pm.getObjectById(parentIdentity);
+    					} catch(Exception ignore) {}
+    					if(parent != null) {
+							RefContainer container = (RefContainer)parent.refGetValue(
+								entryPath.get(entryPath.size() - 2)
+							);
+							container.refAdd(
+								QualifierType.REASSIGNABLE,
+								entryPath.get(entryPath.size() - 1),
+								newEntry
+							);
+    					}
+    					loadedObjects.put(
+    						entryPath, 
+    						newEntry
+    					);
+    					hasNewObjects = true;
+    				}
+    				pm.currentTransaction().commit();
+    			} catch(Exception e) {
+					try {
+						pm.currentTransaction().rollback();
+					} catch(Exception ignore) {}
+    				new ServiceException(e).log();
+    				System.out.println(messagePrefix + "STATUS: " + e.getMessage() + " (for more info see log)");
+    			}
+    		}
+    		if(!hasNewObjects) break;
+    	}
+    }
 
 	/**
 	 * Store bundles in code segment.
@@ -799,27 +797,46 @@ public final class Codes implements Serializable {
             value = value.toUpperCase();
             for(short locale = 0; locale < 255; locale++) {
             	String key = this.getKey(feature, locale, true, false);
-            	if(cachedLongTexts.get(key) == null) {            		
-                    if(!prepareLongText(feature, locale, true, key, false)) {
-                    	return code;
-                    }
+            	// Prio 1: exact match for short texts
+            	{
+	            	if(cachedShortTexts.get(key) == null) {            		
+	                    if(!prepareShortText(feature, locale, true, key, false)) {
+	                    	return code;
+	                    }
+	            	}
+	                @SuppressWarnings("unchecked")
+                    Map<Object,Object> shortTexts = this.getShortText(feature, locale, true, false);
+	                for(Map.Entry<Object,Object> entry: shortTexts.entrySet()) {
+	                    String text = ((String)entry.getValue()).trim();
+	                    if((text != null) && text.toUpperCase().equals(value)) {
+	                    	return (Short)entry.getKey();
+	                    }
+	                }
             	}
-                @SuppressWarnings("unchecked")
-                Map<Object,Object> longTexts = this.getLongText(feature, locale, true, false);
-                Integer lastMatchLength = null;
-                Short lastMatchCode = null;
-                for(Map.Entry<Object,Object> entry: longTexts.entrySet()) {
-                    String text = ((String)entry.getValue()).trim();
-                    if((text != null) && text.toUpperCase().indexOf(value) >= 0) {
-    	    			if(lastMatchLength == null || text.length() < lastMatchLength) {
-    	    				lastMatchCode = (Short)entry.getKey();
-    	    				lastMatchLength = text.length();
-    	    			}
-                    }
-                }
-                if(lastMatchCode != null) {
-                	return lastMatchCode;
-                }
+            	// Prio 2: try with long texts
+            	{
+	            	if(cachedLongTexts.get(key) == null) {            		
+	                    if(!prepareLongText(feature, locale, true, key, false)) {
+	                    	return code;
+	                    }
+	            	}
+	                @SuppressWarnings("unchecked")
+	                Map<Object,Object> longTexts = this.getLongText(feature, locale, true, false);
+	                Integer lastMatchLength = null;
+	                Short lastMatchCode = null;
+	                for(Map.Entry<Object,Object> entry: longTexts.entrySet()) {
+	                    String text = ((String)entry.getValue()).trim();
+	                    if((text != null) && text.toUpperCase().indexOf(value) >= 0) {
+	    	    			if(lastMatchLength == null || text.length() < lastMatchLength) {
+	    	    				lastMatchCode = (Short)entry.getKey();
+	    	    				lastMatchLength = text.length();
+	    	    			}
+	                    }
+	                }
+	                if(lastMatchCode != null) {
+	                	return lastMatchCode;
+	                }
+            	}
             }
         }
         return code;

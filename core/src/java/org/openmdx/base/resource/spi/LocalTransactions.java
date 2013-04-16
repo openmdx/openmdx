@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2009, OMEX AG, Switzerland
+ * Copyright (c) 2009-2012, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -51,13 +51,9 @@ import javax.jdo.JDOException;
 import javax.jdo.PersistenceManager;
 import javax.resource.ResourceException;
 import javax.resource.spi.LocalTransactionException;
-import javax.transaction.HeuristicMixedException;
-import javax.transaction.HeuristicRollbackException;
-import javax.transaction.NotSupportedException;
-import javax.transaction.RollbackException;
-import javax.transaction.SystemException;
-import javax.transaction.TransactionManager;
-import javax.transaction.UserTransaction;
+
+import org.openmdx.base.persistence.cci.PersistenceHelper;
+import org.openmdx.base.persistence.cci.UnitOfWork;
 
 
 /**
@@ -85,36 +81,6 @@ public class LocalTransactions {
         javax.resource.cci.LocalTransaction delegate
     ) throws ResourceException {
         return new LocalTransactionWrapper(delegate);
-    }
-    
-    /**
-     * Acquire a user transaction adapter
-     * 
-     * @param delegate a <code>UserTransaction</code>
-     * 
-     * @return the user transaction adapter
-     * 
-     * @throws ResourceException
-     */
-    public static javax.resource.spi.LocalTransaction getLocalTransaction(
-        UserTransaction delegate
-    ) throws ResourceException {
-        return new UserTransactionWrapper(delegate);
-    }
-
-    /**
-     * Acquire a user transaction adapter
-     * 
-     * @param delegate a <code>TransactionManager</code>
-     * 
-     * @return the user transaction adapter
-     * 
-     * @throws ResourceException
-     */
-    public static javax.resource.spi.LocalTransaction getLocalTransaction(
-        TransactionManager delegate
-    ) throws ResourceException {
-        return new TransactionManagerWrapper(delegate);
     }
     
     /**
@@ -156,13 +122,17 @@ public class LocalTransactions {
          */
         private final PersistenceManager persistenceManager;
 
+        private UnitOfWork currentUnitOfWork(){
+            return PersistenceHelper.currentUnitOfWork(persistenceManager);
+        }
+        
         /* (non-Javadoc)
          * @see javax.resource.cci.LocalTransaction#begin()
          */
         public void begin(
         ) throws ResourceException {
             try {
-                this.persistenceManager.currentTransaction().begin();
+                currentUnitOfWork().begin();
             } catch (JDOException exception) {
                 throw new LocalTransactionException(
                     "Transaction start failure",
@@ -177,7 +147,7 @@ public class LocalTransactions {
         public void commit(
         ) throws ResourceException {
             try {
-                this.persistenceManager.currentTransaction().commit();
+                currentUnitOfWork().commit();
             } catch (JDOException exception) {
                 throw new LocalTransactionException(
                     "Transaction commit failure",
@@ -192,7 +162,7 @@ public class LocalTransactions {
         public void rollback(
         ) throws ResourceException {
             try {
-                this.persistenceManager.currentTransaction().rollback();
+                currentUnitOfWork().rollback();
             } catch (JDOException exception) {
                 throw new LocalTransactionException(
                     "Transaction rollback failure",
@@ -202,119 +172,7 @@ public class LocalTransactions {
         }
         
     }
-    
-    //------------------------------------------------------------------------
-    // Class TransactionManagerWrapper
-    //------------------------------------------------------------------------
 
-    /**
-     * Adapter delegating to the container's transaction manager
-     */
-    static class TransactionManagerWrapper implements  javax.resource.spi.LocalTransaction {
-
-        /**
-         * Constructor 
-         *
-         * @param delegate
-         */
-        TransactionManagerWrapper(
-            TransactionManager delegate
-        ){
-            this.delegate = delegate;
-        }
-
-        /**
-         * The container's transaction manager
-         */
-        private final TransactionManager delegate;
-        
-        /* (non-Javadoc)
-         * @see javax.resource.spi.LocalTransaction#begin()
-         */
-        public void begin(
-        ) throws ResourceException {
-            try {
-                this.delegate.begin();
-            } catch (NotSupportedException exception) {
-                throw new LocalTransactionException(
-                    "Transaction start failure",
-                    exception
-                );
-            } catch (SystemException exception) {
-                throw new LocalTransactionException(
-                    "Transaction start failure",
-                    exception
-                );
-            }
-        }
-
-        /* (non-Javadoc)
-         * @see javax.resource.spi.LocalTransaction#commit()
-         */
-        public void commit(
-        ) throws ResourceException {
-            try {
-                this.delegate.commit();
-            } catch (SecurityException exception) {
-                throw new LocalTransactionException(
-                    "Transaction commit failure",
-                    exception
-                );
-            } catch (IllegalStateException exception) {
-                throw new LocalTransactionException(
-                    "Transaction commit failure",
-                    exception
-                );
-            } catch (RollbackException exception) {
-                throw new LocalTransactionException(
-                    "Transaction commit failure",
-                    exception
-                );
-            } catch (HeuristicMixedException exception) {
-                throw new LocalTransactionException(
-                    "Transaction commit failure",
-                    exception
-                );
-            } catch (HeuristicRollbackException exception) {
-                throw new LocalTransactionException(
-                    "Transaction commit failure",
-                    exception
-                );
-            } catch (SystemException exception) {
-                throw new LocalTransactionException(
-                    "Transaction commit failure",
-                    exception
-                );
-            }
-        }
-
-        /* (non-Javadoc)
-         * @see javax.resource.spi.LocalTransaction#rollback()
-         */
-        public void rollback(
-        ) throws ResourceException {
-            try {
-                this.delegate.rollback();
-            } catch (IllegalStateException exception) {
-                throw new LocalTransactionException(
-                    "Transaction rollback failure",
-                    exception
-                );
-            } catch (SecurityException exception) {
-                throw new LocalTransactionException(
-                    "Transaction rollback failure",
-                    exception
-                );
-            } catch (SystemException exception) {
-                throw new LocalTransactionException(
-                    "Transaction rollback failure",
-                    exception
-                );
-            }
-        }
-        
-    }
-        
     
     //------------------------------------------------------------------------
     // Class LocalTransactionWrapper
@@ -367,117 +225,4 @@ public class LocalTransactions {
         
     }
     
-    
-    //------------------------------------------------------------------------
-    // Class UserTransactionWrapper
-    //------------------------------------------------------------------------
-    
-    /**
-     * Adapter delegating to the container's transaction
-     */
-    static class UserTransactionWrapper implements javax.resource.spi.LocalTransaction {
-
-        /**
-         * Constructor 
-         *
-         * @param delegate
-         */
-        UserTransactionWrapper(
-            UserTransaction delegate
-        ){
-            this.delegate = delegate;
-        }
-        
-        /**
-         * The <code>UserTransaction</code> delegate
-         */
-        private final UserTransaction delegate;
-        
-        /* (non-Javadoc)
-         * @see javax.resource.spi.LocalTransaction#begin()
-         */
-        public void begin(
-        ) throws ResourceException {
-            try {
-                this.delegate.begin();
-            } catch (NotSupportedException exception) {
-                throw new LocalTransactionException(
-                    "Transaction start failure",
-                    exception
-                );
-            } catch (SystemException exception) {
-                throw new LocalTransactionException(
-                    "Transaction start failure",
-                    exception
-                );
-            }
-        }
-
-        /* (non-Javadoc)
-         * @see javax.resource.spi.LocalTransaction#commit()
-         */
-        public void commit(
-        ) throws ResourceException {
-            try {
-                this.delegate.commit();
-            } catch (SystemException exception) {
-                throw new LocalTransactionException(
-                    "Transaction commit failure",
-                    exception
-                );
-            } catch (SecurityException exception) {
-                throw new LocalTransactionException(
-                    "Transaction commit failure",
-                    exception
-                );
-            } catch (IllegalStateException exception) {
-                throw new LocalTransactionException(
-                    "Transaction commit failure",
-                    exception
-                );
-            } catch (RollbackException exception) {
-                throw new LocalTransactionException(
-                    "Transaction commit failure",
-                    exception
-                );
-            } catch (HeuristicMixedException exception) {
-                throw new LocalTransactionException(
-                    "Transaction commit failure",
-                    exception
-                );
-            } catch (HeuristicRollbackException exception) {
-                throw new LocalTransactionException(
-                    "Transaction commit failure",
-                    exception
-                );
-            }
-        }
-
-        /* (non-Javadoc)
-         * @see javax.resource.spi.LocalTransaction#rollback()
-         */
-        public void rollback(
-        ) throws ResourceException {
-            try {
-                this.delegate.rollback();
-            } catch (IllegalStateException exception) {
-                throw new LocalTransactionException(
-                    "Transaction rollback failure",
-                    exception
-                );
-            } catch (SecurityException exception) {
-                throw new LocalTransactionException(
-                    "Transaction rollback failure",
-                    exception
-                );
-            } catch (SystemException exception) {
-                throw new LocalTransactionException(
-                    "Transaction rollback failure",
-                    exception
-                );
-            }
-        }
-                
-    }
-
 }

@@ -48,17 +48,24 @@
 package org.openmdx.base.mof.spi;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.net.URL;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
-import java.util.Enumeration;
+import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Properties;
 import java.util.logging.Level;
 
 import org.openmdx.base.exception.RuntimeServiceException;
+import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.Model_1_0;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.loading.Classes;
+import org.openmdx.kernel.loading.Resources;
 import org.openmdx.kernel.log.SysLog;
 
 /**
@@ -80,54 +87,170 @@ public class Model_1Factory {
     ) {
         if(Model_1Factory.model == null) {
             synchronized(Model_1Factory.class) {
-                if(Model_1Factory.model == null) try {
-                    List<String> modelPackages = new ArrayList<String>();
-                    for(
-                    	Enumeration<URL> resources = Classes.getResources("META-INF/openmdxmof.properties");
-                    	resources.hasMoreElements();
-                    ) {
-                        BufferedReader in = new BufferedReader(new InputStreamReader(resources.nextElement().openStream()));
-                        for(
-                            String line;
-                            (line = in.readLine()) != null;
-                        ) {
-                        	line = line.trim();
-                        	if(
-                        	    line.length() > 0 && 
-                        	    !line.startsWith("#") && 
-                        	    !line.startsWith("!") &&
-                        	    !modelPackages.contains(line) 
-                        	) {
-        	                    modelPackages.add(line);
-                        	}
+                if(Model_1Factory.model == null) {
+                    Properties validationProperties = Model_1Validator.getValidationProperties();
+                    if(Model_1Validator.isValidationRequested(validationProperties)){
+                        final boolean xmlValidation = Model_1Validator.isXMLValidationRequested(validationProperties);
+                        for(int retryCount = 0; model == null; retryCount++) {
+                            Model_1_0 model = loadModel(xmlValidation);
+                            if(Model_1Validator.isValid(validationProperties, model, retryCount)){
+                                Model_1Factory.model = model;
+                            }
                         }
-                        in.close();
+                    } else {                                                                                                                                                                                                                                                                                                                                                                                                       
+                        final boolean xmlValidation = false;
+                        Model_1Factory.model = loadModel(xmlValidation);
                     }
-                    Model_1_0 model = (Model_1_0) Classes.getApplicationClass(
-                        "org.openmdx.application.mof.repository.accessor.Model_1"
-                    ).getMethod(
-                        "getInstance"
-                    ).invoke(
-                        null
-                    );
-                    model.addModels(modelPackages);
-                    Model_1Factory.model = model;
-                }  catch(Exception exception) {
-                    SysLog.log(
-                        Level.SEVERE,
-                        "Model acquisition failure",
-                        exception
-                    );
-                    throw new RuntimeServiceException(
-                        exception,
-                        BasicException.Code.DEFAULT_DOMAIN,
-                        BasicException.Code.INVALID_CONFIGURATION,
-                        "Model acquisition failure"
-                    );
                 }
             }
         }
         return Model_1Factory.model;
+    }
+
+    /**
+     * Load the model and calculate its checksum
+     * 
+     * @return the checksum
+     *  
+     * @throws NoSuchAlgorithmException
+     * @throws UnsupportedEncodingException
+     * @throws ServiceException
+     */
+    public static String calculateChecksum(
+    ) throws NoSuchAlgorithmException, UnsupportedEncodingException, ServiceException{
+        return Model_1Validator.calculateChecksum(loadModel(false));
+    }
+
+    /**
+     * Provide the resource files
+     * 
+     * @param name the system property or meta information file name
+     * 
+     * @return the mode dump
+     * 
+     * @throws IOException
+     */
+    private static Iterable<URL> getModelResource(
+        String name
+    ) throws IOException{
+        String modelResource = System.getProperty(name);
+        if(modelResource == null || modelResource.trim().isEmpty()) {
+            return Resources.getMetaInfResources(name);
+        } else {
+            return Collections.singleton(new URL(modelResource.trim()));
+        }
+    }
+        
+    /**
+     * Try to restore the model repository
+     * 
+     * @param model
+     * @return
+     * @throws IOException
+     * @throws ServiceException
+     */
+    private static boolean restoreModelPackages(
+        Model_1_0 model
+    ) throws IOException, ServiceException {
+        Iterator<URL> modelDumps = getModelResource("openmdxmof.wbxml").iterator();
+        if(modelDumps.hasNext()) {
+            URL modelDump = modelDumps.next();
+            if(modelDumps.hasNext()) {
+                throw new ServiceException(
+                    BasicException.Code.DEFAULT_DOMAIN,
+                    BasicException.Code.INVALID_CONFIGURATION,
+                    "There is more than one model dump in the meta information enbironment",
+                    new BasicException.Parameter("dump", modelDump, modelDumps.next())
+               );
+            }
+            long repositoryCreated = System.currentTimeMillis();
+            model.load(modelDump.openStream());
+            long repositoryRestored =  System.currentTimeMillis() - repositoryCreated;
+            SysLog.performance("Model restored", repositoryRestored);
+            SysLog.log(
+                Level.INFO,
+                "The model repository has been restored from {0}",
+                modelDump
+            );
+            return true;
+        }
+        return false;
+    }
+        
+    /**
+     * @param model
+     * @throws IOException
+     * @throws ServiceException
+     */
+    private static void mergeModelPackages(
+        Model_1_0 model
+    ) throws IOException, ServiceException {
+        List<String> modelPackages = new ArrayList<String>();
+        List<URL> propertyURLs = new ArrayList<URL>();
+        for(URL propertyURL : getModelResource("openmdxmof.properties")) {
+            propertyURLs.add(propertyURL);
+            BufferedReader in = new BufferedReader(new InputStreamReader(propertyURL.openStream()));
+            for(
+                String line;
+                (line = in.readLine()) != null;
+            ) {
+            	line = line.trim();
+            	if(
+            	    !line.isEmpty() && 
+            	    !line.startsWith("#") && 
+            	    !line.startsWith("!") &&
+            	    !modelPackages.contains(line) 
+            	) {
+                    modelPackages.add(line);
+            	}
+            }
+            in.close();
+        }
+        SysLog.log(
+            Level.INFO,
+            "The model package set {0} is based on the openmdxmof.properties located at {1}",
+            modelPackages,
+            propertyURLs
+        );
+        long repositoryCreated = System.currentTimeMillis();
+        model.addModels(modelPackages);
+        long repositoryPopulated =  System.currentTimeMillis() - repositoryCreated;
+        SysLog.performance("Model population", repositoryPopulated);
+    }
+    
+    /**
+     * Load the model
+     * 
+     * @param xmlValidation
+     * 
+     * @return the model
+     */
+    private static Model_1_0 loadModel(
+        boolean xmlValidation
+        ) {
+        try {
+            Model_1_0 model = Classes.newApplicationInstance(
+                Model_1_0.class, 
+                "org.openmdx.application.mof.repository.accessor.Model_1"
+            );
+            if(!restoreModelPackages(model)) {
+                mergeModelPackages(model);
+                
+            }
+            return model;
+        }  catch(Exception exception) {
+            SysLog.log(
+                Level.SEVERE,
+                "Model acquisition failure",
+                exception
+                );
+            throw new RuntimeServiceException(
+                exception,
+                BasicException.Code.DEFAULT_DOMAIN,
+                BasicException.Code.INVALID_CONFIGURATION,
+                "Model acquisition failure"
+            );
+        }
     }
     
     /**
@@ -140,4 +263,21 @@ public class Model_1Factory {
         return Model_1Factory.model != null;
     }
     
+    /**
+     * Print the model checksum
+     * 
+     * @param arguments
+     * 
+     * @throws NoSuchAlgorithmException
+     * @throws UnsupportedEncodingException
+     * @throws ServiceException
+     * 
+     * @deprecated Use {@link Model_1Validator#main(String...)} instead
+     */
+    public static void main(
+        String... arguments
+    ) throws NoSuchAlgorithmException, UnsupportedEncodingException, ServiceException{
+        Model_1Validator.main(arguments);
+    }
+
 }

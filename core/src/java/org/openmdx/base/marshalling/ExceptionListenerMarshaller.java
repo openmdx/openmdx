@@ -47,13 +47,12 @@
  */
 package org.openmdx.base.marshalling;
 
-import java.beans.ExceptionListener;
 import java.io.Serializable;
 import java.util.logging.Level;
 
+import org.openmdx.base.exception.ExceptionListener;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.kernel.log.SysLog;
-
 
 /**
 * This class signals marshal exceptions.
@@ -156,7 +155,7 @@ public class ExceptionListenerMarshaller implements Marshaller, Serializable {
     /**
      * Signal a marshal exception
      * 
-     * @param exception the exception to be signaled
+     * @param exception the exception to be signalled
      */
     public void exceptionThrown(
         Exception exception

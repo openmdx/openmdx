@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2011, OMEX AG, Switzerland
+ * Copyright (c) 2004-2013, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -142,7 +142,8 @@ public abstract class AbstractFilter implements Selector, Serializable {
     /**
      * 
      * @param candidate
-     * @param attribute
+     * @param condition
+     * 
      * @return an iterator for the values, never <code>null</code>
      * 
      * @exception   Exception
@@ -150,9 +151,9 @@ public abstract class AbstractFilter implements Selector, Serializable {
      */
     protected abstract Iterator<?> getValuesIterator(
         Object candidate,
-        String attribute
+        Condition condition
     ) throws Exception;
-
+    
     /**
      * Test two values for equality in the context of a filter
      * 
@@ -215,7 +216,7 @@ public abstract class AbstractFilter implements Selector, Serializable {
         Quantifier quantifier = condition.getQuantifier();
         Iterator<?> iterator;
         try {
-            iterator = getValuesIterator(candidate, condition.getFeature());
+            iterator = getValuesIterator(candidate, condition);
         } catch (Exception exception) {
             Throwables.log(exception);
             return false;

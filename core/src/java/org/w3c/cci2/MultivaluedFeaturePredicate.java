@@ -68,7 +68,7 @@ public interface MultivaluedFeaturePredicate {
     ComparableTypePredicate<java.lang.Integer> size();
 
     /**
-     * This method is deprecated to avoid its erroneous use..
+     * This method is deprecated om order to avoid its erroneous use.
      * 
      * @deprecated to avoid erroneous use 
      * 

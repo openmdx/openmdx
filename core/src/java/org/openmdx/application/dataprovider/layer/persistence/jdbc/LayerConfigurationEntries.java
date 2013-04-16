@@ -384,12 +384,36 @@ static public final String REFERENCE_ID_SUFFIX_ATTRIBUTES_SUFFIX = "referenceIdS
   static public final String NULL_AS_CHARACTER = "nullAsCharacter";
   
   /**
-     * FETCH_SIZE allows to set the fetch size for prepared statements. If
-     * defined the method ps.setFetchSize(fetchSize) is called. This option can
-     * improve dramatically performance of some JDBC drivers. The default is set
-     * to 100.
+     * FETCH_SIZE allows to fix the fetch size for prepared statements. 
+     * The method ps.setFetchSize(fetchSize) is called. This option 
+     * can improve dramatically performance of some JDBC drivers. 
+     * The default is set to 100.
+     * <p>
+     * You can specify either FETCH_SIZE (the fixed value) or 
+     * {@link #FETCH_SIZE_OPTIMAL} (the default value) and 
+     * {@link #FETCH_SIZE_GREEDY} (the maximal value).
      */
   static public final String FETCH_SIZE = "fetchSize";
+
+    /**
+     * The prepared statements fetch size varies with the fetch plan's
+     * fetch size unless it is fixed by the FETCH_SIZE entry. 
+     * <p>
+     * You can specify either {@link #FETCH_SIZE} (the fixed value) or 
+     * FETCH_SIZE_OPTIMAL (the default value) and 
+     * {@link #FETCH_SIZE_GREEDY} (the maximal value).
+   */
+  static public final String FETCH_SIZE_OPTIMAL = "fetchSizeOptimal";
+
+  /**
+     * The prepared statements fetch size varies with the fetch plan's
+     * fetch size unless it is fixed by the FETCH_SIZE entry. 
+     * <p>
+     * You can specify either {@link #FETCH_SIZE} (the fixed value) or 
+     * {@link #FETCH_SIZE_OPTIMAL} (the default value) and 
+     * FETCH_SIZE_GREEDY (the maximal value).
+   */
+  static public final String FETCH_SIZE_GREEDY = "fetchSizeGreedy";
   
   /**
      * Path values are stored by default in the path.toUri() format. The path
@@ -801,6 +825,12 @@ static public final String REFERENCE_ID_SUFFIX_ATTRIBUTES_SUFFIX = "referenceIdS
    */
   static public final String UNIT_OF_WORK_PROVIDER = "unitOfWorkProvider";
   
+  /**
+   * The flag tells whether large object input streams shall be copied into memory
+   * Defaults to <code>true</code>.
+   */
+  static public final String GET_LARGE_OBJECT_BY_VALUE = "getLargeObjectByValue";
+
   /**
    * Tells whether descendants shall be deleted by the persistence layer.<br>
    * Defaults to <code>true</code>.

@@ -1,16 +1,14 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <!--
-==============================org.openmdx.kernel.logging.ClassicFor=========================================
-= Name:        $Id: build-library.xml,v 1.178 2012/07/08 12:39:11 wfro Exp $
+=======================================================================
+= Project:     openMDX, http://www.openmdx.org/
 = Description: openMDX Build Library
-= Revision:    $Revision: 1.178 $
-= Date:        $Date: 2012/07/08 12:39:11 $
-= Copyright:   (c) 2003-2011 OMEX AG
+= Owner:       OMEX AG, Switzerland, http://www.omex.ch
 =======================================================================
 =
 = This software is published under the BSD license as listed below.
 = 
-= Copyright (c) 2004-2011, OMEX AG, Switzerland
+= Copyright (c) 2004-2012, OMEX AG, Switzerland
 = All rights reserved.
 = 
 = Redistribution and use in source and binary forms, with or without 
@@ -595,7 +593,11 @@
 			<openmdx:archivefileset src="${build.dir}/model/models.zip" includes="rsm6.xmi" fullpath="models.xmi"/>
 		</openmdx:archive>
 		<openmdx:archive destfile="${build.dir}/model/${ant.project.name}.openmdx-xmi.zip">
-			<openmdx:archivefileset src="${build.dir}/model/models.zip" includes="**/*.xsd,**/*.xml"/>
+			<openmdx:archivefileset src="${build.dir}/model/models.zip">
+				<include name="**/*.xsd"/>
+				<include name="**/*.xml"/>
+				<include name="**/*.wbxml"/>
+			</openmdx:archivefileset>
 		</openmdx:archive>
 	</target>
 	<target name="-preprocess-poseidon-models" depends="-preprocess-model-init" unless="model-files.are.up-to-date" if="model.transformation.source.is-poseidon">
@@ -822,8 +824,47 @@ java.util.logging.ConsoleHandler.formatter = ${openmdx.log.formatter}
 	<target 
 		name="test" 
 		description="Run JUnit tests, e.g. 'ant test' or 'ant -Djunit.test.case=Test*ProtocolHandler test'" 
-		depends="-junit-test-log-properties,build" 
-		if="junit.has.test.case"
+	>
+		<mkdir dir="${tmp.dir}"/>		
+		<antcontrib:if>
+			<isset property="test.id.list"/>
+			<antcontrib:then>
+				<!-- Iterate all tests listed in test.id.list --> 
+				<antcontrib:foreach list="${test.id.list}" target="-run-test-" param="test.id" delimiter="/" />
+  			</antcontrib:then>
+			<antcontrib:else>
+				<antcontrib:if>
+					<isset property="junit.test.case"/>
+					<antcontrib:then>
+						<!-- Run tests specified by junit.test.case pattern --> 
+						<antcall target="-test-">
+							<param name="test.id" value="default" />
+							<param name="project.bin.classpath" value="project.bin.classpath" />
+							<param name="junit.test.case.pattern" value="null.pattern" />
+						</antcall>
+					</antcontrib:then>
+					<antcontrib:else>
+						<!-- Run tests specified by project.junit.test.case pattern -->
+						<antcall target="-test-">
+							<param name="test.id" value="default" />
+							<param name="project.bin.classpath" value="project.bin.classpath" />
+							<param name="junit.test.case.pattern" value="project.junit.test.case" />
+						</antcall>
+					</antcontrib:else>
+				</antcontrib:if>
+			</antcontrib:else>
+		</antcontrib:if>
+	</target>
+	<target name="-run-test-">
+		<!-- Run test with test-specific project.bin.classpath and test.case.pattern -->
+		<antcall target="-test-">
+			<param name="project.bin.classpath" value="project.bin.classpath.${test.id}" />
+			<param name="junit.test.case.pattern" value="junit.test.case.pattern.${test.id}" />
+		</antcall>
+	</target>
+	<target 
+		name="-test-"
+		depends="-junit-test-log-properties,build"
 	>
 		<junit 
 			printsummary="yes" 
@@ -837,57 +878,56 @@ java.util.logging.ConsoleHandler.formatter = ${openmdx.log.formatter}
 		>
 			<jvmarg value="-Djava.endorsed.dirs=${openmdx.home}/osgi/${build.java.platform}/endorsed/lib"/>
 			<jvmarg value="-Xmx200M" />
-			<classpath refid="project.bin.classpath"/>
+			<classpath refid="${project.bin.classpath}"/>
 			<formatter type="xml"/>
 			<sysproperty key="${junit.set.timezone}" value="${junit.test.timezone}" />
 			<sysproperty key="org.openmdx.comp.env.jdbc.DataSource" value="${junit.test.datasource}" />
 			<sysproperty key="org.openmdx.comp.env.${junit.test.datasource.name}" value="${junit.test.datasource}" />
 			<sysproperty key="org.openmdx.log.debug" value="${junit.test.log.debug}"/>
 			<sysproperty key="org.openmdx.log.path" value="build/${build.target.platform}/log/junit"/>
-			<sysproperty key="java.util.logging.config.file" value="build/${build.target.platform}/log/junit/logging.properties"/>
+			<sysproperty key="java.util.logging.config.file" value="build/${build.target.platform}/log/junit.${test.id}/logging.properties"/>
 			<sysproperty key="java.protocol.handler.pkgs" value="org.openmdx.kernel.url.protocol"/>
 			<sysproperty key="build.java.platform" value="${build.java.platform}"/>
 			<sysproperty key="build.target.platform" value="${build.target.platform}"/>
 			<sysproperty key="junit.test.tmp" value="${tmp.dir}"/>
-			<batchtest todir="build/${build.target.platform}/log/junit/xml" unless="junit.test.case">
-				<fileset dir="${basedir}/src/java">
-					<patternset refid="project.junit.test.case"/>
-				</fileset>
-			</batchtest>
-			<batchtest todir="build/${build.target.platform}/log/junit/xml" if="junit.test.case">
+			<batchtest todir="build/${build.target.platform}/log/junit.${test.id}/xml" if="junit.test.case">
 				<fileset dir="${basedir}/src/java">
 					<patternset>
 						<include name="**/${junit.test.case}.java"/>
 						<patternset refid="build.exclude"/>
-					</patternset>
+					</patternset>					  
+				</fileset>
+			</batchtest>
+			<batchtest todir="build/${build.target.platform}/log/junit.${test.id}/xml">
+				<fileset dir="${basedir}/src/java">
+					<patternset refid="${junit.test.case.pattern}" />
 				</fileset>
 			</batchtest>
 		</junit>
 		<antcontrib:if>
 			<istrue value="${junit.test.report}"/>
 			<antcontrib:then>
-				<junitreport todir="build/${build.target.platform}/log/junit/xml">
-					<fileset dir="build/${build.target.platform}/log/junit/xml">
+				<junitreport todir="build/${build.target.platform}/log/junit.${test.id}/xml">
+					<fileset dir="build/${build.target.platform}/log/junit.${test.id}/xml">
 						<include name="TEST-*.xml"/>
 					</fileset>
-					<report format="frames" todir="build/${build.target.platform}/log/junit/html"/>
+					<report format="frames" todir="build/${build.target.platform}/log/junit.${test.id}/html"/>
 				</junitreport>
 				<echo>
 	------------------------------------------------------------------------------------------------
 	* The JUnit test report for ${ant.project.name} has been generated at 
-	  build/${build.target.platform}/log/junit/html/index.html
+	  build/${build.target.platform}/log/junit.${test.id}/html/index.html
 	* The JUnit log file for ${ant.project.name} can be found at 
-	  build/${build.target.platform}/log/junit/JUnit.shared.log
+	  build/${build.target.platform}/log/junit.${test.id}/JUnit.shared.log
 	------------------------------------------------------------------------------------------------
 			    </echo>
 			</antcontrib:then>
 		</antcontrib:if>
 	</target>
-
 	<target name="-junit-test-init">
-		<mkdir dir="build/${build.target.platform}/log/junit/xml"/>
+		<mkdir dir="build/${build.target.platform}/log/junit.${test.id}/xml"/>
 		<condition property="junit.test.has.log.properties">
-			<available file="logging.properties" filepath="build/${build.target.platform}/log/junit"/>
+			<available file="logging.properties" filepath="build/${build.target.platform}/log/junit.${test.id}"/>
 		</condition>
 		<condition property="junit.has.test.case">
 			<or>
@@ -899,20 +939,19 @@ java.util.logging.ConsoleHandler.formatter = ${openmdx.log.formatter}
 			<available classname="junit.framework.Test"/>
 		</condition>
 	</target>
-	
 	<target 
 		name="-junit-test-log-properties" 
 		depends="-junit-test-init" 
 		unless="junit.test.has.log.properties" 
 		if="junit.has.test.case"
 	>
-		<echo>Setting JUnit Test Log Properties: build/${build.target.platform}/log/junit/logging.properties</echo>
+		<echo>Setting JUnit Test Log Properties: build/${build.target.platform}/log/junit.${test.id}/logging.properties</echo>
 		<mkdir dir="${tmp.dir}"/>
-		<mkdir dir="build/${build.target.platform}/log/junit"/>
-		<echo file="build/${build.target.platform}/log/junit/logging.properties" append="false"># Log properties
+		<mkdir dir="build/${build.target.platform}/log/junit.${test.id}"/>
+		<echo file="build/${build.target.platform}/log/junit.${test.id}/logging.properties" append="false"># Log properties
 handlers= java.util.logging.FileHandler
 java.util.logging.FileHandler.level = ${junit.test.log.level}
-java.util.logging.FileHandler.pattern = build/${build.target.platform}/log/junit/junit.%u.log
+java.util.logging.FileHandler.pattern = build/${build.target.platform}/log/junit.${test.id}/junit.%u.log
 java.util.logging.FileHandler.formatter = ${openmdx.log.formatter}
 	    </echo>
 	</target>
@@ -940,6 +979,7 @@ java.util.logging.FileHandler.formatter = ${openmdx.log.formatter}
 	********************************************************************-->
 	<target name="build" description="Compiles the classes" depends="compile-java,enhance,compile-rmi"/>
 	<target name="compile-rmi" description="Invokes the RMI compiler" depends="compile-java,build-init" if="build.requires.rmi.compiler">
+		<property name="java.bootstrap.classpath" refid="java.bootstrap.lib"/>
 		<rmic 
 			base="${build.dir}/bin" 
 			stubversion="compat" 
@@ -950,7 +990,7 @@ java.util.logging.FileHandler.formatter = ${openmdx.log.formatter}
 			<patternset refid="project.rmi.jrmp.classes"
 		/>
 			<compilerarg value="-bootclasspath"/>
-			<compilerarg file="${build.target.jre}/${build.compile.bootclasspath}"/>
+			<compilerarg value="${java.bootstrap.classpath}"/>
 		</rmic>
 		<rmic 
 			iiop="true" 
@@ -963,7 +1003,7 @@ java.util.logging.FileHandler.formatter = ${openmdx.log.formatter}
 		>
 			<patternset refid="project.rmi.iiop.classes"/>
 			<compilerarg value="-bootclasspath"/>
-			<compilerarg file="${build.target.jre}/${build.compile.bootclasspath}"/>
+			<compilerarg value="${java.bootstrap.classpath}"/>
 		</rmic>
 		<property name="eclipse.rmi" location="${basedir}/build/${build.target.platform}/eclipse/bin"/>
 		<mkdir dir="${build.dir}/lib"/>
@@ -1077,7 +1117,7 @@ java.util.logging.FileHandler.formatter = ${openmdx.log.formatter}
 									classpathref="project.lib.classpath" 
 									source="${build.source.version}" 
 									target="${build.target.version}" 
-									bootclasspath="${build.target.jre}/${build.compile.bootclasspath}" 
+									bootclasspathref="java.bootstrap.lib" 
 									extdirs="${build.target.jre}/ext"
 									includeantruntime="${build.include.ant.runtime}"
 								>
@@ -1142,7 +1182,7 @@ java.util.logging.FileHandler.formatter = ${openmdx.log.formatter}
 									classpathref="project.lib.classpath" 
 									source="${build.source.version}" 
 									target="${build.target.version}" 
-									bootclasspath="${build.target.jre}/${build.compile.bootclasspath}" 
+									bootclasspathref="java.bootstrap.lib" 
 									extdirs="${build.target.jre}/ext"
 									includeantruntime="${build.include.ant.runtime}"
 								>
@@ -1166,13 +1206,13 @@ java.util.logging.FileHandler.formatter = ${openmdx.log.formatter}
   		<taskdef 
   			name="openjpac" 
   			classname="org.apache.openjpa.ant.PCEnhancerTask" 
-  			classpathref="jpa.ant.bin"
+  			classpathref="jpa.ant.lib"
   		/>
-		  <openjpac>
+		  	<openjpac>
  				<fileset dir="${build.dir}/bin">
    					<include name="**/jpa3/*.class"/>
   					<patternset refid="build.exclude"/>
-     		</fileset>
+     			</fileset>
 				<config propertiesFile="${basedir}/etc/openjpa/enhance-persistence.xml"/>
 				<classpath>
 					<path refid="jpa.ant.bin"/>				
@@ -1183,52 +1223,52 @@ java.util.logging.FileHandler.formatter = ${openmdx.log.formatter}
 		name="enhance-eclipse" 
 		unless="build.ignore.jpa"
 		depends="build-init"
-  >
-  		<taskdef 
+  	>
+		<taskdef 
   			name="openjpac" 
   			classname="org.apache.openjpa.ant.PCEnhancerTask" 
-  			classpathref="jpa.ant.bin"
-  		/>
-		  <openjpac>
- 				<fileset dir="${build.dir}/eclipse">
-   					<include name="**/jpa3/*.class"/>
-  					<patternset refid="build.exclude"/>
-     		</fileset>
-				<config propertiesFile="${basedir}/etc/openjpa/enhance-persistence.xml"/>
-				<classpath>
-					<path refid="jpa.ant.lib"/>
-					<path refid="project.lib.classpath"/>
-					<pathelement path="${build.dir}/eclipse"/>
-				</classpath>
-		  </openjpac>
+  			classpathref="jpa.ant.lib"
+		/>
+		<openjpac>
+			<fileset dir="${build.dir}/eclipse">
+				<include name="**/jpa3/*.class"/>
+				<patternset refid="build.exclude"/>
+ 			</fileset>
+			<config propertiesFile="${basedir}/etc/openjpa/enhance-persistence.xml"/>
+			<classpath>
+				<path refid="jpa.ant.lib"/>
+				<path refid="project.lib.classpath"/>
+				<pathelement path="${build.dir}/eclipse"/>
+			</classpath>
+		</openjpac>
 	</target>	
 	<target 
 		name="create-schema" 
 		unless="build.ignore.jpa"
 		depends="build-init"
-  >
+  	>
   		<taskdef 
   			name="mappingtool" 
   			classname="org.apache.openjpa.jdbc.ant.MappingToolTask" 
   			classpathref="jpa.ant.bin"
   		/>
-			<mappingtool action="buildSchema" schemaFile="${build.dir}/src/sql/openjpa-schema.xml">
- 				<fileset dir="${build.dir}/bin">
-   					<include name="**/jpa3/*.class"/>
-   					<exclude name="**/jpa3/*$*.class"/>
-  					<patternset refid="build.exclude"/>
+		<mappingtool action="buildSchema" schemaFile="${build.dir}/src/sql/openjpa-schema.xml">
+ 			<fileset dir="${build.dir}/bin">
+   				<include name="**/jpa3/*.class"/>
+   				<exclude name="**/jpa3/*$*.class"/>
+  				<patternset refid="build.exclude"/>
      		</fileset>
-				<config propertiesFile="${basedir}/etc/openjpa/${database.name}-persistence.xml"/>
-				<classpath>
-					<path refid="jpa.ant.bin"/>				
-				</classpath>
-		  </mappingtool>  	
+			<config propertiesFile="${basedir}/etc/openjpa/${database.name}-persistence.xml"/>
+			<classpath>
+				<path refid="jpa.ant.bin"/>				
+			</classpath>
+		</mappingtool>  	
 	</target>
 	<target 
 		name="create-sql" 
 		unless="build.ignore.jpa"
 		depends="build-init"
-  >
+  	>
   		<taskdef 
   			name="schematool" 
   			classname="org.apache.openjpa.jdbc.ant.SchemaToolTask" 
@@ -1652,16 +1692,7 @@ java.util.logging.FileHandler.formatter = ${openmdx.log.formatter}
 		</antcontrib:if>
 	</target>
 	<target name="-include-platform-" depends="init,test,distribution"/>
-	<target name="-init-platform">
-		<condition property="build.exclude.platform">
-			<and>
-				<equals arg1="${build.target.platform}" arg2="jre-1.5" />
-				<not>
-					<available file="${env.JRE_15}/${build.compile.bootclasspath}"/> 
-				</not>
-			</and>
-		</condition>
-	</target>	
+	<target name="-init-platform"/>
 	<!-- ******************************************************************* -->
 	<!-- * -validate-war- -->
 	<!-- ******************************************************************* -->
@@ -1669,8 +1700,7 @@ java.util.logging.FileHandler.formatter = ${openmdx.log.formatter}
 		<taskdef classname="org.apache.jasper.JspC" name="jasper2" >
 			<classpath id="jspc.classpath"> 
         		<pathelement location="${java.home}/../lib/tools.jar"/>
-        		<path refid="osgi.enterprise.lib"/>				
-        		<path refid="osgi.extension.lib"/>				
+        		<path refid="project.bin.classpath"/>				
         		<fileset dir="${tomcat.home}/bin"> 
           			<include name="*.jar"/> 
         		</fileset> 
@@ -1688,28 +1718,28 @@ java.util.logging.FileHandler.formatter = ${openmdx.log.formatter}
 		  uriroot="${build.dir}/tmp/jspc/webapp" 
 		  outputDir="${build.dir}/tmp/jspc/src" 
     	/>
-	  <!-- compile JSPs -->
-    <mkdir dir="${build.dir}/tmp/jspc/classes"/>
-    <mkdir dir="${build.dir}/tmp/jspc/lib"/>
-    <javac destdir="${build.dir}/tmp/jspc/classes"
-		  optimize="off"
-		  encoding="UTF-8"
-		  debug="on" failonerror="false"
-		  classpathref="project.bin.classpath"
-		  srcdir="${build.dir}/tmp/jspc/src" 
-		  excludes="**/*.smap"
-	  >
-	    <classpath>
-        <fileset dir="${tomcat.home}/lib">
-          <include name="*.jar"/>
-        </fileset>
-        <fileset dir="${tomcat.home}/bin"> 
-          <include name="*.jar"/> 
-        </fileset> 
-      </classpath>
-      <include name="**" />
-      <exclude name="tags/**" />
-    </javac>	  
-  </target>	
+	  	<!-- compile JSPs -->
+    	<mkdir dir="${build.dir}/tmp/jspc/classes"/>
+    	<mkdir dir="${build.dir}/tmp/jspc/lib"/>
+    	<javac destdir="${build.dir}/tmp/jspc/classes"
+			optimize="off"
+			encoding="UTF-8"
+			debug="on" failonerror="false"
+			classpathref="project.bin.classpath"
+			srcdir="${build.dir}/tmp/jspc/src" 
+			excludes="**/*.smap"
+		>
+			<classpath>
+        		<fileset dir="${tomcat.home}/lib">
+          			<include name="*.jar"/>
+        		</fileset>
+        		<fileset dir="${tomcat.home}/bin"> 
+          			<include name="*.jar"/> 
+        		</fileset> 
+      		</classpath>
+      		<include name="**" />
+      		<exclude name="tags/**" />
+    	</javac>	  
+ 	</target>	
 	
 </project>

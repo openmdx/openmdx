@@ -60,17 +60,19 @@ import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Collection;
 
+import org.openmdx.application.configuration.Configuration;
 import org.openmdx.application.dataprovider.cci.DataproviderRequest;
 import org.openmdx.application.dataprovider.cci.FilterProperty;
+import org.openmdx.application.dataprovider.spi.Layer_1;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
-import org.openmdx.base.mof.cci.ModelHelper;
 import org.openmdx.base.query.ConditionType;
 import org.openmdx.base.query.Quantifier;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.log.SysLog;
 import org.w3c.cci2.BinaryLargeObject;
 import org.w3c.cci2.BinaryLargeObjects;
+import org.w3c.cci2.CharacterLargeObject;
 import org.w3c.cci2.CharacterLargeObjects;
 
 /**
@@ -81,13 +83,10 @@ import org.w3c.cci2.CharacterLargeObjects;
 public class Database_1 extends AbstractDatabase_1 {
 
     /**
-     * Constructor 
+     * The large object marshaller instance
      */
-    public Database_1(
-    ) {
-        super();
-    }
-    
+    private LargeObjectMarshaller largeObjectMarshaller;
+
     /**
      * The list of aspect base classes may be extended by overriding isAspectBaseClass()
      */
@@ -97,6 +96,21 @@ public class Database_1 extends AbstractDatabase_1 {
         "org:openmdx:role2:Role"
     );
     
+    /* (non-Javadoc)
+     * @see org.openmdx.application.dataprovider.layer.persistence.jdbc.AbstractDatabase_1#activate(short, org.openmdx.application.configuration.Configuration, org.openmdx.application.dataprovider.spi.Layer_1)
+     */
+    @Override
+    public void activate(
+        short id,
+        Configuration configuration,
+        Layer_1 delegation
+    ) throws ServiceException {
+        super.activate(id, configuration, delegation);
+        this.largeObjectMarshaller = new LargeObjectMarshaller(
+            configuration.isNotDisabled(LayerConfigurationEntries.GET_LARGE_OBJECT_BY_VALUE)
+        );
+    }
+
     /**
      * Tells whether the class denotes an aspect base class to be to be checked indirectly only
      * through their core reference.
@@ -206,39 +220,7 @@ public class Database_1 extends AbstractDatabase_1 {
         String attributeName,
         ModelElement_1_0 attributeDef
     ) throws ServiceException, SQLException {
-        boolean isStream = attributeDef != null && ModelHelper.getMultiplicity(attributeDef).isStreamValued();
-        // Blob
-        if(val instanceof Blob) {
-            Blob blob = (Blob)val;
-            if(isStream) {
-                Long length;
-                if(this.supportsLargeObjectLength) try {
-                    length = Long.valueOf(blob.length());
-//              } catch (SQLFeatureNotSupportedException exception) {
-//                  length = null;
-//                  this.supportsLargeObjectLength = false;
-                } catch (SQLException exception) {
-                    length = null;
-                } else {
-                    length = null;
-                }
-                return BinaryLargeObjects.valueOf(
-                    blob.getBinaryStream(),
-                    length
-                );
-            }
-            else {
-                return blob.getBytes(1L, (int)blob.length());
-            }
-        }
-
-        // byte[]
-        else if(val instanceof byte[]) {
-            return isStream ? BinaryLargeObjects.valueOf((byte[])val) : val;
-        }
-        else {
-            return null;
-        }
+        return this.largeObjectMarshaller.getBinaryColumnValue(val, attributeName, attributeDef);
     }
 
     //---------------------------------------------------------------------------
@@ -248,40 +230,7 @@ public class Database_1 extends AbstractDatabase_1 {
         String attributeName,
         ModelElement_1_0 attributeDef
     ) throws ServiceException, SQLException {
-        boolean isStream = attributeDef != null && ModelHelper.getMultiplicity(attributeDef).isStreamValued();
-        // Clob
-        if(val instanceof Clob) {
-            Clob clob = (Clob)val;
-            if(isStream) {
-                Long length;
-                if(this.supportsLargeObjectLength) try {
-                    length = Long.valueOf(clob.length());
-//              } catch (SQLFeatureNotSupportedException exception) {
-//                  length = null;
-//                  this.supportsLargeObjectLength = false;
-                } catch (SQLException exception) {
-                    length = null;
-                } else {
-                    length = null;
-                }
-                return CharacterLargeObjects.valueOf(
-                    clob.getCharacterStream(),
-                    length
-                );
-            }
-            else {
-                return clob.getSubString(1L, (int)clob.length());
-            }
-        }    
-
-        // String
-        else if(val instanceof String) {
-            return isStream ? CharacterLargeObjects.valueOf((String)val) : val;
-        }
-
-        else {
-            return null;
-        }
+        return this.largeObjectMarshaller.getCharacterColumnValue(val, attributeName, attributeDef);
     }
 
     //---------------------------------------------------------------------------
@@ -291,63 +240,68 @@ public class Database_1 extends AbstractDatabase_1 {
         int column,
         Object val
     ) throws SQLException, ServiceException {
-
-        // String
         if(val instanceof String) {
+            String value = (String)val;
+            if(requiresStreaming(ps, value)){
+                ps.setCharacterStream(column, new StringReader(value), value.length());
+            } else {
+                ps.setString(
+                    column, 
+                    value
+                );
+            }
+        } else if(
+            val instanceof CharacterLargeObject ||
+            val instanceof Reader
+         ) {
+            CharacterLargeObject clob;
+            if(val  instanceof CharacterLargeObject) {
+                clob = (CharacterLargeObject) val;
+            } else if(val instanceof String) {
+                clob = CharacterLargeObjects.valueOf((String)val);
+            } else {
+                clob = CharacterLargeObjects.valueOf((Reader)val);
+            }
+            SetLargeObjectMethod setLargeObjectMethod = howToSetCharacterLargeObject(ps.getConnection());
             try {
-                Clob clob = this.createClob(
-                    new StringReader((String)val),
-                    ((String)val).length()
-                );
-                ps.setClob(
-                    column,
-                    clob
-                );
-            }
-            catch(IOException e) {
-                throw new ServiceException(
-                    BasicException.Code.DEFAULT_DOMAIN,
-                    BasicException.Code.SYSTEM_EXCEPTION,
-                    "Can not create Clob from value",
-                    new BasicException.Parameter("value", val)
-                );            
-            }
-        }
-
-        // Reader
-        else if(val instanceof Reader) {
-            try {
-                Clob clob = this.createClob(
-                    (Reader)val,
-                    -1L
-                );
-                ps.setClob(
-                    column,
-                    clob
-                );
-            }
-            catch(IOException e) {
+                if(clob.getLength() == null && this.largeObjectMarshaller.isTallyingRequired(setLargeObjectMethod)) {
+                    clob = this.tallyLargeObject(clob.getContent());
+                }
+                this.largeObjectMarshaller.setCharacterColumnValue(ps, column, clob, setLargeObjectMethod);
+            } catch(IOException e) {
                 throw new ServiceException(e);
             }
-        } 
-
-        // Clob
-        else if(val instanceof Clob) {
+        } else if(val instanceof Clob) {
             ps.setClob(
                 column,
                 (Clob)val
             );
-        }
-
-        // Not supported
-        else {
+        } else {
             throw new ServiceException(
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.NOT_SUPPORTED,
-                "String type not supported. Supported are [String|Reader|Clob]",
+                "String type not supported. Supported are [String|Reader|CharacterLargeObject|Clob]",
                 new BasicException.Parameter("type", val == null ? null : val.getClass().getName())
             );
         }
+    }
+
+    /**
+     * PreparedStatement.setString() does not work for Oracle with strings > 8K
+     * 
+     * @param ps
+     * @param value
+     * 
+     * @return <code>true</code> if we have to bring a large string into oracle
+     * @throws SQLException 
+     */
+    private boolean requiresStreaming(
+        PreparedStatement ps, 
+        String value
+    ) throws SQLException {
+        return
+            value.length() > 2000 &&
+            "Oracle".equals(this.getDatabaseProductName(ps.getConnection()));
     }
 
     //---------------------------------------------------------------------------
@@ -357,66 +311,37 @@ public class Database_1 extends AbstractDatabase_1 {
         int column,
         Object val
     ) throws SQLException, ServiceException {
-
-        // byte[]
         if(val instanceof byte[]) {
             ps.setBytes(
                 column,
                 (byte[])val
             );
-        }
-
-        // InputStream
-        else if(val instanceof InputStream) {
-            try {
-                Blob blob = this.createBlob(
-                    (InputStream)val,
-                    -1L
-                );
-                ps.setBinaryStream(
-                    column,
-                    blob.getBinaryStream(),
-                    (int)blob.length()
-                );
-            }
-            catch(IOException e) {
+        } else if(
+            val instanceof InputStream ||
+            val instanceof BinaryLargeObject
+        ) {
+            BinaryLargeObject blob = val instanceof InputStream ? BinaryLargeObjects.valueOf(
+                (InputStream)val
+            ) : (BinaryLargeObject) val;
+            try {    
+                SetLargeObjectMethod setLargeObjectMethod = howToSetBinaryLargeObject(ps.getConnection());
+                if(blob.getLength() == null && this.largeObjectMarshaller.isTallyingRequired(setLargeObjectMethod)) {
+                    blob = this.tallyLargeObject(blob.getContent());
+                }
+                this.largeObjectMarshaller.setBinaryColumnValue(ps, column, blob, setLargeObjectMethod);
+            } catch(IOException e) {
                 throw new ServiceException(e);
             }
-        } 
-
-        // BinaryLargeObject
-        else if(val instanceof BinaryLargeObject) {
-            try {
-                BinaryLargeObject lob = (BinaryLargeObject)val;
-                Blob blob = this.createBlob(
-                    lob.getContent(),
-                    lob.getLength() == null ? -1L : lob.getLength()
-                );
-                ps.setBinaryStream(
-                    column,
-                    blob.getBinaryStream(),
-                    (int)blob.length()
-                );
-            }
-            catch(IOException e) {
-                throw new ServiceException(e);
-            }
-        } 
-
-        // Blob
-        else if(val instanceof Blob) {
+        }  else if(val instanceof Blob) {
             ps.setBlob(
                 column,
                 (Blob)val
             );
-        }
-
-        // Not supported
-        else {
+        } else {
             throw new ServiceException(
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.NOT_SUPPORTED,
-                "binary type not supported. Supported are [byte[]|InputStream|InputStream_1_0|Blob]",
+                "binary type not supported. Supported are [byte[]|InputStream|BinaryLargeObject|Blob]",
                 new BasicException.Parameter("type", val == null ? null : val.getClass().getName())
             );
         }
@@ -574,11 +499,6 @@ public class Database_1 extends AbstractDatabase_1 {
         return -1;
     }
 
-    //---------------------------------------------------------------------------
-    // Members
-    //---------------------------------------------------------------------------
-    private boolean supportsLargeObjectLength = true;
-    
 }
 
 //---End of File -------------------------------------------------------------

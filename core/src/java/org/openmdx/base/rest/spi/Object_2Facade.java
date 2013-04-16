@@ -270,6 +270,7 @@ public class Object_2Facade {
         return 
             v == null ? null :
             v instanceof SparseArray ? new SparseArrayFacade(value, attributeName) :
+            v instanceof Map ? v :     
             new ListFacade(value,attributeName);
     }
     
@@ -291,6 +292,15 @@ public class Object_2Facade {
         );
     }
 
+    public Map<String,Object> attributeValuesAsMap(
+        String attributeName
+    ) throws ServiceException {
+        return (Map<String,Object>)this.attributeValues(
+            attributeName,
+            Multiplicity.MAP
+        );
+    }
+    
     public Object attributeValues(
         String attributeName,
         Multiplicity multiplicity
@@ -298,17 +308,29 @@ public class Object_2Facade {
         Object value = this.getAttributeValues(attributeName);
         if(value == null) {
             MappedRecord record = this.getValue(); 
-            record.put(
-                attributeName,
-                null
-            );
-            value = Multiplicity.SPARSEARRAY == multiplicity ? new SparseArrayFacade(
-                record,
-                attributeName
-            ) : new ListFacade(
-                record,
-                attributeName
-            );
+            if (Multiplicity.MAP == multiplicity){
+                value = record.get(attributeName);
+                if(value == null) try {
+                    record.put(
+                        attributeName,
+                        value = Records.getRecordFactory().createMappedRecord(Multiplicity.MAP.toString())
+                    );
+                } catch (ResourceException exception) {
+                    throw new ServiceException(exception);
+                }
+            } else {
+                record.put(
+                    attributeName,
+                    null
+                );
+                value = Multiplicity.SPARSEARRAY == multiplicity ? new SparseArrayFacade(
+                    record,
+                    attributeName
+                ) : new ListFacade(
+                    record,
+                    attributeName
+                );
+            }
         }
         return value;        
     }
@@ -431,14 +453,29 @@ public class Object_2Facade {
                 )).putAll(
                     (SparseArray)source
                 );
-            }
-            else {
+            } else if (source instanceof List){
                 ((List)copy.attributeValues(
                     key,
                     Multiplicity.LIST
                 )).addAll(
                     (List)source
                 );                
+            } else if (source instanceof Map<?,?>){
+                ((Map)copy.attributeValues(
+                    key,
+                    Multiplicity.MAP
+                )).putAll(
+                    (Map)source
+                );                                
+            } else {
+                new ServiceException(
+                    BasicException.Code.DEFAULT_DOMAIN,
+                    BasicException.Code.ASSERTION_FAILURE,
+                    "Unexpected value type to be cloned",
+                    new BasicException.Parameter("xri", this.getPath()),
+                    new BasicException.Parameter("key", key),
+                    new BasicException.Parameter("type", source == null ? null : source.getClass().getName())
+                ).log();
             }
         }
         return copy;
@@ -483,8 +520,8 @@ public class Object_2Facade {
         }
         
         private static final long serialVersionUID = 9044898033126787944L;
-        private MappedRecord record;    
-        private Object key;
+        private final MappedRecord record;    
+        private final Object key;
         
         private List<E> nonDelegate(
         ){
@@ -1187,9 +1224,9 @@ public class Object_2Facade {
         }
         
         private static final long serialVersionUID = 5241681200495515635L;
-        private MappedRecord record;    
-        private Object key;
-        
+        private final MappedRecord record;    
+        private final Object key;
+
         private synchronized SparseArray<E> attributeValues(
         ){
             Object value = this.record.get(this.key);
@@ -1553,10 +1590,6 @@ public class Object_2Facade {
             }
         }
 
-        //------------------------------------------------------------------------
-        // Members
-        //------------------------------------------------------------------------
-        
         //------------------------------------------------------------------------
         // Implements Cloneable
         //------------------------------------------------------------------------

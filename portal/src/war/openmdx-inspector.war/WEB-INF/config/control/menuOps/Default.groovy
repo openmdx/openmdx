@@ -12,5 +12,5 @@ menuControl.paintContent(
     frame, 
     forEditing
 );
-p.write("  </ul>&nbsp;");
+p.write("  </ul>");
 p.write("</div>");  

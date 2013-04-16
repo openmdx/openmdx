@@ -47,7 +47,6 @@
  */
 package org.openmdx.base.accessor.jmi.spi;
 
-import java.beans.ExceptionListener;
 import java.io.Serializable;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
@@ -71,7 +70,6 @@ import javax.jdo.Extent;
 import javax.jdo.FetchPlan;
 import javax.jdo.JDOException;
 import javax.jdo.JDOFatalUserException;
-import javax.jdo.JDOHelper;
 import javax.jdo.JDOObjectNotFoundException;
 import javax.jdo.JDOUnsupportedOptionException;
 import javax.jdo.JDOUserException;
@@ -106,8 +104,7 @@ import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
 import org.openmdx.base.accessor.jmi.cci.RefPackage_1_0;
 import org.openmdx.base.accessor.jmi.cci.RefStruct_1_0;
 import org.openmdx.base.accessor.rest.DataObject_1;
-import org.openmdx.base.accessor.rest.spi.Synchronization_2_0;
-import org.openmdx.base.accessor.spi.AbstractTransaction_1;
+import org.openmdx.base.accessor.spi.AbstractUnitOfWork_1;
 import org.openmdx.base.accessor.spi.Delegating_1_0;
 import org.openmdx.base.accessor.spi.PersistenceManager_1_0;
 import org.openmdx.base.accessor.view.ObjectView_1_0;
@@ -116,6 +113,7 @@ import org.openmdx.base.collection.Maps;
 import org.openmdx.base.collection.MarshallingSet;
 import org.openmdx.base.collection.Registry;
 import org.openmdx.base.collection.Sets;
+import org.openmdx.base.exception.ExceptionListener;
 import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.marshalling.Marshaller;
@@ -134,7 +132,9 @@ import org.openmdx.base.persistence.spi.DelegatingPersistenceManagerFactory;
 import org.openmdx.base.persistence.spi.MarshallingInstanceLifecycleListener;
 import org.openmdx.base.persistence.spi.PersistenceCapableCollection;
 import org.openmdx.base.persistence.spi.SharedObjects;
+import org.openmdx.base.persistence.spi.Transactions;
 import org.openmdx.base.persistence.spi.TransientContainerId;
+import org.openmdx.base.persistence.spi.UnitOfWork;
 import org.openmdx.base.query.Filter;
 import org.openmdx.base.query.Selector;
 import org.openmdx.base.resource.InteractionSpecs;
@@ -142,6 +142,7 @@ import org.openmdx.base.resource.Records;
 import org.openmdx.base.rest.cci.QueryRecord;
 import org.openmdx.base.text.conversion.JavaBeans;
 import org.openmdx.kernel.exception.BasicException;
+import org.openmdx.kernel.jdo.ReducedJDOHelper;
 import org.w3c.jpa3.AbstractObject;
 import org.w3c.spi.StateAccessor;
 
@@ -326,9 +327,9 @@ public class RefRootPackage_1
     }
 
     /* (non-Javadoc)
-     * @see java.beans.ExceptionListener#exceptionThrown(java.lang.Exception)
+     * @see org.openmdx.base.exception.ExceptionListener#exceptionThrown(java.lang.Exception)
      */
-//  @Override
+    @Override
     public void exceptionThrown(Exception cause) {
         
         throw this.toInvalidObjectException(cause);
@@ -377,12 +378,12 @@ public class RefRootPackage_1
     	Object source
     ){
 		return RefRootPackage_1.this.refDelegate().getObjectById(
-			JDOHelper.getTransactionalObjectId(source)
+			ReducedJDOHelper.getTransactionalObjectId(source)
 		);
     }
     
     //-------------------------------------------------------------------------
-//  @Override
+    @Override
     public Object unmarshal(
         Object source
     ) throws ServiceException {
@@ -422,11 +423,11 @@ public class RefRootPackage_1
     }
     
     //-------------------------------------------------------------------------  
-//  @Override
+    @Override
     public Object marshal(
         Object source
     ) throws ServiceException {
-        if(JDOHelper.getPersistenceManager(source) == this.persistenceManager) {
+        if(ReducedJDOHelper.getPersistenceManager(source) == this.persistenceManager) {
             return source;
         } else if(source instanceof RefStruct_1_0) {
             return this.refCreateStruct(((RefStruct_1_0)source).refDelegate());
@@ -702,6 +703,13 @@ public class RefRootPackage_1
     }
 
     /**
+     * Tells whether the outermost package is closed
+     */
+    protected boolean isClosed(){
+        return this.delegate == null;
+    }
+    
+    /**
      * Close the outermost package
      */
     void close(
@@ -826,7 +834,7 @@ public class RefRootPackage_1
         /* (non-Javadoc)
          * @see javax.jmi.reflect.RefObject#refClass()
          */
-    //  @Override
+        @Override
         public RefClass refClass(
         ) {
             throw this.cause;
@@ -835,7 +843,7 @@ public class RefRootPackage_1
         /* (non-Javadoc)
          * @see javax.jmi.reflect.RefObject#refDelete()
          */
-    //  @Override
+        @Override
         public void refDelete() {
             throw this.cause;
         }
@@ -843,7 +851,7 @@ public class RefRootPackage_1
         /* (non-Javadoc)
          * @see javax.jmi.reflect.RefObject#refImmediateComposite()
          */
-    //  @Override
+        @Override
         public RefFeatured refImmediateComposite() {
             if(this.objectId == null) {
                 throw this.cause;
@@ -858,7 +866,7 @@ public class RefRootPackage_1
         /* (non-Javadoc)
          * @see javax.jmi.reflect.RefObject#refIsInstanceOf(javax.jmi.reflect.RefObject, boolean)
          */
-    //  @Override
+        @Override
         public boolean refIsInstanceOf(
             RefObject objType, 
             boolean considerSubtypes
@@ -869,7 +877,7 @@ public class RefRootPackage_1
         /* (non-Javadoc)
          * @see javax.jmi.reflect.RefObject#refOutermostComposite()
          */
-    //  @Override
+        @Override
         public RefFeatured refOutermostComposite() {
             if(this.objectId == null) {
                 throw this.cause;
@@ -883,7 +891,7 @@ public class RefRootPackage_1
         /* (non-Javadoc)
          * @see javax.jmi.reflect.RefFeatured#refGetValue(javax.jmi.reflect.RefObject)
          */
-    //  @Override
+        @Override
         public Object refGetValue(RefObject feature) {
             throw this.cause;
         }
@@ -891,7 +899,7 @@ public class RefRootPackage_1
         /* (non-Javadoc)
          * @see javax.jmi.reflect.RefFeatured#refGetValue(java.lang.String)
          */
-    //  @Override
+        @Override
         public Object refGetValue(String featureName) {
             throw this.cause;
         }
@@ -899,7 +907,7 @@ public class RefRootPackage_1
         /* (non-Javadoc)
          * @see javax.jmi.reflect.RefFeatured#refInvokeOperation(javax.jmi.reflect.RefObject, java.util.List)
          */
-    //  @Override
+        @Override
         public Object refInvokeOperation(
             RefObject requestedOperation, 
             List args
@@ -910,7 +918,7 @@ public class RefRootPackage_1
         /* (non-Javadoc)
          * @see javax.jmi.reflect.RefFeatured#refInvokeOperation(java.lang.String, java.util.List)
          */
-    //  @Override
+        @Override
         public Object refInvokeOperation(
             String requestedOperation, 
             List args
@@ -921,7 +929,7 @@ public class RefRootPackage_1
         /* (non-Javadoc)
          * @see javax.jmi.reflect.RefFeatured#refSetValue(javax.jmi.reflect.RefObject, java.lang.Object)
          */
-    //  @Override
+        @Override
         public void refSetValue(RefObject feature, Object value) {
             throw this.cause;
         }
@@ -929,7 +937,7 @@ public class RefRootPackage_1
         /* (non-Javadoc)
          * @see javax.jmi.reflect.RefFeatured#refSetValue(java.lang.String, java.lang.Object)
          */
-    //  @Override
+        @Override
         public void refSetValue(String featureName, Object value) {
             throw this.cause;
         }
@@ -937,7 +945,7 @@ public class RefRootPackage_1
         /* (non-Javadoc)
          * @see javax.jmi.reflect.RefBaseObject#refImmediatePackage()
          */
-    //  @Override
+        @Override
         public RefPackage refImmediatePackage() {
             throw this.cause;
         }
@@ -945,7 +953,7 @@ public class RefRootPackage_1
         /* (non-Javadoc)
          * @see javax.jmi.reflect.RefBaseObject#refMetaObject()
          */
-    //  @Override
+        @Override
         public RefObject refMetaObject() {
             throw this.cause;
         }
@@ -953,7 +961,7 @@ public class RefRootPackage_1
         /* (non-Javadoc)
          * @see javax.jmi.reflect.RefBaseObject#refMofId()
          */
-    //  @Override
+        @Override
         public String refMofId() {
             return this.objectId.toXRI();
         }
@@ -961,7 +969,7 @@ public class RefRootPackage_1
         /* (non-Javadoc)
          * @see javax.jmi.reflect.RefBaseObject#refOutermostPackage()
          */
-    //  @Override
+        @Override
         public RefPackage refOutermostPackage() {
             return RefRootPackage_1.this;
         }
@@ -969,7 +977,7 @@ public class RefRootPackage_1
         /* (non-Javadoc)
          * @see javax.jmi.reflect.RefBaseObject#refVerifyConstraints(boolean)
          */
-    //  @Override
+        @Override
         public Collection refVerifyConstraints(boolean deepVerify) {
             throw this.cause;
         }
@@ -1009,7 +1017,7 @@ public class RefRootPackage_1
         /* (non-Javadoc)
          * @see java.lang.reflect.InvocationHandler#invoke(java.lang.Object, java.lang.reflect.Method, java.lang.Object[])
          */
-    //  @Override
+        @Override
         public Object invoke(
             Object proxy, 
             Method method, 
@@ -1095,37 +1103,40 @@ public class RefRootPackage_1
          */
         protected final Object lock = new Object();
 
+        private transient Transaction transaction;
+        
         /**
          * The transaction associated with this persistence manager, a one-to-one relation.
          */
-        private final Transaction transaction = newTransaction();
-        
-        /**
-         * Create the persistence manager's transaction object
-         * 
-         * @return the persistence manager's transaction object
-         */
-        protected Transaction newTransaction(){
+        private final UnitOfWork unitOfWork = new AbstractUnitOfWork_1(){
+
+            @Override
+            protected UnitOfWork getDelegate() {
+                return RefRootPackage_1.this.isClosed() ? null : (UnitOfWork)RefRootPackage_1.this.refDelegate().currentUnitOfWork();
+            }
+
+            public PersistenceManager getPersistenceManager() {
+                return StandardPersistenceManager_1.this;
+            }
             
-            return new AbstractTransaction_1(){
+        };
 
-                @Override
-                protected Transaction getDelegate() {
-                    return RefRootPackage_1.this.refDelegate().currentTransaction();
-                }
-
-                public PersistenceManager getPersistenceManager() {
-                    return StandardPersistenceManager_1.this;
-                }
-                
-            };
-
+        
+        /* (non-Javadoc)
+         * @see javax.jdo.PersistenceManager#currentTransaction()
+         */
+        @Override
+        public Transaction currentTransaction() {
+            if(this.transaction == null) {
+                this.transaction = Transactions.toTransaction(currentUnitOfWork());
+            }
+            return this.transaction;
         }
-                
+
         /* (non-Javadoc)
          * @see org.openmdx.base.accessor.spi.PersistenceManager_1_0#lock(java.security.PrivilegedExceptionAction)
          */
-//      @Override
+        @Override
         public <T> T lock(
             final PrivilegedExceptionAction<T> action
         ) throws Exception {
@@ -1137,7 +1148,7 @@ public class RefRootPackage_1
         /* (non-Javadoc)
 		 * @see org.openmdx.base.accessor.spi.PersistenceManager_1_0#getLastXRISegment(java.lang.Object)
 		 */
-//      @Override
+        @Override
 		public String getLastXRISegment(Object pc) {
 			return pc instanceof RefObject_1_0 ?
 				RefRootPackage_1.this.refDelegate().getLastXRISegment(unmarshalLenient(pc)) : 
@@ -1147,7 +1158,7 @@ public class RefRootPackage_1
 		/* (non-Javadoc)
 		 * @see org.openmdx.base.accessor.spi.PersistenceManager_1_0#getTransientIdOfTheObjectsContainer(java.lang.Object)
 		 */
-//      @Override
+        @Override
 		public TransientContainerId getContainerId(Object pc) {
 			return pc instanceof RefObject_1_0 ?
 				RefRootPackage_1.this.refDelegate().getContainerId(unmarshalLenient(pc)) : 
@@ -1174,18 +1185,17 @@ public class RefRootPackage_1
         }
 
         /* (non-Javadoc)
-         * @see javax.jdo.PersistenceManager#currentTransaction()
+         * @see org.openmdx.base.accessor.spi.PersistenceManager_1_0#currentUnitOfWork()
          */
-    //  @Override
-        public Transaction currentTransaction(
-        ) {
-            return this.transaction;
+        @Override
+        public UnitOfWork currentUnitOfWork() {
+            return this.unitOfWork;
         }
-
+        
         /* (non-Javadoc)
          * @see javax.jdo.PersistenceManager#evict(java.lang.Object)
          */
-    //  @Override
+       @Override
         public void evict(Object pc) {
             // The hint is ignored at the moment...
         }
@@ -1205,7 +1215,7 @@ public class RefRootPackage_1
         /* (non-Javadoc)
          * @see javax.jdo.PersistenceManager#evictAll()
          */
-    //  @Override
+        @Override
         public void evictAll(
         ) {
             RefRootPackage_1.this.refDelegate().evictAll();
@@ -1214,7 +1224,7 @@ public class RefRootPackage_1
         /* (non-Javadoc)
          * @see javax.jdo.PersistenceManager#getManagedObjects()
          */
-    //  @Override
+        @Override
         public Set getManagedObjects(
         ) {
             return new MarshallingSet(
@@ -1226,7 +1236,7 @@ public class RefRootPackage_1
         /* (non-Javadoc)
          * @see javax.jdo.PersistenceManager#getManagedObjects(java.util.EnumSet)
          */
-    //  @Override
+        @Override
         public Set getManagedObjects(
             EnumSet<ObjectState> states
         ) {
@@ -1239,7 +1249,7 @@ public class RefRootPackage_1
         /* (non-Javadoc)
          * @see javax.jdo.PersistenceManager#getManagedObjects(java.lang.Class[])
          */
-    //  @Override
+        @Override
         public Set getManagedObjects(
             final Class... classes
         ) {
@@ -1263,7 +1273,7 @@ public class RefRootPackage_1
         /* (non-Javadoc)
          * @see javax.jdo.PersistenceManager#getManagedObjects(java.util.EnumSet, java.lang.Class[])
          */
-    //  @Override
+        @Override
         public Set getManagedObjects(
             final EnumSet<ObjectState> states, 
             final Class... classes
@@ -1288,9 +1298,9 @@ public class RefRootPackage_1
         /* (non-Javadoc)
          * @see javax.jdo.PersistenceManager#refresh(java.lang.Object)
          */
-    //  @Override
+        @Override
         public void refresh(Object pc) {
-            Object objectId = JDOHelper.getObjectId(pc);
+            Object objectId = ReducedJDOHelper.getObjectId(pc);
             if(objectId != null) {
                 PersistenceManager_1_0 delegate = RefRootPackage_1.this.refDelegate(); 
                 delegate.refresh(
@@ -1302,7 +1312,7 @@ public class RefRootPackage_1
         /* (non-Javadoc)
          * @see javax.jdo.PersistenceManager#refreshAll()
          */
-    //  @Override
+        @Override
         public void refreshAll(
         ) {
             RefRootPackage_1.this.refDelegate().refreshAll();
@@ -1325,7 +1335,7 @@ public class RefRootPackage_1
         /* (non-Javadoc)
          * @see javax.jdo.PersistenceManager#newQuery()
          */
-    //  @Override
+        @Override
         public Query newQuery(
         ) {
             throw new UnsupportedOperationException(
@@ -1337,7 +1347,7 @@ public class RefRootPackage_1
         /* (non-Javadoc)
          * @see javax.jdo.PersistenceManager#newQuery(java.lang.Object)
          */
-    //  @Override
+        @Override
         public Query newQuery(
             Object compiled
         ) {
@@ -1347,7 +1357,7 @@ public class RefRootPackage_1
         /* (non-Javadoc)
          * @see javax.jdo.PersistenceManager#newQuery(java.lang.String)
          */
-    //  @Override
+        @Override
         public Query newQuery(
             String query
         ) {
@@ -1439,7 +1449,7 @@ public class RefRootPackage_1
         /* (non-Javadoc)
          * @see javax.jdo.PersistenceManager#newQuery(java.lang.String, java.lang.Object)
          */
-    //  @Override
+        @Override
         public Query newQuery(
             String language, 
             Object query
@@ -1520,7 +1530,7 @@ public class RefRootPackage_1
         /* (non-Javadoc)
          * @see javax.jdo.PersistenceManager#newQuery(java.lang.Class)
          */
-    //  @Override
+        @Override
         public Query newQuery(
             Class cls
         ) {       
@@ -1541,7 +1551,7 @@ public class RefRootPackage_1
         /* (non-Javadoc)
          * @see javax.jdo.PersistenceManager#newQuery(javax.jdo.Extent)
          */
-    //  @Override
+        @Override
         public Query newQuery(
             Extent cln
         ) {
@@ -1570,7 +1580,7 @@ public class RefRootPackage_1
         /* (non-Javadoc)
          * @see javax.jdo.PersistenceManager#newQuery(java.lang.Class, java.lang.String)
          */
-    //  @Override
+        @Override
         public Query newQuery(Class cls, String filter) {
             throw new UnsupportedOperationException("This JDO operation is not yet supported");            
         }
@@ -1578,7 +1588,7 @@ public class RefRootPackage_1
         /* (non-Javadoc)
          * @see javax.jdo.PersistenceManager#newQuery(java.lang.Class, java.util.Collection, java.lang.String)
          */
-    //  @Override
+        @Override
         public Query newQuery(Class cls, Collection cln, String filter) {
             throw new UnsupportedOperationException("This JDO operation is not yet supported");            
         }
@@ -1586,7 +1596,7 @@ public class RefRootPackage_1
         /* (non-Javadoc)
          * @see javax.jdo.PersistenceManager#newQuery(javax.jdo.Extent, java.lang.String)
          */
-    //  @Override
+        @Override
         public Query newQuery(Extent cln, String filter) {
             throw new UnsupportedOperationException("This JDO operation is not yet supported");            
         }
@@ -1594,7 +1604,7 @@ public class RefRootPackage_1
         /* (non-Javadoc)
          * @see javax.jdo.PersistenceManager#newNamedQuery(java.lang.Class, java.lang.String)
          */
-    //  @Override
+        @Override
         public Query newNamedQuery(Class cls, String queryName) {
             throw new UnsupportedOperationException("This JDO operation is not yet supported");            
         }
@@ -1602,7 +1612,7 @@ public class RefRootPackage_1
         /* (non-Javadoc)
          * @see javax.jdo.PersistenceManager#getExtent(java.lang.Class, boolean)
          */
-    //  @Override
+        @Override
         public <T> Extent<T> getExtent(
             Class<T> persistenceCapableClass,
             boolean subclasses
@@ -1613,7 +1623,7 @@ public class RefRootPackage_1
         /* (non-Javadoc)
          * @see javax.jdo.PersistenceManager#getObjectById(java.lang.Object, boolean)
          */
-    //  @Override
+        @Override
         public Object getObjectById(
             Object oid, 
             boolean validate
@@ -1692,7 +1702,7 @@ public class RefRootPackage_1
         /* (non-Javadoc)
          * @see javax.jdo.PersistenceManager#getObjectById(java.lang.Object)
          */
-    //  @Override
+        @Override
         public Object getObjectById(Object oid) {
             return this.getObjectById(oid, true);
         }
@@ -1700,7 +1710,7 @@ public class RefRootPackage_1
         /* (non-Javadoc)
          * @see javax.jdo.PersistenceManager#getObjectId(java.lang.Object)
          */
-    //  @Override
+        @Override
         public Object getObjectId(Object pc) {
             return pc instanceof PersistenceCapable ?
                 ((PersistenceCapable)pc).jdoGetObjectId() :
@@ -1710,7 +1720,7 @@ public class RefRootPackage_1
         /* (non-Javadoc)
          * @see javax.jdo.PersistenceManager#getTransactionalObjectId(java.lang.Object)
          */
-    //  @Override
+        @Override
         public Object getTransactionalObjectId(Object pc) {
             return pc instanceof PersistenceCapable ?
                 ((PersistenceCapable)pc).jdoGetTransactionalObjectId() :
@@ -1720,7 +1730,7 @@ public class RefRootPackage_1
         /* (non-Javadoc)
          * @see javax.jdo.PersistenceManager#newObjectIdInstance(java.lang.Class, java.lang.Object)
          */
-    //  @Override
+        @Override
         public Object newObjectIdInstance(Class pcClass, Object key) {
             return new Path(key.toString());
         }
@@ -1728,7 +1738,7 @@ public class RefRootPackage_1
         /* (non-Javadoc)
          * @see org.openmdx.base.persistence.spi.AbstractPersistenceManager#newInstance(java.lang.Class)
          */
-    //  @Override
+        @Override
         public <T> T newInstance(Class<T> pcClass) {
             try {
                 return (T) RefRootPackage_1.this.refClass(
@@ -1744,27 +1754,27 @@ public class RefRootPackage_1
         /* (non-Javadoc)
          * @see javax.jdo.PersistenceManager#makePersistent(java.lang.Object)
          */
-    //  @Override
+        @Override
         public <T> T makePersistent(T pc) {
             if(pc instanceof AbstractObject) {
                 if(this.getCopyOnAttach()) {
                     AbstractObject source = (AbstractObject) pc;
                     RefObject target;
-                    Path xri = (Path) JDOHelper.getTransactionalObjectId(source);
-                    if(JDOHelper.isDetached(pc)) {
+                    Path xri = (Path) ReducedJDOHelper.getTransactionalObjectId(source);
+                    if(ReducedJDOHelper.isDetached(pc)) {
                         //
                         // Attach Copy
                         //
                         DataObject_1_0 dataObject = RefRootPackage_1.this.refDelegate().makePersistent(
                             new DataObject_1(
                                 xri,
-                                JDOHelper.getVersion(source)
+                                ReducedJDOHelper.getVersion(source)
                             )
                         );
                         target = (RefObject) this.getObjectById(
-                            JDOHelper.getTransactionalObjectId(dataObject)
+                            ReducedJDOHelper.getTransactionalObjectId(dataObject)
                         );
-                        if(JDOHelper.isDirty(pc)) try { 
+                        if(ReducedJDOHelper.isDirty(pc)) try { 
                             this.copy(
                                 target,
                                 source,
@@ -1827,7 +1837,7 @@ public class RefRootPackage_1
         /* (non-Javadoc)
          * @see javax.jdo.PersistenceManager#deletePersistent(java.lang.Object)
          */
-    //  @Override
+        @Override
         public void deletePersistent(
             Object pc
         ) {
@@ -1855,7 +1865,7 @@ public class RefRootPackage_1
         /* (non-Javadoc)
          * @see javax.jdo.PersistenceManager#makeTransient(java.lang.Object, boolean)
          */
-    //  @Override
+        @Override
         public void makeTransient(Object pc, boolean useFetchPlan) {
             throw new UnsupportedOperationException("This JDO operation is not yet supported");            
         }
@@ -1871,7 +1881,7 @@ public class RefRootPackage_1
         /* (non-Javadoc)
          * @see javax.jdo.PersistenceManager#makeTransientAll(java.lang.Object[], boolean)
          */
-//      @Override
+        @Override
         public void makeTransientAll(Object[] pcs, boolean useFetchPlan) {
             throw new UnsupportedOperationException("This JDO operation is not yet supported");            
         }
@@ -1879,12 +1889,12 @@ public class RefRootPackage_1
         /* (non-Javadoc)
          * @see javax.jdo.PersistenceManager#makeTransactional(java.lang.Object)
          */
-    //  @Override
+        @Override
         public void makeTransactional(Object pc) {
         	if(pc == null) throw new JDOUserException(
         		"Null is an illegal argument for makeTransactional()"
         	);
-            Object objectId = JDOHelper.getTransactionalObjectId(pc);
+            Object objectId = ReducedJDOHelper.getTransactionalObjectId(pc);
             if(objectId == null) throw new JDOUserException(
             	"The argument seems to be inappropriate to be made transactional",
             	pc
@@ -1898,7 +1908,7 @@ public class RefRootPackage_1
         /* (non-Javadoc)
          * @see javax.jdo.PersistenceManager#makeNontransactional(java.lang.Object)
          */
-    //  @Override
+        @Override
         public void makeNontransactional(Object pc) {
             throw new UnsupportedOperationException("This JDO operation is not yet supported");            
         }
@@ -1906,9 +1916,9 @@ public class RefRootPackage_1
         /* (non-Javadoc)
          * @see javax.jdo.PersistenceManager#retrieve(java.lang.Object, boolean)
          */
-    //  @Override
+        @Override
         public void retrieve(Object pc, boolean useFetchPlan) {
-            Object objectId = JDOHelper.getObjectId(pc);
+            Object objectId = ReducedJDOHelper.getObjectId(pc);
             if(objectId != null) {
                 PersistenceManager_1_0 delegate = RefRootPackage_1.this.refDelegate(); 
                 delegate.retrieve(
@@ -1938,7 +1948,7 @@ public class RefRootPackage_1
         /* (non-Javadoc)
          * @see javax.jdo.PersistenceManager#getObjectIdClass(java.lang.Class)
          */
-    //  @Override
+        @Override
         public Class<Path> getObjectIdClass(Class cls) {
             return RefObject_1_0.class.isAssignableFrom(cls) ? Path.class : null;
         }
@@ -1946,9 +1956,9 @@ public class RefRootPackage_1
         /* (non-Javadoc)
          * @see javax.jdo.PersistenceManager#detachCopy(java.lang.Object)
          */
-    //  @Override
+        @Override
         public <T> T detachCopy(T pc) {
-            if(JDOHelper.getPersistenceManager(pc) == this) {
+            if(ReducedJDOHelper.getPersistenceManager(pc) == this) {
                 RefObject_1_0 jmiObject = (RefObject_1_0) pc;
                 try {
                     AbstractObject jpaObject = RefRootPackage_1.this.refMapping(
@@ -1965,7 +1975,7 @@ public class RefRootPackage_1
                     StateAccessor.getInstance().initializeDetachedObject(
                         jpaObject,
                         jmiObject.refGetPath(),
-                        JDOHelper.getVersion(pc)
+                        ReducedJDOHelper.getVersion(pc)
                     );
                     return (T) jpaObject;
                 } catch (InstantiationException exception) {
@@ -1998,7 +2008,7 @@ public class RefRootPackage_1
         /* (non-Javadoc)
          * @see javax.jdo.PersistenceManager#flush()
          */
-    //  @Override
+        @Override
         public void flush() {
             RefRootPackage_1.this.refDelegate().flush();          
         }
@@ -2006,7 +2016,7 @@ public class RefRootPackage_1
         /* (non-Javadoc)
          * @see javax.jdo.PersistenceManager#checkConsistency()
          */
-    //  @Override
+        @Override
         public void checkConsistency() {
             throw new UnsupportedOperationException("This JDO operation is not yet supported");            
         }
@@ -2014,7 +2024,7 @@ public class RefRootPackage_1
         /* (non-Javadoc)
          * @see javax.jdo.PersistenceManager#getFetchPlan()
          */
-    //  @Override
+        @Override
         public FetchPlan getFetchPlan() {
             return RefRootPackage_1.this.refDelegate().getFetchPlan();
         }
@@ -2022,7 +2032,7 @@ public class RefRootPackage_1
         /* (non-Javadoc)
          * @see javax.jdo.PersistenceManager#getSequence(java.lang.String)
          */
-    //  @Override
+        @Override
         public Sequence getSequence(String name) {
             throw new UnsupportedOperationException("This JDO operation is not yet supported");            
         }
@@ -2030,7 +2040,7 @@ public class RefRootPackage_1
         /* (non-Javadoc)
          * @see org.openmdx.base.object.spi.AbstractPersistenceManager#getDataStoreConnection()
          */
-    //  @Override
+        @Override
         public JDOConnection getDataStoreConnection() {
             return RefRootPackage_1.this.refDelegate().getDataStoreConnection();
         }
@@ -2038,7 +2048,7 @@ public class RefRootPackage_1
         /* (non-Javadoc)
          * @see javax.jdo.PersistenceManager#getMultithreaded()
          */
-    //  @Override
+        @Override
         public boolean getMultithreaded(
         ){
             return this.getPersistenceManagerFactory().getMultithreaded();
@@ -2047,7 +2057,7 @@ public class RefRootPackage_1
         /* (non-Javadoc)
          * @see javax.jdo.PersistenceManager#setMultithreaded(boolean)
          */
-    //  @Override
+        @Override
         public void setMultithreaded(boolean flag) {
             if(flag != getMultithreaded()) throw new javax.jdo.JDOUnsupportedOptionException(
                 "The " + ConfigurableProperty.Multithreaded.qualifiedName() + 
@@ -2058,7 +2068,7 @@ public class RefRootPackage_1
         /* (non-Javadoc)
          * @see javax.jdo.PersistenceManager#getServerDate()
          */
-    //  @Override
+        @Override
         public Date getServerDate() {
             throw new UnsupportedOperationException("This JDO operation is not yet supported");
         }
@@ -2237,7 +2247,7 @@ public class RefRootPackage_1
                             new BasicException.Parameter("jpa-method", get)
                         );
                     }
-                    PersistenceManager persistenceManager = JDOHelper.getPersistenceManager(jmiObject);
+                    PersistenceManager persistenceManager = ReducedJDOHelper.getPersistenceManager(jmiObject);
                     if(multivalued) {
                         target = jmiObject.refGetValue(jmiFeature);
                         if(multiplicity == Multiplicity.SPARSEARRAY) {
@@ -2274,7 +2284,7 @@ public class RefRootPackage_1
         /* (non-Javadoc)
          * @see org.openmdx.base.accessor.generic.spi.Delegating_1_0#objGetDelegate()
          */
-    //  @Override
+        @Override
         public RefRootPackage_1 objGetDelegate(
         ) {
             return RefRootPackage_1.this;
@@ -2283,7 +2293,7 @@ public class RefRootPackage_1
         /* (non-Javadoc)
          * @see org.openmdx.base.accessor.spi.PersistenceManager_1_0#getPersistenceManager(javax.resource.cci.InteractionSpec)
          */
-    //  @Override
+        @Override
         public PersistenceManager_1_0 getPersistenceManager(
             InteractionSpec interactionSpec
         ) {
@@ -2293,7 +2303,7 @@ public class RefRootPackage_1
         /* (non-Javadoc)
          * @see org.openmdx.base.accessor.spi.PersistenceManager_1_0#getFeatureReplacingObjectById(java.lang.Object, java.lang.String)
          */
-    //  @Override
+        @Override
         public Object getFeatureReplacingObjectById(
             UUID transientObjectId,
             String featureName
@@ -2304,14 +2314,14 @@ public class RefRootPackage_1
         /* (non-Javadoc)
          * @see org.openmdx.base.accessor.spi.PersistenceManager_1_0#isLoaded(java.util.UUID, java.lang.String)
          */
-    //  @Override
+        @Override
         public boolean isLoaded(
             UUID transientObjectId, 
             String fieldName
         ) {
             return RefRootPackage_1.this.refDelegate().isLoaded(transientObjectId, fieldName);
         }
-        
+
     }
     
     //-------------------------------------------------------------------------
@@ -2338,7 +2348,7 @@ public class RefRootPackage_1
             super(factory, listener);
             this.entityManager = entityManager;
             if(this.entityManager) {
-                ((Synchronization_2_0)currentTransaction()).afterBegin();
+                currentUnitOfWork().afterBegin();
             }
         }
 
@@ -2355,7 +2365,7 @@ public class RefRootPackage_1
         ) throws Throwable {
             synchronized(this.lock) {
                 if(this.entityManager) {
-                    ((Synchronization_2_0)currentTransaction()).clear();
+                    currentUnitOfWork().clear();
                 }
                 super.close();
             }
@@ -2368,7 +2378,7 @@ public class RefRootPackage_1
         public void close() {
             synchronized(this.lock) {
                 if(this.entityManager) {
-                    ((Synchronization_2_0)currentTransaction()).beforeCompletion();
+                    currentUnitOfWork().beforeCompletion();
                 }
                 super.close();
             }

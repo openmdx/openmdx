@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2007-2011, OMEX AG, Switzerland
+ * Copyright (c) 2007-2013, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -111,8 +111,9 @@ abstract class ModelAwareFilter
     @Override
     protected Iterator<?> getValuesIterator(
         Object candidate, 
-        String attribute
+        Condition condition
     ) throws ServiceException {
+        String attribute = condition.getFeature();
         DataObject_1 object = (DataObject_1)candidate;
         String objectClass = object.objGetClass();
         if(SystemAttributes.OBJECT_CLASS.equals(attribute)){
@@ -126,17 +127,17 @@ abstract class ModelAwareFilter
             } else {
                 ModelElement_1_0 featureDef = classifier.getModel().getFeatureDef(classifier, attribute, false);
                 switch(ModelHelper.getMultiplicity(featureDef)) {
-	                case LIST:
-	                    return object.objGetList(attribute).iterator();
-	                case SET:
-	                    return object.objGetSet(attribute).iterator();
-	                case SPARSEARRAY:
-	                    return object.objGetSparseArray(attribute).values().iterator();
-	                default:
-	                    Object value = object.objGetValue(attribute);
-	                    return (
-	                        value == null ? Collections.emptySet() : Collections.singleton(value)
-	                    ).iterator();
+                    case LIST:
+                        return object.objGetList(attribute).iterator();
+                    case SET:
+                        return object.objGetSet(attribute).iterator();
+                    case SPARSEARRAY:
+                        return object.objGetSparseArray(attribute).values().iterator();
+                    default:
+                        Object value = object.objGetValue(attribute);
+                        return (
+                            value == null ? Collections.emptySet() : Collections.singleton(value)
+                        ).iterator();
                 }
             }
         }
@@ -195,7 +196,7 @@ abstract class ModelAwareFilter
                 if(featureDef.getModel().referenceIsStoredAsAttribute(featureDef)) {
                     Selector selector = newFilter(filter);
                     for(
-                        Iterator<?> i = getValuesIterator(object, condition.getFeature()); 
+                        Iterator<?> i = getValuesIterator(object, condition); 
                         i.hasNext(); 
                     ){
                         if (selector.accept(i.next()) == (type == ConditionType.IS_IN)) {

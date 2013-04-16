@@ -47,6 +47,7 @@
  */
 package org.openmdx.application.mof.repository.accessor;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -68,17 +69,22 @@ import org.openmdx.application.mof.cci.ModelAttributes;
 import org.openmdx.base.accessor.cci.Container_1_0;
 import org.openmdx.base.accessor.cci.DataObject_1_0;
 import org.openmdx.base.accessor.cci.SystemAttributes;
+import org.openmdx.base.accessor.spi.Delegating_1_0;
+import org.openmdx.base.collection.MarshallingMap;
+import org.openmdx.base.collection.Sets;
+import org.openmdx.base.collection.Unmarshalling;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.AggregationKind;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
 import org.openmdx.base.mof.cci.Multiplicity;
 import org.openmdx.base.naming.Path;
+import org.openmdx.base.rest.cci.ObjectRecord;
 import org.openmdx.base.rest.spi.Facades;
 import org.openmdx.base.rest.spi.Object_2Facade;
 
 //---------------------------------------------------------------------------
 @SuppressWarnings({"rawtypes","unchecked"})
-public class ModelElement_1 implements ModelElement_1_0 {
+public class ModelElement_1 implements ModelElement_1_0, Delegating_1_0<ObjectRecord> {
 
     //-------------------------------------------------------------------------
     public ModelElement_1(
@@ -95,6 +101,16 @@ public class ModelElement_1 implements ModelElement_1_0 {
     ) throws ServiceException {
     	this.data = ((ModelElement_1)element).data.cloneObject();
         this.model = (Model_1)element.getModel();
+    }
+
+    //-------------------------------------------------------------------------
+    /* (non-Javadoc)
+     * @see org.openmdx.base.accessor.spi.Delegating_1_0#objGetDelegate()
+     */
+    @Override
+    public ObjectRecord objGetDelegate(
+    ) throws ServiceException {
+        return this.data.getDelegate();
     }
 
     //-------------------------------------------------------------------------
@@ -390,7 +406,7 @@ public class ModelElement_1 implements ModelElement_1_0 {
             this.isReferenceStoredAsAttribute =
                 AggregationKind.NONE.equals(referencedEnd.objGetValue("aggregation")) &&
                 AggregationKind.NONE.equals(exposedEnd.objGetValue("aggregation")) &&
-                ((qualifierTypes.size() == 0) || this.model.isPrimitiveType(qualifierTypes.get(0), elements));
+                (qualifierTypes.isEmpty() || this.model.isPrimitiveType(qualifierTypes.get(0), elements));
         }
         return this.isReferenceStoredAsAttribute;
     }
@@ -400,13 +416,8 @@ public class ModelElement_1 implements ModelElement_1_0 {
      */
     public Object objGetValue(
         String featureName
-    ) {
-        try {
-            return this.data.attributeValue(featureName);
-        }
-        catch(Exception e) {
-            throw new JDOUserException("Unable to get value", e);
-        }
+    ) throws ServiceException {
+        return this.data.attributeValue(featureName);
     }
         
     /* (non-Javadoc)
@@ -414,18 +425,30 @@ public class ModelElement_1 implements ModelElement_1_0 {
      */
     public List<Object> objGetList(
         String featureName
-    ) {
-        try {
-            return (List<Object>)this.data.attributeValues(
-                featureName,
-                Multiplicity.LIST
-            );
-        }
-        catch(Exception e) {
-            throw new JDOUserException("Unable to get value", e);
-        }
+    ) throws ServiceException {
+        return this.data.attributeValuesAsList(
+            featureName
+        );
     }
-        
+
+    
+    /* (non-Javadoc)
+     * @see org.openmdx.base.accessor.cci.DataObject_1_0#objGetMap(java.lang.String)
+     */
+    @Override
+    public Map objGetMap(
+        String featureName
+    ) throws ServiceException {
+        return new MarshallingMap( 
+            this.model,
+            (Map)this.data.attributeValues(
+                featureName,
+                Multiplicity.MAP
+            ),
+            Unmarshalling.EAGER
+        );
+    }
+
     public void objSetValue(
         String featureName,
         Object value
@@ -542,9 +565,19 @@ public class ModelElement_1 implements ModelElement_1_0 {
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.cci.DataObject_1_0#objGetSet(java.lang.String)
      */
-    public Set<Object> objGetSet(String feature)
+    public Set<Object> objGetSet(String featureName)
         throws ServiceException {
-        throw new UnsupportedOperationException("Operation not supported by ModelElement_1");
+        try {
+            return Sets.asSet(
+                (Collection<Object>)this.data.attributeValues(
+                    featureName,
+                    Multiplicity.SET
+                )
+            );
+        }
+        catch(Exception e) {
+            throw new JDOUserException("Unable to get value", e);
+        }
     }
 
     /* (non-Javadoc)
@@ -590,6 +623,13 @@ public class ModelElement_1 implements ModelElement_1_0 {
      */
     public boolean objIsInaccessible(
     ){
+        throw new UnsupportedOperationException("Operation not supported by ModelElement_1");
+    }
+
+    /* (non-Javadoc)
+     * @see org.openmdx.base.accessor.cci.DataObject_1_0#objDoesNotExist()
+     */
+    public boolean objDoesNotExist() {
         throw new UnsupportedOperationException("Operation not supported by ModelElement_1");
     }
 

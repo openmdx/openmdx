@@ -1,14 +1,14 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Description: Reports
+ * Description: JspWizardDefinition
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
  * ====================================================================
  *
  * This software is published under the BSD license
  * as listed below.
  * 
- * Copyright (c) 2004-2007, OMEX AG, Switzerland
+ * Copyright (c) 2004-2013, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -60,11 +60,23 @@ import java.io.Serializable;
 
 import org.openmdx.base.exception.ServiceException;
 
+/**
+ * JspWizardDefinition
+ *
+ */
 public class JspWizardDefinition
     extends WizardDefinition
     implements Serializable {
     
-    //-----------------------------------------------------------------------
+    /**
+     * Constructor 
+     *
+     * @param name
+     * @param locale
+     * @param index
+     * @param is
+     * @throws ServiceException
+     */
     public JspWizardDefinition(
         String name,
         String locale,
@@ -134,8 +146,7 @@ public class JspWizardDefinition
                     );
                 }
             }
-        }
-        catch(IOException e) {
+        } catch(IOException e) {
             throw new ServiceException(e);
         }
     }

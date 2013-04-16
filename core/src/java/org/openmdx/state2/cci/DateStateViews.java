@@ -128,10 +128,10 @@ public class DateStateViews {
     );
     
     private static final String[] EXCLUDE_FROM_STATE_CLONING = {
-    	"identity", "core", "stateValidFrom", "stateValidTo", "removedAt", "removedBy", "createdAt", "createdBy"
+        SystemAttributes.OBJECT_IDENTITY, "core", "stateValidFrom", "stateValidTo", SystemAttributes.REMOVED_AT, SystemAttributes.REMOVED_BY, SystemAttributes.CREATED_AT, SystemAttributes.CREATED_BY
     };
     private static final String[] EXCLUDE_FROM_CORE_CLONING = {
-    	"identity", "stateVersion", "modifiedAt", "modifiedBy"
+        SystemAttributes.OBJECT_IDENTITY, "stateVersion", SystemAttributes.MODIFIED_AT, SystemAttributes.MODIFIED_BY
     };
     
     /**

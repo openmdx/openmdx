@@ -181,7 +181,7 @@ public class TestFilter {
         extension.setClause("SELECT something FROM somewhere WHERE b0 = ? AND i0 = ? AND i1 = ? AND i2 = ?");
         extension.setBooleanParam(true);
         extension.setIntegerParam(1,2,3);
-        filter.setExtension(extension);      
+        filter.getExtension().add(extension);      
         //
         // CR20018833
         // 

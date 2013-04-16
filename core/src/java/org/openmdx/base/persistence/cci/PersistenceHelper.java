@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2009-2011, OMEX AG, Switzerland
+ * Copyright (c) 2009-2013, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -49,26 +49,36 @@ package org.openmdx.base.persistence.cci;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Map;
 import java.util.UUID;
 
 import javax.jdo.Extent;
-import javax.jdo.JDOHelper;
+import javax.jdo.JDOFatalInternalException;
+import javax.jdo.PersistenceManager;
 import javax.jdo.Query;
 import javax.jmi.reflect.RefObject;
 
+import org.omg.mof.spi.Names;
 import org.openmdx.base.accessor.cci.SystemAttributes;
+import org.openmdx.base.accessor.jmi.cci.RefPackage_1_0;
 import org.openmdx.base.accessor.jmi.cci.RefQuery_1_0;
 import org.openmdx.base.accessor.spi.PersistenceManager_1_0;
 import org.openmdx.base.exception.RuntimeServiceException;
+import org.openmdx.base.exception.ServiceException;
+import org.openmdx.base.mof.cci.ModelElement_1_0;
+import org.openmdx.base.mof.cci.ModelHelper;
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.persistence.spi.ExtentCollection;
 import org.openmdx.base.persistence.spi.FilterCollection;
 import org.openmdx.base.persistence.spi.QueryExtension;
+import org.openmdx.base.persistence.spi.UnitOfWorkFactory;
 import org.openmdx.base.query.ConditionType;
 import org.openmdx.base.query.Extension;
 import org.openmdx.base.query.Filter;
 import org.openmdx.base.query.Quantifier;
 import org.openmdx.kernel.exception.BasicException;
+import org.openmdx.kernel.jdo.ReducedJDOHelper;
+import org.openmdx.kernel.loading.Classes;
 import org.w3c.cci2.AnyTypePredicate;
 
 /**
@@ -83,6 +93,51 @@ public class PersistenceHelper {
         // Avoid instantiation
     }
 
+    /**
+     * The unit of work factory
+     */
+    private static UnitOfWorkFactory unitOfWorkFactory;
+    
+    /**
+     * Retrieve transactionFactory.
+     *
+     * @return Returns the transactionFactory.
+     */
+    private static UnitOfWorkFactory getUnitOfWorkFactory() {
+        if(unitOfWorkFactory == null) try {
+            unitOfWorkFactory = Classes.newApplicationInstance(
+                UnitOfWorkFactory.class, 
+                "org.openmdx.application.persistence.adapter.UnitOfWorkAdapterFactory"
+             );
+        } catch (Exception exception) {
+            throw new JDOFatalInternalException(
+                "Transaction factory acquisition failure",
+                exception
+            );
+        }
+        return unitOfWorkFactory;
+    }
+
+    /**
+     * Determine an object's class name<ul>
+     * <li><code>null</code> in case of a <code>null</code> object reference
+     * <li>the MOF class' id in case of a JDO object
+     * <li>the Java class' name in case of a non-JDO object
+     * </ul<
+     * 
+     * @param pc the object for which its class name should be determined
+     * 
+     * @return the object's class name
+     */
+    public static String getClassName(
+        Object pc
+    ){
+        return 
+            pc == null ? null :
+            pc instanceof RefObject ? ((RefObject)pc).refClass().refMofId() :
+            pc.getClass().getName();
+    }
+    
     /**
      * Return a clone of the object
      * 
@@ -149,9 +204,9 @@ public class PersistenceHelper {
         Object pc,
         String featureName
     ){  
-        PersistenceManager_1_0 pm = (PersistenceManager_1_0) JDOHelper.getPersistenceManager(pc);
+        PersistenceManager_1_0 pm = (PersistenceManager_1_0) ReducedJDOHelper.getPersistenceManager(pc);
         return pm.getFeatureReplacingObjectById(
-            (UUID) JDOHelper.getTransactionalObjectId(pc), 
+            (UUID) ReducedJDOHelper.getTransactionalObjectId(pc), 
             featureName
         );
     }
@@ -265,8 +320,107 @@ public class PersistenceHelper {
     public static String getLastXRISegment(
     	Object pc
     ){
-        return ((PersistenceManager_1_0) JDOHelper.getPersistenceManager(pc)).getLastXRISegment(pc);
+        return ((PersistenceManager_1_0) ReducedJDOHelper.getPersistenceManager(pc)).getLastXRISegment(pc);
     }
     
-}
+    /**
+     * Retrieve all descendants of a given object
+     * 
+     * @param pc
+     * 
+     * @exception NullPointerException if the argument is <code>null</code>
+     * @exception IllegalArgumentException if the argument is not a <code>javax.jmi.reflect.RefObject</code> instance
+     */
+    public static void retrieveAllDescendants(
+        Object pc
+    ){
+        if(!(pc instanceof RefObject)) {
+            throw BasicException.initHolder(
+                new IllegalArgumentException(
+                    "The given argument is inapprpriate for descendant retrieval",
+                    BasicException.newEmbeddedExceptionStack(
+                        BasicException.Code.DEFAULT_DOMAIN, 
+                        BasicException.Code.BAD_PARAMETER, 
+                        new BasicException.Parameter("supported", RefObject.class.getName()),
+                        new BasicException.Parameter("actual", pc.getClass().getName())
+                    )
+                )
+            );        
+        }
+        try {
+            RefObject refObject = (RefObject) pc;
+            RefPackage_1_0 refPackage = (RefPackage_1_0) refObject.refOutermostPackage();
+            retrieveAllDescendants(
+                refPackage,
+                (Path)ReducedJDOHelper.getObjectId(pc),
+                refPackage.refModel().getElement(refObject.refClass().refMofId())
+            );
+        } catch (ServiceException exception) {
+            throw new RuntimeServiceException(exception);
+        }
+    }
 
+    private static void retrieveAllDescendants(
+        RefPackage_1_0 refPackage,
+        Path objectId,
+        ModelElement_1_0 type
+    ) throws ServiceException {
+        Map<String,ModelElement_1_0> nonDerivedAttributes = refPackage.refModel().getStructuralFeatureDefs(
+            type, 
+            true, // includeSubtypes
+            false, // includeDerived
+            false // attributesOnly
+        );  
+        for(Map.Entry<String,ModelElement_1_0> e : nonDerivedAttributes.entrySet()){
+            ModelElement_1_0 candidate = e.getValue();
+            if(
+                ModelHelper.isReference(candidate) && 
+                !ModelHelper.isStoredAsAttribute(candidate) &&
+                ModelHelper.isCompositeEnd(candidate, false)
+            ){
+                Path childPattern = objectId.getDescendant(e.getKey(),":*");
+                ModelElement_1_0 childType = refPackage.refModel().getElementType(candidate);
+                String extentClassName = (String)childType.objGetValue("qualifiedName");
+                Class<?> extentClass;
+                try {
+                    extentClass = Classes.getApplicationClass(
+                        Names.toClassName(extentClassName, Names.JMI1_PACKAGE_SUFFIX)
+                    );
+                } catch (ClassNotFoundException exception) {
+                    throw new ServiceException(
+                        exception,
+                        BasicException.Code.DEFAULT_DOMAIN, 
+                        BasicException.Code.BAD_QUERY_CRITERIA, 
+                        "Unable to retrieve extent class",
+                        new BasicException.Parameter("feature", candidate.objGetValue("qualifiedName")),
+                        new BasicException.Parameter("pattern", childPattern.toXRI()),
+                        new BasicException.Parameter("type", extentClassName)
+                    );
+                }
+                Collection<?> extent = getCandidates(
+                    refPackage.refPersistenceManager().getExtent(extentClass),
+                    childPattern
+                );
+                refPackage.refPersistenceManager().retrieveAll(extent);
+                retrieveAllDescendants(refPackage,childPattern,childType);
+            }
+                
+        }
+    }
+    
+    /**
+     * Provide the persistence manager's current unit of work
+     * 
+     * @param persistenceManager
+     * 
+     * @return the persistence manager's current unit of work
+     */
+    public static UnitOfWork currentUnitOfWork(
+        PersistenceManager persistenceManager
+    ){
+        return persistenceManager instanceof PersistenceManager_1_0 ?
+            ((PersistenceManager_1_0)persistenceManager).currentUnitOfWork() :
+            getUnitOfWorkFactory().toUnitOfWork(persistenceManager.currentTransaction());
+    }
+
+}

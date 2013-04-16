@@ -91,6 +91,8 @@ public class Importer {
 	    // Avoid instantiation
 	}
 	
+	private static final ImportHelper importHelper = new ImportHelper();
+	
     /**
      * Import objects 
      * @param target the object sink
@@ -104,7 +106,7 @@ public class Importer {
         Iterable<InputSource> source,
         ErrorHandler errorHandler
     ) throws ServiceException {
-        ImportHelper.importObjects(
+        importHelper.importObjects(
             target, 
             source, 
             errorHandler
@@ -123,7 +125,7 @@ public class Importer {
         ImportTarget target,
         Iterable<InputSource> source
     ) throws ServiceException {
-        ImportHelper.importObjects(
+        importHelper.importObjects(
             target, 
             source, 
             null // errorHandler

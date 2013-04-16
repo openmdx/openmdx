@@ -95,6 +95,11 @@ public final class DataproviderRequestProcessor
     }
 
     //------------------------------------------------------------------------
+    private boolean isPreferringNotFoundException(){
+        return this.serviceHeader.isPreferringNotFoundException();
+    }
+    
+    //------------------------------------------------------------------------
     /**
      * The requests embedded by beginUnitOfWork() and endUnitOfWork() are 
      * processed together.
@@ -242,7 +247,7 @@ public final class DataproviderRequestProcessor
     ) throws ServiceException {
         this.dispatch(
             new DataproviderRequest(
-                Facades.newQuery(path).getDelegate(),
+                Facades.newQuery(path, isPreferringNotFoundException()).getDelegate(),
                 DataproviderOperations.OBJECT_RETRIEVAL,
                 attributeSelector,
                 attributeSpecifier
@@ -533,7 +538,7 @@ public final class DataproviderRequestProcessor
     ) throws ServiceException {
         this.dispatch(
             new DataproviderRequest(
-                Facades.newQuery(path).getDelegate(),
+                Facades.newQuery(path, isPreferringNotFoundException()).getDelegate(),
                 DataproviderOperations.OBJECT_REMOVAL,
                 attributeSelector,
                 attributeSpecifier
@@ -735,7 +740,7 @@ public final class DataproviderRequestProcessor
     ) throws ServiceException {
         this.dispatch(
             new DataproviderRequest(
-                Facades.newQuery(referenceFilter).getDelegate(),
+                Facades.newQuery(referenceFilter, isPreferringNotFoundException()).getDelegate(),
                 DataproviderOperations.ITERATION_START,
                 attributeFilter,
                 position,

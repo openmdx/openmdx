@@ -129,7 +129,7 @@ public class InMemory_1 extends AbstractPersistence_1 {
         String objectClass,
         String featureName
     ) throws ServiceException{
-        return (ModelElement_1_0)((Map)getModel().getElement(objectClass).objGetValue("allFeature")).get(featureName);
+        return (ModelElement_1_0)getModel().getElement(objectClass).objGetMap("allFeature").get(featureName);
     }
     
     // --------------------------------------------------------------------------
@@ -491,31 +491,34 @@ public class InMemory_1 extends AbstractPersistence_1 {
         ) throws ServiceException {
             DataproviderRequest request = this.newDataproviderRequest(ispec, input);
             DataproviderReply reply = this.newDataproviderReply(output);
-            
             synchronized(InMemory_1.this.referenceMap){
-                Path path = Object_2Facade.getPath(request.object());;
-                MappedRecord source = InMemory_1.this.getReference(
+                Path path = Object_2Facade.getPath(request.object());
+                Map<String, MappedRecord> reference = InMemory_1.this.getReference(
                     path,
                     true
-                ).get(
+                );
+                MappedRecord source = reference == null ? null : reference.get(
                     path.getBase()
                 );
                 if(source == null) {
-                    throw new ServiceException(
-                        BasicException.Code.DEFAULT_DOMAIN,
-                        BasicException.Code.NOT_FOUND,
-                        "Object \u00ab" + path + "\u00bb not found",
-                        new BasicException.Parameter("path",path)
-                    );
+                    if(input.isPreferringNotFoundException()) {
+                        throw new ServiceException(
+                            BasicException.Code.DEFAULT_DOMAIN,
+                            BasicException.Code.NOT_FOUND,
+                            "Object \u00ab" + path + "\u00bb not found",
+                            new BasicException.Parameter("path",path)
+                        );
+                    }
+                } else {
+                    MappedRecord object = InMemory_1.this.replyObject(
+    				    Object_2Facade.cloneObject(source),
+    				    request.attributeSelector(),
+    				    request.attributeSpecifier()
+    				);
+    				reply.getResult().add(object);
                 }
-                MappedRecord object = InMemory_1.this.replyObject(
-				    Object_2Facade.cloneObject(source),
-				    request.attributeSelector(),
-				    request.attributeSpecifier()
-				);
-				reply.getResult().add(object);
-                return true;
             }
+            return true;
         }
 
         //-------------------------------------------------------------------------

@@ -73,13 +73,14 @@ import javax.jdo.JDODataStoreException;
 import javax.jdo.JDOException;
 import javax.jdo.JDOFatalInternalException;
 import javax.jdo.JDOFatalUserException;
-import javax.jdo.JDOHelper;
 import javax.jdo.JDOObjectNotFoundException;
 import javax.jdo.JDOUnsupportedOptionException;
 import javax.jdo.JDOUserException;
 import javax.jdo.ObjectState;
+import javax.jdo.PersistenceManager;
 import javax.jdo.PersistenceManagerFactory;
 import javax.jdo.Query;
+import javax.jdo.Transaction;
 import javax.jdo.datastore.JDOConnection;
 import javax.jdo.datastore.Sequence;
 import javax.jdo.listener.InstanceLifecycleEvent;
@@ -88,6 +89,7 @@ import javax.resource.ResourceException;
 import javax.resource.cci.Connection;
 import javax.resource.cci.Interaction;
 import javax.resource.cci.InteractionSpec;
+import javax.resource.cci.LocalTransaction;
 import javax.resource.cci.MappedRecord;
 
 import org.openmdx.base.accessor.cci.DataObjectManager_1_0;
@@ -115,6 +117,7 @@ import org.openmdx.base.persistence.spi.SharedObjects;
 import org.openmdx.base.persistence.spi.SharedObjects.Aspects;
 import org.openmdx.base.persistence.spi.StandardFetchGroup;
 import org.openmdx.base.persistence.spi.StandardFetchPlan;
+import org.openmdx.base.persistence.spi.Transactions;
 import org.openmdx.base.persistence.spi.TransientContainerId;
 import org.openmdx.base.query.Selector;
 import org.openmdx.base.resource.InteractionSpecs;
@@ -123,6 +126,7 @@ import org.openmdx.base.rest.spi.Facades;
 import org.openmdx.base.rest.spi.Object_2Facade;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.exception.Throwables;
+import org.openmdx.kernel.jdo.ReducedJDOHelper;
 import org.openmdx.kernel.loading.Factory;
 
 /**
@@ -266,7 +270,7 @@ public class DataObjectManager_1 implements Marshaller, DataObjectManager_1_0 {
 
         public Object getNativeConnection(
         ){
-            return connection2 != null && currentTransaction().getInteraction() == null ?
+            return connection2 != null && currentUnitOfWork().getInteraction() == null ?
                 connection2 :
                 connection;
         }
@@ -277,6 +281,11 @@ public class DataObjectManager_1 implements Marshaller, DataObjectManager_1_0 {
      */ 
     private UnitOfWork_1 unitOfWork;
 
+    /**
+     * The transaction adapter belonging to the unit of work
+     */
+    private transient Transaction transaction;
+    
     /**
      * Units of work for a multi-threaded data object managers
      */ 
@@ -412,7 +421,7 @@ public class DataObjectManager_1 implements Marshaller, DataObjectManager_1_0 {
 
 //      @Override
         public String getUnitOfWorkIdentifier() {
-            return DataObjectManager_1.this.currentTransaction().getUnitOfWorkIdentifier();
+            return DataObjectManager_1.this.currentUnitOfWork().getUnitOfWorkIdentifier();
         }
 
         /* (non-Javadoc)
@@ -473,7 +482,7 @@ public class DataObjectManager_1 implements Marshaller, DataObjectManager_1_0 {
      */
     public Interaction getInteraction(
     ) throws ResourceException{
-        Interaction transactionalInteraction = currentTransaction().getInteraction();
+        Interaction transactionalInteraction = currentUnitOfWork().getInteraction();
         if(transactionalInteraction == null) {
             if(this.interaction == null) {
                 this.interaction = this.newInteraction(
@@ -677,11 +686,8 @@ public class DataObjectManager_1 implements Marshaller, DataObjectManager_1_0 {
         }
     }
 
-    /* (non-Javadoc)
-     * @see javax.jdo.PersistenceManager#currentTransaction()
-     */
-    public UnitOfWork_1 currentTransaction(
-    ) {
+    @Override
+    public UnitOfWork_1 currentUnitOfWork() {
         if(this.unitOfWork == null) {
             Thread thread = Thread.currentThread();
             UnitOfWork_1 unitOfWork = this.unitsOfWork.get(thread);
@@ -699,6 +705,17 @@ public class DataObjectManager_1 implements Marshaller, DataObjectManager_1_0 {
         } else {
             return this.unitOfWork;
         }
+    }
+
+    /* (non-Javadoc)
+     * @see javax.jdo.PersistenceManager#currentTransaction()
+     */
+    public Transaction currentTransaction(
+    ) {
+        if(this.transaction == null) {
+            this.transaction = Transactions.toTransaction(this.unitOfWork);
+        }
+        return this.transaction;
     }
 
     /* (non-Javadoc)
@@ -736,11 +753,10 @@ public class DataObjectManager_1 implements Marshaller, DataObjectManager_1_0 {
      * @see javax.jdo.PersistenceManager#flush()
      */
     public void flush() {
-        UnitOfWork_1 unitOfWork = currentTransaction();
         try {
-            unitOfWork.flush(false);
+            currentUnitOfWork().flush(false);
         } catch (ServiceException exception) {
-            unitOfWork.setRollbackOnly();
+            currentUnitOfWork().setRollbackOnly();
             throw BasicException.initHolder(
                 new JDOUserException(
                     "Flushing failed, unit or work has been marked rollback-only",
@@ -917,11 +933,11 @@ public class DataObjectManager_1 implements Marshaller, DataObjectManager_1_0 {
         }
         if(transactional || nonTransactional) {
             return Sets.subSet(
-                nonTransactional ? this.transientRegistry.values() : currentTransaction().getMembers(),
+                nonTransactional ? this.transientRegistry.values() : currentUnitOfWork().getMembers(),
                 new Selector (){
 
                     public boolean accept(Object candidate) {
-                        return states.contains(JDOHelper.getObjectState(candidate));
+                        return states.contains(ReducedJDOHelper.getObjectState(candidate));
                     }
                     
                 }
@@ -1459,7 +1475,7 @@ public class DataObjectManager_1 implements Marshaller, DataObjectManager_1_0 {
      * @see javax.jdo.PersistenceManager#refreshAll()
      */
     public void refreshAll() {
-        UnitOfWork_1 unitOfWork = currentTransaction();
+        UnitOfWork_1 unitOfWork = currentUnitOfWork();
         if(unitOfWork.isActive()) {
             refreshAll(unitOfWork.getMembers());
         }
@@ -1515,7 +1531,8 @@ public class DataObjectManager_1 implements Marshaller, DataObjectManager_1_0 {
                 false, // reload
                 useFetchPlan ? this.getFetchPlan() : null, 
                 null, // features
-                false // beforeImage
+                false, // beforeImage
+                true
             );
         } catch (ServiceException exception) {
             throw new JDOUserException(
@@ -1741,14 +1758,14 @@ public class DataObjectManager_1 implements Marshaller, DataObjectManager_1_0 {
                         null, // objectClass
                         false // untouchable
                     );
-                    DataObject_1 newObject = validate ? object.objRetrieve(false, this.getFetchPlan(), null, false) : object;
+                    DataObject_1 newObject = validate ? object.objRetrieve(false, this.getFetchPlan(), null, false, true) : object;
                     if(object == newObject) {
                         object = this.persistentRegistry.putUnlessPresent(xri, object); 
                     } else {
                         this.persistentRegistry.put(xri, object = newObject);
                     }
                 } else if(validate) {
-                    object.objRetrieve(false, this.getFetchPlan(), null, false);
+                    object.objRetrieve(false, this.getFetchPlan(), null, false, true);
                 }
                 return object;
             } catch(ServiceException exception) {
@@ -1975,6 +1992,11 @@ public class DataObjectManager_1 implements Marshaller, DataObjectManager_1_0 {
 		return null;
 	}
 
+	public static LocalTransaction getLocalTransaction(
+	    PersistenceManager persistenceManager
+	) throws ResourceException {
+	    return persistenceManager instanceof DataObjectManager_1 ? ((DataObjectManager_1)persistenceManager).connection.getLocalTransaction() : null;
+	}
 	
     //------------------------------------------------------------------------
     // Class AspectObjectDispatcher
@@ -2032,7 +2054,7 @@ public class DataObjectManager_1 implements Marshaller, DataObjectManager_1_0 {
             UUID transactionalObjectId, 
             Class<?> aspect
         ) {
-            UnitOfWork_1 unitOfWork = DataObjectManager_1.this.currentTransaction();
+            UnitOfWork_1 unitOfWork = DataObjectManager_1.this.currentUnitOfWork();
             if(unitOfWork.isActive()) {
                 TransactionalState_1 state = this.getState(transactionalObjectId, true);
                 return state == null ? null : state.getContext(aspect);
@@ -2053,7 +2075,7 @@ public class DataObjectManager_1 implements Marshaller, DataObjectManager_1_0 {
             Class<?> aspect, 
             Object context
         ) {
-            UnitOfWork_1 unitOfWork = DataObjectManager_1.this.currentTransaction();
+            UnitOfWork_1 unitOfWork = DataObjectManager_1.this.currentUnitOfWork();
             if(unitOfWork.isActive()) {
                 this.getState(transactionalObjectId, false).setContext(aspect, context);
             }
@@ -2079,7 +2101,7 @@ public class DataObjectManager_1 implements Marshaller, DataObjectManager_1_0 {
             UUID objectId, 
             Class<?> aspect
         ) {
-            UnitOfWork_1 unitOfWork = DataObjectManager_1.this.currentTransaction();
+            UnitOfWork_1 unitOfWork = DataObjectManager_1.this.currentUnitOfWork();
             if(unitOfWork.isActive()) {
                 TransactionalState_1 state = getState(objectId, true);
                 if(state != null) {

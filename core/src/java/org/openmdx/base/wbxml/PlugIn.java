@@ -108,9 +108,20 @@ public interface PlugIn {
      * 
      * @param value the value to be tokenized
      * 
-     * @return the requested token, or <code>null</code> if no such token is available 
+     * @return the requested token, or <code>null</code> if no such token can be provided 
      */
     StringToken getStringToken(
+        String value
+    );
+
+    /**
+     * Retrieve the token for the given value
+     * 
+     * @param value the value which has already be tokenized
+     * 
+     * @return the requested token, or <code>null</code> if no such value has been tokenized 
+     */
+    StringToken findStringToken(
         String value
     );
     
@@ -118,13 +129,13 @@ public interface PlugIn {
      * Retrieve the token for the given value
      * 
      * @param namespaceURI 
-     * @param value the value to be tokenized
+     * @param localName the value to be tokenized
      * 
      * @return the requested token, or <code>null</code> if no such token is available 
      */
     CodeToken getTagToken(
         String namespaceURI, 
-        String value
+        String localName
     );
 
     /**

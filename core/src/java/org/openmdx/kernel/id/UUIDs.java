@@ -127,7 +127,7 @@ public final class UUIDs {
      * Load the configured UUID provider
      * <p>
      * If multiple threads need to generate UUIDs simultaneously then each should<ul>
-     * <li>either obtain its own <code>UUIDBuilder</code> instance (for bulk usage)
+     * <li>either obtain its own <code>UUIDGenerator</code> instance (for bulk usage)
      * <li>or use <code>newUUID()</code> instead (for standard usage)
      * </ul>
      * 

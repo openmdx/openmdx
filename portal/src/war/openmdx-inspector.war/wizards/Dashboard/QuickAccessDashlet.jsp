@@ -2,17 +2,14 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: QuickAccessDashlet.jsp,v 1.34 2012/07/23 19:39:52 wfro Exp $
  * Description: QuickAccessDashlet.jsp
- * Revision:    $Revision: 1.34 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2012/07/23 19:39:52 $
  * ====================================================================
  *
  * This software is published under the BSD license
  * as listed below.
  *
- * Copyright (c) 2004-2012, OMEX AG, Switzerland
+ * Copyright (c) 2004-2013, OMEX AG, Switzerland
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or
@@ -220,7 +217,7 @@ org.openmdx.kernel.log.*
 																);
 															}
 															else {
-																String script = "window.location.href=$('op" + tabId + "Trigger').href;";
+																String script = "window.location.href=$('op" + tabId + "').href;";
 																action = new Action(
 																	MacroAction.EVENT_ID,
 																	new Action.Parameter[]{
@@ -236,7 +233,7 @@ org.openmdx.kernel.log.*
 															}
 														}
 														else {
-															String script = "eval($('op" + tabId + "Trigger').getAttribute('onclick'));";
+															String script = "$('op" + tabId + "').onclick();";
 															action = new Action(
 																MacroAction.EVENT_ID,
 																new Action.Parameter[]{
@@ -250,25 +247,43 @@ org.openmdx.kernel.log.*
 															);
 														}
 														if(!targetXri.equals(previousTargetXri)) {
+															List<Action.Parameter> actionParamsT = new ArrayList<Action.Parameter>();
+															actionParamsT.add(
+																new Action.Parameter(Action.PARAMETER_OBJECTXRI, targetXri.toXri())
+															);
+															Action selectObjectAndReferenceActionT = new Action(
+																SelectObjectAction.EVENT_ID,
+																actionParamsT.toArray(new Action.Parameter[actionParamsT.size()]),
+																null, //action.getTitle(),
+																null, //action.getIconKey(),
+																true  //action.isEnabled()
+															);
+															String targetHref = selectObjectAndReferenceActionT.getEncodedHRef();
+															String toolTip = targetView.getObjectReference().getTitle();
+															if (toolTip != null) {
+																toolTip = toolTip.replace("\"", "'");
+															} else {
+															  toolTip = "--";
+															}
 %>
-										                  	<%= spacer %>
+															<%= spacer %>
 															<tr>
 																<td>
-																	<div style="font-size:90%;font-style:italic;"><img src="images/<%= targetView.getObjectReference().getIconKey() %>" />&nbsp;&nbsp;<%= targetView.getObjectReference().getTitle() %></div>
+																	<div style="white-space:nowrap;font-size:90%;font-style:italic;" title="<%= toolTip %>"><a href='<%= targetHref%>'><img src="images/<%= targetView.getObjectReference().getIconKey() %>" />&nbsp;&nbsp;<%= targetView.getObjectReference().getTitle() %></a></div>
 <%
 															spacer = SPACER;
 														}
 %>
-														<div>								                    		                    	
+														<div <%= !isEditMode && function.compareTo("Operation.org:openmdx:base:BasicObject:reload") == 0 ? "style='display:none;'" : "" %>>								                    		                    	
 <%
 															if(isEditMode) {
 %>									            		
-										          				<a onclick="javascript:$('<%= FIELD_NAME_COMMAND %>').value='<%= COMMAND_DELETE_MENU_ENTRY %>';$('<%= FIELD_NAME_TARGET_XRI %>').value='<%= targetXri %>';$('<%= FIELD_NAME_FUNCTION %>').value='<%= function %>';<%= submitFormScriptlet %>"><img src="./images/collapse.gif" /></a>
+																<a onclick="javascript:$('<%= FIELD_NAME_COMMAND %>').value='<%= COMMAND_DELETE_MENU_ENTRY %>';$('<%= FIELD_NAME_TARGET_XRI %>').value='<%= targetXri %>';$('<%= FIELD_NAME_FUNCTION %>').value='<%= function %>';<%= submitFormScriptlet %>"><img src="./images/collapse.gif" /></a>
 <%															
 															}
 %>									            			
-										          			&nbsp;&nbsp;&raquo;&nbsp;<a <%= target %> href="#" onmouseover="javascript:this.href=<%= view.getEvalHRef(action) %>;onmouseover=function(){};" style="font-size:90%;"><%= action.getTitle().replace(" ", "&nbsp;") %></a>
-										          		</div>
+															&nbsp;&nbsp;&raquo;&nbsp;<a <%= target %> href="#" onmouseover="javascript:this.href=<%= view.getEvalHRef(action) %>;onmouseover=function(){};" style="font-size:90%;"><%= action.getTitle().replace(" ", "&nbsp;") %></a>
+														</div>
 <%
 														previousTargetXri = targetXri;
 													}
@@ -294,7 +309,7 @@ org.openmdx.kernel.log.*
 														);
 													}
 													else {
-														String script = "window.location.href=$('op" + tabId + "Trigger').href;";
+														String script = "window.location.href=$('op" + tabId + "').href;";
 														action = new Action(
 															MacroAction.EVENT_ID,
 															new Action.Parameter[]{
@@ -308,11 +323,29 @@ org.openmdx.kernel.log.*
 														);
 													}
 													if(!targetXri.equals(previousTargetXri)) {
+															List<Action.Parameter> actionParamsT = new ArrayList<Action.Parameter>();
+															actionParamsT.add(
+																new Action.Parameter(Action.PARAMETER_OBJECTXRI, targetXri.toXri())
+															);
+															Action selectObjectAndReferenceActionT = new Action(
+																SelectObjectAction.EVENT_ID,
+																actionParamsT.toArray(new Action.Parameter[actionParamsT.size()]),
+																null, //action.getTitle(),
+																null, //action.getIconKey(),
+																true  //action.isEnabled()
+															);
+															String targetHref = selectObjectAndReferenceActionT.getEncodedHRef();
+															String toolTip = targetView.getObjectReference().getTitle();
+															if (toolTip != null) {
+																toolTip = toolTip.replace("\"", "'");
+															} else {
+															  toolTip = "--";
+															}
 %>
-									                  	<%= spacer %>
+														<%= spacer %>
 														<tr>
 															<td>
-																<div style="font-size:90%;font-style:italic;"><img src="images/<%= targetView.getObjectReference().getIconKey() %>" />&nbsp;&nbsp;<%= targetView.getObjectReference().getTitle() %></div>
+																<div style="white-space:nowrap;font-size:90%;font-style:italic;" title="<%= toolTip %>"><a href='<%= targetHref%>'><img src="images/<%= targetView.getObjectReference().getIconKey() %>" />&nbsp;&nbsp;<%= targetView.getObjectReference().getTitle() %></a></div>
 <%
 														spacer = SPACER;
 													}
@@ -350,11 +383,29 @@ org.openmdx.kernel.log.*
 															action.isEnabled()
 														);
 														if(!targetXri.equals(previousTargetXri)) {
+															List<Action.Parameter> actionParamsT = new ArrayList<Action.Parameter>();
+															actionParamsT.add(
+																new Action.Parameter(Action.PARAMETER_OBJECTXRI, targetXri.toXri())
+															);
+															Action selectObjectAndReferenceActionT = new Action(
+																SelectObjectAction.EVENT_ID,
+																actionParamsT.toArray(new Action.Parameter[actionParamsT.size()]),
+																null, //action.getTitle(),
+																null, //action.getIconKey(),
+																true  //action.isEnabled()
+															);
+															String targetHref = selectObjectAndReferenceActionT.getEncodedHRef();
+															String toolTip = targetView.getObjectReference().getTitle();
+															if (toolTip != null) {
+																toolTip = toolTip.replace("\"", "'");
+															} else {
+															  toolTip = "--";
+															}
 %>
-										                  	<%= spacer %>
+															<%= spacer %>
 															<tr>
 																<td>
-																	<div style="font-size:90%;font-style:italic;"><img src="images/<%= targetView.getObjectReference().getIconKey() %>" />&nbsp;&nbsp;<%= targetView.getObjectReference().getTitle() %></div>
+																	<div style="white-space:nowrap;font-size:90%;font-style:italic;" title="<%= toolTip %>"><a href='<%= targetHref%>'><img src="images/<%= targetView.getObjectReference().getIconKey() %>" />&nbsp;&nbsp;<%= targetView.getObjectReference().getTitle() %></a></div>
 <%
 															spacer = SPACER;
 														}

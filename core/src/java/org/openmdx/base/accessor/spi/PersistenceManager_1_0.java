@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2008-2011, OMEX AG, Switzerland
+ * Copyright (c) 2008-2012, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -54,6 +54,7 @@ import javax.jdo.JDODataStoreException;
 import javax.jdo.PersistenceManager;
 import javax.resource.cci.InteractionSpec;
 
+import org.openmdx.base.persistence.spi.UnitOfWork;
 import org.openmdx.base.persistence.spi.TransientContainerId;
 
 /**
@@ -71,7 +72,7 @@ public interface PersistenceManager_1_0 extends PersistenceManager {
     PersistenceManager_1_0 getPersistenceManager(
         InteractionSpec interactionSpec
     );
-    
+
     /**
      * A way to avoid fetching an object just to retrieve its object id
      * 
@@ -136,5 +137,12 @@ public interface PersistenceManager_1_0 extends PersistenceManager {
 	public TransientContainerId getContainerId(
     	Object pc
     );
+
+    /**
+     * Retrieve the persistence manager's unit of work
+     * 
+     * @return the persistence manager's unit of work
+     */
+    public UnitOfWork currentUnitOfWork();
 
 }

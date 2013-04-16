@@ -169,20 +169,24 @@ public class ShowObjectView
 
     // -------------------------------------------------------------------------
     public void handleCanNotInvokeOperationException(
-        BasicException e, 
+        ServiceException e, 
         String operationName
     ) {
         BasicException e0 = e.getCause(this.app.getExceptionDomain());
         if (e0 == null) {
+        	Throwable cause = e;
+        	while(cause.getCause() != null) {
+        		cause = cause.getCause();
+        	}
             this.app.addErrorMessage(
                 app.getTexts().getErrorTextCanNotInvokeOperation(), 
                 new String[] { 
                     this.getRefObject().refMofId(),
-                    operationName, e.getMessage() 
+                    operationName, 
+                    cause.toString() 
                 }
            );
-        }
-        else if (app.getTexts().getUserDefinedText(e0.getExceptionCode() + "") != null) {
+        } else if (app.getTexts().getUserDefinedText(e0.getExceptionCode() + "") != null) {
             List<String> parameters = new ArrayList<String>();
             int i = 0;
             while (e0.getParameter("param" + i) != null) {
@@ -195,8 +199,7 @@ public class ShowObjectView
                     (String[]) parameters.toArray(new String[parameters.size()]
                 )
             );
-        }
-        else {
+        } else {
             this.app.addErrorMessage(
                 this.app.getTexts().getErrorTextCanNotInvokeOperation(), 
                 new String[] { 
@@ -400,46 +403,6 @@ public class ShowObjectView
     }
 
     // -------------------------------------------------------------------------
-    /**
-     * The tab of the last invoked operation is set with setOperationTabResult.
-     * resetOperationTabResult returns the tab of the last invoked operation and
-     * resets it to null.
-     */
-    public OperationTab resetOperationTabResult(
-    ) {
-        OperationTab value = this.operationTabResult;
-        this.operationTabResult = null;
-        return value;
-    }
-
-    // -------------------------------------------------------------------------
-    public void setOperationTabResult(
-        OperationTab operationTabResult
-    ) {
-        this.operationTabResult = operationTabResult;
-    }
-
-    // -------------------------------------------------------------------------
-    /**
-     * The result of the last created object is set with setCreateObjectResult.
-     * resetCreateObjectResult returns the reference of the last created object
-     * and resets it null.
-     */
-    public ObjectCreationResult resetObjectCreationResult(
-    ) {
-        ObjectCreationResult value = this.objectCreationResult;
-        this.objectCreationResult = null;
-        return value;
-    }
-
-    // -------------------------------------------------------------------------
-    public void setCreateObjectResult(
-        ObjectCreationResult result
-    ) {
-        this.objectCreationResult = result;
-    }
-
-    // -------------------------------------------------------------------------
     public void selectFilter(
         String filterName, 
         String filterValues
@@ -457,7 +420,7 @@ public class ShowObjectView
     ) {
         return this.getObjectReference().getObject();
     }
-    
+
     // -------------------------------------------------------------------------
     // Variables
     // -------------------------------------------------------------------------
@@ -468,8 +431,6 @@ public class ShowObjectView
     protected final OperationPane[] operationPane;
     protected final ReferencePane[] referencePane;
     protected int selectedReferencePaneIndex = 0;
-    protected OperationTab operationTabResult = null;
-    protected ObjectCreationResult objectCreationResult = null;
     
 }
 

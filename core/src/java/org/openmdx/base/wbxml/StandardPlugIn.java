@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2010, OMEX AG, Switzerland
+ * Copyright (c) 2010-2013, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -47,19 +47,9 @@
  */
 package org.openmdx.base.wbxml;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.io.Reader;
-import java.io.Writer;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.nio.charset.CharsetDecoder;
-import java.nio.charset.CharsetEncoder;
-import java.util.HashMap;
-import java.util.Map;
 
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.kernel.exception.BasicException;
@@ -71,6 +61,8 @@ public class StandardPlugIn extends AbstractPlugIn {
     
     /**
      * Constructor 
+     * 
+     * @param stringEncoding
      */
     protected StandardPlugIn(
         String stringEncoding
@@ -88,7 +80,7 @@ public class StandardPlugIn extends AbstractPlugIn {
     /**
      * The string source
      */
-    private StringSource stringSource;
+    private BasicStringSource stringSource;
 
     /**
      * The string sink
@@ -111,18 +103,40 @@ public class StandardPlugIn extends AbstractPlugIn {
     @Override
     public void setStringTable(
         ByteBuffer stringTable
-    ) throws ServiceException{
-        this.stringSource = new StringSource(
-            this.decoder, stringTable
+    ) throws ServiceException {
+        setStringSource(
+            new StringSource(
+                this.decoder, 
+                stringTable
+            )
         );
     }
 
+    /**
+     * Set the string source
+     * 
+     * @param stringSource
+     */
+    protected void setStringSource(
+        BasicStringSource stringSource
+    ){
+        this.stringSource = stringSource;
+    }
+    
     /* (non-Javadoc)
      * @see org.openmdx.base.xml.wbxml.spi.PlugIn#getStringTable()
      */
     @Override
     public ByteBuffer getStringTable() {
         return this.stringSink.getStringTable();
+    }
+
+    /* (non-Javadoc)
+     * @see org.openmdx.base.wbxml.PlugIn#findStringToken(java.lang.String)
+     */
+    @Override
+    public StringToken findStringToken(String value) {
+        return this.stringSink == null ? null : this.stringSink.findStringToken(value);
     }
 
     /* (non-Javadoc)
@@ -151,136 +165,6 @@ public class StandardPlugIn extends AbstractPlugIn {
             "No such string table entry",
             new BasicException.Parameter("index", index)
         );
-    }
-    
-    
-    //------------------------------------------------------------------------
-    // Class StringSink
-    //------------------------------------------------------------------------
-
-    /**
-     * A String Sink
-     */
-    static class StringSink extends ByteArrayOutputStream {
-        
-        /**
-         * Constructor 
-         *
-         * @param encoder
-         */
-        StringSink(
-            CharsetEncoder encoder
-        ){
-            this.target = new OutputStreamWriter(this, encoder);
-        }
-        
-        /**
-         * The str
-         */
-        private final Writer target;
-
-        /**
-         * The string to token-value cache
-         */
-        private final Map<String,Integer> cache = new HashMap<String,Integer>();
-        
-        /**
-         * Retrieve the string table's content in order to flush it
-         * 
-         * @return the string table's content
-         */
-        ByteBuffer getStringTable(){
-            return ByteBuffer.wrap(super.buf, 0, super.count);
-        }
-        
-        /**
-         * Retrieve or create a string token 
-         * 
-         * @param value the string value
-         * 
-         * @return the corresponding token
-         */
-        StringToken getStringToken(
-            String value
-        ){
-            Integer index = this.cache.get(value);
-            if(index != null) {
-                return new StringToken(index.intValue(), false);
-            }
-            try {
-                StringToken token = new StringToken(super.size(), true);
-                target.write(value);
-                target.write('\u0000');
-                target.flush();
-                return token;
-            } catch (IOException exception) {
-                return null;
-            }
-        }
-     
-        @Override
-        public void reset(){
-            super.reset();
-            this.cache.clear();
-        }
-        
-    }
-
-    
-    //------------------------------------------------------------------------
-    // Class StringSource
-    //------------------------------------------------------------------------
-    
-    /**
-     * String Source
-     */
-    static class StringSource extends ByteArrayInputStream {
-
-        /**
-         * Constructor 
-         *
-         * @param encoding
-         * @param bytes
-         */
-        protected StringSource(
-            CharsetDecoder decoder,
-            ByteBuffer stringTable
-        ) {
-            super(stringTable.array(), stringTable.arrayOffset(), stringTable.remaining());
-            this.decoder = decoder;
-        }
-        
-        /**
-         * The string source's decoder
-         */
-        private final CharsetDecoder decoder;
-        
-        /**
-         * Resolve a string table entry
-         * 
-         * @param index the index into the string table
-         * 
-         * @return the corresponding value
-         */
-        CharSequence resolveString(
-            int index
-        ){
-            if(index >= super.count) {
-                return null;
-            } else try {
-                super.pos = index;
-                this.decoder.reset();
-                Reader source = new InputStreamReader(this, this.decoder);
-                StringBuilder target = new StringBuilder();
-                for(int utf16; (utf16 = source.read()) > 0;) {
-                    target.append((char)utf16);
-                }
-                return target;
-            } catch (IOException exception) {
-                return null;
-            }
-        }
-        
     }
     
 }

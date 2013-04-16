@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2009, OMEX AG, Switzerland
+ * Copyright (c) 2009-2012, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -52,7 +52,6 @@ import static org.openmdx.application.dataprovider.cci.SharedConfigurationEntrie
 
 import java.net.URL;
 import java.util.Collections;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.ListIterator;
@@ -65,12 +64,12 @@ import javax.jdo.JDOFatalDataStoreException;
 import javax.jdo.PersistenceManagerFactory;
 import javax.resource.ResourceException;
 import javax.resource.cci.Connection;
-import javax.resource.cci.ConnectionFactory;
 
 import org.openmdx.application.configuration.Configuration;
 import org.openmdx.application.spi.PropertiesConfigurationProvider;
 import org.openmdx.base.accessor.cci.DataObjectManager_1_0;
 import org.openmdx.base.accessor.rest.spi.BasicCache_2;
+import org.openmdx.base.accessor.rest.spi.ConnectionCacheProvider_2_0;
 import org.openmdx.base.accessor.rest.spi.DataStoreCache_2_0;
 import org.openmdx.base.accessor.rest.spi.PinningCache_2;
 import org.openmdx.base.accessor.rest.spi.Switch_2;
@@ -80,20 +79,24 @@ import org.openmdx.base.naming.Path;
 import org.openmdx.base.persistence.cci.ConfigurableProperty;
 import org.openmdx.base.persistence.spi.AbstractPersistenceManagerFactory;
 import org.openmdx.base.persistence.spi.PersistenceManagers;
+import org.openmdx.base.resource.cci.ConnectionFactory;
 import org.openmdx.base.resource.spi.Port;
 import org.openmdx.base.rest.cci.RestConnectionSpec;
 import org.openmdx.base.rest.spi.ConnectionFactoryAdapter;
 import org.openmdx.base.transaction.TransactionAttributeType;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.loading.BeanFactory;
-import org.openmdx.kernel.loading.Classes;
+import org.openmdx.kernel.loading.Resources;
 import org.w3c.cci2.SparseArray;
 
 
 /**
  * Data Object Manager Factory
  */
-public class DataManagerFactory_1 extends AbstractPersistenceManagerFactory<DataObjectManager_1_0> {
+public class DataManagerFactory_1 
+    extends AbstractPersistenceManagerFactory<DataObjectManager_1_0> 
+    implements ConnectionCacheProvider_2_0
+{
 
     /**
      * Constructor 
@@ -117,6 +120,7 @@ public class DataManagerFactory_1 extends AbstractPersistenceManagerFactory<Data
                 "cacheThreshold"
             ).get(0);
             Object connectionFactory = super.getConnectionFactory();
+            // TODO Android
             if(connectionFactory instanceof ConnectionFactoryAdapter) {
             	this.connectionFactory = (ConnectionFactory) connectionFactory;
             	this.connectionFactory2 = (ConnectionFactory) super.getConnectionFactory2();
@@ -325,11 +329,7 @@ public class DataManagerFactory_1 extends AbstractPersistenceManagerFactory<Data
         try {
             String dataObjectManagerName = (String)props.get(ConfigurableProperty.Name.qualifiedName());
             if(dataObjectManagerName != null) {
-                for(
-                    Enumeration<URL> resources = Classes.getResources("META-INF/" + dataObjectManagerName + ".properties");
-                    resources.hasMoreElements();
-                ) {
-                    URL resource = resources.nextElement();
+                for(URL resource : Resources.getMetaInfResources(dataObjectManagerName + ".properties")) {
                     Properties properties = new Properties();
                     properties.load(resource.openStream());
                     configuration.putAll(properties);
@@ -441,10 +441,9 @@ public class DataManagerFactory_1 extends AbstractPersistenceManagerFactory<Data
      * 
      * @return the data store cache
      */
-    public static DataStoreCache_2_0 getDataStoreCache(
-        PersistenceManagerFactory dataManagerFactory
+    public DataStoreCache_2_0 getConnectionCache(
     ){
-        return dataManagerFactory instanceof DataManagerFactory_1 ? ((DataManagerFactory_1)dataManagerFactory).cachePlugIn : null;
+        return this.cachePlugIn;
     }
     
 }

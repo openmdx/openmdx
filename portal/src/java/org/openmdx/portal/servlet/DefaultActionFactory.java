@@ -55,6 +55,7 @@ import org.openmdx.portal.servlet.action.DeleteAction;
 import org.openmdx.portal.servlet.action.EditAction;
 import org.openmdx.portal.servlet.action.FindObjectAction;
 import org.openmdx.portal.servlet.action.FindObjectsAction;
+import org.openmdx.portal.servlet.action.GetOperationDialogAction;
 import org.openmdx.portal.servlet.action.GridAddColumnFilterAction;
 import org.openmdx.portal.servlet.action.GridAddObjectAction;
 import org.openmdx.portal.servlet.action.GridAddOrderAnyAction;
@@ -193,9 +194,11 @@ public class DefaultActionFactory implements ActionFactory_1_0 {
 				return new GridMoveDownObjectAction();				
 			case GridMoveUpObjectAction.EVENT_ID:
 				return new GridMoveUpObjectAction();
+			case GetOperationDialogAction.EVENT_ID:
+				return new GetOperationDialogAction();
 			default:
 				return null;
 		}
 	}
-	
+
 }

@@ -47,14 +47,14 @@
  */
 package org.openmdx.application.dataprovider.cci;
 
-import static org.openmdx.application.dataprovider.layer.persistence.jdbc.Database_1_Attributes.QUERY_FILTER_BOOLEAN_PARAM;
-import static org.openmdx.application.dataprovider.layer.persistence.jdbc.Database_1_Attributes.QUERY_FILTER_CLASS;
-import static org.openmdx.application.dataprovider.layer.persistence.jdbc.Database_1_Attributes.QUERY_FILTER_CLAUSE;
-import static org.openmdx.application.dataprovider.layer.persistence.jdbc.Database_1_Attributes.QUERY_FILTER_DATETIME_PARAM;
-import static org.openmdx.application.dataprovider.layer.persistence.jdbc.Database_1_Attributes.QUERY_FILTER_DATE_PARAM;
-import static org.openmdx.application.dataprovider.layer.persistence.jdbc.Database_1_Attributes.QUERY_FILTER_DECIMAL_PARAM;
-import static org.openmdx.application.dataprovider.layer.persistence.jdbc.Database_1_Attributes.QUERY_FILTER_INTEGER_PARAM;
-import static org.openmdx.application.dataprovider.layer.persistence.jdbc.Database_1_Attributes.QUERY_FILTER_STRING_PARAM;
+import static org.openmdx.application.dataprovider.layer.persistence.jdbc.Database_1_Attributes.QUERY_EXTENSION_BOOLEAN_PARAM;
+import static org.openmdx.application.dataprovider.layer.persistence.jdbc.Database_1_Attributes.QUERY_EXTENSION_CLASS;
+import static org.openmdx.application.dataprovider.layer.persistence.jdbc.Database_1_Attributes.QUERY_EXTENSION_CLAUSE;
+import static org.openmdx.application.dataprovider.layer.persistence.jdbc.Database_1_Attributes.QUERY_EXTENSION_DATETIME_PARAM;
+import static org.openmdx.application.dataprovider.layer.persistence.jdbc.Database_1_Attributes.QUERY_EXTENSION_DATE_PARAM;
+import static org.openmdx.application.dataprovider.layer.persistence.jdbc.Database_1_Attributes.QUERY_EXTENSION_DECIMAL_PARAM;
+import static org.openmdx.application.dataprovider.layer.persistence.jdbc.Database_1_Attributes.QUERY_EXTENSION_INTEGER_PARAM;
+import static org.openmdx.application.dataprovider.layer.persistence.jdbc.Database_1_Attributes.QUERY_EXTENSION_STRING_PARAM;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -186,75 +186,77 @@ public final class FilterProperty implements Serializable  {
                     )
                 );
             }
-            Extension extension = filter.getExtension();
-            if(extension != null) {
-                String namespace = SystemAttributes.CONTEXT_PREFIX + UUIDs.newUUID() + ':';
-                short piggyBackQuantifier = Quantifier.codeOf(null);
-                short piggyBackOperator = ConditionType.codeOf(null);
-                filterProperties.add(
-                    new FilterProperty(
-                        piggyBackQuantifier,
-                        namespace + SystemAttributes.OBJECT_CLASS,
-                        piggyBackOperator,
-                        QUERY_FILTER_CLASS
-                    )
-                );
-                filterProperties.add(
-                    new FilterProperty(
-                        piggyBackQuantifier,
-                        namespace + QUERY_FILTER_CLAUSE,
-                        piggyBackOperator,
-                        extension.getClause()
-                    )
-                );
-                filterProperties.add(
-                    new FilterProperty(
-                        piggyBackQuantifier,
-                        namespace + QUERY_FILTER_BOOLEAN_PARAM,
-                        piggyBackOperator,
-                        extension.getBooleanParam().toArray()
-                    )
-                );
-                filterProperties.add(
-                    new FilterProperty(
-                        piggyBackQuantifier,
-                        namespace + QUERY_FILTER_DATE_PARAM,
-                        piggyBackOperator,
-                        extension.getDateParam().toArray()
-                    )
-                );
-                filterProperties.add(
-                    new FilterProperty(
-                        piggyBackQuantifier,
-                        namespace + QUERY_FILTER_DATETIME_PARAM,
-                        piggyBackOperator,
-                        extension.getDateTimeParam().toArray()
-                    )
-                );
-                filterProperties.add(
-                    new FilterProperty(
-                        piggyBackQuantifier,
-                        namespace + QUERY_FILTER_DECIMAL_PARAM,
-                        piggyBackOperator,
-                        extension.getDecimalParam().toArray()
-                    )
-                );
-                filterProperties.add(
-                    new FilterProperty(
-                        piggyBackQuantifier,
-                        namespace + QUERY_FILTER_INTEGER_PARAM,
-                        piggyBackOperator,
-                        extension.getIntegerParam().toArray()
-                    )
-                );
-                filterProperties.add(
-                    new FilterProperty(
-                        piggyBackQuantifier,
-                        namespace + QUERY_FILTER_STRING_PARAM,
-                        piggyBackOperator,
-                        extension.getStringParam().toArray()
-                    )
-                );
+            List<Extension> extensions = filter.getExtension();
+            if(extensions != null) {
+            	for(Extension extension: extensions) {
+                    String namespace = SystemAttributes.CONTEXT_PREFIX + UUIDs.newUUID() + ':';
+                    short piggyBackQuantifier = Quantifier.codeOf(null);
+                    short piggyBackOperator = ConditionType.codeOf(null);
+                    filterProperties.add(
+                        new FilterProperty(
+                            piggyBackQuantifier,
+                            namespace + SystemAttributes.OBJECT_CLASS,
+                            piggyBackOperator,
+                            QUERY_EXTENSION_CLASS
+                        )
+                    );
+                    filterProperties.add(
+                        new FilterProperty(
+                            piggyBackQuantifier,
+                            namespace + QUERY_EXTENSION_CLAUSE,
+                            piggyBackOperator,
+                            extension.getClause()
+                        )
+                    );
+                    filterProperties.add(
+                        new FilterProperty(
+                            piggyBackQuantifier,
+                            namespace + QUERY_EXTENSION_BOOLEAN_PARAM,
+                            piggyBackOperator,
+                            extension.getBooleanParam().toArray()
+                        )
+                    );
+                    filterProperties.add(
+                        new FilterProperty(
+                            piggyBackQuantifier,
+                            namespace + QUERY_EXTENSION_DATE_PARAM,
+                            piggyBackOperator,
+                            extension.getDateParam().toArray()
+                        )
+                    );
+                    filterProperties.add(
+                        new FilterProperty(
+                            piggyBackQuantifier,
+                            namespace + QUERY_EXTENSION_DATETIME_PARAM,
+                            piggyBackOperator,
+                            extension.getDateTimeParam().toArray()
+                        )
+                    );
+                    filterProperties.add(
+                        new FilterProperty(
+                            piggyBackQuantifier,
+                            namespace + QUERY_EXTENSION_DECIMAL_PARAM,
+                            piggyBackOperator,
+                            extension.getDecimalParam().toArray()
+                        )
+                    );
+                    filterProperties.add(
+                        new FilterProperty(
+                            piggyBackQuantifier,
+                            namespace + QUERY_EXTENSION_INTEGER_PARAM,
+                            piggyBackOperator,
+                            extension.getIntegerParam().toArray()
+                        )
+                    );
+                    filterProperties.add(
+                        new FilterProperty(
+                            piggyBackQuantifier,
+                            namespace + QUERY_EXTENSION_STRING_PARAM,
+                            piggyBackOperator,
+                            extension.getStringParam().toArray()
+                        )
+                    );
+            	}
             }
             return filterProperties;
         }

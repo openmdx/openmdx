@@ -80,7 +80,9 @@
 		<include name="META-INF/orm.xml"/>
 		<include name="META-INF/openmdxmof.properties"/>
 	</patternset>
-
+	<patternset id="project.junit.test.case">
+		<patternset refid="null.pattern"/>
+	</patternset>
 	<!-- ******************************************************************* -->
 	<!-- * Generate -->
 	<!-- ******************************************************************* -->

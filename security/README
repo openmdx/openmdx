@@ -3,13 +3,8 @@
                         openMDX/Security
 
 -------------------------------------------------------------------
-
-openMDX comes with an SDK installer which installs the openMDX 
-development environment. The installation includes all source files 
-and project files for Ant and Eclipse.
-
 For installation instructions and upgrading from previous versions see 
-http://see www.openmdx.org.
+https://sourceforge.net/p/openmdx/wiki/Home/.
 
 ---
 End of README

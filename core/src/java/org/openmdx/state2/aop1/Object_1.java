@@ -95,9 +95,9 @@ abstract public class Object_1 extends Interceptor_1 {
         if(container == null) {
             DataObject_1_0 dataObject = this.self.objGetDelegate();
             String coreClass = dataObject.objGetClass(); 
-            Map<String, ModelElement_1_0> references = (Map<String, ModelElement_1_0>) this.getModel().getElement(
+            Map<String, ModelElement_1_0> references = this.getModel().getElement(
                 coreClass
-            ).objGetValue(
+            ).objGetMap(
                 "reference"
             );
             ModelElement_1_0 reference = references.get(feature);

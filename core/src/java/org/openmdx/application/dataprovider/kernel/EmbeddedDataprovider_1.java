@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2009, OMEX AG, Switzerland
+ * Copyright (c) 2009-2012, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -49,7 +49,6 @@ package org.openmdx.application.dataprovider.kernel;
 
 import javax.resource.ResourceException;
 import javax.resource.cci.Connection;
-import javax.resource.cci.ConnectionFactory;
 import javax.resource.cci.Interaction;
 import javax.resource.spi.ResourceAllocationException;
 
@@ -59,6 +58,7 @@ import org.openmdx.application.dataprovider.cci.SharedConfigurationEntries;
 import org.openmdx.application.dataprovider.spi.Layer_1;
 import org.openmdx.application.spi.StandardConfigurationProvider;
 import org.openmdx.base.exception.ServiceException;
+import org.openmdx.base.resource.cci.ConnectionFactory;
 import org.openmdx.base.resource.spi.Port;
 import org.openmdx.base.resource.spi.ResourceExceptions;
 import org.openmdx.kernel.exception.BasicException;

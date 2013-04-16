@@ -107,9 +107,9 @@ public class Aspect_1 extends Interceptor_1 {
         String feature
     ) throws ServiceException {
         if(this.coreFeatures == null && getCore(false) != null) {
-            this.coreFeatures = (Map<?,?>)getModel().getElement(
+            this.coreFeatures = getModel().getElement(
                 getCore(true).objGetClass()
-            ).objGetValue("allFeature");
+            ).objGetMap("allFeature");
         }
         return this.coreFeatures != null && this.coreFeatures.containsKey(feature) ? getCore(true) : getDelegate();
     }

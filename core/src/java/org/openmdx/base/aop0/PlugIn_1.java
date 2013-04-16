@@ -51,7 +51,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
-import javax.jdo.JDOHelper;
 import javax.jdo.JDOUserCallbackException;
 import javax.jdo.listener.DeleteLifecycleListener;
 import javax.jdo.listener.InstanceLifecycleEvent;
@@ -71,6 +70,7 @@ import org.openmdx.base.persistence.cci.UserObjects;
 import org.openmdx.base.text.conversion.UUIDConversion;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.id.UUIDs;
+import org.openmdx.kernel.jdo.ReducedJDOHelper;
 
 /**
  * Standard Plug-In
@@ -288,7 +288,7 @@ public class PlugIn_1
                     BasicException.Code.ILLEGAL_STATE,
                     "A Removable object can't be deleted unless it is new",
                     new BasicException.Parameter("id", persistentInstance.jdoGetObjectId()),
-                    new BasicException.Parameter("state", JDOHelper.getObjectState(persistentInstance))
+                    new BasicException.Parameter("state", ReducedJDOHelper.getObjectState(persistentInstance))
                 );
             }
         } catch (ServiceException exception) {

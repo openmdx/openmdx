@@ -61,6 +61,7 @@ import org.openmdx.base.naming.Path;
 import org.openmdx.base.resource.Records;
 import org.openmdx.base.rest.cci.QueryRecord;
 import org.openmdx.kernel.exception.BasicException;
+import org.openmdx.kernel.jdo.ReducedJDOHelper;
 
 /**
  * Query Facade
@@ -71,9 +72,13 @@ public class Query_2Facade {
      * Constructor 
      *
      * @param delegate the query record
+     * @param preferringNotFoundException Tells whether a NOT_FOUND exception 
+     * shall be thrown rather than returning an empty result set in case a 
+     * requested object does not exist.
      */
     private Query_2Facade(
-        MappedRecord delegate
+        MappedRecord delegate, 
+        boolean preferringNotFoundException
     ) throws ResourceException {
         if(!isDelegate(delegate)) {
             throw BasicException.initHolder(
@@ -89,16 +94,23 @@ public class Query_2Facade {
             );
         }
         this.delegate = (QueryRecord) delegate;
+        this.preferringNotFoundException = preferringNotFoundException;
     }
     
     /**
      * Constructor 
      * 
+     * @param preferringNotFoundException Tells whether a NOT_FOUND exception 
+     * shall be thrown rather than returning an empty result set in case a 
+     * requested object does not exist.
+     * 
      * @throws ResourceException 
      */
     private Query_2Facade(
+        boolean preferringNotFoundException
     ) throws ResourceException {
         this.delegate = (QueryRecord) Records.getRecordFactory().createMappedRecord(QueryRecord.NAME);
+        this.preferringNotFoundException = preferringNotFoundException;
     }
     
     /**
@@ -106,6 +118,12 @@ public class Query_2Facade {
      */
     private final QueryRecord delegate;
 
+    /**
+     * Tells whether a NOT_FOUND exception shall be thrown rather than 
+     * returning an empty result set in case a requested object does not exist.
+     */
+    private final boolean preferringNotFoundException;
+    
     /**
      * Retrieve delegate.
      *
@@ -119,7 +137,25 @@ public class Query_2Facade {
      * Create a facade for the given record
      * 
      * @param record
+     * @param preferringNotFoundException Tells whether a NOT_FOUND exception 
+     * shall be thrown rather than returning an empty result set in case a 
+     * requested object does not exist.
      * 
+     * @return the query facade
+     * 
+     * @throws ResourceException
+     */
+    public static Query_2Facade newInstance(
+        MappedRecord record, 
+        boolean preferringNotFoundException
+    ) throws ResourceException {
+        return new Query_2Facade(record, preferringNotFoundException);
+    }
+
+    /**
+     * Create a facade for the given record
+     * 
+     * @param record
      * @return the query facade
      * 
      * @throws ResourceException
@@ -127,13 +163,37 @@ public class Query_2Facade {
     public static Query_2Facade newInstance(
         MappedRecord record
     ) throws ResourceException {
-        return new Query_2Facade(record);
+        return new Query_2Facade(record, false);
     }
     
     /**
      * Create a facade for the given object id
      * 
      * @param transientObjectId
+     * @param preferringNotFoundException Tells whether a NOT_FOUND exception 
+     * shall be thrown rather than returning an empty result set in case a 
+     * requested object does not exist.
+     * 
+     * @return a facade for the given object id
+     * 
+     * @throws ResourceException
+     */
+    public static Query_2Facade newInstance(
+        Path path,
+        boolean preferringNotFoundException
+    ) throws ResourceException {
+        Query_2Facade facade = new Query_2Facade(preferringNotFoundException);
+        facade.setPath(path);
+        return facade;
+    }
+    
+    /**
+     * Create a facade for the given object id
+     * 
+     * @param transientObjectId
+     * @param preferringNotFoundException Tells whether a NOT_FOUND exception 
+     * shall be thrown rather than returning an empty result set in case a 
+     * requested object does not exist.
      * 
      * @return a facade for the given object id
      * 
@@ -142,11 +202,31 @@ public class Query_2Facade {
     public static Query_2Facade newInstance(
         Path path
     ) throws ResourceException {
-        Query_2Facade facade = new Query_2Facade();
-        facade.setPath(path);
-        return facade;
+        return newInstance(path, false);
     }
-    
+
+    /**
+     * Create a facade for the given transient object id
+     * 
+     * @param transientObjectId
+     * @param preferringNotFoundException Tells whether a NOT_FOUND exception 
+     * shall be thrown rather than returning an empty result set in case a 
+     * requested object does not exist.
+     * 
+     * @return a facade for the given transient object id
+     * 
+     * @throws ResourceException
+     */
+    public static Query_2Facade newInstance(
+        UUID transientObjectId,
+        boolean preferringNotFoundException
+    ) throws ResourceException{
+        return Query_2Facade.newInstance(
+            new Path(transientObjectId),
+            preferringNotFoundException
+        );
+    }
+
     /**
      * Create a facade for the given transient object id
      * 
@@ -159,11 +239,53 @@ public class Query_2Facade {
     public static Query_2Facade newInstance(
         UUID transientObjectId
     ) throws ResourceException{
-        return Query_2Facade.newInstance(
-            new Path(transientObjectId)
-        );
+        return newInstance(transientObjectId, false);
     }
-    
+
+    /**
+     * Create a query facade for the object's id
+     * 
+     * @param object
+     * 
+     * @param preferringNotFoundException
+     * @param preferringNotFoundException Tells whether a NOT_FOUND exception 
+     * shall be thrown rather than returning an empty result set in case a 
+     * requested object does not exist.
+     * 
+     * @return a facade for the object's id
+     * 
+     * @throws ResourceException
+     */
+    public static Query_2Facade forObjectId(
+        Object object,
+        boolean preferringNotFoundException
+    ) throws ResourceException {
+        return ReducedJDOHelper.isPersistent(object) ? Query_2Facade.newInstance(
+            (Path)ReducedJDOHelper.getObjectId(object),
+            preferringNotFoundException
+         ) : Query_2Facade.newInstance(
+             (UUID)ReducedJDOHelper.getTransactionalObjectId(object),
+            preferringNotFoundException
+         );
+    }
+
+    /**
+     * Create a query facade for the object's id
+     * 
+     * @param object
+     * 
+     * @param preferringNotFoundException
+     * 
+     * @return a facade for the object's id
+     * 
+     * @throws ResourceException
+     */
+    public static Query_2Facade forObjectId(
+        Object object
+    ) throws ResourceException {
+        return forObjectId(object, false);
+    }
+        
     /**
      * Test whether the given record is an object facade delegate
      * 
@@ -198,7 +320,7 @@ public class Query_2Facade {
     ) {
         this.delegate.setPath(path);
     }
-
+    
     /**
      * Retrieve parameters.
      *
@@ -391,6 +513,28 @@ public class Query_2Facade {
         return this.delegate.isRefresh();
     }
 
+    /**
+     * Tells whether a NOT_FOUND exception shall be thrown rather than 
+     * returning an empty result set in case a requested object does not exist.
+     * 
+     * @return <code>true</code> if a NOT_FOUND exception shall be thrown when 
+     * the requested object does not exist
+     */
+    public boolean isPreferringNotFoundException(){
+        return this.preferringNotFoundException;
+    }
+    
+    /**
+     * Tells whether a collection of objects or a single object shall be retrieved
+     * 
+     * @return <code>true</code> if a collection of objects shall be retrieved
+     */
+    public boolean isFindRequest(
+    ){
+        Path xri = getPath();
+        return xri.size() % 2 == 0 || xri.containsWildcard();
+    }
+
     /* (non-Javadoc)
      * @see java.lang.Object#toString()
      */
@@ -398,5 +542,5 @@ public class Query_2Facade {
     public String toString() {
         return this.delegate.toString();
     }
-    
+
 }

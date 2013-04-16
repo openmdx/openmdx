@@ -327,6 +327,7 @@ public class FeatureMapper implements Serializable {
     }
 
     //-----------------------------------------------------------------------        
+    @SuppressWarnings("rawtypes")
     ModelElement_1_0 getFeature(
         String methodName,
         MethodSignature mode
@@ -352,7 +353,8 @@ public class FeatureMapper implements Serializable {
             Model_1_0 model = this.classDef.getModel();
             ModelElement_1_0 classDef = model.getElement(className);
             List<ModelElement_1_0> operations = new ArrayList<ModelElement_1_0>();
-            for(Iterator<?> i = ((Map<?,?>)classDef.objGetValue("allFeature")).values().iterator(); i.hasNext(); ) {
+            Map allFeature = classDef.objGetMap("allFeature");
+            for(Iterator<?> i = allFeature.values().iterator(); i.hasNext(); ) {
                 feature = (ModelElement_1_0)i.next();
                 // Operation
                 if(model.isOperationType(feature)) {

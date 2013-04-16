@@ -92,13 +92,13 @@ import test.openmdx.clock1.jmi1.Clock1Package;
 public class TestQueryExtension {
 
     static final String[] expectedAttributes = new String[]{
-        QUERY_FILTER_DATE_PARAM,
-        QUERY_FILTER_DECIMAL_PARAM,
-        QUERY_FILTER_CLAUSE,
-        QUERY_FILTER_BOOLEAN_PARAM,
-        QUERY_FILTER_INTEGER_PARAM,
-        QUERY_FILTER_DATETIME_PARAM,
-        QUERY_FILTER_STRING_PARAM
+        QUERY_EXTENSION_DATE_PARAM,
+        QUERY_EXTENSION_DECIMAL_PARAM,
+        QUERY_EXTENSION_CLAUSE,
+        QUERY_EXTENSION_BOOLEAN_PARAM,
+        QUERY_EXTENSION_INTEGER_PARAM,
+        QUERY_EXTENSION_DATETIME_PARAM,
+        QUERY_EXTENSION_STRING_PARAM
     };
 
     static final List<?>[] expectedValues = {
@@ -191,7 +191,7 @@ public class TestQueryExtension {
                 Quantifier.codeOf(null),
                 namespace + SystemAttributes.OBJECT_CLASS,
                 ConditionType.codeOf(null),
-                QUERY_FILTER_CLASS
+                QUERY_EXTENSION_CLASS
             ),
             filterProperties.get(1)
         );

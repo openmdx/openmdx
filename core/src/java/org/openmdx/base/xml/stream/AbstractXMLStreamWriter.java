@@ -57,11 +57,13 @@ import java.util.Iterator;
 
 import javax.xml.XMLConstants;
 import javax.xml.namespace.NamespaceContext;
-import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamWriter;
 
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.io.UTF8Writer;
+import org.openmdx.base.xml.spi.LargeObjectWriter;
+
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamWriter;
 import org.openmdx.kernel.exception.BasicException;
 
 /**
@@ -145,6 +147,7 @@ public abstract class AbstractXMLStreamWriter implements XMLStreamWriter, LargeO
         BasicException cause = BasicException.toExceptionStack(exception);
         return new XMLStreamException(cause.getMessage(), cause);
     }
+
     
     /* (non-Javadoc)
      * @see javax.xml.stream.XMLStreamWriter#getNamespaceContext()

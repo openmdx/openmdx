@@ -167,7 +167,7 @@ public class WizardTabControl
             ); 
             if(!isRevokeShow && !isRevokeEdit) {
                 if(this.wizardDefinition.getOpenParameter().length() > 0) {
-                    p.write("    <li><a href=\"#\" onclick=\"javascript:window.open('.", this.getName(), "?", Action.PARAMETER_OBJECTXRI, "=", encodedObjectXri, "&", Action.PARAMETER_REQUEST_ID, "=", view.getRequestId(), "', '", this.getOperationName(), "', '", this.wizardDefinition.getOpenParameter(), "');\" id=\"op", Integer.toString(tabId), "Trigger\">", this.getOperationName(), "...</a></li>");                    
+                    p.write("    <li><a href=\"javascript:void(0)\" onclick=\"javascript:window.open('.", this.getName(), "?", Action.PARAMETER_OBJECTXRI, "=", encodedObjectXri, "&", Action.PARAMETER_REQUEST_ID, "=", view.getRequestId(), "', '", this.getOperationName(), "', '", this.wizardDefinition.getOpenParameter(), "');\" id=\"op", Integer.toString(tabId), "\">", this.getOperationName(), "...</a></li>");                    
                 }
                 else {
                     String parameters = null;
@@ -176,15 +176,15 @@ public class WizardTabControl
                         parameters = operationName.substring(operationName.indexOf("?") + 1);
                     }                    
                     if(this.isInplace()) {
-                        p.write("    <li><a href=\"#\" onclick=\"javascript:new Ajax.Updater('UserDialog', '.", this.getName(), "?", Action.PARAMETER_OBJECTXRI, "=", encodedObjectXri, "&", Action.PARAMETER_REQUEST_ID, "=", view.getRequestId(), (parameters == null ? "" : "&" + parameters), "', {evalScripts: true});\" id=\"op", Integer.toString(tabId), "Trigger\">", this.getOperationName(), "...</a></li>");
+                        p.write("    <li><a href=\"javascript:void(0)\" onclick=\"javascript:new Ajax.Updater('UserDialog', '.", this.getName(), "?", Action.PARAMETER_OBJECTXRI, "=", encodedObjectXri, "&", Action.PARAMETER_REQUEST_ID, "=", view.getRequestId(), (parameters == null ? "" : "&" + parameters), "', {evalScripts: true});\" id=\"op", Integer.toString(tabId), "\">", this.getOperationName(), "...</a></li>");
                     }
                     else {
-                        p.write("    <li><a href=\".", this.getName(), "?", Action.PARAMETER_OBJECTXRI, "=", encodedObjectXri, "&", Action.PARAMETER_REQUEST_ID, "=", view.getRequestId(), (parameters == null ? "" : "&" + parameters), "\" target=\"", this.wizardDefinition.getTargetType(), "\" id=\"op", Integer.toString(tabId), "Trigger\">", this.getOperationName(), "...</a></li>");                        
+                        p.write("    <li><a href=\".", this.getName(), "?", Action.PARAMETER_OBJECTXRI, "=", encodedObjectXri, "&", Action.PARAMETER_REQUEST_ID, "=", view.getRequestId(), (parameters == null ? "" : "&" + parameters), "\" target=\"", this.wizardDefinition.getTargetType(), "\" id=\"op", Integer.toString(tabId), "\">", this.getOperationName(), "...</a></li>");                        
                     }
                 }
             }
             else if(!isRevokeShow) {
-                p.write("    <li><a href=\"#\" id=\"op", Integer.toString(tabId), "Trigger\"><span>", this.getOperationName(), "</span></a></li>");                
+                p.write("    <li><a href=\"javascript:void(0)\" id=\"op", Integer.toString(tabId), "\"><span>", this.getOperationName(), "</span></a></li>");                
             }
         }
     }

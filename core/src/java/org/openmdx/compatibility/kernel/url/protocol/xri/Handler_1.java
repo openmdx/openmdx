@@ -53,6 +53,8 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLStreamHandler;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.openmdx.kernel.url.protocol.XriAuthorities;
 
@@ -63,7 +65,7 @@ public abstract class Handler_1
    extends URLStreamHandler
 {
     
-	/**
+    /**
      * Constructor 
      */
     protected Handler_1() {
@@ -76,17 +78,23 @@ public abstract class Handler_1
     @Override
     protected URLConnection openConnection(
         final URL url
-	) throws IOException {
-//      SysLog.info("XRI 1 based URL's are deprecated", url);
-   		String path = url.getPath();
-   		if(path.startsWith(RESOURCE_PREFIX)) {
-	   		return new ResourceURLConnection(url);
-   		} else if(path.startsWith(ZIP_PREFIX)){
-   			return new ZipURLConnection(url);
-   		} else {
+    ) throws IOException {
+        Logger.getLogger(
+            "org.openmdx.kernel.log.LoggerFactory"
+        ).log(
+            Level.INFO, 
+            "Sys|XRI 1 based URL's are deprecated|{0}", 
+            new Object[]{url}
+        );
+        String path = url.getPath();
+        if(path.startsWith(RESOURCE_PREFIX)) {
+            return new ResourceURLConnection(url);
+        } else if(path.startsWith(ZIP_PREFIX)){
+            return new ZipURLConnection(url);
+        } else {
             throw newMalformedURLException(url);
         }
-	}
+    }
 
     /**
      * Unsupported authority exception
@@ -101,9 +109,9 @@ public abstract class Handler_1
     
     
     /**
-	 *
-	 */
-	private final static String ZIP_PREFIX = XriAuthorities.ZIP_AUTHORITY + ".(";
+     *
+     */
+    private final static String ZIP_PREFIX = XriAuthorities.ZIP_AUTHORITY + ".(";
 
     /**
      * 

@@ -1,7 +1,7 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Description: Non-Managed Context Factory
+ * Description: Non-Managed Initial Context Factory
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
  * ====================================================================
  *
@@ -47,26 +47,20 @@
  */
 package org.openmdx.kernel.lightweight.naming;
 
-import java.util.HashMap;
 import java.util.Hashtable;
-import java.util.Map;
-import java.util.logging.Level;
 
 import javax.naming.Context;
 import javax.naming.NamingException;
 import javax.naming.NoInitialContextException;
-import javax.naming.spi.InitialContextFactory;
 
-import org.openmdx.kernel.lightweight.naming.java.javaURLContextFactory;
 import org.openmdx.kernel.lightweight.transaction.LightweightTransactionManager;
 import org.openmdx.kernel.lightweight.transaction.LightweightTransactionSynchronizationRegistry;
 import org.openmdx.kernel.lightweight.transaction.LightweightUserTransaction;
-import org.openmdx.kernel.log.SysLog;
 
 /**
- * Non-Managed Context Factory
+ * Non-Managed Initial Context Factory
  */
-public class NonManagedInitialContextFactory implements InitialContextFactory {
+public class NonManagedInitialContextFactory extends AbstractInitialContextFactory {
 
     /**
      * Constructor
@@ -83,7 +77,7 @@ public class NonManagedInitialContextFactory implements InitialContextFactory {
     /**
      * The URL scheme specific initial context
      */
-    static private Context initialContext;
+    static private volatile Context initialContext;
 
     /**
      * This initialization code <b>must not</b> be executed in a managed 
@@ -93,43 +87,12 @@ public class NonManagedInitialContextFactory implements InitialContextFactory {
      */
     private static synchronized void initialize(
     ) throws NoInitialContextException {
-        if(initialContext == null) try {
-            //
-            // Component Context Set-Up
-            //
-            Map<String,Object> transactionEnvironment = new HashMap<String,Object>();
-            transactionEnvironment.put(
-                "org.openmdx.comp.TransactionManager",
-                LightweightTransactionManager.getInstance()
-            );
-            transactionEnvironment.put(
-                "org.openmdx.comp.TransactionSynchronizationRegistry",
-                LightweightTransactionSynchronizationRegistry.getInstance()
-            );
-            transactionEnvironment.put(
-                "org.openmdx.comp.UserTransaction",
+        if(initialContext == null) {
+            initialContext = newInitialContext(
+                NonManagedInitialContextFactory.class.getName(),
+                LightweightTransactionManager.getInstance(),
+                LightweightTransactionSynchronizationRegistry.getInstance(),
                 LightweightUserTransaction.getInstance()
-            );
-            javaURLContextFactory.populate(transactionEnvironment);
-            javaURLContextFactory.populate(System.getProperties());
-            //
-            // JDNI set-up
-            //
-            Map<String,String> initialContextEnvironment = new HashMap<String,String>();
-            initialContextEnvironment.put(
-                Context.INITIAL_CONTEXT_FACTORY,
-                NonManagedInitialContextFactory.class.getName()
-            );
-            initialContextEnvironment.put(
-                Context.URL_PKG_PREFIXES,
-                "org.openmdx.kernel.lightweight.naming"
-            );
-            initialContext = new NonManagedInitialContext(initialContextEnvironment);
-        } catch (NamingException exception) {
-            throw (NoInitialContextException) new NoInitialContextException(
-                "Could not populate the non-managed environment's comp context"
-            ).initCause(
-                exception
             );
         }
     }
@@ -141,55 +104,6 @@ public class NonManagedInitialContextFactory implements InitialContextFactory {
         Hashtable<?, ?> environment
     ) throws NamingException {
         return (Context) initialContext.lookup("");
-    }
-
-    /**
-     * Assert that a specific value is among the values in a system property's 
-     * value list.
-     * 
-     * @param name the system property's name
-     * @param value the required value
-     * @param separator the value separator
-     */
-    private static void prependSystemPropertyValue (
-        String name,
-        String value,
-        char separator
-    ){
-        String values = System.getProperty(name);
-        if(values == null || values.length() == 0){
-            SysLog.log(
-                Level.INFO,
-                "Set system property {0} to \"{1}\"",
-                name,value
-            );
-            System.setProperty(
-                name, 
-                value
-            );
-        } else if ((separator + values + separator).indexOf(separator + value + separator) < 0) {
-            String newValue = value + separator + values; 
-            SysLog.log(
-                Level.INFO,
-                "Change system property {0} from \"{1}\" to \"{2}\"",
-                name, values, newValue
-            );
-            System.setProperty(
-                name,
-                newValue
-            );
-        }
-    }
-
-    static {
-        //
-        // URL set-up
-        //
-        prependSystemPropertyValue(
-            "java.protocol.handler.pkgs",
-            "org.openmdx.kernel.url.protocol",
-            '|'
-        );
     }
 
 }

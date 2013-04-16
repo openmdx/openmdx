@@ -80,6 +80,11 @@ public class TestRecord extends TestCase {
      * TODO Sparse array support is such a use case!
      */
     private static boolean USE_INTEGERS_AS_KEYS = Boolean.FALSE; // to avoid dead code warning
+
+    /**
+     * Internalization changes from Java 7 on
+     */
+    private static final boolean RELUCTANT_INTERNALIZATION = System.getProperty("java.specification.version").compareTo("1.6") <= 0;
     
     /**
      * Constructs a test case with the given name.
@@ -1142,6 +1147,22 @@ for(
       );
     }
 
+    public void testStringInternalization(){
+        String s0 = "s";
+        s0 += "4711";
+        String s1 = s0.intern();
+        if(RELUCTANT_INTERNALIZATION) {
+            assertNotSame("String internalization", s0, s1);
+        }
+    }
+
+    public void testNewString(){
+        String s0 = "s";
+        s0 += "4711";
+        String s1 = new String(s0);
+        assertNotSame("String internalization", s0, s1);
+    }
+    
     /**
      * Write the test case method in the fixture class.
      * Be sure to make it public, or it can't be invoked through reflection. 
@@ -1156,7 +1177,9 @@ for(
         original.put(key2, "v2");
         {
             Object key = getKey(original, "v1");
-            assertNotSame(key1, key);
+            if(RELUCTANT_INTERNALIZATION) {
+                assertNotSame(key1, key);
+            }
             assertSame("k1", key);
         }
         {
@@ -1175,7 +1198,9 @@ for(
         original.put(key2, "v2");
         {
             Object key = getKey(copy, "v1");
-            assertNotSame(key1, key);
+            if(RELUCTANT_INTERNALIZATION) {
+                assertNotSame(key1, key);
+            }
             assertSame("k1", key);
         }
         {

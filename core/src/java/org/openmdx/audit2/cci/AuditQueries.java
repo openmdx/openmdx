@@ -55,7 +55,6 @@ import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
-import javax.jdo.JDOHelper;
 import javax.jdo.PersistenceManager;
 
 import org.openmdx.audit2.cci2.UnitOfWorkQuery;
@@ -74,6 +73,7 @@ import org.openmdx.base.query.IsInstanceOfCondition;
 import org.openmdx.base.query.IsLikeCondition;
 import org.openmdx.base.query.Quantifier;
 import org.openmdx.kernel.exception.BasicException;
+import org.openmdx.kernel.jdo.ReducedJDOHelper;
 
 /**
  * Audit Queries
@@ -135,7 +135,7 @@ public class AuditQueries {
                 )
             );
         }
-        return JDOHelper.getPersistenceManager(modifiable[0]);
+        return ReducedJDOHelper.getPersistenceManager(modifiable[0]);
     }
 
     /**
@@ -155,9 +155,9 @@ public class AuditQueries {
             i++
         ){
             Object source = objects[i];
-            objectIds[i] = JDOHelper.isPersistent(source) ? JDOHelper.getObjectId(
+            objectIds[i] = ReducedJDOHelper.isPersistent(source) ? ReducedJDOHelper.getObjectId(
                 source
-            ) : JDOHelper.getTransactionalObjectId(
+            ) : ReducedJDOHelper.getTransactionalObjectId(
                 source
             );
         }
@@ -285,7 +285,7 @@ public class AuditQueries {
                     );
                     SortedMap<Date,UnitOfWork> unitsOfWork = new TreeMap<Date,UnitOfWork>();
                     for(Involvement involvement : involvements) {
-                        if(JDOHelper.isPersistent(involvement)) try {
+                        if(ReducedJDOHelper.isPersistent(involvement)) try {
                             UnitOfWork unitOfWork = involvement.getUnitOfWork();
                             if(
                                 (from == null || !from.after(unitOfWork.getCreatedAt())) &&

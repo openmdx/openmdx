@@ -66,7 +66,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
 
-import javax.jdo.JDOHelper;
 import javax.jdo.listener.ClearCallback;
 import javax.jdo.listener.DeleteCallback;
 import javax.jdo.listener.LoadCallback;
@@ -102,6 +101,7 @@ import org.openmdx.jdo.listener.ConstructCallback;
 import org.openmdx.kernel.collection.ArraysExtension;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.exception.Throwables;
+import org.openmdx.kernel.jdo.ReducedJDOHelper;
 import org.openmdx.kernel.loading.Classes;
 import org.openmdx.kernel.log.SysLog;
 import org.w3c.cci2.AnyTypePredicate;
@@ -409,18 +409,18 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
                     if(proxy == args[0]) {
                         return true;
                     } 
-                    boolean persistent = JDOHelper.isPersistent(proxy);
-                    if(persistent != JDOHelper.isPersistent(args[0])) {
+                    boolean persistent = ReducedJDOHelper.isPersistent(proxy);
+                    if(persistent != ReducedJDOHelper.isPersistent(args[0])) {
                         return false;
                     }
                     Object thisId;
                     Object thatId;
                     if (persistent) {
-                        thisId = JDOHelper.getObjectId(proxy);
-                        thatId = JDOHelper.getObjectId(args[0]);
+                        thisId = ReducedJDOHelper.getObjectId(proxy);
+                        thatId = ReducedJDOHelper.getObjectId(args[0]);
                     } else {
-                        thisId = JDOHelper.getTransactionalObjectId(proxy);
-                        thatId = JDOHelper.getTransactionalObjectId(args[0]);
+                        thisId = ReducedJDOHelper.getTransactionalObjectId(proxy);
+                        thatId = ReducedJDOHelper.getTransactionalObjectId(args[0]);
                     }
                     return thisId != null && thisId.equals(thatId);
                 } 
@@ -1062,17 +1062,21 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
                 args[0] instanceof RefStruct_1_0
             ) {
                 RefStruct_1_0 in = (RefStruct_1_0) args[0];
-                RefStruct_1_0 out = (RefStruct_1_0)(
-                    hasVoidArg ? method.invoke(
-                        next
-                    ) : method.invoke(
-                        next,
-                        in == null ? null : ((RefPackage_1_0) ((RefObject)next).refOutermostPackage()).refCreateStruct(in.refDelegate())
-                    )                    
-                );
-                return out == null ? 
-                    null : 
-                    ((RefPackage_1_0) ((RefObject)proxy).refOutermostPackage()).refCreateStruct(out.refDelegate());
+                RefStruct_1_0 out;
+                if(hasVoidArg) {
+                    out =  (RefStruct_1_0) method.invoke(next);
+                } else {
+                    if(in != null) {
+                        RefPackage_1_0 refPackage = (RefPackage_1_0) ((RefObject)next).refOutermostPackage();
+                        in = (RefStruct_1_0) refPackage.refCreateStruct(in.refDelegate());
+                    }
+                    out =  (RefStruct_1_0) method.invoke(next, in);
+                }
+                if(out == null) {
+                    return null;
+                } else {
+                    return ((RefPackage_1_0) ((RefObject)proxy).refOutermostPackage()).refCreateStruct(out.refDelegate()); 
+                }
             } else {
             	Object[] arguments;
             	if(hasVoidArg){
@@ -1443,7 +1447,7 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
          */
         public Path refGetPath(
         ) {
-            return (Path) JDOHelper.getObjectId(this.cciDelegate);
+            return (Path) ReducedJDOHelper.getObjectId(this.cciDelegate);
         }
     
         /* (non-Javadoc)
@@ -1457,7 +1461,7 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
          * @see javax.jmi.reflect.RefObject#refDelete()
          */
         public void refDelete() {
-            JDOHelper.getPersistenceManager(
+            ReducedJDOHelper.getPersistenceManager(
                 this.cciDelegate
             ).deletePersistent(
                 this.cciDelegate
@@ -1778,7 +1782,7 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
         private String newExceptionMessage(
             String message
         ){
-            Object objectId = JDOHelper.getObjectId(this.cciDelegate);
+            Object objectId = ReducedJDOHelper.getObjectId(this.cciDelegate);
             return objectId == null ?
                 message :
                 message + " on object " + objectId;

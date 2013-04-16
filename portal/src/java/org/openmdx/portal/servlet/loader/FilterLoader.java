@@ -56,7 +56,6 @@ import java.io.ByteArrayOutputStream;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
@@ -67,9 +66,7 @@ import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
 import org.openmdx.base.mof.cci.Model_1_0;
 import org.openmdx.base.query.Condition;
-import org.openmdx.base.query.Extension;
 import org.openmdx.base.query.IsInstanceOfCondition;
-import org.openmdx.base.query.OrderSpecifier;
 import org.openmdx.base.text.conversion.JavaBeans;
 import org.openmdx.kernel.log.SysLog;
 import org.openmdx.portal.servlet.Filter;
@@ -125,10 +122,10 @@ public class FilterLoader
                 null,
                 FILTER_GROUP_NAME_SYSTEM,
                 WebKeys.ICON_FILTER_ALL,
-                null,
-                (List<Condition>)null,
-                (List<OrderSpecifier>)null,
-                (Extension)null,
+                null, // orders
+                null, // conditions
+                null, // orderSpecifiers
+                null, // extensions
                 this.getClass().getName()
             )
         );
@@ -139,14 +136,13 @@ public class FilterLoader
                 null,
                 FILTER_GROUP_NAME_SYSTEM,
                 WebKeys.ICON_FILTER_DEFAULT,
-                null,
-                (List<Condition>)null,
-                (List<OrderSpecifier>)null,
-                (Extension)null,
+                null, // orders
+                null, // conditions
+                null, // orderSpecifiers
+                null, // extensions
                 this.getClass().getName()
             )
         );
-
         // Create a filter for each referenced type (only if there is more than one referenced type)
         Map assertableInspectors = uiContext.getAssertableInspectors(UiContext.MAIN_PERSPECTIVE);
         if(referencedType.objGetList("allSubtype").size() > 1) {
@@ -278,7 +274,7 @@ public class FilterLoader
                 if(element.isClassType()) {
                     // Default filters for all modeled features
                     for(
-                        Iterator j = ((Map)element.objGetValue("allFeature")).values().iterator(); 
+                        Iterator j = element.objGetMap("allFeature").values().iterator(); 
                         j.hasNext(); 
                     ) {
                         ModelElement_1_0 feature = (ModelElement_1_0)j.next();

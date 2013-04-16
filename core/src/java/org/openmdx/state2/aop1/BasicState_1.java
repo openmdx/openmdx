@@ -65,7 +65,7 @@ import java.util.SortedMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-import javax.jdo.JDOHelper;
+import javax.jdo.JDOCanRetryException;
 import javax.jdo.JDOUserException;
 import javax.jdo.PersistenceManager;
 
@@ -82,6 +82,7 @@ import org.openmdx.base.mof.cci.ModelHelper;
 import org.openmdx.base.mof.cci.Model_1_0;
 import org.openmdx.base.mof.cci.Multiplicity;
 import org.openmdx.kernel.exception.BasicException;
+import org.openmdx.kernel.jdo.ReducedJDOHelper;
 import org.openmdx.state2.cci.StateContext;
 import org.openmdx.state2.cci.ViewKind;
 import org.openmdx.state2.spi.Parameters;
@@ -166,9 +167,9 @@ public abstract class BasicState_1<C extends StateContext<?>>
     ) throws ServiceException {
         if(this.enabled) {
             if(this.coreFeatures == null) {
-                this.coreFeatures = (Map<?,?>)getModel().getElement(
+                this.coreFeatures = getModel().getElement(
                     this.self.objGetDelegate().objGetClass()
-                ).objGetValue("allFeature");
+                ).objGetMap("allFeature");
             }
             return !this.coreFeatures.containsKey(feature);
         } else {
@@ -648,7 +649,7 @@ public abstract class BasicState_1<C extends StateContext<?>>
     ) throws ServiceException {
         if(this.enabled) {
             for(DataObject_1_0 state : getInvolved(AccessMode.FOR_QUERY)){
-                JDOHelper.getPersistenceManager(state).makeTransactional(state);
+                ReducedJDOHelper.getPersistenceManager(state).makeTransactional(state);
             }
         } else {
             super.objMakeTransactional();
@@ -663,7 +664,7 @@ public abstract class BasicState_1<C extends StateContext<?>>
     ) throws ServiceException {
         if(this.enabled) {
             for(DataObject_1_0 state : getInvolved(AccessMode.FOR_QUERY)){
-                JDOHelper.getPersistenceManager(state).makeNontransactional(state);
+                ReducedJDOHelper.getPersistenceManager(state).makeNontransactional(state);
             }
         } else {
             super.objMakeNontransactional();
@@ -678,7 +679,7 @@ public abstract class BasicState_1<C extends StateContext<?>>
     ) throws ServiceException {
         if(this.enabled) {
             for(DataObject_1_0 state : getInvolved(AccessMode.FOR_QUERY)){
-                JDOHelper.getPersistenceManager(state).refresh(state);
+                ReducedJDOHelper.getPersistenceManager(state).refresh(state);
             }
         } else { 
             super.objRefresh();
@@ -808,12 +809,25 @@ public abstract class BasicState_1<C extends StateContext<?>>
         try {
             reduceStates();
         } catch (ServiceException exception) {
-            throw new RuntimeServiceException(exception);
+        	throw new JDOCanRetryException("State reduction failure", exception);
         }
         super.jdoPreStore();
     }
 
-    /**
+    
+    /* (non-Javadoc)
+	 * @see org.openmdx.base.accessor.view.Interceptor_1#jdoPreClear()
+	 */
+	@Override
+	public void jdoPreClear() {
+		super.jdoPreClear();
+		this.forTimePointQuery = null;
+		this.forTimeRangeQuery = null;
+		this.forUnderlyingState = null;
+		this.forUpdate = null;
+	}
+
+	/**
      * Retrieve the actual state version
      * 
      * @return the actual state version
@@ -937,7 +951,7 @@ public abstract class BasicState_1<C extends StateContext<?>>
             }
             try {
                 if(this.lastInvolved.jdoIsPersistent()) {
-                    JDOHelper.getPersistenceManager(this.lastInvolved).deletePersistent(this.lastInvolved);
+                    ReducedJDOHelper.getPersistenceManager(this.lastInvolved).deletePersistent(this.lastInvolved);
                 } else {
                     this.candidates.remove();
                 }

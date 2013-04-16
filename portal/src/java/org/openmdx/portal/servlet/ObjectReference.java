@@ -73,20 +73,34 @@ import org.openmdx.portal.servlet.action.SelectObjectAction;
 import org.openmdx.portal.servlet.view.ViewMode;
 import org.openmdx.ui1.layer.application.Ui_1;
 
+/**
+ * ObjectReference
+ *
+ */
 public class ObjectReference
     implements Serializable {
   
-    //-------------------------------------------------------------------------
+    /**
+     * Constructor 
+     *
+     * @param object
+     * @param app
+     */
     public ObjectReference(
         RefObject_1_0 object,
-        ApplicationContext application
+        ApplicationContext app
     ) {
 	    this.object = object;
 	    this.exception = null;
-	    this.app = application;
+	    this.app = app;
     }
 
-    //-------------------------------------------------------------------------
+    /**
+     * Constructor 
+     *
+     * @param exception
+     * @param application
+     */
     public ObjectReference(
         ServiceException exception,
         ApplicationContext application
@@ -96,7 +110,9 @@ public class ObjectReference
 	    this.app = application;
     }
 
-    //-------------------------------------------------------------------------
+    /**
+     * Reload underlying object.
+     */
     public void refresh(
     ) {
         if(this.object != null) {
@@ -110,19 +126,36 @@ public class ObjectReference
 	    }
     }
     
-    //-------------------------------------------------------------------------
-    public String getTitleEscapeQuote(
+    /**
+     * Get title and escape special characters such as ' and CR so that it
+     * can be used as parameter for Javascript functions.
+     * 
+     * @return
+     */
+    public String getTitleAsJavascriptArg(
     ) {
-        return Pattern.compile("'").matcher(this.getTitle()).replaceAll("\\'");
+    	String title = this.getTitle();
+    	title = title.replace("'", "\\'");
+    	title = title.replace("\n", " ");
+    	return title;
     }
-  
-    //-------------------------------------------------------------------------
+
+    /**
+     * Get non-short title of underlying object.
+     * 
+     * @return
+     */
     public String getTitle(
     ) {
     	return this.getTitle(false);
     }
 	 
-    //-------------------------------------------------------------------------
+    /**
+     * Get title of underlying object.
+     * 
+     * @param asShortTitle
+     * @return
+     */
     public String getTitle(
     	boolean asShortTitle
     ) {
@@ -136,39 +169,30 @@ public class ObjectReference
     		else {
     			return this.exception.getMessage();
     		}
-    	}
-    	else if(this.object == null) {
+    	} else if(this.object == null) {
     		return "";
-    	}
-    	else {
-    		String title = "";
+    	} else {
     		try {
-    			RefObject_1_0 refObj = this.object;
-    			title = this.app.getPortalExtension().getTitle(
-    				refObj,
+    			return this.app.getPortalExtension().getTitle(
+    				this.object,
     				this.app.getCurrentLocaleAsIndex(),
     				this.app.getCurrentLocaleAsString(),
     				asShortTitle,
     				this.app
     			);
-    			// Replace newlines by blank
-    			title = title.replace('\n', ' ');
-    			// Replace " by &quot;
-    			int pos = 0;
-    			while((pos = title.indexOf('"')) >= 0) {
-    				title = title.substring(0, pos) + "&quot;" + title.substring(pos + 1); 
-    			}
-    		}
-    		catch(Exception e) {
+    		} catch(Exception e) {
     			this.exception = new ServiceException(e);
     			SysLog.detail(e.getMessage(), e.getCause());
     			return this.getTitle();
     		}
-    		return title;
     	}
     }
 
-    //-------------------------------------------------------------------------
+    /**
+     * Get underlying object.
+     * 
+     * @return
+     */
     public RefObject_1_0 getObject(
     ) {
         return this.object;
@@ -202,7 +226,6 @@ public class ObjectReference
         }
     }
     
-    //-------------------------------------------------------------------------
     /**
      * Returns the background color of the field/value as W3C CSS color, 
      * null if not defined.
@@ -220,7 +243,6 @@ public class ObjectReference
         }
     }
   
-    //-------------------------------------------------------------------------
     /**
      * Returns the color of the field/value as W3C CSS color, null if not
      * defined.
@@ -238,7 +260,11 @@ public class ObjectReference
         }
     }
     
-    //-------------------------------------------------------------------------
+    /**
+     * Get select action.
+     * 
+     * @return
+     */
     public Action getSelectObjectAction(
     ) {  
         String title = this.getTitle();
@@ -270,7 +296,11 @@ public class ObjectReference
         );
     }
 
-    //-------------------------------------------------------------------------
+    /**
+     * Get select and edit action.
+     * 
+     * @return
+     */
     public Action getSelectAndEditObjectAction(
     ) {  
         if(this.object == null) {
@@ -293,7 +323,11 @@ public class ObjectReference
         );
     }
   
-    //-------------------------------------------------------------------------
+    /**
+     * Get reload action.
+     * 
+     * @return
+     */
     public Action getReloadAction(
     ) {
         if(this.object == null) {
@@ -438,7 +472,10 @@ public class ObjectReference
         }
     }
 
-    //-------------------------------------------------------------------------
+    /* (non-Javadoc)
+     * @see java.lang.Object#toString()
+     */
+    @Override
     public String toString(
     ) {
         return this.getTitle();

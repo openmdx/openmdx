@@ -80,12 +80,13 @@ public class WBXMLPlugIn extends DynamicPlugIn {
         DynamicPlugIn.addTo(WBXMLPlugIn.page0, CodeSpace.TAG, "position");
         DynamicPlugIn.addTo(WBXMLPlugIn.page0, CodeSpace.TAG, "size");
         DynamicPlugIn.addTo(WBXMLPlugIn.page0, CodeSpace.TAG, "groups");
-        DynamicPlugIn.addTo(WBXMLPlugIn.page0, CodeSpace.TAG, "group");
+        DynamicPlugIn.addTo(WBXMLPlugIn.page0, CodeSpace.TAG, "features");
         DynamicPlugIn.addTo(WBXMLPlugIn.page0, CodeSpace.TAG, "parameters");
         DynamicPlugIn.addTo(WBXMLPlugIn.page0, CodeSpace.TAG, "element");
         DynamicPlugIn.addTo(WBXMLPlugIn.page0, CodeSpace.TAG, "description");
         DynamicPlugIn.addTo(WBXMLPlugIn.page0, CodeSpace.TAG, "parameter");
         DynamicPlugIn.addTo(WBXMLPlugIn.page0, CodeSpace.TAG, "stackTraceElements");
+        DynamicPlugIn.addTo(WBXMLPlugIn.page0, CodeSpace.TAG, "refresh");
         DynamicPlugIn.addTo(WBXMLPlugIn.page0, CodeSpace.ATTRIBUTE_NAME, "id");
         DynamicPlugIn.addTo(WBXMLPlugIn.page0, CodeSpace.ATTRIBUTE_NAME, "href");
         DynamicPlugIn.addTo(WBXMLPlugIn.page0, CodeSpace.ATTRIBUTE_NAME, "version");
@@ -124,7 +125,8 @@ public class WBXMLPlugIn extends DynamicPlugIn {
      * @see org.openmdx.base.wbxml.AbstractPlugIn#getDefaultDocumentPublicIdentifier()
      */
     @Override
-    public String getDefaultDocumentPublicIdentifier(String defautNamespace
+    public String getDefaultDocumentPublicIdentifier(
+        String defautNamespace
     ) {
         return "-//openMDX//REST 2.0//EN";
     }

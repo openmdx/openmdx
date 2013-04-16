@@ -312,14 +312,10 @@ public class Ui_1 extends Standard_1 {
             this.getDelegation()
         );    
         try {
-	        delegation.addGetRequest(
-	            Object_2Facade.getPath(element)
-	        );
 	        delegation.addReplaceRequest(
 	            element
 	        );
-        }
-        catch(ServiceException e) {
+        } catch(ServiceException e) {
         	if(e.getExceptionCode() != BasicException.Code.NOT_FOUND) {
         		throw e;
         	}
@@ -343,14 +339,10 @@ public class Ui_1 extends Standard_1 {
             this.getDelegation()
         );        	
         try {
-	        delegation.addGetRequest(
-	            Object_2Facade.getPath(elementDefinition)
-	        );
 	        delegation.addReplaceRequest(
 	            elementDefinition
 	        );
-        }
-        catch(ServiceException e) {
+        } catch(ServiceException e) {
         	if(e.getExceptionCode() != BasicException.Code.NOT_FOUND) {
         		throw e;
         	}
@@ -1936,14 +1928,12 @@ public class Ui_1 extends Standard_1 {
     private List<Ui_1.StructuralFeatureDefinition> getStructFeatureDefinitions(
         ModelElement_1_0 paramType
     ) throws ServiceException {
-        Collection fieldDefs = ((Map)paramType.objGetValue("field")).values();
+        @SuppressWarnings("unchecked")
+        Collection<ModelElement_1_0> fieldDefs = paramType.objGetMap("field").values();
         List<Ui_1.StructuralFeatureDefinition> featureDefinitions = new ArrayList<Ui_1.StructuralFeatureDefinition>();
-        for(
-            Iterator i = fieldDefs.iterator();
-            i.hasNext();
-        ) {
+        for(ModelElement_1_0 fieldDef: fieldDefs) {
             featureDefinitions.add(
-                new StructuralFeatureDefinition((ModelElement_1_0)i.next())
+                new StructuralFeatureDefinition(fieldDef)
             );
         }
         return featureDefinitions;
@@ -2026,7 +2016,7 @@ public class Ui_1 extends Standard_1 {
     	Model_1_0 model = this.getModel();
         Map<String,Ui_1.OperationDefinition> featureDefinitions = new HashMap<String,Ui_1.OperationDefinition>();
         // Add modeled operations
-        Collection features = ((Map)classDef.objGetValue("allFeature")).values();
+        Collection features = classDef.objGetMap("allFeature").values();
         for(
             Iterator<ModelElement_1_0> i = features.iterator(); 
             i.hasNext(); 
@@ -2483,11 +2473,11 @@ public class Ui_1 extends Standard_1 {
 	                tabFacade.attributeValuesAsList("operationName").add(
 	                    operationDef.getQualifiedName()
 	                );
-	                if(tabFacade.getAttributeValues("isQuery") != null) {
+	                if(tabFacade.getAttributeValues("isQuery") == null) {
 	                	tabFacade.attributeValuesAsList("isQuery").add(
 	                        Boolean.valueOf(operationDef.isQuery)
 	                    );
-	                }                        
+	                }
 	                // Modeled operation
 	                if(operationDef.getModelElement() != null) {
 	                    // Map parameter to FieldGroup
@@ -2852,13 +2842,12 @@ public class Ui_1 extends Standard_1 {
 		            Query_2Facade.newInstance(getRequest.path()),
 		            getReply.getResult()
 		        );
-		        return getReply.getObject();
-	        }
-	        catch (ResourceException e) {
+		        return getReply.getResult().isEmpty() ? null : getReply.getObject();
+	        } catch (ResourceException e) {
 	        	throw new ServiceException(e);
 	        }
 	    }
-            
+
 	    //------------------------------------------------------------------------
 	    private void assertCachedElements(
 	        Path segmentIdentity
@@ -3212,8 +3201,7 @@ public class Ui_1 extends Standard_1 {
 		                    inspectorDef = this.retrieveObject(
 		                        segmentIdentity.getDescendant(new String[]{"element", forClass})
 		                    );
-		                }
-		                catch(ServiceException e) {} 
+		                } catch(ServiceException e) {} 
 		                if(inspectorDef == null) {
 		                    // Always assert perspective Root
 		                    if(!"Root".equals(segmentIdentity.getBase())) {

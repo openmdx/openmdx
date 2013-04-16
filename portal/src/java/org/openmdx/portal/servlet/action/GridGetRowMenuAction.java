@@ -153,7 +153,7 @@ public class GridGetRowMenuAction extends BoundAction {
                     for(int i = 0; i < referencePanes.length; i++) {
                         ReferencePane referencePane = referencePanes[i];
                         List<Action> selectReferenceActions = referencePane.getSelectReferenceActions();
-                        if(selectReferenceActions.isEmpty()) {
+                        if(!selectReferenceActions.isEmpty()) {
                             for(int j = 0; j < selectReferenceActions.size(); j++) {
                             	Action selectReferenceAction = selectReferenceActions.get(j);
                             	int paneIndex = referencePane.getReferencePaneControl().getPaneIndex();

@@ -52,6 +52,7 @@ import java.nio.ByteBuffer;
 import javax.xml.namespace.NamespaceContext;
 
 import org.openmdx.base.exception.ServiceException;
+import org.openmdx.base.text.conversion.Base64;
 import org.openmdx.kernel.exception.BasicException;
 
 
@@ -71,7 +72,7 @@ public abstract class AbstractPlugIn implements PlugIn {
     /* (non-Javadoc)
      * @see org.openmdx.base.wbxml.PlugIn#reset()
      */
-//  @Override
+    @Override
     public void reset() {
         // nothing to do
     }
@@ -83,7 +84,7 @@ public abstract class AbstractPlugIn implements PlugIn {
      *
      * @return the default public identifier, which may be <code>null</code> 
      */
-//  @Override
+    @Override
     public String getDefaultDocumentPublicIdentifier(
         String defaultNamespaceURI
     ){
@@ -93,7 +94,7 @@ public abstract class AbstractPlugIn implements PlugIn {
     /* (non-Javadoc)
      * @see org.openmdx.base.wbxml.PlugIn#isStringTableReadyAtStartOfDocument()
      */
-//  @Override
+    @Override
     public boolean isStringTableReadyAtStartOfDocument() {
         return true;
     }
@@ -101,7 +102,7 @@ public abstract class AbstractPlugIn implements PlugIn {
     /* (non-Javadoc)
      * @see org.openmdx.base.xml.wbxml.spi.PlugIn#setStringTable(byte[])ic
      */
-//  @Override
+    @Override
     public void setStringTable(
         ByteBuffer stringTable
     ) throws ServiceException {
@@ -115,16 +116,24 @@ public abstract class AbstractPlugIn implements PlugIn {
     /* (non-Javadoc)
      * @see org.openmdx.base.wbxml.PlugIn#getStringTable()
      */
-//  @Override
+    @Override
     public ByteBuffer getStringTable(
     ) throws ServiceException {
         return null;
     }
 
     /* (non-Javadoc)
+     * @see org.openmdx.base.wbxml.PlugIn#findStringToken(java.lang.String)
+     */
+    @Override
+    public StringToken findStringToken(String value) {
+        return null;
+    }
+
+    /* (non-Javadoc)
      * @see org.openmdx.base.xml.wbxml.spi.PlugIn#getStringToken(java.lang.String)
      */
-//  @Override
+    @Override
     public StringToken getStringToken(
         String value
     ) {
@@ -134,7 +143,7 @@ public abstract class AbstractPlugIn implements PlugIn {
     /* (non-Javadoc)
      * @see org.openmdx.base.xml.wbxml.spi.PlugIn#getTagToken(java.lang.String)
      */
-//  @Override
+    @Override
     public CodeToken getTagToken(
         String namespaceURI, String value
     ) {
@@ -144,7 +153,7 @@ public abstract class AbstractPlugIn implements PlugIn {
     /* (non-Javadoc)
      * @see org.openmdx.base.xml.wbxml.spi.PlugIn#getAttributeNameToken(java.lang.String)
      */
-//  @Override
+    @Override
     public CodeToken getAttributeNameToken(
         String namespaceURI, 
         String elementName, 
@@ -156,7 +165,7 @@ public abstract class AbstractPlugIn implements PlugIn {
     /* (non-Javadoc)
      * @see org.openmdx.base.xml.wbxml.spi.PlugIn#getAttributeStartToken(boolean, java.lang.String, java.lang.String)
      */
-//  @Override
+    @Override
     public CodeToken findAttributeStartToken(
         boolean force, 
         String namespaceURI, 
@@ -168,7 +177,7 @@ public abstract class AbstractPlugIn implements PlugIn {
     /* (non-Javadoc)
      * @see org.openmdx.base.xml.wbxml.spi.PlugIn#getAttributeValueStartToken(boolean, java.lang.String)
      */
-//  @Override
+    @Override
     public CodeToken findAttributeValueToken(
         boolean force, 
         String namespaceURI, String value
@@ -179,7 +188,7 @@ public abstract class AbstractPlugIn implements PlugIn {
     /* (non-Javadoc)
      * @see org.openmdx.base.xml.wbxml.spi.PlugIn#getAttributeValueToken(java.lang.String)
      */
-//  @Override
+    @Override
     public CodeToken getAttributeValueToken(
         String namespaceURI, String value
     ) {
@@ -189,7 +198,7 @@ public abstract class AbstractPlugIn implements PlugIn {
     /* (non-Javadoc)
      * @see org.openmdx.base.xml.wbxml.spi.PlugIn#resolveString(int)
      */
-//  @Override
+    @Override
     public CharSequence resolveString(
         int index
     ) throws ServiceException {
@@ -204,7 +213,7 @@ public abstract class AbstractPlugIn implements PlugIn {
     /* (non-Javadoc)
      * @see org.openmdx.base.xml.wbxml.spi.PlugIn#resolveAttributeStart(int, int)
      */
-//  @Override
+    @Override
     public CodeResolution resolveAttributeStart(
         int page, 
         int id
@@ -221,7 +230,7 @@ public abstract class AbstractPlugIn implements PlugIn {
     /* (non-Javadoc)
      * @see org.openmdx.base.xml.wbxml.spi.PlugIn#resolveAttributeValue(int, int)
      */
-//  @Override
+    @Override
     public String resolveAttributeValue(
         int page, 
         int id
@@ -238,7 +247,7 @@ public abstract class AbstractPlugIn implements PlugIn {
     /* (non-Javadoc)
      * @see org.openmdx.base.xml.wbxml.spi.PlugIn#resolveTag(int, int)
      */
-//  @Override
+    @Override
     public Object resolveTag(
         int page, 
         int id
@@ -255,7 +264,7 @@ public abstract class AbstractPlugIn implements PlugIn {
     /* (non-Javadoc)
      * @see org.openmdx.base.xml.wbxml.spi.ExtensionHandler#ext0()
      */
-//  @Override
+    @Override
     public void ext0(
     ) throws ServiceException {
         throw new ServiceException(
@@ -269,7 +278,7 @@ public abstract class AbstractPlugIn implements PlugIn {
     /* (non-Javadoc)
      * @see org.openmdx.base.xml.wbxml.spi.ExtensionHandler#ext1()
      */
-//  @Override
+    @Override
     public void ext1(
     ) throws ServiceException {
         throw new ServiceException(
@@ -283,7 +292,7 @@ public abstract class AbstractPlugIn implements PlugIn {
     /* (non-Javadoc)
      * @see org.openmdx.base.xml.wbxml.spi.ExtensionHandler#ext2()
      */
-//  @Override
+    @Override
     public void ext2(
     ) throws ServiceException {
         throw new ServiceException(
@@ -297,91 +306,103 @@ public abstract class AbstractPlugIn implements PlugIn {
     /* (non-Javadoc)
      * @see org.openmdx.base.xml.wbxml.spi.ExtensionHandler#extI0(java.lang.String)
      */
-//  @Override
-    public void ext0(String argument
+    @Override
+    public void ext0(
+        String argument
     ) throws ServiceException {
         throw new ServiceException(
             BasicException.Code.DEFAULT_DOMAIN,
             BasicException.Code.NOT_SUPPORTED,
             "This extension is not supported",
-            new BasicException.Parameter("token", GlobalTokens.EXT_I_0)
+            new BasicException.Parameter("token", GlobalTokens.EXT_I_0),
+            new BasicException.Parameter("argument", argument)
         );
     }
 
     /* (non-Javadoc)
      * @see org.openmdx.base.xml.wbxml.spi.ExtensionHandler#extI1(java.lang.String)
      */
-//  @Override
-    public void ext1(String argument
+    @Override
+    public void ext1(
+        String argument
     ) throws ServiceException {
         throw new ServiceException(
             BasicException.Code.DEFAULT_DOMAIN,
             BasicException.Code.NOT_SUPPORTED,
             "This extension is not supported",
-            new BasicException.Parameter("token", GlobalTokens.EXT_I_1)
+            new BasicException.Parameter("token", GlobalTokens.EXT_I_1),
+            new BasicException.Parameter("argument", argument)
         );
     }
 
     /* (non-Javadoc)
      * @see org.openmdx.base.xml.wbxml.spi.ExtensionHandler#extI2(java.lang.String)
      */
-//  @Override
-    public void ext2(String argument
+    @Override
+    public void ext2(
+        String argument
     ) throws ServiceException {
         throw new ServiceException(
             BasicException.Code.DEFAULT_DOMAIN,
             BasicException.Code.NOT_SUPPORTED,
             "This extension is not supported",
-            new BasicException.Parameter("token", GlobalTokens.EXT_I_2)
+            new BasicException.Parameter("token", GlobalTokens.EXT_I_2),
+            new BasicException.Parameter("argument", argument)
         );
     }
 
     /* (non-Javadoc)
      * @see org.openmdx.base.xml.wbxml.spi.ExtensionHandler#extT0(int)
      */
-//  @Override
-    public void ext0(int argument
+    @Override
+    public void ext0(
+        int argument
     ) throws ServiceException {
         throw new ServiceException(
             BasicException.Code.DEFAULT_DOMAIN,
             BasicException.Code.NOT_SUPPORTED,
             "This extension is not supported",
-            new BasicException.Parameter("token", GlobalTokens.EXT_T_0)
+            new BasicException.Parameter("token", GlobalTokens.EXT_T_0),
+            new BasicException.Parameter("argument", argument)
         );
     }
 
     /* (non-Javadoc)
      * @see org.openmdx.base.xml.wbxml.spi.ExtensionHandler#extT1(int)
      */
-//  @Override
-    public void ext1(int argument
+    @Override
+    public void ext1(
+        int argument
     ) throws ServiceException {
         throw new ServiceException(
             BasicException.Code.DEFAULT_DOMAIN,
             BasicException.Code.NOT_SUPPORTED,
             "This extension is not supported",
-            new BasicException.Parameter("token", GlobalTokens.EXT_T_1)
+            new BasicException.Parameter("token", GlobalTokens.EXT_T_1),
+            new BasicException.Parameter("argument", argument)
         );
     }
 
     /* (non-Javadoc)
      * @see org.openmdx.base.xml.wbxml.spi.ExtensionHandler#extT2(int)
      */
-//  @Override
-    public void ext2(int argument
+    @Override
+    public void ext2(
+        int argument
     ) throws ServiceException {
         throw new ServiceException(
             BasicException.Code.DEFAULT_DOMAIN,
             BasicException.Code.NOT_SUPPORTED,
             "This extension is not supported",
-            new BasicException.Parameter("token", GlobalTokens.EXT_T_2)
+            new BasicException.Parameter("token", GlobalTokens.EXT_T_2),
+            new BasicException.Parameter("argument", argument)
         );
     }
 
     /* (non-Javadoc)
      * @see org.openmdx.base.xml.wbxml.spi.ExtensionHandler#opaque(byte[])
      */
-//  @Override
+    @Override
     public void opaque(
         byte[] data
     ) throws ServiceException {
@@ -389,14 +410,15 @@ public abstract class AbstractPlugIn implements PlugIn {
             BasicException.Code.DEFAULT_DOMAIN,
             BasicException.Code.NOT_SUPPORTED,
             "This extension is not supported",
-            new BasicException.Parameter("token", GlobalTokens.OPAQUE)
+            new BasicException.Parameter("token", GlobalTokens.OPAQUE),
+            new BasicException.Parameter("argument", data == null ? null : Base64.encode(data))
         );
     }
 
     /* (non-Javadoc)
      * @see org.openmdx.base.wbxml.PlugIn#getNamespaceContext()
      */
-//  @Override
+    @Override
     public NamespaceContext getNamespaceContext() {
         return null;
     }

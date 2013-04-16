@@ -79,6 +79,7 @@
   border-right:1px solid black;
   border-bottom:1px solid black;
   border-left:1px solid black;
+  z-index: 10010;
 }
 #navigation li ul li {
 	display:block;

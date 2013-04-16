@@ -57,44 +57,44 @@ package org.openmdx.application.dataprovider.layer.persistence.jdbc;
 public class Database_1_Attributes {
 
   /**
-   * QueryFilter class.
+   * Query extension class.
    */
-  public static final String QUERY_FILTER_CLASS = "org:openmdx:compatibility:datastore1:QueryFilter";
+  public static final String QUERY_EXTENSION_CLASS = "org:openmdx:compatibility:datastore1:QueryFilter";
 
   /**
-   * Query filter clause.
+   * Query extension clause.
    */
-  public static final String QUERY_FILTER_CLAUSE = "clause";
+  public static final String QUERY_EXTENSION_CLAUSE = "clause";
 
   /**
-   * Query filter string parameters.
+   * Query extension string parameters.
    */
-  public static final String QUERY_FILTER_STRING_PARAM = "stringParam";
+  public static final String QUERY_EXTENSION_STRING_PARAM = "stringParam";
 
   /**
-   * Query filter integer parameters.
+   * Query extension integer parameters.
    */
-  public static final String QUERY_FILTER_INTEGER_PARAM = "integerParam";
+  public static final String QUERY_EXTENSION_INTEGER_PARAM = "integerParam";
 
   /**
-   * Query filter boolean parameters.
+   * Query extension boolean parameters.
    */
-  public static final String QUERY_FILTER_BOOLEAN_PARAM = "booleanParam";
+  public static final String QUERY_EXTENSION_BOOLEAN_PARAM = "booleanParam";
 
   /**
-   * Query filter decimal parameters.
+   * Query extension decimal parameters.
    */
-  public static final String QUERY_FILTER_DECIMAL_PARAM = "decimalParam";
+  public static final String QUERY_EXTENSION_DECIMAL_PARAM = "decimalParam";
 
   /**
-   * Query filter date parameters.
+   * Query extension date parameters.
    */
-  public static final String QUERY_FILTER_DATE_PARAM = "dateParam";
+  public static final String QUERY_EXTENSION_DATE_PARAM = "dateParam";
 
   /**
-   * Query filter dateTime parameters.
+   * Query extension dateTime parameters.
    */
-  public static final String QUERY_FILTER_DATETIME_PARAM = "dateTimeParam";
+  public static final String QUERY_EXTENSION_DATETIME_PARAM = "dateTimeParam";
   
   /**
    * The hint allows to activate counting of the result set. To be activated

@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2009-2011, OMEX AG, Switzerland
+ * Copyright (c) 2009-2012, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -47,12 +47,16 @@
  */
 package org.openmdx.base.accessor.rest.spi;
 
-import javax.transaction.Synchronization;
 
 /**
  * Synchronization_2_0
+ * 
+ * @deprecated use a org.openmdx.base.persistence.cci.UnitOfWork
+ * instance instead of a javax.jdo.Transaction instance
  */
-public interface Synchronization_2_0 extends Synchronization {
+@Deprecated
+public interface Synchronization_2_0 {
+
 
     /**
      * The <code>afterBegin</code> method notifies a 
@@ -67,4 +71,20 @@ public interface Synchronization_2_0 extends Synchronization {
      */
     void clear();
     
+    /**
+     * The beforeCompletion method is called by the transaction manager prior 
+     * to the start of the two-phase transaction commit process. This call is 
+     * executed with the transaction context of the transaction that is being 
+     * committed.
+     */
+    void beforeCompletion();
+    
+    /**
+     * This method is called by the transaction manager after the transaction 
+     * is committed or rolled back.
+     * 
+     * @param status The status of the transaction completion.
+     */
+    void afterCompletion(int status);
+      
 }

@@ -99,23 +99,24 @@ public class Jmi1PackageInvocationHandler implements InvocationHandler {
         String qualifiedMofName = qualifiedMofNames.get(qualifiedCciName);
         if(qualifiedMofName == null) {
             Model_1_0 model = Model_1Factory.getModel();
-            for(
+            QualifiedName: for(
                 Iterator<ModelElement_1_0> i = model.getContent().iterator(); 
                 i.hasNext(); 
             ) {
                 ModelElement_1_0 e = i.next();
-                String elementName = Identifier.CLASS_PROXY_NAME.toIdentifier((String)e.objGetValue("name"));
-                String qualifiedElementName = (String)e.objGetValue("qualifiedName");
-                if(
-                    (model.isClassType(e) || model.isStructureType(e)) &&
-                    elementName.equals(cciName) &&
-                    qualifiedElementName.substring(0, qualifiedElementName.lastIndexOf(":")).equals(qualifiedPackageName)
-                ) {
-                    qualifiedMofNames.putIfAbsent(
-                        qualifiedCciName, 
-                        qualifiedMofName = qualifiedElementName
-                    );
-                    break;
+                if(model.isClassType(e) || model.isStructureType(e)) {
+                    String elementName = Identifier.CLASS_PROXY_NAME.toIdentifier((String)e.objGetValue("name"));
+                    String qualifiedElementName = (String)e.objGetValue("qualifiedName");
+                    if(
+                        elementName.equals(cciName) &&
+                        qualifiedElementName.substring(0, qualifiedElementName.lastIndexOf(":")).equals(qualifiedPackageName)
+                    ) {
+                        qualifiedMofNames.putIfAbsent(
+                            qualifiedCciName, 
+                            qualifiedMofName = qualifiedElementName
+                        );
+                        break QualifiedName;
+                    }
                 }
             }
         }

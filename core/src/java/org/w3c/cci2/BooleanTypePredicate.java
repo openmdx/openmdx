@@ -74,8 +74,8 @@ public interface BooleanTypePredicate {
     );
 
     /**
-     * This method is deprecated to avoid its erroneous use as in lieu of
-     * equalTo().
+     * This method is deprecated in order to avoid its erroneous use in 
+     * lieu of equalTo().
      * 
      * @deprecated to avoid erroneous use 
      * 

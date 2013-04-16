@@ -1,14 +1,14 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
- * Description: write model as org.omg.model1.xsd compliant XML file
+ * Project:     openMDX/Core, http://www.openmdx.org/
+ * Description: XMI Model Mapper
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
  * ====================================================================
  *
  * This software is published under the BSD license
  * as listed below.
  * 
- * Copyright (c) 2004, OMEX AG, Switzerland
+ * Copyright (c) 2004-2013, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -46,672 +46,922 @@
  * This product includes software developed by the Apache Software
  * Foundation (http://www.apache.org/).
  */
-
-/**
- * @author wfro
- */
 package org.openmdx.application.mof.mapping.xmi;
 
-import java.io.PrintWriter;
+import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamWriter;
+
+import org.openmdx.base.accessor.cci.DataObject_1_0;
+import org.openmdx.base.accessor.cci.SystemAttributes;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
 import org.openmdx.base.naming.Path;
+import org.openmdx.base.wbxml.cci.StringTable;
+import org.openmdx.base.xml.stream.XMLOutputFactories;
 import org.w3c.format.DateTimeFormat;
 
-@SuppressWarnings({"rawtypes"})
-public class XMIModelMapper {
+/**
+ * XMI Model Mapper
+ */
+public class XMIModelMapper implements StringTable {
 
-  //---------------------------------------------------------------------------
-  public XMIModelMapper(
-    PrintWriter os, 
-    boolean allFeatures
-  ) {
-    this.pw = new PrintWriter(os);
-    this.allFeatures = allFeatures;
-  }
-
-  //---------------------------------------------------------------------------
-  String xmlEncodeValue(
-    String value
-  ) {
-    StringBuffer encodedString = new StringBuffer(value);
-    for(
-      int i = value.length()-1; 
-      i >= 0;
-      i--
-    ) {
-      switch(value.charAt(i)) {
-        case '<':
-          encodedString.replace(i, i+1, "&lt;");
-          break;
-        case '>':
-          encodedString.replace(i, i+1, "&gt;");
-          break;
-        case '&':
-          encodedString.replace(i, i+1, "&amp;");
-          break;
-        case '"':
-          encodedString.replace(i, i+1, "&quot;");
-          break;
-      }
+    /**
+     * Constructor 
+     *
+     * @param os
+     * @param mimeType
+     * @param allFeatures 
+     * 
+     * @throws ServiceException
+     */
+    public XMIModelMapper(
+        OutputStream os,
+        String mimeType, 
+        boolean allFeatures
+    ) throws ServiceException {
+        try {
+            this.pw = XMLOutputFactories.newInstance(mimeType).createXMLStreamWriter(os, "UTF-8");
+            this.derivedFeatures = allFeatures;
+            this.emptyFeatures = allFeatures;
+        } catch(Exception e) {
+            throw new ServiceException(e);
+        }
     }
-    return encodedString.toString();
-  }
     
-  //---------------------------------------------------------------------------
+    private final XMLStreamWriter pw;
+    private final boolean derivedFeatures;
+    private final boolean emptyFeatures;
+
+    /* (non-Javadoc)
+     * @see org.openmdx.base.wbxml.cci.StringTable#isStringTablePopulatedExplicitely()
+     */
+    @Override
+    public boolean isStringTablePopulatedExplicitely() {
+        if(this.pw instanceof StringTable) {
+            return ((StringTable)this.pw).isStringTablePopulatedExplicitely();
+        } else {
+            return false;
+        }
+    }
+
+    /* (non-Javadoc)
+     * @see org.openmdx.base.wbxml.cci.StringTable#addString(java.lang.String)
+     */
+    @Override
+    public void addString(String string) {
+        if(this.pw instanceof StringTable) {
+            ((StringTable)this.pw).addString(string);
+        }
+    }
+
     /**
      * In case of a multi-valued element write it in the form 
-     * <elementName>{<_item>value</_item>}</elementName>.
+     * <elementName>{<_item >value</_item>}</elementName>.
+     * 
+     * @param elementName
+     * @param elementValues
      */
-  void writeElement(
-    String elementName,
-    List elementValues
-  ) {
-    if(elementValues.size() == 0) {
-        return;
+    void writeElement(
+        String elementName,
+        Collection<Object> elementValues
+    ) throws XMLStreamException {
+        if(elementValues.isEmpty()) {
+            if(this.emptyFeatures) {
+                this.pw.writeEmptyElement(elementName);
+            }
+        } else {
+            this.pw.writeStartElement(elementName);
+            for(Object elementValue: elementValues) {
+                this.pw.writeStartElement("_item");
+                writeValue(elementValue);
+                this.pw.writeEndElement();
+            }
+            this.pw.writeEndElement();
+        }
     }
-    this.pw.println(spaces(44) + "<" + elementName +  ">");
-    for(
-      Iterator<?> i = elementValues.iterator();
-      i.hasNext();
-    ) {
-      java.lang.Object elementValue = i.next();
-      if(elementValue instanceof Path) {
-        this.pw.println(spaces(48) + "<_item>" + ((Path)elementValue).toXRI() + "</_item>");
-      }
-      else {
-        this.pw.println(spaces(48) + "<_item>" + elementValue.toString() + "</_item>");
-      }
-    }    
-    this.pw.println(spaces(44) + "</" + elementName +  ">");
-  } 
 
-  //---------------------------------------------------------------------------
+    /**
+     * In case of a map element write it in the form 
+     * <elementName>{<_item key="key">value</_item>}</elementName>.
+     * 
+     * @param elementName
+     * @param elementValues
+     */
+    void writeElement(
+        String elementName,
+        Map<?,?> elementValues
+    ) throws XMLStreamException {
+        if(elementValues.isEmpty()) {
+            if(this.emptyFeatures) {
+                this.pw.writeEmptyElement(elementName);
+            }
+        } else {
+            this.pw.writeStartElement(elementName);
+            for(Map.Entry<?, ?> elementValue: elementValues.entrySet()) {
+                this.pw.writeStartElement("_item");
+                this.pw.writeAttribute("_key", elementValue.getKey().toString());
+                writeValue(elementValue.getValue());
+                this.pw.writeEndElement();
+            }
+            this.pw.writeEndElement();
+        }
+    }
+
+    
     /**
      * Otherwise write it in the form <elementName>value</elementName>
+     *
+     * @param elementName
+     * @param elementValue
      */
-  void writeElement(
-    String elementName,
-    java.lang.Object elementValue
-  ) {
-    this.writeElement(
-      44,
-      elementName,
-      elementValue
-    );
-  } 
+    void writeElement(
+        String elementName,
+        java.lang.Object elementValue
+    ) throws XMLStreamException {
+        this.writeElement(
+            44,
+            elementName,
+            elementValue instanceof ModelElement_1_0 ? ((ModelElement_1_0)elementValue).jdoGetObjectId() : elementValue
+        );
+    } 
 
-  //---------------------------------------------------------------------------
-  void writeElement(
-    int pos,
-    String elementName,
-    java.lang.Object elementValue
-  ) {
-    if(elementValue != null) {    
-      if(elementValue instanceof Path) {
-        this.pw.println(spaces(pos) + "<" + elementName +  ">" + ((Path)elementValue).toXRI() + "</" + elementName + ">");
-      }
-      else {
-        this.pw.println(spaces(pos) + "<" + elementName +  ">" + elementValue.toString() + "</" + elementName + ">");
-      }
+    /**
+     * Externalize an element value
+     * 
+     * @param elementValue
+     * @throws XMLStreamException
+     */
+    void writeValue(
+        Object elementValue
+    ) throws XMLStreamException{
+        if(elementValue instanceof Path) {
+            this.pw.writeCharacters(((Path)elementValue).toXRI());
+        } else if (elementValue instanceof DataObject_1_0) {
+            this.pw.writeCharacters(((DataObject_1_0)elementValue).jdoGetObjectId().toXRI());
+        } else {
+            this.pw.writeCharacters(elementValue.toString());
+        }
     }
-  } 
+    
+   /**
+     * @param pos
+     * @param elementName
+     * @param elementValue
+     */
+    void writeElement(
+        int pos,
+        String elementName,
+        java.lang.Object elementValue
+    ) throws XMLStreamException {
+        if(elementValue == null) {
+            if(this.emptyFeatures) {
+                this.pw.writeEmptyElement(elementName);
+            }
+        } else {
+            this.pw.writeStartElement(elementName);
+            writeValue(elementValue);
+            this.pw.writeEndElement();
+        }
+    } 
 
-  //---------------------------------------------------------------------------
-  /**
-   * Translate a string of the form 20020406T082623.930Z to a string of the
-   * form 2002-04-06T08:26:23Z.
-   */
-  void writeElementAsDateTime(
-    String elementName,
-    Date elementValue
-  ) {
-    this.writeElementAsDateTime(
-      44,
-      elementName,
-      elementValue
-    );
-  }  
-
-  //---------------------------------------------------------------------------
-  void writeElementAsDateTime(
-    int pos,
-    String elementName,
-    Date elementValue
-  ) {
-    this.pw.println(
-      spaces(pos) + "<" + elementName +  ">" + 
-      DateTimeFormat.EXTENDED_UTC_FORMAT.format(elementValue) +
-      "</" + elementName + ">"
-    );
-  }  
-
-  //---------------------------------------------------------------------------
-  void writeElementEncoded(
-    String elementName,
-    List elementValues
-  ) {
-    for(
-      Iterator i = elementValues.iterator();
-      i.hasNext();
-    ) {
-     this.pw.println(spaces(44) + "<" + elementName +  ">" + xmlEncodeValue((String)i.next()) + "</" + elementName + ">");
+    /**
+     * Translate a string of the form 20020406T082623.930Z to a string of the
+     * form 2002-04-06T08:26:23Z.
+     * 
+     * @param elementName
+     * @param elementValue
+     */
+    void writeElementAsDateTime(
+        String elementName,
+        Date elementValue
+    ) throws XMLStreamException {
+        this.writeElementAsDateTime(
+            44,
+            elementName,
+            elementValue
+        );
     }
-  }  
 
-  //---------------------------------------------------------------------------
-  public void writePackage(
-    ModelElement_1_0 packageDef
-  ) throws ServiceException {
+    /**
+     * Write element as date time.
+     * 
+     * @param pos
+     * @param elementName
+     * @param elementValue
+     */
+    void writeElementAsDateTime(
+        int pos,
+        String elementName,
+        Date elementValue
+    ) throws XMLStreamException {
+        this.pw.writeStartElement(elementName);
+        this.pw.writeCharacters(DateTimeFormat.EXTENDED_UTC_FORMAT.format(elementValue));
+        this.pw.writeEndElement();
+    }  
 
-    this.pw.println(spaces(36) + "<org.omg.model1.Package qualifiedName=\"" + packageDef.objGetValue("qualifiedName") + "\">");
-    this.pw.println(spaces(40) + "<_object>");
+    /**
+     * Write element with XML-encoded element values.
+     * 
+     * @param elementName
+     * @param elementValues
+     */
+    void writeElementEncoded(
+        String elementName,
+        List<Object> elementValues
+    ) throws XMLStreamException {
+        for(Object elementValue: elementValues) {
+            this.pw.writeStartElement(elementName);
+            this.pw.writeCharacters(elementValue.toString());
+            this.pw.writeEndElement();
+        }
+    }  
 
-    if(this.allFeatures) {
-      writeElement("identity", packageDef.jdoGetObjectId().toString());
+    /**
+     * Write model package definition.
+     * 
+     * @param packageDef
+     * @throws ServiceException
+     */
+    public void writePackage(
+        ModelElement_1_0 packageDef
+    ) throws ServiceException {
+        try {
+            this.pw.writeStartElement("org.omg.model1.Package");
+            this.pw.writeAttribute("qualifiedName", (String)packageDef.objGetValue("qualifiedName"));
+            this.pw.writeStartElement("_object");
+            if(this.derivedFeatures) {
+                this.writeElement(SystemAttributes.OBJECT_IDENTITY, packageDef.jdoGetObjectId().toXRI());
+                this.writeElementAsDateTime(SystemAttributes.CREATED_AT, (Date)packageDef.objGetValue(SystemAttributes.CREATED_AT));
+                this.writeElement(SystemAttributes.CREATED_BY, packageDef.objGetSet(SystemAttributes.CREATED_BY));
+                this.writeElementAsDateTime(SystemAttributes.MODIFIED_AT, (Date)packageDef.objGetValue(SystemAttributes.MODIFIED_AT));
+                this.writeElement(SystemAttributes.MODIFIED_BY, packageDef.objGetSet(SystemAttributes.MODIFIED_BY));
+            }
+            this.writeElement("container", packageDef.objGetValue("container"));
+            if(this.derivedFeatures) {
+                this.writeElement("name", packageDef.objGetValue("name"));
+                this.writeElement("qualifiedName", packageDef.objGetValue("qualifiedName"));
+            }
+            this.writeElement("stereotype", packageDef.objGetList("stereotype"));
+            this.writeElement("isAbstract", packageDef.objGetValue("isAbstract"));
+            if(this.derivedFeatures) {
+                this.writeElement("feature", packageDef.objGetList("feature"));
+                this.writeElement("content", packageDef.objGetList("content"));
+                this.writeElement("allSupertype", packageDef.objGetList("allSupertype"));
+                this.writeElement("subtype", packageDef.objGetList("subtype"));
+                this.writeElement("allSubtype", packageDef.objGetList("allSubtype"));
+            }
+            this.writeElement("supertype", packageDef.objGetList("supertype"));
+            this.writeElement("visibility", packageDef.objGetValue("visibility"));
+            this.pw.writeEndElement();
+            this.pw.writeEmptyElement("_content");
+            this.pw.writeEndElement();
+        } catch(Exception e) {
+            throw new ServiceException(e);
+        }
     }
-    writeElement("container", packageDef.objGetValue("container"));
-    if(this.allFeatures) {
-      writeElement("name", packageDef.objGetValue("name"));
-      writeElement("qualifiedName", packageDef.objGetValue("qualifiedName"));
+
+    /**
+     * Write primitive type definition.
+     * 
+     * @param primitiveTypeDef
+     * @throws ServiceException
+     */
+    public void writePrimitiveType(
+        ModelElement_1_0 primitiveTypeDef
+    ) throws ServiceException {
+        try {
+            this.pw.writeStartElement("org.omg.model1.PrimitiveType");
+            this.pw.writeAttribute("qualifiedName", (String)primitiveTypeDef.objGetValue("qualifiedName"));
+            this.pw.writeStartElement("_object");
+            if(this.derivedFeatures) {
+                this.writeElement(SystemAttributes.OBJECT_IDENTITY, primitiveTypeDef.jdoGetObjectId().toXRI());
+                this.writeElementAsDateTime(SystemAttributes.CREATED_AT, (Date)primitiveTypeDef.objGetValue(SystemAttributes.CREATED_AT));
+                this.writeElement(SystemAttributes.CREATED_BY, primitiveTypeDef.objGetSet(SystemAttributes.CREATED_BY));
+                this.writeElementAsDateTime(SystemAttributes.MODIFIED_AT, (Date)primitiveTypeDef.objGetValue(SystemAttributes.MODIFIED_AT));
+                this.writeElement(SystemAttributes.MODIFIED_BY, primitiveTypeDef.objGetSet(SystemAttributes.MODIFIED_BY));
+            }
+            this.writeElement("container", primitiveTypeDef.objGetValue("container"));
+            if(this.derivedFeatures) {
+                this.writeElement("name", primitiveTypeDef.objGetValue("name"));
+                this.writeElement("qualifiedName", primitiveTypeDef.objGetValue("qualifiedName"));
+            }
+            this.writeElement("stereotype", primitiveTypeDef.objGetList("stereotype"));
+            this.writeElement("isAbstract", primitiveTypeDef.objGetValue("isAbstract"));
+            if(this.derivedFeatures) {
+                this.writeElement("feature", primitiveTypeDef.objGetList("feature"));
+                this.writeElement("content", primitiveTypeDef.objGetList("content"));
+                this.writeElement("allSupertype", primitiveTypeDef.objGetList("allSupertype"));
+                this.writeElement("subtype", primitiveTypeDef.objGetList("subtype"));
+                this.writeElement("allSubtype", primitiveTypeDef.objGetList("allSubtype"));
+            }
+            this.writeElement("supertype", primitiveTypeDef.objGetList("supertype"));
+            this.writeElement("visibility", primitiveTypeDef.objGetValue("visibility"));
+            this.pw.writeEndElement();
+            this.pw.writeEmptyElement("_content");
+            this.pw.writeEndElement();
+        } catch(Exception e) {
+            throw new ServiceException(e);
+        }
     }
-    writeElement("stereotype", packageDef.objGetList("stereotype"));
-    writeElement("isAbstract", packageDef.objGetValue("isAbstract"));
-    if(this.allFeatures) {
-      writeElement("content", packageDef.objGetList("content"));
-      writeElement("allSupertype", packageDef.objGetList("allSupertype"));
-      writeElement("subtype", packageDef.objGetList("allSubtype"));
+
+    /**
+     * Write attribute definition.
+     * 
+     * @param attributeDef
+     * @throws ServiceException
+     */
+    public void writeAttribute(
+        ModelElement_1_0 attributeDef
+    ) throws ServiceException {
+        try {
+            this.pw.writeStartElement("org.omg.model1.Attribute");
+            this.pw.writeAttribute("qualifiedName", (String)attributeDef.objGetValue("qualifiedName"));
+            this.pw.writeStartElement("_object");
+            if(this.derivedFeatures) {
+                this.writeElement(SystemAttributes.OBJECT_IDENTITY, attributeDef.jdoGetObjectId().toXRI());
+                this.writeElementAsDateTime(SystemAttributes.CREATED_AT, (Date)attributeDef.objGetValue(SystemAttributes.CREATED_AT));
+                this.writeElement(SystemAttributes.CREATED_BY, attributeDef.objGetSet(SystemAttributes.CREATED_BY));
+                this.writeElementAsDateTime(SystemAttributes.MODIFIED_AT, (Date)attributeDef.objGetValue(SystemAttributes.MODIFIED_AT));
+                this.writeElement(SystemAttributes.MODIFIED_BY, attributeDef.objGetSet(SystemAttributes.MODIFIED_BY));
+            }
+            this.writeElement("isDerived", attributeDef.objGetValue("isDerived"));
+            this.writeElement("maxLength", attributeDef.objGetValue("maxLength"));
+            this.writeElement("container", attributeDef.objGetValue("container"));
+            if(this.derivedFeatures) {
+                this.writeElement("content", attributeDef.objGetList("content"));
+                this.writeElement("name", attributeDef.objGetValue("name"));
+                this.writeElement("qualifiedName", attributeDef.objGetValue("qualifiedName"));
+            }
+            this.writeElement("stereotype", attributeDef.objGetList("stereotype"));
+            this.writeElement("scope", attributeDef.objGetValue("scope"));
+            this.writeElement("visibility", attributeDef.objGetValue("visibility"));
+            this.writeElement("isChangeable", attributeDef.objGetValue("isChangeable"));
+            this.writeElement("multiplicity", attributeDef.objGetValue("multiplicity"));
+            this.writeElement("type", attributeDef.objGetValue("type"));
+            this.pw.writeEndElement();
+            this.pw.writeEmptyElement("_content");
+            this.pw.writeEndElement();
+        } catch(Exception e) {
+            throw new ServiceException(e);
+        }
     }
-    writeElement("supertype", packageDef.objGetList("supertype"));
-    writeElement("visibility", packageDef.objGetValue("visibility"));
 
-    this.pw.println(spaces(40) + "</_object>");
-    this.pw.println(spaces(40) + "<_content/>");
-    this.pw.println(spaces(36) + "</org.omg.model1.Package>");  
-    this.pw.flush();
+    /**
+     * Write structure field definition.
+     * 
+     * @param structureFieldDef
+     * @throws ServiceException
+     */
+    public void writeStructureField(
+        ModelElement_1_0 structureFieldDef
+    ) throws ServiceException {
+        try {
+            this.pw.writeStartElement("org.omg.model1.StructureField");
+            this.pw.writeAttribute("qualifiedName", (String)structureFieldDef.objGetValue("qualifiedName"));
+            this.pw.writeStartElement("_object");
+            if(this.derivedFeatures) {
+                this.writeElement(SystemAttributes.OBJECT_IDENTITY, structureFieldDef.jdoGetObjectId().toXRI());
+                this.writeElementAsDateTime(SystemAttributes.CREATED_AT, (Date)structureFieldDef.objGetValue(SystemAttributes.CREATED_AT));
+                this.writeElement(SystemAttributes.CREATED_BY, structureFieldDef.objGetSet(SystemAttributes.CREATED_BY));
+                this.writeElementAsDateTime(SystemAttributes.MODIFIED_AT, (Date)structureFieldDef.objGetValue(SystemAttributes.MODIFIED_AT));
+                this.writeElement(SystemAttributes.MODIFIED_BY, structureFieldDef.objGetSet(SystemAttributes.MODIFIED_BY));
+            }
+            this.writeElement("maxLength", structureFieldDef.objGetValue("maxLength"));
+            this.writeElement("multiplicity", structureFieldDef.objGetValue("multiplicity"));
+            this.writeElement("container", structureFieldDef.objGetValue("container"));
+            if(this.derivedFeatures) {
+                this.writeElement("content", structureFieldDef.objGetList("content"));
+                this.writeElement("name", structureFieldDef.objGetValue("name"));
+                this.writeElement("qualifiedName", structureFieldDef.objGetValue("qualifiedName"));
+            }
+            this.writeElement("stereotype", structureFieldDef.objGetList("stereotype"));
+            this.writeElement("type", structureFieldDef.objGetValue("type"));
+            this.pw.writeEndElement();
+            this.pw.writeEmptyElement("_content");
+            this.pw.writeEndElement();
+        } catch(Exception e) {
+            throw new ServiceException(e);
+        }
+    }
 
-  }
+    /**
+     * Write operation definition.
+     * 
+     * @param operationDef
+     * @throws ServiceException
+     */
+    public void writeOperation(
+        ModelElement_1_0 operationDef
+    ) throws ServiceException {
+        try {
+            this.pw.writeStartElement("org.omg.model1.Operation");
+            this.pw.writeAttribute("qualifiedName", (String)operationDef.objGetValue("qualifiedName"));
+            this.pw.writeStartElement("_object");
+            if(this.derivedFeatures) {
+                this.writeElement(SystemAttributes.OBJECT_IDENTITY, operationDef.jdoGetObjectId().toXRI());
+                this.writeElementAsDateTime(SystemAttributes.CREATED_AT, (Date)operationDef.objGetValue(SystemAttributes.CREATED_AT));
+                this.writeElement(SystemAttributes.CREATED_BY, operationDef.objGetSet(SystemAttributes.CREATED_BY));
+                this.writeElementAsDateTime(SystemAttributes.MODIFIED_AT, (Date)operationDef.objGetValue(SystemAttributes.MODIFIED_AT));
+                this.writeElement(SystemAttributes.MODIFIED_BY, operationDef.objGetSet(SystemAttributes.MODIFIED_BY));
+            }
+            if(this.derivedFeatures) {
+                this.writeElement("parameter", operationDef.objGetList("parameter"));
+            }
+            this.writeElement("container", operationDef.objGetValue("container"));
+            if(this.derivedFeatures) {
+                this.writeElement("name", operationDef.objGetValue("name"));
+                this.writeElement("qualifiedName", operationDef.objGetValue("qualifiedName"));
+            }
+            this.writeElement("stereotype", operationDef.objGetList("stereotype"));
+            this.writeElement("scope", operationDef.objGetValue("scope"));
+            this.writeElement("visibility", operationDef.objGetValue("visibility"));
+            this.writeElement("exception", operationDef.objGetList("exception"));
+            this.writeElementEncoded("semantics", operationDef.objGetList("semantics"));
+            this.writeElement("isQuery", operationDef.objGetValue("isQuery"));
+            if(this.derivedFeatures) {
+                this.writeElement("feature", operationDef.objGetList("feature"));
+                this.writeElement("content", operationDef.objGetList("content"));
+            }
+            this.pw.writeEndElement();
+            this.pw.writeEmptyElement("_content");
+            this.pw.writeEndElement();
+        } catch(Exception e) {
+            throw new ServiceException(e);
+        }
+    }
 
-  //---------------------------------------------------------------------------
-  public void writePrimitiveType(
-    ModelElement_1_0 primitiveTypeDef
-  ) throws ServiceException {
+    /**
+     * Write exception definition.
+     * 
+     * @param exceptionDef
+     * @throws ServiceException
+     */
+    public void writeException(
+        ModelElement_1_0 exceptionDef
+    ) throws ServiceException {
+        try {
+            this.pw.writeStartElement("org.omg.model1.Exception");
+            this.pw.writeAttribute("qualifiedName", (String)exceptionDef.objGetValue("qualifiedName"));
+            this.pw.writeStartElement("_object");
+            if(this.derivedFeatures) {
+                this.writeElement(SystemAttributes.OBJECT_IDENTITY, exceptionDef.jdoGetObjectId().toXRI());
+                this.writeElementAsDateTime(SystemAttributes.CREATED_AT, (Date)exceptionDef.objGetValue(SystemAttributes.CREATED_AT));
+                this.writeElement(SystemAttributes.CREATED_BY, exceptionDef.objGetSet(SystemAttributes.CREATED_BY));
+                this.writeElementAsDateTime(SystemAttributes.MODIFIED_AT, (Date)exceptionDef.objGetValue(SystemAttributes.MODIFIED_AT));
+                this.writeElement(SystemAttributes.MODIFIED_BY, exceptionDef.objGetSet(SystemAttributes.MODIFIED_BY));
+            }
+            if(this.derivedFeatures) {
+                this.writeElement("parameter", exceptionDef.objGetList("parameter"));
+            }
+            this.writeElement("container", exceptionDef.objGetValue("container"));
+            if(this.derivedFeatures) {
+                this.writeElement("name", exceptionDef.objGetValue("name"));
+                this.writeElement("qualifiedName", exceptionDef.objGetValue("qualifiedName"));
+            }
+            this.writeElement("stereotype", exceptionDef.objGetList("stereotype"));
+            this.writeElement("scope", exceptionDef.objGetValue("scope"));
+            this.writeElement("visibility", exceptionDef.objGetValue("visibility"));
+            if(this.derivedFeatures) {
+                this.writeElement("feature", exceptionDef.objGetList("feature"));
+                this.writeElement("content", exceptionDef.objGetList("content"));
+            }
+            this.pw.writeEndElement();
+            this.pw.writeEmptyElement("_content");
+            this.pw.writeEndElement();
+        } catch(Exception e) {
+            throw new ServiceException(e);
+        }
+    }
+
+    /**
+     * Write parameter definition.
+     * 
+     * @param parameterDef
+     * @throws ServiceException
+     */
+    public void writeParameter(
+        ModelElement_1_0 parameterDef
+    ) throws ServiceException {
+        try {
+            this.pw.writeStartElement("org.omg.model1.Parameter");
+            this.pw.writeAttribute("qualifiedName", (String)parameterDef.objGetValue("qualifiedName"));
+            this.pw.writeStartElement("_object");
+            if(this.derivedFeatures) {
+                this.writeElement(SystemAttributes.OBJECT_IDENTITY, parameterDef.jdoGetObjectId().toXRI());
+                this.writeElementAsDateTime(SystemAttributes.CREATED_AT, (Date)parameterDef.objGetValue(SystemAttributes.CREATED_AT));
+                this.writeElement(SystemAttributes.CREATED_BY, parameterDef.objGetSet(SystemAttributes.CREATED_BY));
+                this.writeElementAsDateTime(SystemAttributes.MODIFIED_AT, (Date)parameterDef.objGetValue(SystemAttributes.MODIFIED_AT));
+                this.writeElement(SystemAttributes.MODIFIED_BY, parameterDef.objGetSet(SystemAttributes.MODIFIED_BY));
+            }
+            this.writeElement("container", parameterDef.objGetValue("container"));
+            if(this.derivedFeatures) {
+                this.writeElement("content", parameterDef.objGetList("content"));
+                this.writeElement("name", parameterDef.objGetValue("name"));
+                this.writeElement("qualifiedName", parameterDef.objGetValue("qualifiedName"));
+            }
+            this.writeElement("stereotype", parameterDef.objGetList("stereotype"));
+            this.writeElement("direction", parameterDef.objGetValue("direction"));
+            this.writeElement("multiplicity", parameterDef.objGetValue("multiplicity"));
+            this.writeElement("type", parameterDef.objGetValue("type"));
+            this.pw.writeEndElement();
+            this.pw.writeEmptyElement("_content");
+            this.pw.writeEndElement();
+        } catch(Exception e) {
+            throw new ServiceException(e);
+        }
+    }
+
+    /**
+     * Write association definition.
+     * 
+     * @param associationDef
+     * @throws ServiceException
+     */
+    public void writeAssociation(
+        ModelElement_1_0 associationDef
+    ) throws ServiceException {
+        try {
+            this.pw.writeStartElement("org.omg.model1.Association");
+            this.pw.writeAttribute("qualifiedName", (String)associationDef.objGetValue("qualifiedName"));
+            this.pw.writeStartElement("_object");
+            if(this.derivedFeatures) {
+                this.writeElement(SystemAttributes.OBJECT_IDENTITY, associationDef.jdoGetObjectId().toXRI());
+                this.writeElementAsDateTime(SystemAttributes.CREATED_AT, (Date)associationDef.objGetValue(SystemAttributes.CREATED_AT));
+                this.writeElement(SystemAttributes.CREATED_BY, associationDef.objGetSet(SystemAttributes.CREATED_BY));
+                this.writeElementAsDateTime(SystemAttributes.MODIFIED_AT, (Date)associationDef.objGetValue(SystemAttributes.MODIFIED_AT));
+                this.writeElement(SystemAttributes.MODIFIED_BY, associationDef.objGetSet(SystemAttributes.MODIFIED_BY));
+            }
+            this.writeElement("container", associationDef.objGetValue("container"));
+            if(this.derivedFeatures) {
+                this.writeElement("name", associationDef.objGetValue("name"));
+                this.writeElement("qualifiedName", associationDef.objGetValue("qualifiedName"));
+            }
+            this.writeElement("stereotype", associationDef.objGetList("stereotype"));
+            this.writeElement("isAbstract", associationDef.objGetValue("isAbstract"));
+            if(this.derivedFeatures) {
+                this.writeElement("feature", associationDef.objGetList("feature"));
+                this.writeElement("content", associationDef.objGetList("content"));
+                this.writeElement("allSupertype", associationDef.objGetList("allSupertype"));
+                this.writeElement("subtype", associationDef.objGetList("subtype"));
+                this.writeElement("allSubtype", associationDef.objGetList("allSubtype"));
+            }
+            this.writeElement("supertype", associationDef.objGetList("supertype"));
+            this.writeElement("visibility", associationDef.objGetValue("visibility"));  
+            this.writeElement("isDerived", associationDef.objGetValue("isDerived"));
+            this.pw.writeEndElement();
+            this.pw.writeEmptyElement("_content");
+            this.pw.writeEndElement();
+        } catch(Exception e) {
+            throw new ServiceException(e);
+        }
+    }
+
+    /**
+     * Write association end definition.
+     * 
+     * @param associationEndDef
+     * @throws ServiceException
+     */
+    public void writeAssociationEnd(
+        ModelElement_1_0 associationEndDef
+        ) throws ServiceException {
+        try {
+            this.pw.writeStartElement("org.omg.model1.AssociationEnd");
+            this.pw.writeAttribute("qualifiedName", (String)associationEndDef.objGetValue("qualifiedName"));
+            this.pw.writeStartElement("_object");
+            if(this.derivedFeatures) {
+                this.writeElement(SystemAttributes.OBJECT_IDENTITY, associationEndDef.jdoGetObjectId().toXRI());
+                this.writeElementAsDateTime(SystemAttributes.CREATED_AT, (Date)associationEndDef.objGetValue(SystemAttributes.CREATED_AT));
+                this.writeElement(SystemAttributes.CREATED_BY, associationEndDef.objGetSet(SystemAttributes.CREATED_BY));
+                this.writeElementAsDateTime(SystemAttributes.MODIFIED_AT, (Date)associationEndDef.objGetValue(SystemAttributes.MODIFIED_AT));
+                this.writeElement(SystemAttributes.MODIFIED_BY, associationEndDef.objGetSet(SystemAttributes.MODIFIED_BY));
+            }
+            this.writeElement("aggregation", associationEndDef.objGetValue("aggregation"));
+            this.writeElement("isChangeable", associationEndDef.objGetValue("isChangeable"));
+            this.writeElement("isNavigable", associationEndDef.objGetValue("isNavigable"));
+            this.writeElement("multiplicity", associationEndDef.objGetValue("multiplicity"));
+            this.writeElement("qualifierName", associationEndDef.objGetList("qualifierName"));
+            this.writeElement("qualifierType", associationEndDef.objGetList("qualifierType"));
+            this.writeElement("container", associationEndDef.objGetValue("container"));
+            if(this.derivedFeatures) {
+                this.writeElement("content", associationEndDef.objGetList("content"));
+                this.writeElement("name", associationEndDef.objGetValue("name"));
+                this.writeElement("qualifiedName", associationEndDef.objGetValue("qualifiedName"));
+            }
+            this.writeElement("stereotype", associationEndDef.objGetList("stereotype"));
+            this.writeElement("type", associationEndDef.objGetValue("type"));
+            this.pw.writeEndElement();
+            this.pw.writeEmptyElement("_content");
+            this.pw.writeEndElement();
+        } catch(Exception e) {
+            throw new ServiceException(e);
+        }
+    }
   
-    this.pw.println(spaces(36) + "<org.omg.model1.PrimitiveType qualifiedName=\"" + primitiveTypeDef.objGetValue("qualifiedName") + "\">");
-    this.pw.println(spaces(40) + "<_object>");
-
-    if(this.allFeatures) {
-      writeElement("identity", primitiveTypeDef.jdoGetObjectId().toString());
-      writeElementAsDateTime("createdAt", (Date)primitiveTypeDef.objGetValue("createdAt"));
-      writeElementAsDateTime("modifiedAt", (Date)primitiveTypeDef.objGetValue("modifiedAt"));
-    }
-    writeElement("container", primitiveTypeDef.objGetValue("container"));
-    if(this.allFeatures) {
-      writeElement("name", primitiveTypeDef.objGetValue("name"));
-      writeElement("qualifiedName", primitiveTypeDef.objGetValue("qualifiedName"));
-    }
-    writeElement("stereotype", primitiveTypeDef.objGetList("stereotype"));
-    writeElement("isAbstract", primitiveTypeDef.objGetValue("isAbstract"));
-    if(this.allFeatures) {
-      writeElement("allSupertype", primitiveTypeDef.objGetList("allSupertype"));
-      writeElement("subtype", primitiveTypeDef.objGetList("allSubtype"));
-    }
-    writeElement("supertype", primitiveTypeDef.objGetList("supertype"));
-    writeElement("visibility", primitiveTypeDef.objGetValue("visibility"));
-
-    this.pw.println(spaces(40) + "</_object>");
-    this.pw.println(spaces(40) + "<_content/>");
-    this.pw.println(spaces(36) + "</org.omg.model1.PrimitiveType>");  
-    this.pw.flush();
-
-  }
-
-  //---------------------------------------------------------------------------
-  public void writeAttribute(
-    ModelElement_1_0 attributeDef
-  ) throws ServiceException {
-
-    this.pw.println(spaces(36) + "<org.omg.model1.Attribute qualifiedName=\"" + attributeDef.objGetValue("qualifiedName") + "\">");
-    this.pw.println(spaces(40) + "<_object>");
-  
-    if(this.allFeatures) {
-      writeElement("identity", attributeDef.jdoGetObjectId().toString());
-      writeElementAsDateTime("createdAt", (Date)attributeDef.objGetValue("createdAt"));
-      writeElementAsDateTime("modifiedAt", (Date)attributeDef.objGetValue("modifiedAt"));
-    }
-    writeElement("isDerived", attributeDef.objGetValue("isDerived"));
-    writeElement("maxLength", attributeDef.objGetValue("maxLength"));
-    writeElement("container", attributeDef.objGetValue("container"));
-    if(this.allFeatures) {
-      writeElement("name", attributeDef.objGetValue("name"));
-      writeElement("qualifiedName", attributeDef.objGetValue("qualifiedName"));
-    }
-    writeElement("stereotype", attributeDef.objGetList("stereotype"));
-    writeElement("scope", attributeDef.objGetValue("scope"));
-    writeElement("visibility", attributeDef.objGetValue("visibility"));
-    writeElement("isChangeable", attributeDef.objGetValue("isChangeable"));
-    writeElement("multiplicity", attributeDef.objGetValue("multiplicity"));
-    writeElement("type", attributeDef.objGetValue("type"));
-  
-    this.pw.println(spaces(40) + "</_object>");
-    this.pw.println(spaces(40) + "<_content/>");
-    this.pw.println(spaces(36) + "</org.omg.model1.Attribute>");  
-    this.pw.flush();
-  }
-
-  //---------------------------------------------------------------------------
-  public void writeStructureField(
-    ModelElement_1_0 structureFieldDef
-  ) throws ServiceException {
-
-    this.pw.println(spaces(36) + "<org.omg.model1.StructureField qualifiedName=\"" + structureFieldDef.objGetValue("qualifiedName") + "\">");
-    this.pw.println(spaces(40) + "<_object>");
-  
-    if(this.allFeatures) {
-      writeElement("identity", structureFieldDef.jdoGetObjectId().toString());
-      writeElementAsDateTime("createdAt", (Date)structureFieldDef.objGetValue("createdAt"));
-      writeElementAsDateTime("modifiedAt", (Date)structureFieldDef.objGetValue("modifiedAt"));
-    }
-    writeElement("maxLength", structureFieldDef.objGetValue("maxLength"));
-    writeElement("multiplicity", structureFieldDef.objGetValue("multiplicity"));
-    writeElement("container", structureFieldDef.objGetValue("container"));
-    if(this.allFeatures) {
-      writeElement("name", structureFieldDef.objGetValue("name"));
-      writeElement("qualifiedName", structureFieldDef.objGetValue("qualifiedName"));
-    }
-    writeElement("stereotype", structureFieldDef.objGetList("stereotype"));
-    writeElement("type", structureFieldDef.objGetValue("type"));
-  
-    this.pw.println(spaces(40) + "</_object>");
-    this.pw.println(spaces(40) + "<_content/>");
-    this.pw.println(spaces(36) + "</org.omg.model1.StructureField>");  
-    this.pw.flush();
-  }
-
-  //---------------------------------------------------------------------------
-  public void writeOperation(
-    ModelElement_1_0 operationDef
-  ) throws ServiceException {
-
-    this.pw.println(spaces(36) + "<org.omg.model1.Operation qualifiedName=\"" + operationDef.objGetValue("qualifiedName") + "\">");
-    this.pw.println(spaces(40) + "<_object>");
-
-    if(this.allFeatures) {
-      writeElement("identity", operationDef.jdoGetObjectId().toString());
-      writeElementAsDateTime("createdAt", (Date)operationDef.objGetValue("createdAt"));
-      writeElementAsDateTime("modifiedAt", (Date)operationDef.objGetValue("modifiedAt"));
-    }
-    if(this.allFeatures) {
-      writeElement("parameter", operationDef.objGetList("parameter"));
-    }
-    writeElement("container", operationDef.objGetValue("container"));
-    if(this.allFeatures) {
-      writeElement("name", operationDef.objGetValue("name"));
-      writeElement("qualifiedName", operationDef.objGetValue("qualifiedName"));
-    }
-    writeElement("stereotype", operationDef.objGetList("stereotype"));
-    writeElement("scope", operationDef.objGetValue("scope"));
-    writeElement("visibility", operationDef.objGetValue("visibility"));
-    writeElement("exception", operationDef.objGetList("exception"));
-    writeElementEncoded("semantics", operationDef.objGetList("semantics"));
-    writeElement("isQuery", operationDef.objGetValue("isQuery"));
-    if(this.allFeatures) {
-      writeElement("content", operationDef.objGetList("content"));
+    /**
+     * Write reference definition.
+     * 
+     * @param referenceDef
+     * @throws ServiceException
+     */
+    public void writeReference(
+        ModelElement_1_0 referenceDef
+    ) throws ServiceException {
+        try {
+            this.pw.writeStartElement("org.omg.model1.Reference");
+            this.pw.writeAttribute("qualifiedName", (String)referenceDef.objGetValue("qualifiedName"));
+            this.pw.writeStartElement("_object");
+            if(this.derivedFeatures) {
+                this.writeElement(SystemAttributes.OBJECT_IDENTITY, referenceDef.jdoGetObjectId().toXRI());
+                this.writeElementAsDateTime(SystemAttributes.CREATED_AT, (Date)referenceDef.objGetValue(SystemAttributes.CREATED_AT));
+                this.writeElement(SystemAttributes.CREATED_BY, referenceDef.objGetSet(SystemAttributes.CREATED_BY));
+                this.writeElementAsDateTime(SystemAttributes.MODIFIED_AT, (Date)referenceDef.objGetValue(SystemAttributes.MODIFIED_AT));
+                this.writeElement(SystemAttributes.MODIFIED_BY, referenceDef.objGetSet(SystemAttributes.MODIFIED_BY));
+            }
+            this.writeElement("container", referenceDef.objGetValue("container"));
+            if(this.derivedFeatures) {
+                this.writeElement("content", referenceDef.objGetList("content"));
+                this.writeElement("name", referenceDef.objGetValue("name"));
+                this.writeElement("qualifiedName", referenceDef.objGetValue("qualifiedName"));
+            }
+            this.writeElement("stereotype", referenceDef.objGetList("stereotype"));
+            this.writeElement("scope", referenceDef.objGetValue("scope"));
+            this.writeElement("visibility", referenceDef.objGetValue("visibility"));
+            this.writeElement("exposedEnd", referenceDef.objGetValue("exposedEnd"));
+            this.writeElement("referencedEnd", referenceDef.objGetValue("referencedEnd"));
+            if(this.derivedFeatures) {
+                this.writeElement("referencedEndIsNavigable", referenceDef.objGetValue("referencedEndIsNavigable"));
+            }
+            this.writeElement("isChangeable", referenceDef.objGetValue("isChangeable"));
+            this.writeElement("multiplicity", referenceDef.objGetValue("multiplicity"));
+            this.writeElement("type", referenceDef.objGetValue("type"));
+            this.pw.writeEndElement();
+            this.pw.writeEmptyElement("_content");
+            this.pw.writeEndElement();
+        } catch(Exception e) {
+            throw new ServiceException(e);
+        }
     }
 
-    this.pw.println(spaces(40) + "</_object>");
-    this.pw.println(spaces(40) + "<_content/>");
-    this.pw.println(spaces(36) + "</org.omg.model1.Operation>");  
-    this.pw.flush();
-
-  }
-
-  //---------------------------------------------------------------------------
-  public void writeException(
-    ModelElement_1_0 exceptionDef
-  ) throws ServiceException {
-
-    this.pw.println(spaces(36) + "<org.omg.model1.Exception qualifiedName=\"" + exceptionDef.objGetValue("qualifiedName") + "\">");
-    this.pw.println(spaces(40) + "<_object>");
-
-    if(this.allFeatures) {
-      writeElement("identity", exceptionDef.jdoGetObjectId().toString());
-      writeElementAsDateTime("createdAt", (Date)exceptionDef.objGetValue("createdAt"));
-      writeElementAsDateTime("modifiedAt", (Date)exceptionDef.objGetValue("modifiedAt"));
+    List<Path> toPaths(
+        List<?> source
+    ){
+        List<Path> target = new ArrayList<Path>();
+        for(Object e : target){
+            ((ModelElement_1_0)e).jdoGetObjectId();
+        }
+        return target;
     }
-    if(this.allFeatures) {
-      writeElement("parameter", exceptionDef.objGetList("parameter"));
+    
+    /**
+     * Write class definition.
+     * 
+     * @param classDef
+     * @throws ServiceException
+     */
+    public void writeClass(
+        ModelElement_1_0 classDef
+    ) throws ServiceException {
+        try {
+            this.pw.writeStartElement("org.omg.model1.Class");
+            this.pw.writeAttribute("qualifiedName", (String)classDef.objGetValue("qualifiedName"));
+            this.pw.writeStartElement("_object");
+            if(this.derivedFeatures) {
+                this.writeElement(SystemAttributes.OBJECT_IDENTITY, classDef.jdoGetObjectId().toXRI());
+                this.writeElementAsDateTime(SystemAttributes.CREATED_AT, (Date)classDef.objGetValue(SystemAttributes.CREATED_AT));
+                this.writeElement(SystemAttributes.CREATED_BY, classDef.objGetSet(SystemAttributes.CREATED_BY));
+                this.writeElementAsDateTime(SystemAttributes.MODIFIED_AT, (Date)classDef.objGetValue(SystemAttributes.MODIFIED_AT));
+                this.writeElement(SystemAttributes.MODIFIED_BY, classDef.objGetSet(SystemAttributes.MODIFIED_BY));
+            }
+            this.writeElement("isSingleton", classDef.objGetValue("isSingleton"));
+            if(this.derivedFeatures) {
+                this.writeElement("feature", classDef.objGetList("feature"));
+                this.writeElement("content", classDef.objGetList("content"));
+            }
+            this.writeElement("container", classDef.objGetValue("container"));
+            if(this.derivedFeatures) {
+                this.writeElement("name", classDef.objGetValue("name"));
+                this.writeElement("qualifiedName", classDef.objGetValue("qualifiedName"));
+            }
+            this.writeElement("stereotype", classDef.objGetList("stereotype"));
+            this.writeElement("isAbstract", classDef.objGetValue("isAbstract"));
+            if(this.derivedFeatures) {
+                this.writeElement("allSupertype", classDef.objGetList("allSupertype"));
+                this.writeElement("subtype", classDef.objGetList("subtype"));
+                this.writeElement("allSubtype", classDef.objGetList("allSubtype"));
+            }
+            this.writeElement("supertype", classDef.objGetList("supertype"));
+            this.writeElement("visibility", classDef.objGetValue("visibility"));  
+            if(this.derivedFeatures) {
+                writeElement("compositeReference", classDef.objGetValue("compositeReference"));  
+                writeElement("attribute", classDef.objGetMap("attribute"));
+                writeElement("reference", classDef.objGetMap("reference"));
+                writeElement("operation", classDef.objGetMap("operation"));
+                writeElement("field", classDef.objGetMap("field"));
+                writeElement("allFeature", classDef.objGetMap("allFeature"));
+                writeElement("allFeatureWithSubtype", classDef.objGetMap("allFeatureWithSubtype"));
+            }
+            this.pw.writeEndElement();
+            this.pw.writeEmptyElement("_content");
+            this.pw.writeEndElement();
+        } catch(Exception e) {
+            throw new ServiceException(e);
+        }
     }
-    writeElement("container", exceptionDef.objGetValue("container"));
-    if(this.allFeatures) {
-      writeElement("name", exceptionDef.objGetValue("name"));
-      writeElement("qualifiedName", exceptionDef.objGetValue("qualifiedName"));
+
+    /**
+     * Write structure type definition.
+     * 
+     * @param structDef
+     * @throws ServiceException
+     */
+    public void writeStructureType(
+        ModelElement_1_0 structDef
+    ) throws ServiceException {
+        try {
+            this.pw.writeStartElement("org.omg.model1.StructureType");
+            this.pw.writeAttribute("qualifiedName", (String)structDef.objGetValue("qualifiedName"));
+            this.pw.writeStartElement("_object");
+            if(this.derivedFeatures) {
+                this.writeElement(SystemAttributes.OBJECT_IDENTITY, structDef.jdoGetObjectId().toXRI());
+                this.writeElementAsDateTime(SystemAttributes.CREATED_AT, (Date)structDef.objGetValue(SystemAttributes.CREATED_AT));
+                this.writeElement(SystemAttributes.CREATED_BY, structDef.objGetSet(SystemAttributes.CREATED_BY));
+                this.writeElementAsDateTime(SystemAttributes.MODIFIED_AT, (Date)structDef.objGetValue(SystemAttributes.MODIFIED_AT));
+                this.writeElement(SystemAttributes.MODIFIED_BY, structDef.objGetSet(SystemAttributes.MODIFIED_BY));
+            }
+            if(this.derivedFeatures) {
+                this.writeElement("feature", structDef.objGetList("feature"));
+                this.writeElement("content", structDef.objGetList("content"));
+            }
+            this.writeElement("container", structDef.objGetValue("container"));
+            if(this.derivedFeatures) {
+                this.writeElement("name", structDef.objGetValue("name"));
+                this.writeElement("qualifiedName", structDef.objGetValue("qualifiedName"));
+            }
+            this.writeElement("stereotype", structDef.objGetList("stereotype"));
+            this.writeElement("isAbstract", structDef.objGetValue("isAbstract"));
+            if(this.derivedFeatures) {
+                this.writeElement("allSupertype", structDef.objGetList("allSupertype"));
+                this.writeElement("subtype", structDef.objGetList("subtype"));
+                this.writeElement("allSubtype", structDef.objGetList("allSubtype"));
+            }
+            this.writeElement("supertype", structDef.objGetList("supertype"));
+            this.writeElement("visibility", structDef.objGetValue("visibility"));  
+            this.writeElement("compositeReference", structDef.objGetValue("compositeReference"));
+            if(this.derivedFeatures) {
+                writeElement("attribute", structDef.objGetMap("attribute"));
+                writeElement("reference", structDef.objGetMap("reference"));
+                writeElement("operation", structDef.objGetMap("operation"));
+                writeElement("field", structDef.objGetMap("field"));
+                writeElement("allFeature", structDef.objGetMap("allFeature"));
+                writeElement("allFeatureWithSubtype", structDef.objGetMap("allFeatureWithSubtype"));
+            }
+            this.pw.writeEndElement();
+            this.pw.writeEmptyElement("_content");
+            this.pw.writeEndElement();
+        } catch(Exception e) {
+            throw new ServiceException(e);
+        }
     }
-    writeElement("stereotype", exceptionDef.objGetList("stereotype"));
-    writeElement("scope", exceptionDef.objGetValue("scope"));
-    writeElement("visibility", exceptionDef.objGetValue("visibility"));
-    if(this.allFeatures) {
-      writeElement("content", exceptionDef.objGetList("content"));
+
+    /**
+     * Write alias type definition.
+     * 
+     * @param aliasTypeDef
+     * @throws ServiceException
+     */
+    public void writeAliasType(
+        ModelElement_1_0 aliasTypeDef
+    ) throws ServiceException {
+        try {
+            this.pw.writeStartElement("org.omg.model1.AliasType");
+            this.pw.writeAttribute("qualifiedName", (String)aliasTypeDef.objGetValue("qualifiedName"));
+            this.pw.writeStartElement("_object");
+            if(this.derivedFeatures) {
+                this.writeElement(SystemAttributes.OBJECT_IDENTITY, aliasTypeDef.jdoGetObjectId().toXRI());
+                this.writeElementAsDateTime(SystemAttributes.CREATED_AT, (Date)aliasTypeDef.objGetValue(SystemAttributes.CREATED_AT));
+                this.writeElement(SystemAttributes.CREATED_BY, aliasTypeDef.objGetSet(SystemAttributes.CREATED_BY));
+                this.writeElementAsDateTime(SystemAttributes.MODIFIED_AT, (Date)aliasTypeDef.objGetValue(SystemAttributes.MODIFIED_AT));
+                this.writeElement(SystemAttributes.MODIFIED_BY, aliasTypeDef.objGetSet(SystemAttributes.MODIFIED_BY));
+            }
+            if(this.derivedFeatures) {
+                this.writeElement("feature", aliasTypeDef.objGetList("feature"));
+                this.writeElement("content", aliasTypeDef.objGetList("content"));
+            }
+            writeElement("container", aliasTypeDef.objGetValue("container"));
+            if(this.derivedFeatures) {
+                this.writeElement("name", aliasTypeDef.objGetValue("name"));
+                this.writeElement("qualifiedName", aliasTypeDef.objGetValue("qualifiedName"));
+            }
+            this.writeElement("stereotype", aliasTypeDef.objGetList("stereotype"));
+            this.writeElement("isAbstract", aliasTypeDef.objGetValue("isAbstract"));
+            if(this.derivedFeatures) {
+                this.writeElement("allSupertype", aliasTypeDef.objGetList("allSupertype"));
+                this.writeElement("subtype", aliasTypeDef.objGetList("subtype"));
+                this.writeElement("allSubtype", aliasTypeDef.objGetList("allSubtype"));
+            }
+            this.writeElement("supertype", aliasTypeDef.objGetList("supertype"));
+            this.writeElement("visibility", aliasTypeDef.objGetValue("visibility"));  
+            this.writeElement("type", aliasTypeDef.objGetValue("type"));
+            this.writeElement("compositeReference", aliasTypeDef.objGetValue("compositeReference"));
+            this.pw.writeEndElement();
+            this.pw.writeEmptyElement("_content");
+            this.pw.writeEndElement();
+        } catch(Exception e) {
+            throw new ServiceException(e);
+        }
     }
 
-    this.pw.println(spaces(40) + "</_object>");
-    this.pw.println(spaces(40) + "<_content/>");
-    this.pw.println(spaces(36) + "</org.omg.model1.Exception>");  
-    this.pw.flush();
-
-  }
-
-  //---------------------------------------------------------------------------
-  public void writeParameter(
-    ModelElement_1_0 parameterDef
-  ) throws ServiceException {
-
-    this.pw.println(spaces(36) + "<org.omg.model1.Parameter qualifiedName=\"" + parameterDef.objGetValue("qualifiedName") + "\">");
-    this.pw.println(spaces(40) + "<_object>");
-
-    if(this.allFeatures) {
-      writeElement("identity", parameterDef.jdoGetObjectId().toString());
-      writeElementAsDateTime("createdAt", (Date)parameterDef.objGetValue("createdAt"));
-      writeElementAsDateTime("modifiedAt", (Date)parameterDef.objGetValue("modifiedAt"));
+    /**
+     * Write model header.
+     * 
+     * @param providerName
+     * @param segmentName
+     * @param schemaFileName
+     */
+    public void writeModelHeader(
+        String providerName,
+        String schemaFileName
+    ) throws ServiceException {
+        try {
+            this.pw.writeStartDocument("UTF-8", "1.3");
+            this.pw.setPrefix("xsi", "http://www.w3.org/2001/XMLSchema-instance");
+            this.pw.writeStartElement("org.openmdx.base.Authority");
+            this.pw.writeAttribute("name", "org:omg:model1");
+            this.pw.writeAttribute("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance");            
+            this.pw.writeAttribute("http://www.w3.org/2001/XMLSchema-instance", "noNamespaceSchemaLocation", schemaFileName);
+            this.pw.writeEmptyElement("_object");
+            this.pw.writeStartElement("_content");
+            this.pw.writeStartElement("provider");
+            this.pw.writeStartElement("org.openmdx.base.Provider");
+            this.pw.writeAttribute("qualifiedName", providerName);
+            this.pw.writeEmptyElement("_object");
+            this.pw.writeStartElement("_content");
+            this.pw.writeStartElement("segment");
+        } catch(Exception e) {
+            throw new ServiceException(e);
+        }
     }
-    writeElement("container", parameterDef.objGetValue("container"));
-    if(this.allFeatures) {
-      writeElement("name", parameterDef.objGetValue("name"));
-      writeElement("qualifiedName", parameterDef.objGetValue("qualifiedName"));
+
+    /**
+     * Write model header.
+     * 
+     * @param providerName
+     * @param segmentName
+     * @param schemaFileName
+     */
+    public void writeSegmentHeader(
+        String segmentName
+    ) throws ServiceException {
+        try {
+            this.pw.writeStartElement("org.omg.model1.Segment");
+            this.pw.writeAttribute("qualifiedName", segmentName);
+            this.pw.writeEmptyElement("_object");
+            this.pw.writeStartElement("_content");
+            this.pw.writeStartElement("element");
+        } catch(Exception e) {
+            throw new ServiceException(e);
+        }
     }
-    writeElement("stereotype", parameterDef.objGetList("stereotype"));
-    writeElement("direction", parameterDef.objGetValue("direction"));
-    writeElement("multiplicity", parameterDef.objGetValue("multiplicity"));
-    writeElement("type", parameterDef.objGetValue("type"));
 
-    this.pw.println(spaces(40) + "</_object>");
-    this.pw.println(spaces(40) + "<_content/>");
-    this.pw.println(spaces(36) + "</org.omg.model1.Parameter>");  
-    this.pw.flush();
-
-  }
-  
-  //---------------------------------------------------------------------------
-  public void writeAssociation(
-    ModelElement_1_0 associationDef
-  ) throws ServiceException {
-
-    this.pw.println(spaces(36) + "<org.omg.model1.Association qualifiedName=\"" + associationDef.objGetValue("qualifiedName") + "\">");
-    this.pw.println(spaces(40) + "<_object>");
-
-    if(this.allFeatures) {
-      writeElement("identity", associationDef.jdoGetObjectId().toString());
-      writeElementAsDateTime("createdAt", (Date)associationDef.objGetValue("createdAt"));
-      writeElementAsDateTime("modifiedAt", (Date)associationDef.objGetValue("modifiedAt"));
+    /**
+     * Write model end.
+     */
+    public void writeSegmentFooter(
+    ) throws ServiceException {
+        try {
+            this.pw.writeEndElement(); // element
+            this.pw.writeEndElement(); // _content
+            this.pw.writeEndElement(); // org.omg.model1.Segment
+        } catch(Exception e) {
+            throw new ServiceException(e);
+        }
     }
-    writeElement("container", associationDef.objGetValue("container"));
-    if(this.allFeatures) {
-      writeElement("name", associationDef.objGetValue("name"));
-      writeElement("qualifiedName", associationDef.objGetValue("qualifiedName"));
+    
+    /**
+     * Write model end.
+     */
+    public void writeModelFooter(
+    ) throws ServiceException {
+        try {
+            this.pw.writeEndElement(); // segment
+            this.pw.writeEndElement(); // _content
+            this.pw.writeEndElement(); // org.openmdx.base.Provider
+            this.pw.writeEndElement(); // provider
+            this.pw.writeEndElement(); // _content
+            this.pw.writeEndElement(); // org.openmdx.base.Authority
+            this.pw.close();
+        } catch(Exception e) {
+            throw new ServiceException(e);
+        }
     }
-    writeElement("stereotype", associationDef.objGetList("stereotype"));
-    writeElement("isAbstract", associationDef.objGetValue("isAbstract"));
-    if(this.allFeatures) {
-      writeElement("allSupertype", associationDef.objGetList("allSupertype"));
-      writeElement("subtype", associationDef.objGetList("allSubtype"));
-      writeElement("content", associationDef.objGetList("content"));
-    }
-    writeElement("supertype", associationDef.objGetList("supertype"));
-    writeElement("visibility", associationDef.objGetValue("visibility"));  
-    writeElement("isDerived", associationDef.objGetValue("isDerived"));  
-
-    this.pw.println(spaces(40) + "</_object>");
-    this.pw.println(spaces(40) + "<_content/>");
-    this.pw.println(spaces(36) + "</org.omg.model1.Association>");
-    this.pw.flush();
-  }
-
-  //---------------------------------------------------------------------------
-  public void writeAssociationEnd(
-    ModelElement_1_0 associationEndDef
-  ) throws ServiceException {
-
-    this.pw.println(spaces(36) + "<org.omg.model1.AssociationEnd qualifiedName=\"" + associationEndDef.objGetValue("qualifiedName") + "\">");
-    this.pw.println(spaces(40) + "<_object>");
-
-    if(this.allFeatures) {
-      writeElement("identity", associationEndDef.jdoGetObjectId().toString());
-      writeElementAsDateTime("createdAt", (Date)associationEndDef.objGetValue("createdAt"));
-      writeElementAsDateTime("modifiedAt", (Date)associationEndDef.objGetValue("modifiedAt"));
-    }
-    writeElement("aggregation", associationEndDef.objGetValue("aggregation"));
-    writeElement("isChangeable", associationEndDef.objGetValue("isChangeable"));
-    writeElement("isNavigable", associationEndDef.objGetValue("isNavigable"));
-    writeElement("multiplicity", associationEndDef.objGetValue("multiplicity"));
-    writeElement("qualifierName", associationEndDef.objGetList("qualifierName"));
-    writeElement("qualifierType", associationEndDef.objGetList("qualifierType"));
-    writeElement("container", associationEndDef.objGetValue("container"));
-    if(this.allFeatures) {
-      writeElement("name", associationEndDef.objGetValue("name"));
-      writeElement("qualifiedName", associationEndDef.objGetValue("qualifiedName"));
-    }
-    writeElement("stereotype", associationEndDef.objGetList("stereotype"));
-    writeElement("type", associationEndDef.objGetValue("type"));
-
-    this.pw.println(spaces(40) + "</_object>");
-    this.pw.println(spaces(40) + "<_content/>");
-    this.pw.println(spaces(36) + "</org.omg.model1.AssociationEnd>");  
-    this.pw.flush();
-  }
-  
-  //---------------------------------------------------------------------------
-  public void writeReference(
-    ModelElement_1_0 referenceDef
-  ) throws ServiceException {
-
-    this.pw.println(spaces(36) + "<org.omg.model1.Reference qualifiedName=\"" + referenceDef.objGetValue("qualifiedName") + "\">");
-    this.pw.println(spaces(40) + "<_object>");
-
-    if(this.allFeatures) {
-      writeElement("identity", referenceDef.jdoGetObjectId().toString());
-      writeElementAsDateTime("createdAt", (Date)referenceDef.objGetValue("createdAt"));
-      writeElementAsDateTime("modifiedAt", (Date)referenceDef.objGetValue("modifiedAt"));
-    }
-    writeElement("container", referenceDef.objGetValue("container"));
-    if(this.allFeatures) {
-      writeElement("name", referenceDef.objGetValue("name"));
-      writeElement("qualifiedName", referenceDef.objGetValue("qualifiedName"));
-    }
-    writeElement("stereotype", referenceDef.objGetList("stereotype"));
-    writeElement("scope", referenceDef.objGetValue("scope"));
-    writeElement("visibility", referenceDef.objGetValue("visibility"));
-    writeElement("exposedEnd", referenceDef.objGetValue("exposedEnd"));
-    writeElement("referencedEnd", referenceDef.objGetValue("referencedEnd"));
-    if(this.allFeatures) {
-      writeElement("referencedEndIsNavigable", referenceDef.objGetValue("referencedEndIsNavigable"));
-    }
-    writeElement("isChangeable", referenceDef.objGetValue("isChangeable"));
-    writeElement("multiplicity", referenceDef.objGetValue("multiplicity"));
-    writeElement("type", referenceDef.objGetValue("type"));
-
-    this.pw.println(spaces(40) + "</_object>");
-    this.pw.println(spaces(40) + "<_content/>");
-    this.pw.println(spaces(36) + "</org.omg.model1.Reference>");  
-    this.pw.flush();
-
-  }
-
-  //---------------------------------------------------------------------------
-  public void writeClass(
-    ModelElement_1_0 classDef
-  ) throws ServiceException {
-  
-    this.pw.println(spaces(36) + "<org.omg.model1.Class qualifiedName=\"" + classDef.objGetValue("qualifiedName") + "\">");
-    this.pw.println(spaces(40) + "<_object>");
-
-    if(this.allFeatures) {
-      writeElement("identity", classDef.jdoGetObjectId().toString());
-      writeElementAsDateTime("createdAt", (Date)classDef.objGetValue("createdAt"));
-      writeElementAsDateTime("modifiedAt", (Date)classDef.objGetValue("modifiedAt"));
-    }
-    writeElement("isSingleton", classDef.objGetValue("isSingleton"));
-    if(this.allFeatures) {
-      writeElement("feature", classDef.objGetList("feature"));
-      writeElement("content", classDef.objGetList("content"));
-    }
-    writeElement("container", classDef.objGetValue("container"));
-    if(this.allFeatures) {
-      writeElement("name", classDef.objGetValue("name"));
-      writeElement("qualifiedName", classDef.objGetValue("qualifiedName"));
-    }
-    writeElement("stereotype", classDef.objGetList("stereotype"));
-    writeElement("isAbstract", classDef.objGetValue("isAbstract"));
-    if(this.allFeatures) {
-      writeElement("allSupertype", classDef.objGetList("allSupertype"));
-      writeElement("subtype", classDef.objGetList("allSubtype"));
-    }
-    writeElement("supertype", classDef.objGetList("supertype"));
-    writeElement("visibility", classDef.objGetValue("visibility"));  
-    if(this.allFeatures) {
-      writeElement("compositeReference", classDef.objGetValue("compositeReference"));  
-    }
-   
-    this.pw.println(spaces(40) + "</_object>");
-    this.pw.println(spaces(40) + "<_content/>");
-    this.pw.println(spaces(36) + "</org.omg.model1.Class>");  
-    this.pw.flush();
-  }
-
-  //---------------------------------------------------------------------------
-  public void writeStructureType(
-    ModelElement_1_0 structDef
-  ) throws ServiceException {
-  
-    this.pw.println(spaces(36) + "<org.omg.model1.StructureType qualifiedName=\"" + structDef.objGetValue("qualifiedName") + "\">");
-    this.pw.println(spaces(40) + "<_object>");
-
-    if(this.allFeatures) {
-      writeElement("identity", structDef.jdoGetObjectId().toString());
-      writeElementAsDateTime("createdAt", (Date)structDef.objGetValue("createdAt"));
-      writeElementAsDateTime("modifiedAt", (Date)structDef.objGetValue("modifiedAt"));
-    }
-    if(this.allFeatures) {
-      writeElement("feature", structDef.objGetList("feature"));
-      writeElement("content", structDef.objGetList("content"));
-    }
-    writeElement("container", structDef.objGetValue("container"));
-    if(this.allFeatures) {
-      writeElement("name", structDef.objGetValue("name"));
-      writeElement("qualifiedName", structDef.objGetValue("qualifiedName"));
-    }
-    writeElement("stereotype", structDef.objGetList("stereotype"));
-    writeElement("isAbstract", structDef.objGetValue("isAbstract"));
-    if(this.allFeatures) {
-      writeElement("allSupertype", structDef.objGetList("allSupertype"));
-      writeElement("subtype", structDef.objGetList("allSubtype"));
-    }
-    writeElement("supertype", structDef.objGetList("supertype"));
-    writeElement("visibility", structDef.objGetValue("visibility"));  
-    writeElement("compositeReference", structDef.objGetValue("compositeReference"));  
-   
-    this.pw.println(spaces(40) + "</_object>");
-    this.pw.println(spaces(40) + "<_content/>");
-    this.pw.println(spaces(36) + "</org.omg.model1.StructureType>");  
-    this.pw.flush();
-  }
-
-  //---------------------------------------------------------------------------
-  public void writeAliasType(
-    ModelElement_1_0 aliasTypeDef
-  ) throws ServiceException {
-  
-    this.pw.println(spaces(36) + "<org.omg.model1.AliasType qualifiedName=\"" + aliasTypeDef.objGetValue("qualifiedName") + "\">");
-    this.pw.println(spaces(40) + "<_object>");
-
-    if(this.allFeatures) {
-      writeElement("identity", aliasTypeDef.jdoGetObjectId().toString());
-      writeElementAsDateTime("createdAt", (Date)aliasTypeDef.objGetValue("createdAt"));
-      writeElementAsDateTime("modifiedAt", (Date)aliasTypeDef.objGetValue("modifiedAt"));
-    }
-    if(this.allFeatures) {
-      writeElement("feature", aliasTypeDef.objGetList("feature"));
-      writeElement("content", aliasTypeDef.objGetList("content"));
-    }
-    writeElement("container", aliasTypeDef.objGetValue("container"));
-    if(this.allFeatures) {
-      writeElement("name", aliasTypeDef.objGetValue("name"));
-      writeElement("qualifiedName", aliasTypeDef.objGetValue("qualifiedName"));
-    }
-    writeElement("stereotype", aliasTypeDef.objGetList("stereotype"));
-    writeElement("isAbstract", aliasTypeDef.objGetValue("isAbstract"));
-    if(this.allFeatures) {
-      writeElement("allSupertype", aliasTypeDef.objGetList("allSupertype"));
-      writeElement("subtype", aliasTypeDef.objGetList("allSubtype"));
-    }
-    writeElement("supertype", aliasTypeDef.objGetList("supertype"));
-    writeElement("visibility", aliasTypeDef.objGetValue("visibility"));  
-    writeElement("type", aliasTypeDef.objGetValue("type"));
-    writeElement("compositeReference", aliasTypeDef.objGetValue("compositeReference"));  
-   
-    this.pw.println(spaces(40) + "</_object>");
-    this.pw.println(spaces(40) + "<_content/>");
-    this.pw.println(spaces(36) + "</org.omg.model1.AliasType>");  
-    this.pw.flush();
-  }
-
-  //---------------------------------------------------------------------------
-  public void writeModelHeader(
-    String providerName,
-    String segmentName, 
-    String schemaFileName
-  ) {
-//  String currentDateTime = DateFormat.getInstance().format(new Date(System.currentTimeMillis()));
-    this.pw.println("<?xml version=" + "\"1.0\"" + " encoding=" + "\"UTF-8\"" + "?>");
-    this.pw.println("<!-- Generated by openMDX XMI Exporter -->");
-    this.pw.println("<org.openmdx.base.Authority name=\"org:omg:model1\" xmlns:xsi=" + "\"http://www.w3.org/2001/XMLSchema-instance\"" + " xsi:noNamespaceSchemaLocation=\"" + schemaFileName + "\">");
-    this.pw.println("    <_object></_object>");
-    this.pw.println("    <_content>");
-    this.pw.println("        <provider>");
-    this.pw.println("            <org.openmdx.base.Provider qualifiedName=\"" + providerName + "\">");
-    this.pw.println("                <_object></_object>");
-    this.pw.println("                <_content>");
-    this.pw.println("                    <segment>");
-    this.pw.println("                        <org.omg.model1.Segment qualifiedName=" + "\"" + segmentName + "\">");
-    this.pw.println("                            <_object/>");
-    this.pw.println("                            <_content>");
-    this.pw.println("                                <element>");
-    this.pw.flush();
-  }
-  
-  //---------------------------------------------------------------------------
-  public void writeModelFooter(
-  ) {
-    this.pw.println("                                </element>");
-    this.pw.println("                             </_content>");
-    this.pw.println("                        </org.omg.model1.Segment>");
-    this.pw.println("                    </segment>");
-    this.pw.println("                </_content>");
-    this.pw.println("            </org.openmdx.base.Provider>");
-    this.pw.println("        </provider>");
-    this.pw.println("    </_content>");
-    this.pw.println("</org.openmdx.base.Authority>");
-
-    this.pw.flush();
-  }
-
-  //---------------------------------------------------------------------------
-  private String spaces(
-    int number
-  ) {
-    return(SPACES.substring(0, number));
-  }
-
-  //---------------------------------------------------------------------------  
-  // Variables
-  //---------------------------------------------------------------------------  
-
-  PrintWriter pw = null;
-  boolean allFeatures = false;
-  private static String SPACES = new String("                                                                                                     ");
 
 }
 

@@ -242,11 +242,12 @@ public class EditObjectView
 				);
 				if(this.app.getErrorMessages().isEmpty()) {
 					Object[] qualifiers = (Object[])parameterMap.get("qualifier");
-					if (qualifiers == null) {
+					if(qualifiers == null) {
 						qualifiers = new String[] {
 							UUIDConversion.toUID(UUIDs.newUUID())
 						};
-					}
+					}					
+					pm.refresh(this.parent); // no CONCURRENT_MODIFICATION in case the parent was updated by some other user 
 					Object container = this.parent.refGetValue(this.forReference);
 					((RefContainer)container).refAdd(
 					    org.oasisopen.cci2.QualifierType.REASSIGNABLE,

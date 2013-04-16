@@ -50,12 +50,12 @@ package org.openmdx.base.xml.stream;
 import java.io.OutputStream;
 import java.io.Writer;
 
+import javax.xml.transform.Result;
+
 import javax.xml.stream.XMLEventWriter;
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
-import javax.xml.transform.Result;
-
 import org.openmdx.kernel.exception.BasicException;
 
 /**
@@ -104,7 +104,7 @@ public abstract class AbstractXMLOutputFactory extends XMLOutputFactory {
     public XMLEventWriter createXMLEventWriter(
         Result target
     ) throws XMLStreamException {
-        throw new XMLStreamException("The iterator API is not supported by this XMLOutputFactory");
+        throw new XMLStreamException("Result targets are not supported by this XMLOutputFactory");
     }
 
     /* (non-Javadoc)
@@ -127,7 +127,7 @@ public abstract class AbstractXMLOutputFactory extends XMLOutputFactory {
     public XMLEventWriter createXMLEventWriter(
         Writer target
     ) throws XMLStreamException {
-        throw new XMLStreamException("The iterator API is not supported by this XMLOutputFactory");
+        throw new XMLStreamException("Character stream targets are not supported by this XMLOutputFactory");
     }
 
     /* (non-Javadoc)
@@ -138,7 +138,7 @@ public abstract class AbstractXMLOutputFactory extends XMLOutputFactory {
         OutputStream target, 
         String encoding
     ) throws XMLStreamException {
-        throw new XMLStreamException("The iterator API is not supported by this XMLOutputFactory");
+        throw new XMLStreamException("Byte stream targets are not supported by this XMLOutputFactory");
     }
 
     /* (non-Javadoc)
@@ -148,9 +148,7 @@ public abstract class AbstractXMLOutputFactory extends XMLOutputFactory {
     public XMLStreamWriter createXMLStreamWriter(
         Writer target
     ) throws XMLStreamException {
-        throw new XMLStreamException(
-            "Character stream targets are not supported by this XMLOutputFactory"
-        );
+        throw new XMLStreamException("Character stream targets are not supported by this XMLOutputFactory");
     }
 
     /* (non-Javadoc)

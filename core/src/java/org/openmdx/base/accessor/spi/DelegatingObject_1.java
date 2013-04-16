@@ -48,11 +48,11 @@
 package org.openmdx.base.accessor.spi;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.UUID;
 
-import javax.jdo.JDOHelper;
 import javax.jdo.JDOUserException;
 import javax.jdo.spi.PersistenceCapable;
 import javax.jdo.spi.StateManager;
@@ -65,6 +65,7 @@ import org.openmdx.base.accessor.cci.DataObject_1_0;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.naming.Path;
 import org.openmdx.kernel.exception.BasicException;
+import org.openmdx.kernel.jdo.ReducedJDOHelper;
 
 /**
  * A delegating object
@@ -173,6 +174,20 @@ public abstract class DelegatingObject_1
     }
 
     /* (non-Javadoc)
+     * @see org.openmdx.base.accessor.spi.AbstractDataObject_1#objDoesNotExist()
+     */
+    @Override
+    public boolean objDoesNotExist() {
+        try {
+            return 
+                super.objDoesNotExist() ||
+                this.getDelegate().objDoesNotExist();
+        } catch (ServiceException exception) {
+            return exception.getExceptionCode() == BasicException.Code.NOT_FOUND;
+        }
+    }
+
+    /* (non-Javadoc)
      * @see org.openmdx.base.accessor.generic.spi.AbstractObject_1#getInaccessibilityReason()
      */
     @Override
@@ -230,7 +245,7 @@ public abstract class DelegatingObject_1
     public void objMakeTransactional(
     ) throws ServiceException {
         DataObject_1_0 delegate = this.getDelegate();
-        JDOHelper.getPersistenceManager(delegate).makeTransactional(delegate);
+        ReducedJDOHelper.getPersistenceManager(delegate).makeTransactional(delegate);
     }
      
     /**
@@ -247,7 +262,7 @@ public abstract class DelegatingObject_1
     public void objMakeNontransactional(
     ) throws ServiceException {
         DataObject_1_0 delegate = this.getDelegate();
-        JDOHelper.getPersistenceManager(delegate).makeNontransactional(delegate);
+        ReducedJDOHelper.getPersistenceManager(delegate).makeNontransactional(delegate);
     }
 
     //--------------------------------------------------------------------------
@@ -641,6 +656,17 @@ public abstract class DelegatingObject_1
         return getDelegate().objGetSet(feature);
     }
     
+    /* (non-Javadoc)
+     * @see org.openmdx.base.accessor.cci.DataObject_1_0#objGetMap(java.lang.String)
+     */
+    @SuppressWarnings("rawtypes")
+    @Override
+    public Map objGetMap(
+        String feature
+    ) throws ServiceException {
+        return getDelegate().objGetMap(feature);
+    }
+
     /**
      * Get a SparseArray attribute.
      * <p> 

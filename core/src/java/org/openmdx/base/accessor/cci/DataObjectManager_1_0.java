@@ -92,5 +92,4 @@ public interface DataObjectManager_1_0 extends PersistenceManager_1_0 {
     int getCacheThreshold(
     );
 
-
 }

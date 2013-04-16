@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2009-2010, OMEX AG, Switzerland
+ * Copyright (c) 2009-2012, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -47,6 +47,7 @@
  */
 package org.openmdx.application.rest.ejb;
 
+import java.io.Serializable;
 import java.rmi.RemoteException;
 import java.util.HashMap;
 import java.util.Map;
@@ -63,15 +64,15 @@ import javax.naming.NamingEnumeration;
 import javax.naming.NamingException;
 import javax.resource.ResourceException;
 import javax.resource.cci.Connection;
-import javax.resource.cci.ConnectionFactory;
 import javax.resource.cci.ConnectionSpec;
 import javax.resource.cci.Interaction;
 import javax.resource.cci.InteractionSpec;
 import javax.resource.cci.Record;
 
-import org.openmdx.application.rest.spi.InboundConnectionFactory_2;
+import org.openmdx.application.rest.adapter.InboundConnectionFactory_2;
 import org.openmdx.base.collection.Maps;
 import org.openmdx.base.persistence.cci.ConfigurableProperty;
+import org.openmdx.base.resource.cci.ConnectionFactory;
 import org.openmdx.base.rest.cci.RestConnectionSpec;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.exception.Throwables;

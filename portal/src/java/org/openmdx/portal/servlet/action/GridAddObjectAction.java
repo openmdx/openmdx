@@ -115,12 +115,16 @@ public class GridAddObjectAction extends BoundAction {
                         String addRemoveMode = Action.getParameter(parameter, Action.PARAMETER_NAME);
                         PersistenceManager pm = app.getNewPmData();
                         RefObject_1_0 target = (RefObject_1_0)pm.getObjectById(currentView.getRefObject().refGetPath());
+                        @SuppressWarnings("unchecked")
                         Collection<RefObject_1_0> values = (Collection)target.refGetValue(feature);
                         // Remove non-existing objects from list
                         pm.currentTransaction().begin();
                         for(Iterator i = values.iterator(); i.hasNext();) {
                         	try {
-                        		RefObject r = (RefObject) i.next();
+                        		RefObject r = (RefObject)i.next();
+                        		if(r == null) {
+                        			i.remove();
+                        		}
                         	} catch(Exception e) {
                         		ServiceException e0 = new ServiceException(e);
                         		if(e0.getExceptionCode() == BasicException.Code.NOT_FOUND) {

@@ -52,14 +52,12 @@
  */
 package org.openmdx.portal.servlet.view;
 
-import java.beans.ExceptionListener;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collection;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
@@ -77,6 +75,7 @@ import javax.jdo.PersistenceManager;
 
 import org.openmdx.base.accessor.cci.SystemAttributes;
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
+import org.openmdx.base.exception.ExceptionListener;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
 import org.openmdx.base.mof.cci.Model_1_0;
@@ -972,11 +971,6 @@ public abstract class Grid
     );
 
     //-------------------------------------------------------------------------
-    abstract public Collection<RefObject_1_0> getAllObjects(
-    	PersistenceManager pm
-    );
-    
-    //-------------------------------------------------------------------------
     public void selectFilter(
     	String filterName,
     	String filterValues
@@ -1094,10 +1088,9 @@ public abstract class Grid
     			List<Condition> conditions = new ArrayList<Condition>(
     				baseFilter.getCondition()  
     			);
-    			Extension extension = baseFilter.getExtension();
-    			if(extension != null) {
-    				extension = extension.clone();
-    			}
+    			List<Extension> extensions = new ArrayList<Extension>(
+    				baseFilter.getExtension()
+    			);
     			// Number
     			if(column instanceof org.openmdx.ui1.jmi1.NumberField) {
     				// Code
@@ -1139,17 +1132,32 @@ public abstract class Grid
     								).trim();
     								Short code = (Short)shortTexts.get(trimmedToken);
     								if(code == null) {
+    									// Try to match a short text
+    									{
+									    	String trimmedTokenUpper = trimmedToken.toUpperCase();
+									    	String lastMatch = null;
+									    	for(Entry<String,Short> entry: shortTexts.entrySet()) {
+									    		if(entry.getKey().toUpperCase().indexOf(trimmedTokenUpper) >= 0) {
+									    			if(lastMatch == null || entry.getKey().length() < lastMatch.length()) {
+									    				code = entry.getValue();
+									    				lastMatch = entry.getKey();
+									    			}
+									    		}
+									    	}
+    									}
     									// Try to match a long text
-								    	String trimmedTokenUpper = trimmedToken.toUpperCase();
-								    	String lastMatch = null;
-								    	for(Entry<String,Short> entry: longTexts.entrySet()) {
-								    		if(entry.getKey().toUpperCase().indexOf(trimmedTokenUpper) >= 0) {
-								    			if(lastMatch == null || entry.getKey().length() < lastMatch.length()) {
-								    				code = entry.getValue();
-								    				lastMatch = entry.getKey();
-								    			}
-								    		}
-								    	}
+    									if(code == null) {
+									    	String trimmedTokenUpper = trimmedToken.toUpperCase();
+									    	String lastMatch = null;
+									    	for(Entry<String,Short> entry: longTexts.entrySet()) {
+									    		if(entry.getKey().toUpperCase().indexOf(trimmedTokenUpper) >= 0) {
+									    			if(lastMatch == null || entry.getKey().length() < lastMatch.length()) {
+									    				code = entry.getValue();
+									    				lastMatch = entry.getKey();
+									    			}
+									    		}
+									    	}
+    									}
     									if(code == null) {
 	    									try {
 	    										code = new Short(trimmedToken);
@@ -1165,8 +1173,23 @@ public abstract class Grid
     							} catch(NumberFormatException e) {}
     						}
     						if(!values.isEmpty()) {
-    							condition.setValue(values.toArray());
-    							conditions.add(condition);
+    							String stringifiedValues = "";
+    							for(Object value: values) {
+    								stringifiedValues += (stringifiedValues.isEmpty() ? "" : ",") + value;
+    							}
+    							org.openmdx.base.query.Filter customQuery = app.getPortalExtension().getQuery(
+									column,
+									stringifiedValues,
+									0, // paramCount
+									app
+								);
+								if(customQuery != null) {
+									conditions.addAll(customQuery.getCondition());
+									extensions.addAll(customQuery.getExtension());
+								} else {
+	    							condition.setValue(values.toArray());
+	    							conditions.add(condition);
+	    						}
     						}
     					}
     				}
@@ -1219,7 +1242,7 @@ public abstract class Grid
     				SimpleDateFormat dateParser = (SimpleDateFormat)SimpleDateFormat.getDateInstance(
     					java.text.DateFormat.SHORT,
     					this.getCurrentLocale()
-    				);            
+    				);
     				StringTokenizer andExpr = new StringTokenizer(filterValues, "&");
     				while(andExpr.hasMoreTokens()) {
     					ConditionParser parser = app.getPortalExtension().getConditionParser(
@@ -1313,35 +1336,16 @@ public abstract class Grid
     						if(andExpr != null) {
     							// if getQuery() returns a query extension it must be merged with 
     							// the base query which might also contain a query extension
-    							org.openmdx.base.query.Filter query = app.getPortalExtension().getQuery(
+    							org.openmdx.base.query.Filter customQuery = app.getPortalExtension().getQuery(
     								column,
     								andExpr,
-    								extension == null ? 0 : extension.getStringParam().size(),
+    								0, // paramCount
     								app
     							);
-    							if(query != null) {
-    								conditions.addAll(query.getCondition());
-    								Extension queryExtension = query.getExtension();
-    								if(queryExtension != null) {
-    									//
-    									// Merge base query with returned query
-    									//
-    									if(extension == null) {
-    										extension = queryExtension.clone();
-    									} 
-    									else {
-    										// Merged clause
-    										extension.setClause(
-    											extension.getClause() + " AND " + queryExtension.getClause()
-    										);
-    										// Merged string parameter
-    										extension.getStringParam().addAll(
-    											queryExtension.getStringParam()
-    										);
-    									}
-    								}
-    							} 
-    							else {
+    							if(customQuery != null) {
+    								conditions.addAll(customQuery.getCondition());
+    								extensions.addAll(customQuery.getExtension());
+    							} else {
     								ConditionParser conditionParser = app.getPortalExtension().getConditionParser(
     									column, 
     									new IsLikeCondition(
@@ -1371,7 +1375,7 @@ public abstract class Grid
     						}
     					}
     				}
-    			}          
+    			}
     			this.currentFilter = new Filter(
     				column.getFeatureName(),
     				null,
@@ -1380,7 +1384,7 @@ public abstract class Grid
     				null,
     				conditions,
     				null, // order
-    				extension,
+    				extensions,
     				this.getGridControl().getContainerId(), 
     				this.view.getApplicationContext().getCurrentUserRole(), 
     				this.view.getObjectReference().getXRI()               

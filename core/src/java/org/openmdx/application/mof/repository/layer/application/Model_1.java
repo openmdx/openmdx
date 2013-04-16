@@ -675,7 +675,6 @@ public class Model_1 extends Layer_1 {
                         ModelAttributes.REFERENCE
                     )
                 ) {
-                    MappedRecord referencedEnd;
                     DataproviderRequest getRequest = new DataproviderRequest(
 						Facades.newQuery((Path)facade.attributeValue("referencedEnd")).getDelegate(),
 					    DataproviderOperations.OBJECT_RETRIEVAL,
@@ -688,7 +687,7 @@ public class Model_1 extends Layer_1 {
 					    Facades.asQuery(getRequest.object()), 
 					    getReply.getResult()
 					);
-					referencedEnd = getReply.getObject();
+					MappedRecord referencedEnd = getReply.getObject();
                     facade.attributeValuesAsList("referencedEndIsNavigable").clear();
 					facade.attributeValuesAsList("referencedEndIsNavigable").addAll(
 							Facades.asObject(referencedEnd).attributeValuesAsList("isNavigable")
@@ -730,21 +729,16 @@ public class Model_1 extends Layer_1 {
             DataproviderRequest request,
             DataproviderReply reply
         ) throws ServiceException {
-            for(
-                int i = 0;
-                i < reply.getObjects().length;
-                i++
-            ) {
-                //SysLog.trace("completing object: " + reply.getObjects()[i]);
+            MappedRecord[] objects = reply.getObjects();
+            for(MappedRecord object : objects) { 
                 this.completeObject(
                     header,
                     request,
-                    reply.getObjects()[i]
+                    object
                 );
             }
             reply.setHasMore(Boolean.FALSE);
-            reply.setTotal(new Integer(reply.getObjects().length));
-    
+            reply.setTotal(Integer.valueOf(objects.length));    
             return reply;
         }
     

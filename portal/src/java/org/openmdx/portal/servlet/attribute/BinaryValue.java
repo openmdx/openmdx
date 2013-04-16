@@ -462,14 +462,15 @@ public class BinaryValue
         HtmlEncoder_1_0 htmlEncoder = p.getApplicationContext().getHtmlEncoder();   
         label = this.getLabel(attribute, p, label);
         String title = this.getTitle(attribute, label);
-        if(forEditing && readonlyModifier.isEmpty()) {
-            String idTag = id == null ? 
-                "" : 
+        if(forEditing) {
+            String idTag = id == null ? "" : 
                 "id=\"" + id + "\"";                                                                        
             p.write("<td class=\"label\" title=\"", (title == null ? "" : htmlEncoder.encode(title, false)), "\"><span class=\"nw\">", htmlEncoder.encode(label, false), "</span></td>");            
             String feature = this.getName();
             p.write("<td ", rowSpanModifier, ">");
-            p.write("  <input ", idTag, " type=\"file\" class=\"valueL", lockedModifier, "\" name=\"", feature, "[", Integer.toString(tabIndex), "]\" ", readonlyModifier, " ", (readonlyModifier.isEmpty() ? "" : "disabled"), " tabindex=\"", Integer.toString(tabIndex), "\" title=\"", texts.getEnterNullToDeleteText(), "\">");
+            if(readonlyModifier.isEmpty()) {            
+            	p.write("  <input ", idTag, " type=\"file\" class=\"valueL", lockedModifier, "\" name=\"", feature, "[", Integer.toString(tabIndex), "]\" ", readonlyModifier, " ", (readonlyModifier.isEmpty() ? "" : "disabled"), " tabindex=\"", Integer.toString(tabIndex), "\" title=\"", texts.getEnterNullToDeleteText(), "\">");
+            }
             p.write("</td>");
             p.write("<td class=\"addon\" ", rowSpanModifier, "></td>");            
         }

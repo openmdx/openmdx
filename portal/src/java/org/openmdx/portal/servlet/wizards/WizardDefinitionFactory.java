@@ -8,7 +8,7 @@
  * This software is published under the BSD license
  * as listed below.
  * 
- * Copyright (c) 2004-2007, OMEX AG, Switzerland
+ * Copyright (c) 2004-2013, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -49,8 +49,11 @@
  * This product includes yui, the Yahoo! UI Library
  * (License - based on BSD).
  *
+ * ---[ SMC (http://www.smc.it) ]---
+ *
+ * Allowed Jsf, MyFaces
+ *
  */
-
 package org.openmdx.portal.servlet.wizards;
 
 import java.io.InputStream;
@@ -67,10 +70,22 @@ import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.Model_1_0;
 import org.openmdx.kernel.log.SysLog;
 
-public class WizardDefinitionFactory
-implements Serializable {
+/**
+ * WizardDefinitionFactory
+ *
+ */
+public class WizardDefinitionFactory implements Serializable {
 
-    //-------------------------------------------------------------------------
+    /**
+     * Create wizard definition.
+     * 
+     * @param path
+     * @param locale
+     * @param localeIndex
+     * @param is
+     * @return
+     * @throws ServiceException
+     */
     public static WizardDefinition createWizardDefinition(
         String path,
         String locale,
@@ -84,38 +99,60 @@ implements Serializable {
                 localeIndex,
                 is
             );
-        }
-        else if(path.endsWith(".config")) {
+        } else if(path.endsWith(".xhtml") || path.endsWith(".jsf")) {
+            return new JsfWizardDefinition(
+                path,
+                locale,
+                localeIndex,
+                is
+            );
+        } else if(path.endsWith(".config")) {
             // Ignore configuration files
             return null;
-        }
-        else {
+        } else {
         	SysLog.info("Unsupported wizard definition format. Supported formats are [.jsp]", path);
             return null;
         }
     }
 
-    //-------------------------------------------------------------------------
+    /**
+     * Constructor 
+     *
+     * @param wizardDefinitions
+     * @param model
+     */
     public WizardDefinitionFactory(
-        Map reports,
+        Map wizardDefinitions,
         Model_1_0 model
     ) {
-        this.allDefinitions = reports;
+        this.wizardDefinitions = wizardDefinitions;
         this.customizedDefinitions = new HashMap<String,Set<String>>();
         this.model = model;
-        SysLog.info("loaded wizards=" + this.allDefinitions.keySet());
+        SysLog.info("loaded wizards=" + this.wizardDefinitions.keySet());
     }
 
-    //-------------------------------------------------------------------------
+    /**
+     * Get wizard definitions.
+     * 
+     * @param locale
+     * @return
+     */
     public List getWizardDefinitions(
         String locale
     ) {
-        return (List)this.allDefinitions.get(
+        return (List)this.wizardDefinitions.get(
             locale
         );
     }
 
-    //-------------------------------------------------------------------------
+    /**
+     * Find wizard definition for given class and locale.
+     * 
+     * @param forClass
+     * @param locale
+     * @param orderPattern
+     * @return
+     */
     public WizardDefinition[] findWizardDefinitions(
         String forClass,
         String locale,
@@ -132,7 +169,6 @@ implements Serializable {
                 customizedDefinitions = new HashSet<String>()
             );
         }
-
         int ii = 0;
         if(wizardDefinitions != null) {
 	        for(
@@ -184,11 +220,11 @@ implements Serializable {
     }
 
     //-------------------------------------------------------------------------
-    // Variables
+    // Members
     //-------------------------------------------------------------------------
     private static final long serialVersionUID = 53793339941479036L;
 
-    private final Map allDefinitions;
+    private final Map wizardDefinitions;
     /**
      * The factory manages a set of customized definitions for each 
      * forClass and locale. This allows to put all non or wrong customized 

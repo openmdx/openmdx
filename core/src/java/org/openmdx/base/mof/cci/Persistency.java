@@ -49,7 +49,6 @@ package org.openmdx.base.mof.cci;
 
 import java.io.IOException;
 import java.net.URL;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -57,7 +56,7 @@ import java.util.logging.Level;
 
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.kernel.exception.BasicException;
-import org.openmdx.kernel.loading.Classes;
+import org.openmdx.kernel.loading.Resources;
 import org.openmdx.kernel.log.SysLog;
 
 
@@ -74,11 +73,7 @@ public class Persistency {
     private Persistency() throws ServiceException {
         try {
             Properties persistenceModifiers = new Properties();
-            for(
-                Enumeration<URL> orm = Classes.getResources("META-INF/openmdxorm.properties");
-                orm.hasMoreElements();
-            ) {
-                URL url = orm.nextElement();
+            for(URL url : Resources.getMetaInfResources("openmdxorm.properties")) {
                 SysLog.log(
                     Level.INFO,
                     "Sys|ORM mapping: Persistence Modifiers|Apply configuration {0}", 

@@ -52,7 +52,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
 
-import javax.jdo.JDOHelper;
 import javax.jdo.JDOUserCallbackException;
 import javax.jdo.listener.DeleteLifecycleListener;
 import javax.jdo.listener.InstanceLifecycleEvent;
@@ -70,6 +69,7 @@ import org.openmdx.base.mof.cci.Model_1_0;
 import org.openmdx.base.mof.cci.Multiplicity;
 import org.openmdx.base.naming.PathComponent;
 import org.openmdx.kernel.exception.BasicException;
+import org.openmdx.kernel.jdo.ReducedJDOHelper;
 import org.openmdx.state2.spi.Propagation;
 
 /**
@@ -365,7 +365,7 @@ public abstract class AbstractPlugIn_1 implements PlugIn_1_0, StoreLifecycleList
                 BasicException.Code.ILLEGAL_STATE,
                 "The configuration inhibits the removal of StateCapable instances unless they are new",
                 new BasicException.Parameter("stateCapableDeletable", this.stateCapableDeletable),
-                new BasicException.Parameter("state", JDOHelper.getObjectState(persistentInstance))
+                new BasicException.Parameter("state", ReducedJDOHelper.getObjectState(persistentInstance))
             );
         } catch (ServiceException exception) {
             throw new JDOUserCallbackException(

@@ -56,8 +56,8 @@ import java.io.ObjectOutput;
 
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.resource.spi.VariableSizeIndexedRecord;
-import org.openmdx.base.rest.spi.RestFormat.Target;
-
+import org.openmdx.base.rest.stream.RestFormatter;
+import org.openmdx.base.rest.stream.RestTarget;
 
 /**
  * Result Record
@@ -97,7 +97,7 @@ public class ResultRecord
     /* (non-Javadoc)
      * @see org.openmdx.base.rest.spi.ResultRecord#setMore(boolean)
      */
-//  @Override
+    @Override
     public void setHasMore(boolean hasMore) {
         this.hasMore = Boolean.valueOf(hasMore);
     }
@@ -105,7 +105,7 @@ public class ResultRecord
     /* (non-Javadoc)
      * @see org.openmdx.base.rest.spi.ResultRecord#getMore()
      */
-//  @Override
+    @Override
     public Boolean getHasMore() {
         return this.hasMore;
     }
@@ -113,7 +113,7 @@ public class ResultRecord
     /* (non-Javadoc)
      * @see org.openmdx.base.rest.spi.ResultRecord#setTotal(long)
      */
-//  @Override
+    @Override
     public void setTotal(long total) {
         this.total = Long.valueOf(total);
     }
@@ -121,7 +121,7 @@ public class ResultRecord
     /* (non-Javadoc)
      * @see org.openmdx.base.rest.spi.ResultRecordd#getTotal()
      */
-//  @Override
+    @Override
     public Long getTotal() {
         return this.total;
     }
@@ -134,14 +134,14 @@ public class ResultRecord
     /* (non-Javadoc)
      * @see java.io.Externalizable#readExternal(java.io.ObjectInput)
      */
-//  @Override
+    @Override
     public void readExternal(
         ObjectInput in
     ) throws IOException, ClassNotFoundException {
         try {
-            RestFormat.parseResponse(
+            RestParser.parseResponse(
                 this, 
-                RestFormat.asSource(in)
+                RestParser.asSource(in)
             );
         } catch (ServiceException exception) {
             throw (InvalidObjectException) new InvalidObjectException(
@@ -155,17 +155,13 @@ public class ResultRecord
     /* (non-Javadoc)
      * @see java.io.Externalizable#writeExternal(java.io.ObjectOutput)
      */
-//  @Override
+    @Override
     public void writeExternal(
         ObjectOutput out
     ) throws IOException {
         try {
-            Target target = RestFormat.asTarget(out); 
-            RestFormat.format(
-                target, 
-                null, 
-                this
-            );
+            RestTarget target = RestFormatter.asTarget(out); 
+            RestFormatter.format(target, null, this);
             target.close();
         } catch (Exception exception) {
             throw (NotSerializableException) new NotSerializableException(
