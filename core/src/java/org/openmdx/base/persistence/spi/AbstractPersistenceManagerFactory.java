@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2005-2012, OMEX AG, Switzerland
+ * Copyright (c) 2005-2013, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -247,7 +247,7 @@ public abstract class AbstractPersistenceManagerFactory<P extends PersistenceMan
         return 
             flag == null ? defaultValue :
             flag instanceof Boolean ? ((Boolean)flag).booleanValue() : 
-            Boolean.valueOf((String)flag);
+            Boolean.parseBoolean((String)flag);
     }
 
     private static boolean getFlag (

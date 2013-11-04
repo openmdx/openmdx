@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2009, OMEX AG, Switzerland
+ * Copyright (c) 2009-2013, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -251,7 +251,7 @@ public class Exporter {
 	                        this.target.write(
 	                            typeName, 
 	                            multiplicity, 
-	                            (Integer)e.getKey(), 
+	                            ((Integer)e.getKey()).intValue(), 
 	                            toValue(e.getValue())
 	                        );
 	                    }
@@ -375,13 +375,16 @@ public class Exporter {
         RefObject object
     ) throws ServiceException{
         boolean noOperation = object == null;
+        final RefObject refObject;
         if(noOperation) {
-            object = this.source.getObjectbyId(objectId);
+            refObject = this.source.getObjectbyId(objectId);
+        } else {
+            refObject = object;
         }
-        this.target.startObject(object, noOperation);
-        exportAttributes(noOperation ? null : object);
+        this.target.startObject(refObject, noOperation);
+        exportAttributes(noOperation ? null : refObject);
         exportChildren(objectId);
-        this.target.endObject(object);
+        this.target.endObject(refObject);
     }
     
     /**
@@ -444,14 +447,14 @@ public class Exporter {
      * Support <code>RefObject</code>/<code>String</code> specification
      * 
      * @param startFrom
-     * @param filter
+     * @param rawFilter
      * @param itemMimeType
      * 
      * @throws ServiceException
      */
     public static Object[] exportIntoToByteArray(
         RefObject startFrom, 
-        String filter,
+        String rawFilter,
         String itemMimeType
     ) throws ServiceException {
         List<Path> startingPoints = new ArrayList<Path>();
@@ -459,6 +462,7 @@ public class Exporter {
         //
         // Starting identities are separated from the export filter by '$'
         //
+        String filter = rawFilter;
         int delimiterPosition = filter == null ? -1 : filter.indexOf('$');
         if(delimiterPosition > 0) {
             StringTokenizer tokenizer = new StringTokenizer(

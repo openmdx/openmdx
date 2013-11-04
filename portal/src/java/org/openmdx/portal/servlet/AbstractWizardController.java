@@ -437,23 +437,25 @@ public abstract class AbstractWizardController {
 						this.initFormFields(formValues);
 						for(String formName: formNames) {
 				    		org.openmdx.ui1.jmi1.FormDefinition formDefinition = this.app.getUiFormDefinition(formName);
-				    		FormControl form = new org.openmdx.portal.servlet.control.FormControl(
-								formDefinition.refGetPath().getBase(),
-								this.app.getCurrentLocaleAsString(),
-								this.app.getCurrentLocaleAsIndex(),
-								this.app.getUiContext(),
-								formDefinition
-							);
-							form.updateObject(
-								parameterMap,
-								formValues,
-								this.app,
-								this.pm
-							);
-							this.forms.put(
-								formName,
-								form
-							);
+				    		if(formDefinition != null) {
+					    		FormControl form = new org.openmdx.portal.servlet.control.FormControl(
+									formDefinition.refGetPath().getBase(),
+									this.app.getCurrentLocaleAsString(),
+									this.app.getCurrentLocaleAsIndex(),
+									this.app.getUiContext(),
+									formDefinition
+								);
+								form.updateObject(
+									parameterMap,
+									formValues,
+									this.app,
+									this.pm
+								);
+								this.forms.put(
+									formName,
+									form
+								);
+				    		}
 						}
 						parameterValues.add(formValues);
 					} else {

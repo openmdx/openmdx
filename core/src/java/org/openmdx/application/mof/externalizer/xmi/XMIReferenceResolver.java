@@ -52,6 +52,8 @@
  */
 package org.openmdx.application.mof.externalizer.xmi;
 
+import java.net.URI;
+
 import org.openmdx.application.mof.externalizer.xmi.uml1.UML1AssociationEnd;
 import org.openmdx.application.mof.externalizer.xmi.uml1.UML1Comment;
 import org.openmdx.application.mof.externalizer.xmi.uml1.UML1Generalization;
@@ -59,11 +61,20 @@ import org.openmdx.application.mof.externalizer.xmi.uml1.UML1TagDefinition;
 
 public interface XMIReferenceResolver {
 
-  //---------------------------------------------------------------------------
   public void parse(
       String uri
   ) throws Exception;
     
+  /**
+   * Get href as URI.
+   * 
+   * @param href
+   * @return
+   */
+  public URI hrefToURI(
+      String href
+  );
+  
   /**
    * Retrieves the fully qualified name of the model element identified by a 
    * given xmiId

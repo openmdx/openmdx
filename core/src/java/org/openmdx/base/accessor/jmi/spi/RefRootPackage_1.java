@@ -106,7 +106,9 @@ import org.openmdx.base.accessor.jmi.cci.RefStruct_1_0;
 import org.openmdx.base.accessor.rest.DataObject_1;
 import org.openmdx.base.accessor.spi.AbstractUnitOfWork_1;
 import org.openmdx.base.accessor.spi.Delegating_1_0;
+import org.openmdx.base.accessor.spi.IdentityMarshaller;
 import org.openmdx.base.accessor.spi.PersistenceManager_1_0;
+import org.openmdx.base.accessor.spi.StandardPrimitiveTypeMarshallerProvider;
 import org.openmdx.base.accessor.view.ObjectView_1_0;
 import org.openmdx.base.collection.ConcurrentWeakRegistry;
 import org.openmdx.base.collection.Maps;
@@ -117,6 +119,8 @@ import org.openmdx.base.exception.ExceptionListener;
 import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.marshalling.Marshaller;
+import org.openmdx.base.marshalling.MarshallerProvider;
+import org.openmdx.base.marshalling.PrimitiveTypeMarshallers;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
 import org.openmdx.base.mof.cci.ModelHelper;
 import org.openmdx.base.mof.cci.Model_1_0;
@@ -295,6 +299,11 @@ public class RefRootPackage_1
      * Alternate package name format indicator
      */
     private static final String JMI1_PACKAGE_NAME_INDICATOR = "." + Names.JMI1_PACKAGE_SUFFIX;
+
+    private static final List<MarshallerProvider> PRIMITIVE_TYPE_MARSHALLERS = PrimitiveTypeMarshallers.getProviders(
+        StandardPrimitiveTypeMarshallerProvider.getInstance()
+    );
+
     
     //-------------------------------------------------------------------------
     void unregister(
@@ -786,6 +795,19 @@ public class RefRootPackage_1
         return "RefPackage <root>";
     }
 
+    Marshaller getMarshaller(String type) throws ServiceException {
+        for(MarshallerProvider marshallerProvider : PRIMITIVE_TYPE_MARSHALLERS) {
+            Marshaller marshaller = marshallerProvider.getMarshaller(type);
+            if(marshaller != null) {
+                return marshaller;
+            }
+        }
+        Model_1_0 model = refModel();
+        return 
+            model.isClassType(type) || PrimitiveTypes.OBJECT_ID.equals(type) || model.isStructureType(type) ? RefRootPackage_1.this :
+            IdentityMarshaller.INSTANCE; // fall back
+    }
+    
     
     //-------------------------------------------------------------------------
     // Class InaccessibleObject

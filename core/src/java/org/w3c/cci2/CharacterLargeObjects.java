@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2006-2012, OMEX AG, Switzerland
+ * Copyright (c) 2006-2013, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -403,10 +403,12 @@ public class CharacterLargeObjects {
             Writer stream, 
             long position
         ) throws IOException {
-            Long length = position + streamCopy(
-                getContent(),
-                position,
-                stream
+            Long length = Long.valueOf(
+                position + streamCopy(
+                    getContent(),
+                    position,
+                    stream
+                )
             );
             this.length = length;
         }
@@ -478,7 +480,8 @@ public class CharacterLargeObjects {
         /* (non-Javadoc)
          * @see org.w3c.cci2.CharacterLargeObject#getContent()
          */
-//      @Override
+        @Override
+        @SuppressWarnings("resource")
         public Reader getContent() throws IOException {
             if(this.url == null) {
                 return newContent();
@@ -555,6 +558,7 @@ public class CharacterLargeObjects {
         /* (non-Javadoc)
          * @see org.w3c.cci2.CharacterLargeObject#getContent()
          */
+        @SuppressWarnings("resource")
         public Reader getContent(
         ) throws IOException {
             return this.file != null ? new InputStreamReader(

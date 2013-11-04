@@ -1,16 +1,13 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: Launch.java,v 1.2 2008/12/20 00:21:59 wfro Exp $
  * Description: Launch
- * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/12/20 00:21:59 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2007, OMEX AG, Switzerland
+ * Copyright (c) 2007-2013, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without 
@@ -136,7 +133,7 @@ public class Launch {
     	String[] source,
     	int classNameIndex
     ) throws IOException{
-    	List target = new ArrayList();
+    	List<String> target = new ArrayList<String>();
     	for(
              int i = 0;
              i < source.length;
@@ -160,7 +157,7 @@ public class Launch {
 						if(in != null) try {
 							in.close(); 
 						} catch (IOException ignore) {
-							// ignore exception
+							// Ignored close failure
 						}
 	    	        }
 	    		} else {

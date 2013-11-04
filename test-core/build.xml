@@ -59,7 +59,7 @@
 	<description>Builds the openMDX/Test-Core component</description>
 	<property name="project.specification.title" value="openMDX/Test-Core"/>
 
-	<property name="model.transformation.class.path" value="project.lib.classpath"/>
+	<property name="model.transformation.class.path" value="project.bin.classpath"/>
 
 	<!-- Slash separated platform list, the last entry being the default -->
 	<property name="project.platform.list" value="jre-1.6"/>
@@ -92,7 +92,82 @@
 	<!-- ******************************************************************* -->
 	<!-- * generate -->
 	<!-- ******************************************************************* -->
-	<target name="generate" description="Generate version, jt and model dependend files" depends="build-init">
+	<target 
+		name="bootstrap" 
+		depends="build-init"
+		description="Generate version and jt dependend files" 
+	>
+		<patternset id="openmdx-bootstrap.content">
+			<include name="test/openmdx/application/mof/mapping/java/*.java"/>
+		</patternset>
+		<antcontrib:if>
+			<istrue value="${build.compile.without.bootclasspath}"/>
+			<antcontrib:then>
+				<javac 
+					destdir="${build.dir}/bin" 
+					debug="${build.debug}" 
+					optimize="${build.optimize}" 
+					fork="true" 
+					memoryMaximumSize="256m" 
+					classpathref="project.lib.classpath"
+					source="${build.source.version}"
+					target="${build.target.version}"
+					extdirs="${build.target.jre}/ext"
+					includeantruntime="${build.include.ant.runtime}"
+				>
+					<src path="${basedir}/src/java"/>		    
+					<patternset refid="openmdx-bootstrap.content"/>
+					<compilerarg value="-implicit:class"/>
+				</javac>
+			</antcontrib:then>
+			<antcontrib:elseif>
+				<istrue value="${build.compile.without.bootclasspath+compliance-level}"/>
+				<antcontrib:then>
+					<javac 
+						destdir="${build.dir}/bin" 
+						debug="${build.debug}" 
+						optimize="${build.optimize}" 
+						fork="true" 
+						memoryMaximumSize="256m" 
+						classpathref="project.lib.classpath"
+						bootclasspathref="java.bootstrap.lib"
+						extdirs="${build.target.jre}/ext"
+						includeantruntime="${build.include.ant.runtime}"
+					>
+						<src path="${basedir}/src/java"/>		    
+						<patternset refid="openmdx-bootstrap.content"/>
+						<compilerarg value="-implicit:class"/>
+					</javac>
+				</antcontrib:then>
+			</antcontrib:elseif>
+			<antcontrib:else>
+				<javac 
+					destdir="${build.dir}/bin" 
+					debug="${build.debug}" 
+					optimize="${build.optimize}" 
+					fork="true" 
+					memoryMaximumSize="256m" 
+					classpathref="project.lib.classpath"
+					source="${build.source.version}"
+					target="${build.target.version}"
+					bootclasspathref="java.bootstrap.lib"
+					extdirs="${build.target.jre}/ext"
+					includeantruntime="${build.include.ant.runtime}"
+				>
+					<src path="${basedir}/src/java"/>		    
+					<patternset refid="openmdx-bootstrap.content"/>
+					<compilerarg value="-implicit:class"/>
+				</javac>
+			</antcontrib:else>
+		</antcontrib:if>
+		<available 
+			file="${openmdx.home}/ant/build.xml" 
+			type="file" 
+			property="generate-ant.required"
+		/>
+	</target>
+	
+	<target name="generate" description="Generate version, jt and model dependend files" depends="bootstrap">
 		<ant dir="${openmdx.home}/core" inheritAll="false" target="deliverables">
 			<property name="build.target.platform" value="${build.java.platform}"/>
 		</ant> 

@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2005-2008, OMEX AG, Switzerland
+ * Copyright (c) 2005-2013, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without 
@@ -406,6 +406,7 @@ public class ManagedDatabaseConnection
     /* (non-Javadoc)
      * @see org.openmdx.kernel.application.container.spi.resource.Validatable#validate()
      */
+    @SuppressWarnings("resource")
     public boolean validate() {
         if(this.connectionRequestInfo instanceof DatabaseConnectionRequestInfo) {
             String validationStatement = ((DatabaseConnectionRequestInfo)connectionRequestInfo).getValidationStatement();

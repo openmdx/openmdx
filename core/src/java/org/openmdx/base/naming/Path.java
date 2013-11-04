@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2008, OMEX AG, Switzerland
+ * Copyright (c) 2004-2013, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -1348,7 +1348,7 @@ public final class Path
     @Override
     public String toString(
     ){
-        return LEGACY_STRING_REPRESENTATION ? toComponent() : toXRI(); 
+        return LEGACY_STRING_REPRESENTATION.booleanValue() ? toComponent() : toXRI(); 
     }
 
     /**
@@ -1400,7 +1400,7 @@ public final class Path
     private static String WILDCARD_COMPONENT_TERMINATOR = "*" + COMPONENT_SEPARATOR;
     private static final String COMPONENT_SEPARATOR_STRING = Character.toString(COMPONENT_SEPARATOR);
     private static final String[] EMPTY_COMPONENTS = {};
-    private static final boolean LEGACY_STRING_REPRESENTATION = Boolean.TRUE; // avoid dead code warning
+    private static final Boolean LEGACY_STRING_REPRESENTATION = Boolean.TRUE; // avoid dead code warning
 
     /**
      * Defines, whether the path can be modified or not

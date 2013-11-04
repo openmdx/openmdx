@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2007, OMEX AG, Switzerland
+ * Copyright (c) 2007-2013, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -95,7 +95,7 @@ public enum ExtensionTarget {
     ){
         if(xmlFormat == null) {
             return null;
-        };
+        }
         for(ExtensionTarget value : values()) {
             if(value.xmlFormat.equals(xmlFormat)) {
                 return value;

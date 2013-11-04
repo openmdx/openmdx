@@ -113,7 +113,11 @@
 		<exclude name="org/openmdx/application/**/stream"/>
 		<exclude name="org/openmdx/application/**/stream/*"/>
 		<!-- Exclusion of XML resources -->
+		<exclude name="**/*.wbxml" />
 		<exclude name="**/*.xml" />
+		<exclude name="**/*.xsd" />
+		<exclude name="**/xmi1" />
+		<exclude name="org/omg/primitivetypes/**" />
 	</patternset>
 	<patternset id="openmdx-dalvik.meta-inf">
 		<include name="META-INF/*.properties"/>

@@ -230,6 +230,10 @@ public class BooleanValue
                 p.write("</td>");
             }
         } else {
+        	String cssClass = DEFAULT_CSS_CLASS;
+        	if(this.getCssClassFieldGroup() != null) {
+        		cssClass = this.getCssClassFieldGroup() + " " + cssClass;
+        	}        	
             if(stringifiedValue.isEmpty() || WebKeys.LOCKED_VALUE.equals(stringifiedValue)) {
                 super.paint(
                     attribute,
@@ -252,17 +256,17 @@ public class BooleanValue
                 styleModifier += "\"";
                 if(p.getViewPortType() == ViewPort.Type.MOBILE) {
                 	p.write("		<label>",  htmlEncoder.encode(label, false), "</label>");                	
-                	p.write("       <div class=\"valueL\" title=\"", stringifiedValue, "\">", boolImages, "</div>");
+                	p.write("       <div class=\"", cssClass, "\" title=\"", stringifiedValue, "\">", boolImages, "</div>");
                 } else {
 	                p.debug("<!-- BooleanValue -->");
 	                p.write(gapModifier);
 	                p.write("<td class=\"label\" title=\"", (title == null ? "" : htmlEncoder.encode(title, false)), "\"><span class=\"nw\">", htmlEncoder.encode(label, false), "</span></td>");
-	                p.write("<td ",  rowSpanModifier, " class=\"valueL\" ",  widthModifier, " ",  styleModifier, "><div class=\"field\" title=\"", stringifiedValue, "\">",  boolImages, "</div></td>");
+	                p.write("<td ",  rowSpanModifier, " class=\"", cssClass, "\" ",  widthModifier, " ",  styleModifier, "><div class=\"field\" title=\"", stringifiedValue, "\">",  boolImages, "</div></td>");
                 }
             }
         }
     }
-  
+
     //-------------------------------------------------------------------------
     private static final long serialVersionUID = 3761124925162927922L;
 

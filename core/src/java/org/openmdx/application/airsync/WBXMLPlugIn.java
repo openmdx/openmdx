@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2010, OMEX AG, Switzerland
+ * Copyright (c) 2010-2013, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -731,7 +731,7 @@ public class WBXMLPlugIn extends AbstractPlugIn {
      */
     private static final NamespaceContext namespaceContext = new NamespaceContext(){
 
-    //  @Override
+      @Override
         public String getNamespaceURI(String prefix) {
             if(XMLConstants.DEFAULT_NS_PREFIX.equals(prefix)) {
                 return NAMESPACE_URIS[0];
@@ -741,13 +741,13 @@ public class WBXMLPlugIn extends AbstractPlugIn {
             }
         }
 
-    //  @Override
+      @Override
         public String getPrefix(String namespaceURI) {
             Integer page = _NAMESPACE_URIS.get(namespaceURI);
             return page == null ? null : NAMESPACE_PREFIXES[page.intValue()];
         }
 
-    //  @Override
+      @Override
         public Iterator<?> getPrefixes(String namespaceURI) {
             String prefix = getPrefix(namespaceURI);
             return (prefix == null ? Collections.emptySet() : Collections.singleton(prefix)).iterator();
@@ -789,7 +789,7 @@ public class WBXMLPlugIn extends AbstractPlugIn {
         Integer code = _TAGS[page.intValue()].get(value);
         if(code == null) return null;    
         return new CodeToken(
-            page << 8 | code.intValue(),
+            page.intValue() << 8 | code.intValue(),
             value.length(),
             false
         );

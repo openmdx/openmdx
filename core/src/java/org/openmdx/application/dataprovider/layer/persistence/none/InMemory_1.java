@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2011, OMEX AG, Switzerland
+ * Copyright (c) 2004-2013, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -103,12 +103,17 @@ import org.w3c.cci2.SparseArray;
 @SuppressWarnings({"rawtypes","unchecked"})
 public class InMemory_1 extends AbstractPersistence_1 {
 
-    // --------------------------------------------------------------------------
+    /**
+     * Constructor 
+     *
+     */
     public InMemory_1(
     ) {
     }
     
-    // --------------------------------------------------------------------------
+    /* (non-Javadoc)
+     * @see org.openmdx.application.dataprovider.spi.OperationAwareLayer_1#getInteraction(javax.resource.cci.Connection)
+     */
     @Override
     public Interaction getInteraction(
         Connection connection
@@ -132,14 +137,16 @@ public class InMemory_1 extends AbstractPersistence_1 {
         return (ModelElement_1_0)getModel().getElement(objectClass).objGetMap("allFeature").get(featureName);
     }
     
-    // --------------------------------------------------------------------------
+    /**
+     * InMemoryIterator
+     *
+     */
     private static class InMemoryIterator implements Serializable {
 
         private static final long serialVersionUID = 3905236814703769655L;
         private final AttributeSpecifier[] attributeSpecifier;
         private final FilterProperty[] attributeFilter;
 
-        //---------------------------------------------------------------------------
         InMemoryIterator(
           FilterProperty[] attributeFilter,
           AttributeSpecifier[] attributeSpecifier
@@ -267,16 +274,15 @@ public class InMemory_1 extends AbstractPersistence_1 {
 
     }
 
-    //-------------------------------------------------------------------------
     /**
-     * Get an object's reference
+     * Get an object's reference.
      *
-     * @param   path  
-     *        the reference's path
-     * @param   referenceMustExist
-     *        Defines whether an exception should be thrown if the
+     * @param path
+     * @param referenceMustExist Defines whether an exception should be thrown if the
      *        reference doesn't exist
-     *
+     * @param isPreferringNotFoundException
+     * @return
+
      * @exception ServiceException BAD_PARAMETER
      *        if the path refers to an object, not a reference
      * @exception ServiceException NOT_FOUND
@@ -285,7 +291,8 @@ public class InMemory_1 extends AbstractPersistence_1 {
      */
     protected Map<String,MappedRecord> getReference(
         Path path,
-        boolean referenceMustExist
+        boolean referenceMustExist,
+        boolean isPreferringNotFoundException
     ) throws ServiceException {
         if(path.size() % 2 == 0) throw new ServiceException(
             BasicException.Code.DEFAULT_DOMAIN,
@@ -294,21 +301,23 @@ public class InMemory_1 extends AbstractPersistence_1 {
             new BasicException.Parameter("path",path)
         );
         Map<String,MappedRecord> result = this.referenceMap.get(path.getParent());
-        if(referenceMustExist && result == null) throw new ServiceException(
-            BasicException.Code.DEFAULT_DOMAIN,
-            BasicException.Code.NOT_FOUND,
-            "Reference \u00ab" + path.getParent() + "\u00bb not found",
-            new BasicException.Parameter("object", path),
-            new BasicException.Parameter("reference", path.getParent())
-        );
+        if(referenceMustExist && result == null) {
+            if(isPreferringNotFoundException) {            
+                throw new ServiceException(
+                    BasicException.Code.DEFAULT_DOMAIN,
+                    BasicException.Code.NOT_FOUND,
+                    "Reference \u00ab" + path.getParent() + "\u00bb not found",
+                    new BasicException.Parameter("object", path),
+                    new BasicException.Parameter("reference", path.getParent())
+                );
+            }
+        }
         return result;
     }
 
-    //------------------------------------------------------------------------
-    // Implements Dataprovider_1_0
-    //------------------------------------------------------------------------
-
-    //------------------------------------------------------------------------
+    /* (non-Javadoc)
+     * @see org.openmdx.application.dataprovider.layer.persistence.common.AbstractPersistence_1#activate(short, org.openmdx.application.configuration.Configuration, org.openmdx.application.dataprovider.spi.Layer_1)
+     */
     @Override
     public void activate(
         short id,
@@ -321,11 +330,14 @@ public class InMemory_1 extends AbstractPersistence_1 {
             delegation
         );
         if(!configuration.values(SharedConfigurationEntries.BATCH_SIZE).isEmpty()) {
-            this.batchSize = ((Number)configuration.values(SharedConfigurationEntries.BATCH_SIZE).get(0)).intValue();
+            this.batchSize = ((Number)configuration.values(SharedConfigurationEntries.BATCH_SIZE).get(Integer.valueOf(0))).intValue();
         }
         String namespaceId = configuration.getFirstValue(
             SharedConfigurationEntries.NAMESPACE_ID
         );
+        if(!configuration.values(LayerConfigurationEntries.CLONE_REPLY).isEmpty()) {
+            this.cloneReply = ((Boolean)(configuration.values(LayerConfigurationEntries.CLONE_REPLY).get(Integer.valueOf(0)))).booleanValue();
+        }
         synchronized(InMemory_1.referenceMaps) {
             this.referenceMap = (Map)InMemory_1.referenceMaps.get(namespaceId);
             if (this.referenceMap == null) {
@@ -340,7 +352,6 @@ public class InMemory_1 extends AbstractPersistence_1 {
         }
     }
 
-    //-------------------------------------------------------------------------
     /**
      * Prepare the reply object.
      * <p>
@@ -368,7 +379,9 @@ public class InMemory_1 extends AbstractPersistence_1 {
 		        ).getDelegate();
 		    case AttributeSelectors.SPECIFIED_AND_TYPICAL_ATTRIBUTES:
 		    case AttributeSelectors.ALL_ATTRIBUTES: 
-		        return Object_2Facade.cloneObject(source);
+		        return this.cloneReply
+		            ? Object_2Facade.cloneObject(source)
+		            : source;
 		    case AttributeSelectors.SPECIFIED_AND_SYSTEM_ATTRIBUTES: {
 		        MappedRecord target = Object_2Facade.cloneObject(source);
 		        Set attributes = new HashSet();
@@ -395,7 +408,6 @@ public class InMemory_1 extends AbstractPersistence_1 {
 		}
     }
 
-    //-------------------------------------------------------------------------
     /**
      * Compare the value of an attribute of two objects.
      * <p>
@@ -458,15 +470,18 @@ public class InMemory_1 extends AbstractPersistence_1 {
             return aLarger;
         }
         Object aValue = aValues instanceof SparseArray ?
-            ((SparseArray)aValues).get(index) :
+            ((SparseArray)aValues).get(Integer.valueOf(index)) :
                 ((List)aValues).get(index);
         Object bValue = bValues instanceof SparseArray ?
-            ((SparseArray)bValues).get(index) :
+            ((SparseArray)bValues).get(Integer.valueOf(index)) :
                 ((List)bValues).get(index);
         return ((Comparable)aValue).compareTo(bValue);
     }
 
-    // --------------------------------------------------------------------------
+    /**
+     * InMemoryLayerInteraction
+     *
+     */
     public class InMemoryLayerInteraction extends OperationAwareLayer_1.LayerInteraction {
         
         public InMemoryLayerInteraction(
@@ -475,7 +490,6 @@ public class InMemory_1 extends AbstractPersistence_1 {
             super(connection);
         }
             
-        //-------------------------------------------------------------------------
         /**
          * Get the object specified by the requests's path 
          *
@@ -494,8 +508,9 @@ public class InMemory_1 extends AbstractPersistence_1 {
             synchronized(InMemory_1.this.referenceMap){
                 Path path = Object_2Facade.getPath(request.object());
                 Map<String, MappedRecord> reference = InMemory_1.this.getReference(
-                    path,
-                    true
+                    path, 
+                    true, // referenceMustExist
+                    input.isPreferringNotFoundException()
                 );
                 MappedRecord source = reference == null ? null : reference.get(
                     path.getBase()
@@ -511,7 +526,7 @@ public class InMemory_1 extends AbstractPersistence_1 {
                     }
                 } else {
                     MappedRecord object = InMemory_1.this.replyObject(
-    				    Object_2Facade.cloneObject(source),
+    				    source,
     				    request.attributeSelector(),
     				    request.attributeSpecifier()
     				);
@@ -521,7 +536,6 @@ public class InMemory_1 extends AbstractPersistence_1 {
             return true;
         }
 
-        //-------------------------------------------------------------------------
         /**
          * Get the objects specified by the references and filter properties
          *
@@ -769,9 +783,7 @@ public class InMemory_1 extends AbstractPersistence_1 {
                 reply.getResult().addAll(objects);
                 boolean hasMore = request.position() + objects.size() < position;
                 if(!hasMore) {
-                    reply.setTotal(
-                        new Integer(position)
-                    );
+                    reply.setTotal(position);
                 }
                 reply.setHasMore(
                     hasMore
@@ -780,7 +792,6 @@ public class InMemory_1 extends AbstractPersistence_1 {
             }
         }
     
-        //-------------------------------------------------------------------------
         /**
          * Create a new object
          *
@@ -798,7 +809,11 @@ public class InMemory_1 extends AbstractPersistence_1 {
             DataproviderReply reply = this.newDataproviderReply(output);
             synchronized(InMemory_1.this.referenceMap){
                 Path path = request.path();
-                Map<String,MappedRecord> container = InMemory_1.this.getReference(path, false);
+                Map<String,MappedRecord> container = InMemory_1.this.getReference(
+                    path, 
+                    false, // referenceMustExist
+                    false // isPreferringNotFoundException
+                );
                 if(container == null) {
                     InMemory_1.this.referenceMap.put(
                         path.getParent(),
@@ -850,7 +865,6 @@ public class InMemory_1 extends AbstractPersistence_1 {
             }
         }   
     
-        //-------------------------------------------------------------------------
         /**
          * Removes an object including its descendents
          *
@@ -881,10 +895,12 @@ public class InMemory_1 extends AbstractPersistence_1 {
 				);
                 Map<String,MappedRecord> reference = InMemory_1.this.getReference(
                     path, 
-                    false
+                    false, // referenceMustExist 
+                    false // isPreferringNotFoundException
                 );
-                MappedRecord source = reference == null ? null :
-                    reference.remove(path.getBase());
+                MappedRecord source = reference == null 
+                    ? null 
+                    : reference.remove(path.getBase());
                 for(
                     Iterator iterator = referenceMap.keySet().iterator();
                     iterator.hasNext();
@@ -911,7 +927,9 @@ public class InMemory_1 extends AbstractPersistence_1 {
             }
         }
     
-        //-------------------------------------------------------------------------
+        /* (non-Javadoc)
+         * @see org.openmdx.application.dataprovider.spi.Layer_1.LayerInteraction#put(org.openmdx.base.resource.spi.RestInteractionSpec, org.openmdx.base.rest.spi.Object_2Facade, javax.resource.cci.IndexedRecord)
+         */
         @Override
         public boolean put(
             RestInteractionSpec ispec,
@@ -926,7 +944,8 @@ public class InMemory_1 extends AbstractPersistence_1 {
                 Path path = source.getPath();
                 Map<String,MappedRecord> container = InMemory_1.this.getReference(
                     path, 
-                    true
+                    true, // referenceMustExist 
+                    true // isPreferringNotFoundException
                 );
                 Object_2Facade target = Facades.asObject(container.get(path.getBase()));
                 if(target == null) {
@@ -961,5 +980,6 @@ public class InMemory_1 extends AbstractPersistence_1 {
     protected static final Map referenceMaps = new HashMap();
     protected Map<Path,Map<String,MappedRecord>> referenceMap = null;
     protected int batchSize = Integer.MAX_VALUE;
+    protected boolean cloneReply = true;
 
 }

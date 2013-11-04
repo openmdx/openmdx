@@ -133,7 +133,8 @@ public class Oid {
      * value, <code>false</code> otherwise.
      * @param other the Oid object that has to be compared to this one
      */
-    public boolean equals(Object other) {
+    @SuppressWarnings("deprecation")
+	public boolean equals(Object other) {
 
         //check if both reference the same object
         if (this == other)
@@ -155,7 +156,8 @@ public class Oid {
      * @return byte array containing the DER encoding of this oid object.
      * @exception GSSException may be thrown when the oid can't be encoded
      */
-    public byte[] getDER() throws GSSException {
+    @SuppressWarnings("resource")
+	public byte[] getDER() throws GSSException {
     
         if (derEncoding == null) {
 	    DerOutputStream dout = new DerOutputStream();

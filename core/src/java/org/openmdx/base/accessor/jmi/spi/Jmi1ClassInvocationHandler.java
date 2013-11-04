@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2007-2010, OMEX AG, Switzerland
+ * Copyright (c) 2007-2013, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -103,18 +103,20 @@ public class Jmi1ClassInvocationHandler implements InvocationHandler {
                 return proxy.getClass().getName() + " delegating to " + this.delegate;
             } 
             else if ("hashCode".equals(methodName)) {
-                return this.delegate.hashCode();
+                return Integer.valueOf(this.delegate.hashCode());
             } 
             else if ("equals".equals(methodName)) {
                 if(Proxy.isProxyClass(args[0].getClass())) {
                     InvocationHandler invocationHandler = Proxy.getInvocationHandler(args[0]);
                     if(invocationHandler instanceof Jmi1ClassInvocationHandler) {
-                        return this.delegate.equals(
-                            ((Jmi1ClassInvocationHandler)invocationHandler).delegate
+                        return Boolean.valueOf(
+                            this.delegate.equals(
+                                ((Jmi1ClassInvocationHandler)invocationHandler).delegate
+                            )
                         );
                     }
                 }
-                return false;
+                return Boolean.FALSE;
             }
         } else {
             this.delegate.assertOpen();

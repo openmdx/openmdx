@@ -69,13 +69,6 @@ public class AssociationMapper
 
     /**
      * Constructor 
-     *
-     * @param writer
-     * @param model
-     * @param format
-     * @param packageSuffix
-     * @param metaData
-     * @throws ServiceException 
      */
     public AssociationMapper(
         ModelElement_1_0 element,
@@ -83,9 +76,10 @@ public class AssociationMapper
         Model_1_0 model,
         Format format,
         String packageSuffix,
-        MetaData_1_0 metaData
+        MetaData_1_0 metaData, 
+        PrimitiveTypeMapper primitiveTypeMapper
     ) throws ServiceException {
-        super(writer, model, format, packageSuffix, metaData);
+        super(writer, model, format, packageSuffix, metaData, primitiveTypeMapper);
         this.associationName = Identifier.CLASS_PROXY_NAME.toIdentifier(
             (String)element.objGetValue("name"),
             null, // removablePrefix
@@ -158,7 +152,7 @@ public class AssociationMapper
         String name = Identifier.CLASS_PROXY_NAME.toIdentifier(associationEnd.getName());            
         String qualifierValueName = Identifier.ATTRIBUTE_NAME.toIdentifier(associationEnd.getQualifierName());
         String qualifierTypeName = qualifierValueName + InstanceMapper.QUALIFIER_TYPE_SUFFIX;
-        String qualifierValueType = getType(associationEnd.getQualifierType());
+        String qualifierValueType = getType(associationEnd.getQualifierType(), getFormat(), false);
         String objectValueName = Identifier.ATTRIBUTE_NAME.toIdentifier(associationEnd.getName());
         if(objectValueName.equals(qualifierValueName)) {
             objectValueName = '_' + objectValueName;

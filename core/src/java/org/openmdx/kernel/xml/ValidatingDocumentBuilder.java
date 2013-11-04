@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2007, OMEX AG, Switzerland
+ * Copyright (c) 2007-2013, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -150,9 +150,15 @@ public class ValidatingDocumentBuilder {
         documentBuilder.setEntityResolver(EntityMapper.getInstance());
         documentBuilder.setErrorHandler(new DocumentErrorHandler(url));
         InputStream stream = url.openStream(); 
-        return dtd ? 
+        Document document = dtd ? 
             documentBuilder.parse(stream) :
             documentBuilder.parse(stream, namespace + '/');
+        try {
+            stream.close();
+        } catch (IOException ignored) {
+            SysLog.trace("Ignored close failure", ignored);
+        }
+        return document;
     }
 
     /**
@@ -175,30 +181,32 @@ public class ValidatingDocumentBuilder {
             true, // xmlDeclarationAware
             true // popagateClode
         );
-        char[] charArray = new char[READ_AHEAD_LIMIT];
-        int l = in.read(charArray);
-        CharBuffer charBuffer = CharBuffer.wrap(charArray, 0, l);
-        Matcher startMatcher = TRUNCATED_DOCUMENT.matcher(charBuffer);
-        if(
-            startMatcher.matches()
-        ) {
-            if(startMatcher.group(1) == null) {
-                String start = startMatcher.group(2);
-                int i = start.indexOf("xmlns=\"");
-                if(i > 0) {
-                    int j = start.indexOf('"', i + 7);
-                    String namespace = start.substring(i + 7, j);
-                    return namespace;
+        try {
+            char[] charArray = new char[READ_AHEAD_LIMIT];
+            int l = in.read(charArray);
+            CharBuffer charBuffer = CharBuffer.wrap(charArray, 0, l);
+            Matcher startMatcher = TRUNCATED_DOCUMENT.matcher(charBuffer);
+            if(startMatcher.matches()) {
+                if(startMatcher.group(1) == null) {
+                    String start = startMatcher.group(2);
+                    int i = start.indexOf("xmlns=\"");
+                    if(i > 0) {
+                        int j = start.indexOf('"', i + 7);
+                        String namespace = start.substring(i + 7, j);
+                        return namespace;
+                    }
                 }
+            } else {
+                SysLog.log(
+                    Level.WARNING, 
+                    "Don't know how to validate the document at URL {0}", 
+                    url
+                );
             }
-        } else {
-            SysLog.log(
-                Level.WARNING, 
-                "Don't know how to validate the document at URL {0}", 
-                url
-            );
+            return null;
+        } finally {
+            in.close();
         }
-        return null;
     }
     
     /**

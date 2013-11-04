@@ -84,11 +84,9 @@ public abstract class TabControl
         
         List<FieldGroupControl> fieldGroups = new ArrayList<FieldGroupControl>();
         if(tab != null) {
-            int index = 0;
             for(
               Iterator i = tab.getMember().iterator(); 
               i.hasNext();
-              index++
             ) {
               org.openmdx.ui1.jmi1.FieldGroup fieldGroup = (org.openmdx.ui1.jmi1.FieldGroup)i.next();
               fieldGroups.add(

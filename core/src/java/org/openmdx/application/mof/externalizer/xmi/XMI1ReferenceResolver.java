@@ -49,6 +49,8 @@
 package org.openmdx.application.mof.externalizer.xmi;
 
 import java.io.PrintStream;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -82,6 +84,34 @@ public class XMI1ReferenceResolver
       this.errors = errors;
   }
 
+  /**
+   * Get href as URI.
+   * 
+   * @param href
+   * @return
+   */
+  public URI hrefToURI(
+      String href
+  ) {
+      URI hrefURI = null;
+      String schema = null;
+      String value = null;
+      try {
+          value = href;
+          value = value.replace(" ", "%20");
+          // Convert relative paths to platform resource paths
+          schema = "";
+          while(value.startsWith("../") || value.startsWith("..\\")) {
+              value = value.substring(3);
+              schema = "platform:/resource/";
+          }                 
+          hrefURI = new URI(schema + value);
+      } catch(URISyntaxException e) {
+          this.error("Reference is not a valid URI >" + schema + value + "<");
+      }
+      return hrefURI;
+  }
+  
   //---------------------------------------------------------------------------
   public String lookupXMIId(
     String xmiId

@@ -56,10 +56,4 @@ public class GridAddColumnFilterAction extends GridSetColumnFilterAction {
 
 	public final static int EVENT_ID = 26;
 
-	@Override
-    protected boolean isAddFilter(
-    ) {
-		return false;
-    }
-
 }

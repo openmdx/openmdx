@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<uml:Model xmi:version="20110701" xmlns:xmi="http://www.omg.org/spec/XMI/20110701" xmlns:uml="http://www.eclipse.org/uml2/4.0.0/UML" xmi:id="_l_0U4Eb9Ed-o1OTPw_6HJg" name="models">
+  <packageImport xmi:id="_9dbckEcCEd-o1OTPw_6HJg">
+    <importedPackage href="../openMDX 2 ~ Core (EMF)/org.ietf.uml#_Szs1cLeAEdueCKP_VeXehw"/>
+  </packageImport>
+  <packageImport xmi:id="_GYc20EcDEd-o1OTPw_6HJg">
+    <importedPackage href="../openMDX 2 ~ Core (EMF)/org.iso.uml#_3C7B8A60016D3C8B7F0E0072"/>
+  </packageImport>
+  <packageImport xmi:id="_KGZIMEcDEd-o1OTPw_6HJg">
+    <importedPackage href="../openMDX 2 ~ Core (EMF)/org.oasis-open.uml#_3C7B8A60016D4022002100C9"/>
+  </packageImport>
+  <packageImport xmi:id="_6r56sEcDEd-o1OTPw_6HJg">
+    <importedPackage href="../openMDX 2 ~ Core (EMF)/org.un.uml#_3C7B8A60016D3C8B7F380249"/>
+  </packageImport>
+  <packageImport xmi:id="_KELFMEcEEd-o1OTPw_6HJg">
+    <importedPackage href="../openMDX 2 ~ Core (EMF)/net.rfc.uml#_3C7B8A60016D3C8B8343014DP"/>
+  </packageImport>
+  <packageImport xmi:id="_yxKcQEcEEd-o1OTPw_6HJg">
+    <importedPackage href="../openMDX 2 ~ Core (EMF)/org.w3c.uml#_3C7B8A60016D3C8B62D700DA"/>
+  </packageImport>
+  <packageImport xmi:id="_SInSMEcDEd-o1OTPw_6HJg">
+    <importedPackage href="../openMDX 2 ~ Core (EMF)/org.omg.PrimitiveTypes.uml#_3C7B8A60016D3D0C708700E2"/>
+  </packageImport>
+  <packageImport xmi:id="_Oc3ZMEcDEd-o1OTPw_6HJg">
+    <importedPackage href="../openMDX 2 ~ Core (EMF)/org.omg.model1.uml#_3C7B8A60016D3C3238A3033A"/>
+  </packageImport>
+  <packageImport xmi:id="_V9XWMEcDEd-o1OTPw_6HJg">
+    <importedPackage href="../openMDX 2 ~ Core (EMF)/org.openmdx.audit2.uml#_3C7B8A60016D3FF13E19007A"/>
+  </packageImport>
+  <packageImport xmi:id="_aATnMEcDEd-o1OTPw_6HJg">
+    <importedPackage href="../openMDX 2 ~ Core (EMF)/org.openmdx.base.uml#_3C7B8A60016D40A89A0D0015"/>
+  </packageImport>
+  <packageImport xmi:id="_rmL4wEcDEd-o1OTPw_6HJg">
+    <importedPackage href="../openMDX 2 ~ Core (EMF)/org.openmdx.generic1.uml#_3C7B8A60016D3FF13E0E02A5"/>
+  </packageImport>
+  <packageImport xmi:id="_y0TsUEcDEd-o1OTPw_6HJg">
+    <importedPackage href="../openMDX 2 ~ Core (EMF)/org.openmdx.role2.uml#_3C7B8A60016D407129D101F2"/>
+  </packageImport>
+  <packageImport xmi:id="_2UgcoEcDEd-o1OTPw_6HJg">
+    <importedPackage href="../openMDX 2 ~ Core (EMF)/org.openmdx.state2.uml#_3C7B8A60016D407170B300B4"/>
+  </packageImport>
+  <packageImport xmi:id="_Th7QwHLyEeGDZOi-upD3nQ">
+    <importedPackage href="../openMDX 2 ~ Core (EMF)/org.openmdx.preferences2.uml#_c6xKEHLfEeGNgPDkuA6txQ"/>
+  </packageImport>
+</uml:Model>

@@ -268,10 +268,10 @@ public class NumberValue
                         null,
                         null,
                         "class=\"valueL valueAC\"",
-                        null
+                        null, // imgTag
+                        null // onChangeValueScript
                     );
-                }
-                else {
+                } else {
                     BigDecimal minValue = this.getMinValue();
                     String minValueModifier = minValue.compareTo(new BigDecimal(Long.MIN_VALUE)) <= 0 ? 
                         "" : 
@@ -290,8 +290,7 @@ public class NumberValue
                 }
                 p.write("</td>");
                 p.write("<td class=\"addon\" ", rowSpanModifier, "></td>");
-            }
-            else {
+            } else {
                 p.write("<td ", rowSpanModifier, ">");
                 p.write("  <textarea id=\"", id, "\" name=\"", id, "\" class=\"multiStringLocked\" rows=\"" + attribute.getSpanRow(), "\" cols=\"20\" readonly tabindex=\"" + tabIndex, "\">", stringifiedValue, "</textarea>");
                 p.write("</td>");
@@ -301,8 +300,7 @@ public class NumberValue
                 }
                 p.write("</td>");
             }
-        }
-        else {
+        } else {
             super.paint(
                 attribute,
                 p,

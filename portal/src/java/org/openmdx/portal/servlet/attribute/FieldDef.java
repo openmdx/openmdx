@@ -8,7 +8,7 @@
  * This software is published under the BSD license
  * as listed below.
  * 
- * Copyright (c) 2004-2007, OMEX AG, Switzerland
+ * Copyright (c) 2004-2013, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -58,10 +58,24 @@ import java.math.BigDecimal;
 import org.openmdx.portal.servlet.ApplicationContext;
 import org.openmdx.portal.servlet.DataBinding;
 
-public class FieldDef
-    implements Serializable {
+public class FieldDef implements Serializable {
     
-    //-----------------------------------------------------------------------
+    /**
+     * Constructor 
+     *
+     * @param featureName
+     * @param qualifiedFeatureName
+     * @param multiplicity
+     * @param isChangeable
+     * @param isMandatory
+     * @param iconKey
+     * @param color
+     * @param backColor
+     * @param cssClassFieldGroup
+     * @param cssClassObjectContainer
+     * @param defaultValue
+     * @param dataBinding
+     */
     public FieldDef(
         String featureName,
         String qualifiedFeatureName,
@@ -71,6 +85,8 @@ public class FieldDef
         String iconKey,
         String color,
         String backColor,
+        String cssClassFieldGroup,
+        String cssClassObjectContainer,
         String defaultValue,
         DataBinding dataBinding        
     ) {
@@ -82,6 +98,8 @@ public class FieldDef
         this.iconKey = iconKey;
         this.color = color;
         this.backColor = backColor;
+        this.cssClassFieldGroup = cssClassFieldGroup;
+        this.cssClassObjectContainer = cssClassObjectContainer;
         this.format = null;
         this.defaultValue = defaultValue;
         this.decimalPlaces = -1;
@@ -93,7 +111,23 @@ public class FieldDef
         this.dataBinding = dataBinding;
     }
     
-    //-----------------------------------------------------------------------
+    /**
+     * Constructor 
+     *
+     * @param featureName
+     * @param qualifiedFeatureName
+     * @param multiplicity
+     * @param isChangeable
+     * @param isMandatory
+     * @param iconKey
+     * @param color
+     * @param backColor
+     * @param cssClassFieldGroup
+     * @param cssClassObjectContainer
+     * @param format
+     * @param defaultValue
+     * @param dataBinding
+     */
     private FieldDef(
         String featureName,
         String qualifiedFeatureName,
@@ -103,6 +137,8 @@ public class FieldDef
         String iconKey,
         String color,
         String backColor,
+        String cssClassFieldGroup,
+        String cssClassObjectContainer,
         String format,
         String defaultValue,
         DataBinding dataBinding
@@ -115,6 +151,8 @@ public class FieldDef
         this.iconKey = iconKey;
         this.color = color;
         this.backColor = backColor;
+        this.cssClassFieldGroup = cssClassFieldGroup;
+        this.cssClassObjectContainer = cssClassObjectContainer;
         this.format = format;
         this.defaultValue = defaultValue;
         this.decimalPlaces = -1;
@@ -126,7 +164,26 @@ public class FieldDef
         this.dataBinding = dataBinding;
     }
     
-    //-----------------------------------------------------------------------
+    /**
+     * Constructor 
+     *
+     * @param featureName
+     * @param qualifiedFeatureName
+     * @param multiplicity
+     * @param decimalPlaces
+     * @param minValue
+     * @param maxValue
+     * @param increment
+     * @param isChangeable
+     * @param isMandatory
+     * @param iconKey
+     * @param color
+     * @param backColor
+     * @param cssClassFieldGroup
+     * @param cssClassObjectContainer
+     * @param defaultValue
+     * @param dataBinding
+     */
     private FieldDef(
         String featureName,
         String qualifiedFeatureName,
@@ -140,6 +197,8 @@ public class FieldDef
         String iconKey,
         String color,
         String backColor,
+        String cssClassFieldGroup,
+        String cssClassObjectContainer,        
         String defaultValue,
         DataBinding dataBinding
     ) {
@@ -155,6 +214,8 @@ public class FieldDef
         this.iconKey = iconKey;
         this.color = color;
         this.backColor = backColor;
+        this.cssClassFieldGroup = cssClassFieldGroup;
+        this.cssClassObjectContainer = cssClassObjectContainer;        
         this.format = null;
         this.defaultValue = defaultValue;
         this.isInPlace = false;
@@ -162,7 +223,23 @@ public class FieldDef
         this.dataBinding = dataBinding;
     }
 
-    //-----------------------------------------------------------------------
+    /**
+     * Constructor 
+     *
+     * @param featureName
+     * @param qualifiedFeatureName
+     * @param multiplicity
+     * @param isChangeable
+     * @param isMandatory
+     * @param iconKey
+     * @param color
+     * @param backColor
+     * @param cssClassFieldGroup
+     * @param cssClassObjectContainer
+     * @param mimeType
+     * @param isInPlace
+     * @param dataBinding
+     */
     private FieldDef(
         String featureName,
         String qualifiedFeatureName,
@@ -172,8 +249,10 @@ public class FieldDef
         String iconKey,
         String color,
         String backColor,
+        String cssClassFieldGroup,
+        String cssClassObjectContainer,
         String mimeType,
-        boolean isInPlace,                          
+        boolean isInPlace,
         DataBinding dataBinding
     ) {
         this.featureName = featureName;
@@ -184,6 +263,8 @@ public class FieldDef
         this.iconKey = iconKey;
         this.color = color;
         this.backColor = backColor;
+        this.cssClassFieldGroup = cssClassFieldGroup;
+        this.cssClassObjectContainer = cssClassObjectContainer;        
         this.mimeType = mimeType;
         this.isInPlace = isInPlace;
         this.format = null;
@@ -195,7 +276,13 @@ public class FieldDef
         this.dataBinding = dataBinding;
     }
     
-    //-----------------------------------------------------------------------
+    /**
+     * Create field definition.
+     * 
+     * @param application
+     * @param f
+     * @return
+     */
     public static FieldDef createFieldDef(
         ApplicationContext application,
         org.openmdx.ui1.jmi1.ValuedField f        
@@ -209,12 +296,20 @@ public class FieldDef
             f.getIconKey(),
             f.getColor(),
             f.getBackColor(),
+            f.getCssClassFieldGroup(),
+            f.getCssClassObjectContainer(),
             f.getDefaultValue(),
             application.getPortalExtension().getDataBinding(f.getDataBindingName())            
         );
     }
 
-    //-----------------------------------------------------------------------
+    /**
+     * Create number field definition.
+     * 
+     * @param application
+     * @param f
+     * @return
+     */
     public static FieldDef createNumberFieldDef(
         ApplicationContext application,
         org.openmdx.ui1.jmi1.NumberField f    
@@ -232,12 +327,20 @@ public class FieldDef
             f.getIconKey(),
             f.getColor(),
             f.getBackColor(),
+            f.getCssClassFieldGroup(),
+            f.getCssClassObjectContainer(),
             f.getDefaultValue(),
             application.getPortalExtension().getDataBinding(f.getDataBindingName())            
         );
     }
     
-    //-----------------------------------------------------------------------
+    /**
+     * Create date field definition.
+     * 
+     * @param application
+     * @param f
+     * @return
+     */
     public static FieldDef createDateFieldDef(
         ApplicationContext application,
         org.openmdx.ui1.jmi1.DateField f    
@@ -251,13 +354,21 @@ public class FieldDef
             f.getIconKey(),
             f.getColor(),
             f.getBackColor(),
+            f.getCssClassFieldGroup(),
+            f.getCssClassObjectContainer(),
             f.getFormat(),
             f.getDefaultValue(),
             application.getPortalExtension().getDataBinding(f.getDataBindingName())
         );        
     }
     
-    //-----------------------------------------------------------------------
+    /**
+     * Create binary field definition.
+     * 
+     * @param application
+     * @param f
+     * @return
+     */
     public static FieldDef createBinaryFieldDef(
         ApplicationContext application,
         org.openmdx.ui1.jmi1.DocumentBox f    
@@ -271,12 +382,34 @@ public class FieldDef
             f.getIconKey(),
             f.getColor(),
             f.getBackColor(),
+            f.getCssClassFieldGroup(),
+            f.getCssClassObjectContainer(),
             f.getMimeType(),
             f.isInPlace(),
             application.getPortalExtension().getDataBinding(f.getDataBindingName())
         );
     }
     
+    /**
+	 * Retrieve cssClassFieldGroup.
+	 *
+	 * @return Returns the cssClassFieldGroup.
+	 */
+	public String getCssClassFieldGroup(
+	) {
+		return this.cssClassFieldGroup;
+	}
+
+	/**
+	 * Retrieve cssClassObjectContainer.
+	 *
+	 * @return Returns the cssClassObjectContainer.
+	 */
+	public String getCssClassObjectContainer(
+	) {
+		return this.cssClassObjectContainer;
+	}	
+
     //-----------------------------------------------------------------------   
     private static final long serialVersionUID = 3544958757449838900L;
     
@@ -288,6 +421,8 @@ public class FieldDef
     public final String iconKey;
     public final String color;
     public final String backColor;
+    public final String cssClassFieldGroup;
+	public final String cssClassObjectContainer;
     public final String format;
     public final String defaultValue;
     public final int decimalPlaces;

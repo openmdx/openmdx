@@ -2,17 +2,14 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: edit-Default.jsp,v 1.51 2012/07/07 08:09:46 wfro Exp $
  * Description: edit-Default.jsp
- * Revision:    $Revision: 1.51 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2012/07/07 08:09:46 $
  * ====================================================================
  *
  * This software is published under the BSD license
  * as listed below.
  *
- * Copyright (c) 2004-2008, OMEX AG, Switzerland
+ * Copyright (c) 2004-2013, OMEX AG, Switzerland
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or
@@ -163,7 +160,7 @@ org.openmdx.base.naming.*
 <body class="yui-skin-sam" onload="initPage();">
 <iframe class="popUpFrame" id="DivShim" src="blank.html" scrolling="no" frameborder="0" style="position:absolute; top:0px; left:0px; display:none;"></iframe>
 <%
-	if(view.getMode() != ViewMode.EMBEDDED) {
+	if(view.getMode() == ViewMode.STANDARD) {
 		EditObjectControl.paintEditPopups(p);
 		p.flush();
 	}
@@ -202,6 +199,9 @@ org.openmdx.base.naming.*
 		);
 		if(!app.getErrorMessages().isEmpty()) {
 			edit.addControl(errors);
+		}
+		if(!view.isEditMode()) {
+			edit.addControl(title);
 		}
 		edit.addControl(attributes);
 		edit.paint(p, true);

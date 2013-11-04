@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2011, OMEX AG, Switzerland
+ * Copyright (c) 2004-2013, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -189,14 +189,16 @@ public class DataproviderRequest {
 		    // direction
 		    switch(SortOrder.valueOf(direction)) {
 		        case ASCENDING:
-		            queryFacade.setPosition(position);
+		            queryFacade.setPosition(Integer.valueOf(position));
 		            break;
 		        case DESCENDING:
-		            queryFacade.setPosition(-(1 + position));
+		            queryFacade.setPosition(Integer.valueOf(-(1 + position)));
 		            break;
+                default:
+                    break;
 		    }
 		    // size
-		    queryFacade.setSize(size);
+		    queryFacade.setSize(Integer.valueOf(size));
 		    // fetch groups
 		    this.setGroups(
 		        queryFacade, 

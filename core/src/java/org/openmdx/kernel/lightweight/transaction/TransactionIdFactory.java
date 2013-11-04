@@ -83,4 +83,17 @@ class TransactionIdFactory
         return new TransactionBranchId((TransactionId)transactionId, branchQualifier);
     }
 
+    /* (non-Javadoc)
+     * @see org.openmdx.kernel.id.spi.TimeBasedIdBuilder#getNode()
+     */
+    @Override
+    protected long getNode() {
+        return node;
+    }
+    
+    /**
+     * The node value
+     */
+    private static final long node = createRandomBasedNode();
+
 }

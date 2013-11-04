@@ -128,10 +128,7 @@ public class Standard_1 extends Layer_1 {
                 this.getModel().isSubtypeOf(facade.getObjectClass(), "org:openmdx:base:ExtentCapable") &&
                 (!facade.getValue().containsKey(OBJECT_IDENTITY))                      
             ) {
-                facade.attributeValuesAsList(OBJECT_IDENTITY).clear();
-                facade.attributeValuesAsList(OBJECT_IDENTITY).add(
-                    facade.getPath().toXRI()
-                );
+                facade.replaceAttributeValuesAsListBySingleton(OBJECT_IDENTITY, facade.getPath().toXRI());
             }
         }      
     }

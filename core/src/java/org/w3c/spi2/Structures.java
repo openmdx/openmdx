@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2011, OMEX AG, Switzerland
+ * Copyright (c) 2004-2013, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -108,11 +108,10 @@ public class Structures {
 
     /**
      * Create a structure proxy instance
-     * @param persistenceManager TODO
-     * @param structureClass
-     *            the structure's interface
-     * @param values
-     *            the structure's values
+     * 
+     * @param persistenceManager 
+     * @param structureClass the structure's interface
+     * @param values the structure's values
      * 
      * @return an initialized structure proxy instance
      * 
@@ -332,10 +331,11 @@ public class Structures {
         T target
     ){
         return toJavaBean(
-            source instanceof MappedRecord ? (MappedRecord)source : toRecord(source, true),
+            source instanceof MappedRecord ? (MappedRecord)source : toRecord(source, true, true),
             target
         );
     }
+
     
     /**
      * Retrieve the record type
@@ -392,7 +392,27 @@ public class Structures {
         Object structure,
         boolean mapNullValues
     ){
-        return ((PersistenceAware)structure).openmdxjdoRecord(mapNullValues);
+        return toRecord(structure, mapNullValues, true);
+    }
+
+    /**
+     * Return a mapped record view of the given structure
+     * 
+     * @param structure
+     * @param mapNullValues if true, fields with value==null are added to the mapped record. 
+     *                      They are not added if mapNullValues is false.
+     * @param mofCompliant when <code>true<code> use <code>"::"</code> as separator, <code>":"</code> otherwise       
+     * 
+     * @return a mapped record view of the given structure
+     * 
+     * @exception ClassCastException unless isStructureInstance(structure) evaluates to <code>true</code>
+     */
+    static MappedRecord toRecord(
+        Object structure,
+        boolean mapNullValues,
+        boolean mofCompliant
+    ){
+        return ((PersistenceAware)structure).openmdxjdoRecord(mapNullValues, mofCompliant);
     }
     
     /**
@@ -512,12 +532,12 @@ public class Structures {
         private transient String string = null;
         
         /**
-         * Record names are internal qualified names using ":" as separator
+         * Record names are MOF compliant qualified names using "::" as separator
          */
         private transient MappedRecord record = null;
 
         /**
-         * Record names are external qualified names using "::" as separator
+         * Record names are internal qualified names using ":" as separator
          */
         private transient MappedRecord delegate = null;
         
@@ -582,12 +602,12 @@ public class Structures {
             if (Object.class == declaringClass) {
                 if ("equals".equals(methodName)) {
                     if (this == args[0]) {
-                        return true;
+                        return Boolean.TRUE;
                     } else if (!getClass().isInstance(args[0])) {
-                        return false;
+                        return Boolean.FALSE;
                     } else {
                         ProxyHandler that = (ProxyHandler) Proxy.getInvocationHandler(args[0]);
-                        return Arrays.deepEquals(this.values, that.values);
+                        return Boolean.valueOf(Arrays.deepEquals(this.values, that.values));
                     }
                 } else if ("toString".equals(methodName)) {
                     if (this.string == null) {
@@ -598,7 +618,7 @@ public class Structures {
                     if (this.hashCode == 0) {
                         this.hashCode = Arrays.deepHashCode(this.values);
                     }
-                    return this.hashCode;
+                    return Integer.valueOf(this.hashCode);
                 }
             } else if (PersistenceAware.class == declaringClass) {
                 if ("openmdxjdoValues".equals(methodName)) {
@@ -609,7 +629,7 @@ public class Structures {
                     return values;
                 } else if ("openmdxjdoRecord".equals(methodName)) {
                     if(this.record == null) {
-                        this.record =  toRecord(Boolean.TRUE.equals(args[0]), true);
+                        this.record =  toRecord(Boolean.TRUE.equals(args[0]), Boolean.TRUE.equals(args[1]));
                     }
                     return this.record;
                 }
@@ -836,7 +856,7 @@ public class Structures {
 			                    (Object[])i[0], // keys
 			                    toRecordValues(
 			                        (Object[])i[1], 
-			                        mapNullValues
+			                        mapNullValues, mofCompliant
 			                    ) // values
 			                );
 			            }
@@ -853,15 +873,13 @@ public class Structures {
 			                    null, // recordShortDescription 
 			                    toRecordValues(
 			                        i, 
-			                        mapNullValues
+			                        mapNullValues, mofCompliant
 			                    )
 			                );
 			            }
 			        }
 			    } else {
-			        value = v instanceof PersistenceAware
-			            ? Structures.toRecord(v, mapNullValues)
-			            : v;
+			        value = v instanceof PersistenceAware ? Structures.toRecord(v, mapNullValues, mofCompliant) : v;
 			    }
 			    if(mapNullValues || (value != null)) {
 			        keys.add(this.metaData.keys[slot]);
@@ -897,7 +915,8 @@ public class Structures {
         
         private Object[] toRecordValues(
             Object[] structureValues,
-            boolean mapNullValues
+            boolean mapNullValues, 
+            boolean mofCompliant
         ){
             Object[] recordValues = new Object[structureValues.length];
             int slot = 0;
@@ -909,7 +928,7 @@ public class Structures {
                         "Transient object's can't be used as value of a structure member"
                     );
                 } else if (v instanceof PersistenceAware){
-                    recordValues[slot++] = Structures.toRecord(v, mapNullValues);
+                    recordValues[slot++] = Structures.toRecord(v, mapNullValues, mofCompliant);
                 } else {
                     recordValues[slot++] = v;
                 }
@@ -1131,7 +1150,7 @@ public class Structures {
              * @see java.util.SortedMap#firstKey()
              */
             public Integer firstKey() {
-                return this.indices[this.begin];
+                return Integer.valueOf(this.indices[this.begin]);
             }
         
             /*
@@ -1141,7 +1160,7 @@ public class Structures {
              */
             public SortedMap<Integer, Object> headMap(Integer toKey) {
                 int end = this.begin;
-                while (end < this.end && this.indices[end] < toKey) {
+                while (end < this.end && this.indices[end] < toKey.intValue()) {
                     end++;
                 }
                 return new UnmodifiableSortedMap(
@@ -1157,7 +1176,7 @@ public class Structures {
              * @see java.util.SortedMap#lastKey()
              */
             public Integer lastKey() {
-                return this.indices[this.end - 1];
+                return Integer.valueOf(this.indices[this.end - 1]);
             }
         
             /*
@@ -1167,11 +1186,11 @@ public class Structures {
              */
             public SortedMap<Integer, Object> subMap(Integer fromKey, Integer toKey) {
                 int begin = this.begin;
-                while (begin < this.end && this.indices[begin] < fromKey) {
+                while (begin < this.end && this.indices[begin] < fromKey.intValue()) {
                     begin++;
                 }
                 int end = this.begin;
-                while (end < this.end && this.indices[end] < toKey) {
+                while (end < this.end && this.indices[end] < toKey.intValue()) {
                     end++;
                 }
                 return new UnmodifiableSortedMap(
@@ -1188,7 +1207,7 @@ public class Structures {
              */
             public SortedMap<Integer, Object> tailMap(Integer fromKey) {
                 int begin = this.begin;
-                while (begin < this.end && this.indices[begin] < fromKey) {
+                while (begin < this.end && this.indices[begin] < fromKey.intValue()) {
                     begin++;
                 }
                 return new UnmodifiableSortedMap(
@@ -1228,7 +1247,7 @@ public class Structures {
                                 final int position = i++;
         
                                 public Integer getKey() {
-                                    return UnmodifiableSortedMap.this.indices[this.position];
+                                    return Integer.valueOf(UnmodifiableSortedMap.this.indices[this.position]);
                                 }
         
                                 public Object getValue() {
@@ -1613,7 +1632,7 @@ public class Structures {
                             SparseArray<Object> target = new TreeSparseArray<Object>();
                             for(int i = 0; i < source.length; i++) {
                                 if(source[i] != null) {
-                                    target.put(i, source[i]);
+                                    target.put(Integer.valueOf(i), source[i]);
                                 }
                             }
                             values[slot] = target;
@@ -1881,7 +1900,7 @@ public class Structures {
 
     
     // ------------------------------------------------------------------------
-    // Class UnmodifiableSet
+    // Class PersistenceAware
     // ------------------------------------------------------------------------
 
     /**
@@ -1903,10 +1922,13 @@ public class Structures {
          * @param mapNullValues if true, fields with value==null are added
          *        to the mapped record. They are not added if mapNullValues 
          *        is false.
+         * @param mofCompliant when <code>true<code> use <code>"::"</code> as separator, <code>":"</code> otherwise       
+         * 
          * @return JCA record representation of the structure
          */
         MappedRecord openmdxjdoRecord(
-            boolean mapNullValues
+            boolean mapNullValues,
+            boolean mofCompliant
         );
         
     }

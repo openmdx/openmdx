@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2009-2012, OMEX AG, Switzerland
+ * Copyright (c) 2009-2013, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -132,7 +132,7 @@ import org.w3c.spi2.Datatypes;
  */
 public class InboundConnection_2 
     extends AbstractConnection
-    implements Serializable, org.openmdx.base.accessor.rest.spi.Synchronization_2_0 
+    implements Serializable
 {
 
     /**
@@ -195,16 +195,17 @@ public class InboundConnection_2
             //
             return null;
         }
-        if(resourceIdentifier instanceof String) {
-            resourceIdentifier = new Path((String)resourceIdentifier);
+        Object objectId = resourceIdentifier;
+        if(objectId instanceof String) {
+            objectId = new Path((String)objectId);
         }
-        if(resourceIdentifier instanceof Path){
-            Path xri = (Path) resourceIdentifier;
+        if(objectId instanceof Path){
+            Path xri = (Path) objectId;
             if(xri.isTransientObjectId()) {
-                resourceIdentifier = xri.toUUID();
+                objectId = xri.toUUID();
             }
         }
-        return (RefObject) getPersistenceManager().getObjectById(resourceIdentifier);
+        return (RefObject) getPersistenceManager().getObjectById(objectId);
     }
 
     /**
@@ -249,24 +250,13 @@ public class InboundConnection_2
         }
     }
 
-    /* (non-Javadoc)
-     * @see org.openmdx.base.accessor.rest.spi.Synchronization_2_0#afterBegin()
-     */
-    public void afterBegin() {
+    void afterBegin() {
         UnitOfWork unitOfWork = currentUnitOfWork();
         if(!unitOfWork.isActive()) {
             unitOfWork.begin();
         }
     }
     
-    /* (non-Javadoc)
-     * @see org.openmdx.base.accessor.rest.spi.Synchronization_2_0#clear()
-     */
-//  @Override
-    public void clear() {
-        currentUnitOfWork().clear();
-    }
-
 	/* (non-Javadoc)
      * @see javax.transaction.Synchronization#afterCompletion(int)
      */
@@ -802,7 +792,7 @@ public class InboundConnection_2
                     featureName = (String) featureDef.objGetValue("name");
                     Boolean isChangeable = (Boolean)featureDef.objGetValue("isChangeable");                
                     Boolean isDerived = (Boolean)featureDef.objGetValue("isDerived");
-                    if(isChangeable != null && isChangeable && (isDerived == null || !isDerived)) {
+                    if(Boolean.TRUE.equals(isChangeable) && !Boolean.TRUE.equals(isDerived)) {
                     	switch(ModelHelper.getMultiplicity(featureDef)) {
 	                    	case LIST: case SET: {
 	                            @SuppressWarnings("rawtypes")

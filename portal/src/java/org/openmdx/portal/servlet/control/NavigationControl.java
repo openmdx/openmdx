@@ -8,7 +8,7 @@
  * This software is published under the BSD license
  * as listed below.
  * 
- * Copyright (c) 2008-2012, OMEX AG, Switzerland
+ * Copyright (c) 2008-2013, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -107,8 +107,7 @@ public class NavigationControl
                     p.write("<div id=\"closeButton\" onclick=\"javascript:window.location.href=", p.getEvalHRef(backAction), ";\">&nbsp;</div>");
                 }
             }
-        }
-        catch(Exception e) {
+        } catch(Exception e) {
             new ServiceException(e).log();
         }
     }
@@ -189,8 +188,7 @@ public class NavigationControl
                 }
                 p.write("<div id=\"", id, "\" onClick=\"javascript:if(this.id=='headerHidden'){new Ajax.Request(", p.getEvalHRef(showHeaderAction), ", {asynchronous:true});this.id='headerShown';$('logoTableNH').id='logoTable';", setContentHeaderIdScriptIfHeaderHidden, "}else{new Ajax.Request(", p.getEvalHRef(hideHeaderAction), ", {asynchronous:true});this.id='headerHidden';$('logoTable').id='logoTableNH';", setContentHeaderIdScriptIfHeaderShown, "};\">&nbsp;</div>");
             }
-        }
-        catch(Exception e) {
+        } catch(Exception e) {
             new ServiceException(e).log();
         }
     }
@@ -207,8 +205,7 @@ public class NavigationControl
     ) {
         try {
             p.write("<div id=\"printButton\" onClick=\"javascript:yuiPrint();\">&nbsp;</div>");
-        }
-        catch(Exception e) {
+        } catch(Exception e) {
             new ServiceException(e).log();
         }
     }
@@ -244,8 +241,7 @@ public class NavigationControl
                     p.write("</div>");
                 }
             }
-        }
-        catch(Exception e) {
+        } catch(Exception e) {
             new ServiceException(e).log();
         }
     }
@@ -272,17 +268,15 @@ public class NavigationControl
                 if(p.getViewPortType() == ViewPort.Type.MOBILE) {
                 	p.write("<div style=\"float:right;height:20px;width:150px;cursor:pointer;\" title=\"", htmlEncoder.encode(texts.getViewTitle() + " " + action.getTitle(), false), "\" onclick=\"javascript:window.location.href=", p.getEvalHRef(action), ";\">&nbsp;</div>");
                 	p.write("<a class=\"button\" href=\"#\" onclick=\"javascript:self.close();\">X</a>");                	
-                }
-                else {
+                } else {
                 	p.write("<div id=\"toggleViewPort\" style=\"cursor:pointer;\" title=\"", htmlEncoder.encode(texts.getViewTitle() + " " + action.getTitle(), false), "\" onclick=\"javascript:window.location.href=", p.getEvalHRef(action), ";\">&nbsp;</div>");
                 }
             }
-        }
-        catch(Exception e) {
+        } catch(Exception e) {
             new ServiceException(e).log();
         }
     }
-    
+
     /**
      * Paint navigation breadcrums.
      * 
@@ -305,8 +299,7 @@ public class NavigationControl
                 if(p.getViewPortType() == ViewPort.Type.MOBILE) {
                     p.write("<a href=\"#\" onmouseover=\"javascript:window.location.href=", p.getEvalHRef(view.getObjectReference().getReloadAction()), ";\" title=\"", texts.getReloadText(), "\">", p.getImg("src=\"", p.getResourcePath("images/"), view.getObjectReference().getIconKey(), "\" border=\"0\" align=\"top\" alt=\"o\" title=\"\""), "&nbsp;&nbsp;</a>");
                     p.write("<a href=\"./jsp/MobileMain.jsp?", Action.PARAMETER_REQUEST_ID, "=", view.getRequestId(), "\">", htmlEncoder.encode(app.getApplicationName(), false), "</a>&nbsp;&gt;");                	
-                }
-                else {
+                } else {
                     p.write("<div id=\"reloadIcon\" onclick=\"javascript:window.location.href=", p.getEvalHRef(view.getObjectReference().getReloadAction()), ";\" title=\"", texts.getReloadText(), "\">", p.getImg("src=\"", p.getResourcePath("images/"), view.getObjectReference().getIconKey(), "\" border=\"0\" align=\"absbottom\" alt=\"o\" title=\"\""), "</div>");                	
                 }
                 Action[] selectParentActions = view.getSelectParentAction();
@@ -331,20 +324,18 @@ public class NavigationControl
                                 strippedTitle + " - " + view.getObjectReference().getLabel();
                             style = "class=\"current\"";
                             separator = "";
-                        }
-                        else {
+                        } else {
                             title = selectParentAction.getTitle();
                             style = "";
                             separator = " &gt;";
                         }
-                        p.write("<a ", style, " href=\"#\" onmouseover=\"javascript:this.href='./' + ", p.getEvalHRef(selectParentAction), ";onmouseover=function(){};\">", title, "</a>", separator);
+                        p.write("<a ", style, " href=\"#\" onmouseover=\"javascript:this.href='./' + ", p.getEvalHRef(selectParentAction), ";onmouseover=function(){};\">", htmlEncoder.encode(title, false), "</a>", separator);
                     }
                 }
-            }            
-        }
-        catch(Exception e) {
+            }
+        } catch(Exception e) {
             new ServiceException(e).log();
-        }        
+        }       
     }
-    
+
 }

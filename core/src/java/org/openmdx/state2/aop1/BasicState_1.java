@@ -342,6 +342,9 @@ public abstract class BasicState_1<C extends StateContext<?>>
 			    			this.forTimePointQuery = new SingleStateCache(accessMode);
 			    		}
 			    		return this.forTimePointQuery;
+                    default:
+                        // fall through to exception
+                        break;
 				}
     	}
         throw new RuntimeServiceException(

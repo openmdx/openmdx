@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2007-2008, OMEX AG, Switzerland
+ * Copyright (c) 2007-2013, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -174,7 +174,7 @@ public enum Identifier {
         String modelElementName
     ){
         return toIdentifier(modelElementName, null, null, null, null);        
-    };
+    }
 
     /**
      * Retrieve the identifier for a given model element
@@ -289,7 +289,7 @@ public enum Identifier {
     /**
      * Tells whether the standard mapping should be used or a strictly JMI 1 compliant one
      */
-    public static final boolean STRICTLY_JMI_1_COMPLIANT = Boolean.FALSE; // to avoid dead code warning
+    public static final boolean STRICTLY_JMI_1_COMPLIANT = Boolean.FALSE.booleanValue(); // to avoid dead code warning
     
     /**
      * The first word's case

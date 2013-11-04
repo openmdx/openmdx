@@ -73,13 +73,6 @@ import org.openmdx.kernel.exception.BasicException;
 public class RidOidQueryDatabase_1 extends Database_1 {
 
     /**
-     * Constructor 
-     */
-    public RidOidQueryDatabase_1() {
-        super();
-    }
-
-    /**
      * Get rid of view prefix
      * 
      * @param joinColumns the join columns

@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2008-2012, OMEX AG, Switzerland
+ * Copyright (c) 2008-2013, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -278,7 +278,7 @@ public class MapView implements SortedMap<Integer,Object> {
             for(SortedMap<Integer,Object> delegate : this.members.getInvolved(AccessMode.FOR_QUERY)) {
                 reply.set(Boolean.valueOf(delegate.containsKey(key)));
             }
-            return reply.get();
+            return reply.get().booleanValue();
         } catch (ServiceException exception) {
             throw Throwables.initCause(
                 new IllegalStateException(
@@ -301,7 +301,7 @@ public class MapView implements SortedMap<Integer,Object> {
             for(SortedMap<Integer,Object> delegate : this.members.getInvolved(AccessMode.FOR_QUERY)) {
                 reply.set(Boolean.valueOf(delegate.containsValue(value)));
             }
-            return reply.get();
+            return reply.get().booleanValue();
         } catch (ServiceException exception) {
             throw Throwables.initCause(
                 new IllegalStateException(
@@ -413,7 +413,7 @@ public class MapView implements SortedMap<Integer,Object> {
             for(SortedMap<Integer,Object> delegate : this.members.getInvolved(AccessMode.FOR_QUERY)) {
                 reply.set(Boolean.valueOf(delegate.isEmpty()));
             }
-            return reply.get();
+            return reply.get().booleanValue();
         } catch (ServiceException exception) {
             throw Throwables.initCause(
                 new IllegalStateException(

@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2007-2011, OMEX AG, Switzerland
+ * Copyright (c) 2007-2013, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -316,11 +316,11 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
                 int i = 0;
                 if(source instanceof Collection) {
                     for(Object value : (Collection)source){
-                        target.put(i++, value);
+                        target.put(Integer.valueOf(i++), value);
                     }
                 } else if (source.getClass().isArray()) {
                     for(Object value : ArraysExtension.asList(source)){
-                        target.put(i++, value);
+                        target.put(Integer.valueOf(i++), value);
                     }
                 } else {
                     throw new JmiServiceException(
@@ -400,18 +400,18 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
         try {
             if (declaringClass == Object.class) {
                 if("hashCode".equals(methodName)) {
-                    return System.identityHashCode(this);
+                    return Integer.valueOf(System.identityHashCode(this));
                 }
                 if("toString".equals(methodName)) {
                     return this.refDelegate.toString();
                 } 
                 if("equals".equals(methodName)) {
                     if(proxy == args[0]) {
-                        return true;
+                        return Boolean.TRUE;
                     } 
                     boolean persistent = ReducedJDOHelper.isPersistent(proxy);
                     if(persistent != ReducedJDOHelper.isPersistent(args[0])) {
-                        return false;
+                        return Boolean.FALSE;
                     }
                     Object thisId;
                     Object thatId;
@@ -422,7 +422,7 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
                         thisId = ReducedJDOHelper.getTransactionalObjectId(proxy);
                         thatId = ReducedJDOHelper.getTransactionalObjectId(args[0]);
                     }
-                    return thisId != null && thisId.equals(thatId);
+                    return Boolean.valueOf(thisId != null && thisId.equals(thatId));
                 } 
             } 
             //
@@ -696,7 +696,7 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
                                         this.refClass.getMarshaller(), 
                                         FeatureMapper.Kind.METHOD
                                     );
-                                    long position = args[2] == null ? 0l : (Long)args[2];
+                                    long position = args[2] == null ? 0l : ((Long)args[2]).longValue();
                                     if(largeObject instanceof BinaryLargeObject) {
                                         ((BinaryLargeObject)largeObject).getContent(
                                             (OutputStream)args[1],
@@ -892,7 +892,7 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
     private Object marshal(
         Object value,
         String featureName,
-        Class<?> returnType
+        Class<?> returnType_
     ) throws ServiceException {
         if(value instanceof InputStream){
             return new Jmi1BinaryLargeObject(
@@ -905,6 +905,7 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
                 (SortedMap<Integer,?>)value
             );
         }
+        Class<?> returnType = returnType_;
         if(value instanceof RefContainer){
             if(returnType == null) try {
                 returnType = this.refClass.getDelegateClass().getMethod(
@@ -1010,7 +1011,7 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
                 ){
                     target[i] = i % 2 == 1 || i == iLimit ? 
                 		validateSubSegment(source[i]) : 
-                        ((Boolean)source[i]) ? RefContainer.PERSISTENT : RefContainer.REASSIGNABLE; 
+                        ((Boolean)source[i]).booleanValue() ? RefContainer.PERSISTENT : RefContainer.REASSIGNABLE; 
                 }
                 return target;
             }
@@ -1296,10 +1297,12 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
             OutputStream stream, 
             long position
         ) throws IOException {
-            this.length = position + BinaryLargeObjects.streamCopy(
-                getContent(), 
-                position,
-                stream
+            this.length = Long.valueOf(
+                position + BinaryLargeObjects.streamCopy(
+                    getContent(), 
+                    position,
+                    stream
+                )
             );            
         }
         
@@ -1360,10 +1363,12 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
             Writer stream, 
             long position
         ) throws IOException {
-            this.length = position + CharacterLargeObjects.streamCopy(
-                getContent(), 
-                position,
-                stream
+            this.length = Long.valueOf(
+                position + CharacterLargeObjects.streamCopy(
+                    getContent(), 
+                    position,
+                    stream
+                )
             );            
         }
         

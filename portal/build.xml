@@ -1,16 +1,13 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <!--
 =======================================================================
-= Name:        $Id: build.xml,v 1.61 2011/09/16 09:02:29 wfro Exp $
 = Description: ant build for openMDX/Portal
-= Revision:    $Revision: 1.61 $
-= Date:        $Date: 2011/09/16 09:02:29 $
-= Copyright:   (c) 2004-2010 OMEX AG
+= Copyright:   (c) 2004-2013 OMEX AG
 =======================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2011, OMEX AG, Switzerland
+ * Copyright (c) 2004-2013, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without 
@@ -70,6 +67,7 @@
 	</path>
 	<path id="project.bin.classpath">
 		<path refid="project.lib.classpath"/>
+		<pathelement location="${basedir}/src/resource"/>		
 		<pathelement location="${build.dir}/bin"/>
 		<pathelement location="${build.dir}/src/resource"/>
 		<pathelement location="${build.dir}/model/${ant.project.name}.openmdx-xmi.zip"/>

@@ -1,14 +1,14 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Description: GridEventHandler 
+ * Description: GridSetColumnFilterAction 
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
  * ====================================================================
  *
  * This software is published under the BSD license
  * as listed below.
  * 
- * Copyright (c) 2004-2008, OMEX AG, Switzerland
+ * Copyright (c) 2004-2013, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -75,15 +75,17 @@ import org.openmdx.portal.servlet.view.ObjectView;
 import org.openmdx.portal.servlet.view.ReferencePane;
 import org.openmdx.portal.servlet.view.ShowObjectView;
 
+/**
+ * GridSetColumnFilterAction
+ *
+ */
 public class GridSetColumnFilterAction extends BoundAction {
 
 	public final static int EVENT_ID = 13;
 
-	protected boolean isAddFilter(
-	) {
-		return false;
-	}
-	
+    /* (non-Javadoc)
+     * @see org.openmdx.portal.servlet.action.BoundAction#perform(org.openmdx.portal.servlet.view.ObjectView, javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, java.lang.String, javax.servlet.http.HttpSession, java.util.Map, org.openmdx.portal.servlet.ViewsCache, org.openmdx.portal.servlet.ViewsCache)
+     */
     @Override
     public ActionPerformResult perform(
         ObjectView view,
@@ -110,21 +112,20 @@ public class GridSetColumnFilterAction extends BoundAction {
             	if(requestParameters.get(WebKeys.REQUEST_PARAMETER_FILTER_VALUES) != null) {
                     Object[] parameterValues = (Object[])requestParameters.get(WebKeys.REQUEST_PARAMETER_FILTER_VALUES);
                     String filterValue = parameterValues == null ? null : (parameterValues.length > 0 ? (String) parameterValues[0] : null);
-                    addFilter = this.isAddFilter();
+                    addFilter = false;
                     if ((filterValue != null) && filterValue.startsWith("+")) {
                         filterValue = filterValue.substring(1);
                         addFilter = true;
-                    }
-                    else if ((filterValue != null) && filterValue.startsWith("AND")) {
+                    } else if ((filterValue != null) && filterValue.startsWith("AND")) {
                         filterValue = filterValue.substring(3);
                         addFilter = true;
                     }
                     String filterName = Action.getParameter(parameter, Action.PARAMETER_NAME);
                     filterNames.add(filterName);
                     filterValues.add(filterValue);
-            	}
-            	// form-based search
-            	else {
+            	} else {
+            		addFilter = true;
+                	// form-based search
             		for(Iterator<String> i = requestParameters.keySet().iterator(); i.hasNext(); ) {
             			String parameterName = i.next();
             			if(parameterName.startsWith(WebKeys.REQUEST_PARAMETER_FILTER_VALUES + ".")) {
@@ -133,9 +134,12 @@ public class GridSetColumnFilterAction extends BoundAction {
             				);
 	                        Object[] parameterValues = (Object[])requestParameters.get(parameterName);
 	                        String filterValue = parameterValues == null ? null : (parameterValues.length > 0 ? (String) parameterValues[0] : null);
+	                        if ((filterValue != null) && filterValue.startsWith("+")) {
+	                            filterValue = filterValue.substring(1);
+	                            addFilter = true;
+	                        }
             				filterValues.add(filterValue);
             			}
-            			
             		}
             	}
                 int paneIndex = Integer.parseInt(Action.getParameter(parameter, Action.PARAMETER_PANE));
@@ -145,7 +149,7 @@ public class GridSetColumnFilterAction extends BoundAction {
                     currentView.selectReferencePane(paneIndex);
                     referencePanes[paneIndex].selectReference(referenceIndex);
                     Grid grid = referencePanes[paneIndex].getGrid();
-                    if (grid != null) {
+                    if(grid != null) {
                         grid.setShowRows(true);                                
                         for(int i = 0; i < filterNames.size(); i++) {
                         	if(filterValues.get(i) != null) {
@@ -176,15 +180,13 @@ public class GridSetColumnFilterAction extends BoundAction {
                         );
                     }
                 }
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 ServiceException e0 = new ServiceException(e);
                 SysLog.warning(e0.getMessage(), e0.getCause());
             }
             try {
                 p.close(true);
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 ServiceException e0 = new ServiceException(e);
                 SysLog.warning(e0.getMessage(), e0.getCause());
             }            

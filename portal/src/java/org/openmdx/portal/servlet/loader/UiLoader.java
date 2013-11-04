@@ -144,7 +144,6 @@ public class UiLoader
 
     }
       
-    //-------------------------------------------------------------------------
     /**
      * Constructs an in-memory ui repository
      */
@@ -154,6 +153,9 @@ public class UiLoader
         try {
             Configuration configuration = new Configuration();
             configuration.values("namespaceId").put(0, "ui");
+            configuration.values(
+                org.openmdx.application.dataprovider.layer.persistence.none.LayerConfigurationEntries.CLONE_REPLY
+            ).put(0, Boolean.FALSE);
             Layer_1 persistencePlugin = Classes.<Layer_1>getApplicationClass(
                 org.openmdx.application.dataprovider.layer.persistence.none.InMemory_1.class.getName()
             ).newInstance();
@@ -167,7 +169,7 @@ public class UiLoader
             ).newInstance();
             applicationPlugin.activate((short)2, configuration, modelPlugin);
             Layer_1 typePlugin = Classes.<Layer_1>getApplicationClass(
-                org.openmdx.application.dataprovider.layer.type.Strict_1.class.getName()
+                org.openmdx.application.dataprovider.layer.type.Standard_1.class.getName()
             ).newInstance();
             typePlugin.activate((short)3, configuration, applicationPlugin);
             Layer_1 interceptionPlugin = Classes.<Layer_1>getApplicationClass(
@@ -176,7 +178,6 @@ public class UiLoader
             Configuration interceptionConfiguration = new Configuration(configuration);
             interceptionConfiguration.values("propagateSet").put(0, Boolean.TRUE);
             interceptionPlugin.activate((short)4, interceptionConfiguration, typePlugin);
-       
             return new Dataprovider(
                 Arrays.asList(
                     new Layer_1[]{
@@ -188,11 +189,9 @@ public class UiLoader
                     }
                 )
             );
-        }
-        catch(ServiceException e) {
+        } catch(ServiceException e) {
             throw e;
-        }
-        catch(Exception e) {
+        } catch(Exception e) {
             throw new RuntimeServiceException(e);
         }
     }
@@ -314,14 +313,15 @@ public class UiLoader
                           try {
                         	  Importer.importObjects(
                         		  Importer.asTarget(uiElementDefs),
-                        		  Importer.asSource(context.getResource(path))
+                        		  Importer.asSource(context.getResource(path)),
+                        		  null, // errorHandler
+                        		  org.openmdx.application.xml.spi.ImportMode.CREATE
                               );
-                          }
-                          catch(Exception e) {
+                          } catch(Exception e) {
                               new ServiceException(e).log();
                               System.out.println(messagePrefix + "STATUS: " + e.getMessage() + " (for more info see log)");
                           }
-                      }        
+                      }   
                       // Merge entries
                       if(j == 0) {
                     	  mergedUiElementDefs.putAll(

@@ -4,4 +4,5 @@ import javax.jmi.reflect.*;
 
 @SuppressWarnings("unused")
 public interface DataType extends Classifier {
+    // Empty block
 }

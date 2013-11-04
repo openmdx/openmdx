@@ -8,7 +8,7 @@
  * This software is published under the BSD license
  * as listed below.
  * 
- * Copyright (c) 2004, OMEX AG, Switzerland
+ * Copyright (c) 2004-2013, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -53,7 +53,6 @@
 package org.openmdx.application.mof.externalizer.spi;
 
 import java.util.List;
-import java.util.Map;
 
 import javax.resource.ResourceException;
 import javax.resource.cci.MappedRecord;
@@ -150,8 +149,7 @@ public class Model_1Accessor {
     }
 
     public Configuration getConfiguration(
-      String[] section,
-      Map specification
+      String[] section
     ) throws ServiceException {
       Configuration configuration = new Configuration();        
       if(section != null && section.length == 1){
@@ -161,29 +159,29 @@ public class Model_1Accessor {
 
           // namespaceId
           configuration.values(SharedConfigurationEntries.NAMESPACE_ID).put(
-              0,
+              Integer.valueOf(0),
               "org::omg::model1"
           );
   
           // layers
           configuration.values(DataproviderLayers.toString(DataproviderLayers.INTERCEPTION)).put(
-              0,
+              Integer.valueOf(0),
               org.openmdx.application.dataprovider.layer.interception.Standard_1.class.getName()
           );
           configuration.values(DataproviderLayers.toString(DataproviderLayers.TYPE)).put(
-              0,
+              Integer.valueOf(0),
               org.openmdx.application.mof.repository.layer.type.Model_1.class.getName()
           );
           configuration.values(DataproviderLayers.toString(DataproviderLayers.APPLICATION)).put(
-              0,
+              Integer.valueOf(0),
               org.openmdx.application.mof.repository.layer.application.Model_1.class.getName()
           );
           configuration.values(DataproviderLayers.toString(DataproviderLayers.MODEL)).put(
-              0,
+              Integer.valueOf(0),
               org.openmdx.application.mof.repository.layer.model.Model_1.class.getName()
           );
           configuration.values(DataproviderLayers.toString(DataproviderLayers.PERSISTENCE)).put(
-              0,
+              Integer.valueOf(0),
               org.openmdx.application.dataprovider.layer.persistence.none.InMemory_1.class.getName()
           );
         }
@@ -191,7 +189,7 @@ public class Model_1Accessor {
         // APPLICATION        
         else if(section[0].equals(DataproviderLayers.toString(DataproviderLayers.APPLICATION))) {
           configuration.values(LayerConfigurationEntries.OPENMDXJDO_METADATA_DIRECTORY).put(
-              0, 
+              Integer.valueOf(0), 
               this.openmdxjdoMetadataDirectory
           );
         } 

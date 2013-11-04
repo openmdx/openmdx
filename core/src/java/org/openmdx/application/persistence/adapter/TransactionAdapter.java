@@ -52,15 +52,13 @@ import javax.jdo.PersistenceManager;
 import javax.jdo.Transaction;
 import javax.transaction.Synchronization;
 
-import org.openmdx.base.accessor.rest.spi.Synchronization_2_0;
 import org.openmdx.base.persistence.spi.UnitOfWork;
 import org.openmdx.base.transaction.Status;
 
 /**
  * Transaction Adapter
  */
-@SuppressWarnings("deprecation")
-class TransactionAdapter implements Transaction, javax.transaction.Synchronization, Synchronization_2_0 {
+class TransactionAdapter implements Transaction, javax.transaction.Synchronization {
 
     /**
      * Constructor 
@@ -282,25 +280,7 @@ class TransactionAdapter implements Transaction, javax.transaction.Synchronizati
         this.unitOfWork.afterCompletion(Status.valueOf(status));
     }
 
-    /**
-     * 
-     * @see javax.transaction.Synchronization#afterBegin()
-     */
-    @Override
-    public void afterBegin() {
-        this.unitOfWork.afterBegin();
-    }
 
-    /**
-     * 
-     * @see org.openmdx.base.persistence.cci.UnitOfWork#clear()
-     */
-    @Override
-    public void clear() {
-        this.unitOfWork.clear();
-    }
-
-    
     //------------------------------------------------------------------------
     // Class Synchronization Adapter
     //------------------------------------------------------------------------

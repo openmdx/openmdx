@@ -782,7 +782,7 @@
         </ownedAttribute>
         <ownedAttribute xmi:id="_3C7B8A60016D3E8CCA1B0060" name="createdBy" isReadOnly="true" isDerived="true">
           <eAnnotations xmi:id="_MkJrct65EdmrtKJSXC0_FQ" source="http://www.eclipse.org/uml2/2.0.0/UML">
-            <details xmi:id="_MkJrc965EdmrtKJSXC0_FQ" key="set"/>
+            <details xmi:id="_ySLywP6REeKJQaV_JiM_ZQ" key="list"/>
           </eAnnotations>
           <type xmi:type="uml:PrimitiveType" href="org.w3c.emx#_3C7B8A60016D3C8B62E40010?w3c/w3c/string?"/>
         </ownedAttribute>
@@ -796,7 +796,7 @@
         </ownedAttribute>
         <ownedAttribute xmi:id="_3C7B8A60016D3E8CCA5800EA" name="modifiedBy" isReadOnly="true" isDerived="true">
           <eAnnotations xmi:id="_MkPyEt65EdmrtKJSXC0_FQ" source="http://www.eclipse.org/uml2/2.0.0/UML">
-            <details xmi:id="_MkPyE965EdmrtKJSXC0_FQ" key="set"/>
+            <details xmi:id="_zb07YP6REeKJQaV_JiM_ZQ" key="list"/>
           </eAnnotations>
           <type xmi:type="uml:PrimitiveType" href="org.w3c.emx#_3C7B8A60016D3C8B62E40010?w3c/w3c/string?"/>
         </ownedAttribute>
@@ -812,7 +812,7 @@
         </ownedAttribute>
         <ownedAttribute xmi:id="_wxJYIH8wEd2MQvsjduCbTg" name="removedBy" isReadOnly="true" isDerived="true">
           <eAnnotations xmi:id="_CJ-FIH8xEd2MQvsjduCbTg" source="http://www.eclipse.org/uml2/2.0.0/UML">
-            <details xmi:id="_CJ-FIX8xEd2MQvsjduCbTg" key="set"/>
+            <details xmi:id="_0RsMYP6REeKJQaV_JiM_ZQ" key="list"/>
           </eAnnotations>
           <type xmi:type="uml:PrimitiveType" href="org.w3c.emx#_3C7B8A60016D3C8B62E40010?w3c/w3c/string?"/>
         </ownedAttribute>

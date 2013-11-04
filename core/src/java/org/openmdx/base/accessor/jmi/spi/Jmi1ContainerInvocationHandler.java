@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2008-2011, OMEX AG, Switzerland
+ * Copyright (c) 2008-2013, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -139,11 +139,14 @@ public class Jmi1ContainerInvocationHandler
         try {
             if(declaringClass == Object.class) {
                 if("hashCode".equals(methodName)) {
-                    return ReducedJDOHelper.getTransactionalObjectId(proxy).hashCode();
+                    return Integer.valueOf(
+                        ReducedJDOHelper.getTransactionalObjectId(proxy).hashCode()
+                    );
                 } else if ("equals".equals(methodName)) {
-                    return
+                    return Boolean.valueOf(
                         ReducedJDOHelper.getPersistenceManager(proxy).equals(ReducedJDOHelper.getPersistenceManager(args[0])) &&
-                        ReducedJDOHelper.getTransactionalObjectId(proxy).equals(ReducedJDOHelper.getTransactionalObjectId(args[0]));
+                        ReducedJDOHelper.getTransactionalObjectId(proxy).equals(ReducedJDOHelper.getTransactionalObjectId(args[0]))
+                    );
                 } else if ("toString".equals(methodName)) {
                     return proxy.getClass().getInterfaces()[0].getName() + ": " + (
                         ReducedJDOHelper.isPersistent(proxy) ? ((Path)ReducedJDOHelper.getObjectId(proxy)).toXRI() : ReducedJDOHelper.getTransactionalObjectId(proxy)

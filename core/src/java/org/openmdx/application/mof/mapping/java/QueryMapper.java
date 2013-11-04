@@ -73,22 +73,26 @@ public class QueryMapper
      *
      * @param writer
      * @param model
-     * @param format TODO
+     * @param format 
      * @param packageSuffix
-     * @param metaData TODO
+     * @param metaData 
+     * @param primitiveTypeMapper 
      */
     public QueryMapper(
         Writer writer,
         Model_1_0 model,
         Format format, 
-        String packageSuffix, MetaData_1_0 metaData
+        String packageSuffix, 
+        MetaData_1_0 metaData, 
+        PrimitiveTypeMapper primitiveTypeMapper
     ) {
         super(
             writer,
             model,
             format, 
             packageSuffix,
-            metaData
+            metaData, 
+            primitiveTypeMapper
         );
     }
     
@@ -97,7 +101,7 @@ public class QueryMapper
      * @param featureDef
      * @throws ServiceException
      */
-    public void mapStructurealFeature(
+    public void mapStructuralFeature(
         ClassifierDef classDef,
         StructuralFeatureDef featureDef
     ) throws ServiceException {

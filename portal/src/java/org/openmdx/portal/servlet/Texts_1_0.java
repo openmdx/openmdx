@@ -129,6 +129,25 @@ public interface Texts_1_0 {
     public String getShowTitle();
     public String getWorkspacesTitle();
     public String getActionsTitle();
+    public String getOpenTitle();
+    public String getQuitTitle();
+    public String getExitTitle();
+    public String getSaveAsTitle();
+    public String getAcceptTitle();
+    public String getDeclineTitle();
+    public String getRepeatTitle();
+	public String getRetryTitle();
+	public String getNextTitle();
+	public String getPreviousTitle();
+	public String getForwardTitle();
+	public String getBackTitle();
+	public String getContinueTitle();
+	public String getResetTitle();
+	public String getCompleteTitle();
+	public String getFinishTitle();
+	public String getExpandTitle();
+	public String getCollapseTitle();
+	public String getSelectExistingText();
     
 }
 

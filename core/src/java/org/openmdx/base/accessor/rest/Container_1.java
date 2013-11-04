@@ -236,12 +236,12 @@ class Container_1
         return null;
     }
 
-    //  @Override
+    @Override
     public boolean jdoIsPersistent(){
         return this.containerId != null || this.owner.jdoIsPersistent();
     }
 
-    //  @Override
+    @Override
     public Path jdoGetObjectId() {
         if(this.containerId == null && this.owner.jdoIsPersistent()){
             this.containerId = this.owner.jdoGetObjectId().getChild(this.transientContainerId.getFeature());
@@ -249,7 +249,7 @@ class Container_1
         return this.containerId;
     }
 
-    //  @Override
+    @Override
     public TransientContainerId jdoGetTransactionalObjectId() {
         return this.transientContainerId;
     }
@@ -257,7 +257,7 @@ class Container_1
     /* (non-Javadoc)
      * @see org.openmdx.base.persistence.spi.PersistenceCapableContainer#openmdxjdoGetPersistenceManager()
      */
-//  @Override
+    @Override
     public PersistenceManager jdoGetPersistenceManager(){
         return this.owner.jdoGetPersistenceManager();
     }
@@ -319,7 +319,7 @@ class Container_1
             if(unitOfWork.isActive()) {
                 TransactionalState_1 state = unitOfWork.getState(this.owner, true);
                 if(state != null) {
-                    Set<?> notFound = (Set<?>) state.values(true).get(this.transientContainerId.getFeature());
+                    Set<String> notFound = state.unavailability(true).get(this.transientContainerId.getFeature());
                     if(notFound != null && notFound.contains(key)) {
                         return true;
                     }
@@ -331,7 +331,7 @@ class Container_1
         }
     }
     
-//  @Override
+    @Override
     public DataObject_1_0 get(
         Object key
     ) {
@@ -359,7 +359,7 @@ class Container_1
         }
     }
 
-//  @Override
+    @Override
     public boolean containsKey(Object key) {
         if(this.isRetrieved()) {
             return this.cache.containsKey(key);
@@ -434,14 +434,14 @@ class Container_1
         return false;
     }
     
-//  @Override
+    @Override
     public boolean containsValue(
         Object value
     ) {
         return containsObject(value) && !ReducedJDOHelper.isDeleted(value);
     }
 
-//  @Override
+    @Override
     public DataObject_1_0 put(
         String key, 
         DataObject_1_0 value
@@ -506,7 +506,7 @@ class Container_1
         amendAndDeployCache(cache);
     }
     
-    //  @Override
+    @Override
    public void openmdxjdoRetrieve(
        FetchPlan fetchPlan
    ) {
@@ -543,7 +543,7 @@ class Container_1
         }
     }
 
-//  @Override
+    @Override
     public void openmdxjdoEvict(
         boolean allMembers, 
         boolean allSubSets
@@ -631,7 +631,6 @@ class Container_1
         return this.owner.jdoIsPersistent() && !this.owner.jdoIsNew();
     }
 
-    //  @Override
     public void flush(
     ) throws IOException {
         // Nothing to do in this implementation

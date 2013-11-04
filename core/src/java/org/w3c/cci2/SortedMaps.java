@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2006-2008, OMEX AG, Switzerland
+ * Copyright (c) 2006-2013, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -322,7 +322,7 @@ public class SortedMaps {
          */
         public SparseArray<E> subMap(Integer fromKey, Integer toKey) {
             return new AsSparseArray<E>(
-                fromKey,
+                fromKey.intValue(),
                 delegate.subMap(fromKey, toKey)
             );
         }
@@ -404,7 +404,7 @@ public class SortedMaps {
          *         this sparse array does not tolerate <tt>null</tt> keys.
          */
         public SparseArray<E> tailMap(Integer fromKey){
-            return new AsSparseArray<E>(fromKey, delegate.tailMap(fromKey));
+            return new AsSparseArray<E>(fromKey.intValue(), delegate.tailMap(fromKey));
         }
 
         /* (non-Javadoc)
@@ -491,8 +491,8 @@ public class SortedMaps {
                 public int nextIndex() {
                     int i = this.iterator.nextIndex();
                     return i < list.size() ? 
-                        this.list.get(i) :
-                        this.list.get(i-1) + 1;
+                        this.list.get(i).intValue() :
+                        this.list.get(i-1).intValue() + 1;
                 }
 
                 public E previous() {
@@ -503,7 +503,7 @@ public class SortedMaps {
 
                 public int previousIndex() {
                     int i = this.iterator.previousIndex();
-                    return i < 0 ? -1 : this.list.get(i);
+                    return i < 0 ? -1 : this.list.get(i).intValue();
                 }
 
                 public void set(E o) {
@@ -683,7 +683,7 @@ public class SortedMaps {
 
         @Override
         public E get(int index) {
-            return this.delegate.get(this.offest + index);
+            return this.delegate.get(Integer.valueOf(this.offest + index));
         }
 
         /* (non-Javadoc)
@@ -691,7 +691,7 @@ public class SortedMaps {
          */
         @Override
         public int size() {
-            return this.delegate.lastKey() + 1 - this.offest;
+            return this.delegate.lastKey().intValue() + 1 - this.offest;
         }
 
         /* (non-Javadoc)
@@ -700,7 +700,7 @@ public class SortedMaps {
         @Override
         public E set(int index, E element) {
             return this.delegate.put(
-                this.offest + index,
+                Integer.valueOf(this.offest + index),
                 element
             );
         }
@@ -713,11 +713,11 @@ public class SortedMaps {
             if(o == null) {
                 int i = -1;
                 for(Map.Entry<Integer, E> e : this.delegate.entrySet()) {
-                    if(++i != e.getKey()) return i - this.offest;
+                    if(++i != e.getKey().intValue()) return i - this.offest;
                 }
             } else {
                 for(Map.Entry<Integer, E> e : this.delegate.entrySet()) {
-                    if(o.equals(e.getValue())) return e.getKey() - this.offest;
+                    if(o.equals(e.getValue())) return e.getKey().intValue() - this.offest;
                 }
             }
             return -1;
@@ -732,9 +732,9 @@ public class SortedMaps {
                 return false;
             } else {
                 if(this.delegate.isEmpty()) {
-                    this.delegate.put(this.offest, o);
+                    this.delegate.put(Integer.valueOf(this.offest), o);
                 } else {
-                    this.delegate.put(this.delegate.lastKey() + 1, o);
+                    this.delegate.put(Integer.valueOf(this.delegate.lastKey().intValue() + 1), o);
                 }
                 return true;
             }
@@ -766,8 +766,8 @@ public class SortedMaps {
         @Override
         protected void removeRange(int fromIndex, int toIndex) {
             this.delegate.subMap(
-                fromIndex + this.offest,
-                toIndex + this.offest
+                Integer.valueOf(fromIndex + this.offest),
+                Integer.valueOf(toIndex + this.offest)
             ).clear();
         }
 

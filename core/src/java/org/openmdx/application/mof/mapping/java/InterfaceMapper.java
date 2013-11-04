@@ -69,14 +69,6 @@ extends AbstractClassMapper {
 
     /**
      * Constructor 
-     *
-     * @param classDef
-     * @param writer
-     * @param model
-     * @param format
-     * @param packageSuffix
-     * @param metaData
-     * @throws ServiceException
      */
     public InterfaceMapper(
         ModelElement_1_0 classDef,
@@ -84,7 +76,8 @@ extends AbstractClassMapper {
         Model_1_0 model,
         Format format, 
         String packageSuffix,
-        MetaData_1_0 metaData
+        MetaData_1_0 metaData, 
+        PrimitiveTypeMapper primitiveTypeMapper
     ) throws ServiceException {
         super(
             classDef,
@@ -92,7 +85,8 @@ extends AbstractClassMapper {
             model,
             format, 
             packageSuffix, 
-            metaData
+            metaData, 
+            primitiveTypeMapper
         );
     }
 
@@ -147,9 +141,8 @@ extends AbstractClassMapper {
     ) throws ServiceException {
         for(FieldMetaData field : this.spiFeatures){
             this.trace("Interface/PrivateFeature");
-            String fieldType = getType(field);
             boolean singlevalued = !isMultivalued(field);
-            boolean flag = PrimitiveTypes.BOOLEAN.equals(fieldType);
+            boolean flag = PrimitiveTypes.BOOLEAN.equals(getType(field));
             //
             // Accessor
             //
@@ -203,7 +196,7 @@ extends AbstractClassMapper {
             );
             this.pw.println("(");
             this.pw.println(
-                "    " + fieldType + (
+                "    " + getType(field) + (
                         singlevalued ? " " : "... "
                 ) + field.getName()
             );

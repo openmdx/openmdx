@@ -47,6 +47,7 @@
  */
 package org.openmdx.application.dataprovider.layer.persistence.jdbc;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -322,6 +323,24 @@ public class DbObjectConfiguration {
     //---------------------------------------------------------------------------
     public Map<String, Pattern> getReferenceIdPattern() {
         return this.referenceIdPattern;
+    }
+
+    /**
+     * Compare whether the db objects are equal for their join criteria.
+     * 
+     * @param that
+     * @return
+     */
+    public boolean matchesJoinCriteria(
+        DbObjectConfiguration that
+    ) {
+        return
+            (this.dbObject1 == null ? that.dbObject1 == null : this.dbObject1.equals(that.dbObject1)) &&
+            (this.dbObject2 == null ? that.dbObject2 == null : this.dbObject2.equals(that.dbObject2)) &&
+            (this.dbObjectForQuery1 == null ? that.dbObjectForQuery1 == null : this.dbObjectForQuery1.equals(that.dbObjectForQuery1)) &&
+            (this.dbObjectForQuery2 == null ? that.dbObjectForQuery2 == null : this.dbObjectForQuery2.equals(that.dbObjectForQuery2)) &&
+            (this.dbObjectsForQueryJoinColumn == null ? that.dbObjectsForQueryJoinColumn == null : this.dbObjectsForQueryJoinColumn.equals(that.dbObjectsForQueryJoinColumn)) &&
+            (this.joinCriteria == null ? that.joinCriteria == null : Arrays.equals(this.joinCriteria, that.joinCriteria));
     }
 
     //---------------------------------------------------------------------------

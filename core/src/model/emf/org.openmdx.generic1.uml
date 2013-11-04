@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<uml:Model xmi:version="2.1" xmlns:xmi="http://schema.omg.org/spec/XMI/2.1" xmlns:uml="http://www.eclipse.org/uml2/3.0.0/UML" xmi:id="_tjGt4N67EdmkJO73lqONhA" name="generic1">
+<uml:Model xmi:version="2.1" xmlns:xmi="http://schema.omg.org/spec/XMI/2.1" xmlns:uml="http://www.eclipse.org/uml2/4.0.0/UML" xmi:id="_tjGt4N67EdmkJO73lqONhA" name="generic1">
   <packagedElement xmi:type="uml:Package" xmi:id="_3C7B8A60016D3FF13E0E02A5PP" name="org">
     <packagedElement xmi:type="uml:Package" xmi:id="_3C7B8A60016D3FF13E0E02A5P" name="openmdx">
       <packagedElement xmi:type="uml:Package" xmi:id="_3C7B8A60016D3FF13E0E02A5" name="generic1">
@@ -9,7 +9,7 @@
             <eAnnotations xmi:id="_Mi6Vb965EdmrtKJSXC0_FQ" source="keywords">
               <details xmi:id="_PbCukFhTEdqpq69lOCMZBw" key="sparsearray"/>
             </eAnnotations>
-            <type xmi:type="uml:PrimitiveType" href="org.w3c.uml#_3C7B8A60016D3C8B62E40010?w3c/w3c/string"/>
+            <type xmi:type="uml:PrimitiveType" href="org.w3c.uml#_3C7B8A60016D3C8B62E40010"/>
           </ownedAttribute>
         </packagedElement>
         <packagedElement xmi:type="uml:Class" xmi:id="_3C7B8A60016D3CEE6428035E" name="BooleanProperty">
@@ -18,7 +18,7 @@
             <eAnnotations xmi:id="_Mi6VdN65EdmrtKJSXC0_FQ" source="keywords">
               <details xmi:id="_RxLfgFhTEdqpq69lOCMZBw" key="sparsearray"/>
             </eAnnotations>
-            <type xmi:type="uml:PrimitiveType" href="org.w3c.uml#_3C7B8A60016D3C8B63180083?w3c/w3c/boolean"/>
+            <type xmi:type="uml:PrimitiveType" href="org.w3c.uml#_3C7B8A60016D3C8B63180083"/>
           </ownedAttribute>
         </packagedElement>
         <packagedElement xmi:type="uml:Class" xmi:id="_3C7B8A60016D3D3D7A7702E3" name="UriProperty">
@@ -27,7 +27,7 @@
             <eAnnotations xmi:id="_Mi6Ved65EdmrtKJSXC0_FQ" source="keywords">
               <details xmi:id="_TvPusFhTEdqpq69lOCMZBw" key="sparsearray"/>
             </eAnnotations>
-            <type xmi:type="uml:PrimitiveType" href="org.w3c.uml#_3C7B8A60016D3C8B62F20331?w3c/w3c/anyURI"/>
+            <type xmi:type="uml:PrimitiveType" href="org.w3c.uml#_3C7B8A60016D3C8B62F20331"/>
           </ownedAttribute>
         </packagedElement>
         <packagedElement xmi:type="uml:Class" xmi:id="_3C7B8A60016D3E3E92AF00AF" name="IntegerProperty">
@@ -36,17 +36,17 @@
             <eAnnotations xmi:id="_Mi6Vft65EdmrtKJSXC0_FQ" source="keywords">
               <details xmi:id="_XKz2oFhTEdqpq69lOCMZBw" key="sparsearray"/>
             </eAnnotations>
-            <type xmi:type="uml:PrimitiveType" href="org.w3c.uml#_3C7B8A60016D3CC6A34B0011?w3c/w3c/integer"/>
+            <type xmi:type="uml:PrimitiveType" href="org.w3c.uml#_3C7B8A60016D3CC6A34B0011"/>
           </ownedAttribute>
         </packagedElement>
         <packagedElement xmi:type="uml:Class" xmi:id="_3C7B8A60016D3D106CB603A3" name="Property" isAbstract="true">
           <ownedAttribute xmi:id="_3C7B8A60016D3E2D44BF01DD" name="description">
-            <type xmi:type="uml:PrimitiveType" href="org.w3c.uml#_3C7B8A60016D3C8B62E40010?w3c/w3c/string"/>
-            <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_MjAb8d65EdmrtKJSXC0_FQ" value="1"/>
+            <type xmi:type="uml:PrimitiveType" href="org.w3c.uml#_3C7B8A60016D3C8B62E40010"/>
             <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_MjAb8N65EdmrtKJSXC0_FQ"/>
+            <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_MjAb8d65EdmrtKJSXC0_FQ" value="1"/>
           </ownedAttribute>
           <ownedAttribute xmi:id="_3C7B8A60016D417F6C5E02A4" name="name" isReadOnly="true" isDerived="true">
-            <type xmi:type="uml:PrimitiveType" href="org.w3c.uml#_3C7B8A60016D3C8B62E40010?w3c/w3c/string"/>
+            <type xmi:type="uml:PrimitiveType" href="org.w3c.uml#_3C7B8A60016D3C8B62E40010"/>
           </ownedAttribute>
         </packagedElement>
         <packagedElement xmi:type="uml:Class" xmi:id="_3C7B8A60016D3DC93385006B" name="PropertySet" isAbstract="true">
@@ -58,10 +58,10 @@
 </body>
           </ownedComment>
           <ownedAttribute xmi:id="_3C7B8A60016D3DC933B400EB" name="property" type="_3C7B8A60016D3D106CB603A3" isUnique="false" aggregation="composite" association="_3C7B8A60016D3DC933B30298">
-            <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_MjAcA965EdmrtKJSXC0_FQ" value="1"/>
             <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_MjAcAt65EdmrtKJSXC0_FQ"/>
+            <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_MjAcA965EdmrtKJSXC0_FQ" value="1"/>
             <qualifier xmi:id="_3C7B8A60016D3DC934170152" name="name" visibility="private">
-              <type xmi:type="uml:PrimitiveType" href="org.w3c.uml#_3C7B8A60016D3C8B62E40010?w3c/w3c/string"/>
+              <type xmi:type="uml:PrimitiveType" href="org.w3c.uml#_3C7B8A60016D3C8B62E40010"/>
             </qualifier>
           </ownedAttribute>
         </packagedElement>
@@ -71,13 +71,13 @@
             <eAnnotations xmi:id="_MjAb_t65EdmrtKJSXC0_FQ" source="keywords">
               <details xmi:id="_VRPF4FhTEdqpq69lOCMZBw" key="sparsearray"/>
             </eAnnotations>
-            <type xmi:type="uml:PrimitiveType" href="org.w3c.uml#_3C7B8A60016D3C8B631E003C?w3c/w3c/decimal"/>
+            <type xmi:type="uml:PrimitiveType" href="org.w3c.uml#_3C7B8A60016D3C8B631E003C"/>
           </ownedAttribute>
         </packagedElement>
         <packagedElement xmi:type="uml:Association" xmi:id="_3C7B8A60016D3DC933B30298" name="PropertySetHasProperties" memberEnd="_3C7B8A60016D3DC933B400EB _3C7B8A60016D3DC933B40109">
           <ownedEnd xmi:id="_3C7B8A60016D3DC933B40109" name="propertySet" type="_3C7B8A60016D3DC93385006B" isUnique="false" association="_3C7B8A60016D3DC933B30298">
-            <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_MjAcB965EdmrtKJSXC0_FQ" value="1"/>
             <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_MjAcBt65EdmrtKJSXC0_FQ" value="1"/>
+            <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_MjAcB965EdmrtKJSXC0_FQ" value="1"/>
           </ownedEnd>
         </packagedElement>
       </packagedElement>

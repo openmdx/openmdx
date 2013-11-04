@@ -1058,9 +1058,10 @@ public class ReducedJDOHelper implements Constants {
      */
     public static PersistenceManagerFactory getPersistenceManagerFactory(
             Map overrides,
-            String name,
+            String rawName,
             ClassLoader resourceLoader,
-            ClassLoader pmfLoader) {
+            ClassLoader pmfLoader
+    ){
         if (pmfLoader == null)
             throw new JDOFatalUserException (msg.msg (
                 "EXC_GetPMFNullPMFLoader")); //NOI18N
@@ -1071,7 +1072,7 @@ public class ReducedJDOHelper implements Constants {
 
         Map props = null;
         // trim spaces from name and ensure non-null
-        name = (name == null?ANONYMOUS_PERSISTENCE_MANAGER_FACTORY_NAME:name.trim());
+        String name = (rawName == null?ANONYMOUS_PERSISTENCE_MANAGER_FACTORY_NAME:rawName.trim());
         if (!ANONYMOUS_PERSISTENCE_MANAGER_FACTORY_NAME.equals(name)) {
             props = loadPropertiesFromResource(resourceLoader, name);
         }
@@ -1226,6 +1227,7 @@ public class ReducedJDOHelper implements Constants {
                 try {
                     in.close();
                 } catch (IOException ioe) {
+                    // Ignored close failure
                 }
             }
         }
@@ -1399,13 +1401,11 @@ public class ReducedJDOHelper implements Constants {
      * value of the String key is the empty string, "".
      */
     protected static Map/*<String,Map>*/ readNamedPMFProperties(
-            URL url,
-            String requestedPMFName,
-            DocumentBuilderFactory factory) {
-        requestedPMFName = requestedPMFName == null
-            ? ""
-            : requestedPMFName.trim();
-
+        URL url,
+        String rawRequestedPMFName,
+        DocumentBuilderFactory factory
+    ) {
+        String requestedPMFName = rawRequestedPMFName == null ? "" : rawRequestedPMFName.trim();
         Map propertiesByName = new HashMap();
         InputStream in = null;
         try {
@@ -1722,7 +1722,9 @@ public class ReducedJDOHelper implements Constants {
             if (in != null)
                 try { 
                     in.close (); 
-                } catch (IOException ioe) { }
+                } catch (IOException ioe) { 
+                    // Ignored close failure
+                }
         }
     }
 

@@ -22,9 +22,7 @@ public class DateTime {
     public static final java.sql.Timestamp toJDO (
         java.util.Date cciDateTime
     ){
-        return cciDateTime == null ? null : new java.sql.Timestamp(
-            cciDateTime.getTime()
-        );
+        return cciDateTime == null ? null : new java.sql.Timestamp(cciDateTime.getTime());
     }
 
     /**
@@ -37,9 +35,7 @@ public class DateTime {
     public static final java.util.Date toCCI (
         java.sql.Timestamp jdoDateTime
     ){
-        return jdoDateTime == null ? null : new java.util.Date(
-            jdoDateTime.getTime()
-        );
+        return jdoDateTime == null ? null : new java.util.Date(jdoDateTime.getTime());
     }
     
 }

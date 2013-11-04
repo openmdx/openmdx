@@ -55,6 +55,7 @@ import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.rest.spi.Facades;
 import org.openmdx.base.rest.spi.Object_2Facade;
 import org.openmdx.kernel.exception.BasicException;
+import org.openmdx.application.dataprovider.cci.RequestedObject;
 
 /**
  * Dataprovider Target
@@ -106,27 +107,28 @@ public class DataproviderTarget implements ImportTarget {
                 );
                 break;
             case SET:
-                try {
-                    this.target2.addGetRequest(
-                        Object_2Facade.getPath(objectHolder)
+                RequestedObject result = new RequestedObject();
+                this.target2.addGetRequest(
+                    Object_2Facade.getPath(objectHolder),
+                    AttributeSelectors.SPECIFIED_AND_TYPICAL_ATTRIBUTES,
+                    null,
+                    result
+                );
+                if(result.getException() != null && result.getException().getExceptionCode() != BasicException.Code.NOT_FOUND) {
+                    throw result.getException();
+                }
+                if(result.getObject(false) == null) {
+                    this.target.addCreateRequest(
+                        objectHolder,
+                        AttributeSelectors.NO_ATTRIBUTES,
+                        null // attributeSpecifier
                     );
+                } else {
                     this.target.addReplaceRequest(
                         objectHolder,
                         AttributeSelectors.NO_ATTRIBUTES,
                         null // attributeSpecifier
                     );
-                }
-                catch(ServiceException e) {
-                    if(e.getExceptionCode() == BasicException.Code.NOT_FOUND) {
-                        this.target.addCreateRequest(
-                            objectHolder,
-                            AttributeSelectors.NO_ATTRIBUTES,
-                            null // attributeSpecifier
-                        );
-                    }
-                    else {
-                        throw e;
-                    }
                 }
                 break;
             case CREATE:

@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2006-2009, OMEX AG, Switzerland
+ * Copyright (c) 2006-2013, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -175,6 +175,7 @@ public abstract class AbstractObject implements Serializable {
      * 
      * @return the large object's byte[] representation
      */
+    @SuppressWarnings("resource")
     protected static final byte[] openmdxjdoToArray(
         BinaryLargeObject largeObject
     ){
@@ -207,6 +208,7 @@ public abstract class AbstractObject implements Serializable {
      * 
      * @return the large object's char[] representation
      */
+    @SuppressWarnings("resource")
     protected static final char[] openmdxjdoToArray(
         CharacterLargeObject largeObject
     ){

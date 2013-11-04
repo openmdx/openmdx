@@ -51,6 +51,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.nio.charset.Charset;
 import java.util.ArrayDeque;
 import java.util.Deque;
 
@@ -90,7 +91,7 @@ public class WBXMLReader implements XMLReader {
      */
     public WBXMLReader(
     ) {
-        this.readerPlugIn = null;
+        this.plugIn = null;
     }
 
     /**
@@ -101,7 +102,7 @@ public class WBXMLReader implements XMLReader {
     public WBXMLReader(
         PlugIn plugIn
     ) {
-        this.readerPlugIn = plugIn;
+        this.plugIn = plugIn;
     }
 
     /**
@@ -122,7 +123,7 @@ public class WBXMLReader implements XMLReader {
     /**
      * The {@link WBXMLPlugIns#PLUG_IN} property value
      */
-    private PlugIn readerPlugIn;
+    private PlugIn plugIn;
 
     /**
      * The buffer for readStringI() 
@@ -133,11 +134,6 @@ public class WBXMLReader implements XMLReader {
      * The element queue
      */
     private final Deque<Object> stack = new ArrayDeque<Object>();
-
-    /**
-     * The current plug-in
-     */
-    private PlugIn parserPlugIn;
 
     /**
      * 
@@ -158,11 +154,6 @@ public class WBXMLReader implements XMLReader {
      * The current tag page, initially <code>0</code>
      */
     private int tagPage;
-
-    /**
-     * The string table
-     */
-    private byte[] stringTable;
 
     /**
      * The character encoding
@@ -190,7 +181,7 @@ public class WBXMLReader implements XMLReader {
     private PlugIn getPlugIn(
         String publicDocumentId
     ) throws ServiceException{
-        if(this.readerPlugIn == null) {
+        if(this.plugIn == null) {
             if(publicDocumentId != null) {
                 return WBXMLPlugIns.newInstance(publicDocumentId);
             }
@@ -200,11 +191,38 @@ public class WBXMLReader implements XMLReader {
                 "A PUBLIC document id must be provided unless a WBXML plug-in has been configured"
             );
         } else {
-            this.readerPlugIn.reset();
-            return this.readerPlugIn;
+            this.plugIn.reset();
+            return this.plugIn;
         }
     }
 
+    /**
+     * Create a string source reading the content from the given input stream
+     * 
+     * @param charset
+     * @param in
+     * @param byteCount
+     * 
+     * @return a new string source
+     * 
+     * @throws IOException
+     */
+    protected StringSource newStringSource(
+        Charset charset,
+        InputStream in,
+        int byteCount
+    ) throws IOException {
+        return StandardStringSource.isSupported(charset) ? new StandardStringSource(
+            charset,
+            in,
+            byteCount
+        ) : new GenericStringSource(
+            charset,
+            in,
+            byteCount
+        );
+    }
+    
     /**
      * Parse the binary stream
      * 
@@ -237,7 +255,7 @@ public class WBXMLReader implements XMLReader {
             // Document type
             //
             int publicid = readInt();
-            this.parserPlugIn = getPlugIn(
+            this.plugIn = getPlugIn(
                 publicid == ExternalIdentifiers.LITERAL ? readStringFromTable() : ExternalIdentifiers.toPublicDocumentId(publicid)
             );
             //
@@ -249,24 +267,14 @@ public class WBXMLReader implements XMLReader {
             // String Table
             //
             int stringTableSize = readInt();
-            if(stringTableSize == 0){
-                this.stringTable = null;
-            } else {
-                this.stringTable = new byte[stringTableSize];
-                int read = 0;
-                while(read < stringTableSize) {
-                    int batchSize = this.in.read(this.stringTable, read, stringTableSize - read);
-                    if(batchSize < 0) {
-                        throw new ServiceException(
-                            BasicException.Code.DEFAULT_DOMAIN,
-                            BasicException.Code.INVALID_CARDINALITY,
-                            "Missing bytes for string table",
-                            new BasicException.Parameter("expected", stringTableSize),
-                            new BasicException.Parameter("actual", read)
-                        );
-                    }
-                    read += batchSize;
-                }
+            if(stringTableSize > 0){
+                this.plugIn.setStringTable(
+                    newStringSource(
+                        Charset.forName(this.charset),
+                        this.in,
+                        stringTableSize
+                    )
+                );
             }
             //
             // Body
@@ -358,7 +366,7 @@ public class WBXMLReader implements XMLReader {
                     }
 
                     default:
-                        Object resolvedTag = this.parserPlugIn.resolveTag(this.tagPage, (id & 0x03f));
+                        Object resolvedTag = this.plugIn.resolveTag(this.tagPage, (id & 0x03f));
                         if(resolvedTag instanceof CodeResolution) {
                             this.readElement(
                                 (CodeResolution)resolvedTag,
@@ -412,33 +420,33 @@ public class WBXMLReader implements XMLReader {
     ) throws ServiceException, IOException, SAXException {
         switch (id) {
             case GlobalTokens.EXT_I_0:
-                this.parserPlugIn.ext0(readInlineString());
+                this.plugIn.ext0(readInlineString());
                 break;
             case GlobalTokens.EXT_I_1:
-                this.parserPlugIn.ext1(readInlineString());
+                this.plugIn.ext1(readInlineString());
                 break;
             case GlobalTokens.EXT_I_2:
-                this.parserPlugIn.ext2(readInlineString());
+                this.plugIn.ext2(readInlineString());
                 break;
 
             case GlobalTokens.EXT_T_0:
-                this.parserPlugIn.ext0(readInt());
+                this.plugIn.ext0(readInt());
                 break;
             case GlobalTokens.EXT_T_1:
-                this.parserPlugIn.ext1(readInt());
+                this.plugIn.ext1(readInt());
                 break;
             case GlobalTokens.EXT_T_2:
-                this.parserPlugIn.ext2(readInt());
+                this.plugIn.ext2(readInt());
                 break;
 
             case GlobalTokens.EXT_0:
-                this.parserPlugIn.ext0();
+                this.plugIn.ext0();
                 break;
             case GlobalTokens.EXT_1:
-                this.parserPlugIn.ext1();
+                this.plugIn.ext1();
                 break;
             case GlobalTokens.EXT_2:
-                this.parserPlugIn.ext2();
+                this.plugIn.ext2();
                 break;
 
             case GlobalTokens.OPAQUE: {
@@ -450,7 +458,7 @@ public class WBXMLReader implements XMLReader {
                 if(this.contentHandler instanceof LargeObjectWriter) {
                     ((LargeObjectWriter)this.contentHandler).writeBinaryData(buf, 0, len);
                 } else {
-                    this.parserPlugIn.opaque(buf);
+                    this.plugIn.opaque(buf);
                 }
             } // case OPAQUE
         } // SWITCH
@@ -492,20 +500,21 @@ public class WBXMLReader implements XMLReader {
                 this.attributePage = readByte();
                 id = readByte();
             } else {
-                CodeResolution attribute = this.parserPlugIn.resolveAttributeStart(this.attributePage, id);
-                StringBuilder value = new StringBuilder(attribute.valueStart);
+                CodeResolution attribute = this.plugIn.resolveAttributeStart(this.attributePage, id);
+                String value = attribute.valueStart;
+                StringBuilder buffer = null;
                 id = readByte();
                 while (id > 128 || id == GlobalTokens.ENTITY || id == GlobalTokens.STR_I || id == GlobalTokens.STR_T || (id >= GlobalTokens.EXT_I_0 && id <= GlobalTokens.EXT_I_2) || (id >= GlobalTokens.EXT_T_0 && id <= GlobalTokens.EXT_T_2)) {
-
+                    if(buffer == null) {
+                        buffer = new StringBuilder(value);
+                    }
                     switch (id) {
                         case GlobalTokens.ENTITY:
-                            value.append((char) readInt());
-                            break;
-
+                            buffer.append((char) readInt());
+                        break;
                         case GlobalTokens.STR_I:
-                            value.append(readInlineString());
-                            break;
-
+                            buffer.append(readInlineString());
+                        break;
                         case GlobalTokens.EXT_I_0:
                         case GlobalTokens.EXT_I_1:
                         case GlobalTokens.EXT_I_2:
@@ -517,19 +526,19 @@ public class WBXMLReader implements XMLReader {
                         case GlobalTokens.EXT_2:
                         case GlobalTokens.OPAQUE:
                             handleExtensions(id);
-                            break;
-
+                        break;
                         case GlobalTokens.STR_T:
-                            value.append(readStringFromTable());
-                            break;
-
+                            buffer.append(readStringFromTable());
+                        break;
                         default:
-                            value.append(this.parserPlugIn.resolveAttributeValue(this.attributePage, id));
+                            buffer.append(this.plugIn.resolveAttributeValue(this.attributePage, id));
                     }
                     id = readByte();
                 }
-
-                result.addAttribute(attribute.namespaceURI, attribute.localName, attribute.name, null, value.toString());
+                if(buffer != null) {
+                    value = buffer.toString();
+                }
+                result.addAttribute(attribute.namespaceURI, attribute.localName, attribute.name, null, value);
             }
         }
         return result;
@@ -634,33 +643,7 @@ public class WBXMLReader implements XMLReader {
      */
     private String readStringFromTable(
     ) throws IOException, SAXException, ServiceException {
-        int pos = readInt();
-        int limit = this.stringTable == null ? 0 : this.stringTable.length;
-        if(pos >= limit) {
-            throw new ServiceException(
-                BasicException.Code.DEFAULT_DOMAIN,
-                BasicException.Code.BAD_SEQUENCE_LENGTH,
-                "Unable to retrieve a string from the WBXML string table",
-                new BasicException.Parameter("limit", limit),
-                new BasicException.Parameter("start", pos)
-            );
-        }
-        for(
-            int end = pos;
-            end < limit;
-            end++
-        ){
-            if(this.stringTable[end] == 0){
-                return new String(this.stringTable, pos, end - pos, this.charset);
-            }
-        }
-        throw new ServiceException(
-            BasicException.Code.DEFAULT_DOMAIN,
-            BasicException.Code.BAD_SEQUENCE_LENGTH,
-            "Unterminated string in WBXML string table",
-            new BasicException.Parameter("limit", limit),
-            new BasicException.Parameter("start", pos)
-        );
+        return this.plugIn.resolveString(readInt()).toString();
     }
 
     //------------------------------------------------------------------------
@@ -723,7 +706,7 @@ public class WBXMLReader implements XMLReader {
         String name
     ) throws SAXNotRecognizedException, SAXNotSupportedException {
         if(WBXMLPlugIns.PLUG_IN.equals(name)) {
-            return this.readerPlugIn;
+            return this.plugIn;
         } else {
             throw new SAXNotRecognizedException("Property: " + name);
         }
@@ -840,7 +823,7 @@ public class WBXMLReader implements XMLReader {
         Object value
      ) throws SAXNotRecognizedException, SAXNotSupportedException {
         if(WBXMLPlugIns.PLUG_IN.equals(name)) {
-            this.readerPlugIn = (PlugIn) value;
+            this.plugIn = (PlugIn) value;
         } else {
             throw new SAXNotRecognizedException("Property: " + name);
         }

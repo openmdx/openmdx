@@ -1,14 +1,14 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Description: EditObjectEventHandler 
+ * Description: SaveAction 
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
  * ====================================================================
  *
  * This software is published under the BSD license
  * as listed below.
  * 
- * Copyright (c) 2004-2012, OMEX AG, Switzerland
+ * Copyright (c) 2004-2013, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -68,10 +68,10 @@ import org.openmdx.kernel.log.SysLog;
 import org.openmdx.portal.servlet.ApplicationContext;
 import org.openmdx.portal.servlet.ViewPort;
 import org.openmdx.portal.servlet.ViewsCache;
+import org.openmdx.portal.servlet.attribute.Attribute;
 import org.openmdx.portal.servlet.view.EditObjectView;
 import org.openmdx.portal.servlet.view.ObjectView;
 import org.openmdx.portal.servlet.view.ShowObjectView;
-import org.openmdx.portal.servlet.view.ViewMode;
 
 /**
  * SaveAction
@@ -84,7 +84,6 @@ public class SaveAction extends BoundAction {
 	/* (non-Javadoc)
 	 * @see org.openmdx.portal.servlet.action.BoundAction#perform(org.openmdx.portal.servlet.view.ObjectView, javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, java.lang.String, javax.servlet.http.HttpSession, java.util.Map, org.openmdx.portal.servlet.ViewsCache, org.openmdx.portal.servlet.ViewsCache)
 	 */
-	@SuppressWarnings("unchecked")
 	@Override
     public ActionPerformResult perform(
         ObjectView currentView,
@@ -100,22 +99,22 @@ public class SaveAction extends BoundAction {
         ViewPort.Type nextViewPortType = null;
         if(currentView instanceof EditObjectView) {
         	EditObjectView editView = (EditObjectView)currentView;
-	        ApplicationContext application = editView.getApplicationContext();
+	        ApplicationContext app = editView.getApplicationContext();
 	        {
-	            Map attributeMap = new HashMap();    
+	            Map<String,Attribute> attributeMap = new HashMap<String,Attribute>();    
 	            boolean hasErrors;
 	            try {  
 	                editView.storeObject(
 	                	requestParameters,
-	                    attributeMap
+	                    attributeMap,
+	                    false
 	                );
-	                List errorMessages = application.getErrorMessages();
+	                List errorMessages = app.getErrorMessages();
 	                hasErrors = !errorMessages.isEmpty();
 	                if(hasErrors) {
 	                    errorMessages.clear();                        
 	                }
-	            }
-	            catch(Exception e) {
+	            } catch(Exception e) {
 	                ServiceException e0 = new ServiceException(e);
 	                SysLog.warning(e0.getMessage(), e0.getMessage());
 	                SysLog.warning(e0.getMessage(), e0.getCause());
@@ -128,42 +127,58 @@ public class SaveAction extends BoundAction {
 	                    try {
 	                    	// Try to clone current object and use it as new working object
 	                    	workObject = PersistenceHelper.clone(editView.getRefObject());
-	                    }
-	                    catch(Exception e) {
+	                    } catch(Exception e) {
 	                        // If cloning fails, create a new empty instance
 	                    	workObject = (RefObject_1_0)editView.getRefObject().refClass().refCreateInstance(null);                        	
 	                        workObject.refInitialize(false, false);
 	                    }
 	                    // Initialize with received attribute values. This also updates the error messages
-	                    application.getPortalExtension().updateObject(
+	                    app.getPortalExtension().updateObject(
 	                        workObject,
 	                        requestParameters,
 	                        attributeMap,
-	                        application
+	                        app
 	                    );
 	                    nextView = new EditObjectView(
 	                        editView.getId(),
 	                        editView.getContainerElementId(),
 	                        workObject,
 	                        editView.getEditObjectIdentity(),
-	                        application,
+	                        app,
 	                        editView.getHistoryActions(),
 	                        editView.getLookupType(),
 	                        editView.getParentObject(),
 	                        editView.getForReference(),
 	                        editView.getResourcePathPrefix(),
 	                        editView.getNavigationTarget(),
-	                        editView.getMode()
+	                        editView.getMode(),
+	                        editView.isEditMode()
 	                    );
-	                }
-	                // Can not stay in edit object view. Return to returnToView as fallback
-	                catch(Exception e1) {
+	                } catch(Exception e1) {
+		                // Can not stay in edit object view. Return to returnToView as fallback
 	                    nextView = editView.getPreviousView(null);
 	                }
-	            }
-	            // Object is saved
-	            else {
-	            	nextView = editView.getPreviousView(showViewsCache);
+	            } else {
+		            // Object is saved
+	            	if(editView.isEditMode()) {
+	            		nextView = editView.getPreviousView(showViewsCache);
+	            	} else {
+	            		try {
+		                    nextView = new ShowObjectView(
+		                        currentView.getId(),
+		                        null,
+		                        editView.getRefObject(),
+		                        app,
+		                        currentView.getHistoryActions(), 
+		                        null, // no lookupType
+		                        null, // do not propagate resourcePathPrefix
+		                        null, // do not propagate navigationTarget
+		                        null // isReadOnly
+		                    );
+	            		} catch(Exception ignore) {
+		            		nextView = editView.getPreviousView(showViewsCache);	            			
+	            		}
+	            	}
                 	try {
                 		nextView.refresh(true, true);
                 	} catch(Exception e) {
@@ -175,7 +190,7 @@ public class SaveAction extends BoundAction {
 	                    editView.getRequestId()
 	                );
 	                // Paint attributes if view is embedded
-	                if(editView.getMode() == ViewMode.EMBEDDED) {
+	                if(editView.isEditMode()) {
 	                    nextViewPortType = ViewPort.Type.EMBEDDED;
 	                }
 	            }

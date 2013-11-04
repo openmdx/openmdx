@@ -1,16 +1,13 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: ElementFilter.java,v 1.7 2010/06/04 22:16:17 hburger Exp $
  * Description: element Filter
- * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/06/04 22:16:17 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2005-2010, OMEX AG, Switzerland
+ * Copyright (c) 2005-2013, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without 
@@ -97,12 +94,12 @@ public class ElementFilter
 	/**
 	 * 
 	 */
-    private Vector elements = new Vector();
+    private Vector<Element> elements = new Vector<Element>();
 
     /**
      * 
      */
-    private Map mapping = null;
+    private Map<String,String> mapping = null;
     	
 	protected static final byte CONTENT = 0;
 	protected static final byte ELEMENT = 1;
@@ -127,7 +124,7 @@ public class ElementFilter
      * 
      * @return a <code>Vector</code> fo
      */
-    protected Vector getElements(){
+    protected Vector<Element> getElements(){
     	return this.elements;
     }
     
@@ -136,7 +133,7 @@ public class ElementFilter
 	 * 
 	 * @return the mapping
 	 */
-	protected synchronized Map getMapping(
+	protected synchronized Map<String,String> getMapping(
 	){
 		if(!getInitialized()){
 			this.mapping = this.filterSet.getMapping(
@@ -154,7 +151,7 @@ public class ElementFilter
 	 * @param mapping
 	 */
 	protected void setMapping(
-		Map mapping 
+		Map<String,String> mapping 
 	){
 		this.mapping = mapping;
 	}
@@ -235,7 +232,7 @@ public class ElementFilter
 						this.regexpMatcher = regexpFactory.newRegexpMatcher(getProject());
 						this.regexpMatcher.setPattern(ID_PATTERN);
 					}
-					Vector v = this.regexpMatcher.getGroups(this.element.toString());
+					Vector<?> v = this.regexpMatcher.getGroups(this.element.toString());
 					if( v != null) {
 						String key = (String) v.get(1);
 						if(key != null && key.length() > 2) {
@@ -304,19 +301,19 @@ public class ElementFilter
     
     static final class ElementFilterSet extends FilterSet {
     	
-        private Vector filterSets = new Vector();
+        private Vector<FilterSet> filterSets = new Vector<FilterSet>();
 
-        private Map mapping;
+        private Map<String,String> mapping;
 
-        synchronized Map getMapping(
+        synchronized Map<String,String> getMapping(
         	Parameter[] parameters,
-        	Vector entries
+        	Vector<Element> entries
         ){
-        	this.mapping = new HashMap();
+        	this.mapping = new HashMap<String,String>();
         	for(
-        		Enumeration e = filterSets.elements();
+        		Enumeration<FilterSet> e = filterSets.elements();
         		e.hasMoreElements();
-            ) this.addConfiguredFilterSet((FilterSet)e.nextElement());
+            ) this.addConfiguredFilterSet(e.nextElement());
         	if(parameters != null) for(
         		int i = 0; 
         		i < parameters.length;
@@ -326,10 +323,10 @@ public class ElementFilter
             	parameters[i].getValue()            	
             );
         	if(entries != null) for(
-        		Enumeration e = entries.elements();
+        		Enumeration<Element> e = entries.elements();
         		e.hasMoreElements();
         	){
-        		Element f = (Element) e.nextElement();
+        		Element f = e.nextElement();
         		addFilter(
         			f.getId(),
         			f.getContent()

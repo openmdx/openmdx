@@ -262,8 +262,6 @@ public enum ClassType {
     /**
      * Retrieve type with specified usage and format.
      * 
-     * @param classDef
-     * 
      * @return the type with specified usage and format.
      */
     public abstract String getType(
@@ -272,11 +270,6 @@ public enum ClassType {
         TypeMode featureUsage
     );
         
-    /**
-     * 
-     * @param classDef
-     * @return
-     */
     static ClassDef getSuperClassDef(
         ClassDef classDef
     ){
@@ -292,12 +285,6 @@ public enum ClassType {
         return null;
     }
     
-    /**
-     * 
-     * @param qualifiedName
-     * @param packageSuffix
-     * @return
-     */
     static String getType(
         String qualifiedName,
         String packageSuffix

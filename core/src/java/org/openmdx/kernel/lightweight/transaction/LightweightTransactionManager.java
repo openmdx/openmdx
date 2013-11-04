@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2005-2011, OMEX AG, Switzerland
+ * Copyright (c) 2005-2013, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without 
@@ -141,7 +141,7 @@ public final class LightweightTransactionManager implements TransactionManager {
         LightweightTransaction currentTransaction = new LightweightTransaction(
             this.transactionIdFactory
         );
-        currentTransaction.setTimeout(timeouts.get());
+        currentTransaction.setTimeout(timeouts.get().intValue());
         bindings.put(Thread.currentThread(), currentTransaction);
         SysLog.log(Level.FINEST,"Begin {0}", currentTransaction);
     }

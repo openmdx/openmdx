@@ -97,7 +97,7 @@ public class PlugInReplacement_1 extends VirtualObjects_1 {
             Path objectId = request.path();
             if(objectId.isLike(MESSAGE_TEMPLATE_PATTERN)) {
 				Object_2Facade facade = Facades.asObject(request.object());
-                String text = (String) facade.attributeValuesAsList("text").get(0);
+                String text = (String) facade.getSingletonFromAttributeValuesAsList("text");
                 if(text == null || text.length() == 0) {
                     throw new ServiceException(
                         BasicException.Code.DEFAULT_DOMAIN,

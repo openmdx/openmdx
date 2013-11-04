@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2010, OMEX AG, Switzerland
+ * Copyright (c) 2010-2013, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -47,7 +47,6 @@
  */
 package org.openmdx.application.rest.http;
 
-import java.io.IOException;
 import java.net.HttpURLConnection;
 
 import javax.resource.ResourceException;
@@ -58,6 +57,7 @@ import javax.resource.cci.Record;
 
 import org.openmdx.application.rest.http.spi.Message;
 import org.openmdx.base.exception.ServiceException;
+import org.openmdx.base.io.Closeables;
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.resource.cci.RestFunction;
 import org.openmdx.base.resource.spi.RestInteractionSpec;
@@ -65,8 +65,9 @@ import org.openmdx.base.rest.cci.MessageRecord;
 import org.openmdx.base.rest.spi.AbstractRestInteraction;
 import org.openmdx.base.rest.spi.Object_2Facade;
 import org.openmdx.base.rest.spi.Query_2Facade;
+import org.openmdx.base.rest.spi.RestFormatter;
+import org.openmdx.base.rest.spi.RestFormatters;
 import org.openmdx.base.rest.spi.RestParser;
-import org.openmdx.base.rest.stream.RestFormatter;
 import org.openmdx.base.text.conversion.URITransformation;
 import org.openmdx.kernel.exception.BasicException;
 
@@ -94,6 +95,11 @@ public abstract class AbstractHttpInteraction extends AbstractRestInteraction {
      */
     protected final String contextURL;
     
+    /**
+     * The eagerly acquired REST formatter instance
+     */
+    protected static final RestFormatter restFormatter = RestFormatters.getFormatter();
+
     /**
      * The interaction spec to create (virtual) connection objects
      */
@@ -184,7 +190,7 @@ public abstract class AbstractHttpInteraction extends AbstractRestInteraction {
         IndexedRecord output
     ) throws ServiceException {
         Message message = newMessage(interactionSpec, xri);
-        RestFormatter.format(message.getRequestBody(), input);
+        restFormatter.format(message.getRequestBody(), input);
         return process(message, output);
     }
 
@@ -205,7 +211,7 @@ public abstract class AbstractHttpInteraction extends AbstractRestInteraction {
         IndexedRecord output
     ) throws ServiceException {
         Message message = newMessage(interactionSpec, input.getPath());
-        RestFormatter.format(message.getRequestBody(), input);
+        restFormatter.format(message.getRequestBody(), input);
         return process(message, output);
     }
     
@@ -249,9 +255,7 @@ public abstract class AbstractHttpInteraction extends AbstractRestInteraction {
                 remote
             );
         } else {
-            try {
-                message.getResponseBody().close();
-            } catch (IOException e) {}
+            Closeables.close(message.getResponseBody());
         }
         return status >= 200 && status < 300;
     }
@@ -363,7 +367,7 @@ public abstract class AbstractHttpInteraction extends AbstractRestInteraction {
         MessageRecord output
     ) throws ServiceException {
         Message message = newMessage(interactionSpec, input.getPath());
-        RestFormatter.format(message.getRequestBody(), "in", input);
+        restFormatter.format(message.getRequestBody(), "in", input);
         return process(message, output);
     }
 

@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2011, OMEX AG, Switzerland
+ * Copyright (c) 2004-2013, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -231,7 +231,7 @@ public class JmiHelper {
                     j.hasNext();
                 ) {
                     ((SparseArray)targetValues).put(
-                        j.nextIndex(),
+                        Integer.valueOf(j.nextIndex()),
                         marshaller.marshal(j.next())
                     );
                 }
@@ -260,11 +260,8 @@ public class JmiHelper {
         Object_2Facade facade = Facades.asObject(source);
         Model_1_0 model = ((RefPackage_1_0)target.refImmediatePackage()).refModel();
         ModelElement_1_0 classDef = model.getElement(typeName);
-        if(ignorableFeatures == null) {
-            ignorableFeatures = DEFAULT_SET_OF_IGNORABLE_FEATURES;
-        }
         Features: for(String featureName: (Set<String>)facade.getValue().keySet()) {
-            if(ignorableFeatures.contains(featureName)) {
+            if((ignorableFeatures == null ? DEFAULT_SET_OF_IGNORABLE_FEATURES : ignorableFeatures).contains(featureName)) {
                 continue Features;
             }
             ModelElement_1_0 featureDef = model.getFeatureDef(

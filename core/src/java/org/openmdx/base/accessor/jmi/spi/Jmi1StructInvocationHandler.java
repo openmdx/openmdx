@@ -8,7 +8,7 @@
  * This software is published under the BSD license
  * as listed below.
  * 
- * Copyright (c) 2007-2010, OMEX AG, Switzerland
+ * Copyright (c) 2007-2013, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -199,12 +199,12 @@ public class Jmi1StructInvocationHandler implements InvocationHandler, Marshalle
                     InvocationHandler invocationHandler = Proxy.getInvocationHandler(args[0]);
                     if(invocationHandler instanceof Jmi1StructInvocationHandler) {
                         Jmi1StructInvocationHandler that = (Jmi1StructInvocationHandler) invocationHandler;
-                        return this.delegate.equals(that.delegate);
+                        return Boolean.valueOf(this.delegate.equals(that.delegate));
                     }
                 }
-                return false;
+                return Boolean.FALSE;
             } else if("hashCode".equals(methodName)) {
-                return this.delegate.hashCode();
+                return Integer.valueOf(this.delegate.hashCode());
             } else if("toString".equals(methodName)) {
                 return this.delegate.toString();
             }
@@ -323,17 +323,18 @@ public class Jmi1StructInvocationHandler implements InvocationHandler, Marshalle
             OutputStream stream, 
             long position
         ) throws IOException {
-            this.length = Jmi1StructInvocationHandler.this.delegate instanceof RefObject_1_0 ?
+            this.length = Long.valueOf(
+                Jmi1StructInvocationHandler.this.delegate instanceof RefObject_1_0 ?
                 ((RefObject_1_0)Jmi1StructInvocationHandler.this.delegate).refGetValue(
                     this.fieldName, 
                     stream, 
                     position
-                ) :
-                    position + BinaryLargeObjects.streamCopy(
-                        getContent(), 
-                        position,
-                        stream
-                    );            
+                ) : position + BinaryLargeObjects.streamCopy(
+                    getContent(), 
+                    position,
+                    stream
+                )
+            );            
         }
 
     }

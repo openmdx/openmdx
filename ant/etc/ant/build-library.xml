@@ -8,7 +8,7 @@
 =
 = This software is published under the BSD license as listed below.
 = 
-= Copyright (c) 2004-2012, OMEX AG, Switzerland
+= Copyright (c) 2004-2013, OMEX AG, Switzerland
 = All rights reserved.
 = 
 = Redistribution and use in source and binary forms, with or without 
@@ -57,7 +57,7 @@
 			<pathelement location="${openmdx.home}/apache/jre-1.2/contribution/lib/ant-contrib.jar"/>
 		</classpath>
 	</taskdef>
-	
+
 	<!--*******************************************************************
 	* openMDX Ant tasks
 	********************************************************************-->
@@ -86,7 +86,7 @@
 				</classpath>
 			</componentdef>
 			<propertyhelper>
-			  	<propertyoperations/>
+				<propertyoperations/>
 			</propertyhelper>
 			<taskdef 
 				resource="org/openmdx/tools/ant/antlib.xml" uri="xri://(antlib:org.openmdx.tools.ant)"
@@ -107,12 +107,12 @@
 	        timeout="4000000"
 	        taskname="help"
 		>
-		    <classpath>
-		        <pathelement location="${ant.home}/lib/ant-launcher.jar"/>
-		    </classpath>
-		    <arg value="-buildfile"/>
-		    <arg file="${ant.file}"/>
-		    <arg value="-projecthelp"/>
+			<classpath>
+				<pathelement location="${ant.home}/lib/ant-launcher.jar"/>
+			</classpath>
+			<arg value="-buildfile"/>
+			<arg file="${ant.file}"/>
+			<arg value="-projecthelp"/>
 		</java>
 	</target>
 	<!--*******************************************************************
@@ -251,7 +251,7 @@
 		<echo message="junit.test.datasource          = ${junit.test.datasource}"/>
 		<echo message="junit.test.datasource.name     = ${junit.test.datasource.name}"/>
 	</target>
-	
+
 	<!--*******************************************************************
 	* Initialization
 	********************************************************************-->
@@ -433,58 +433,49 @@
 	* Preprocess JT files
 	********************************************************************-->
 	<target name="-preprocess-jt-files-" depends="-preprocess-jt-init" unless="preprocess-jt.target.is.up-to-date">
-		<fail message="Preprocessor gcc not available. Check the PATH environment variable" unless="preprocess-jt.is.supported"/>
-		<echo>Preprocessing Java Templates: ${basedir}/src/jt</echo>
-		<mkdir dir="${log.dir}/gcc"/>
-		<!-- Establish the directory structure because gcc does not create -->
+		<!--
+		    Ant Java Pre-Processor task (https://sourceforge.net/projects/epptask/)
+		-->
+		<taskdef resource="epp.task" >
+			<classpath>
+				<pathelement location="${openmdx.home}/ant/thirdparty/epptask/lib/epptask.jar" />
+			</classpath>
+		</taskdef>
+		<!-- Establish the directory structure because epp does not create -->
 		<!-- directories itself :-( and fails otherwise                    -->
 		<copy todir="${build.dir}/src/${preprocess-jt.target}">
 			<fileset dir="${basedir}/src/jt">
 				<exclude name="**/*.jt"/>
 			</fileset>
 		</copy>
-		<apply executable="gcc" dest="${build.dir}/src/${preprocess-jt.target}" parallel="false" output="${log.dir}/gcc/jt-to-${preprocess-jt.target}.out" error="${log.dir}/gcc/jt-to-${preprocess-jt.target}.err">
-			<arg value="-P"/>
-			<arg value="-E"/>
-			<arg value="-C"/>
-			<arg value="-I"/>
-			<arg value="${basedir}/src/jt/org/openmdx/base/accessor/jmi/spi"/>
-			<arg value="-D"/>
-			<arg value="${preprocess-jt.tag1}"/>
-			<arg value="-D"/>
-			<arg value="${preprocess-jt.tag2}"/>
-			<arg value="-D"/>
-			<arg value="${preprocess-jt.tag3}"/>
-			<arg value="-D"/>
-			<arg value="${preprocess-jt.tag4}"/>
-			<arg value="-D"/>
-			<arg value="${preprocess-jt.tag5}"/>
-			<arg value="-D"/>
-			<arg value="${project.build.preprocess.tag1}"/>
-			<arg value="-D"/>
-			<arg value="${project.build.preprocess.tag2}"/>
-			<arg value="-x"/>
-			<arg value="c"/>
-			<arg value="-o"/>
-			<targetfile/>
-			<srcfile/>
-			<fileset dir="${basedir}/src/jt">
-				<patternset refid="preprocess-jt.source.pattern"/>
-			</fileset>
-			<mapper type="glob" from="*.jt" to="*.${preprocess-jt.target}"/>
-		</apply>
+		<antcontrib:for param="source-file">
+			<path>
+				<fileset dir="${basedir}/src/jt">
+					<patternset refid="preprocess-jt.source.pattern"/>
+				</fileset>
+			</path>
+			<sequential>
+				<antcontrib:var name="target-file" unset="true" />
+				<!-- build target file name -->
+				<pathconvert property="target-file">
+  					<path location="@{source-file}"/>
+  					<globmapper 
+						from="${basedir}/src/jt/*.jt" 
+						to="${build.dir}/src/${preprocess-jt.target}/*.${preprocess-jt.target}"
+						handledirsep="true"
+					/>
+				</pathconvert>
+				<!-- run preprocessor -->
+				<epp
+					srcfile="@{source-file}"
+					destfile="${target-file}"
+					incdir="${basedir}/src/jt/org/openmdx/base/accessor/jmi/spi"
+					defs="${preprocess-jt.tag1},${preprocess-jt.tag2},${preprocess-jt.tag3},${preprocess-jt.tag4},${preprocess-jt.tag5},${project.build.preprocess.tag1},${project.build.preprocess.tag2}" />
+				<!--<echo>diff @{source-file} ${target-file} </echo>-->
+			</sequential>
+		</antcontrib:for>
 	</target>
 	<target name="-preprocess-jt-init">
-		<condition property="preprocess-jt.is.supported">
-			<or>
-				<available file="gcc.exe" filepath="${env.Path}"/>
-				<!-- Windows        -->
-				<available file="gcc.exe" filepath="${env.PATH}"/>
-				<!-- Windows/CygWin -->
-				<available file="gcc" filepath="${env.PATH}"/>
-				<!-- Unix           -->
-			</or>
-		</condition>
 		<antcontrib:if>
 			<equals arg1="${preprocess-jt.target}" arg2="java"/>
 			<antcontrib:then>
@@ -552,7 +543,7 @@
 					</antcontrib:then>
 				</antcontrib:if>
 			</antcontrib:else>
-		</antcontrib:if>		
+		</antcontrib:if>
 		<patternset id="preprocess-jt.source.pattern">
 			<include name="**/*.jt"/>
 			<exclude name="org/openmdx/base/accessor/jmi/spi/portability-macros.jt"/>
@@ -726,6 +717,7 @@ java.util.logging.ConsoleHandler.formatter = ${openmdx.log.formatter}
 			<sysproperty key="user.language" value="en"/>
 			<sysproperty key="user.region" value="US"/>
 			<sysproperty key="file.encoding" value="Cp1252"/>
+			<sysproperty key="org.openmdx.application.mof.externalizer.xmi.ignoreImportedPackage" value="true"/>
 			<arg value="--pathMapSymbol=openMDX 2 ~ Core (RSM)"/>
 			<arg value="--pathMapPath=file:${openmdx.home}/core/src/model/rsm/"/>
 			<arg value="--pathMapSymbol=openMDX 2 ~ Security (RSM)"/>
@@ -769,10 +761,10 @@ java.util.logging.ConsoleHandler.formatter = ${openmdx.log.formatter}
 			<arg line="${model.build.formats}"/>
 			<arg value="%"/>
 		</java>
-	</target>	
+	</target>
 	<target name="-preprocess-model-init">
 		<uptodate property="model-files.are.up-to-date" targetfile="${build.dir}/model/${ant.project.name}.openmdx-xmi.zip">
-			<srcfiles dir="${basedir}/src/model"/>
+			<srcfiles dir="${basedir}/src/model" excludes="**/*.dott,**/*.umlclass"/>
 		</uptodate>
 		<condition property="model.transformation.source.is-magicdraw">
 			<equals arg1="${model.transformation.source}" arg2="magicdraw"/>
@@ -793,6 +785,42 @@ java.util.logging.ConsoleHandler.formatter = ${openmdx.log.formatter}
 		<mkdir dir="${build.dir}/model"/>
 		<mkdir dir="${build.dir}/src/java"/>
 		<mkdir dir="${build.dir}/src/jsl"/>
+	</target>
+	<!-- ******************************************************************* -->
+	<!-- * model-diagrams -->
+	<!-- ******************************************************************* -->
+	<target name="-render-diagram-">
+		<basename property="dot.file.basename" file="${dot.file.name}" suffix=".dot" />
+		<dirname property="dot.file.dirname" file="${dot.file.name}" />
+		<exec executable="${env.GRAPHVIZ_HOME}/dot" dir="${dot.file.dirname}" output="${build.dir}/model/graphviz.log">
+			<arg line="-Tpng -o ${dot.file.basename}.png ${dot.file.basename}.dot" />
+		</exec>
+		<delete file="${dot.file.name}" />
+	</target>
+	<target name="-render-album-">
+		<exec executable="${env.ALBUM_HOME}/album" dir="${album.path}" output="${build.dir}/model/album.log">
+			<arg line="-theme ${album.theme.name} -theme_path ${album.theme.path} -theme_url ${album.theme.url} -save_conf=off -clean=on" />
+		</exec>
+	</target>
+	<target name="model-diagrams" description="Generate model diagrams">
+		<property name="album.path" value="${build.dir}/model/diagrams/${project.vendor.name} ${project.implementation.version} Model" />
+		<java classname="org.openmdx.base.mof.spi.Model_1DiagramDrawer" fork="true" classpathref="project.bin.classpath">
+			<arg value="src/model/graphviz/diagrams" />
+			<arg value="${build.dir}/model/diagrams/dot" />
+			<sysproperty key="java.protocol.handler.pkgs" value="org.openmdx.kernel.url.protocol" />
+		</java>
+		<copy todir="${album.path}">
+			<fileset dir="${build.dir}/model/diagrams/dot" />
+			<fileset dir="src/model/graphviz/diagrams/" includes="**/*.jpg, **/*.gif" />
+		</copy>
+		<antcontrib:foreach target="-render-diagram-" param="dot.file.name">
+			<path>
+				<fileset dir="${album.path}" casesensitive="yes">
+					<include name="**/*.dot" />
+				</fileset>
+			</path>
+		</antcontrib:foreach>
+		<antcall target="-render-album-" inheritAll="true" />
 	</target>
 	<!--*******************************************************************
 	* Version Class
@@ -825,18 +853,18 @@ java.util.logging.ConsoleHandler.formatter = ${openmdx.log.formatter}
 		name="test" 
 		description="Run JUnit tests, e.g. 'ant test' or 'ant -Djunit.test.case=Test*ProtocolHandler test'" 
 	>
-		<mkdir dir="${tmp.dir}"/>		
+		<mkdir dir="${tmp.dir}"/>
 		<antcontrib:if>
 			<isset property="test.id.list"/>
 			<antcontrib:then>
-				<!-- Iterate all tests listed in test.id.list --> 
+				<!-- Iterate all tests listed in test.id.list -->
 				<antcontrib:foreach list="${test.id.list}" target="-run-test-" param="test.id" delimiter="/" />
-  			</antcontrib:then>
+			</antcontrib:then>
 			<antcontrib:else>
 				<antcontrib:if>
 					<isset property="junit.test.case"/>
 					<antcontrib:then>
-						<!-- Run tests specified by junit.test.case pattern --> 
+						<!-- Run tests specified by junit.test.case pattern -->
 						<antcall target="-test-">
 							<param name="test.id" value="default" />
 							<param name="project.bin.classpath" value="project.bin.classpath" />
@@ -895,7 +923,7 @@ java.util.logging.ConsoleHandler.formatter = ${openmdx.log.formatter}
 					<patternset>
 						<include name="**/${junit.test.case}.java"/>
 						<patternset refid="build.exclude"/>
-					</patternset>					  
+					</patternset>
 				</fileset>
 			</batchtest>
 			<batchtest todir="build/${build.target.platform}/log/junit.${test.id}/xml">
@@ -1203,21 +1231,21 @@ java.util.logging.FileHandler.formatter = ${openmdx.log.formatter}
 		unless="build.ignore.jpa"
 		depends="build-init"
   >
-  		<taskdef 
+		<taskdef 
   			name="openjpac" 
   			classname="org.apache.openjpa.ant.PCEnhancerTask" 
   			classpathref="jpa.ant.lib"
   		/>
-		  	<openjpac>
- 				<fileset dir="${build.dir}/bin">
-   					<include name="**/jpa3/*.class"/>
-  					<patternset refid="build.exclude"/>
-     			</fileset>
-				<config propertiesFile="${basedir}/etc/openjpa/enhance-persistence.xml"/>
-				<classpath>
-					<path refid="jpa.ant.bin"/>				
-				</classpath>
-		  </openjpac>
+		<openjpac>
+			<fileset dir="${build.dir}/bin">
+				<include name="**/jpa3/*.class"/>
+				<patternset refid="build.exclude"/>
+			</fileset>
+			<config propertiesFile="${basedir}/etc/openjpa/enhance-persistence.xml"/>
+			<classpath>
+				<path refid="jpa.ant.bin"/>
+			</classpath>
+		</openjpac>
 	</target>
 	<target 
 		name="enhance-eclipse" 
@@ -1233,7 +1261,7 @@ java.util.logging.FileHandler.formatter = ${openmdx.log.formatter}
 			<fileset dir="${build.dir}/eclipse">
 				<include name="**/jpa3/*.class"/>
 				<patternset refid="build.exclude"/>
- 			</fileset>
+			</fileset>
 			<config propertiesFile="${basedir}/etc/openjpa/enhance-persistence.xml"/>
 			<classpath>
 				<path refid="jpa.ant.lib"/>
@@ -1241,57 +1269,56 @@ java.util.logging.FileHandler.formatter = ${openmdx.log.formatter}
 				<pathelement path="${build.dir}/eclipse"/>
 			</classpath>
 		</openjpac>
-	</target>	
+	</target>
 	<target 
 		name="create-schema" 
 		unless="build.ignore.jpa"
 		depends="build-init"
   	>
-  		<taskdef 
+		<taskdef 
   			name="mappingtool" 
   			classname="org.apache.openjpa.jdbc.ant.MappingToolTask" 
   			classpathref="jpa.ant.bin"
   		/>
 		<mappingtool action="buildSchema" schemaFile="${build.dir}/src/sql/openjpa-schema.xml">
- 			<fileset dir="${build.dir}/bin">
-   				<include name="**/jpa3/*.class"/>
-   				<exclude name="**/jpa3/*$*.class"/>
-  				<patternset refid="build.exclude"/>
-     		</fileset>
+			<fileset dir="${build.dir}/bin">
+				<include name="**/jpa3/*.class"/>
+				<exclude name="**/jpa3/*$*.class"/>
+				<patternset refid="build.exclude"/>
+			</fileset>
 			<config propertiesFile="${basedir}/etc/openjpa/${database.name}-persistence.xml"/>
 			<classpath>
-				<path refid="jpa.ant.bin"/>				
+				<path refid="jpa.ant.bin"/>
 			</classpath>
-		</mappingtool>  	
+		</mappingtool>
 	</target>
 	<target 
 		name="create-sql" 
 		unless="build.ignore.jpa"
 		depends="build-init"
   	>
-  		<taskdef 
+		<taskdef 
   			name="schematool" 
   			classname="org.apache.openjpa.jdbc.ant.SchemaToolTask" 
-  			classpathref="jpa.ant.bin"
-  		/>
-			<schematool action="add" file="${build.dir}/src/sql/${database.name}-add.sql" primaryKeys="false">
- 				<fileset dir="${basedir}/src/sql">
-   					<include name="openjpa-schema.xml"/>
-     		</fileset>
-				<config propertiesFile="${basedir}/etc/openjpa/${database.name}-persistence.xml"/>
-				<classpath>
-					<path refid="jpa.ant.bin"/>				
-				</classpath>
-		  </schematool>  		
-			<schematool action="build" file="${build.dir}/src/sql/${database.name}-build.sql">
- 				<fileset dir="${basedir}/src/sql">
-   					<include name="openjpa-schema.xml"/>
-     		</fileset>
-				<config propertiesFile="${basedir}/etc/openjpa/${database.name}-persistence.xml"/>
-				<classpath>
-					<path refid="jpa.ant.bin"/>				
-				</classpath>
-		  </schematool>  		
+  			classpathref="jpa.ant.bin"/>
+		<schematool action="add" file="${build.dir}/src/sql/${database.name}-add.sql" primaryKeys="false">
+			<fileset dir="${basedir}/src/sql">
+				<include name="openjpa-schema.xml"/>
+			</fileset>
+			<config propertiesFile="${basedir}/etc/openjpa/${database.name}-persistence.xml"/>
+			<classpath>
+				<path refid="jpa.ant.bin"/>
+			</classpath>
+		</schematool>
+		<schematool action="build" file="${build.dir}/src/sql/${database.name}-build.sql">
+			<fileset dir="${basedir}/src/sql">
+				<include name="openjpa-schema.xml"/>
+			</fileset>
+			<config propertiesFile="${basedir}/etc/openjpa/${database.name}-persistence.xml"/>
+			<classpath>
+				<path refid="jpa.ant.bin"/>
+			</classpath>
+		</schematool>
 	</target>
 	<!--*******************************************************************
 	* Distribution Archives
@@ -1518,7 +1545,7 @@ java.util.logging.FileHandler.formatter = ${openmdx.log.formatter}
 			<isreference refid="${jar.name}.content"/>
 			<antcontrib:then>
 				<antcontrib:propertyregex property="zip.name" input="${jar.name}" override="true" regexp="(.*)\.jar" select="\1.java.zip"/>
-				<mkdir dir="${deliver.dir}/src"/>				
+				<mkdir dir="${deliver.dir}/src"/>
 				<antcall target="-src-for-jar" inheritAll="false">
 					<param name="java-archive.platform-independent" value="${java-archive.platform-independent}"/>
 					<param name="java-archive.platform-dependent" value="${java-archive.platform-dependent}"/>
@@ -1698,30 +1725,30 @@ java.util.logging.FileHandler.formatter = ${openmdx.log.formatter}
 	<!-- ******************************************************************* -->
 	<target name="-validate-war-">
 		<taskdef classname="org.apache.jasper.JspC" name="jasper2" >
-			<classpath id="jspc.classpath"> 
-        		<pathelement location="${java.home}/../lib/tools.jar"/>
-        		<path refid="project.bin.classpath"/>				
-        		<fileset dir="${tomcat.home}/bin"> 
-          			<include name="*.jar"/> 
-        		</fileset> 
-        		<fileset dir="${tomcat.home}/lib"> 
-          			<include name="*.jar"/> 
-        		</fileset> 
-      		</classpath>
-    	</taskdef>
-    	<unzip
+			<classpath id="jspc.classpath">
+				<pathelement location="${java.home}/../lib/tools.jar"/>
+				<path refid="project.bin.classpath"/>
+				<fileset dir="${tomcat.home}/bin">
+					<include name="*.jar"/>
+				</fileset>
+				<fileset dir="${tomcat.home}/lib">
+					<include name="*.jar"/>
+				</fileset>
+			</classpath>
+		</taskdef>
+		<unzip
 		  src="${build.dir}/module/${module.name}"
 		  dest="${build.dir}/tmp/jspc/webapp"
 	  	/>
-    	<jasper2 
+		<jasper2 
 		  validateXml="false" 
 		  uriroot="${build.dir}/tmp/jspc/webapp" 
 		  outputDir="${build.dir}/tmp/jspc/src" 
     	/>
-	  	<!-- compile JSPs -->
-    	<mkdir dir="${build.dir}/tmp/jspc/classes"/>
-    	<mkdir dir="${build.dir}/tmp/jspc/lib"/>
-    	<javac destdir="${build.dir}/tmp/jspc/classes"
+		<!-- compile JSPs -->
+		<mkdir dir="${build.dir}/tmp/jspc/classes"/>
+		<mkdir dir="${build.dir}/tmp/jspc/lib"/>
+		<javac destdir="${build.dir}/tmp/jspc/classes"
 			optimize="off"
 			encoding="UTF-8"
 			debug="on" failonerror="false"
@@ -1730,16 +1757,16 @@ java.util.logging.FileHandler.formatter = ${openmdx.log.formatter}
 			excludes="**/*.smap"
 		>
 			<classpath>
-        		<fileset dir="${tomcat.home}/lib">
-          			<include name="*.jar"/>
-        		</fileset>
-        		<fileset dir="${tomcat.home}/bin"> 
-          			<include name="*.jar"/> 
-        		</fileset> 
-      		</classpath>
-      		<include name="**" />
-      		<exclude name="tags/**" />
-    	</javac>	  
- 	</target>	
-	
+				<fileset dir="${tomcat.home}/lib">
+					<include name="*.jar"/>
+				</fileset>
+				<fileset dir="${tomcat.home}/bin">
+					<include name="*.jar"/>
+				</fileset>
+			</classpath>
+			<include name="**" />
+			<exclude name="tags/**" />
+		</javac>
+	</target>
+
 </project>

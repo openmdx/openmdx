@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2009-2012, OMEX AG, Switzerland
+ * Copyright (c) 2009-2013, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -115,10 +115,10 @@ public class DataManagerFactory_1
             );
             this.optimalFetchSize = (Integer) persistenceManagerConfiguration.values(
                 "optimalFetchSize"
-            ).get(0);
+            ).get(Integer.valueOf(0));
             this.cacheThreshold = (Integer) persistenceManagerConfiguration.values(
                 "cacheThreshold"
-            ).get(0);
+            ).get(Integer.valueOf(0));
             Object connectionFactory = super.getConnectionFactory();
             // TODO Android
             if(connectionFactory instanceof ConnectionFactoryAdapter) {
@@ -143,7 +143,7 @@ public class DataManagerFactory_1
                             "class",
                             PropertiesConfigurationProvider.getConfiguration(
                                 properties,
-                                toSection(plugIns.get(i))
+                                toSection(plugIns.get(Integer.valueOf(i)))
                             ).entries()
                         ).instantiate();
                     }
@@ -186,7 +186,7 @@ public class DataManagerFactory_1
                 ){
                     int index = i.nextIndex();
                     String pattern = i.next().toString();
-                    String restPlugIn = (String) restPlugIns.get(index);
+                    String restPlugIn = (String) restPlugIns.get(Integer.valueOf(index));
                     Port destination = raw.get(restPlugIn);
                     if(destination == null){
                         Configuration plugInConfiguration = PropertiesConfigurationProvider.getConfiguration(
@@ -196,7 +196,7 @@ public class DataManagerFactory_1
                         plugInConfiguration.values(
                             DATAPROVIDER_CONNECTION_FACTORY
                         ).put(
-                            0, 
+                            Integer.valueOf(0), 
                             this.connectionFactory
                         );
                         if(connectionFactoryName != null) {
@@ -204,7 +204,7 @@ public class DataManagerFactory_1
                             	DATABASE_CONNECTION_FACTORY
                             );
                             if(datasources.isEmpty()) {
-                                datasources.put(0,connectionFactoryName);
+                                datasources.put(Integer.valueOf(0),connectionFactoryName);
                             }
                         }
                         destination = new BeanFactory<Port>(

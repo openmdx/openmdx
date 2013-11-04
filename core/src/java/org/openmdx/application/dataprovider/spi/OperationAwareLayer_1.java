@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2005-2011, OMEX AG, Switzerland
+ * Copyright (c) 2005-2013, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -62,6 +62,7 @@ import org.openmdx.base.rest.cci.MessageRecord;
 import org.openmdx.base.rest.spi.Facades;
 import org.openmdx.base.rest.spi.Object_2Facade;
 import org.openmdx.kernel.exception.BasicException;
+import org.w3c.cci2.SparseArray;
 
 
 /**
@@ -106,7 +107,7 @@ public abstract class OperationAwareLayer_1 extends Layer_1 {
     ){
         Configuration configuration = getConfiguration();
         return configuration.containsEntry(key) && !configuration.values(key).isEmpty() ?
-            ((String)configuration.values(key).get(0)) :
+            ((String)configuration.values(key).get(Integer.valueOf(0))) :
                 defaultValue;
     }
 
@@ -125,10 +126,31 @@ public abstract class OperationAwareLayer_1 extends Layer_1 {
         int defaultValue
     ){
         Configuration configuration = getConfiguration();
-        return configuration.containsEntry(key) && !configuration.values(key).isEmpty() ? (
-            configuration.values(key).get(0) instanceof Number ? ((Number)configuration.values(key).get(0)).intValue() :
-            Integer.valueOf(((String)configuration.values(key).get(0))) 
-        ) : defaultValue;
+        if(configuration.containsEntry(key)) {
+            SparseArray<Object> values = configuration.values(key);
+            if(!values.isEmpty()) {
+                Object value = values.get(Integer.valueOf(0));
+                if(value instanceof Number) {
+                    return ((Number)value).intValue();
+                } else if (value instanceof String){
+                    return Integer.parseInt((String)value);
+                } else if (value != null) {
+                    throw BasicException.initHolder(
+                        new IllegalArgumentException(
+                            "Inappropriate configuration value",
+                            BasicException.newEmbeddedExceptionStack(
+                                BasicException.Code.DEFAULT_DOMAIN,
+                                BasicException.Code.BAD_PARAMETER,
+                                new BasicException.Parameter("value", value),
+                                new BasicException.Parameter("supported", String.class.getName(), Integer.class.getName()),
+                                new BasicException.Parameter("value", value.getClass().getName())
+                            )
+                        )
+                    );
+                }
+            }
+        }
+        return  defaultValue;
     }
 
     //-----------------------------------------------------------------------

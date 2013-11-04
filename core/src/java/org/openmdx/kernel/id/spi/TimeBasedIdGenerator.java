@@ -1,14 +1,13 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
+ * Project:     openMDX, http://www.openmdx.org/
  * Description: Time Based Id Provider using Random based Node
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
  * ====================================================================
  *
- * This software is published under the BSD license
- * as listed below.
+ * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004, OMEX AG, Switzerland
+ * Copyright (c) 2004-2013, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without 
@@ -49,16 +48,53 @@
 package org.openmdx.kernel.id.spi;
 
 import java.security.SecureRandom;
+import java.util.Date;
+import java.util.logging.Level;
 
 import org.openmdx.kernel.exception.BasicException;
+import org.openmdx.kernel.log.SysLog;
+import org.w3c.format.DateTimeFormat;
 
 /**
- * Time Based Id Provider Using Random Based Node
+ * Time Based Id Provider 
  */
-public abstract class TimeBasedIdGenerator
-    extends TimeBasedIdBuilder 
-{
+public abstract class TimeBasedIdGenerator extends TimeBasedIdBuilder {
 
+    /**
+     * The time frame reserved for this generator instance
+     */
+    private TimeFrame timeFrame;
+    
+    /**
+     * Since System.currentTimeMillis() returns time from January 1st 1970,
+     * and UUIDs need time from the beginning of gregorian calendar
+     * (15-oct-1582), need to apply the offset:
+     */
+    private static final long OFFSET = 0x01b21dd213814000L;
+    
+    /**
+     * Also, instead of getting time in units of 100nsecs, we get something
+     * with max resolution of 1 msec... and need the multiplier as well
+     */
+    private static final long FRAME_SIZE = 10000L;
+    
+    /**
+     * Remember the last used system timestamp to avoid returning the
+     * same time frame twice.
+     */
+    private static volatile long lastReservation = -1L;
+    
+    /**
+     * The random number generator used by this class to create clock sequences.
+     */
+    private static final SecureRandom random = new SecureRandom();
+    
+    /**
+     * The clock sequence
+     */
+    private static volatile int clockSequence = createClockSequence();
+    
+    
     /**
      * The 14 bit clock sequence value is used to set the clock sequence field 
      * of this UUID. The clock sequence field is used to guarantee temporal 
@@ -87,32 +123,25 @@ public abstract class TimeBasedIdGenerator
      */
     @Override
     protected long getTimestamp(){
-        long timestamp = this.timestamp++;
-        if(timestamp >= frameEnd){
-            this.timestamp = getTimeFrame();
-            this.frameEnd = this.timestamp + FRAME_SIZE;
-            timestamp = this.timestamp++;
-        }
-        return timestamp;
-    }    
-    
-    /**
-     * Timestamp in 100-nanosecond units since 1582-10-15T00:00:00Z
-     */
-    private long timestamp = -1L;
-    
-    /**
-     * Last timestamp reserved for this UUID generator instance
-     */
-    private long frameEnd = -1L;
-
-    /* (non-Javadoc)
-     * @see org.openmdx.kernel.id.spi.TimeBasedIdBuilder#getNode()
-     */
-    @Override
-    protected long getNode() {
-        return getRandomBasedNode();
+        return getTimeFrame().nextTimeStamp();
     }
+
+    /**
+     * Get a non-exhausted time frame
+     */
+    private TimeFrame getTimeFrame(
+    ){
+        if(this.timeFrame == null || this.timeFrame.isExhausted()) try {
+            this.timeFrame = newTimeFrame();
+            SysLog.detail("New time frame reserved", this.timeFrame);
+        } catch (InterruptedException exception) {
+            throw new RuntimeException(
+                "Time frame acquisition failure",
+                exception
+            );
+        }
+        return this.timeFrame;
+    }    
     
     
     //------------------------------------------------------------------------
@@ -133,134 +162,211 @@ public abstract class TimeBasedIdGenerator
      * Reserves a time frame of a millisecond for a specific UUID generator 
      * instance.
      * 
-     * @return a time frame of a millisecond to be reserved for a specific
-     * UUID generator instance
-     */
-    protected static long getTimeFrame(
-    ){
-        try {
-            return OFFSET + (
-                getSystemTimeFrame(System.currentTimeMillis()) * FRAME_SIZE
-            );
-        } catch (InterruptedException exception) {
-            throw BasicException.initHolder(
-                new RuntimeException(
-                    "Time frame acquisition failure", 
-                    BasicException.newEmbeddedExceptionStack(exception)
-                )
-            );
-        }
-    }
-    
-    /**
-     * Reserves a time frame of a millisecond for a specific UUID generator 
-     * instance.
-     * 
-     * @param currentMillisecond the current time retrieval does not 
-     * require locking
-     * 
-     * @return a time frame of a millisecond reserved for a the calling
-     * UUID generator instance
+     * @return a time frame reserved for a the calling UUID generator instance
      *
      * @throws InterruptedException 
      */
-    private static synchronized long getSystemTimeFrame(
-        long currentMillisecond
+    private static synchronized TimeFrame newTimeFrame(
     ) throws InterruptedException{
-        if(currentMillisecond > TimeBasedIdGenerator.lastMillisecond){
-            //
-            // Return 'actual' time frame
-            // 
-            TimeBasedIdGenerator.savedMillisecond = TimeBasedIdGenerator.lastMillisecond + 1L;
-            return TimeBasedIdGenerator.lastMillisecond = currentMillisecond;
-        } else if (currentMillisecond < TimeBasedIdGenerator.lastMillisecond) {
-            //
-            // Clock has been set back in the meanwhile
-            // 
-            TimeBasedIdGenerator.clockSequence = (TimeBasedIdGenerator.clockSequence + 1) & 0x3FFF;
-            TimeBasedIdGenerator.savedMillisecond = currentMillisecond; // no spare time frames left
-            return TimeBasedIdGenerator.lastMillisecond = currentMillisecond;
-        } else if(TimeBasedIdGenerator.savedMillisecond < TimeBasedIdGenerator.lastMillisecond) {
-            //
-            // Recycle unused time frame
-            //
-            return TimeBasedIdGenerator.savedMillisecond++;
+        final long lastReservation = TimeBasedIdGenerator.lastReservation;
+        final long nextReservation = nextReservation(lastReservation);
+        TimeFrame timeFrame = toTimeFrame(lastReservation, nextReservation);
+        TimeBasedIdGenerator.lastReservation = nextReservation;
+        return timeFrame;
+    }
+
+    /**
+     * Validates the reservation and create the corresponding time frame
+     * 
+     * @param lastReservation the last reservation (which maybe belongs to another generator)
+     * @param nextReservation the next reservation for the calling generator
+     * 
+     * @return a new time frame for the calling generator
+     */
+    private static TimeFrame toTimeFrame(
+        final long lastReservation,
+        final long nextReservation
+    ) {
+        final int signum = Long.signum(nextReservation - lastReservation);
+        switch (signum){
+            case -1:
+                //
+                // Clock has been set back in the meanwhile
+                // 
+                changeClockSequence(lastReservation, nextReservation);
+                break;
+            case 0:
+                throw new RuntimeException(
+                    BasicException.newStandAloneExceptionStack(
+                        BasicException.Code.DEFAULT_DOMAIN,
+                        BasicException.Code.ASSERTION_FAILURE,
+                        "This time frame is already reserved",
+                        new BasicException.Parameter("time-frame", new TimeFrame(nextReservation))
+                    )
+                );
+            case 1:
+                //
+                // Normal 
+                // 
+                break;
+            default:
+                //
+                // Should never happen!
+                //
+                throw new RuntimeException(
+                    BasicException.newStandAloneExceptionStack(
+                        BasicException.Code.DEFAULT_DOMAIN,
+                        BasicException.Code.ASSERTION_FAILURE,
+                        "The signum is expectzed to be in the range [-1..1]",
+                        new BasicException.Parameter("signum", signum)
+                    )
+                );
         }
-        //
-        // Wait for the next tick
-        //
-        do {
-            Thread.sleep(1L);
-            currentMillisecond = System.currentTimeMillis();
-        } while(
-            currentMillisecond == TimeBasedIdGenerator.lastMillisecond
+        return new TimeFrame(nextReservation);
+    }
+
+    /**
+     * Change the clock sequence when the clock has been set back
+     * 
+     * @param lastReservation the last reservation (which maybe belongs to another generator)
+     * @param nextReservation the next reservation for the calling generator
+     */
+    private static void changeClockSequence(
+        final long lastReservation,
+        final long nextReservation
+     ) {
+        int clockSequence = (TimeBasedIdGenerator.clockSequence + 1) & 0x3FFF;
+        SysLog.log(
+            Level.WARNING, 
+            "Sys|Clock has been set back from {0} to {1}|Clock sequence will be changed from {2} to {3}",
+            DateTimeFormat.EXTENDED_UTC_FORMAT.format(new Date(lastReservation)), DateTimeFormat.EXTENDED_UTC_FORMAT.format(new Date(nextReservation)), 
+            Long.valueOf(TimeBasedIdGenerator.clockSequence), Long.valueOf(clockSequence)
         );
-        if(currentMillisecond < TimeBasedIdGenerator.lastMillisecond){
-            //
-            // Clock has been set back in the meanwhile
-            // 
-            TimeBasedIdGenerator.clockSequence = (TimeBasedIdGenerator.clockSequence + 1) & 0x3FFF;
-            TimeBasedIdGenerator.savedMillisecond = currentMillisecond;  // no spare time frames left
-            return TimeBasedIdGenerator.lastMillisecond = currentMillisecond;
-        } else { // currentMillisecond > TimeBasedIdGenerator.lastMillisecond
-            //
-            // Return 'actual' time frame
-            // 
-            TimeBasedIdGenerator.savedMillisecond = TimeBasedIdGenerator.lastMillisecond + 1L;
-            return TimeBasedIdGenerator.lastMillisecond = currentMillisecond;
+        TimeBasedIdGenerator.clockSequence = clockSequence;
+    }
+
+    /**
+     * Find the next reservation
+     * 
+     * @param lastReservation the last reservation
+     * 
+     * @return the next reservation
+     * 
+     * @throws InterruptedException
+     */
+    private static long nextReservation(
+        final long lastReservation
+    ) throws InterruptedException {
+        long currentMillisecond = System.currentTimeMillis();
+        int i = 0;
+        while(currentMillisecond == lastReservation) {
+            i++;
+            Thread.sleep(1L); // wait for 1 ms
+            currentMillisecond = System.currentTimeMillis();
         }
+        SysLog.log(Level.FINE, "Sys|Delay for acquiring a new time frame|{0} ms", Integer.valueOf(i));
+        return currentMillisecond;
+    }
+
+    /**
+     * Create a random based node
+     */
+    protected static long createRandomBasedNode(){
+        long randomBasedNode = 
+            (getRandom().nextLong() & 0x0000FEFF0FFFFFFFL) | // Random Address
+            0x00000100E0000000L; // with the MAC and IP multicast bits set
+        SysLog.info("The time based id generator has a random based node", new HexFormatter(randomBasedNode));
+        return randomBasedNode;
     }
     
     /**
-     * Since System.currentTimeMillis() returns time from january 1st 1970,
-     * and UUIDs need time from the beginning of gregorian calendar
-     * (15-oct-1582), need to apply the offset:
+     * @return
      */
-    private final static long OFFSET = 0x01b21dd213814000L;
-
-    /**
-     * Also, instead of getting time in units of 100nsecs, we get something
-     * with max resolution of 1 msec... and need the multiplier as well
-     */
-    private final static long FRAME_SIZE = 10000L;
-
-    /**
-     * Remember the last used system timestamp to avoid returning the
-     * same time frame twice.
-     */
-    private static long lastMillisecond = System.currentTimeMillis() - 1L;
-
-    /**
-     * Remember the second-last used system timestamp to allow reuse of
-     * milliseconds unavailable due to low system clock resolution.
-     */
-    private static long savedMillisecond = lastMillisecond;
-   
-    /**
-     * The random number generator used by this class to create clock sequences.
-     */
-    private static final SecureRandom random = new SecureRandom();
-
-    /**
-     * The clock sequence
-     */
-    private static int clockSequence = getRandom().nextInt(0x4000);
-
-    /**
-     * Return a random based node id
-     * 
-     * @return a random based node id
-     */
-    protected static long getRandomBasedNode(
-    ){
-        return TimeBasedIdGenerator.node;
+    private static int createClockSequence() {
+        int clockSequence = getRandom().nextInt(0x4000);
+        SysLog.info("Clock sequence created", new HexFormatter(clockSequence));
+        return clockSequence;
     }
 
+    
+    //------------------------------------------------------------------------
+    // Class TimeFrame
+    //------------------------------------------------------------------------
+    
     /**
-     * The random based node value
+     * Represents a time frame allocated to a single generator
      */
-    private static final long node = 
-        (random.nextLong() & 0x0000FEFF0FFFFFFFL) | // Random Address
-        0x00000100E0000000L; // with the MAC and IP multicast bits set
+    private static class TimeFrame {
+    
+        /**
+         * Constructor 
+         *
+         * @param millisecond milliseconds passed since January 1st 1970
+         */
+        TimeFrame(
+            long millisecond
+        ) {
+            this.millisecond = millisecond;
+            this.currentTimeStamp = OFFSET + millisecond * FRAME_SIZE;
+            this.limit = this.currentTimeStamp + FRAME_SIZE;
+        }
+
+        private final long millisecond;
         
+        /**
+         * Timestamp in 100-nanosecond units since 1582-10-15T00:00:00Z
+         */
+        private long currentTimeStamp;
+        
+        private final long limit;
+        
+        boolean isExhausted(){
+            return this.currentTimeStamp == limit;
+        }
+
+        /**
+         * Retrieve a 100-nanosecond unit since 1582-10-15T00:00:00Z
+         * 
+         * @return the next time stamp
+         */
+        long nextTimeStamp(){
+            return this.currentTimeStamp++;
+        }
+        
+        /* (non-Javadoc)
+         * @see java.lang.Object#toString()
+         */
+        @Override
+        public String toString() {
+            return DateTimeFormat.EXTENDED_UTC_FORMAT.format(new Date(millisecond)) + "/P0.001S";
+        }
+        
+    }
+    
+    
+    //------------------------------------------------------------------------
+    // Class HexFormatter
+    //------------------------------------------------------------------------
+    
+    /**
+     * Allows loggers to log nodes and clock sequences appropriately
+     */
+    private static class HexFormatter {
+
+        HexFormatter(long node) {
+            this.node = node;
+        }
+
+        private final long node;
+
+        /* (non-Javadoc)
+         * @see java.lang.Object#toString()
+         */
+        @Override
+        public String toString() {
+            return Long.toHexString(node);
+        }
+        
+    }
+
 }

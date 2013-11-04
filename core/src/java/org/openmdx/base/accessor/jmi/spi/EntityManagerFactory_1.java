@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2009-2012, OMEX AG, Switzerland
+ * Copyright (c) 2009-2013, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -511,7 +511,7 @@ public class EntityManagerFactory_1
         plugInConfiguration.values(
             "userObjects"
         ).put(
-            0,
+            Integer.valueOf(0),
             userObjects
         );
         for(
@@ -533,7 +533,7 @@ public class EntityManagerFactory_1
         plugInConfiguration.values(
             "implementationMap"
         ).put(
-            0,
+            Integer.valueOf(0),
             implementationMap
         );
         SparseArray<String> modelPackages = plugInConfiguration.values(
@@ -546,7 +546,7 @@ public class EntityManagerFactory_1
             j.hasNext();
         ){
             implementationMap.put(
-                modelPackages.get(j.nextIndex()),
+                modelPackages.get(Integer.valueOf(j.nextIndex())),
                 j.next().toString()
             );
         }

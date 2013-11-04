@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2012, OMEX AG, Switzerland
+ * Copyright (c) 2004-2013, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -210,7 +210,7 @@ public abstract class Layer_1 implements Dataprovider_1_0, Port {
             SharedConfigurationEntries.DATAPROVIDER_CONNECTION_FACTORY
         );        
         if(!connectionFactories.isEmpty()) {
-            this.connectionFactory = (ConnectionFactory)connectionFactories.get(0);
+            this.connectionFactory = (ConnectionFactory)connectionFactories.get(Integer.valueOf(0));
         }        
         SysLog.detail(
             "Activating " + DataproviderLayers.toString(id) + " layer " + getClass().getName(),
@@ -427,6 +427,7 @@ public abstract class Layer_1 implements Dataprovider_1_0, Port {
          */
         public void close(
         ) throws ResourceException {
+            // Nothing to do
         }
 
         /* (non-Javadoc)

@@ -60,23 +60,27 @@ import org.openmdx.base.mof.cci.ModelElement_1_0;
 import org.openmdx.base.mof.cci.ModelHelper;
 import org.openmdx.base.mof.cci.Model_1_0;
 
-public class ExceptionMapper
-    extends AbstractMapper {
+public class ExceptionMapper extends AbstractMapper {
     
-    //-----------------------------------------------------------------------
+    /**
+     * Constructor 
+     */
     public ExceptionMapper(
         ModelElement_1_0 exceptionDef,
         Writer writer,
         Model_1_0 model,
         Format format, 
-        String packageSuffix, MetaData_1_0 metaData
+        String packageSuffix, 
+        MetaData_1_0 metaData, 
+        PrimitiveTypeMapper primitiveTypeMapper
     ) throws ServiceException {
         super(
             writer,
             model,
             format, 
             packageSuffix,
-            metaData
+            metaData, 
+            primitiveTypeMapper
         );
         this.exceptionDef = new ExceptionDef(exceptionDef, model);
     }
@@ -312,6 +316,8 @@ public class ExceptionMapper
                 this.pw.println("      cause.printStackTrace(s);");
                 this.pw.println("    }");
                 this.pw.println("  }");
+                break;
+            default:
                 break;
         }
         this.pw.println();

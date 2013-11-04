@@ -70,8 +70,7 @@ import org.openmdx.kernel.log.SysLog;
  * method must be implemented by a concreted subclass.
  */
 
-public abstract class AbstractMapper_1
-  implements Mapper_1_0 {
+public abstract class AbstractMapper_1 implements Mapper_1_0 {
 
   //---------------------------------------------------------------------------  
   protected AbstractMapper_1(

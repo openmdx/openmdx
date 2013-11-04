@@ -1,14 +1,14 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Description: ShowObjectView 
+ * Description: EditAction 
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
  * ====================================================================
  *
  * This software is published under the BSD license
  * as listed below.
  * 
- * Copyright (c) 2004-2007, OMEX AG, Switzerland
+ * Copyright (c) 2004-2013, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -53,6 +53,7 @@
 package org.openmdx.portal.servlet.action;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Map;
 
 import javax.servlet.ServletException;
@@ -61,6 +62,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.openmdx.base.exception.ServiceException;
+import org.openmdx.base.naming.Path;
 import org.openmdx.kernel.log.SysLog;
 import org.openmdx.portal.servlet.Action;
 import org.openmdx.portal.servlet.ApplicationContext;
@@ -71,10 +73,18 @@ import org.openmdx.portal.servlet.view.ObjectView;
 import org.openmdx.portal.servlet.view.ShowObjectView;
 import org.openmdx.portal.servlet.view.ViewMode;
 
+/**
+ * EditAction
+ *
+ */
 public class EditAction extends BoundAction {
 
     public final static int EVENT_ID = 16;
 
+	/* (non-Javadoc)
+	 * @see org.openmdx.portal.servlet.action.BoundAction#perform(org.openmdx.portal.servlet.view.ObjectView, javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, java.lang.String, javax.servlet.http.HttpSession, java.util.Map, org.openmdx.portal.servlet.ViewsCache, org.openmdx.portal.servlet.ViewsCache)
+	 */
+    @Override
 	public ActionPerformResult perform(
         ObjectView view,
         HttpServletRequest request,
@@ -87,15 +97,35 @@ public class EditAction extends BoundAction {
     ) throws IOException, ServletException {
     	ObjectView nextView = view;
         ViewPort.Type nextViewPortType = null;        
-        ApplicationContext application = view.getApplicationContext();
+        ApplicationContext app = view.getApplicationContext();
         try {
-        	ShowObjectView currentView = (ShowObjectView)view;
+        	ObjectView currentView = (ObjectView)view;
+        	Path objectIdentity = null;
+        	Map<Path,Action> historyActions = null;
+        	if(currentView instanceof ShowObjectView) {
+        		objectIdentity = currentView.getRefObject().refGetPath();
+        		historyActions = ((ShowObjectView)currentView).createHistoryAppendCurrent();
+        	} else {
+        		objectIdentity = new Path(Action.getParameter(parameter, Action.PARAMETER_OBJECTXRI));
+        		historyActions = new HashMap<Path,Action>();
+    	        historyActions.put(
+    	            objectIdentity, 
+    	            new Action(
+    	                SelectObjectAction.EVENT_ID,
+    	                new Action.Parameter[] { 
+    	                    new Action.Parameter(Action.PARAMETER_OBJECTXRI, objectIdentity.toXRI())
+    	                },
+    	                "", // title
+    	                true
+    	            )
+    	        );
+        	}
             nextView = new EditObjectView(
                 currentView.getId(),
                 currentView.getContainerElementId(),
-                currentView.getRefObject().refGetPath(),
-                application,
-                currentView.createHistoryAppendCurrent(),
+                objectIdentity,
+                app,
+                historyActions,
                 currentView.getLookupType(),
                 currentView.getResourcePathPrefix(),
                 currentView.getNavigationTarget(),
@@ -103,12 +133,11 @@ public class EditAction extends BoundAction {
                     Action.getParameter(parameter, Action.PARAMETER_MODE)
                 )
             );
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             ServiceException e0 = new ServiceException(e);
             SysLog.warning(e0.getMessage(), e0.getCause());
-            application.addErrorMessage(
-                application.getTexts().getErrorTextCannotEditObject(), new String[] {view.getRefObject().refMofId(), e.getMessage() }
+            app.addErrorMessage(
+                app.getTexts().getErrorTextCannotEditObject(), new String[] {view.getRefObject().refMofId(), e.getMessage() }
             );
         }
         return new ActionPerformResult(
@@ -116,5 +145,5 @@ public class EditAction extends BoundAction {
             nextViewPortType
         );
     }
-        
+
 }

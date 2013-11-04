@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2012, OMEX AG, Switzerland
+ * Copyright (c) 2012-2013, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and uEJBse in source and binary forms, with or
@@ -170,11 +170,12 @@ public class ManagedPreferencesFactory implements PreferencesFactory {
      */
     protected Node newRootNode(
         Segment segment,
-        Root root,        
+        Root optionalRoot,        
         String type,
         String name
     ){
-        if(root == null) {
+        final Root root;
+        if(optionalRoot == null) {
             //
             // Create a Preferences object
             //
@@ -184,6 +185,8 @@ public class ManagedPreferencesFactory implements PreferencesFactory {
             preferences.setType(type);
             segment.addPreferences(name, preferences);
             root = preferences;
+        } else {
+            root = optionalRoot;
         }
         //
         // Create a root Node

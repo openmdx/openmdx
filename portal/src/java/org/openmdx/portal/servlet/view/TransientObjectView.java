@@ -101,7 +101,8 @@ public class TransientObjectView
     	PersistenceManager pm
     ) {
     	if(object instanceof Map) {
-    		Map<String,Object> source = (Map<String,Object>)object;
+    		@SuppressWarnings("unchecked")
+            Map<String,Object> source = (Map<String,Object>)object;
     		Map<String,Object> target = new HashMap<String,Object>();
     		for(String feature: source.keySet()) {
     			Object value = source.get(feature);

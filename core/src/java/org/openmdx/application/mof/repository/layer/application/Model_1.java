@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2011, OMEX AG, Switzerland
+ * Copyright (c) 2004-2013, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -57,7 +57,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.StringTokenizer;
 import java.util.TreeSet;
 import java.util.zip.ZipOutputStream;
 
@@ -82,6 +81,7 @@ import org.openmdx.application.mof.mapping.cci.Mapper_1_0;
 import org.openmdx.application.mof.mapping.cci.Mapper_1_1;
 import org.openmdx.application.mof.mapping.cci.MappingTypes;
 import org.openmdx.application.mof.mapping.spi.MapperFactory_1;
+import org.openmdx.application.mof.repository.accessor.ModelBuilder_1;
 import org.openmdx.application.mof.repository.utils.ModelUtils;
 import org.openmdx.base.accessor.cci.SystemAttributes;
 import org.openmdx.base.exception.ServiceException;
@@ -120,48 +120,6 @@ public class Model_1 extends Layer_1 {
         return new LayerInteraction(connection);
     }
                     
-    // --------------------------------------------------------------------------
-    class PathComponent {
-
-        //-----------------------------------------------------------------------
-        public PathComponent(
-            String component
-        ) {
-            components = new ArrayList();
-            StringTokenizer tokenizer = new StringTokenizer(component, ":");
-            while(tokenizer.hasMoreElements()) {
-                components.add(tokenizer.nextToken());
-            }
-        }
-
-        //-----------------------------------------------------------------------
-        public String get(
-            int pos
-        ) {
-            return (String)components.get(pos);
-        }
-
-        //-----------------------------------------------------------------------
-        public int size() {
-            return components.size();
-        }
-
-        //-----------------------------------------------------------------------
-        public String toString(
-            int fromPos,
-            int toPos
-        ) {
-            StringBuffer s = new StringBuffer((String)components.get(fromPos));
-            for(int i = fromPos+1; i < toPos; i++) {
-                s.append(":" + components.get(i));
-            }
-            return s.toString();
-        }
-
-        private ArrayList components = null;
-
-    }
-
     //---------------------------------------------------------------------------
     @Override
     public void activate(
@@ -206,15 +164,15 @@ public class Model_1 extends Layer_1 {
             MappedRecord element = i.next();
             Object_2Facade elementFacade = Facades.asObject(element);
             // collect classifier
-            if(elementFacade.attributeValuesAsList(SystemAttributes.OBJECT_INSTANCE_OF).contains(ModelAttributes.CLASSIFIER)) {
+            if(elementFacade.attributeValuesAsListContains(SystemAttributes.OBJECT_INSTANCE_OF,ModelAttributes.CLASSIFIER)) {
                 classifiers.put(
                     elementFacade.getPath(),
                     element
                 );
             }
             // qualified name
-            elementFacade.attributeValuesAsList("qualifiedName").clear();
-            elementFacade.attributeValuesAsList("qualifiedName").add(
+            elementFacade.replaceAttributeValuesAsListBySingleton(
+                "qualifiedName",
                 elementFacade.getPath().getBase()
             );
         }
@@ -226,9 +184,9 @@ public class Model_1 extends Layer_1 {
         ) { 
             MappedRecord classifier = i.next();
             Object_2Facade classifierFacade = Facades.asObject(classifier);
-            if(classifierFacade.attributeValuesAsList(SystemAttributes.OBJECT_INSTANCE_OF).contains(ModelAttributes.CLASSIFIER)) {
-                classifierFacade.attributeValuesAsList("allSupertype").clear();
-                classifierFacade.attributeValuesAsList("allSupertype").addAll(
+            if(classifierFacade.attributeValuesAsListContains(SystemAttributes.OBJECT_INSTANCE_OF,ModelAttributes.CLASSIFIER)) {
+                classifierFacade.replaceAttributeValuesAsList(
+                    "allSupertype",
                     this.getAllSupertype(
                         classifier,
                         elements
@@ -249,9 +207,9 @@ public class Model_1 extends Layer_1 {
         ) {
             MappedRecord classifier = i.next();
             Object_2Facade classifierFacade = Facades.asObject(classifier);
-            if(classifierFacade.attributeValuesAsList(SystemAttributes.OBJECT_INSTANCE_OF).contains(ModelAttributes.CLASSIFIER)) {
-                classifierFacade.attributeValuesAsList("allSubtype").clear();
-                classifierFacade.attributeValuesAsList("allSubtype").addAll(
+            if(classifierFacade.attributeValuesAsListContains(SystemAttributes.OBJECT_INSTANCE_OF,ModelAttributes.CLASSIFIER)) {
+                classifierFacade.replaceAttributeValuesAsList(
+                    "allSubtype",
                     this.getAllSubtype(
                         classifier,
                         elements
@@ -272,9 +230,9 @@ public class Model_1 extends Layer_1 {
         ) {
             MappedRecord classifier = i.next();
             Object_2Facade classifierFacade = Facades.asObject(classifier);
-            if(classifierFacade.attributeValuesAsList(SystemAttributes.OBJECT_INSTANCE_OF).contains(ModelAttributes.CLASSIFIER)) {      
-                classifierFacade.attributeValuesAsList("feature").clear();
-                classifierFacade.attributeValuesAsList("feature").addAll(
+            if(classifierFacade.attributeValuesAsListContains(SystemAttributes.OBJECT_INSTANCE_OF,ModelAttributes.CLASSIFIER)) {      
+                classifierFacade.replaceAttributeValuesAsList(
+                    "feature",
                     this.getFeatures(
                         header,
                         classifier,
@@ -351,19 +309,15 @@ public class Model_1 extends Layer_1 {
         Map<Path,MappedRecord> elements
     ) throws ServiceException {
         Set<Path> allSupertype = new TreeSet<Path>();
-        for(
-            Iterator i = Facades.asObject(classifier).attributeValuesAsList("supertype").iterator();
-            i.hasNext();
-        ) {
-            Path supertypePath = (Path)i.next();
-            MappedRecord supertype = elements.get(supertypePath);
+        for(Object supertypeId : Facades.asObject(classifier).getAttributeValuesAsReadOnlyList("supertype")){
+            MappedRecord supertype = elements.get(supertypeId);
             if(supertype == null) {
                 throw new ServiceException(
                     BasicException.Code.DEFAULT_DOMAIN,
                     BasicException.Code.ASSERTION_FAILURE, 
                     "type not found in set of loaded models (HINT: probably not configured as 'modelPackage')",
                     new BasicException.Parameter("classifier", Object_2Facade.getPath(classifier)),
-                    new BasicException.Parameter("supertype", supertypePath)
+                    new BasicException.Parameter("supertype", supertypeId)
                 );
             }
             allSupertype.addAll(
@@ -392,7 +346,7 @@ public class Model_1 extends Layer_1 {
             i.hasNext();
         ) {
             MappedRecord classifier = i.next();
-            Facades.asObject(classifier).attributeValuesAsList("subtype").clear();
+            Facades.asObject(classifier).clearAttributeValuesAsList("subtype");
         }
         // recalc subtype
         for(
@@ -401,26 +355,22 @@ public class Model_1 extends Layer_1 {
         ) {
             MappedRecord classifier = i.next();
             Object_2Facade classifierFacade = Facades.asObject(classifier);
-            for(
-			    Iterator j = Facades.asObject(classifier).attributeValuesAsList("supertype").iterator();
-			    j.hasNext();
-			) {
-			    Object next = j.next();
-			    MappedRecord supertype = classifiers.get(next);
+            for(Object supertypeId : Facades.asObject(classifier).getAttributeValuesAsReadOnlyList("supertype")){
+			    MappedRecord supertype = classifiers.get(supertypeId);
 			    if(supertype == null) {
-			        SysLog.error("supertype " + next + " of classifier " + Object_2Facade.getPath(classifier) + " not found in repository");
+			        SysLog.error("supertype " + supertypeId + " of classifier " + Object_2Facade.getPath(classifier) + " not found in repository");
 			    }
 			    else {
 			        Object_2Facade superTypeFacade = Facades.asObject(supertype);
-			        if(!superTypeFacade.attributeValuesAsList("subtype").contains(classifierFacade.getPath())) {
-			            superTypeFacade.attributeValuesAsList("subtype").add(
+			        if(!superTypeFacade.attributeValuesAsListContains("subtype",classifierFacade.getPath())) {
+			            superTypeFacade.addToAttributeValuesAsList("subtype",
 			                classifierFacade.getPath()
 			            );
 			        }
 			    }
 			}
-            if(!classifierFacade.attributeValuesAsList("subtype").contains(classifierFacade.getPath())) {
-                classifierFacade.attributeValuesAsList("subtype").add(
+            if(!classifierFacade.attributeValuesAsListContains("subtype",classifierFacade.getPath())) {
+                classifierFacade.addToAttributeValuesAsList("subtype",
                     classifierFacade.getPath()
                 );
             }
@@ -440,7 +390,7 @@ public class Model_1 extends Layer_1 {
             i.hasNext();
         ) {
             MappedRecord element = i.next();
-            Facades.asObject(element).attributeValuesAsList("content");
+            Facades.asObject(element).getAttributeValuesAsReadOnlyList("content");
         }
         // recalc content
         for(
@@ -458,8 +408,8 @@ public class Model_1 extends Layer_1 {
                 }
                 else { 
                     Object_2Facade containerFacade = Facades.asObject(container);
-                    if(!containerFacade.attributeValuesAsList("content").contains(contentFacade.getPath())) {
-                        containerFacade.attributeValuesAsList("content").add(
+                    if(!containerFacade.attributeValuesAsListContains("content",contentFacade.getPath())) {
+                        containerFacade.addToAttributeValuesAsList("content",
                             contentFacade.getPath()
                         );
                     }
@@ -477,10 +427,10 @@ public class Model_1 extends Layer_1 {
             Object_2Facade containerFacade = Facades.asObject(container);
             if(containerFacade.getAttributeValues("content") != null) {
                 Set content = new TreeSet(
-                    containerFacade.attributeValuesAsList("content")
+                    containerFacade.getAttributeValuesAsReadOnlyList("content")
                 );
-                containerFacade.attributeValuesAsList("content").clear();
-                containerFacade.attributeValuesAsList("content").addAll(
+                containerFacade.replaceAttributeValuesAsList(
+                    "content",
                     content
                 );
             }
@@ -500,17 +450,11 @@ public class Model_1 extends Layer_1 {
         Map<Path,MappedRecord> elements
     ) throws ServiceException {
         Set<Path> features = new TreeSet<Path>();    
-        for(
-            Iterator i = Facades.asObject(classifier).attributeValuesAsList("allSupertype").iterator();
-            i.hasNext();
-        ) {
-            MappedRecord supertype = elements.get(i.next());
-            for(
-                Iterator j = Facades.asObject(supertype).attributeValuesAsList("content").iterator();
-                j.hasNext();
-            ) {
-                MappedRecord feature = elements.get(j.next());
-                if(Facades.asObject(feature).attributeValuesAsList(SystemAttributes.OBJECT_INSTANCE_OF).contains(ModelAttributes.FEATURE)) {
+        for(Object supertypeId : Facades.asObject(classifier).getAttributeValuesAsReadOnlyList("allSupertype")){
+            MappedRecord supertype = elements.get(supertypeId);
+            for(Object featureId : Facades.asObject(supertype).getAttributeValuesAsReadOnlyList("content")) {
+                MappedRecord feature = elements.get(featureId);
+                if(Facades.asObject(feature).attributeValuesAsListContains(SystemAttributes.OBJECT_INSTANCE_OF,ModelAttributes.FEATURE)) {
                     features.add(
                         Object_2Facade.getPath(feature)
                     );
@@ -530,11 +474,8 @@ public class Model_1 extends Layer_1 {
         Map<Path,MappedRecord> elements
     ) throws ServiceException {
         Set<Path> allSubtypes = new TreeSet<Path>();
-        for(
-            Iterator i = Facades.asObject(classifier).attributeValuesAsList("subtype").iterator();
-            i.hasNext();
-        ) {
-            MappedRecord subtype = elements.get(i.next());
+        for(Object subtypeId : Facades.asObject(classifier).getAttributeValuesAsReadOnlyList("subtype")){
+            MappedRecord subtype = elements.get(subtypeId);
             // classifier is member of its subtypes
             if(subtype != classifier) {
                 allSubtypes.addAll(
@@ -566,7 +507,7 @@ public class Model_1 extends Layer_1 {
         ) {
             MappedRecord reference = i.next();
             Object_2Facade referenceFacade = Facades.asObject(reference);
-            if(referenceFacade.attributeValuesAsList(SystemAttributes.OBJECT_INSTANCE_OF).contains(ModelAttributes.REFERENCE)) {
+            if(referenceFacade.attributeValuesAsListContains(SystemAttributes.OBJECT_INSTANCE_OF,ModelAttributes.REFERENCE)) {
                 MappedRecord type = classifiers.get(
                     referenceFacade.attributeValue("type")
                 );
@@ -584,19 +525,16 @@ public class Model_1 extends Layer_1 {
                     else {
                         Object_2Facade referencedEndFacade = Facades.asObject(referencedEnd);
                         if(AggregationKind.COMPOSITE.equals(referencedEndFacade.attributeValue("aggregation"))) {
-                            typeFacade.attributeValuesAsList("compositeReference").clear();
-                            typeFacade.attributeValuesAsList("compositeReference").add(
+                            typeFacade.replaceAttributeValuesAsListBySingleton(
+                                "compositeReference",
                                 referenceFacade.getPath()
                             );
                             // set 'compositeReference' for all subtypes of type
-                            for(
-                                Iterator j = typeFacade.attributeValuesAsList("allSubtype").iterator();
-                                j.hasNext();
-                            ) {
-                                MappedRecord subtype = classifiers.get(j.next());
+                            for(Object subtypeId : typeFacade.getAttributeValuesAsReadOnlyList("allSubtype")) {
+                                MappedRecord subtype = classifiers.get(subtypeId);
                                 Object_2Facade subtypeFacade = Facades.asObject(subtype);
-								subtypeFacade.attributeValuesAsList("compositeReference").clear();
-								subtypeFacade.attributeValuesAsList("compositeReference").add(
+								subtypeFacade.replaceAttributeValuesAsListBySingleton(
+								    "compositeReference",
 								    referenceFacade.getPath()
 								);
                             }
@@ -618,11 +556,11 @@ public class Model_1 extends Layer_1 {
         // qualifiedName = last path component
         // name = last component of qualifiedName
         String qualifiedName = facade.getPath().getBase();
-        facade.attributeValuesAsList("qualifiedName").clear();
-        facade.attributeValuesAsList("qualifiedName").add(
+        facade.replaceAttributeValuesAsListBySingleton(
+            "qualifiedName",
             qualifiedName
         );
-        facade.attributeValuesAsList("name").add(
+        facade.addToAttributeValuesAsList("name",
             qualifiedName.substring(qualifiedName.lastIndexOf(':') + 1)
         );
         return object;
@@ -658,21 +596,21 @@ public class Model_1 extends Layer_1 {
             
             // INSTANCEOF
             List allSupertype = ModelUtils.getallSupertype(facade.getObjectClass());
-            facade.attributeValuesAsList(SystemAttributes.OBJECT_INSTANCE_OF).clear();
-            if(allSupertype != null) {
-                facade.attributeValuesAsList(SystemAttributes.OBJECT_INSTANCE_OF).addAll(allSupertype);
+            if(allSupertype == null) {
+                facade.clearAttributeValuesAsList(SystemAttributes.OBJECT_INSTANCE_OF);
+            } else {
+                facade.replaceAttributeValuesAsList(SystemAttributes.OBJECT_INSTANCE_OF,allSupertype);
             }
     
             // calculate derived attributes only if attributes have to be returned
             // and if it is a class of org:omg:model1
             if(
                 (request.attributeSelector() != AttributeSelectors.NO_ATTRIBUTES) &&
-                facade.attributeValuesAsList(SystemAttributes.OBJECT_INSTANCE_OF).contains(ModelAttributes.ELEMENT)
+                facade.attributeValuesAsListContains(SystemAttributes.OBJECT_INSTANCE_OF,ModelAttributes.ELEMENT)
             ) {
                 // Reference.referencedEndIsNavigable
                 if(
-                    facade.attributeValuesAsList(SystemAttributes.OBJECT_INSTANCE_OF).contains(
-                        ModelAttributes.REFERENCE
+                    facade.attributeValuesAsListContains(SystemAttributes.OBJECT_INSTANCE_OF, ModelAttributes.REFERENCE
                     )
                 ) {
                     DataproviderRequest getRequest = new DataproviderRequest(
@@ -688,19 +626,15 @@ public class Model_1 extends Layer_1 {
 					    getReply.getResult()
 					);
 					MappedRecord referencedEnd = getReply.getObject();
-                    facade.attributeValuesAsList("referencedEndIsNavigable").clear();
-					facade.attributeValuesAsList("referencedEndIsNavigable").addAll(
-							Facades.asObject(referencedEnd).attributeValuesAsList("isNavigable")
+                    facade.replaceAttributeValuesAsList(
+                        "referencedEndIsNavigable",
+						Facades.asObject(referencedEnd).getAttributeValuesAsReadOnlyList("isNavigable")
 					);
                 }
                 // Operation.parameter
-                if(
-                    facade.attributeValuesAsList(SystemAttributes.OBJECT_INSTANCE_OF).contains(
-                        ModelAttributes.OPERATION
-                    )
-                ) {
-                    facade.attributeValuesAsList("parameter").clear();
-                    facade.attributeValuesAsList("parameter").addAll(
+                if(facade.attributeValuesAsListContains(SystemAttributes.OBJECT_INSTANCE_OF,ModelAttributes.OPERATION)) {
+                    facade.replaceAttributeValuesAsList(
+                        "parameter",
                         Model_1.this.getNamespaceContentAsPaths(
                             header,
                             object
@@ -708,17 +642,11 @@ public class Model_1 extends Layer_1 {
                     );
                 }
                 // GeneralizableElement.allSupertype
-                if(
-                    facade.attributeValuesAsList(SystemAttributes.OBJECT_INSTANCE_OF).contains(
-                        ModelAttributes.GENERALIZABLE_ELEMENT
-                    )
-                ) {
+                if(facade.attributeValuesAsListContains(SystemAttributes.OBJECT_INSTANCE_OF,ModelAttributes.GENERALIZABLE_ELEMENT)) {
                     // should this statement really be empty? TODO  
                 }         
                 // ModelElement.name, qualifiedName
-                Model_1.this.completeNames(
-                    object
-                );
+                Model_1.this.completeNames(object);
     
             }
         }
@@ -737,8 +665,8 @@ public class Model_1 extends Layer_1 {
                     object
                 );
             }
-            reply.setHasMore(Boolean.FALSE);
-            reply.setTotal(Integer.valueOf(objects.length));    
+            reply.setHasMore(false);
+            reply.setTotal(objects.length);    
             return reply;
         }
     
@@ -785,18 +713,19 @@ public class Model_1 extends Layer_1 {
                     output
                 );
             }
-            // reset to access path
-            this.completeReply(
-                header,
-                request,
-                reply
-            );
-            Facades.asObject(reply.getObject()).setPath(
-			    accessPath
-			);
+            if(reply.getObjects().length > 0) {
+                this.completeReply(
+                    header,
+                    request,
+                    reply
+                );
+                Facades.asObject(reply.getObject()).setPath(
+    			    accessPath
+    			);
+            }
             return true;
         }
-    
+
         //---------------------------------------------------------------------------
         @Override
         public boolean find(
@@ -935,7 +864,7 @@ public class Model_1 extends Layer_1 {
                         content
                     );
                     if(Facades.asObject(content).attributeValue("name").equals(paramsFacade.attributeValue("name"))) {
-					    paramsFacade.attributeValuesAsList("result").add(Object_2Facade.getPath(content));
+					    paramsFacade.addToAttributeValuesAsList("result",Object_2Facade.getPath(content));
 					    break;
 					}
                 }
@@ -968,8 +897,8 @@ public class Model_1 extends Layer_1 {
                     Model_1.this.completeNames(
                         content
                     );
-                    if(Facades.asObject(content).attributeValue("qualifiedName").equals(paramsFacade.attributeValuesAsList("qualifiedName").get(0))) {
-					    paramsFacade.attributeValuesAsList("result").add(
+                    if(Facades.asObject(content).attributeValue("qualifiedName").equals(paramsFacade.getSingletonFromAttributeValuesAsList("qualifiedName"))) {
+					    paramsFacade.addToAttributeValuesAsList("result",
 					        Object_2Facade.getPath(content)
 					    );
 					    break;
@@ -1010,15 +939,13 @@ public class Model_1 extends Layer_1 {
                             Iterator j = subtypes.iterator();
                             j.hasNext();
                         ) {
-                            if(Facades.asObject(content).attributeValuesAsList(SystemAttributes.OBJECT_INSTANCE_OF).contains(j.next())) {
-							    paramsFacade.attributeValuesAsList("result").add(
-							        Object_2Facade.getPath(content)
-							    );
+                            if(Facades.asObject(content).attributeValuesAsListContains(SystemAttributes.OBJECT_INSTANCE_OF,j.next())) {
+							    paramsFacade.addToAttributeValuesAsList("result",Object_2Facade.getPath(content));
 							    break;
 							}
                         }
-                    } else if(Facades.asObject(content).attributeValuesAsList(SystemAttributes.OBJECT_INSTANCE_OF).contains(paramsFacade.attributeValuesAsList("ofType").get(0))) {
-					    paramsFacade.attributeValuesAsList("result").add(
+                    } else if(Facades.asObject(content).attributeValuesAsListContains(SystemAttributes.OBJECT_INSTANCE_OF,paramsFacade.getSingletonFromAttributeValuesAsList("ofType"))) {
+					    paramsFacade.addToAttributeValuesAsList("result",
 					        Object_2Facade.getPath(content)
 					    );
 					}
@@ -1036,12 +963,8 @@ public class Model_1 extends Layer_1 {
             else if("externalizePackage".equals(operationName)) {
                 try {
                     SysLog.trace("activating model");
-                    Model_1_0 model = org.openmdx.application.mof.repository.accessor.Model_1.getInstance(
-                        Model_1.this,
-                        true
-                    );
-                    // check whether the desired package to externalize exists in the 
-                    // model repository or not
+                    Model_1_0 model = new ModelBuilder_1(false, Model_1.this).build();
+                    // check whether the desired package to externalize exists in the  model repository or not
                     Path modelPackagePath = input.getPath().getParent().getParent();
                     String qualifiedPackageName = modelPackagePath.getBase();
     
@@ -1064,14 +987,11 @@ public class Model_1 extends Layer_1 {
                     ZipOutputStream zip = new ZipOutputStream(
                         bs = new ByteArrayOutputStream()         
                     );
-                    List formats = !paramsFacade.attributeValuesAsList("format").isEmpty() ? 
-                        paramsFacade.attributeValuesAsList("format") : 
+                    List formats = paramsFacade.getSizeOfAttributeValuesAsList("format") != 0 ? 
+                        paramsFacade.getAttributeValuesAsReadOnlyList("format") : 
                         STANDARD_FORMAT;
-                    for(
-                        Iterator i = formats.iterator();
-                        i.hasNext();
-                    ) {
-                        String format = (String)i.next();
+                    for(Object f : formats){
+                        String format = (String)f;
                         Mapper_1_0 mapper = MapperFactory_1.create(format);
                         if(
                             Model_1.this.openmdxjdoMetadataDirectory != null && 
@@ -1169,7 +1089,7 @@ public class Model_1 extends Layer_1 {
                         element
                     );
                 }
-                SysLog.trace("completed elements", completedElements.size());
+                SysLog.trace("completed elements", Integer.valueOf(completedElements.size()));
                 // Void reply  
                 output.setPath(newResponseId(input.getPath()));
                 output.setBody(null);

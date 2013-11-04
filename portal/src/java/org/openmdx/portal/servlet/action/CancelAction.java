@@ -1,15 +1,14 @@
-package org.openmdx.portal.servlet.action;
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Description: EditObjectEventHandler 
+ * Description: CancelAction 
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
  * ====================================================================
  *
  * This software is published under the BSD license
  * as listed below.
  * 
- * Copyright (c) 2004-2008, OMEX AG, Switzerland
+ * Copyright (c) 2004-2013, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -51,7 +50,7 @@ package org.openmdx.portal.servlet.action;
  * (License - based on BSD).
  *
  */
-
+package org.openmdx.portal.servlet.action;
 
 import java.util.Map;
 
@@ -64,13 +63,19 @@ import org.openmdx.portal.servlet.ViewsCache;
 import org.openmdx.portal.servlet.view.EditObjectView;
 import org.openmdx.portal.servlet.view.ObjectView;
 import org.openmdx.portal.servlet.view.ShowObjectView;
-import org.openmdx.portal.servlet.view.ViewMode;
 
+/**
+ * CancelAction
+ *
+ */
 public class CancelAction extends BoundAction {
 
     public final static int EVENT_ID = 9;
 
-	//-------------------------------------------------------------------------
+    /* (non-Javadoc)
+     * @see org.openmdx.portal.servlet.action.BoundAction#perform(org.openmdx.portal.servlet.view.ObjectView, javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, java.lang.String, javax.servlet.http.HttpSession, java.util.Map, org.openmdx.portal.servlet.ViewsCache, org.openmdx.portal.servlet.ViewsCache)
+     */
+    @Override
     public ActionPerformResult perform(
         ObjectView currentView,
         HttpServletRequest request,
@@ -92,7 +97,7 @@ public class CancelAction extends BoundAction {
 	            );
 	            nextView = editView.getPreviousView(showViewsCache);
 	            // If the view is embedded paint attribute pane
-	            if(editView.getMode() == ViewMode.EMBEDDED) {
+	            if(editView.isEditMode()) {
 	                nextViewPortType = ViewPort.Type.EMBEDDED;
 	            }
 	        }

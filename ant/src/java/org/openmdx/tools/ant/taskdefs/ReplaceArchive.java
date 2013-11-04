@@ -1,16 +1,13 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: ReplaceArchive.java,v 1.2 2010/06/04 22:22:49 hburger Exp $
  * Description: ReplaceArchive ant task
- * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/06/04 22:22:49 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2010, OMEX AG, Switzerland
+ * Copyright (c) 2004-2013, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -366,7 +363,7 @@ public class ReplaceArchive
   public void setExcludeArchives(
       String excludeArchives
   ) {
-      this.excludeArchives = new HashSet();
+      this.excludeArchives = new HashSet<String>();
       StringTokenizer tokenizer = new StringTokenizer(excludeArchives, " ,");
       while (tokenizer.hasMoreTokens()) {
 	      this.excludeArchives.add(tokenizer.nextToken());
@@ -382,7 +379,7 @@ public class ReplaceArchive
   public void setIncludeTypes(
       String includeTypes
   ) {
-      this.includeTypes = new HashSet();
+      this.includeTypes = new HashSet<String>();
       StringTokenizer tokenizer = new StringTokenizer(includeTypes, " ,");
       while (tokenizer.hasMoreTokens()) {
 	      this.includeTypes.add(tokenizer.nextToken());
@@ -511,8 +508,8 @@ public class ReplaceArchive
               }
               else {
                   boolean include = false;
-                  for(Iterator i = this.includeTypes.iterator(); i.hasNext(); ) {
-                      if(include = sourceEntry.getName().endsWith((String)i.next())) break;
+                  for(Iterator<String> i = this.includeTypes.iterator(); i.hasNext(); ) {
+                      if(include = sourceEntry.getName().endsWith(i.next())) break;
                   }
                   this.writeAndReplace(source, dest, include);
               }
@@ -544,8 +541,8 @@ public class ReplaceArchive
 //private String excludes = null;
   private File destArchive = null;
   private File srcArchive = null;
-  private Set excludeArchives = new HashSet();
-  private Set includeTypes = new HashSet();
+  private Set<String> excludeArchives = new HashSet<String>();
+  private Set<String> includeTypes = new HashSet<String>();
 }
 
 //--- End of File -----------------------------------------------------------

@@ -1,16 +1,13 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: ArchiveFilterChain.java,v 1.9 2010/06/04 22:24:36 hburger Exp $
  * Description: Archive Filter Chain
- * Revision:    $Revision: 1.9 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/06/04 22:24:36 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2005-2010, OMEX AG, Switzerland
+ * Copyright (c) 2005-2013, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without 
@@ -85,7 +82,7 @@ public class ArchiveFilterChain extends FilterChain {
 
     private PatternSet defaultPatterns = new PatternSet();
     private boolean hasDefaultPatterns = false;
-    private Vector additionalPatterns = new Vector();
+    private Vector<PatternSet> additionalPatterns = new Vector<PatternSet>();
 
     private boolean initialized = false;
     private String[] includePatterns = null;
@@ -160,7 +157,7 @@ public class ArchiveFilterChain extends FilterChain {
     /**
 	 * @return Returns the additionalPatterns.
 	 */
-	protected final Vector getAdditionalPatterns() {
+	protected final Vector<PatternSet> getAdditionalPatterns() {
 		return this.additionalPatterns;
 	}
 
@@ -296,7 +293,8 @@ public class ArchiveFilterChain extends FilterChain {
      * 
      * @param elementFilter
      */
-    public final void addElementFilter(final ElementFilter elementFilter) {
+    @SuppressWarnings("unchecked")
+	public final void addElementFilter(final ElementFilter elementFilter) {
         getFilterReaders().addElement(elementFilter);
     }
 
@@ -305,7 +303,8 @@ public class ArchiveFilterChain extends FilterChain {
      * 
      * @param filter
      */
-    public final void addFilter(
+    @SuppressWarnings("unchecked")
+	public final void addFilter(
     	final Filter filter
     ){
         getFilterReaders().addElement(filter);
@@ -380,9 +379,9 @@ public class ArchiveFilterChain extends FilterChain {
     	if(!this.initialized) {
     		Project p = getProject();
             for(
-            	Enumeration e = additionalPatterns.elements();
+            	Enumeration<PatternSet> e = additionalPatterns.elements();
             	e.hasMoreElements();
-            ) defaultPatterns.append((PatternSet) e.nextElement(), p);
+            ) defaultPatterns.append(e.nextElement(), p);
             this.includePatterns = defaultPatterns.getIncludePatterns(p);
             this.excludePatterns = defaultPatterns.getExcludePatterns(p);
             this.initialized = true;

@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2011, OMEX AG, Switzerland
+ * Copyright (c) 2004-2013, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -48,9 +48,7 @@
 package org.openmdx.application.mof.repository.accessor;
 
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.io.Reader;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -64,145 +62,77 @@ import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.Stack;
-import java.util.StringTokenizer;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-import javax.resource.ResourceException;
 import javax.resource.cci.MappedRecord;
 import javax.xml.datatype.Duration;
 import javax.xml.datatype.XMLGregorianCalendar;
 
-import org.omg.mof.spi.AbstractNames;
-import org.omg.mof.spi.Names;
-import org.openmdx.application.configuration.Configuration;
-import org.openmdx.application.dataprovider.cci.AttributeSelectors;
-import org.openmdx.application.dataprovider.cci.DataproviderRequestProcessor;
-import org.openmdx.application.dataprovider.cci.Dataprovider_1_0;
-import org.openmdx.application.dataprovider.cci.ServiceHeader;
-import org.openmdx.application.dataprovider.spi.Layer_1;
-import org.openmdx.application.mof.cci.ModelAttributes;
 import org.openmdx.application.mof.cci.ModelConstraints;
 import org.openmdx.application.mof.cci.ModelExceptions;
-import org.openmdx.application.mof.mapping.xmi.XMIMapper_1;
-import org.openmdx.application.xml.spi.DataproviderTarget;
-import org.openmdx.application.xml.spi.ImportHelper;
-import org.openmdx.application.xml.spi.MapTarget;
 import org.openmdx.base.accessor.cci.DataObject_1_0;
 import org.openmdx.base.accessor.cci.Structure_1_0;
 import org.openmdx.base.accessor.cci.SystemAttributes;
 import org.openmdx.base.collection.Maps;
-import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.marshalling.Marshaller;
 import org.openmdx.base.mof.cci.AggregationKind;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
-import org.openmdx.base.mof.cci.ModelHelper;
 import org.openmdx.base.mof.cci.Model_1_0;
 import org.openmdx.base.mof.cci.Multiplicity;
 import org.openmdx.base.mof.cci.PrimitiveTypes;
 import org.openmdx.base.mof.cci.Stereotypes;
 import org.openmdx.base.naming.Path;
-import org.openmdx.base.query.SortOrder;
-import org.openmdx.base.resource.Records;
-import org.openmdx.base.rest.cci.MessageRecord;
 import org.openmdx.base.rest.spi.Facades;
 import org.openmdx.base.rest.spi.Object_2Facade;
 import org.openmdx.kernel.exception.BasicException;
-import org.openmdx.kernel.loading.Classes;
-import org.openmdx.kernel.loading.Resources;
-import org.openmdx.kernel.log.SysLog;
-import org.openmdx.kernel.url.protocol.XRI_2Protocols;
 import org.w3c.cci2.LargeObject;
 import org.w3c.spi2.Datatypes;
-import org.xml.sax.InputSource;
 
 /**
  * Helper class to access MOF repository. The class adds utility 
  * functions and provides a cache for fast model element access.
  */
-//---------------------------------------------------------------------------
-@SuppressWarnings({"rawtypes","unchecked"})
 public class Model_1 implements Marshaller, Model_1_0 {
-
-    /**
-     * This constructor is invoked reflectively 
-     *
-     * @throws ServiceException
-     */
-    public Model_1(
-    ) throws ServiceException {
-        this.repository = Model_1.createRepository(null);          
-        this.setupRepository();
-    }
 
     /**
      * Constructor 
      *
-     * @param repository
-     * @param force
-     * @throws ServiceException
+     * @param modelElements
+     * @param associationDefs
      */
-    private Model_1(
-        Dataprovider_1_0 repository,
-        boolean force
-    ) throws ServiceException {
-        this.repository = repository; 
-        this.isSetup = false;
-        this.setupRepository();
+    Model_1(
+        Map<String,ModelElement_1_0> modelElements,
+        Map<String,List<AssociationDef>> associationDefs
+    ){
+        this.modelElements = modelElements;
+        this.associationDefMap = associationDefs;
     }
 
-    /* (non-Javadoc)
-     * @see org.openmdx.base.io.Externalizable#save(java.io.OutputStream, java.lang.String)
+    /**
+     * The repository's content
      */
-    @Override
-    public void save(
-        OutputStream target, 
-        String mimeType
-    ) throws ServiceException {
-        new XMIMapper_1().externalizeRepository(
-            this,
-            target,
-            mimeType
-        );
-    }
-
-    /* (non-Javadoc)
-     * @see org.openmdx.base.io.Externalizable#load(java.io.InputStream)
+    private final Map<String,ModelElement_1_0> modelElements;
+    
+    /**
+     * The eagerly populated associationDefMap
      */
-    @Override
-    public void load(
-        InputStream source
-    ) throws ServiceException {
-        Map<Path, MappedRecord> content = new HashMap<Path, MappedRecord>();
-        new ImportHelper().importObjects(
-            new MapTarget(content),
-            ImportHelper.asSource(new InputSource(source)), 
-            null // errorHandler
-        ); 
-        futureCache = new HashMap<String,ModelElement_1_0>();
-        for(Map.Entry<Path, MappedRecord> entry : content.entrySet()) {
-            if(!"org:omg:model1:Segment".equals(Object_2Facade.getObjectClass(entry.getValue()))){
-                futureCache.put(
-                    entry.getKey().getBase(),
-                    new ModelElement_1(entry.getValue(), this)
-                );
-            }
-        }
-        for(Map.Entry<String,ModelElement_1_0> entry : futureCache.entrySet()){
-            ModelElement_1_0 element = entry.getValue();
-            List<Object> objectInstanceOf = element.objGetList(SystemAttributes.OBJECT_INSTANCE_OF);
-            for(Object p : futureCache.get(element.objGetClass()).objGetList("allSupertype")) {
-                objectInstanceOf.add(((Path)p).getBase());
-            }
-        }
-        this.activatePreparedCache();
-        this.refreshAssociationDefs();
-        this.structuralFeatureDefMap.clear();
-        this.sharedAssociations.clear();
-    }
-
+    private final Map<String,List<AssociationDef>> associationDefMap;
+    
+    /**
+     * The lazily populated structuralFeatureDefMap
+     */
+    private final ConcurrentMap<Path,Map<Boolean,Map<Boolean,Map<Boolean,Map<String,ModelElement_1_0>>>>> structuralFeatureDefMap = new ConcurrentHashMap<Path,Map<Boolean,Map<Boolean,Map<Boolean,Map<String,ModelElement_1_0>>>>>();
+    
+    /**
+     * The lazily populated sharedAssociations
+     */
+    private final ConcurrentMap<Path,Boolean> sharedAssociations = new ConcurrentHashMap<Path,Boolean>();
+    
+    private static final String AUTHORITY_TYPE_NAME = "org:openmdx:base:Authority";
+    
     /* (non-Javadoc)
      * @see org.openmdx.base.marshalling.Marshaller#marshal(java.lang.Object)
      */
@@ -210,9 +140,7 @@ public class Model_1 implements Marshaller, Model_1_0 {
     public Object marshal(
         Object source
     ) throws ServiceException {
-        return source instanceof Path ?
-           (this.futureCache == null ? this.cache : this.futureCache).get(((Path)source).getBase()) :
-            source;
+        return source instanceof Path ? this.modelElements.get(((Path)source).getBase()) : source;
     }
 
     /* (non-Javadoc)
@@ -225,382 +153,6 @@ public class Model_1 implements Marshaller, Model_1_0 {
         return source instanceof ModelElement_1_0 ? 
             ((ModelElement_1_0)source).jdoGetObjectId() :
             source;
-    }
-
-    //-------------------------------------------------------------------------
-    public static Model_1_0 getInstance(
-        Dataprovider_1_0 repository,
-        boolean force
-        ) throws ServiceException {
-        return new Model_1(
-            repository, 
-            force
-            ); 
-    }
-    
-    //-------------------------------------------------------------------------
-    private void setupRepository(
-    ) throws ServiceException {
-        synchronized(this.repository) {
-            if(!this.isSetup) {
-                this.channel = new DataproviderRequestProcessor(
-                    new ServiceHeader(),
-                    this.repository
-                );
-                this.refreshCache();
-                this.refreshAssociationDefs();
-                this.structuralFeatureDefMap.clear();
-                this.isSetup = true;
-            }
-        }
-    }
-
-    //-------------------------------------------------------------------------
-    static class Model_1Provider extends Layer_1 {
-
-        /**
-         * Constructor 
-         *
-         * @param plugInChain
-         * @throws Exception
-         */
-        public Model_1Provider(            
-            Layer_1 plugInChain
-        ) throws Exception {
-            this.activate(
-                (short)5, 
-                new Configuration(), 
-                plugInChain
-            );
-        }
-
-    }
-
-    //-------------------------------------------------------------------------
-    /**
-     * Constructs an in-memory MOF repository consisting of the MOF Model_1 
-     * application and the InMemory_1 persistence plugin.
-     */
-    public static Dataprovider_1_0 createRepository(
-        String storageFolder
-    ) throws ServiceException {
-        try {
-            Configuration configuration = new Configuration();
-            configuration.values("namespaceId").put(
-                0,
-                "model1"
-            );
-            Configuration persistenceConfiguration = new Configuration(configuration);
-            if(storageFolder != null) {
-                persistenceConfiguration.values("storageFolder").put(
-                    0,
-                    storageFolder
-                );
-            }
-            Layer_1 persistencePlugin = Classes.<Layer_1>getApplicationClass(
-                org.openmdx.application.dataprovider.layer.persistence.none.InMemory_1.class.getName()
-            ).newInstance();
-            persistencePlugin.activate((short)0, persistenceConfiguration, null);
-            Layer_1 modelPlugin = Classes.<Layer_1>getApplicationClass(
-                org.openmdx.application.mof.repository.layer.model.Model_1.class.getName()
-            ).newInstance();
-            modelPlugin.activate((short)1, configuration, persistencePlugin);
-            Layer_1 applicationPlugin = Classes.<Layer_1>getApplicationClass(
-                org.openmdx.application.mof.repository.layer.application.Model_1.class.getName()
-            ).newInstance();
-            applicationPlugin.activate((short)2, configuration, modelPlugin);
-            Layer_1 typePlugin = Classes.<Layer_1>getApplicationClass(
-                org.openmdx.application.mof.repository.layer.type.Model_1.class.getName()
-            ).newInstance();
-            typePlugin.activate((short)3, configuration, applicationPlugin);
-            Layer_1 interceptionPlugin = Classes.<Layer_1>getApplicationClass(
-                org.openmdx.application.dataprovider.layer.interception.Standard_1.class.getName()
-            ).newInstance();
-            interceptionPlugin.activate((short)4, configuration, typePlugin);
-            return new Model_1Provider(interceptionPlugin);
-        }
-        catch(ServiceException e) {
-            throw e;
-        }
-        catch(Exception e) {
-            throw new RuntimeServiceException(e);
-        }
-    }
-
-    //-------------------------------------------------------------------------
-    /**
-     * Helper class holding the types of the exposed and referenced ends.
-     * In addition provides a method which returns the type of the referenced
-     * end plus all its subtypes and their supertypes. An AssociationDef allows
-     * efficient validation of object paths.
-     */
-    static class AssociationDef {
-
-        //-----------------------------------------------------------------------
-        /**
-         * Creates and AssociationDef. exposedType and referencedType are the
-         * types of the exposedEnd and referenceEnd of the supplied reference.
-         */
-        public AssociationDef(
-            ModelElement_1_0 exposedType, 
-            ModelElement_1_0 referencedType,
-            ModelElement_1_0 reference,
-            Model_1_0 model
-        ) throws ServiceException {
-            this.exposedType = exposedType;
-            this.referencedType = referencedType;
-            /**
-             * Calculate the set of types referenced by referencedType
-             * This is all subtypes of the referenced type and their supertypes
-             */
-            this.allReferencedTypes = new HashSet<String>();      
-            for(
-                Iterator<?> i = this.referencedType.objGetList("allSubtype").iterator(); 
-                i.hasNext(); 
-            ) {
-                this.allReferencedTypes.add(
-                    ((Path)i.next()).getBase()
-                );
-            }
-            // add all supertypes of referenced types
-            Set<String> allSupertypes = new HashSet<String>();
-            for(
-                Iterator<?> i = this.allReferencedTypes.iterator();
-                i.hasNext();
-            ) {
-                try {
-                    ModelElement_1_0 type = model.getElement(i.next());
-                    for(
-                        Iterator<?> j = type.objGetList("allSupertype").iterator(); 
-                        j.hasNext(); 
-                    ) {
-                        allSupertypes.add(
-                            ((Path)j.next()).getBase()
-                        );
-                    }
-                }
-                catch(Exception e) {
-                    System.out.println("element not found");
-                }
-            }
-            this.allReferencedTypes.addAll(
-                allSupertypes
-            );
-            this.reference = reference;
-        }
-
-        //-----------------------------------------------------------------------
-        public Set<String> getAllReferencedTypes(
-        ) {
-            return this.allReferencedTypes;
-        }
-
-        //-----------------------------------------------------------------------
-        public ModelElement_1_0 getReferencedType(
-        ) {
-            return this.referencedType;
-        }
-
-        //-----------------------------------------------------------------------
-        public ModelElement_1_0 getExposedType(
-        ) {
-            return this.exposedType;
-        }
-
-        //-----------------------------------------------------------------------
-        public ModelElement_1_0 getReference(
-        ) {
-            return this.reference;
-        }
-
-        //-----------------------------------------------------------------------
-        @Override
-        public String toString(
-        ) {
-            return
-            "  reference=" + reference.jdoGetObjectId() + "\n" +
-            "  referencedType=" + referencedType.jdoGetObjectId() + "\n" +
-            "  exposedType=" + exposedType.jdoGetObjectId() + "\n" + 
-            "  allReferencedTypes=" + allReferencedTypes + "\n";
-        }
-
-        //-----------------------------------------------------------------------
-        // Variables
-        //-----------------------------------------------------------------------
-        private ModelElement_1_0 exposedType;
-        private ModelElement_1_0 referencedType;
-        private ModelElement_1_0 reference;
-        private Set<String> allReferencedTypes;
-    }
-
-    //-------------------------------------------------------------------------
-    private void loadModels(
-        Collection<String> qualifiedPackageNames,
-        ImportHelper importHelper
-    ) throws ServiceException {
-
-        // get exclusive access to repository. Synchronize with
-        // other concurrent loaders are readers
-        synchronized(this.repository) {
-            boolean isDirty = false;
-            boolean importing = false;
-            for(
-                Iterator<String> i = qualifiedPackageNames.iterator();
-                i.hasNext();
-            ) {
-                String qualifiedPackageName = toCanonicalModelPackage(i.next());
-                if(!this.loadedModels.contains(qualifiedPackageName)) {
-                    String modelName = qualifiedPackageName.substring(
-                        qualifiedPackageName.lastIndexOf(':') + 1
-                    );
-                    // test whether package already loaded
-                    String qualifiedModelName = qualifiedPackageName + ":" + modelName;
-                    if(this.cache.get(qualifiedModelName) == null) {
-                        if(!importing) {
-                            // beginImport
-                            MessageRecord params = (MessageRecord) newMappedRecord(MessageRecord.NAME);
-                            params.setPath(PROVIDER_ROOT_PATH.getDescendant("segment", "-", "beginImport"));
-                            params.setBody(null);
-                            this.channel.addOperationRequest(params);
-                            importing = true;
-                        }        
-                        // load model from XMI resource
-                        String xmlResource = getResourceURI(qualifiedPackageName, modelName);
-                        SysLog.detail("loading model " + modelName + " from " + xmlResource);
-                        // Avoid org.openmdx.application.xml.Importer references 
-                        // for bootstrap dependency reasons!
-                        importHelper.importObjects(
-                            new DataproviderTarget(this.channel),
-                            ImportHelper.asSource(new InputSource(xmlResource)), 
-                            null // errorHandler
-                        ); 
-                        isDirty = true;
-                    }  
-                    // add to model to loaded models  
-                    this.loadedModels.add(qualifiedPackageName);
-                }
-            }
-            if(isDirty) {
-                if(importing) {
-                    // endImport
-                    MessageRecord params = (MessageRecord) newMappedRecord(MessageRecord.NAME);
-                    params.setPath(PROVIDER_ROOT_PATH.getDescendant("segment", "-", "endImport"));
-                    params.setBody(null);
-                    this.channel.addOperationRequest(params);
-                }
-                // retrieve imported and merged models and update cache    
-                this.refreshCache();
-                this.refreshAssociationDefs();
-                this.structuralFeatureDefMap.clear();
-                this.sharedAssociations.clear();
-            }
-        }
-    }
-    //---------------------------------------------------------------------------
-
-    /**
-     * Retrieve the model URI<ol>
-     * <li>try to locate the WBXML resource URL
-     * <li>fall back to the XML resource XRI
-     * </ol>
-     * 
-     * @param qualifiedPackageName
-     * @param modelName
-     * 
-     * @return the model resource URI 
-     *   
-     * @throws ServiceException
-     */
-    private String getResourceURI(
-        String qualifiedPackageName, 
-        String modelName
-    ) throws ServiceException {
-        String resourcePath = this.toJavaPackageName(
-            qualifiedPackageName,
-            Names.XMI_PACKAGE_SUFFIX
-        ).replace('.', '/') + '/' + modelName;
-        URL resourceURL = Resources.getResource(resourcePath + ".wbxml");
-        return resourceURL == null ? (
-            XRI_2Protocols.RESOURCE_PREFIX + resourcePath + ".xml" 
-        ) : resourceURL.toExternalForm();  
-    }
-
-    /**
-     * Provides mappings for openMDX 1/2 model name changes.
-     * 
-     * @param qualifiedModelName
-     * 
-     * @return the <code>qualifiedModelName</code>'s canonical name
-     */
-    protected String toCanonicalModelPackage(
-        String qualifiedModelName
-    ){
-        int index = Arrays.binarySearch(FROM_MODEL_PACKAGE_NAMES, qualifiedModelName);
-        if(index < 0) {
-            return qualifiedModelName;
-        } else {
-            SysLog.warning(
-                "Deprecated model package name " + qualifiedModelName,
-                "Replaced by canonical model package name " + TO_MODEL_PACKAGE_NAMES[index]
-            );
-            return TO_MODEL_PACKAGE_NAMES[index];
-        }
-    }
-
-    //---------------------------------------------------------------------------
-    /** 
-     * Prepare AssociationDefs which allow fast lookup of referenced and exposed
-     * ends given a path
-     */
-    private void refreshAssociationDefs(
-    ) throws ServiceException {
-        Map<String,List<AssociationDef>> associationDefMap = new HashMap<String,List<AssociationDef>>();
-        for(
-            Iterator<ModelElement_1_0> i = this.getContent().iterator();
-            i.hasNext();
-        ) {
-            ModelElement_1_0 elementDef = i.next();
-            /**
-             * Add only associations used in references to the list of AssociationDefs
-             */
-            if(elementDef.objGetClass().equals(ModelAttributes.REFERENCE)) {
-                addAssociationDef(associationDefMap, elementDef);
-            }
-        }
-        this.associationDefMap = associationDefMap;
-    }
-
-    /**
-     * @param associationDefMap
-     * @param elementDef
-     * @throws ServiceException
-     */
-    private void addAssociationDef(
-        Map<String, List<AssociationDef>> associationDefMap,
-        ModelElement_1_0 elementDef)
-        throws ServiceException {
-        Path referencedEndPath = (Path)elementDef.objGetValue("referencedEnd");
-        Path exposedEndPath = (Path)elementDef.objGetValue("exposedEnd");
-        String referenceName = (String)elementDef.objGetValue("name");
-        List<AssociationDef> associationDefs = associationDefMap.get(referenceName);
-        if(associationDefs == null) {
-            associationDefMap.put(
-                referenceName,
-                associationDefs = new ArrayList<AssociationDef>()
-            );
-        }
-        associationDefs.add(
-            new AssociationDef(
-                this.getDereferencedType(
-                    getElement(exposedEndPath).objGetValue("type")
-                ),
-                this.getDereferencedType(
-                    getElement(referencedEndPath).objGetValue("type")
-                ),
-                elementDef,
-                this
-            )
-        );
     }
 
     //---------------------------------------------------------------------------
@@ -623,7 +175,7 @@ public class Model_1 implements Marshaller, Model_1_0 {
             null,
             this.getDereferencedType(AUTHORITY_TYPE_NAME),
             this.getDereferencedType(AUTHORITY_TYPE_NAME + ":provider"),
-            this
+            this.modelElements
         );
         for(
             int i = 1; 
@@ -830,6 +382,7 @@ public class Model_1 implements Marshaller, Model_1_0 {
     }
 
     //-------------------------------------------------------------------------
+    @SuppressWarnings("unchecked")
     private void verifyObject(
         Object value,
         Object type,
@@ -1077,7 +630,7 @@ public class Model_1 implements Marshaller, Model_1_0 {
                         this.verifyObject(
                             fieldValue,
                             featureDef.objGetValue("type"),
-                            ModelHelper.toMultiplicity((String)featureDef.objGetValue("multiplicity")),
+                            org.openmdx.base.mof.cci.ModelHelper.toMultiplicity((String)featureDef.objGetValue("multiplicity")),
                             enforceRequired,
                             validationContext, 
                             attributesOnly, 
@@ -1169,7 +722,7 @@ public class Model_1 implements Marshaller, Model_1_0 {
                         DataObject_1_0 object = (DataObject_1_0)value;
                         if(
                             Multiplicity.LIST.toString().equals(featureMultiplicity) ||
-                            ModelHelper.UNBOUNDED.equals(featureMultiplicity) || (
+                            org.openmdx.base.mof.cci.ModelHelper.UNBOUND.equals(featureMultiplicity) || (
                                 this.isReferenceType(featureDef) &&
                                 this.referenceIsStoredAsAttribute(featureDef) &&
                                 Multiplicity.OPTIONAL.toString().equals(featureMultiplicity)
@@ -1208,7 +761,7 @@ public class Model_1 implements Marshaller, Model_1_0 {
                         if(
                             enforceRequired && 
                             Multiplicity.SINGLE_VALUE.toString().equals(featureMultiplicity) &&
-                            (attributeValue == null || ((List)genericValue).isEmpty())
+                            (attributeValue == null || ((List<?>)genericValue).isEmpty())
                         ) {
                             throw new ServiceException(
                                 BasicException.Code.DEFAULT_DOMAIN,
@@ -1234,13 +787,13 @@ public class Model_1 implements Marshaller, Model_1_0 {
                             featureDef.objGetValue("referencedEnd")
                         );
                         if(!referencedEnd.objGetList("qualifierType").isEmpty()) {
-                            attributeMultiplicity = ModelHelper.UNBOUNDED;
+                            attributeMultiplicity = org.openmdx.base.mof.cci.ModelHelper.UNBOUND;
                         }
                     }
                     this.verifyObject(
                         attributeValue,
                         featureDef.objGetValue("type"),
-                        ModelHelper.toMultiplicity(attributeMultiplicity),
+                        org.openmdx.base.mof.cci.ModelHelper.toMultiplicity(attributeMultiplicity),
                         enforceRequired,
                         validationContext, 
                         attributesOnly, 
@@ -1264,290 +817,13 @@ public class Model_1 implements Marshaller, Model_1_0 {
     }
 
     //-------------------------------------------------------------------------
-    // Model_1_0
-    //-------------------------------------------------------------------------
-
-    private Map<String,ModelElement_1_0> newMappedRecord(
-        String type
-    ) throws ServiceException{
-        try {
-            return Records.getRecordFactory().createMappedRecord(type);
-        } catch (ResourceException exception) {
-            throw new ServiceException(exception);
-        }
-    }
-    //-------------------------------------------------------------------------
-    /**
-     * Refreshes the element cache. In addition performs the following operations: 
-     * <ul>
-     *   <li> for CLASS model elements the attributes 'attribute' and 'reference' are 
-     *        added. 'attribute' contains the list of all class attributes
-     *        and 'reference' a list of all references. </li>
-     *   <li> references which are stored as attributes are added to the 'attribute' list. </li>
-     * </ul>
-     */
-    private void refreshCache(
-    ) throws ServiceException {
-
-        SysLog.trace("refreshing cache...");   
-
-        futureCache = new HashMap<String,ModelElement_1_0>();
-
-        // get exclusive access to repository. synchronize
-        // with possibly concurrent loaders
-        synchronized(this.repository) {
-            List<MappedRecord> modelPackages = this.channel.addFindRequest(
-                PROVIDER_ROOT_PATH.getChild("segment"),
-                null,
-                AttributeSelectors.ALL_ATTRIBUTES,
-                0,
-                Integer.MAX_VALUE,
-                SortOrder.ASCENDING.code()
-            );
-            for(
-                Iterator<MappedRecord> i = modelPackages.iterator();
-                i.hasNext();
-            ) {
-                MappedRecord modelPackage = i.next(); 
-                List<MappedRecord> elementDefs = this.channel.addFindRequest(
-                    Object_2Facade.getPath(modelPackage).getChild("element"),
-                    null,
-                    AttributeSelectors.ALL_ATTRIBUTES,
-                    null, 
-                    0,
-                    Integer.MAX_VALUE,
-                    SortOrder.ASCENDING.code()
-                );
-                for(
-                    Iterator<MappedRecord> j = elementDefs.iterator();
-                    j.hasNext();
-                ) {
-                    MappedRecord elementDef = j.next();
-                    futureCache.put(
-                        Object_2Facade.getPath(elementDef).getBase(),
-                        new ModelElement_1(elementDef, this)
-                    ); 
-                }
-            }
-        }
-        SysLog.detail("#elements in cache", new Integer(futureCache.size()));
-        /**
-         * Complete attributes 'attribute' and 'reference' for class elements
-         * and 'field' for structures. This improves performance when accessing
-         * the features and fields of classes and structures.
-         */
-        for(
-            Iterator<ModelElement_1_0> i = futureCache.values().iterator();
-            i.hasNext();
-        ) {
-            ModelElement_1_0 element = i.next();
-            // feature = content + content of all supertypes. Attn: StructurType is a Classifier so 
-            // if must be in this order!
-            List<Object> content = null;
-            if(element.objGetClass().equals(ModelAttributes.STRUCTURE_TYPE)) {
-                content = element.objGetList("content");
-            }
-            else if(element.objGetClass().equals(ModelAttributes.CLASS)) {
-                content = element.objGetList("feature");
-            }
-            if(content != null) {        
-                Map<String,ModelElement_1_0> attributes = element.objGetMap("attribute");
-                Map<String,ModelElement_1_0> references = element.objGetMap("reference");
-                Map<String,ModelElement_1_0> fields = element.objGetMap("field");
-                Map<String,ModelElement_1_0> operations = element.objGetMap("operation");
-                for(
-                    Iterator<?> j = content.iterator();
-                    j.hasNext();
-                ) {
-                    Path contentElementPath = (Path)j.next();
-                    if(!futureCache.containsKey(contentElementPath.getBase())) {
-                        throw new ServiceException (
-                            BasicException.Code.DEFAULT_DOMAIN, 
-                            BasicException.Code.NOT_FOUND, 
-                            "element is member of container but was not found in model. Probably the model is inconsistent.",
-                            new BasicException.Parameter("container", element.jdoGetObjectId()),
-                            new BasicException.Parameter("element", contentElementPath.getBase())
-                        );
-                    }
-                    ModelElement_1_0 contentElement = futureCache.get(
-                        contentElementPath.getBase()
-                    );
-                    if(contentElement.objGetClass().equals(ModelAttributes.ATTRIBUTE)) {
-                        attributes.put(
-                            (String)contentElement.objGetValue("name"),
-                            contentElement
-                        );
-                    }
-                    else if(contentElement.objGetClass().equals(ModelAttributes.OPERATION)) {
-                        operations.put(
-                            (String)contentElement.objGetValue("name"),
-                            contentElement
-                        );
-                    }
-                    else if(contentElement.objGetClass().equals(ModelAttributes.REFERENCE)) {
-                        references.put(
-                            (String)contentElement.objGetValue("name"),
-                            contentElement
-                        );
-                        // add references stored as attribute to the list of attributes
-                        if(this.referenceIsStoredAsAttribute(contentElement.jdoGetObjectId(), futureCache)) {
-                            ModelElement_1_0 attribute = new ModelElement_1(
-                                contentElement
-                            );
-                            attribute.objSetValue(
-                                SystemAttributes.OBJECT_CLASS,
-                                ModelAttributes.ATTRIBUTE
-                            );
-                            attribute.objSetValue(
-                                "isDerived",
-                                Boolean.valueOf(
-                                    this.referenceIsDerived(contentElement, futureCache)
-                                )
-                            );
-                            // Maximum length of path
-                            attribute.objSetValue(
-                                "maxLength",
-                                new Integer(1024)
-                            );
-                            // If reference has a qualifier --> multiplicity 0..n
-                            if(!this.getElement(contentElement.objGetValue("referencedEnd"), futureCache).objGetList("qualifierName").isEmpty()) {
-                                attribute.objSetValue("multiplicity", ModelHelper.UNBOUNDED);
-                            }
-                            SysLog.trace("referenceIsStoredAsAttribute", attribute.jdoGetObjectId());
-                            attributes.put(
-                                (String)attribute.objGetValue("name"),
-                                attribute
-                            );
-                        }
-                    }
-                    else if(contentElement.objGetClass().equals(ModelAttributes.STRUCTURE_FIELD)) {
-                        fields.put(
-                            (String)contentElement.objGetValue("name"),
-                            contentElement
-                        );
-                    }
-                }
-            }
-        }
-        // Complete allFeature
-        for(
-            Iterator<ModelElement_1_0> i = futureCache.values().iterator();
-            i.hasNext();
-        ) {
-            ModelElement_1_0 classDef = i.next();
-            if(classDef.objGetClass().equals(ModelAttributes.CLASS)) {
-                Map<String,ModelElement_1_0> allFeature = classDef.objGetMap("allFeature");
-                List<Object> allSupertypes = classDef.objGetList("allSupertype");
-                for(
-                    Iterator<?> j = allSupertypes.iterator();
-                    j.hasNext();
-                ) {
-                    ModelElement_1_0 supertype = this.getElement(
-                        j.next(),
-                        futureCache
-                    );
-                    allFeature.putAll(supertype.objGetMap("attribute"));
-                    allFeature.putAll(supertype.objGetMap("reference"));
-                    allFeature.putAll(supertype.objGetMap("operation"));
-                }
-            }
-        }
-        // Complete allFeatureWithSubtype
-        for(
-            Iterator<ModelElement_1_0> i = futureCache.values().iterator();
-            i.hasNext();
-        ) {
-            ModelElement_1_0 classDef = i.next();      
-            if(classDef.objGetClass().equals(ModelAttributes.CLASS)) {
-                Map<String,ModelElement_1_0> allFeatureWithSubtype = classDef.objGetMap("allFeatureWithSubtype");
-                allFeatureWithSubtype.putAll(classDef.objGetMap("allFeature"));
-                for(
-                    Iterator<?> j = classDef.objGetList("allSubtype").iterator();
-                    j.hasNext();
-                ) {
-                    ModelElement_1_0 subtype = this.getElement(
-                        j.next(), 
-                        futureCache
-                    );
-                    allFeatureWithSubtype.putAll(subtype.objGetMap("attribute"));
-                    allFeatureWithSubtype.putAll(subtype.objGetMap("reference"));        
-                    allFeatureWithSubtype.putAll(subtype.objGetMap("operation"));        
-                }
-            }
-        }
-
-        activatePreparedCache();
-        SysLog.trace("done refreshing cache");
-    }
-
-    /**
-     * Activate the new cache
-     */
-    private void activatePreparedCache() {
-        this.cache = futureCache; 
-        futureCache = null;
-    }
-
-    //-------------------------------------------------------------------------
-    public void addModels(
-        Collection<String> qualifiedPackageNames
-    ) throws ServiceException {
-        this.loadModels(
-            qualifiedPackageNames,
-            new ImportHelper()
-        );
-    }
-    
-    /* (non-Javadoc)
-     * @see org.openmdx.base.mof.cci.Model_1_0#addModels(java.util.Collection, boolean)
-     */
     @Override
-    public void addModels(
-        Collection<String> qualifiedModelNames,
-        boolean schemaValidation
-    ) throws ServiceException {
-        this.loadModels(
-            qualifiedModelNames,
-            new ImportHelper(schemaValidation)
-        );
-    }
-
-    //-------------------------------------------------------------------------
-    protected ModelElement_1_0 getElement(
-        java.lang.Object element,
-        Map<String,ModelElement_1_0> elements
-    ) {
-        ModelElement_1_0 e = null;
-        if(element instanceof ModelElement_1_0) {
-            e = (ModelElement_1_0)element;
-        }
-        else if(element instanceof Path) {
-            e = elements.get(((Path)element).getBase());
-        }
-        else if(element instanceof List<?>) {
-            String qualifiedElementName = "";
-            int ii = 0;
-            for(Iterator<?> i = ((List<?>)element).iterator(); i.hasNext(); ii++) {
-                qualifiedElementName += (ii == 0 ? "" : ":") + i.next();
-            }
-            e = elements.get(qualifiedElementName);
-        }
-        else if(element instanceof String) {
-            e = elements.get(element);            
-        }
-        else {
-            throw new UnsupportedOperationException("Unsupported element type. Element is " + element);
-        }
-        return e;
-    }  
-
-    //-------------------------------------------------------------------------
     public ModelElement_1_0 getElement(
         java.lang.Object element
     ) throws ServiceException {
-        ModelElement_1_0 e = this.getElement(
+        ModelElement_1_0 e = ModelHelper.findElement(
             element,
-            this.cache
+            this.modelElements
         ); 
         if(e == null) {
             throw new ServiceException (
@@ -1561,22 +837,25 @@ public class Model_1 implements Marshaller, Model_1_0 {
     }
 
     //-------------------------------------------------------------------------
+    @Override
     public ModelElement_1_0 findElement(
         Object element
     ) {
-        return this.getElement(
+        return ModelHelper.findElement(
             element,
-            this.cache
+            this.modelElements
         );
     }
 
     //-------------------------------------------------------------------------
+    @Override
     public Collection<ModelElement_1_0> getContent(
     ) throws ServiceException {
-        return this.cache.values();
+        return this.modelElements.values();
     }  
 
     //-------------------------------------------------------------------------
+    @Override
     public boolean isLocal(
         Object type,
         Object modelPackage
@@ -1595,6 +874,7 @@ public class Model_1 implements Marshaller, Model_1_0 {
      * @return <code>true</code> if the given XRI contains a shared association 
      * @throws ServiceException 
      */
+    @Override
     public boolean containsSharedAssociation(
         Path xri
     ) throws ServiceException{
@@ -1617,47 +897,44 @@ public class Model_1 implements Marshaller, Model_1_0 {
                     Path reference = size % 2 == 0 ? xri : xri.getParent();
                     ModelElement_1_0 referenceType = this.getReferenceType(reference);
                     ModelElement_1_0 referencedEnd = this.getElement(referenceType.objGetValue("referencedEnd"));
-                    sharedAssociation = "shared".equals(referencedEnd.objGetValue("aggregation"));
+                    sharedAssociation = Boolean.valueOf("shared".equals(referencedEnd.objGetValue("aggregation")));
                 }
                 this.sharedAssociations.put(key, sharedAssociation);
             }
-            return sharedAssociation;
+            return sharedAssociation.booleanValue();
         }
     }
     
     //---------------------------------------------------------------------------
+    @Override
     public ModelElement_1_0 getFeatureDef(
         ModelElement_1_0 classifierDef,
         String feature,
         boolean includeSubtypes
     ) throws ServiceException {
-
-        ModelElement_1_0 featureDef = null;
-
-        // Structure
         if(this.isStructureType(classifierDef)) {
-            if((featureDef = (ModelElement_1_0)classifierDef.objGetMap("field").get(feature)) != null) {
-                return featureDef;
-            }
-        }
-        // Class
-        else {
+            //
+            // Structure
+            //
+            return (ModelElement_1_0)classifierDef.objGetMap("field").get(feature);
+        } else {
+            //
+            // Class
+            //
             if(includeSubtypes) {
+                //
                 // references stored as attributes are in maps allReference and allAttribute. 
                 // give allReference priority in case feature is a reference
-                if((featureDef = (ModelElement_1_0)classifierDef.objGetMap("allFeatureWithSubtype").get(feature)) != null) {
-                    return featureDef;
-                }
-            }
-            else {
+                //
+                return (ModelElement_1_0)classifierDef.objGetMap("allFeatureWithSubtype").get(feature);
+            } else {
+                //
                 // references stored as attributes are in maps allReference and allAttribute. 
                 // give allReference priority in case feature is a reference
-                if((featureDef = (ModelElement_1_0)classifierDef.objGetMap("allFeature").get(feature)) != null) {
-                    return featureDef;
-                }
+                //
+                return (ModelElement_1_0)classifierDef.objGetMap("allFeature").get(feature);
             }
         }
-        return null;
     }
 
     //---------------------------------------------------------------------------
@@ -1673,6 +950,7 @@ public class Model_1 implements Marshaller, Model_1_0 {
      * @return Map map of features of class, its supertypes and subtypes. The
      *          map contains an entry of the form (featureName, featureDef).
      */
+    @Override
     public Map<String,ModelElement_1_0> getAttributeDefs(
         ModelElement_1_0 classDef,
         boolean includeSubtypes,
@@ -1701,7 +979,10 @@ public class Model_1 implements Marshaller, Model_1_0 {
      * @return Map map of features of class, its supertypes and subtypes. The
      *          map contains an entry of the form (featureName, featureDef).
      */
-    @SuppressWarnings("cast")
+    @SuppressWarnings({
+        "cast", "rawtypes", "unchecked"
+    })
+    @Override
     public Map<String,ModelElement_1_0> getStructuralFeatureDefs(
         ModelElement_1_0 classDef,
         boolean includeSubtypes,
@@ -1715,14 +996,14 @@ public class Model_1 implements Marshaller, Model_1_0 {
                 boolean bIncludeSubtypes = ii == 0; 
                 Map<Boolean,Map<Boolean,Map<String,ModelElement_1_0>>> structuralFeatureDefsIncludeSubtypes = new HashMap<Boolean,Map<Boolean,Map<String,ModelElement_1_0>>>();
                 allStructuralFeatureDefs.put(
-                    bIncludeSubtypes,
+                    Boolean.valueOf(bIncludeSubtypes),
                     structuralFeatureDefsIncludeSubtypes
                 );
                 for(int jj = 0; jj < 2; jj++) {
                     boolean bIncludeDerived = jj == 0;
                     Map<Boolean,Map<String,ModelElement_1_0>> structuralFeatureDefsIncludeDerived = new HashMap<Boolean,Map<String,ModelElement_1_0>>();
                     structuralFeatureDefsIncludeSubtypes.put(
-                        bIncludeDerived,
+                        Boolean.valueOf(bIncludeDerived),
                         structuralFeatureDefsIncludeDerived
                     );
                     for(int kk = 0; kk < 2; kk++) {
@@ -1750,7 +1031,7 @@ public class Model_1 implements Marshaller, Model_1_0 {
                             }
                         }          
                         structuralFeatureDefsIncludeDerived.put(
-                            bAttributesOnly,
+                            Boolean.valueOf(bAttributesOnly),
                             structuralFeatureDefs
                         );
                     }
@@ -1762,89 +1043,49 @@ public class Model_1 implements Marshaller, Model_1_0 {
                 allStructuralFeatureDefs
             );
         }
-        Map<Boolean,Map<Boolean,Map<String,ModelElement_1_0>>> structuralFeatureDefsIncludeSubtypes = (Map)allStructuralFeatureDefs.get(includeSubtypes);
-        Map<Boolean,Map<String,ModelElement_1_0>> structuralFeatureDefsIncludeDerived = (Map<Boolean,Map<String,ModelElement_1_0>>)structuralFeatureDefsIncludeSubtypes.get(includeDerived);
-        Map<String,ModelElement_1_0> structuralFeatureDefs = (Map<String,ModelElement_1_0>)structuralFeatureDefsIncludeDerived.get(attributesOnly);
+        Map<Boolean,Map<Boolean,Map<String,ModelElement_1_0>>> structuralFeatureDefsIncludeSubtypes = (Map)allStructuralFeatureDefs.get(Boolean.valueOf(includeSubtypes));
+        Map<Boolean,Map<String,ModelElement_1_0>> structuralFeatureDefsIncludeDerived = (Map<Boolean,Map<String,ModelElement_1_0>>)structuralFeatureDefsIncludeSubtypes.get(Boolean.valueOf(includeDerived));
+        Map<String,ModelElement_1_0> structuralFeatureDefs = (Map<String,ModelElement_1_0>)structuralFeatureDefsIncludeDerived.get(Boolean.valueOf(attributesOnly));
         return structuralFeatureDefs;
     }
 
     //-------------------------------------------------------------------------
-    private boolean referenceIsStoredAsAttribute(
-        java.lang.Object referenceType,
-        Map<String,ModelElement_1_0> elements
-    ) throws ServiceException {
-        ModelElement_1_0 reference = this.getElement(
-            referenceType, 
-            elements
-        );    
-        return reference.isReferenceStoredAsAttribute(elements);
-    }
-
-    //-------------------------------------------------------------------------
+    @Override
     public boolean referenceIsStoredAsAttribute(
         java.lang.Object referenceType
     ) throws ServiceException {
-        return this.referenceIsStoredAsAttribute(
+        return ModelHelper.referenceIsStoredAsAttribute(
             referenceType,
-            this.cache
+            this.modelElements
         );
     }
 
     //-------------------------------------------------------------------------
-    private boolean referenceIsDerived(
-        java.lang.Object referenceType,
-        Map<String,ModelElement_1_0> elements
-    ) throws ServiceException {
-        ModelElement_1_0 reference = this.getElement(
-            referenceType,
-            elements
-        );
-        ModelElement_1_0 referencedEnd = this.getElement(
-            reference.objGetValue("referencedEnd"),
-            elements
-        );
-        ModelElement_1_0 association = this.getElement(
-            referencedEnd.objGetValue("container"),
-            elements
-        );
-        if(association.objGetList("isDerived").size() < 1) {
-            throw new ServiceException(
-                BasicException.Code.DEFAULT_DOMAIN,
-                BasicException.Code.ASSERTION_FAILURE, 
-                "missing feature isDerived",
-                new BasicException.Parameter("association", association)
-            );
-        }
-        return ((Boolean)association.objGetValue("isDerived")).booleanValue();
-    }
-
-    //-------------------------------------------------------------------------
+    @Override
     public boolean referenceIsDerived(
         java.lang.Object referenceType
     ) throws ServiceException {
-        return this.referenceIsDerived(
+        return ModelHelper.referenceIsDerived(
             referenceType,
-            this.cache
+            this.modelElements
         );
     }
 
     //-------------------------------------------------------------------------
-    @SuppressWarnings("deprecation")
-    private ModelElement_1_0 getDereferencedType(
-        java.lang.Object _element,
-        Map<String,ModelElement_1_0> elements 
+    @Override
+    public ModelElement_1_0 getDereferencedType(
+        java.lang.Object element
     ) throws ServiceException {
-        java.lang.Object element = _element;
+        java.lang.Object current = element;
         Set<ModelElement_1_0> visitedElements = null;
-        Object originalElement = element;
         while(true) {
-            ModelElement_1_0 modelElement = this.getElement(element, elements);
+            ModelElement_1_0 modelElement = ModelHelper.findElement(current, this.modelElements);
             if(modelElement == null) {
                 throw new ServiceException (
                     BasicException.Code.DEFAULT_DOMAIN, 
                     BasicException.Code.NOT_FOUND, 
                     "element not found in repository. Can not dereference type",
-                    new BasicException.Parameter("element", element)
+                    new BasicException.Parameter("element", current)
                 );
             }
             if(modelElement.isAliasType()) {
@@ -1856,35 +1097,19 @@ public class Model_1 implements Marshaller, Model_1_0 {
                         ModelExceptions.MODEL_DOMAIN,
                         ModelExceptions.CIRCULAR_ALIAS_TYPE_DEFINITION, 
                         ModelConstraints.CIRCULAR_TYPE_DEPENCENCY_NOT_ALLOWED,
-                        new BasicException.Parameter("element", originalElement)
+                        new BasicException.Parameter("element", current)
                     );
                 }
                 visitedElements.add(modelElement);
-                element = modelElement.objGetValue("type");
-                Path elementType = (Path) element;
-                if(
-                    PrimitiveTypes.XRI_ALIAS.equals(elementType.getBase())
-                ) {
-                    element = elementType.getParent().getChild(PrimitiveTypes.XRI);
-                }
-            }
-            else {
+                current = modelElement.objGetValue("type");
+            } else {
                 return modelElement;
             }
-        }   
+        }
     }
 
     //-------------------------------------------------------------------------
-    public ModelElement_1_0 getDereferencedType(
-        java.lang.Object element
-    ) throws ServiceException {
-        return this.getDereferencedType(
-            element,
-            this.cache 
-        );
-    }
-
-    //-------------------------------------------------------------------------
+    @Override
     public ModelElement_1_0 getElementType(
         ModelElement_1_0 elementDef
     ) throws ServiceException {
@@ -1907,6 +1132,7 @@ public class Model_1 implements Marshaller, Model_1_0 {
     }
     
     //-------------------------------------------------------------------------
+    @Override
     public ModelElement_1_0 getReferenceType(
         Path path
     ) throws ServiceException {
@@ -1915,29 +1141,19 @@ public class Model_1 implements Marshaller, Model_1_0 {
     }
 
     //-------------------------------------------------------------------------
-    protected boolean isPrimitiveType(
-        java.lang.Object type,
-        Map<String,ModelElement_1_0> elements
-    ) throws ServiceException {   
-        return this.getDereferencedType(type, elements).isPrimitiveType();
-    }
-
-    //-------------------------------------------------------------------------
+    @Override
     public boolean isPrimitiveType(
         java.lang.Object type
     ) throws ServiceException {   
-        return this.isPrimitiveType(
-            type,
-            this.cache
-        );
+        return this.getDereferencedType(type).isPrimitiveType();
     }
 
     //-------------------------------------------------------------------------
-    private boolean isNumericType(
-        java.lang.Object type,
-        Map<String,ModelElement_1_0> elements
-    ) throws ServiceException {   
-        ModelElement_1_0 typeDef = this.getDereferencedType(type, elements);
+    @Override
+    public boolean isNumericType(
+        java.lang.Object type
+    ) throws ServiceException {
+        ModelElement_1_0 typeDef = this.getDereferencedType(type);
         if(typeDef.isPrimitiveType()) {
             String typeName = (String)typeDef.objGetValue("qualifiedName");
             return 
@@ -1950,16 +1166,7 @@ public class Model_1 implements Marshaller, Model_1_0 {
     }
 
     //-------------------------------------------------------------------------
-    public boolean isNumericType(
-        java.lang.Object type
-    ) throws ServiceException {
-        return this.isNumericType(
-            type,
-            this.cache
-        );
-    }
-
-    //-------------------------------------------------------------------------
+    @Override
     public boolean isStructureType(
         java.lang.Object type
     ) throws ServiceException {
@@ -1967,6 +1174,7 @@ public class Model_1 implements Marshaller, Model_1_0 {
     }
 
     //-------------------------------------------------------------------------
+    @Override
     public boolean isStructureFieldType(
         java.lang.Object type
     ) throws ServiceException {
@@ -1974,6 +1182,7 @@ public class Model_1 implements Marshaller, Model_1_0 {
     }
 
     //---------------------------------------------------------------------------
+    @Override
     public void verifyObjectCollection(
         Object values,
         Object type,
@@ -1987,7 +1196,7 @@ public class Model_1 implements Marshaller, Model_1_0 {
         this.verifyObjectCollection(
             values,
             type,
-            ModelHelper.toMultiplicity(multiplicity),
+            org.openmdx.base.mof.cci.ModelHelper.toMultiplicity(multiplicity),
             includeRequired,
             validationContext, 
             true, // attributesOnly
@@ -2010,6 +1219,7 @@ public class Model_1 implements Marshaller, Model_1_0 {
      * otherwise, a list of <code>ServiceException</code> objects 
      * (each representing a constraint violation) is returned.
      */
+    @Override
     public Collection<ServiceException> verifyObject(
         DataObject_1_0 object,
         boolean deepVerify, 
@@ -2047,6 +1257,7 @@ public class Model_1 implements Marshaller, Model_1_0 {
     }
 
     //-------------------------------------------------------------------------
+    @Override
     public void verifyObject(
         Object value,
         Object type,
@@ -2087,6 +1298,7 @@ public class Model_1 implements Marshaller, Model_1_0 {
      * 
      * @param removeDerived removes all derived features.
      */
+    @Override
     public void verifyObject(
         Object value,
         Object type,
@@ -2131,6 +1343,7 @@ public class Model_1 implements Marshaller, Model_1_0 {
      * 
      * @param removeDerived removes all derived features.
      */
+    @Override
     public void verifyObject(
         Object value,
         Object type,
@@ -2146,7 +1359,7 @@ public class Model_1 implements Marshaller, Model_1_0 {
         this.verifyObject(
             value,
             type,
-            ModelHelper.toMultiplicity(multiplicity),
+            org.openmdx.base.mof.cci.ModelHelper.toMultiplicity(multiplicity),
             enforceRequired,
             validationContext, 
             attributesOnly, 
@@ -2155,6 +1368,7 @@ public class Model_1 implements Marshaller, Model_1_0 {
     }
 
     //-------------------------------------------------------------------------
+    @Override
     public boolean isClassType(
         java.lang.Object type
     ) throws ServiceException {
@@ -2162,6 +1376,7 @@ public class Model_1 implements Marshaller, Model_1_0 {
     }
 
     //-------------------------------------------------------------------------
+    @Override
     public boolean isStructuralFeatureType(
         java.lang.Object type
     ) throws ServiceException {
@@ -2170,24 +1385,15 @@ public class Model_1 implements Marshaller, Model_1_0 {
     }
 
     //-------------------------------------------------------------------------
-    public boolean isReferenceType(
-        java.lang.Object type,
-        Map<String,ModelElement_1_0> elements
-    ) throws ServiceException {
-        return this.getDereferencedType(type, elements).isReferenceType();
-    }
-
-    //-------------------------------------------------------------------------
+    @Override
     public boolean isReferenceType(
         java.lang.Object type
     ) throws ServiceException {
-        return this.isReferenceType(
-            type,
-            this.cache
-        );
+        return this.getDereferencedType(type).isReferenceType();
     }
 
     //-------------------------------------------------------------------------
+    @Override
     public boolean isAttributeType(
         java.lang.Object type
     ) throws ServiceException {
@@ -2195,6 +1401,7 @@ public class Model_1 implements Marshaller, Model_1_0 {
     }
 
     //-------------------------------------------------------------------------
+    @Override
     public boolean isOperationType(
         java.lang.Object type
     ) throws ServiceException {
@@ -2202,6 +1409,7 @@ public class Model_1 implements Marshaller, Model_1_0 {
     }
 
     //-------------------------------------------------------------------------
+    @Override
     public boolean isPackageType(
         java.lang.Object type
     ) throws ServiceException {
@@ -2209,16 +1417,16 @@ public class Model_1 implements Marshaller, Model_1_0 {
     }
 
     //-------------------------------------------------------------------------
+    @Override
     public boolean objectIsSubtypeOf(
         Object object,
         Object type
     ) throws ServiceException {
         String typeName = (String)this.getElement(type).objGetValue("qualifiedName");
-        String objectClass = object instanceof MappedRecord ?
-            Object_2Facade.getObjectClass((MappedRecord)object) :
-            object instanceof DataObject_1_0 ?
-                ((DataObject_1_0)object).objGetClass() :
-                null;
+        String objectClass = 
+            object instanceof MappedRecord ? Object_2Facade.getObjectClass((MappedRecord)object) :
+            object instanceof DataObject_1_0 ? ((DataObject_1_0)object).objGetClass() :
+            null;
         for(
             Iterator<?> i = this.getElement(objectClass).objGetList("allSupertype").iterator();
             i.hasNext();
@@ -2231,6 +1439,7 @@ public class Model_1 implements Marshaller, Model_1_0 {
     }
 
     //-------------------------------------------------------------------------
+    @Override
     public boolean isSubtypeOf(
         Object objectType,
         Object type
@@ -2248,6 +1457,7 @@ public class Model_1 implements Marshaller, Model_1_0 {
     }
     
     //-------------------------------------------------------------------------
+    @Override
     public boolean isInstanceof(
         DataObject_1_0 object,
         Object type
@@ -2259,6 +1469,7 @@ public class Model_1 implements Marshaller, Model_1_0 {
     }
 
     //---------------------------------------------------------------------------  
+    @Override
     public String toJavaPackageName(
         Object type,
         String packageSuffix
@@ -2271,6 +1482,7 @@ public class Model_1 implements Marshaller, Model_1_0 {
     }
 
     //---------------------------------------------------------------------------  
+    @Override
     public String toJavaPackageName(
         Object type,
         String packageSuffix,
@@ -2279,44 +1491,17 @@ public class Model_1 implements Marshaller, Model_1_0 {
         ModelElement_1_0 element = dereferenceType ? 
             this.getDereferencedType(type) : 
             this.getElement(type);
-        return toJavaPackageName( 
+        return ModelHelper.toJavaPackageName( 
             element.jdoGetObjectId().get(4),
             packageSuffix
         );
-    }
-
-    //---------------------------------------------------------------------------  
-    public String toJavaPackageName(
-        String qualifiedPackageName,
-        String packageSuffix
-    ) throws ServiceException {
-        List<String> packageNameComponents = new ArrayList<String>();
-        StringTokenizer tokenizer = new StringTokenizer(qualifiedPackageName, ":");
-        while(tokenizer.hasMoreTokens()) {
-            packageNameComponents.add(tokenizer.nextToken());
-        }
-        //javaPackageName
-        StringBuffer javaPackageName = new StringBuffer();
-        for(
-            int i = 0, iLimit = packageNameComponents.size(); 
-            i < iLimit; 
-            i++
-        )  {
-            StringBuffer target = i == 0 ? javaPackageName : javaPackageName.append('.');
-            String source = packageNameComponents.get(i);
-            AbstractNames.openmdx2NamespaceElement(target, source);
-        }
-        return javaPackageName.append(
-            '.'
-        ).append(
-            packageSuffix
-        ).toString();
     }
 
     //---------------------------------------------------------------------------
     /* (non-Javadoc)
      * @see org.openmdx.model1.accessor.basic.cci.Model_1_3#getCompositeReference(org.openmdx.model1.accessor.basic.cci.ModelElement_1_0)
      */
+    @Override
     public ModelElement_1_0 getCompositeReference(
         ModelElement_1_0 classDef
     ) throws ServiceException {
@@ -2420,49 +1605,17 @@ public class Model_1 implements Marshaller, Model_1_0 {
         );
         return pattern;
     }
+
     
-    //-------------------------------------------------------------------------
-    // Members
-    //-------------------------------------------------------------------------
-    private static final String AUTHORITY_TYPE_NAME = "org:openmdx:base:Authority";
-    static private final Path PROVIDER_ROOT_PATH = new Path("xri:@openmdx:org.omg.model1/provider/Mof");
-
-    // Flag indicating whether repository is initialized
-    private boolean isSetup = false;
-    // Set of loaded models
-    private Set<String> loadedModels = new HashSet<String>();
-    // Repository containing loaded models
-    private Dataprovider_1_0 repository = null;
-    // Channel to access repository
-    private DataproviderRequestProcessor channel = null;
-    // Caches for associations, structural features and all model elements 
-    private volatile Map<String,List<AssociationDef>> associationDefMap = new HashMap<String,List<AssociationDef>>();
-    private volatile ConcurrentMap<Path,Map<Boolean,Map<Boolean,Map<Boolean,Map<String,ModelElement_1_0>>>>> structuralFeatureDefMap = new ConcurrentHashMap<Path,Map<Boolean,Map<Boolean,Map<Boolean,Map<String,ModelElement_1_0>>>>>();
-    private volatile Map<String,ModelElement_1_0> cache = new HashMap<String,ModelElement_1_0>();
-    private volatile Map<String,ModelElement_1_0> futureCache = null;
-    private volatile ConcurrentMap<Path,Boolean> sharedAssociations = new ConcurrentHashMap<Path,Boolean>();
-
     /**
-     * <em>Sorted</em> array of deprecated model package names.
-     * 
-     * @see Model_1#TO_MODEL_PACKAGE_NAMES
+     * This accessor is reserved for the model's builder
+     *
+     * @return Returns the modelElements.
      */
-    private final static String[] FROM_MODEL_PACKAGE_NAMES = {
-        "org:oasis_open",
-        "org:omg:primitiveTypes"   
-    };
-
-    /**
-     * Array of canonical model package names, each entry corresponding to a 
-     * given deprecated model package name.
-     * 
-     * @see Model_1#FROM_MODEL_PACKAGE_NAMES
-     */
-    private final static String[] TO_MODEL_PACKAGE_NAMES = {
-        "org:oasis-open",
-        "org:omg:PrimitiveTypes"
-    };
-
+    Map<String, ModelElement_1_0> getModelElements() {
+        return this.modelElements;
+    }
+    
 }
 
 //--- End of File -----------------------------------------------------------

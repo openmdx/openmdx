@@ -196,12 +196,13 @@ class ManagedKeyStoreConnection extends AbstractManagedConnection {
 	    			);
 	    		}
 	        	signature.initSign((PrivateKey) this.key);
-	    		break;
+	        	return signature;
 	    	case SIGNATURE_VERIFIER:
 	    		signature.initVerify(this.certificate);
-	    		break;
+	        	return signature;
+	        default:
+	        	throw new IllegalArgumentException("Signature cnnection type expected: " + type);
     	}
-    	return signature;
     }
 
 	/**

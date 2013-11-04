@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2010, OMEX AG, Switzerland
+ * Copyright (c) 2010-2013, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -72,7 +72,7 @@ public class ConcurrentWeakRegistry<K,V> implements Registry<K, V> {
      * The value reference queue
      */
     private ReferenceQueue<V> queue = new ReferenceQueue<V>();
-    
+
     /**
      * The value collection
      */
@@ -100,31 +100,72 @@ public class ConcurrentWeakRegistry<K,V> implements Registry<K, V> {
     };
 
     /**
-     * Retrieve the delegate and evict its stale entries if required
+     * Retrieve the delegate after evicting its stale entries if required
      * 
      * @return the thread-safe delegate
      */
     protected ConcurrentMap<K,WeakReference<V>> getDelegate(
     ){
-        boolean hasStaleEntries = false;
-        while(this.queue.poll() != null) {
-            hasStaleEntries = true;
-        }
-        if(hasStaleEntries) {
-            for(
-                Iterator<? extends Reference<V>> i = this.delegate.values().iterator();
-                i.hasNext();
-            ){
-                Reference<V> r = i.next();
-                if(r.get() == null) {
-                    i.remove();
-                }
-            }
+        assertOpen();
+        if(this.queue.poll() != null){
+            clearQueue();
+            evictStaleEntries();
         }
         return this.delegate;
     }
-    
 
+    /**
+     * Determines whether the registry is open or closed
+     * 
+     * @return <code>true</code> if the reogistry is open
+     */
+    private boolean isOpen(){
+        return this.delegate != null;
+    }
+    
+    /**
+     * Assert that the registry is open
+     * 
+     * @throws IllegalStateException if the registry is already closed
+     */
+    private void assertOpen() {
+        if(this.delegate == null) {
+            throw new IllegalStateException("This registry is already closed");
+        }
+    }
+
+    /**
+     * Get rid of stale entries
+     */
+    private synchronized void evictStaleEntries() {
+        for(
+            Iterator<? extends Reference<V>> i = this.delegate.values().iterator();
+            i.hasNext();
+        ){
+            if(i.next().get() == null) {
+                i.remove();
+            }
+        }
+    }
+
+
+    /**
+     * Clear the reference queue
+     */
+    private void clearQueue() {
+        while(this.queue.poll() != null) {
+            // Iterate as there is no clear() method
+        }
+    }
+    
+    /**
+     * Clear the delegate
+     */
+    private void clearDelegate() {
+        this.delegate.clear();
+    }
+    
+    
     //------------------------------------------------------------------------
     // Implements Registry
     //------------------------------------------------------------------------
@@ -132,30 +173,31 @@ public class ConcurrentWeakRegistry<K,V> implements Registry<K, V> {
     /* (non-Javadoc)
      * @see org.openmdx.base.collection.Cache#clear()
      */
-//  @Override
+    @Override
     public void clear() {
-        //
-        // No need to evict stale entries before clearance
-        //
-        this.delegate.clear();
+        assertOpen();
+        clearDelegate();
+        clearQueue();
     }
-    
+
     /* (non-Javadoc)
      * @see org.openmdx.base.collection.Registry#close()
      */
-//  @Override
-    public void close() {
-        clear();
-        this.delegate = null;
-        this.queue = null;
+    @Override
+    public synchronized void close() {
+        if(isOpen()) {
+            clearDelegate();
+            this.delegate = null;
+            clearQueue();
+            this.queue = null;
+        }
     }
-
 
     /* (non-Javadoc)
      * 
      * @see org.openmdx.base.collection.Cache#get(java.lang.Object)
      */
-//  @Override
+    @Override
     public V get(K key) {
         WeakReference<V> v = getDelegate().get(key); 
         return v == null ? null : v.get();
@@ -164,7 +206,7 @@ public class ConcurrentWeakRegistry<K,V> implements Registry<K, V> {
     /* (non-Javadoc)
      * @see org.openmdx.base.collection.Cache#remove(java.lang.Object)
      */
-//  @Override
+    @Override
     public V remove(K key) {
         WeakReference<V> v = getDelegate().remove(key); 
         return v == null ? null : v.get();
@@ -173,7 +215,7 @@ public class ConcurrentWeakRegistry<K,V> implements Registry<K, V> {
     /* (non-Javadoc)
      * @see org.openmdx.base.collection.Cache#putIfAbsent(java.lang.Object, java.lang.Object)
      */
-//  @Override
+    @Override
     public V putUnlessPresent(K key, V value) {
         WeakReference<V> v = new WeakReference<V>(value, this.queue);
         ConcurrentMap<K,WeakReference<V>> delegate = getDelegate();
@@ -194,7 +236,7 @@ public class ConcurrentWeakRegistry<K,V> implements Registry<K, V> {
     /* (non-Javadoc)
      * @see org.openmdx.base.collection.Cache#put(java.lang.Object, java.lang.Object)
      */
-//  @Override
+    @Override
     public V put(K key, V value) {
         WeakReference<V> v = new WeakReference<V>(value, this.queue);
         WeakReference<V> c = getDelegate().put(key, v);
@@ -206,10 +248,13 @@ public class ConcurrentWeakRegistry<K,V> implements Registry<K, V> {
      * Retrieve the objects managed by the cache
      * *
      * @return a collection with the objects managed by the cache
+     * 
+     * @throws IllegalStateException if the registry is already closed
      */
-//  @Override
+    @Override
     public Set<V> values(
     ){
+        assertOpen();
         return this.values;
     }
     
@@ -247,7 +292,7 @@ public class ConcurrentWeakRegistry<K,V> implements Registry<K, V> {
         /* (non-Javadoc)
          * @see java.util.Iterator#hasNext()
          */
-    //  @Override
+        @Override
         public boolean hasNext() {
             while(this.next == null && this.delegate.hasNext()) {
                 this.next = this.delegate.next().get();
@@ -258,7 +303,7 @@ public class ConcurrentWeakRegistry<K,V> implements Registry<K, V> {
         /* (non-Javadoc)
          * @see java.util.Iterator#next()
          */
-    //  @Override
+        @Override
         public V next() {
             if(hasNext()) {
                 V next = this.next;
@@ -272,7 +317,7 @@ public class ConcurrentWeakRegistry<K,V> implements Registry<K, V> {
         /* (non-Javadoc)
          * @see java.util.Iterator#remove()
          */
-    //  @Override
+       @Override
         public void remove() {
             this.delegate.remove();
         }

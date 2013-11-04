@@ -56,8 +56,6 @@ import java.io.ObjectOutput;
 
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.resource.spi.VariableSizeIndexedRecord;
-import org.openmdx.base.rest.stream.RestFormatter;
-import org.openmdx.base.rest.stream.RestTarget;
 
 /**
  * Result Record
@@ -79,6 +77,11 @@ public class ResultRecord
      */
     private static final long serialVersionUID = -1447605619412752707L;
 
+    /**
+     * The eagerly acquired REST formatter instance
+     */
+    protected static final RestFormatter restFormatter = RestFormatters.getFormatter();
+    
     /**
      * The base collections size
      */
@@ -160,8 +163,8 @@ public class ResultRecord
         ObjectOutput out
     ) throws IOException {
         try {
-            RestTarget target = RestFormatter.asTarget(out); 
-            RestFormatter.format(target, null, this);
+            Target target = restFormatter.asTarget(out); 
+            restFormatter.format(target, null, this);
             target.close();
         } catch (Exception exception) {
             throw (NotSerializableException) new NotSerializableException(

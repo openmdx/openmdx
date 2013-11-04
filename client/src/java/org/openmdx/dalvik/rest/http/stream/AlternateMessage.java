@@ -56,11 +56,12 @@ import javax.resource.cci.InteractionSpec;
 import org.openmdx.application.rest.http.HttpContext;
 import org.openmdx.application.rest.http.HttpInteraction;
 import org.openmdx.application.rest.http.spi.Message;
-import org.openmdx.application.rest.http.spi.Target;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.resource.spi.RestInteractionSpec;
+import org.openmdx.base.rest.spi.RestFormatters;
 import org.openmdx.base.rest.spi.RestSource;
-import org.openmdx.dalvik.rest.stream.RestFormatter;
+import org.openmdx.base.rest.spi.Target;
+import org.openmdx.dalvik.rest.stream.AlternateRestFormatter;
 import org.openmdx.dalvik.rest.stream.RestTarget;
 import org.openmdx.dalvik.uses.javax.xml.stream.XMLStreamException;
 import org.openmdx.dalvik.uses.javax.xml.stream.XMLStreamWriter;
@@ -115,6 +116,11 @@ class AlternateMessage implements Message, Closeable {
     private RestSource responseBody = null;
 
     /**
+     * The eagerly acquired REST formatter instance
+     */
+    protected static final AlternateRestFormatter restFormatter = RestFormatters.getFormatter();
+    
+    /**
      * Create a request body
      * 
      * @return a new request body
@@ -137,12 +143,14 @@ class AlternateMessage implements Message, Closeable {
                     contentType
                 );
                 try {
-                    return RestFormatter.getOutputFactory(httpContext.getMimeType()).createXMLStreamWriter(
+                    return restFormatter.getOutputFactory(httpContext.getMimeType()).createXMLStreamWriter(
                         urlConnection.getOutputStream()
                     );
                 } catch (IOException exception) {
                     throw toXMLStreamException(exception);
-                }
+                } catch (BasicException exception) {
+                    throw toXMLStreamException(exception);
+				}
             }
             
         };
@@ -171,7 +179,7 @@ class AlternateMessage implements Message, Closeable {
     ) throws ServiceException {
         if(this.requestBody != null) try {
             this.requestBody.close();
-        } catch (XMLStreamException exception) {
+        } catch (IOException exception) {
             throw new ServiceException (
                 exception,
                 BasicException.Code.DEFAULT_DOMAIN,

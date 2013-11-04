@@ -64,6 +64,8 @@ import javax.resource.ResourceException;
 import javax.resource.cci.IndexedRecord;
 import javax.resource.cci.MappedRecord;
 import javax.xml.datatype.XMLGregorianCalendar;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamWriter;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -73,14 +75,14 @@ import org.openmdx.base.naming.Path;
 import org.openmdx.base.resource.Records;
 import org.openmdx.base.rest.cci.ResultRecord;
 import org.openmdx.base.rest.spi.Object_2Facade;
+import org.openmdx.base.rest.spi.RestFormatters;
 import org.openmdx.base.rest.spi.RestParser;
 import org.openmdx.base.rest.spi.RestSource;
-import org.openmdx.base.rest.stream.RestFormatter;
 import org.openmdx.base.rest.stream.RestTarget;
+import org.openmdx.base.rest.stream.StandardRestFormatter;
 import org.openmdx.base.text.conversion.UUIDConversion;
-import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamWriter;
 import org.openmdx.kernel.collection.ArraysExtension;
+import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.id.UUIDs;
 import org.openmdx.state2.cci.DateStateViews;
 import org.xml.sax.InputSource;
@@ -94,6 +96,11 @@ public class TestPerformance {
     protected static final String URI = "xri://+test/REST";
     protected static final boolean WBXML = false;
 
+    /**
+     * The eagerly acquired REST formatter instance
+     */
+    protected static final StandardRestFormatter restFormatter = RestFormatters.getFormatter();
+    
     private final SerializationTest[] tests = {
         new SerializationTest("Java (Externalizable)"){
 
@@ -186,7 +193,7 @@ public class TestPerformance {
             @Override
             public int serialize(IndexedRecord resultSet) throws Exception {
                 this.sink.reset();
-                RestFormatter.format(sink, BASE, resultSet);
+                restFormatter.format(sink, BASE, resultSet);
                 return sink.size();
             }
 
@@ -211,7 +218,7 @@ public class TestPerformance {
             @Override
             public int serialize(IndexedRecord resultSet) throws Exception {
                 this.sink.reset();
-                RestFormatter.format(sink, BASE, resultSet);
+                restFormatter.format(sink, BASE, resultSet);
                 return this.sink.size();
             }
 
@@ -371,7 +378,11 @@ public class TestPerformance {
         @Override
         protected XMLStreamWriter newWriter(
         ) throws XMLStreamException {
-            return RestFormatter.getOutputFactory(MIME_TYPE).createXMLStreamWriter(sink);
+            try {
+                return restFormatter.getOutputFactory(MIME_TYPE).createXMLStreamWriter(sink);
+            } catch (BasicException exception) {
+                throw new XMLStreamException(exception);
+            }
         }
 
         @Override
@@ -414,7 +425,11 @@ public class TestPerformance {
         @Override
         protected XMLStreamWriter newWriter(
         ) throws XMLStreamException {
-            return RestFormatter.getOutputFactory(MIME_TYPE).createXMLStreamWriter(sink);
+            try {
+                return restFormatter.getOutputFactory(MIME_TYPE).createXMLStreamWriter(sink);
+            } catch (BasicException exception) {
+                throw new XMLStreamException(exception);
+            }
         }
 
         @Override
@@ -459,9 +474,13 @@ public class TestPerformance {
         @Override
         protected XMLStreamWriter newWriter(
         ) throws XMLStreamException {
-            return RestFormatter.getOutputFactory(MIME_TYPE).createXMLStreamWriter(
-                new UTF8Writer(sink)
-            );
+            try {
+                return restFormatter.getOutputFactory(MIME_TYPE).createXMLStreamWriter(
+                    new UTF8Writer(sink)
+                );
+            } catch (BasicException exception) {
+                throw new XMLStreamException(exception);
+            }
         }
 
         @Override

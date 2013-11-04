@@ -1,16 +1,13 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Archive.java,v 1.25 2010/06/04 22:22:49 hburger Exp $
  * Description: Ant Archive Task
- * Revision:    $Revision: 1.25 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/06/04 22:22:49 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2010, OMEX AG, Switzerland
+ * Copyright (c) 2004-2013, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without 
@@ -103,8 +100,8 @@ public class Archive
 {
 	
     private FilterChainCollection filterset = new FilterChainCollection();
-    private Vector nested = new Vector ();
-    private Vector filesets = new Vector ();
+    private Vector<Nested> nested = new Vector<Nested> ();
+    private Vector<FileSet> filesets = new Vector<FileSet> ();
     private Format format = new Format();
     private CompressionMethod compression = null;
     private String checksumAlgorithm = null;
@@ -113,7 +110,7 @@ public class Archive
     private File baseDir;
     private Delegate delegate = null;
 	private String nameEncoding = null;
-    private Vector cleanupTasks = new Vector ();
+    private Vector<Task> cleanupTasks = new Vector<Task> ();
 
     /**
      * merged manifests added through addConfiguredManifest 
@@ -133,25 +130,21 @@ public class Archive
      */
     private File manifestFile;
 	
-	protected static final Collection MODULE_HOLDER = Collections.unmodifiableCollection(
+	protected static final Collection<String> MODULE_HOLDER = Collections.unmodifiableCollection(
 		Arrays.asList(
-			new String[]{
-				ArchiveFormat.TAR,
-				ArchiveFormat.ZIP,
-				ArchiveFormat.EAR
-			}
+			ArchiveFormat.TAR,
+			ArchiveFormat.ZIP,
+			ArchiveFormat.EAR
 		)
 	);
 	
-	protected static final Collection MANIFEST_HOLDER = Collections.unmodifiableCollection(
+	protected static final Collection<String> MANIFEST_HOLDER = Collections.unmodifiableCollection(
 		Arrays.asList(
-			new String[]{
-				ArchiveFormat.JAR,
-				ArchiveFormat.WAR,
-				ArchiveFormat.RAR,
-				ArchiveFormat.PAR,
-				ArchiveFormat.EAR
-			}
+			ArchiveFormat.JAR,
+			ArchiveFormat.WAR,
+			ArchiveFormat.RAR,
+			ArchiveFormat.PAR,
+			ArchiveFormat.EAR
 		)
 	);
 
@@ -165,10 +158,10 @@ public class Archive
 	 */
 	public boolean isUpToDate() {
 		for(	
-			Enumeration e = this.nested.elements();
+			Enumeration<Nested> e = this.nested.elements();
 			e.hasMoreElements();
 		){
-			Nested nested = (Nested) e.nextElement();
+			Nested nested = e.nextElement();
 			if(!nested.isUpToDate()) return false;
 		}
 		Project project = getProject();
@@ -183,10 +176,10 @@ public class Archive
 			upToDate.addSrcfiles(implicitFileSet);
 		}
 		for(
-			Enumeration e = this.filesets.elements();
+			Enumeration<FileSet> e = this.filesets.elements();
 			e.hasMoreElements();
 		){
-			FileSet fileSet = (FileSet)e.nextElement();
+			FileSet fileSet = e.nextElement();
 			if(fileSet instanceof ZipFileSet) {
 				ZipFileSet zfs = (ZipFileSet) fileSet;
 				File src = zfs.getSrc(project);
@@ -529,7 +522,7 @@ public class Archive
      * @param parentFormat
      */
     protected void checkParentFormat(
-    	Collection acceptedFormat
+    	Collection<String> acceptedFormat
     ){
     	if(!acceptedFormat.contains(getFormat().getValue())) throw new BuildException(
     		"The parent's archive format should not be " + getFormat() +
@@ -570,10 +563,10 @@ public class Archive
     			References.getReference(project, getImplicitFileSet())
     		);
     		for(
-    			Enumeration e = this.filesets.elements();
+    			Enumeration<FileSet> e = this.filesets.elements();
     			e.hasMoreElements();
     		) {
-    			FileSet fileSet = (FileSet) e.nextElement();
+    			FileSet fileSet = e.nextElement();
     			if(
     				!(fileSet instanceof Condition) ||
     				((Condition) fileSet).eval()
@@ -624,11 +617,10 @@ public class Archive
 			);
 		} else try {
 			for(
-				Enumeration e = this.nested.elements();
+				Enumeration<Nested> e = this.nested.elements();
 				e.hasMoreElements();		
 			){
-				Nested nested = (Nested) e.nextElement();
-				nested.execute();
+				e.nextElement().execute();
 			}
 			Delegate delegate = getDelegate();
 			delegate.execute();
@@ -649,18 +641,17 @@ public class Archive
 			exception.printStackTrace();
 		} finally {
 			for(
-				Enumeration e = this.nested.elements();
+				Enumeration<Nested> e = this.nested.elements();
 				e.hasMoreElements();		
 			){
-				Nested nested = (Nested) e.nextElement();
+				Nested nested = e.nextElement();
 				if(nested.isTempFile()) nested.getDestFile().delete();
 			}
 			for(
-				Enumeration e = this.cleanupTasks.elements();
+				Enumeration<Task> e = this.cleanupTasks.elements();
 				e.hasMoreElements();
 			) try {
-				Task cleanupTask = (Task) e.nextElement();
-				cleanupTask.execute();
+				e.nextElement().execute();
 			} catch (BuildException exception) {
 				this.log("Clean-up failure: " + exception.getMessage());
 			}
@@ -759,7 +750,7 @@ public class Archive
 		/**
 		 * 
 		 */
-		private final Vector filterChains = new Vector();
+		private final Vector<ArchiveFilterChain> filterChains = new Vector<ArchiveFilterChain>();
 		
 		/**
 		 * 
@@ -790,12 +781,12 @@ public class Archive
 	    	String mappedPath = path;
 	    	InputStream filteredInputStream = in;
 			if(!this.filterChains.isEmpty()) {
-		    	Vector applicableFilterChains = new Vector();		    	
+		    	Vector<ArchiveFilterChain> applicableFilterChains = new Vector<ArchiveFilterChain>();		    	
 		    	FilterChains: for(
-		    		Enumeration e = this.filterChains.elements();
+		    		Enumeration<ArchiveFilterChain> e = this.filterChains.elements();
 		    		e.hasMoreElements();
 		    	) {
-		    		ArchiveFilterChain candidate = (ArchiveFilterChain) e.nextElement();
+		    		ArchiveFilterChain candidate = e.nextElement();
 		    		if(candidate.appliesTo(mappedPath)) {
 		    			FileNameMapper mapper = candidate.getMapper();
 		    			if(mapper != null) {
@@ -822,7 +813,8 @@ public class Archive
 				    helper.setPrimaryReader(primaryReader);
 				    helper.setFilterChains(applicableFilterChains);
 				    helper.setProject(project);
-				    ReaderInputStream readerInputStream = outputEncoding == null ?
+				    @SuppressWarnings("resource")
+					ReaderInputStream readerInputStream = outputEncoding == null ?
 			    		new ReaderInputStream(helper.getAssembledReader()) :
 			    		new ReaderInputStream(helper.getAssembledReader(), outputEncoding);			    	
 				    XMLDeclaration xmlDeclaration = primaryReader.getXMLDclaration();

@@ -121,23 +121,29 @@
             <references xmi:type="uml:Package" href="org.omg.PrimitiveTypes.emx#_3C7B8A60016D3D0C708700E2?PrimitiveTypes/PrimitiveTypes?"/>
           </contents>
         </eAnnotations>
+        <eAnnotations xmi:id="_9xTp8P9sEeKzmadRMZOARA" source="uml2.diagrams">
+          <contents xmi:type="notation:Diagram" xmi:id="_9xTp8f9sEeKzmadRMZOARA" type="Class" name="Contains">
+            <children xmi:id="_9xTqBv9sEeKzmadRMZOARA">
+              <children xmi:id="_9xTqB_9sEeKzmadRMZOARA" type="ImageCompartment">
+                <layoutConstraint xmi:type="notation:Size" xmi:id="_9xTqCP9sEeKzmadRMZOARA" width="1320" height="1320"/>
+              </children>
+              <children xmi:id="_9xTqCf9sEeKzmadRMZOARA" type="Stereotype"/>
+              <children xmi:id="_9xTqCv9sEeKzmadRMZOARA" type="Name"/>
+              <children xmi:id="_9xTqC_9sEeKzmadRMZOARA" type="Parent"/>
+              <children xmi:id="_9xTqDP9sEeKzmadRMZOARA" type="PackageContents">
+                <styles xmi:type="umlnotation:UMLShapeCompartmentStyle" xmi:id="_9xTqDf9sEeKzmadRMZOARA" canonical="false" collapsed="true"/>
+              </children>
+              <styles xmi:type="umlnotation:UMLShapeStyle" xmi:id="_9xTqDv9sEeKzmadRMZOARA" fontName="DejaVu Sans" fontHeight="8" fillColor="13434879" lineColor="3342489" showStereotype="Label"/>
+              <element xmi:type="uml:Package" href="org.omg.model1.emx#_3C7B8A60016D3C3238A3033A?model1/model1?"/>
+              <layoutConstraint xmi:type="notation:Bounds" xmi:id="_9xTqD_9sEeKzmadRMZOARA" x="660" y="792" width="2479" height="1549"/>
+            </children>
+            <styles xmi:type="umlnotation:UMLDiagramStyle" xmi:id="_9xTqGv9sEeKzmadRMZOARA"/>
+          </contents>
+        </eAnnotations>
       </packagedElement>
       <packagedElement xmi:type="uml:Package" xmi:id="_3C7B8A60016D3FB3D59203B1" name="openmdx">
         <eAnnotations xmi:id="_MpHrBd65EdmrtKJSXC0_FQ" source="uml2.diagrams" references="_3C7B8A60016D400E55220148">
           <contents xmi:type="notation:Diagram" xmi:id="_3C7B8A60016D400E55220148" type="Class" name="Contains">
-            <children xmi:id="_MyYUtd65EdmrtKJSXC0_FQ" element="_3C7B8A60016D3FF0C2EF0115">
-              <children xmi:id="_MyYUuN65EdmrtKJSXC0_FQ" type="ImageCompartment">
-                <layoutConstraint xmi:type="notation:Size" xmi:id="_MyYUud65EdmrtKJSXC0_FQ" width="1320" height="1320"/>
-              </children>
-              <children xmi:id="_MyYUut65EdmrtKJSXC0_FQ" type="Stereotype"/>
-              <children xmi:id="_MyYUu965EdmrtKJSXC0_FQ" type="Name"/>
-              <children xmi:id="_L6sFYgi6Ed6oA6YRo2H_jw" type="Parent"/>
-              <children xmi:id="_L6sFYwi6Ed6oA6YRo2H_jw" type="PackageContents">
-                <styles xmi:type="umlnotation:UMLShapeCompartmentStyle" xmi:id="_L6sFZAi6Ed6oA6YRo2H_jw" canonical="false" collapsed="true"/>
-              </children>
-              <styles xmi:type="umlnotation:UMLShapeStyle" xmi:id="_MyYUtt65EdmrtKJSXC0_FQ" fontName="Arial" fontHeight="8" showListStereotype="None" showListVisibility="None" fillColor="13434879" lineColor="3342489" showStereotype="Image"/>
-              <layoutConstraint xmi:type="notation:Bounds" xmi:id="_MyYUt965EdmrtKJSXC0_FQ" x="620" y="620" width="2540" height="1676"/>
-            </children>
             <children xmi:id="_MyYUyt65EdmrtKJSXC0_FQ">
               <children xmi:id="_MyYUzd65EdmrtKJSXC0_FQ" type="ImageCompartment">
                 <layoutConstraint xmi:type="notation:Size" xmi:id="_MyYUzt65EdmrtKJSXC0_FQ" width="1320" height="1320"/>
@@ -150,7 +156,7 @@
               </children>
               <styles xmi:type="umlnotation:UMLShapeStyle" xmi:id="_MyYUy965EdmrtKJSXC0_FQ" fontName="Arial" fontHeight="8" showListStereotype="None" showListVisibility="None" fillColor="13434879" lineColor="3342489" showStereotype="Image"/>
               <element xmi:type="uml:Package" href="org.openmdx.generic1.emx#_3C7B8A60016D3FF13E0E02A5?generic1/generic1?"/>
-              <layoutConstraint xmi:type="notation:Bounds" xmi:id="_MyYUzN65EdmrtKJSXC0_FQ" x="620" y="3100" width="2540" height="1540"/>
+              <layoutConstraint xmi:type="notation:Bounds" xmi:id="_MyYUzN65EdmrtKJSXC0_FQ" x="660" y="2772" width="2540" height="1540"/>
             </children>
             <children xmi:id="_MyYU0d65EdmrtKJSXC0_FQ">
               <children xmi:id="_MyYU1N65EdmrtKJSXC0_FQ" type="ImageCompartment">
@@ -164,21 +170,7 @@
               </children>
               <styles xmi:type="umlnotation:UMLShapeStyle" xmi:id="_MyYU0t65EdmrtKJSXC0_FQ" fontName="Arial" fontHeight="8" showListStereotype="None" showListVisibility="None" fillColor="13434879" lineColor="3342489" showStereotype="Image"/>
               <element xmi:type="uml:Package" href="org.openmdx.audit2.emx#_3C7B8A60016D3FF13E19007A?audit2/audit2?"/>
-              <layoutConstraint xmi:type="notation:Bounds" xmi:id="_MyYU0965EdmrtKJSXC0_FQ" x="620" y="5580" width="2540" height="1540"/>
-            </children>
-            <children xmi:id="_xNJRQKaREd608rQJr4Jvxw">
-              <children xmi:id="_xNP-8KaREd608rQJr4Jvxw" type="ImageCompartment">
-                <layoutConstraint xmi:type="notation:Size" xmi:id="_xNP-8aaREd608rQJr4Jvxw" width="1320" height="1320"/>
-              </children>
-              <children xmi:id="_xNeBYKaREd608rQJr4Jvxw" type="Stereotype"/>
-              <children xmi:id="_xNeBYaaREd608rQJr4Jvxw" type="Name"/>
-              <children xmi:id="_xNeocKaREd608rQJr4Jvxw" type="Parent"/>
-              <children xmi:id="_xNfPgKaREd608rQJr4Jvxw" type="PackageContents">
-                <styles xmi:type="umlnotation:UMLShapeCompartmentStyle" xmi:id="_xNfPgaaREd608rQJr4Jvxw" canonical="false" collapsed="true"/>
-              </children>
-              <styles xmi:type="umlnotation:UMLShapeStyle" xmi:id="_xNJ4UKaREd608rQJr4Jvxw" fontName="DejaVu Sans" fontHeight="8" fillColor="13434879" lineColor="3342489" showStereotype="Label"/>
-              <element xmi:type="uml:Package" href="org.omg.model1.emx#_3C7B8A60016D3C3238A3033A?model1/model1?"/>
-              <layoutConstraint xmi:type="notation:Bounds" xmi:id="_xNJ4UaaREd608rQJr4Jvxw" x="4030" y="3100" width="2479" height="1549"/>
+              <layoutConstraint xmi:type="notation:Bounds" xmi:id="_MyYU0965EdmrtKJSXC0_FQ" x="660" y="5252" width="2540" height="1540"/>
             </children>
             <children xmi:id="_3gOY4KaREd608rQJr4Jvxw">
               <children xmi:id="_3gPnAKaREd608rQJr4Jvxw" type="ImageCompartment">
@@ -192,7 +184,49 @@
               </children>
               <styles xmi:type="umlnotation:UMLShapeStyle" xmi:id="_3gOY4aaREd608rQJr4Jvxw" fontName="DejaVu Sans" fontHeight="8" fillColor="13434879" lineColor="3342489" showStereotype="Label"/>
               <element xmi:type="uml:Package" href="org.openmdx.state2.emx#_3C7B8A60016D407170B300B4?state2/state2?"/>
-              <layoutConstraint xmi:type="notation:Bounds" xmi:id="_3gOY4qaREd608rQJr4Jvxw" x="4030" y="5578" width="2478" height="1551"/>
+              <layoutConstraint xmi:type="notation:Bounds" xmi:id="_3gOY4qaREd608rQJr4Jvxw" x="4070" y="5250" width="2478" height="1551"/>
+            </children>
+            <children xmi:id="_BpKsUP9tEeKzmadRMZOARA">
+              <children xmi:id="_BpKsU_9tEeKzmadRMZOARA" type="ImageCompartment">
+                <layoutConstraint xmi:type="notation:Size" xmi:id="_BpKsVP9tEeKzmadRMZOARA" width="1320" height="1320"/>
+              </children>
+              <children xmi:id="_BpKsVf9tEeKzmadRMZOARA" type="Stereotype"/>
+              <children xmi:id="_BpKsVv9tEeKzmadRMZOARA" type="Name"/>
+              <children xmi:id="_BpKsV_9tEeKzmadRMZOARA" type="Parent"/>
+              <children xmi:id="_BpKsWP9tEeKzmadRMZOARA" type="PackageContents">
+                <styles xmi:type="umlnotation:UMLShapeCompartmentStyle" xmi:id="_BpKsWf9tEeKzmadRMZOARA" canonical="false" collapsed="true"/>
+              </children>
+              <styles xmi:type="umlnotation:UMLShapeStyle" xmi:id="_BpKsUf9tEeKzmadRMZOARA" fontName="Segoe UI" fillColor="13434879" lineColor="3342489" showParent="QualifiedName" showStereotype="Label"/>
+              <element xmi:type="uml:Package" href="org.openmdx.preferences2.emx#_sUE1XXTSEeGNposaCGm5NA?preferences2/preferences2?"/>
+              <layoutConstraint xmi:type="notation:Bounds" xmi:id="_BpKsUv9tEeKzmadRMZOARA" x="7696" y="5216"/>
+            </children>
+            <children xmi:id="_VTVw4P9tEeKzmadRMZOARA">
+              <children xmi:id="_VTVw4_9tEeKzmadRMZOARA" type="ImageCompartment">
+                <layoutConstraint xmi:type="notation:Size" xmi:id="_VTVw5P9tEeKzmadRMZOARA" width="1320" height="1320"/>
+              </children>
+              <children xmi:id="_VTVw5f9tEeKzmadRMZOARA" type="Stereotype"/>
+              <children xmi:id="_VTVw5v9tEeKzmadRMZOARA" type="Name"/>
+              <children xmi:id="_VTVw5_9tEeKzmadRMZOARA" type="Parent"/>
+              <children xmi:id="_VTVw6P9tEeKzmadRMZOARA" type="PackageContents">
+                <styles xmi:type="umlnotation:UMLShapeCompartmentStyle" xmi:id="_VTVw6f9tEeKzmadRMZOARA" canonical="false" collapsed="true"/>
+              </children>
+              <styles xmi:type="umlnotation:UMLShapeStyle" xmi:id="_VTVw4f9tEeKzmadRMZOARA" fontName="Segoe UI" fillColor="13434879" lineColor="3342489" showStereotype="Label"/>
+              <element xmi:type="uml:Package" href="org.openmdx.base.emx#_3C7B8A60016D40A89A0D0015?base/base?"/>
+              <layoutConstraint xmi:type="notation:Bounds" xmi:id="_VTVw4v9tEeKzmadRMZOARA" x="660" y="660"/>
+            </children>
+            <children xmi:id="_fVcvAP9tEeKzmadRMZOARA">
+              <children xmi:id="_fVl48P9tEeKzmadRMZOARA" type="ImageCompartment">
+                <layoutConstraint xmi:type="notation:Size" xmi:id="_fVl48f9tEeKzmadRMZOARA" width="1320" height="1320"/>
+              </children>
+              <children xmi:id="_fVl48v9tEeKzmadRMZOARA" type="Stereotype"/>
+              <children xmi:id="_fVl48_9tEeKzmadRMZOARA" type="Name"/>
+              <children xmi:id="_fVl49P9tEeKzmadRMZOARA" type="Parent"/>
+              <children xmi:id="_fVl49f9tEeKzmadRMZOARA" type="PackageContents">
+                <styles xmi:type="umlnotation:UMLShapeCompartmentStyle" xmi:id="_fVl49v9tEeKzmadRMZOARA" canonical="false" collapsed="true"/>
+              </children>
+              <styles xmi:type="umlnotation:UMLShapeStyle" xmi:id="_fVcvAf9tEeKzmadRMZOARA" fontName="Segoe UI" fillColor="13434879" lineColor="3342489" showStereotype="Label"/>
+              <element xmi:type="uml:Package" href="org.openmdx.role2.emx#_3C7B8A60016D407129D101F2?role2/role2?"/>
+              <layoutConstraint xmi:type="notation:Bounds" xmi:id="_fVcvAv9tEeKzmadRMZOARA" x="12012" y="5412"/>
             </children>
             <styles xmi:type="umlnotation:UMLDiagramStyle" xmi:id="_MpHrB965EdmrtKJSXC0_FQ"/>
           </contents>
@@ -207,9 +241,6 @@
           <contents xmi:type="ecore:EAnnotation" xmi:id="_urf5UN67EdmkJO73lqONhA" source="eObjectShortcut">
             <references xmi:type="uml:Package" href="org.openmdx.audit2.emx#_3C7B8A60016D3FF13E19007A?audit2/audit2?"/>
           </contents>
-          <contents xmi:type="ecore:EAnnotation" xmi:id="_hzk-cK9uEdqQYLW9BPgXuQ" source="eObjectShortcut">
-            <references xmi:type="uml:Package" href="org.openmdx.preferences1.emx#_o9hDQFhTEdqpq69lOCMZBw?preferences1/preferences1?"/>
-          </contents>
           <contents xmi:type="ecore:EAnnotation" xmi:id="_RaEnwH9VEd2oO_-UZxLZvA" source="eObjectShortcut">
             <references xmi:type="uml:Package" href="org.openmdx.state2.emx#_3C7B8A60016D407170B300B4?state2/state2?"/>
           </contents>
@@ -220,32 +251,6 @@
             <references xmi:type="uml:Package" href="org.openmdx.preferences2.emx#_sUE1XXTSEeGNposaCGm5NA?preferences2/preferences2?"/>
           </contents>
         </eAnnotations>
-        <packagedElement xmi:type="uml:Package" xmi:id="_3C7B8A60016D3FF0C2EF0115" name="compatibility">
-          <eAnnotations xmi:id="_Mi6VaN65EdmrtKJSXC0_FQ" source="uml2.diagrams" references="_3C7B8A60016D400E55C40281">
-            <contents xmi:type="notation:Diagram" xmi:id="_3C7B8A60016D400E55C40281" type="Class" name="Contains">
-              <children xmi:id="_MtIBQN65EdmrtKJSXC0_FQ">
-                <children xmi:id="_MtIBQ965EdmrtKJSXC0_FQ" type="ImageCompartment">
-                  <layoutConstraint xmi:type="notation:Size" xmi:id="_MtIBRN65EdmrtKJSXC0_FQ" width="1320" height="1320"/>
-                </children>
-                <children xmi:id="_MtIBRd65EdmrtKJSXC0_FQ" type="Stereotype"/>
-                <children xmi:id="_MtIBRt65EdmrtKJSXC0_FQ" type="Name"/>
-                <children xmi:id="_L612UAi6Ed6oA6YRo2H_jw" type="Parent"/>
-                <children xmi:id="_L612UQi6Ed6oA6YRo2H_jw" type="PackageContents">
-                  <styles xmi:type="umlnotation:UMLShapeCompartmentStyle" xmi:id="_L612Ugi6Ed6oA6YRo2H_jw" canonical="false" collapsed="true"/>
-                </children>
-                <styles xmi:type="umlnotation:UMLShapeStyle" xmi:id="_MtIBQd65EdmrtKJSXC0_FQ" fontName="Arial" fontHeight="8" showListStereotype="None" showListVisibility="None" fillColor="13434879" lineColor="3342489" showStereotype="Image"/>
-                <element xmi:type="uml:Package" href="org.openmdx.compatibility.audit1.emx#_3C7B8A60016D3EC4B01F0206?audit1/audit1?"/>
-                <layoutConstraint xmi:type="notation:Bounds" xmi:id="_MtIBQt65EdmrtKJSXC0_FQ" x="821" y="931" width="2540" height="1540"/>
-              </children>
-              <styles xmi:type="umlnotation:UMLDiagramStyle" xmi:id="_Mi6Vat65EdmrtKJSXC0_FQ"/>
-            </contents>
-          </eAnnotations>
-          <eAnnotations xmi:id="_zpoAM967EdmkJO73lqONhA" source="uml2.ownedShortcuts">
-            <contents xmi:type="ecore:EAnnotation" xmi:id="_zpoANN67EdmkJO73lqONhA" source="eObjectShortcut">
-              <references xmi:type="uml:Package" href="org.openmdx.compatibility.audit1.emx#_3C7B8A60016D3EC4B01F0206?audit1/audit1?"/>
-            </contents>
-          </eAnnotations>
-        </packagedElement>
       </packagedElement>
     </packagedElement>
     <packagedElement xmi:type="uml:Package" xmi:id="_3C7B8A60016D3C08F0220092" name="net">

@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2009, OMEX AG, Switzerland
+ * Copyright (c) 2009-2013, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -270,6 +270,7 @@ public abstract class AbstractFormatter
      * Allows format information to be included in the file header
      */
     protected void appendLogFormat(){
+        // nothing to do
     }
 
     

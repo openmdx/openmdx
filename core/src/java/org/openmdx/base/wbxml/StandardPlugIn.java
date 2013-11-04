@@ -49,7 +49,6 @@ package org.openmdx.base.wbxml;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
-import java.nio.charset.CharsetDecoder;
 
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.kernel.exception.BasicException;
@@ -67,26 +66,37 @@ public class StandardPlugIn extends AbstractPlugIn {
     protected StandardPlugIn(
         String stringEncoding
     ){
-        Charset charset = Charset.forName(stringEncoding);
-        this.stringSink = new StringSink(charset.newEncoder());
-        this.decoder =  charset.newDecoder();
+        this.charset = Charset.forName(stringEncoding);
     }
 
     /**
-     * The re-usable decoder
+     * The character set
      */
-    private final CharsetDecoder decoder;
+    private final Charset charset;
     
     /**
      * The string source
      */
-    private BasicStringSource stringSource;
+    private StringSource stringSource;
 
     /**
      * The string sink
      */
-    private final StringSink stringSink;
+    private StringSink stringSink;
 
+    /**
+     * Provide the string sink
+     * 
+     * @return the (lazily created) string sink
+     */
+    private StringSink getStringSink(
+    ){
+        if(this.stringSink == null) {
+            this.stringSink = new StringSink(this.charset);
+        }
+        return this.stringSink;
+    }
+    
     /* (non-Javadoc)
      * @see org.openmdx.base.wbxml.AbstractPlugIn#reset()
      */
@@ -94,41 +104,27 @@ public class StandardPlugIn extends AbstractPlugIn {
     public void reset() {
         super.reset();
         this.stringSource = null;
-        this.stringSink.reset();
+        if(this.stringSink != null) {
+            this.stringSink.reset();
+        }
     }
 
     /* (non-Javadoc)
-     * @see org.openmdx.base.xml.wbxml.spi.PlugIn#setStringTable(byte[])ic
+     * @see org.openmdx.base.wbxml.AbstractPlugIn#setStringTable(org.openmdx.base.wbxml.StringSource)
      */
     @Override
     public void setStringTable(
-        ByteBuffer stringTable
+        StringSource stringTable
     ) throws ServiceException {
-        setStringSource(
-            new StringSource(
-                this.decoder, 
-                stringTable
-            )
-        );
+        this.stringSource = stringTable;
     }
 
-    /**
-     * Set the string source
-     * 
-     * @param stringSource
-     */
-    protected void setStringSource(
-        BasicStringSource stringSource
-    ){
-        this.stringSource = stringSource;
-    }
-    
     /* (non-Javadoc)
      * @see org.openmdx.base.xml.wbxml.spi.PlugIn#getStringTable()
      */
     @Override
     public ByteBuffer getStringTable() {
-        return this.stringSink.getStringTable();
+        return this.stringSink == null ? null : this.stringSink.getStringTable();
     }
 
     /* (non-Javadoc)
@@ -136,7 +132,7 @@ public class StandardPlugIn extends AbstractPlugIn {
      */
     @Override
     public StringToken findStringToken(String value) {
-        return this.stringSink == null ? null : this.stringSink.findStringToken(value);
+        return getStringSink().findStringToken(value);
     }
 
     /* (non-Javadoc)
@@ -146,25 +142,35 @@ public class StandardPlugIn extends AbstractPlugIn {
     public StringToken getStringToken(
         String value
     ) {
-        return this.stringSink == null ? null : this.stringSink.getStringToken(value);
+        return getStringSink().getStringToken(value);
     }
 
     /* (non-Javadoc)
      * @see org.openmdx.base.xml.wbxml.spi.PlugIn#resolveString(int)
      */
     @Override
-    public CharSequence resolveString(
+    public String resolveString(
         int index
     ) throws ServiceException {
-        CharSequence literal = this.stringSource == null ? null : this.stringSource.resolveString(index);
-        if(literal != null) {
-            return literal;
-        } else throw new ServiceException(
-            BasicException.Code.DEFAULT_DOMAIN,
-            BasicException.Code.BAD_PARAMETER,
-            "No such string table entry",
-            new BasicException.Parameter("index", index)
-        );
+        if(this.stringSource == null) {
+            throw new ServiceException(
+                BasicException.Code.DEFAULT_DOMAIN,
+                BasicException.Code.NOT_AVAILABLE,
+                "No string source has been provided",
+                new BasicException.Parameter("index", index)
+            );
+        }
+        try {
+            return this.stringSource.resolveString(index);
+        } catch (RuntimeException exception) {
+            throw new ServiceException(
+                exception,
+                BasicException.Code.DEFAULT_DOMAIN,
+                BasicException.Code.BAD_PARAMETER,
+                "String resolution failure",
+                new BasicException.Parameter("index", index)
+            );
+        }
     }
     
 }

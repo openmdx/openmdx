@@ -104,6 +104,7 @@ import org.w3c.spi.DatatypeFactories;
 import org.w3c.spi2.Datatypes;
 
 import test.openmdx.datatypes1.cci2.NonStatedQuery;
+import test.openmdx.datatypes1.dto.CountryCode;
 import test.openmdx.datatypes1.jmi1.Data;
 import test.openmdx.datatypes1.jmi1.Datatypes1Package;
 import test.openmdx.datatypes1.jmi1.NonStated;
@@ -142,6 +143,7 @@ public class TestDatatypes  {
     protected static final int VALUE11B = VALUE_COUNT++;
     protected static final int VALUE11a = VALUE_COUNT++;
     protected static final int VALUE11b = VALUE_COUNT++;
+    protected static final int COUNTRY = VALUE_COUNT++;
     protected static final int SLICE_COUNT = 3;
 
     protected static PersistenceManagerFactory entityManagerFactory;
@@ -177,6 +179,8 @@ public class TestDatatypes  {
         this.values[0][VALUE11B] = datatypeFactory.newDurationDayTime("PT446582.010S");
         this.values[0][VALUE11a] = datatypeFactory.newDurationYearMonth("P12Y6M");
         this.values[0][VALUE11b] = datatypeFactory.newDurationDayTime("P5DT4H3M2.010S");
+        this.values[0][COUNTRY] = CountryCode.valueOf("ch");
+        
         this.values[1][VALUE1] = Boolean.FALSE;
         this.values[1][VALUE2] = new Short(Short.MIN_VALUE);
         this.values[1][VALUE3] = new int[]{};
@@ -191,6 +195,8 @@ public class TestDatatypes  {
         this.values[1][VALUE11B] = datatypeFactory.newDurationDayTime("-PT446582.010S");
         this.values[1][VALUE11a] = datatypeFactory.newDurationYearMonth("-P12Y6M");
         this.values[1][VALUE11b] = datatypeFactory.newDurationDayTime("-P5DT4H3M2.010S");
+        this.values[1][COUNTRY] = CountryCode.valueOf("de");
+        
         this.values[2][VALUE1] = Boolean.FALSE;
         this.values[2][VALUE2] = new Short(Short.MIN_VALUE);
         this.values[2][VALUE3] = new int[]{};
@@ -205,6 +211,8 @@ public class TestDatatypes  {
         this.values[2][VALUE11b] = datatypeFactory.newDurationDayTime("-P5DT4H3M2.010S");
         this.values[2][VALUE11A] = datatypeFactory.newDurationYearMonth("-P150M");
         this.values[2][VALUE11B] = datatypeFactory.newDurationDayTime("-PT446582.010S");
+        this.values[2][COUNTRY] = CountryCode.valueOf("li");
+        
         System.out.println("Acquiring persistence manager factory...");
     }
 
@@ -248,6 +256,13 @@ public class TestDatatypes  {
             firstOfApril,
             Datatypes.create(XMLGregorianCalendar.class, "090401")
         );
+    }
+    
+    @Test
+    public void testCountryCode(){
+        CountryCode actual = Datatypes.create(CountryCode.class, "ch");
+        CountryCode expected = CountryCode.valueOf("ch");
+        assertEquals("Datatypes", expected, actual);
     }
     
     @Test
@@ -684,9 +699,23 @@ public class TestDatatypes  {
         data.setValue9((URI)source[VALUE9]);
         data.setValue10((byte[])source[VALUE10]);
         data.setValue11a((Duration)source[VALUE11A]);
-        data.setValue11b((Duration)source[VALUE11B]);
+        data.setValue11b((Duration)source[VALUE11B]);        
     }
 
+    /**
+     * Populate Data objects
+     * 
+     * @param data
+     * @param source
+     */
+    protected void setData(
+        NonStated data,
+        Object[] source
+    ){
+        data.setCountry((CountryCode) source[COUNTRY]);
+        setData((Data)data, source);
+    }
+    
     /**
      * Clear the optional values
      * 

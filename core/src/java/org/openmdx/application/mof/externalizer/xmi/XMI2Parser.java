@@ -51,7 +51,6 @@ package org.openmdx.application.mof.externalizer.xmi;
 
 import java.io.PrintStream;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -468,13 +467,7 @@ public class XMI2Parser
         }
         // generalization reference
         else if("general".equals(qName)) {
-            URI href = null;
-            try {
-                href = new URI(atts.getValue("href"));
-            }
-            catch(URISyntaxException e) {
-                this.error("reference is not a valid URI " + atts.getValue("href"));
-            }
+            URI href = this.resolver.hrefToURI(atts.getValue("href"));
             if(href != null) {
                 String id = href.getFragment();
                 if(id.indexOf("?") >= 0) {
@@ -599,23 +592,10 @@ public class XMI2Parser
         }
         // package references
         else if(
-            "references".equals(qName) &&
+            ("importedPackage".equals(qName) || "references".equals(qName)) &&
             ("uml:Package".equals(atts.getValue("xmi:type")) || "uml:Model".equals(atts.getValue("xmi:type"))) 
         ) {
-            URI href = null;
-            try {
-                String value = atts.getValue("href");
-                // Convert relative paths to platform resource paths
-                String schema = "";
-                while(value.startsWith("../") || value.startsWith("..\\")) {
-                    value = value.substring(3);
-                    schema = "platform:/resource/";
-                }                 
-                href = new URI(schema + value);
-            }
-            catch(URISyntaxException e) {
-                this.error("reference is not a valid URI " + atts.getValue("href"));
-            }
+            URI href = this.resolver.hrefToURI(atts.getValue("href"));
             if(href != null) {
                 try {
                     String scheme = href.getScheme();
@@ -659,13 +639,7 @@ public class XMI2Parser
         }
         // type reference
         else if("type".equals(qName)) {
-            URI href = null;
-            try {
-                href = new URI(atts.getValue("href"));
-            }
-            catch(URISyntaxException e) {
-                this.error("reference is not a valid URI " + atts.getValue("href"));
-            }
+            URI href = this.resolver.hrefToURI(atts.getValue("href"));
             if(href != null) {
                 String id = href.getFragment();
                 if(id.indexOf("?") >= 0) {

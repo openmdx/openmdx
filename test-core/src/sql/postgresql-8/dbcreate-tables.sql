@@ -444,7 +444,8 @@ CREATE SEQUENCE test_ref_seq
 	  VALUE11B varchar(20), 
 	  VALUE6 varchar(200), 
 	  VALUE7 CHAR(20), 
-	  VALUE8 varchar(8)
+	  VALUE8 varchar(8),
+	  COUNTRY varchar(4)
   ) ;
 
   DROP TABLE EXTENSION_NATIVE;
@@ -476,7 +477,8 @@ CREATE SEQUENCE test_ref_seq
 	  VALUE11B varchar(20), 
 	  VALUE6 varchar(200),
 	  VALUE7 TIMESTAMP (3) WITH TIME ZONE, 
-	  VALUE8 DATE
+	  VALUE8 DATE,
+	  COUNTRY varchar(4)
   ) ;
 
   DROP TABLE EXTENSION_NUMERIC;
@@ -506,7 +508,8 @@ CREATE SEQUENCE test_ref_seq
 	  VALUE11B decimal(12,3),
 	  VALUE6 varchar(200),
 	  VALUE7 decimal(19,3),
-	  VALUE8 varchar(8)
+	  VALUE8 varchar(8),
+	  COUNTRY varchar(4)
   ) ;
 
   DROP TABLE EXTENSION_SEGMENT ;

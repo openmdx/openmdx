@@ -47,23 +47,13 @@
  */
 package org.w3c.spi2;
 
-import java.math.BigDecimal;
-import java.math.BigInteger;
-import java.net.URI;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
-import java.util.UUID;
 
-import javax.xml.datatype.Duration;
-import javax.xml.datatype.XMLGregorianCalendar;
-
-import org.ietf.jgss.GSSException;
-import org.ietf.jgss.Oid;
-import org.openmdx.base.text.conversion.UUIDConversion;
-import org.openmdx.kernel.exception.BasicException;
-import org.w3c.spi.DatatypeFactories;
+import org.w3c.spi.Parser;
+import org.w3c.spi.PrimitiveTypeParsers;
+import org.w3c.spi.StandardPrimitiveTypeParser;
 
 /**
  * Date
@@ -76,6 +66,10 @@ public class Datatypes {
     private Datatypes() {
         // Avoid instantiation
     }
+    
+    private static final List<Parser> PRIMITIVE_TYPE_PARSERS = PrimitiveTypeParsers.getParser(
+        StandardPrimitiveTypeParser.getInstance()
+    );
 
     /**
      * Create a value from its string representation 
@@ -92,50 +86,18 @@ public class Datatypes {
         Class<V> valueClass,
         String string
     ){
-        if (valueClass == Long.class) {
-            return string == null ? null : valueClass.cast(Long.valueOf(string));
-        } else if (valueClass == Integer.class) {
-            return string == null ? null : valueClass.cast(Integer.valueOf(string));
-        } else if (valueClass == Short.class) {
-            return string == null ? null : valueClass.cast(Short.valueOf(string));
-        } else if (valueClass == String.class) {
-            return string == null ? null : valueClass.cast(string);
-        } else if(valueClass == Boolean.class) {
-            return string == null ? null : valueClass.cast(Boolean.valueOf(string));
-        } else if(valueClass == BigDecimal.class) {
-            return string == null ? null : valueClass.cast(new BigDecimal(string));
-        } else if(valueClass == BigInteger.class) {
-            return string == null ? null : valueClass.cast(new BigInteger(string));
-        } else if (valueClass == URI.class) {
-            return string == null ? null : valueClass.cast(URI.create(string));
-        } else if (valueClass == Date.class) {
-            return string == null ? null : valueClass.cast(DatatypeFactories.immutableDatatypeFactory().newDateTime(string));
-        } else if (valueClass == UUID.class){
-            return string == null ? null : valueClass.cast(UUIDConversion.fromString(string));
-        } else if (valueClass == Duration.class){
-            return string == null ? null : valueClass.cast(DatatypeFactories.immutableDatatypeFactory().newDuration(string));
-        } else if (valueClass == XMLGregorianCalendar.class){
-            return string == null ? null : valueClass.cast(DatatypeFactories.immutableDatatypeFactory().newDate(string));
-        } else if (valueClass == Oid.class){
-            try {
-                return string == null ? null : valueClass.cast(new Oid(string));
-            } catch (GSSException exception) {
-                throw BasicException.initHolder(
-                    new IllegalArgumentException(
-                        "Unable to parse the given OID value",
-                        BasicException.newEmbeddedExceptionStack(
-                            exception,
-                            BasicException.Code.DEFAULT_DOMAIN,
-                            BasicException.Code.PARSE_FAILURE,
-                            new BasicException.Parameter("class", valueClass.getName()),
-                            new BasicException.Parameter("value", string)
-                        )
-                    )
-                );
+        //
+        // Handle primitive types
+        //
+        for(Parser primitiveTypeParser : PRIMITIVE_TYPE_PARSERS) {
+            if(primitiveTypeParser.handles(valueClass)) {
+                return primitiveTypeParser.parse(valueClass, string);
             }
-        } else {
-            return create(valueClass, (Object)string);
         }
+        //
+        // Handle null-values and non-primitive types
+        // 
+        return create(valueClass, (Object)string);
     }
 
     /**
@@ -199,5 +161,5 @@ public class Datatypes {
             )
         );  
     }
-
+    
 }

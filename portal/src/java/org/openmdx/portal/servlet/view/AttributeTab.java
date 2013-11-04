@@ -1,14 +1,14 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.opencrx.org/
- * Description: CompositeGrid
+ * Description: AttributeTab
  * Owner:       CRIXP AG, Switzerland, http://www.crixp.com
  * ====================================================================
  *
  * This software is published under the BSD license
  * as listed below.
  * 
- * Copyright (c) 2004-2007, OMEX AG, Switzerland
+ * Copyright (c) 2004-2013, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -57,11 +57,20 @@ import java.io.Serializable;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.portal.servlet.control.AttributeTabControl;
 
-public class AttributeTab 
-    extends ControlState
-    implements Serializable {
+/**
+ * AttributeTab
+ *
+ */
+public class AttributeTab extends ControlState implements Serializable {
     
-    //-----------------------------------------------------------------------    
+    /**
+     * Constructor 
+     *
+     * @param control
+     * @param view
+     * @param attributePane
+     * @param object
+     */
     public AttributeTab(
         AttributeTabControl control,
         ObjectView view,
@@ -83,13 +92,30 @@ public class AttributeTab
         }
     }
 
-    //-----------------------------------------------------------------------    
+    /**
+     * Get control for this attribute tab.
+     * 
+     * @return
+     */
+    public AttributeTabControl getAttributeTabControl(
+    ) {
+    	return (AttributeTabControl)this.control;
+    }
+    
+    /**
+     * Get field groups for this tab.
+     * 
+     * @return
+     */
     public FieldGroup[] getFieldGroup(
     ) {
         return this.fieldGroup;
     }
     
-    //-------------------------------------------------------------------------
+    /* (non-Javadoc)
+     * @see org.openmdx.portal.servlet.view.ControlState#refresh(boolean)
+     */
+    @Override
     public void refresh(
         boolean refreshData
     ) throws ServiceException {
@@ -98,6 +124,8 @@ public class AttributeTab
         }
     }
     
+    //-----------------------------------------------------------------------
+    // Members
     //-----------------------------------------------------------------------    
     private static final long serialVersionUID = -7375080538351577732L;
 

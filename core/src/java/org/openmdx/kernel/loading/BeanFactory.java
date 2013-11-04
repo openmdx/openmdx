@@ -131,7 +131,7 @@ public class BeanFactory<T> implements Factory<T> {
     private final Map<String,?> properties;
 
     /**
-     * The lazily acquired Java bean introspector
+     * The eagerly acquired Java bean introspector
      */
     private static final BeanIntrospector introspector = Classes.newPlatformInstance(
         "org.openmdx.base.beans.StandardBeanIntrospector",

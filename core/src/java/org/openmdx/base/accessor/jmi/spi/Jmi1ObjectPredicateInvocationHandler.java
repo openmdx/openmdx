@@ -5,10 +5,9 @@
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
  * ====================================================================
  *
- * This software is published under the BSD license
- * as listed below.
+ * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2007-2011, OMEX AG, Switzerland
+ * Copyright (c) 2007-2013, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -98,10 +97,10 @@ public class Jmi1ObjectPredicateInvocationHandler extends Jmi1QueryInvocationHan
                 return this.predicate.toString();
             } 
             else if("hashCode".equals(methodName)) {
-                return this.predicate.hashCode();
+                return Integer.valueOf(this.predicate.hashCode());
             } 
             else if ("equals".equals(methodName)) {
-                return args[0] == proxy; // Identity
+                return Boolean.valueOf(args[0] == proxy); // Identity
             }
         } 
         if (declaringClass == AnyTypePredicate.class) {

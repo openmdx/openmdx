@@ -352,7 +352,8 @@ public abstract class AbstractXMLStreamWriter implements XMLStreamWriter, LargeO
      * @return a newly created <code>Writer</code>
      * @throws UnsupportedEncodingException
      */
-    protected Writer newWriter(
+    @SuppressWarnings("resource")
+	protected Writer newWriter(
         OutputStream binaryStream,
         String encoding
     ) throws UnsupportedEncodingException {

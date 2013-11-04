@@ -214,7 +214,8 @@ public class ImportHelper {
     public void importObjects (
         ImportTarget target,
         Iterable<InputSource> sources,
-        ErrorHandler errorHandler
+        ErrorHandler errorHandler,
+        ImportMode defaultOperation
     ) throws ServiceException {
         target.importProlog();
         boolean success = false;
@@ -224,7 +225,8 @@ public class ImportHelper {
                     newReader(
                         new ImportHandler(
                             target, 
-                            source
+                            source,
+                            defaultOperation
                         ), 
                         errorHandler
                     ).parse(

@@ -1,14 +1,14 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Description: ListAutocompleteControl 
+ * Description: FindObjectsAutocompleter 
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
  * ====================================================================
  *
  * This software is published under the BSD license
  * as listed below.
  * 
- * Copyright (c) 2004-2007, OMEX AG, Switzerland
+ * Copyright (c) 2004-2013, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -64,10 +64,12 @@ import org.openmdx.portal.servlet.action.FindObjectsAction;
 import org.openmdx.portal.servlet.attribute.AttributeValue;
 import org.openmdx.portal.servlet.attribute.ObjectReferenceValue;
 
-public class FindObjectsAutocompleter
-    implements Autocompleter_1_0, Serializable {
+/**
+ * FindObjectsAutocompleter
+ *
+ */
+public class FindObjectsAutocompleter implements Autocompleter_1_0, Serializable {
   
-    //-------------------------------------------------------------------------
     /**
      * Create an input field control with Ajax.Autocompleter based auto completion.
      * Multiple triples {filterByFeature, filterOperator, orderByFeature} can be specified.
@@ -76,6 +78,14 @@ public class FindObjectsAutocompleter
      * by the user. The completer uses the EVENT_FIND_OBJECTS of ObjectInspectorServlet
      * in order to get the objects located at the specified target object and
      * reference.
+     *
+     * @param target
+     * @param referenceName
+     * @param filterByType
+     * @param filterByFeature
+     * @param filterByLabel
+     * @param filterOperator
+     * @param orderByFeature
      */
     public FindObjectsAutocompleter(
         Path target,
@@ -101,12 +111,11 @@ public class FindObjectsAutocompleter
             i++
         ) {
             List<Action.Parameter> parameters = new ArrayList<Action.Parameter>();
-
             // xri
             parameters.add(
                 new Action.Parameter(
                     Action.PARAMETER_OBJECTXRI,
-                    this.target.toXri()
+                    this.target.toXRI()
                 )
             );
             // referenceName
@@ -173,7 +182,10 @@ public class FindObjectsAutocompleter
         }
     }
     
-    //-----------------------------------------------------------------------
+    /* (non-Javadoc)
+     * @see org.openmdx.portal.servlet.Autocompleter_1_0#paint(org.openmdx.portal.servlet.ViewPort, java.lang.String, int, java.lang.String, org.openmdx.portal.servlet.attribute.AttributeValue, boolean, java.lang.CharSequence, java.lang.CharSequence, java.lang.CharSequence, java.lang.CharSequence, java.lang.CharSequence)
+     */
+    @Override
     public void paint(
         ViewPort p,
         String id,
@@ -184,15 +196,14 @@ public class FindObjectsAutocompleter
         CharSequence tdTag,
         CharSequence inputFieldDivClass,
         CharSequence inputFieldClass,        
-        CharSequence imgTag
+        CharSequence imgTag,
+        CharSequence onChangeValueScript
     ) throws ServiceException {
-        
     	SysLog.detail("> paint");        
         id = (id == null) || (id.length() == 0)
             ? fieldName + (tabIndex >= 0 ? "[" + tabIndex + "]" : "")
             : id;
         HtmlEncoder_1_0 htmlEncoder = p.getApplicationContext().getHtmlEncoder();
-        
         // Get current value as object reference
         ObjectReference objectReference = null;
         if(
@@ -203,7 +214,6 @@ public class FindObjectsAutocompleter
         }
         // Generate id if none is specified
         String acName = "ac_" + fieldName.replace(':', '_').replace('!', '_').replace('*', '_') + Integer.toString(tabIndex);
-        
         p.write("<div class=\"autocompleterMenu\">");
         p.write("  <ul id=\"nav\" class=\"nav\" onmouseover=\"sfinit(this);\" >");
         p.write("    <li><a href=\"#\">", p.getImg("border=\"0\" alt=\"\" src=\"", p.getResourcePath("images/"), WebKeys.ICON_AUTOCOMPLETE_SELECT, "\""), "</a>");
@@ -215,8 +225,8 @@ public class FindObjectsAutocompleter
         p.write("    </li>");
         p.write("  </ul>");                    
         p.write("</div>");       
-        p.write("<div ", (inputFieldDivClass == null ? "" : inputFieldDivClass), "><input type=\"text\" ", (inputFieldClass == null ? "" : inputFieldClass), " id=\"", id, ".Title\" name=\"", id, ".Title\" tabindex=\"", Integer.toString(tabIndex), "\" value=\"", (objectReference == null ? "" : objectReference.getTitle(true)), "\" />", (imgTag == null ? "" : "&nbsp;" + imgTag) ,"</div>");
-        p.write("<input type=\"hidden\" class=\"valueLLocked\" id=\"", id, "\" name=\"", id, "\" readonly value=\"", (objectReference == null ? "" : objectReference.getXRI()), "\" />");
+        p.write("<div ", (inputFieldDivClass == null ? "" : inputFieldDivClass), "><input type=\"text\" ", (inputFieldClass == null ? "" : inputFieldClass), " id=\"", id, ".Title\" name=\"", id, ".Title\" tabindex=\"", Integer.toString(tabIndex), "\" value=\"", (objectReference == null ? "" : objectReference.getTitle(true)), "\"", " />", (imgTag == null ? "" : "&nbsp;" + imgTag) ,"</div>");
+        p.write("<input type=\"hidden\" class=\"valueLLocked\" id=\"", id, "\" name=\"", id, "\" readonly value=\"", (objectReference == null ? "" : objectReference.getXRI()), "\"", (onChangeValueScript == null ? "" : "onChange=\"javascript:" + onChangeValueScript + "\""), " />");
         if(tdTag != null) {
             p.write("</td>");
             p.write(tdTag);
@@ -230,14 +240,16 @@ public class FindObjectsAutocompleter
         p.write("    {");
         p.write("      ", "paramName: '", WebKeys.REQUEST_PARAMETER_FILTER_VALUES, "', ");
         p.write("      ", "minChars: 0,");
-        p.write("      ", "afterUpdateElement: updateXriField");
+        p.write("      ", "afterUpdateElement: function(titleField, selectedItem){updateXriField(titleField,selectedItem);$('", id, "').onchange();}");
         p.write("    }");
         p.write("  );");
         p.write("</script>");
-        
     }
 
-    //-----------------------------------------------------------------------
+    /* (non-Javadoc)
+     * @see org.openmdx.portal.servlet.Autocompleter_1_0#hasFixedSelectableValues()
+     */
+    @Override
     public boolean hasFixedSelectableValues(
     ) {
         return false;

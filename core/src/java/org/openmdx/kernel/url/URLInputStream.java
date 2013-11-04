@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2009, OMEX AG, Switzerland
+ * Copyright (c) 2009-2013, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without 
@@ -114,7 +114,7 @@ public class URLInputStream extends InputStream {
 	 * @see java.io.InputStream#mark(int)
 	 */
     @Override
-	public void mark(int readlimit) {
+	public synchronized void mark(int readlimit) {
 		try {
 			getDelegate().mark(readlimit);
 		} catch (IOException e) {
@@ -174,7 +174,7 @@ public class URLInputStream extends InputStream {
 	 * @see java.io.InputStream#reset()
 	 */
     @Override
-	public void reset() throws IOException {
+	public synchronized void reset() throws IOException {
 		getDelegate().reset();
 	}
 

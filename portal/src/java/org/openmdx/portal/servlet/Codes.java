@@ -8,7 +8,7 @@
  * This software is published under the BSD license
  * as listed below.
  * 
- * Copyright (c) 2004-2011, OMEX AG, Switzerland
+ * Copyright (c) 2004-2013, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -55,6 +55,7 @@ package org.openmdx.portal.servlet;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -68,21 +69,29 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 
+import javax.jdo.FetchPlan;
 import javax.jdo.JDOHelper;
 import javax.jdo.PersistenceManager;
+import javax.jdo.Query;
 import javax.jmi.reflect.RefObject;
 import javax.resource.cci.MappedRecord;
 
 import org.oasisopen.cci2.QualifierType;
 import org.oasisopen.jmi1.RefContainer;
+import org.omg.mof.spi.Names;
 import org.openmdx.application.dataprovider.cci.JmiHelper;
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.jmi1.Authority;
+import org.openmdx.base.mof.cci.ModelElement_1_0;
+import org.openmdx.base.mof.cci.Model_1_0;
 import org.openmdx.base.mof.cci.Multiplicity;
+import org.openmdx.base.mof.spi.Model_1Factory;
 import org.openmdx.base.naming.Path;
+import org.openmdx.base.persistence.cci.UserObjects;
 import org.openmdx.base.rest.spi.Object_2Facade;
 import org.openmdx.kernel.exception.BasicException;
+import org.openmdx.kernel.loading.Classes;
 import org.openmdx.kernel.log.SysLog;
 
 /**
@@ -160,8 +169,214 @@ public final class Codes implements Serializable {
 		private final Date validTo;
 	}
 	
+	/**
+	 * CodeContainer
+	 *
+	 */
+	public static class CodeContainer {
+		
+		/**
+		 * Constructor 
+		 *
+		 * @param id
+		 * @param names
+		 * @param codeEntries
+		 */
+		public CodeContainer(
+			Path id,
+			Set<String> names
+		) {
+			this.id = id;
+			this.names = names;
+			this.codeEntries = null;
+		}
+
+		/**
+		 * Retrieve id.
+		 *
+		 * @return Returns the id.
+		 */
+		public Path getId() {
+			return this.id;
+		}
+		
+		/**
+		 * Retrieve names.
+		 *
+		 * @return Returns the names.
+		 */
+		public Set<String> getNames(
+		) {
+			return this.names;
+		}
+		
+		/**
+		 * Retrieve code entries.
+		 *
+		 * @return Returns the entries.
+		 */
+		public SortedMap<Short,CodeEntry> getCodeEntries(
+			PersistenceManager pm
+		) {
+			if(this.codeEntries == null) {
+				Model_1_0 model = Model_1Factory.getModel();
+				RefObject_1_0 codeEntryContainer = (RefObject_1_0)pm.getObjectById(this.id);
+	    		SortedMap<Short,CodeEntry> codeEntries = new TreeMap<Short,CodeEntry>();
+	            // Try to get query for code entry retrieval. Set fetch 
+	            // plan to FetchPlan.ALL in order to improve performance. 
+	    		Query entryQuery = null;
+	    		try {
+	    			ModelElement_1_0 entryDef = model.getElementType(
+	    				model.getReferenceType(codeEntryContainer.refGetPath().getChild("entry"))
+	    			);
+	    			String entryClassName = Names.toClassName(
+	    				(String)entryDef.objGetValue("qualifiedName"),
+	    				Names.JMI1_PACKAGE_SUFFIX
+	    			);
+	    			Class<?> entryClass = Classes.getApplicationClass(entryClassName);
+	    			entryQuery = pm.newQuery(entryClass);
+	    			entryQuery.getFetchPlan().setGroup(FetchPlan.ALL);    			
+	    		} catch(Exception ignore) {}
+	    		@SuppressWarnings("unchecked")
+	            RefContainer<RefObject_1_0> entries = (RefContainer)codeEntryContainer.refGetValue("entry");
+	    		for(RefObject_1_0 entry: entryQuery == null ? entries : entries.refGetAll(entryQuery)) {
+	                Short code = 0;
+	                try {
+	                    code = new Short(entry.refGetPath().getBase());
+	                } catch(Exception ignore) {}
+	                @SuppressWarnings("unchecked")
+	                List<String> shortTexts = (List<String>)entry.refGetValue("shortText");
+	                @SuppressWarnings("unchecked")
+	                List<String> longTexts = (List<String>)entry.refGetValue("longText");
+	    			codeEntries.put(
+	    				code,
+	    				new CodeEntry(
+	    					entry.refGetPath(),
+	    					new ArrayList<String>(shortTexts),
+	    					new ArrayList<String>(longTexts),
+	    					(String)entry.refGetValue("iconKey"),
+	    					(String)entry.refGetValue("color"),
+	    					(String)entry.refGetValue("backColor"),        					
+	    			        (Date)entry.refGetValue("validFrom"),
+	    			        (Date)entry.refGetValue("validTo")
+	    			    )
+	    			);
+	    		}
+	    		this.codeEntries = codeEntries;
+			}
+			return this.codeEntries;
+		}
+
+		private final Path id;
+		private final Set<String> names;
+		private SortedMap<Short,CodeEntry> codeEntries;
+	}
+
+	/**
+	 * CodeContainerManager
+	 *
+	 */
+	static class CodeContainerManager {
+
+		/**
+		 * Constructor 
+		 *
+		 * @param codeSegment
+		 */
+		public CodeContainerManager(
+			RefObject_1_0 codeSegment
+		) {
+			PersistenceManager pm = JDOHelper.getPersistenceManager(codeSegment);
+			this.pm = pm.getPersistenceManagerFactory().getPersistenceManager(
+    			UserObjects.getPrincipalChain(pm).toString(),
+    			null
+    		);
+			this.codeSegmentIdentity = codeSegment.refGetPath();
+			this.refreshedAt = 0L;
+		}
+
+		/**
+		 * Refresh codes.
+		 * 
+		 */
+		public void refresh(
+		) {
+			this.refreshedAt = 0L;
+		}
+
+		/**
+		 * Get code entries of given container.
+		 * 
+		 * @param name
+		 * @return
+		 */
+		public SortedMap<Short,CodeEntry> getCodeEntries(
+			String name
+		) {
+			if(System.currentTimeMillis() > this.refreshedAt + TTL) {
+				PersistenceManager pm = this.pm.getPersistenceManagerFactory().getPersistenceManager(
+	    			UserObjects.getPrincipalChain(this.pm).toString(),
+	    			null
+	    		);
+				Model_1_0 model = Model_1Factory.getModel();
+				RefObject_1_0 codeSegment = (RefObject_1_0)pm.getObjectById(this.codeSegmentIdentity);
+		        // Try to get query for code entry container retrieval. Set fetch 
+		        // plan to FetchPlan.ALL in order to improve performance. 
+		        Query codeEntryContainerQuery = null;
+				try {
+					ModelElement_1_0 codeEntryContainerDef = model.getElementType(
+						model.getReferenceType(codeSegment.refGetPath().getChild("valueContainer"))
+					);
+					String codeEntryContainerClassName = Names.toClassName(
+						(String)codeEntryContainerDef.objGetValue("qualifiedName"),
+						Names.JMI1_PACKAGE_SUFFIX
+					);
+					Class<?> codeEntryContainerClass = Classes.getApplicationClass(codeEntryContainerClassName);
+			        codeEntryContainerQuery = pm.newQuery(codeEntryContainerClass);
+			        codeEntryContainerQuery.getFetchPlan().setGroup(FetchPlan.ALL);
+				} catch(Exception ignore) {}
+		        @SuppressWarnings("unchecked")
+		        RefContainer<RefObject_1_0> codeEntryContainers = (RefContainer)codeSegment.refGetValue("valueContainer");
+		        Map<String,CodeContainer> codeContainers = new TreeMap<String,CodeContainer>();
+		        for(RefObject_1_0 codeEntryContainer: codeEntryContainerQuery == null ? codeEntryContainers : codeEntryContainers.refGetAll(codeEntryContainerQuery)) {
+		        	@SuppressWarnings("unchecked")
+		            Set<String> codeEntryContainerNames = (Set<String>)codeEntryContainer.refGetValue("name");
+		        	Set<String> containerNames = new HashSet<String>(codeEntryContainerNames);
+		        	containerNames.add(
+		        		codeEntryContainer.refGetPath().getBase()
+		        	);
+		        	CodeContainer codeContainer = new CodeContainer(
+		        		codeEntryContainer.refGetPath(),
+		        		containerNames
+		        	);
+		        	for(String containerName: containerNames) {
+		        		codeContainers.put(
+		        			containerName,
+		        			codeContainer
+		        		);
+		        	}
+		        }
+		        try {
+		        	this.pm.close();
+		        } catch(Exception ignore) {}
+		        this.pm = pm;
+				this.codeContainers = codeContainers;
+				this.refreshedAt = System.currentTimeMillis();				
+			}
+			CodeContainer codeContainer = this.codeContainers.get(name);
+			return codeContainer == null
+				? null 
+				: codeContainer.getCodeEntries(this.pm);
+		}
+
+		private long refreshedAt = 0L;
+		private final Path codeSegmentIdentity;
+		private PersistenceManager pm;
+		private Map<String,CodeContainer> codeContainers = Collections.emptyMap();
+	}
+
     /**
-     * Constructor 
+     * Constructor.
      *
      * @param codeSegment
      * @throws ServiceException
@@ -169,36 +384,30 @@ public final class Codes implements Serializable {
     public Codes(
         RefObject_1_0 codeSegment
     ) {
-    	if(System.currentTimeMillis() > refreshedAt + TTL) {
-    		codeSegmentIdentity = codeSegment.refGetPath();
-    		PersistenceManager pm = JDOHelper.getPersistenceManager(codeSegment);
-    		refresh(pm);
-    	}
+    	this.codeContainerManager = new CodeContainerManager(codeSegment);
     }
 
     /**
      * Refresh codes.
+     * 
      * @param pm
      * @throws ServiceException
      */
-    public static void refresh(
-    	PersistenceManager pm
+    public void refresh(
     ) {
-    	if(codeSegmentIdentity != null) {
-        	RefObject_1_0 codeSegment = (RefObject_1_0)pm.getObjectById(codeSegmentIdentity);
-    		Map<String,SortedMap<Short,CodeEntry>> codeEntries = loadCodes(codeSegment);
-	        cachedCodeEntryContainer = codeEntries;
+    	if(this.codeContainerManager != null) {
+    		this.codeContainerManager.refresh();
 	        cachedShortTexts.clear();
 	        cachedLongTexts.clear();
 	        cachedIconKeys.clear();
 	        cachedColors.clear();
 	        cachedBackColors.clear();
-    		refreshedAt = System.currentTimeMillis();
     	}
     }
 
 	/**
 	 * Store codes to specified segment.
+	 * 
 	 * @param codeProviderIdentity
 	 * @param segmentName
 	 * @param pmf
@@ -297,6 +506,7 @@ public final class Codes implements Serializable {
 
 	/**
 	 * Store bundles in code segment.
+	 * 
 	 * @param codeSegmentIdentity
 	 * @param pm
 	 * @param bundles
@@ -376,60 +586,9 @@ public final class Codes implements Serializable {
 		);
 	}
 
-	/**
-	 * Load codes.
-	 * @param codeProviderIdentity
-	 * @param segmentName
-	 * @param pmf
-	 * @return
-	 * @throws ServiceException
-	 */
-	public static Map<String,SortedMap<Short,CodeEntry>> loadCodes(
-		RefObject_1_0 codeSegment
-	) {
-    	Map<String,SortedMap<Short,CodeEntry>> codeEntryContainers = new ConcurrentHashMap<String,SortedMap<Short,CodeEntry>>();    	
-        @SuppressWarnings("unchecked")
-        Collection<RefObject_1_0> valueContainers = (Collection)codeSegment.refGetValue("valueContainer");
-        for(RefObject_1_0 valueContainer: valueContainers) {
-        	Set<String> containerNames = new HashSet<String>( 
-        		(Set<String>)valueContainer.refGetValue("name")
-        	);
-        	containerNames.add(
-        		valueContainer.refGetPath().getBase()
-        	);
-        	for(String containerName: containerNames) {
-        		SortedMap<Short,CodeEntry> codeEntries = new TreeMap<Short,CodeEntry>();
-        		@SuppressWarnings("unchecked")
-                Collection<RefObject_1_0> entries = (Collection)valueContainer.refGetValue("entry");
-        		for(RefObject_1_0 entry: entries) {
-                    Short code = 0;
-                    try {
-                        code = new Short(entry.refGetPath().getBase());
-                    } catch(Exception e) {}        			
-        			codeEntries.put(
-        				code,
-        				new CodeEntry(
-        					entry.refGetPath(),
-        					new ArrayList<String>((List<String>)entry.refGetValue("shortText")),
-        					new ArrayList<String>((List<String>)entry.refGetValue("longText")),
-        					(String)entry.refGetValue("iconKey"),
-        					(String)entry.refGetValue("color"),
-        					(String)entry.refGetValue("backColor"),        					
-        			        (Date)entry.refGetValue("validFrom"),
-        			        (Date)entry.refGetValue("validTo")
-        			    )
-        			);
-        		}
-        		codeEntryContainers.put(
-        			containerName,
-        			codeEntries
-        		);
-        	}
-        }
-        return codeEntryContainers;
-	}
-	
     /**
+     * Test whether entry is valid.
+     * 
      * @param codeEntry
      * @return
      */
@@ -446,7 +605,8 @@ public final class Codes implements Serializable {
 
     /**
      * Returns true if at least one short text is locale-specific. Returns false
-     * if all short texts are fallback texts (taken from locale 0)
+     * if all short texts are fallback texts (taken from locale 0).
+     * 
      * @param name
      * @param locale
      * @param codeAsKey
@@ -454,20 +614,20 @@ public final class Codes implements Serializable {
      * @param includeAll
      * @return
      */
-    private static boolean prepareShortText(
+    private boolean prepareShortText(
         String name,
         short locale,
         boolean codeAsKey,
         String key,
         boolean includeAll
     ) {
-    	SortedMap<Short,CodeEntry> codeEntryContainer = cachedCodeEntryContainer.get(name);
-        if(codeEntryContainer == null) {
+    	SortedMap<Short,CodeEntry> codeEntries = this.codeContainerManager.getCodeEntries(name);
+        if(codeEntries == null) {
             return false;
         }
         boolean hasLocaleSpecificTexts = false;
         SortedMap<Object,Object> shortTexts = new TreeMap<Object,Object>();
-        for(Map.Entry<Short,CodeEntry> entry: codeEntryContainer.entrySet()) {
+        for(Map.Entry<Short,CodeEntry> entry: codeEntries.entrySet()) {
             if(includeAll || entryIsValid(entry.getValue())) {
                 List texts = entry.getValue().getShortText();
                 Object text;
@@ -484,7 +644,7 @@ public final class Codes implements Serializable {
                 }
             }
         }
-        cachedShortTexts.put(
+        this.cachedShortTexts.put(
             key,
             shortTexts
         );
@@ -493,7 +653,8 @@ public final class Codes implements Serializable {
 
     /**
      * Returns true if at least one long text is locale-specific. Returns false
-     * if all long texts are fallback texts (taken from locale 0). 
+     * if all long texts are fallback texts (taken from locale 0).
+     * 
      * @param name
      * @param locale
      * @param codeAsKey
@@ -501,20 +662,20 @@ public final class Codes implements Serializable {
      * @param includeAll
      * @return
      */
-    private static boolean prepareLongText(
+    private boolean prepareLongText(
         String name,
         short locale,
         boolean codeAsKey,
         String key,
         boolean includeAll
     ) {
-    	SortedMap<Short,CodeEntry> codeEntryContainer = cachedCodeEntryContainer.get(name);
-        if(codeEntryContainer == null) {
+    	SortedMap<Short,CodeEntry> codeEntries = this.codeContainerManager.getCodeEntries(name);
+        if(codeEntries == null) {
             return false;
         }
         boolean hasLocaleSpecificTexts = false;
         SortedMap<Object,Object> longTexts = new TreeMap<Object,Object>();
-        for(Map.Entry<Short,CodeEntry> entry: codeEntryContainer.entrySet()) {
+        for(Map.Entry<Short,CodeEntry> entry: codeEntries.entrySet()) {
             if(includeAll || entryIsValid(entry.getValue())) {
                 List texts = entry.getValue().getLongText();
                 Object text;
@@ -545,7 +706,7 @@ public final class Codes implements Serializable {
                 }
             }
         }
-        cachedLongTexts.put(
+        this.cachedLongTexts.put(
             key,
             longTexts
         );
@@ -584,7 +745,7 @@ public final class Codes implements Serializable {
         SortedMap<Object,Object> longTexts = null;
         String key = this.getKey(name, locale, codeAsKey, includeAll);
         if((longTexts = cachedLongTexts.get(key)) == null) {
-            prepareLongText(
+            this.prepareLongText(
                 name,
                 locale,
                 codeAsKey,
@@ -597,6 +758,8 @@ public final class Codes implements Serializable {
     }
 
     /**
+     * Get long texts ordered by code.
+     * 
      * @param name
      * @param locale
      * @param includeAll
@@ -612,6 +775,8 @@ public final class Codes implements Serializable {
     }
 
     /**
+     * Get long texts ordered by text.
+     * 
      * @param name
      * @param locale
      * @param includeAll
@@ -627,6 +792,8 @@ public final class Codes implements Serializable {
     }
 
     /**
+     * Get short texts.
+     * 
      * @param name
      * @param locale
      * @param codeAsKey
@@ -641,20 +808,22 @@ public final class Codes implements Serializable {
     ) {
         SortedMap<Object,Object> shortTexts = null;
         String key = this.getKey(name, locale, codeAsKey, includeAll);
-        if((shortTexts = cachedShortTexts.get(key)) == null) {
-            prepareShortText(
+        if((shortTexts = this.cachedShortTexts.get(key)) == null) {
+            this.prepareShortText(
                 name,
                 locale,
                 codeAsKey,
                 key,
                 includeAll
             );
-            shortTexts = cachedShortTexts.get(key);
+            shortTexts = this.cachedShortTexts.get(key);
         }
         return shortTexts;      
     }
 
     /**
+     * Get short texts ordered by code.
+     * 
      * @param name
      * @param locale
      * @param includeAll
@@ -670,6 +839,8 @@ public final class Codes implements Serializable {
     }
 
     /**
+     * Get short texts ordered by text.
+     * 
      * @param name
      * @param locale
      * @param includeAll
@@ -685,6 +856,8 @@ public final class Codes implements Serializable {
     }
 
     /**
+     * Get icon keys.
+     * 
      * @param name
      * @param includeAll
      * @return
@@ -695,13 +868,13 @@ public final class Codes implements Serializable {
     ) {
         SortedMap<Short,String> iconKeys = null;
         String key = name + ":" + includeAll;
-        if((iconKeys = cachedIconKeys.get(key)) == null) {
-        	SortedMap<Short,CodeEntry> codeEntryContainer = cachedCodeEntryContainer.get(name);
-            if(codeEntryContainer == null) {
+        if((iconKeys = this.cachedIconKeys.get(key)) == null) {
+        	SortedMap<Short,CodeEntry> codeEntries = this.codeContainerManager.getCodeEntries(name);
+            if(codeEntries == null) {
                 return null;
             }
             iconKeys = new TreeMap<Short,String>();
-            for(Map.Entry<Short,CodeEntry> entry: codeEntryContainer.entrySet()) {
+            for(Map.Entry<Short,CodeEntry> entry: codeEntries.entrySet()) {
                 if(includeAll || entryIsValid(entry.getValue())) {
                     iconKeys.put(
                         entry.getKey(), 
@@ -709,7 +882,7 @@ public final class Codes implements Serializable {
                     );
                 }
             }
-            cachedIconKeys.put(
+            this.cachedIconKeys.put(
                 key,
                 iconKeys
             );
@@ -718,6 +891,8 @@ public final class Codes implements Serializable {
     }
 
     /**
+     * Get colors.
+     * 
      * @param name
      * @param includeAll
      * @return
@@ -728,13 +903,13 @@ public final class Codes implements Serializable {
     ) {
         SortedMap<Short,String> colors = null;
         String key = name + ":" + includeAll;
-        if((colors = cachedColors.get(key)) == null) {
-        	SortedMap<Short,CodeEntry> codeEntryContainer = cachedCodeEntryContainer.get(name);
-            if(codeEntryContainer == null) {
+        if((colors = this.cachedColors.get(key)) == null) {
+        	SortedMap<Short,CodeEntry> codeEntries = this.codeContainerManager.getCodeEntries(name);
+            if(codeEntries == null) {
                 return null;
             }
             colors = new TreeMap<Short,String>();
-            for(Map.Entry<Short,CodeEntry> entry: codeEntryContainer.entrySet()) {
+            for(Map.Entry<Short,CodeEntry> entry: codeEntries.entrySet()) {
                 if(includeAll || entryIsValid(entry.getValue())) {
                     colors.put(
                         entry.getKey(), 
@@ -742,7 +917,7 @@ public final class Codes implements Serializable {
                     );
                 }
             }
-            cachedColors.put(
+            this.cachedColors.put(
                 key,
                 colors
             );
@@ -751,6 +926,8 @@ public final class Codes implements Serializable {
     }
 
     /**
+     * Get back colors.
+     * 
      * @param name
      * @param includeAll
      * @return
@@ -761,13 +938,13 @@ public final class Codes implements Serializable {
     ) {
         SortedMap<Short,String> backColors = null;
         String key = name + ":" + includeAll;
-        if((backColors = cachedBackColors.get(key)) == null) {
-        	SortedMap<Short,CodeEntry> codeEntryContainer = cachedCodeEntryContainer.get(name);
-            if(codeEntryContainer == null) {
+        if((backColors = this.cachedBackColors.get(key)) == null) {
+        	SortedMap<Short,CodeEntry> codeEntries = this.codeContainerManager.getCodeEntries(name);
+            if(codeEntries == null) {
                 return null;
             }
             backColors = new TreeMap<Short,String>();
-            for(Map.Entry<Short,CodeEntry> entry: codeEntryContainer.entrySet()) {
+            for(Map.Entry<Short,CodeEntry> entry: codeEntries.entrySet()) {
                 if(includeAll || entryIsValid(entry.getValue())) {
                     backColors.put(
                         entry.getKey(), 
@@ -775,7 +952,7 @@ public final class Codes implements Serializable {
                     );
                 }
             }
-            cachedBackColors.put(
+            this.cachedBackColors.put(
                 key,
                 backColors
             );
@@ -799,7 +976,7 @@ public final class Codes implements Serializable {
             	String key = this.getKey(feature, locale, true, false);
             	// Prio 1: exact match for short texts
             	{
-	            	if(cachedShortTexts.get(key) == null) {            		
+	            	if(this.cachedShortTexts.get(key) == null) {            		
 	                    if(!prepareShortText(feature, locale, true, key, false)) {
 	                    	return code;
 	                    }
@@ -815,7 +992,7 @@ public final class Codes implements Serializable {
             	}
             	// Prio 2: try with long texts
             	{
-	            	if(cachedLongTexts.get(key) == null) {            		
+	            	if(this.cachedLongTexts.get(key) == null) {            		
 	                    if(!prepareLongText(feature, locale, true, key, false)) {
 	                    	return code;
 	                    }
@@ -850,14 +1027,12 @@ public final class Codes implements Serializable {
     // Time to live of cached elements is TTL unless refresh is explicitly called.
     private static final long TTL = 86400000L;
     
-    private static long refreshedAt = 0L;
-    private static Path codeSegmentIdentity = null;
-    private static Map<String,SortedMap<Short,CodeEntry>> cachedCodeEntryContainer = new HashMap<String,SortedMap<Short,CodeEntry>>();    
-    private static final Map<String,SortedMap<Object,Object>> cachedShortTexts = new ConcurrentHashMap<String,SortedMap<Object,Object>>();
-    private static final Map<String,SortedMap<Object,Object>> cachedLongTexts = new ConcurrentHashMap<String,SortedMap<Object,Object>>();
-    private static final Map<String,SortedMap<Short,String>> cachedIconKeys = new ConcurrentHashMap<String,SortedMap<Short,String>>();
-    private static final Map<String,SortedMap<Short,String>> cachedColors = new ConcurrentHashMap<String,SortedMap<Short,String>>();
-    private static final Map<String,SortedMap<Short,String>> cachedBackColors = new ConcurrentHashMap<String,SortedMap<Short,String>>();
+    private final CodeContainerManager codeContainerManager;  
+    private final Map<String,SortedMap<Object,Object>> cachedShortTexts = new ConcurrentHashMap<String,SortedMap<Object,Object>>();
+    private final Map<String,SortedMap<Object,Object>> cachedLongTexts = new ConcurrentHashMap<String,SortedMap<Object,Object>>();
+    private final Map<String,SortedMap<Short,String>> cachedIconKeys = new ConcurrentHashMap<String,SortedMap<Short,String>>();
+    private final Map<String,SortedMap<Short,String>> cachedColors = new ConcurrentHashMap<String,SortedMap<Short,String>>();
+    private final Map<String,SortedMap<Short,String>> cachedBackColors = new ConcurrentHashMap<String,SortedMap<Short,String>>();
 
 }
 

@@ -1,14 +1,14 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Description: ShowObjectView 
+ * Description: NewObjectAction 
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
  * ====================================================================
  *
  * This software is published under the BSD license
  * as listed below.
  * 
- * Copyright (c) 2004-2007, OMEX AG, Switzerland
+ * Copyright (c) 2004-2013, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -73,10 +73,17 @@ import org.openmdx.portal.servlet.view.ObjectView;
 import org.openmdx.portal.servlet.view.ShowObjectView;
 import org.openmdx.portal.servlet.view.ViewMode;
 
+/**
+ * NewObjectAction
+ *
+ */
 public class NewObjectAction extends BoundAction {
 
 	public final static int EVENT_ID = 5;
 
+	/* (non-Javadoc)
+	 * @see org.openmdx.portal.servlet.action.BoundAction#perform(org.openmdx.portal.servlet.view.ObjectView, javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, java.lang.String, javax.servlet.http.HttpSession, java.util.Map, org.openmdx.portal.servlet.ViewsCache, org.openmdx.portal.servlet.ViewsCache)
+	 */
 	@Override
     public ActionPerformResult perform(
         ObjectView view,
@@ -91,12 +98,12 @@ public class NewObjectAction extends BoundAction {
 		ShowObjectView currentView = (ShowObjectView)view;
     	ObjectView nextView = currentView;    	
         ViewPort.Type nextViewPortType = null;
-        ApplicationContext application = currentView.getApplicationContext();
+        ApplicationContext app = currentView.getApplicationContext();
         try {
             String forClass = Action.getParameter(parameter, Action.PARAMETER_FOR_CLASS);
             String forReference = Action.getParameter(parameter, Action.PARAMETER_FOR_REFERENCE);
             SysLog.detail("creating object", Action.PARAMETER_FOR_CLASS + "=" + forClass + "; " + Action.PARAMETER_FOR_REFERENCE + "=" + forReference);
-            PersistenceManager pm = application.getNewPmData();
+            PersistenceManager pm = app.getNewPmData();
             RefObject_1_0 parent = (RefObject_1_0)pm.getObjectById(currentView.getRefObject().refGetPath()); 
             RefObject_1_0 newObject = (RefObject_1_0)parent.refOutermostPackage().refClass(forClass).refCreateInstance(null);
             newObject.refInitialize(false, false);
@@ -105,7 +112,7 @@ public class NewObjectAction extends BoundAction {
                 currentView.getContainerElementId(),
                 newObject,
                 null,
-                application,
+                app,
                 currentView.createHistoryAppendCurrent(),
                 currentView.getLookupType(),
                 parent,
@@ -114,12 +121,11 @@ public class NewObjectAction extends BoundAction {
                 currentView.getNavigationTarget(),
                 ViewMode.STANDARD
             );
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             ServiceException e0 = new ServiceException(e);
             SysLog.warning(e0.getMessage(), e0.getCause());
-            application.addErrorMessage(
-                application.getTexts().getErrorTextCannotEditObject(), new String[] { currentView.getRefObject().refMofId(), e.getMessage() }
+            app.addErrorMessage(
+                app.getTexts().getErrorTextCannotEditObject(), new String[] { currentView.getRefObject().refMofId(), e.getMessage() }
             );
         }
         return new ActionPerformResult(

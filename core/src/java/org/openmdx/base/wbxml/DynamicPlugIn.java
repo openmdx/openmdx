@@ -7,7 +7,7 @@
  * 
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2010, OMEX AG, Switzerland All rights reserved.
+ * Copyright (c) 2013, OMEX AG, Switzerland All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -136,16 +136,17 @@ public class DynamicPlugIn extends AbstractPlugIn {
                 "Value \"{0}\" is mapped to [{1}, {2}, {3}]",
                 value,
                 codeSpace,
-                0,
-                index);
+                Integer.valueOf(0),
+                Integer.valueOf(index)
+           );
         } else if (!value.equals(target[index])) {
             SysLog.log(
                 Level.WARNING,
                 "Both values \"{0}\" and \"{4}\" are mapped to [{1}, {2}, {3}]]",
                 value,
                 codeSpace,
-                0,
-                index,
+                Integer.valueOf(0),
+                Integer.valueOf(index),
                 target[index]
            );
         }
@@ -529,7 +530,7 @@ public class DynamicPlugIn extends AbstractPlugIn {
                 new BasicException.Parameter("value", argument));
         }
 
-        String value = this.stringSource.get(token);
+        String value = this.stringSource.get(Integer.valueOf(token));
         this.stringTarget = -1;
         if (value != null && !value.equals(argument)) {
             throw new ServiceException(
@@ -584,9 +585,10 @@ public class DynamicPlugIn extends AbstractPlugIn {
      * @see org.openmdx.base.xml.wbxml.spi.AbstractPlugIn#resolveString(int)
      */
     @Override
-    public CharSequence resolveString(int index)
-        throws ServiceException {
-        String value = this.stringSource.get(index);
+    public String resolveString(
+        int index
+    ) throws ServiceException {
+        String value = this.stringSource.get(Integer.valueOf(index));
         return value == null ? super.resolveString(index) : value;
     }
 

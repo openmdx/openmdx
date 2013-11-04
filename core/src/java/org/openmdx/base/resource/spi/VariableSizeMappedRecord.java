@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license  as listed below.
  * 
- * Copyright (c) 2004-2012, OMEX AG, Switzerland
+ * Copyright (c) 2004-2013, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -52,12 +52,13 @@ import java.io.ObjectOutputStream;
 import java.util.AbstractMap;
 import java.util.IdentityHashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import javax.resource.cci.MappedRecord;
 
-import org.openmdx.kernel.exception.BasicException;
+import org.openmdx.kernel.collection.InternalizedKeys;
 import org.openmdx.kernel.text.MultiLineStringRepresentation;
 import org.openmdx.kernel.text.format.IndentingFormatter;
 import org.w3c.cci2.ImmutableDatatype;
@@ -115,64 +116,7 @@ class VariableSizeMappedRecord
      */
     private static final long serialVersionUID = 7135299628146306393L;
 
-    /**
-     * Normalize the key to use an identity hash map.
-     * <p>
-     * This method supports
-     * <li><code>String</code>s
-     * <li><code>Integer</code>s in the range <code>-128</code> to <code>128</code>
-     * </ul>
-     * 
-     * @param key the key to be normalized
-     * 
-     * @return the normalized key
-     * 
-     * @exception IllegalArgumentException unless the key is one of<ul>
-     * <li>a <code>java.lang.String</code> instance
-     * <li>a <code>java.lang.Instance</code> instance in the range 
-     * <code>-128</code> to <code>127</code>
-     * </ul>
-     * @exception NullPointerException if the key is <code>null</code>
-     */
-    private static Object normalizeKey(
-        Object key
-    ) {
-        if(key instanceof String) {
-            return ((String)key).intern();
-        } else if (key instanceof Integer) {
-            Integer i = ((Integer) key).intValue();
-            Integer integerKey = Integer.valueOf(i);
-            if(integerKey != Integer.valueOf(i)) {
-                throw BasicException.initHolder(
-                    new IllegalArgumentException(
-                        "Inappropriate key value, the supported key range is implementation and configuration dependent",
-                        BasicException.newEmbeddedExceptionStack(
-                            BasicException.Code.DEFAULT_DOMAIN,
-                            BasicException.Code.BAD_PARAMETER,
-                            new BasicException.Parameter("actual-value", i)
-                        )
-                    ) 
-                );
-            }
-            return integerKey;
-        } else {
-            throw key == null ? new NullPointerException(
-                "Null keys are not allowed"
-            ) : BasicException.initHolder(
-                new IllegalArgumentException(
-                    "Inappropriate key class",
-                    BasicException.newEmbeddedExceptionStack(
-                        BasicException.Code.DEFAULT_DOMAIN,
-                        BasicException.Code.BAD_PARAMETER,
-                        new BasicException.Parameter("supported", String.class.getName(), Integer.class.getName()),
-                        new BasicException.Parameter("actual", key == null ? null : key.getClass().getName())
-                    )
-                )
-            );
-        }
-    }
-    
-    
+
     //------------------------------------------------------------------------
     // Implements Serializable
     //------------------------------------------------------------------------
@@ -215,7 +159,7 @@ class VariableSizeMappedRecord
            i++
        ){
            this.values.put(
-               VariableSizeMappedRecord.normalizeKey(in.readObject()),
+               InternalizedKeys.internalize(in.readObject()),
                in.readObject()
            );
        }
@@ -259,7 +203,7 @@ class VariableSizeMappedRecord
         Object value
     ){
         return this.values.put(
-            VariableSizeMappedRecord.normalizeKey(key), 
+            InternalizedKeys.internalize(key), 
             value
          );
     }
@@ -293,7 +237,7 @@ class VariableSizeMappedRecord
         Object key
     ) {
         return this.values.containsKey(
-            VariableSizeMappedRecord.normalizeKey(key)
+            InternalizedKeys.internalize(key)
         );
     }
 
@@ -315,7 +259,7 @@ class VariableSizeMappedRecord
         Object key
     ) {
         return this.values.get(
-            VariableSizeMappedRecord.normalizeKey(key)
+            InternalizedKeys.internalize(key)
         );
     }
 
@@ -336,7 +280,7 @@ class VariableSizeMappedRecord
         Object key
     ) {
         return this.values.remove(
-            VariableSizeMappedRecord.normalizeKey(key)
+            InternalizedKeys.internalize(key)
         );
     }
 
@@ -425,15 +369,29 @@ class VariableSizeMappedRecord
             Object thatValue = that.get(key);
 			if (thisValue == null) {
                 if (!(thatValue==null && that.containsKey(key))) return false;
-            } else if (thatValue instanceof ImmutableDatatype<?>){
-                if (!thatValue.equals(thisValue)) return false;
+            } else if (thisValue instanceof List<?> && thatValue instanceof List<?>){
+                List<?> thisList = (List<?>) thisValue;
+                List<?> thatList = (List<?>) thatValue;
+                int thisSize = thisList.size();
+                int thatSize = thatList.size();
+                if(thisSize == thatSize) {
+                    for(int j = 0; j < thisSize; j++) {
+                        if(!areEqual(thisList.get(j), thatList.get(j))) return false;
+                    }
+                } else {
+                    return false;
+                }
             } else {
-                if (!thisValue.equals(thatValue)) return false;
+                if(!areEqual(thisValue, thatValue)) return false;
             }
         }
         return true;
     }
 
+    private static boolean areEqual(Object thisValue, Object thatValue){
+        return thatValue instanceof ImmutableDatatype<?> ? thatValue.equals(thisValue) : thisValue.equals(thatValue);
+    }
+    
     /**
      * Returns the hash code for the Record instance. 
      *

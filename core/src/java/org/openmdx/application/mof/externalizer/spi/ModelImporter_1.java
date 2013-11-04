@@ -331,8 +331,8 @@ implements ModelImporter_1_0 {
                 return new String();
             }
         }
-        if(ModelHelper.UNBOUNDED.equals(text)) {
-            multiplicity.append(ModelHelper.UNBOUNDED);
+        if(ModelHelper.UNBOUND.equals(text)) {
+            multiplicity.append(ModelHelper.UNBOUND);
             return new String();
         }
 
@@ -372,6 +372,8 @@ implements ModelImporter_1_0 {
             		case STREAM:	
                         multiplicity.append(Multiplicity.STREAM.toString());
                         return text.substring(lastPos).trim();
+                    case MAP: case OPTIONAL: case SINGLE_VALUE:
+                        break; // TODO
             	}
             }
         } else {
@@ -437,28 +439,28 @@ implements ModelImporter_1_0 {
                     ),
                     ModelAttributes.REFERENCE
                 );
-                referenceDefFacade.attributeValuesAsList("container").addAll(
-                    associationEndDef1Facade.attributeValuesAsList("type")
+                referenceDefFacade.addAllToAttributeValuesAsList("container",
+                    associationEndDef1Facade.getAttributeValuesAsReadOnlyList("type")
                 );
-                referenceDefFacade.attributeValuesAsList("type").addAll(
-                    associationEndDef2Facade.attributeValuesAsList("type")
+                referenceDefFacade.addAllToAttributeValuesAsList("type",
+                    associationEndDef2Facade.getAttributeValuesAsReadOnlyList("type")
                 );
-                referenceDefFacade.attributeValuesAsList("referencedEnd").add(
+                referenceDefFacade.addToAttributeValuesAsList("referencedEnd",
                     associationEndDef2Facade.getPath()
                 );
-                referenceDefFacade.attributeValuesAsList("exposedEnd").add(
+                referenceDefFacade.addToAttributeValuesAsList("exposedEnd",
                     associationEndDef1Facade.getPath()
                 );
-                referenceDefFacade.attributeValuesAsList("multiplicity").addAll(
-                    associationEndDef2Facade.attributeValuesAsList("multiplicity")
+                referenceDefFacade.addAllToAttributeValuesAsList("multiplicity",
+                    associationEndDef2Facade.getAttributeValuesAsReadOnlyList("multiplicity")
                 );
-                referenceDefFacade.attributeValuesAsList("isChangeable").addAll(
-                    associationEndDef2Facade.attributeValuesAsList("isChangeable")
+                referenceDefFacade.addAllToAttributeValuesAsList("isChangeable",
+                    associationEndDef2Facade.getAttributeValuesAsReadOnlyList("isChangeable")
                 );
-                referenceDefFacade.attributeValuesAsList("visibility").add(
+                referenceDefFacade.addToAttributeValuesAsList("visibility",
                     VisibilityKind.PUBLIC_VIS
                 );
-                referenceDefFacade.attributeValuesAsList("scope").add(
+                referenceDefFacade.addToAttributeValuesAsList("scope",
                     ScopeKind.INSTANCE_LEVEL
                 );
                 createModelElement(
@@ -485,21 +487,21 @@ implements ModelImporter_1_0 {
             Object_2Facade associationEndDef2Facade = Facades.asObject(associationEndDef2);
             // end1.aggregation=COMPOSITE --> end2.isChangeable=false
             if(AggregationKind.COMPOSITE.equals(associationEndDef1Facade.attributeValue("aggregation"))) {
-                associationEndDef2Facade.attributeValuesAsList("isChangeable").clear();
-                associationEndDef2Facade.attributeValuesAsList("isChangeable").add(
+                associationEndDef2Facade.replaceAttributeValuesAsListBySingleton(
+                    "isChangeable",
                     Boolean.FALSE
                 );
             }
             if(AggregationKind.COMPOSITE.equals(associationEndDef2Facade.attributeValue("aggregation"))) {
-                associationEndDef1Facade.attributeValuesAsList("isChangeable").clear();
-                associationEndDef1Facade.attributeValuesAsList("isChangeable").add(
+                associationEndDef1Facade.replaceAttributeValuesAsListBySingleton(
+                    "isChangeable",
                     Boolean.FALSE
                 );
             }
             // end1.aggregation=COMPOSITE --> end2.aggregation=AggregationKind.NONE
             if(
-                (AggregationKind.COMPOSITE.equals(associationEndDef1Facade.attributeValue("aggregation")) && !AggregationKind.NONE.equals(associationEndDef2Facade.attributeValuesAsList("aggregation").get(0))) ||
-                (AggregationKind.COMPOSITE.equals(associationEndDef2Facade.attributeValue("aggregation")) && !AggregationKind.NONE.equals(associationEndDef1Facade.attributeValuesAsList("aggregation").get(0)))
+                (AggregationKind.COMPOSITE.equals(associationEndDef1Facade.attributeValue("aggregation")) && !AggregationKind.NONE.equals(associationEndDef2Facade.getSingletonFromAttributeValuesAsList("aggregation"))) ||
+                (AggregationKind.COMPOSITE.equals(associationEndDef2Facade.attributeValue("aggregation")) && !AggregationKind.NONE.equals(associationEndDef1Facade.getSingletonFromAttributeValuesAsList("aggregation")))
             ) {
                 SysLog.error("Wrong aggregation. end1.aggregation='composite' --> end2.aggregation='none'");
                 throw new ServiceException(
@@ -514,8 +516,8 @@ implements ModelImporter_1_0 {
             }
             // end1.aggregation=COMPOSITE --> end2.multiplicity="1..1"
             if(
-                (AggregationKind.COMPOSITE.equals(associationEndDef1Facade.attributeValue("aggregation")) && !("1..1".equals(associationEndDef2Facade.attributeValuesAsList("multiplicity").get(0)) || "0..1".equals(associationEndDef2Facade.attributeValuesAsList("multiplicity").get(0)))) ||
-                (AggregationKind.COMPOSITE.equals(associationEndDef2Facade.attributeValue("aggregation")) && !("1..1".equals(associationEndDef1Facade.attributeValuesAsList("multiplicity").get(0)) || "0..1".equals(associationEndDef1Facade.attributeValuesAsList("multiplicity").get(0))))
+                (AggregationKind.COMPOSITE.equals(associationEndDef1Facade.attributeValue("aggregation")) && !("1..1".equals(associationEndDef2Facade.getSingletonFromAttributeValuesAsList("multiplicity")) || "0..1".equals(associationEndDef2Facade.getSingletonFromAttributeValuesAsList("multiplicity")))) ||
+                (AggregationKind.COMPOSITE.equals(associationEndDef2Facade.attributeValue("aggregation")) && !("1..1".equals(associationEndDef1Facade.getSingletonFromAttributeValuesAsList("multiplicity")) || "0..1".equals(associationEndDef1Facade.getSingletonFromAttributeValuesAsList("multiplicity"))))
             ) {
                 SysLog.error("Wrong multiplicity. end1.aggregation='composite' --> end2.multiplicity='1..1'|'0..1'");
                 throw new ServiceException(
@@ -574,7 +576,7 @@ implements ModelImporter_1_0 {
     ) throws ServiceException {
         Object_2Facade associationEndDefFacade = Facades.asObject(associationEndDef);
         if(
-            (associationEndDefFacade.attributeValuesAsList("qualifierName").size() > 0) &&
+            (associationEndDefFacade.getSizeOfAttributeValuesAsList("qualifierName") > 0) &&
             !((Boolean)associationEndDefFacade.attributeValue("isNavigable")).booleanValue()
         ) {
             SysLog.error("Found association end with qualifier which is not navigable. Only navigable association ends need a unique identifying qualifier.");

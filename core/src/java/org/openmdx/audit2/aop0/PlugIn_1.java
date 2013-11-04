@@ -103,6 +103,11 @@ public class PlugIn_1 implements Configuration, PlugIn_1_0 {
     protected Path[] auditPrefix;
 
     /**
+     * The XRI pattern of the objects not to be audited
+     */
+    protected Path[] exclusionPattern = new Path[]{};
+    
+    /**
      * The involvement persistence mode
      */
     private InvolvementPersistence involvementPersistence = InvolvementPersistence.STANDARD;
@@ -115,6 +120,9 @@ public class PlugIn_1 implements Configuration, PlugIn_1_0 {
         ObjectState.PERSISTENT_DELETED
     );
 
+    /**
+     * Pattern to validate a segment XRI
+     */
     private static final Path SEGMENT_PATTERN = new Path(
         "xri://@openmdx*($..)/provider/($..)/segment/($..)"
     ).lock();
@@ -181,21 +189,48 @@ public class PlugIn_1 implements Configuration, PlugIn_1_0 {
     /* (non-Javadoc)
 	 * @see org.openmdx.base.aop0.PlugIn_1_0#getPlugInObject(java.lang.Class)
 	 */
+    @Override
 	public <T> T getPlugInObject(Class<T> type) {
         return 
         	Configuration.class == type ? type.cast(this) :
         	UpdateAvoidance.class == type ? type.cast(UpdateAvoidance_1.plugInObject) :
     		null;
     }
+	
+	/**
+	 * Internalize a pattern resource identifier
+	 * 
+	 * @param value
+	 *            an XRI's <code>String</code> representation
+	 * @return an XRI's <code>Path</code> representation
+	 */
+	protected Path toPattern(String value) {
+	    if (value != null) {
+	        Path pattern = new Path(value);
+	        if(pattern.containsWildcard()) {
+	            return pattern;
+	        }
+	    }
+	    throw BasicException.initHolder(
+	        new IllegalArgumentException(
+	            "Valid pattern expected",
+	            BasicException.newEmbeddedExceptionStack(
+	                BasicException.Code.DEFAULT_DOMAIN,
+	                BasicException.Code.BAD_PARAMETER,
+	                new BasicException.Parameter("xri", value)
+	                )
+	            )
+	        );
+	}
 
     /**
-     * Internalize a resource identifier
+     * Internalize a prefix resource identifier
      * 
      * @param value
      *            an XRI's <code>String</code> representation
      * @return an XRI's <code>Path</code> representation
      */
-    private static Path toPrefix(String value) {
+    protected Path toPrefix(String value) {
         if (value != null) {
             Path candidate = new Path(value);
             if (candidate.toXRI().endsWith("/($...)")) {
@@ -225,7 +260,7 @@ public class PlugIn_1 implements Configuration, PlugIn_1_0 {
      * 
      * @return an XRI's <code>Path</code> representation
      */
-    private static Path toSegmentIdentifier(String value) {
+    protected Path toSegmentIdentifier(String value) {
         if (value != null) {
             Path candidate = new Path(value);
             if (candidate.isLike(SEGMENT_PATTERN)) {
@@ -249,7 +284,7 @@ public class PlugIn_1 implements Configuration, PlugIn_1_0 {
      * 
      * @return an XRI's <code>String</code> representation
      */
-    private static String toXRI(Path value, boolean prefix) {
+    protected String toXRI(Path value, boolean prefix) {
         return 
             value == null ? null : 
             prefix ? value.toXRI() + "/($...)" : 
@@ -363,6 +398,66 @@ public class PlugIn_1 implements Configuration, PlugIn_1_0 {
     }
     
     /**
+     * Get an object id patterns for the before image
+     * 
+     * @param index
+     * 
+     * @return an object id patterns for the before image
+     */
+    public String getAuditPattern(int index) {
+        return toXRI(this.auditPrefix[index], true);
+    }
+    
+    /**
+     * Set the object id patterns for the objects not to be audited
+     * 
+     * @param value
+     *            the object id patterns for the objects not  to be audited
+     */
+    public void setExclusionPattern(String[] value) {
+        this.exclusionPattern = new Path[value.length];
+        int i = 0;
+        for (String exclusionPattern : value) {
+            this.exclusionPattern[i++] = toPattern(exclusionPattern);
+        }
+    }
+    
+    /**
+     * Retrieve the object id patterns for the objects not  to be audited
+     * 
+     * @return the object id patterns for the objects not  to be audited
+     */
+    public String[] getExclusionPattern() {
+        String[] exclusionPattern = new String[this.dataPrefix.length];
+        int i = 0;
+        for (Path value : this.exclusionPattern) {
+            exclusionPattern[i++] = toXRI(value, false);
+        }
+        return exclusionPattern;
+    }
+
+    /**
+     * Set an object id patterns for objects not to be audited
+     * 
+     * @param index
+     * @param value
+     */
+    public void setExclusionPattern(int index, String value) {
+        this.exclusionPattern[index] = toPattern(value);
+    }
+
+    /**
+     * Get an object id patterns for objects not to be audited
+     * 
+     * @param index
+     * 
+     * @return an object id patterns for objects not to be audited
+     */
+    public String getExclusionPattern(int index) {
+        return toXRI(this.exclusionPattern[index], false);
+    }
+
+    /**
      * Retrieve involvementPersistence.
      *
      * @return Returns the involvementPersistence.
@@ -387,25 +482,15 @@ public class PlugIn_1 implements Configuration, PlugIn_1_0 {
     /* (non-Javadoc)
      * @see org.openmdx.audit2.spi.Configuration#getPersistenceMode()
      */
-//  @Override
+    @Override
     public InvolvementPersistence getPersistenceMode() {
         return this.involvementPersistence;
-    }
-
-    /**
-     * Get an object id patterns for the before image
-     * 
-     * @param index
-     * 
-     * @return an object id patterns for the before image
-     */
-    public String getAuditPattern(int index) {
-        return toXRI(this.auditPrefix[index], true);
     }
 
     /* (non-Javadoc)
      * @see org.openmdx.audit2.spi.Configuration#getMapping()
      */
+    @Override
     public Map<Path, Path> getMapping() {
         return this.mapping;
     }
@@ -413,6 +498,7 @@ public class PlugIn_1 implements Configuration, PlugIn_1_0 {
     /* (non-Javadoc)
      * @see org.openmdx.audit2.spi.Configuration#getAuditSegmentId()
      */
+    @Override
     public Path getAuditSegmentId(
         PersistenceManager context
     ) {
@@ -431,6 +517,7 @@ public class PlugIn_1 implements Configuration, PlugIn_1_0 {
      * org.openmdx.base.aop0.PlugIn_1_0#getQualifier(org.openmdx.base.accessor
      * .rest.DataObject_1, java.lang.String)
      */
+    @Override
     public String getQualifier(DataObject_1 object, String qualifier)
     throws ServiceException {
         return qualifier;
@@ -443,6 +530,7 @@ public class PlugIn_1 implements Configuration, PlugIn_1_0 {
      * org.openmdx.base.aop0.PlugIn_1_0#setCore(org.openmdx.base.accessor.rest
      * .DataObject_1, org.openmdx.base.accessor.rest.DataObject_1)
      */
+    @Override
     public void postSetCore(
         DataObject_1 target, 
         DataObject_1 core
@@ -469,6 +557,11 @@ public class PlugIn_1 implements Configuration, PlugIn_1_0 {
             Path path = candidate.jdoGetObjectId();
             for(int i = 0; i < this.dataPrefix.length; i++) {
                 if(path.startsWith(this.dataPrefix[i])) {
+                    for(Path exclusionPattern : this.exclusionPattern) {
+                        if(path.isLike(exclusionPattern)) {
+                            return -1;
+                        }
+                    }
                     return i;
                 }
              }
@@ -496,6 +589,7 @@ public class PlugIn_1 implements Configuration, PlugIn_1_0 {
      * 
      * @see org.openmdx.base.aop0.PlugIn_1_0#flush(UnitOfWork_1,boolean)
      */
+    @Override
     public void flush(
         UnitOfWork_1 unitOfWork, 
         boolean beforeCompletion
@@ -572,7 +666,7 @@ public class PlugIn_1 implements Configuration, PlugIn_1_0 {
     /* (non-Javadoc)
      * @see org.openmdx.base.aop0.PlugIn_1_0#callbackOnCascadedDeletes()
      */
-//  @Override
+    @Override
     public boolean requiresCallbackOnCascadedDelete(
         DataObject_1 object
     ) throws ServiceException {
@@ -582,7 +676,7 @@ public class PlugIn_1 implements Configuration, PlugIn_1_0 {
 	/* (non-Javadoc)
 	 * @see org.openmdx.base.aop0.PlugIn_1_0#isExemptFromValidation(org.openmdx.base.mof.cci.ModelElement_1_0)
 	 */
-//  @Override
+    @Override
 	public boolean isExemptFromValidation(DataObject_1 object, ModelElement_1_0 feature)
 			throws ServiceException {
 		return false;
@@ -591,7 +685,7 @@ public class PlugIn_1 implements Configuration, PlugIn_1_0 {
 	/* (non-Javadoc)
 	 * @see org.openmdx.base.aop0.PlugIn_1_0#isAspect(org.openmdx.base.accessor.rest.DataObject_1)
 	 */
-//  @Override
+    @Override
 	public Boolean isAspect(DataObject_1 object) {
 		return null;
 	}

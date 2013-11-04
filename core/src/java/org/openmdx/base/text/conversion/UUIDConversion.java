@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2007, OMEX AG, Switzerland
+ * Copyright (c) 2004-2013, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without 
@@ -389,22 +389,24 @@ public class UUIDConversion {
         long mostSignificantBits,
         long leastSignificantBits
     ){
+        long msb = mostSignificantBits;
+        long lsb = leastSignificantBits;        
         StringBuilder uid = new StringBuilder(UID_FORMAT);
-        long leastSignificantSignum = leastSignificantBits < 0 ? 3 : 0;
-        leastSignificantBits &= 0x7FFFFFFFFFFFFFFFl;
-        long mostSignificantSignum = mostSignificantBits < 0 ? 3 : 0;
-        mostSignificantBits &= 0x7FFFFFFFFFFFFFFFl;
+        long leastSignificantSignum = lsb < 0 ? 3 : 0;
+        lsb &= 0x7FFFFFFFFFFFFFFFl;
+        long mostSignificantSignum = msb < 0 ? 3 : 0;
+        msb &= 0x7FFFFFFFFFFFFFFFl;
         for(int i = 0; i < 12; i++) {
-            uid.insert(0, forDigit(leastSignificantBits % 36));
-            leastSignificantBits /= 36;
+            uid.insert(0, forDigit(lsb % 36));
+            lsb /= 36;
         }
         for(int i = 0; i < 12; i++) {
-            uid.insert(0, forDigit(mostSignificantBits % 36));
-            mostSignificantBits /= 36;
+            uid.insert(0, forDigit(msb % 36));
+            msb /= 36;
         }
-        leastSignificantBits += leastSignificantSignum;
-        mostSignificantBits += mostSignificantSignum;
-        uid.insert(0, forDigit(6 * mostSignificantBits + leastSignificantBits));
+        lsb += leastSignificantSignum;
+        msb += mostSignificantSignum;
+        uid.insert(0, forDigit(6 * msb + lsb));
         return uid.toString();
     }
     

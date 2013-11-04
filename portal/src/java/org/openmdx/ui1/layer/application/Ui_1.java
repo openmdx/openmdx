@@ -81,6 +81,7 @@ import org.openmdx.application.dataprovider.cci.DataproviderRequestProcessor;
 import org.openmdx.application.dataprovider.cci.ServiceHeader;
 import org.openmdx.application.dataprovider.layer.application.Standard_1;
 import org.openmdx.application.dataprovider.spi.Layer_1;
+import org.openmdx.base.accessor.cci.SystemAttributes;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.AggregationKind;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
@@ -378,14 +379,26 @@ public class Ui_1 extends Standard_1 {
         }
     }
 
-    //-------------------------------------------------------------------------
+    /**
+     * Set default values for abstract field.
+     * 
+     * @param f
+     * @param toolTip
+     * @param isChangeable
+     * @param iconKey
+     * @param color
+     * @param backColor
+     * @throws ServiceException
+     */
     private void setAbstractFieldDefault(
     	MappedRecord f,
         List<Object> toolTip,
         boolean isChangeable,
         String iconKey,
         String color,
-        String backColor
+        String backColor,
+        String cssClassFieldGroup,
+        String cssClassObjectContainer
     ) throws ServiceException {
         this.setElementDefault(
             f,
@@ -393,13 +406,7 @@ public class Ui_1 extends Standard_1 {
             isChangeable,
             iconKey
         );
-    	Object_2Facade facade;
-        try {
-	        facade = Object_2Facade.newInstance(f);
-        }
-        catch (ResourceException e) {
-        	throw new ServiceException(e);
-        }        
+    	Object_2Facade facade = Facades.asObject(f);
         if(color != null) {
         	facade.attributeValuesAsList("color").add(color);
         }
@@ -408,13 +415,25 @@ public class Ui_1 extends Standard_1 {
         }
         facade.attributeValuesAsList("fontName").add("Tahoma");
         facade.attributeValuesAsList("fontSize").add(new BigDecimal(8.25));
-        facade.attributeValuesAsList("fontBold").add(new Boolean(false));
-        facade.attributeValuesAsList("fontItalic").add(new Boolean(false));
-        facade.attributeValuesAsList("fontStrikeout").add(new Boolean(false));
-        facade.attributeValuesAsList("fontUnderline").add(new Boolean(false));
+        facade.attributeValuesAsList("cssClassFieldGroup").add(cssClassFieldGroup);
+        facade.attributeValuesAsList("cssClassObjectContainer").add(cssClassObjectContainer);        
     }
 
-    //-------------------------------------------------------------------------
+    /**
+     * Set default values for labelled field.
+     * 
+     * @param f
+     * @param labels
+     * @param shortLabels
+     * @param toolTips
+     * @param isChangeable
+     * @param iconKey
+     * @param color
+     * @param backColor
+     * @param cssClassFieldGroup
+     * @param cssClassObjectContainer
+     * @throws ServiceException
+     */
     private void setLabelledFieldDefault(
     	MappedRecord f,
         List<Object> labels,
@@ -423,7 +442,9 @@ public class Ui_1 extends Standard_1 {
         boolean isChangeable,
         String iconKey,
         String color,
-        String backColor
+        String backColor,
+        String cssClassFieldGroup,
+        String cssClassObjectContainer
     ) throws ServiceException {
         List<Object> toolTipDefault = new ArrayList<Object>(toolTips);
         for(int i = 0; i < toolTipDefault.size(); i++) {
@@ -457,15 +478,11 @@ public class Ui_1 extends Standard_1 {
             isChangeable,
             iconKey,
             color,
-            backColor
+            backColor,
+            cssClassFieldGroup,
+            cssClassObjectContainer
         );
-    	Object_2Facade facade;
-        try {
-	        facade = Object_2Facade.newInstance(f);
-        }
-        catch (ResourceException e) {
-        	throw new ServiceException(e);
-        }                
+    	Object_2Facade facade = Facades.asObject(f);
         facade.attributeValuesAsList("label").addAll(labels);
         facade.attributeValuesAsList("shortLabel").addAll(shortLabelDefault);
     }
@@ -481,6 +498,8 @@ public class Ui_1 extends Standard_1 {
         String iconKey,
         String color,
         String backColor,
+        String cssClassFieldGroup,
+        String cssClassObjectContainer,
         String multiplicity,
         Integer spanRow,
         Integer skipRow,
@@ -499,15 +518,11 @@ public class Ui_1 extends Standard_1 {
             isChangeable,
             iconKey,
             color,
-            backColor
+            backColor,
+            cssClassFieldGroup,
+            cssClassObjectContainer
         );
-    	Object_2Facade facade;
-        try {
-	        facade = Object_2Facade.newInstance(f);
-        }
-        catch (ResourceException e) {
-        	throw new ServiceException(e);
-        }                        
+    	Object_2Facade facade = Facades.asObject(f);
         facade.attributeValuesAsList("multiplicity").add(multiplicity);
         facade.attributeValuesAsList("spanRow").add(spanRow);
         facade.attributeValuesAsList("skipRow").add(skipRow);
@@ -964,15 +979,15 @@ public class Ui_1 extends Standard_1 {
         }
         // Default isSortable=false, isFilterable=false if non-modeled element
         if(feature.getModelElement() == null) {
-        	elementDefinitionFacade.attributeValuesAsList("sortable").add(
-                Boolean.FALSE
-            );
-        	elementDefinitionFacade.attributeValuesAsList("filterable").add(
-                Boolean.FALSE
-            );
-        	elementDefinitionFacade.attributeValuesAsList("mandatory").add(
-                Boolean.FALSE
-            );
+        	if(elementDefinitionFacade.attributeValuesAsList("sortable").isEmpty()) {
+	        	elementDefinitionFacade.attributeValuesAsList("sortable").add(Boolean.FALSE);
+        	}
+        	if(elementDefinitionFacade.attributeValuesAsList("filterable").isEmpty()) {
+        		elementDefinitionFacade.attributeValuesAsList("filterable").add(Boolean.FALSE);
+        	}
+        	if(elementDefinitionFacade.attributeValuesAsList("mandatory").isEmpty()) {
+	        	elementDefinitionFacade.attributeValuesAsList("mandatory").add(Boolean.FALSE);
+        	}
         }
         // Default sizeXWeight
         if(!feature.isReference()) {
@@ -987,7 +1002,17 @@ public class Ui_1 extends Standard_1 {
         return elementDefinition;    
     }
 
-    //-------------------------------------------------------------------------
+    /**
+     * Map field definition to field.
+     * 
+     * @param field
+     * @param feature
+     * @param definition
+     * @param asMemberOfObjectContainer
+     * @param defaultMimeType
+     * @param defaultValue
+     * @throws ServiceException
+     */
     private void mapField(
     	MappedRecord field,
         StructuralFeatureDefinition feature,
@@ -1006,8 +1031,7 @@ public class Ui_1 extends Standard_1 {
 	        	);
 	        }
 	        definitionFacade = Object_2Facade.newInstance(definition);
-        }
-        catch (ResourceException e) {
+        } catch (ResourceException e) {
         	throw new ServiceException(e);
         }
         Model_1_0 model = this.getModel();
@@ -1031,7 +1055,7 @@ public class Ui_1 extends Standard_1 {
             );
             fieldFacade.attributeValuesAsList("titleIndex").add(
                 !definitionFacade.attributeValuesAsList("titleIndex").isEmpty() 
-                ? definitionFacade.attributeValue("titleIndex")
+                	? definitionFacade.attributeValue("titleIndex")
                     : new Integer(0)
             );
         }
@@ -1047,14 +1071,13 @@ public class Ui_1 extends Standard_1 {
             isAdditionalElementDefinition
         ) {
             mapToString = true;
-        }
-        // decimal
-        else if(
+        } else if(
             PrimitiveTypes.DECIMAL.equals(typeName) ||
             PrimitiveTypes.SHORT.equals(typeName) ||
             PrimitiveTypes.LONG.equals(typeName) ||
             PrimitiveTypes.INTEGER.equals(typeName)
         ) {
+            // decimal
         	fieldFacade.getValue().setRecordName("org:openmdx:ui1:NumberField");
             BigDecimal defaultMinValue = null;
             BigDecimal defaultMaxValue = null;
@@ -1063,16 +1086,13 @@ public class Ui_1 extends Standard_1 {
                 defaultMinValue = new BigDecimal(Long.MIN_VALUE);
                 defaultMaxValue = new BigDecimal(Long.MAX_VALUE);
                 defaultDecimalPlaces = new Integer(2);
-            }
-            else if(PrimitiveTypes.SHORT.equals(typeName)) {
+            } else if(PrimitiveTypes.SHORT.equals(typeName)) {
                 defaultMinValue = new BigDecimal(Short.MIN_VALUE);
                 defaultMaxValue = new BigDecimal(Short.MAX_VALUE);
-            }
-            else if(PrimitiveTypes.LONG.equals(typeName)) {
+            } else if(PrimitiveTypes.LONG.equals(typeName)) {
                 defaultMinValue = new BigDecimal(Long.MIN_VALUE);
                 defaultMaxValue = new BigDecimal(Long.MAX_VALUE);
-            }
-            else if(PrimitiveTypes.INTEGER.equals(typeName)) {
+            } else if(PrimitiveTypes.INTEGER.equals(typeName)) {
                 defaultMinValue = new BigDecimal(Integer.MIN_VALUE);
                 defaultMaxValue = new BigDecimal(Integer.MAX_VALUE);            
             }
@@ -1083,42 +1103,38 @@ public class Ui_1 extends Standard_1 {
             );
             fieldFacade.attributeValuesAsList("maxValue").add(
                 !definitionFacade.attributeValuesAsList("maxValue").isEmpty()
-                ? new BigDecimal((String)definitionFacade.attributeValue("maxValue"))
-                : defaultMaxValue
+	                ? new BigDecimal((String)definitionFacade.attributeValue("maxValue"))
+	                : defaultMaxValue
             );
             fieldFacade.attributeValuesAsList("decimalPlaces").add(
                 !definitionFacade.attributeValuesAsList("decimalPlaces").isEmpty()
-                ? new Integer(((Number)definitionFacade.attributeValue("decimalPlaces")).intValue())
-                : defaultDecimalPlaces        
+	                ? new Integer(((Number)definitionFacade.attributeValue("decimalPlaces")).intValue())
+	                : defaultDecimalPlaces        
             );
             fieldFacade.attributeValuesAsList("increment").add(
                 !definitionFacade.attributeValuesAsList("increment").isEmpty()
-                ? new BigDecimal((String)definitionFacade.attributeValue("increment"))
-                : new BigDecimal(1)
+	                ? new BigDecimal((String)definitionFacade.attributeValue("increment"))
+	                : new BigDecimal(1)
             );
             fieldFacade.attributeValuesAsList("hasThousandsSeparator").add(
                 !definitionFacade.attributeValuesAsList("hasThousandsSeparator").isEmpty()
-                ? (Boolean)definitionFacade.attributeValue("hasThousandsSeparator")
+                	? (Boolean)definitionFacade.attributeValue("hasThousandsSeparator")
                     : Boolean.TRUE
             );
-        }
-        // date
-        else if(PrimitiveTypes.DATE.equals(typeName)) {
+        } else if(PrimitiveTypes.DATE.equals(typeName)) {
+            // date
             fieldFacade.getValue().setRecordName("org:openmdx:ui1:DateField");
             fieldFacade.attributeValuesAsList("format").add("d");
-        }
-        // dateTime
-        else if(PrimitiveTypes.DATETIME.equals(typeName)) {
+        } else if(PrimitiveTypes.DATETIME.equals(typeName)) {
+            // dateTime
         	fieldFacade.getValue().setRecordName("org:openmdx:ui1:DateField");
         	fieldFacade.attributeValuesAsList("format").add("g");
-        }
-        // boolean
-        else if(PrimitiveTypes.BOOLEAN.equals(typeName)) {
+        } else if(PrimitiveTypes.BOOLEAN.equals(typeName)) {
+            // boolean
         	fieldFacade.getValue().setRecordName("org:openmdx:ui1:CheckBox");
         	fieldFacade.attributeValuesAsList("threeState").add(new Boolean(false));
-        }
-        // binary
-        else if(PrimitiveTypes.BINARY.equals(typeName)) {
+        } else if(PrimitiveTypes.BINARY.equals(typeName)) {
+            // binary
         	fieldFacade.getValue().setRecordName("org:openmdx:ui1:DocumentBox");
             if(defaultMimeType != null) {
                 fieldFacade.attributeValuesAsList("mimeType").add(defaultMimeType);
@@ -1128,9 +1144,8 @@ public class Ui_1 extends Standard_1 {
                 ? (Boolean)definitionFacade.attributeValue("inPlace")
                     : Boolean.FALSE
             );
-        }
-        // unknown primitive types are mapped to string
-        else if(model.isPrimitiveType(featureType)) {
+        } else if(model.isPrimitiveType(featureType)) {
+            // unknown primitive types are mapped to string
             mapToString = true;
         }
         if(mapToString) {
@@ -1140,15 +1155,15 @@ public class Ui_1 extends Standard_1 {
         	fieldFacade.attributeValuesAsList("multiline").add(new Boolean(false));
         	fieldFacade.attributeValuesAsList("maxLength").add(
                 !definitionFacade.attributeValuesAsList("maxLength").isEmpty()
-                ? (Integer)definitionFacade.attributeValue("maxLength")
+                	? (Integer)definitionFacade.attributeValue("maxLength")
                     : new Integer(Integer.MAX_VALUE)
             );
         	fieldFacade.attributeValuesAsList("autoSize").add(new Boolean(true));
         	fieldFacade.attributeValuesAsList("acceptsTab").add(new Boolean(false));
         	fieldFacade.attributeValuesAsList("isPassword").add(
         		definitionFacade.attributeValuesAsList("isPassword").isEmpty()
-                ? new Boolean(false)
-                : definitionFacade.attributeValue("isPassword")
+	                ? new Boolean(false)
+	                : definitionFacade.attributeValue("isPassword")
             );
         	fieldFacade.attributeValuesAsList("textAlign").add(new Short((short)0));
             if(defaultMimeType != null) {
@@ -1160,7 +1175,7 @@ public class Ui_1 extends Standard_1 {
             // as default take changeability from model. 
             Boolean isChangeable = feature.isChangeable();
             isChangeable = (definitionFacade.getAttributeValues("changeable") == null) || definitionFacade.attributeValuesAsList("changeable").isEmpty()
-            ? isChangeable
+            	? isChangeable
                 : (Boolean)definitionFacade.attributeValue("changeable"); 
             boolean isSortable = 
                 !"org:openmdx:base:ExtentCapable:identity".equals(feature.getQualifiedName()) &&
@@ -1174,25 +1189,27 @@ public class Ui_1 extends Standard_1 {
                 isChangeable.booleanValue(), 
                 (String)definitionFacade.attributeValue("iconKey"),
                 (String)definitionFacade.attributeValue("color"), 
-                (String)definitionFacade.attributeValue("backColor"), 
-                definitionFacade.attributeValuesAsList("multiplicity").isEmpty() ? 
-                    feature.getMultiplicity() : 
-                    (String)definitionFacade.attributeValue("multiplicity"),
-                !definitionFacade.attributeValuesAsList("spanRow").isEmpty() ? 
-                    (Integer)definitionFacade.attributeValue("spanRow") : 
-                    new Integer(1), 
-                !definitionFacade.attributeValuesAsList("skipRow").isEmpty() ? 
-                    (Integer)definitionFacade.attributeValue("skipRow") : 
-                    new Integer(0), 
+                (String)definitionFacade.attributeValue("backColor"),
+                (String)definitionFacade.attributeValue("cssClassFieldGroup"),
+                (String)definitionFacade.attributeValue("cssClassObjectContainer"),
+                definitionFacade.attributeValuesAsList("multiplicity").isEmpty() 
+                	? feature.getMultiplicity() 
+                	: (String)definitionFacade.attributeValue("multiplicity"),
+                !definitionFacade.attributeValuesAsList("spanRow").isEmpty() 
+                	? (Integer)definitionFacade.attributeValue("spanRow") 
+                	: 1,
+                !definitionFacade.attributeValuesAsList("skipRow").isEmpty() 
+                	? (Integer)definitionFacade.attributeValue("skipRow") 
+                	: 0, 
                 definitionFacade.attributeValuesAsList("filterable").isEmpty() ? 
                     !isReferenceField : 
                     ((Boolean)definitionFacade.attributeValue("filterable")).booleanValue(),
-                definitionFacade.attributeValuesAsList("sortable").isEmpty() ? 
-                    isSortable : 
-                    ((Boolean)definitionFacade.attributeValue("sortable")).booleanValue(),
-                definitionFacade.attributeValuesAsList("mandatory").isEmpty() ? 
-                	Multiplicity.SINGLE_VALUE.toString().equals(feature.getMultiplicity()) && feature.isChangeable() : 
-                    ((Boolean)definitionFacade.attributeValue("mandatory")).booleanValue(),
+                definitionFacade.attributeValuesAsList("sortable").isEmpty() 
+                	? isSortable 
+                	: ((Boolean)definitionFacade.attributeValue("sortable")).booleanValue(),
+                definitionFacade.attributeValuesAsList("mandatory").isEmpty() 
+                	? Multiplicity.SINGLE_VALUE.toString().equals(feature.getMultiplicity()) && feature.isChangeable() 
+                	: ((Boolean)definitionFacade.attributeValue("mandatory")).booleanValue(),
                 feature.getName(),
                 feature.getQualifiedName(),
                 (String)definitionFacade.attributeValue("dataBindingName")
@@ -1310,11 +1327,16 @@ public class Ui_1 extends Standard_1 {
         }
     }
 
-    //-------------------------------------------------------------------------
     /**
      * Add elements to attribute pane. The elements are grouped 
      * according to their order into tabs and field groups and ordered
-     * within the field groups. 
+     * within the field groups.
+     *  
+     * @param segmentIdentity
+     * @param pane
+     * @param featureDefinitions
+     * @param inspectorClass
+     * @throws ServiceException
      */
     @SuppressWarnings("unchecked")
     private void addElementsToAttributePane(
@@ -1359,8 +1381,7 @@ public class Ui_1 extends Standard_1 {
 	                        Boolean definitionIsActive = Boolean.TRUE;
 	                        if(definitionFacade.attributeValue("active") instanceof String) {
 	                            SysLog.error("Value of attibute 'active' is not instanceof Boolean", definition);
-	                        }                        
-	                        else {
+	                        } else {
 	                            definitionIsActive = (Boolean)definitionFacade.attributeValue("active");
 	                        }
 	                        // Only render if definition is active
@@ -1456,12 +1477,14 @@ public class Ui_1 extends Standard_1 {
 	                                    groupElementDefinitionFacade.attributeValuesAsList("label"),
 	                                    groupElementDefinitionFacade.attributeValuesAsList("shortLabel"),
 	                                    groupElementDefinitionFacade.attributeValuesAsList("toolTip"),
-	                                    groupElementDefinitionFacade.attributeValuesAsList("changeable").isEmpty() ? 
-	                                        this.changableDefaultValue : 
-	                                        ((Boolean)groupElementDefinitionFacade.attributeValue("changeable")).booleanValue(),
+	                                    groupElementDefinitionFacade.attributeValuesAsList("changeable").isEmpty() 
+	                                    	? this.changableDefaultValue 
+	                                    	: ((Boolean)groupElementDefinitionFacade.attributeValue("changeable")).booleanValue(),
 	                                    "N/A",
 	                                    (String)groupElementDefinitionFacade.attributeValue("color"),
-	                                    (String)groupElementDefinitionFacade.attributeValue("backColor")
+	                                    (String)groupElementDefinitionFacade.attributeValue("backColor"),
+	                                    (String)groupElementDefinitionFacade.attributeValue("cssClassFieldGroup"),
+	                                    (String)groupElementDefinitionFacade.attributeValue("cssClassObjectContainer")	                                    
 	                                );
 	                                this.setElementDefinitionDefaultLayout(group);
 	                                groupFacade.attributeValuesAsList("showMaxMember").addAll(
@@ -1534,8 +1557,7 @@ public class Ui_1 extends Standard_1 {
 	                                    members.add(
 	                                        Object_2Facade.getPath(element)
 	                                    );
-	                                }
-	                                else {
+	                                } else {
 	                                    members.add(
 	                                        l,
 	                                        Object_2Facade.getPath(element)
@@ -1555,8 +1577,7 @@ public class Ui_1 extends Standard_1 {
 	                        }
 	                    }
 	                }
-                }
-                catch (ResourceException e) {
+                } catch (ResourceException e) {
                 	throw new ServiceException(e);
                 }
             }      
@@ -1576,10 +1597,19 @@ public class Ui_1 extends Standard_1 {
         }
     }
 
-    //-------------------------------------------------------------------------
     /**
      * Add fields to container. Container's members are possibly modified.
      * Caller must store container.
+     * 
+     * @param segmentIdentity
+     * @param container
+     * @param containerName
+     * @param showMemberRange
+     * @param featureDefinitions
+     * @param inspectorClass
+     * @param memberMimeTypes
+     * @param memberDefaultValues
+     * @throws ServiceException
      */
     private void addFieldsToObjectContainer(
         Path segmentIdentity,
@@ -1610,20 +1640,16 @@ public class Ui_1 extends Standard_1 {
                 String featureName = (String)featureDefinition.getName();
                 if("name".equals(featureName)) {
                     featureN = featureDefinition;
-                }
-                else if("description".equals(featureName)) {
+                } else if("description".equals(featureName)) {
                     featureD = featureDefinition;
-                }
-                else if("title".equals(featureName)) {
+                } else if("title".equals(featureName)) {
                     featureT = featureDefinition;
-                }
-                else {
+                } else {
                     orderedFeatures.add(
                         featureDefinition
                     );
                 }
-            }
-            else {
+            } else {
                 orderedFeatures.add(
                     0, 
                     featureDefinition
@@ -1686,8 +1712,7 @@ public class Ui_1 extends Standard_1 {
 	                                    for(String e: range.substring(range.indexOf("-") + 1).split(":")) {
 	                                        orderTo.add(Integer.valueOf(e));
 	                                    }
-	                                }
-	                                else {
+	                                } else {
 	                                    orderFrom = new ArrayList<Integer>();
 	                                    for(String e: range.split(":")) {
 	                                        orderFrom.add(Integer.valueOf(e));
@@ -1702,8 +1727,7 @@ public class Ui_1 extends Standard_1 {
 	                                    break;
 	                                }
 	                            }
-	                        }
-	                        else {
+	                        } else {
 	                            isInShowMemberRange = true;
 	                        }
 	                        if(isInShowMemberRange) {
@@ -1715,13 +1739,11 @@ public class Ui_1 extends Standard_1 {
 	                                Object_2Facade.getPath(element),
 	                                elementDefinition
 	                            );
-   
 	                            // add element to container and sort by order
 	                            List<Object> members;
 	                            try {
 	                                members = Object_2Facade.newInstance(container).attributeValuesAsList("member");
-	                            }
-	                            catch (ResourceException e) {
+	                            } catch (ResourceException e) {
 	                            	throw new ServiceException(e);
 	                            }
 	                            int l = 0;
@@ -1743,8 +1765,7 @@ public class Ui_1 extends Standard_1 {
 	                                members.add(
 	                                    Object_2Facade.getPath(element)
 	                                );
-	                            }
-	                            else {
+	                            } else {
 	                                members.add(
 	                                    l,
 	                                    Object_2Facade.getPath(element)
@@ -1753,11 +1774,9 @@ public class Ui_1 extends Standard_1 {
 	                        }
 	                    }
 	                }
-                }
-                catch (NumberFormatException e) {
+                } catch (NumberFormatException e) {
                 	throw new ServiceException(e);
-                }
-                catch (ResourceException e) {
+                } catch (ResourceException e) {
                 	throw new ServiceException(e);
                 }
             }
@@ -2051,7 +2070,17 @@ public class Ui_1 extends Standard_1 {
         return new ArrayList<Ui_1.OperationDefinition>(featureDefinitions.values());
     }
 
-    //-------------------------------------------------------------------------
+    /**
+     * Add reference tab.
+     * 
+     * @param segmentIdentity
+     * @param panes
+     * @param feature
+     * @param forClass
+     * @param inspectorClassDef
+     * @param elementDefinitions
+     * @throws ServiceException
+     */
     private void addReferenceTab(
         Path segmentIdentity,
         Map<Path,MappedRecord> panes,        
@@ -2087,13 +2116,7 @@ public class Ui_1 extends Standard_1 {
         );
         // Create ui object containers for base and additional definitions
         for(MappedRecord definition: definitions) {
-        	Object_2Facade definitionFacade;
-            try {
-	            definitionFacade = Object_2Facade.newInstance(definition);
-            }
-            catch (ResourceException e) {
-            	throw new ServiceException(e);
-            }
+        	Object_2Facade definitionFacade = Facades.asObject(definition);
             if(
             	definitionFacade.attributeValuesAsList("active").isEmpty() || // default to true if active is not set
                 ((Boolean)definitionFacade.attributeValue("active")).booleanValue()
@@ -2122,17 +2145,10 @@ public class Ui_1 extends Standard_1 {
 	                        segmentIdentity.getDescendant(new String[]{"element", containerName}),
 	                        "org:openmdx:ui1:ObjectContainer"
 	                    ).getDelegate();
-                    }
-                    catch (ResourceException e) {
+                    } catch (ResourceException e) {
                     	throw new ServiceException(e);
                     }
-                    Object_2Facade containerFacade;
-                    try {
-	                    containerFacade = Object_2Facade.newInstance(container);
-                    }
-                    catch (ResourceException e) {
-                    	throw new ServiceException(e);
-                    }
+                    Object_2Facade containerFacade = Facades.asObject(container);
                     Boolean isChangeable = feature.isChangeable();
                     isChangeable = definitionFacade.attributeValuesAsList("changeable").isEmpty() ? 
                         isChangeable : 
@@ -2145,7 +2161,9 @@ public class Ui_1 extends Standard_1 {
                         isChangeable.booleanValue(),
                         "N/A",
                         (String)definitionFacade.attributeValue("color"),
-                        (String)definitionFacade.attributeValue("backColor")
+                        (String)definitionFacade.attributeValue("backColor"),
+                        (String)definitionFacade.attributeValue("cssClassFieldGroup"),
+                        (String)definitionFacade.attributeValue("cssClassObjectContainer")
                     );
                     containerFacade.attributeValuesAsList("showMaxMember").addAll(
                     	definitionFacade.attributeValuesAsList("showMaxMember")
@@ -2178,6 +2196,30 @@ public class Ui_1 extends Standard_1 {
                         null,
                         null
                     );
+                    // In case the referenced type is org:openmdx:base:ExtentCapable 
+                    // move the SystemAttributes at first order
+                    if("org:openmdx:base:ExtentCapable".equals(featureType.objGetValue("qualifiedName"))) {
+                    	List<Object> members = containerFacade.attributeValuesAsList("member");
+                    	List<Path> firstOrderMembers = new ArrayList<Path>();
+                    	for(Iterator<Object> i = members.iterator(); i.hasNext(); ) {
+                    		Path member = (Path)i.next();
+                    		if(member.getBase().endsWith(":" + SystemAttributes.OBJECT_IDENTITY)) {
+                    			firstOrderMembers.add(member);
+                    			i.remove();
+                    		} else if(
+                    			member.getBase().endsWith(":" + SystemAttributes.CREATED_AT) ||
+                    			member.getBase().endsWith(":" + SystemAttributes.CREATED_BY) ||
+                    			member.getBase().endsWith(":" + SystemAttributes.MODIFIED_AT) ||
+                    			member.getBase().endsWith(":" + SystemAttributes.MODIFIED_BY)                    			
+                    		) {
+                    			firstOrderMembers.add(0, member);
+                    			i.remove();
+                    		}
+                    	}
+                    	for(Path member: firstOrderMembers) {
+                    		containerFacade.attributeValuesAsList("member").add(0, member);
+                    	}
+                    }
                     // Limit number of members to maxMember (if defined)
                     int maxMember = !definitionFacade.attributeValuesAsList("maxMember").isEmpty() ? 
                         ((Number)definitionFacade.attributeValue("maxMember")).intValue()
@@ -2204,8 +2246,7 @@ public class Ui_1 extends Standard_1 {
 	                    segmentIdentity.getDescendant(new String[]{"element", tabName}),
 	                    "org:openmdx:ui1:Tab"
 	                ).getDelegate();
-                }
-                catch (ResourceException e) {
+                } catch (ResourceException e) {
                 	throw new ServiceException(e);
                 }                
             	Object_2Facade tabFacade = Facades.asObject(tab);
@@ -2223,8 +2264,7 @@ public class Ui_1 extends Standard_1 {
                 List<Object> members;
                 try {
 	                members = Object_2Facade.newInstance(pane).attributeValuesAsList("member");
-                }
-                catch (ResourceException e) {
+                } catch (ResourceException e) {
                 	throw new ServiceException(e);
                 }
                 int l = 0;
@@ -2237,20 +2277,22 @@ public class Ui_1 extends Standard_1 {
 	                    	definitionFacade.attributeValuesAsList("order"),
 	                        Object_2Facade.newInstance(elementDefinitions.get(members.get(pos))).attributeValuesAsList("order")
 	                    );
-                    }
-                    catch (ResourceException e) {
+                    } catch (ResourceException e) {
                     	throw new ServiceException(e);
                     }
-                    if(res == 0) { l = pos; r = pos; break;} 
-                    else if(res > 0) l = pos + 1;
-                    else if(res < 0) r = pos - 1;
+                    if(res == 0) {
+                    	l = pos; r = pos; break;
+                    } else if(res > 0) {
+                    	l = pos + 1;
+                    } else if(res < 0) {
+                    	r = pos - 1;
+                    }
                 }
                 if(members.isEmpty()) {
                     members.add(
                         Object_2Facade.getPath(tab)
                     );
-                }
-                else {
+                } else {
                     members.add(
                         l,
                         Object_2Facade.getPath(tab)
@@ -2261,8 +2303,7 @@ public class Ui_1 extends Standard_1 {
 	                Object_2Facade.newInstance(tab).attributeValuesAsList("member").add(
 	                    Object_2Facade.getPath(container)
 	                );
-                }
-                catch (ResourceException e) {
+                } catch (ResourceException e) {
                 	throw new ServiceException(e);
                 }
                 this.storeElement(
@@ -2422,7 +2463,16 @@ public class Ui_1 extends Standard_1 {
     	}
     }
 
-    //-------------------------------------------------------------------------
+    /**
+     * Map operation definition to operation pane.
+     * 
+     * @param segmentIdentity
+     * @param panes
+     * @param operationDef
+     * @param inspectorClass
+     * @param elementDefinitions
+     * @throws ServiceException
+     */
     private void addOperationPane(
         Path segmentIdentity,
         Map<Path,MappedRecord> panes,
@@ -2506,12 +2556,14 @@ public class Ui_1 extends Standard_1 {
 	                            groupElementDefinitionFacade.attributeValuesAsList("label"),
 	                            groupElementDefinitionFacade.attributeValuesAsList("shortLabel"),
 	                            groupElementDefinitionFacade.attributeValuesAsList("toolTip"),
-	                            groupElementDefinitionFacade.attributeValuesAsList("changeable").isEmpty() ? 
-	                                this.changableDefaultValue : 
-	                                ((Boolean)groupElementDefinitionFacade.attributeValue("changeable")).booleanValue(),
+	                            groupElementDefinitionFacade.attributeValuesAsList("changeable").isEmpty() 
+	                            	? this.changableDefaultValue 
+	                            	: ((Boolean)groupElementDefinitionFacade.attributeValue("changeable")).booleanValue(),
 	                            "N/A",
 	                            (String)groupElementDefinitionFacade.attributeValue("color"),
-	                            (String)groupElementDefinitionFacade.attributeValue("backColor")
+	                            (String)groupElementDefinitionFacade.attributeValue("backColor"),
+	                            (String)groupElementDefinitionFacade.attributeValue("cssClassFieldGroup"),
+	                            (String)groupElementDefinitionFacade.attributeValue("cssClassObjectContainer")
 	                        );
 	                        this.setElementDefinitionDefaultLayout(group);
 	                        tabFacade.attributeValuesAsList("member").add(
@@ -2554,8 +2606,7 @@ public class Ui_1 extends Standard_1 {
 	                );
 	            }
 	        }
-        }
-        catch (ResourceException e) {
+        } catch (ResourceException e) {
         	throw new ServiceException(e);
         }
     }
@@ -2614,7 +2665,13 @@ public class Ui_1 extends Standard_1 {
         );
     }
 
-    //-------------------------------------------------------------------------
+    /**
+     * Create inspector element.
+     * 
+     * @param segmentIdentity
+     * @param forClass
+     * @throws ServiceException
+     */
     private void createInspector(
         Path segmentIdentity,
         String forClass
@@ -2690,6 +2747,8 @@ public class Ui_1 extends Standard_1 {
 	                (String)definitionFacade.attributeValue("iconKey"),
 	                (String)definitionFacade.attributeValue("color"),
 	                (String)definitionFacade.attributeValue("backColor"),
+	                (String)definitionFacade.attributeValue("cssClassFieldGroup"),
+	                (String)definitionFacade.attributeValue("cssClassObjectContainer"),
 	                Multiplicity.SINGLE_VALUE.toString(),
 	                new Integer(1),
 	                new Integer(0),
@@ -2810,8 +2869,7 @@ public class Ui_1 extends Standard_1 {
 	            segmentIdentity,
 	            inspector
 	        );
-    	}
-    	catch(ResourceException e) {
+    	} catch(ResourceException e) {
     		throw new ServiceException(e);
     	}
     }

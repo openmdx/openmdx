@@ -304,6 +304,7 @@ public class RestParser {
      * 
      * @return a <code>Source</code>
      */
+    @SuppressWarnings("resource")
     public static RestSource asSource(
         ObjectInput input
     ){
@@ -359,7 +360,7 @@ public class RestParser {
 
         private final Record target;
 
-        private final Deque<MappedRecord> values = new ArrayDeque<MappedRecord>();
+        private final Deque<Record> values = new ArrayDeque<Record>();
 
         private String featureName = null;
 
@@ -391,7 +392,7 @@ public class RestParser {
             if (this.isQueryType(typeName)) {
                 return this.getQuery(xri);
             } else if (this.isStructureType(typeName)) {
-                return this.values.peek();
+                return (MappedRecord) this.values.peek();
             } else if (xri.isTransientObjectId()){
                 Object_2Facade facade = this.getObject(null);
                 MappedRecord delegate = facade.getDelegate();
@@ -419,7 +420,7 @@ public class RestParser {
             Object_2Facade object = Facades.newObject(
 			    xri == null ? this.source.getXRI(this.href) : xri
 			);
-			object.setValue(this.values.peek());
+			object.setValue((MappedRecord) this.values.peek());
 			if (this.version != null) {
 			    object.setVersion(Base64.decode(this.version));
 			}
@@ -453,79 +454,24 @@ public class RestParser {
                     //
                 } else if (name.indexOf('.') > 0) {
                     //
-                    // Object
+                    // Object or struct
                     //
                     if (target instanceof IndexedRecord) {
                         ((IndexedRecord)this.target).add((MappedRecord) this.getObject(null).getDelegate());
                         this.values.pop();
                     } else if (this.target instanceof MessageRecord) {
                         ((MessageRecord)this.target).setPath(this.source.getXRI(this.href));
-                        ((MessageRecord)this.target).setBody(this.values.peekLast());
+                        ((MessageRecord)this.target).setBody((MappedRecord) this.values.peekLast());
                         this.values.pop();
-                    } else if (this.isStructureType(this.values.peek().getRecordName()) && this.values.size() > 1){
-                        MappedRecord struct = this.values.pop();
-                        this.values.peek().put(this.featureName, struct);
+                    } else if(this.values.size() > 1 && isStructureType(this.values.peek().getRecordName())){
+                        this.values.pop(); // struct has been added by startElement()
                     }
-                } else if (
-                    ITEM_TAG.equals(name) || 
-                    (name.equals(this.featureName) && !ITEM_TAG.equals(this.previousEndElement))
-                ) {
-                    if (hasData()) {
-                        java.lang.Object data = getData();
-                        if(data instanceof String) {
-                            //
-                            // Map value
-                            //
-                            String text = (String) data;
-                            data =
-                                PrimitiveTypes.STRING.equals(featureType) ? text : 
-                                PrimitiveTypes.SHORT.equals(featureType) ? Datatypes.create(Short.class, text.trim()) :
-                                PrimitiveTypes.LONG.equals(featureType) ? Datatypes.create(Long.class, text.trim()) : 
-                                PrimitiveTypes.INTEGER.equals(featureType) ? Datatypes.create(Integer.class, text.trim()) : 
-                                PrimitiveTypes.DECIMAL.equals(featureType) ? Datatypes.create(BigDecimal.class,text.trim()) : 
-                                PrimitiveTypes.BOOLEAN.equals(featureType) ? Datatypes.create(Boolean.class, text.trim()) : 
-                                PrimitiveTypes.OBJECT_ID.equals(featureType) ? text.trim() : 
-                                PrimitiveTypes.DATETIME.equals(featureType) ? Datatypes.create(Date.class,text.trim()) : 
-                                PrimitiveTypes.DATE.equals(featureType) ? Datatypes.create(XMLGregorianCalendar.class, text.trim()) : 
-                                PrimitiveTypes.ANYURI.equals(featureType) ? Datatypes.create(URI.class, text.trim()) : 
-                                PrimitiveTypes.BINARY.equals(featureType) ? Base64.decode(text.trim()) : 
-                                featureType != null && model.isClassType(featureType) ? new Path(text.trim()) : text;
-                        }
-                        if(data == null && this.multiplicity != Multiplicity.SINGLE_VALUE && this.multiplicity != Multiplicity.OPTIONAL) {
-                            SysLog.warning(
-                                "Null feature for the given multiplicity ignored",
-                                multiplicity
-                            );
-                        } else {
-	                        switch(this.multiplicity) {
-		                        case SINGLE_VALUE: case OPTIONAL:
-		                            this.values.peek().put(this.featureName, data);
-		                            break;
-		                        case LIST: case SET:  
-		                            ((IndexedRecord) this.value).add(data);
-		                            break;
-		                        case SPARSEARRAY:
-		                            ((MappedRecord) this.value).put(
-	                                    Integer.valueOf(this.index), 
-	                                    data
-	                                );
-		                            break;
-		                        case STREAM:
-		                            this.values.peek().put(
-	                                    this.featureName,
-	                                    PrimitiveTypes.BINARY.equals(featureType) ? BinaryLargeObjects.valueOf((byte[]) data) : 
-	                                    PrimitiveTypes.STRING.equals(featureType) ? CharacterLargeObjects.valueOf((String) data) : 
-	                                    data
-	                                );
-		                            break;
-		                        default:
-		                            SysLog.warning(
-	                                    "Unsupported multiplicity, feature ignored",
-	                                    multiplicity
-	                                );
-	                        }
-                        }
-                    }
+                } else if (ITEM_TAG.equals(name)) { 
+                    propagateData();
+                } else if (this.peekMultivaluedMultiplicity() != null) {
+                    this.values.pop(); 
+                } else if (name.equals(this.featureName) && !ITEM_TAG.equals(this.previousEndElement)) {
+                    propagateData();
                 }
                 this.previousEndElement = name;
             } catch (Exception e) {
@@ -533,6 +479,83 @@ public class RestParser {
             }
         }
 
+        /**
+         * @throws ServiceException
+         */
+        @SuppressWarnings("unchecked")
+        private void propagateData()
+            throws ServiceException {
+            if (hasData()) {
+                java.lang.Object data = getData();
+                if(data instanceof String) {
+                    //
+                    // Map value
+                    //
+                    String text = (String) data;
+                    data =
+                        PrimitiveTypes.STRING.equals(featureType) ? text : 
+                        PrimitiveTypes.SHORT.equals(featureType) ? Datatypes.create(Short.class, text.trim()) :
+                        PrimitiveTypes.LONG.equals(featureType) ? Datatypes.create(Long.class, text.trim()) : 
+                        PrimitiveTypes.INTEGER.equals(featureType) ? Datatypes.create(Integer.class, text.trim()) : 
+                        PrimitiveTypes.DECIMAL.equals(featureType) ? Datatypes.create(BigDecimal.class,text.trim()) : 
+                        PrimitiveTypes.BOOLEAN.equals(featureType) ? Datatypes.create(Boolean.class, text.trim()) : 
+                        PrimitiveTypes.OBJECT_ID.equals(featureType) ? text.trim() : 
+                        PrimitiveTypes.DATETIME.equals(featureType) ? Datatypes.create(Date.class,text.trim()) : 
+                        PrimitiveTypes.DATE.equals(featureType) ? Datatypes.create(XMLGregorianCalendar.class, text.trim()) : 
+                        PrimitiveTypes.ANYURI.equals(featureType) ? Datatypes.create(URI.class, text.trim()) : 
+                        PrimitiveTypes.BINARY.equals(featureType) ? Base64.decode(text.trim()) : 
+                        featureType != null && model.isClassType(featureType) ? new Path(text.trim()) : text;
+                }
+                if(data == null && this.multiplicity != Multiplicity.SINGLE_VALUE && this.multiplicity != Multiplicity.OPTIONAL) {
+                    SysLog.warning(
+                        "Null feature for the given multiplicity ignored",
+                        multiplicity
+                    );
+                } else {
+                    switch(this.multiplicity) {
+                        case SINGLE_VALUE: case OPTIONAL:
+                            ((MappedRecord) this.values.peek()).put(this.featureName, data);
+                            break;
+                        case LIST: case SET:  
+                            ((IndexedRecord) this.value).add(data); // TODO honour index
+                            break;
+                        case SPARSEARRAY:
+                            ((MappedRecord) this.value).put(
+                                Integer.valueOf(this.index), 
+                                data
+                            );
+                            break;
+                        case STREAM:
+                            ((MappedRecord) this.values.peek()).put(
+                                this.featureName,
+                                PrimitiveTypes.BINARY.equals(featureType) ? BinaryLargeObjects.valueOf((byte[]) data) : 
+                                PrimitiveTypes.STRING.equals(featureType) ? CharacterLargeObjects.valueOf((String) data) : 
+                                data
+                            );
+                            break;
+                        default:
+                            SysLog.warning(
+                                "Unsupported multiplicity, feature ignored",
+                                multiplicity
+                            );
+                    }
+                }
+            }
+        }
+
+        private Multiplicity peekMultivaluedMultiplicity(
+        ){
+            String type = this.values.peek().getRecordName();
+            if(type.indexOf(':') < 0) {
+                for(Multiplicity candidate : Multiplicity.values()) {
+                    if(candidate.toString().equals(type)){
+                        return candidate;
+                    }
+                }
+            }
+            return null;
+        }
+        
         @SuppressWarnings("unchecked")
         @Override
         public void startElement(
@@ -560,10 +583,45 @@ public class RestParser {
                         // Begin object or struct
                         String typeName = qName.replace('.', ':');
                         MappedRecord mappedRecord = recordFactory.createMappedRecord(typeName);
-                        if(!this.values.isEmpty()) {
-                            this.values.peek().put(featureName, mappedRecord);
+                        if(this.isStructureType(typeName)){
+                            if(!this.values.isEmpty()) {
+                                Multiplicity multiplicity = peekMultivaluedMultiplicity();
+                                if(multiplicity == null) {
+                                    ((MappedRecord) this.values.peek()).put(featureName, mappedRecord);
+                                } else {
+                                    switch(multiplicity) {
+                                        case SET:
+                                            ((IndexedRecord)this.values.peek()).add(mappedRecord);
+                                            break;
+                                        case LIST:
+                                            this.index = attributes.getValue("index");
+                                            IndexedRecord list = (IndexedRecord)this.values.peek();
+                                            int index = Integer.parseInt(this.index);
+                                            if(index != list.size()) throw new ServiceException(
+                                                  BasicException.Code.DEFAULT_DOMAIN,
+                                                  BasicException.Code.NOT_SUPPORTED,
+                                                  "List indices must be ascending and without holes",
+                                                  new BasicException.Parameter("multiplicity", this.multiplicity),
+                                                  new BasicException.Parameter("index", this.index),
+                                                  new BasicException.Parameter("item", mappedRecord)
+                                            );
+                                            list.add(mappedRecord);
+                                            break;
+                                        case SPARSEARRAY: case MAP:
+                                            this.index = attributes.getValue("index");
+                                            ((MappedRecord)this.values.peek()).put(this.index, mappedRecord);
+                                            break;
+                                        default:
+                                            throw new ServiceException(
+                                                BasicException.Code.DEFAULT_DOMAIN,
+                                                BasicException.Code.ASSERTION_FAILURE,
+                                                "Unexpected multiplicity",
+                                                new BasicException.Parameter("multiplicity", multiplicity)
+                                            );
+                                    }
+                                }
+                            }
                         }
-                        this.values.push(mappedRecord);
                         String href = attributes.getValue("href");
                         if(href != null) {
                              this.href = href;
@@ -572,13 +630,13 @@ public class RestParser {
                         if(version != null){
                             this.version = version;
                         }
+                        this.values.push(mappedRecord);
                     } catch (ResourceException exception) {
                         throw new SAXException(exception);
                     }
                 } else if (ITEM_TAG.equals(qName)) {
                     this.index = attributes.getValue("index");
                 } else {
-                    this.index = null;
                     this.featureName = localName;
                     ModelElement_1_0 featureDef = getFeatureDef(
                         this.values.peek().getRecordName(),
@@ -588,19 +646,21 @@ public class RestParser {
                     this.multiplicity = getMultiplicity(featureDef);
                     switch(this.multiplicity) {
 	                    case LIST: case SET: 
-	                        this.values.peek().put(
+	                        ((MappedRecord) this.values.peek()).put(
                                 this.featureName, 
                                 this.value = recordFactory.createIndexedRecord(this.multiplicity.toString())
                             );
+	                        this.values.push(this.value);
 	                        break;
 	                    case SPARSEARRAY:
-	                        this.values.peek().put(
+	                        ((MappedRecord) this.values.peek()).put(
                                 this.featureName, 
                                 this.value = recordFactory.createMappedRecord(this.multiplicity.toString())
                             );
+                            this.values.push(this.value);
 	                        break;
 	                    case OPTIONAL:
-	                        this.values.peek().put(this.featureName, this.value = null);
+	                        ((MappedRecord) this.values.peek()).put(this.featureName, this.value = null);
 	                        break;
 	                    default:
 	                        this.value = null;
@@ -800,7 +860,7 @@ public class RestParser {
                     }
                     BasicException element = new BasicException(
                         this.exceptionDomain,
-                        Integer.valueOf(this.exceptionCode),
+                        Integer.parseInt(this.exceptionCode),
                         this.exceptionClass,
                         this.exceptionTime == null ? null : DateTimeFormat.EXTENDED_UTC_FORMAT.parse(exceptionTime),
                         this.methodName,

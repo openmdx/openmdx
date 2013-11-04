@@ -96,6 +96,7 @@
         <property name="org.openmdx.audit2.PlugIn.auditSegment" value="xri://@openmdx*org.openmdx.audit2/provider/Audit/segment/Standard"/>
         <property name="org.openmdx.audit2.PlugIn.auditPattern[0]" value="xri://@openmdx*test.openmdx.app1/provider/Audit/($...)"/>
         <property name="org.openmdx.audit2.PlugIn.dataPattern[0]" value="xri://@openmdx*test.openmdx.app1/provider/Data/($...)"/>
+        <property name="org.openmdx.audit2.PlugIn.exclusionPattern[0]" value="xri://@openmdx*test.openmdx.app1/provider/Data/segment/NO-AUDIT/($...)"/>
         <property name="org.openmdx.audit2.PlugIn.involvementPersistence" value="EMBEDDED"/>
         <property name="org.openmdx.base.PlugIn.class" value="org.openmdx.base.aop0.PlugIn_1"/>
     </persistence-manager-factory>    

@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  *
- * Copyright (c) 2010, OMEX AG, Switzerland
+ * Copyright (c) 2010-2013, OMEX AG, Switzerland
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or
@@ -159,7 +159,7 @@ public class HttpCookie implements Comparable<HttpCookie> {
    /**
     * Otherwise even the same Java object does not match itself unless it contains a dot
     */
-   private static final Boolean EMBEDDED_DOT_DOMAIN_HANDLING = false;
+   private static final Boolean EMBEDDED_DOT_DOMAIN_HANDLING = Boolean.FALSE;
 
    /**
     * The netscape date format
@@ -215,8 +215,8 @@ public class HttpCookie implements Comparable<HttpCookie> {
     * @return
     */
    private static String trim(String text) {
-      text = text.trim();
-      return text.startsWith("\"") && text.endsWith("\"") ? text.substring(1, text.length() - 1) : text;
+      String value = text.trim();
+      return value.startsWith("\"") && value.endsWith("\"") ? value.substring(1, value.length() - 1) : value;
    }
 
    /**
@@ -384,7 +384,7 @@ public class HttpCookie implements Comparable<HttpCookie> {
 
       // if there's no embedded dot in domain and domain is not .local
       boolean isLocalDomain = ".local".equalsIgnoreCase(domain);
-      if (EMBEDDED_DOT_DOMAIN_HANDLING) {
+      if (EMBEDDED_DOT_DOMAIN_HANDLING.booleanValue()) {
          int embeddedDotInDomain = domain.indexOf('.');
          if (embeddedDotInDomain == 0)
             embeddedDotInDomain = domain.indexOf('.', 1);

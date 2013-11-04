@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2008, OMEX AG, Switzerland
+ * Copyright (c) 2008-2013, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -136,23 +136,23 @@ class AlternativeDatatypeFactory implements ImmutableDatatypeFactory {
      * if the value can't be parsed
      */
     public ImmutableDate newDate(
-        String value
+        String rawValue
     ){
-        if(value == null) {
+        if(rawValue == null) {
             return null;
-        } else try {
-            value = DateTimeFormat.completeCentury(value);
+        }
+        String value;
+        try {
+            value = DateTimeFormat.completeCentury(rawValue);
         } catch (Exception exception) {
             throw new IllegalArgumentException(
                 "Century completion failure",
                 exception
             );
         }
-        if(basicDatePattern.matcher(value).matches()) {
-            return new ImmutableDate(value);
-        } else if(extendedDatePattern.matcher(value).matches()) {
-            return new ImmutableDate(value.replaceAll("-", ""));
-        } else {
+        if(extendedDatePattern.matcher(value).matches()) {
+            value = value.replaceAll("-", "");
+        } else if (!basicDatePattern.matcher(value).matches()) {
             throw BasicException.initHolder(
                 new IllegalArgumentException(
                     "The value does not match the org::w3c::date pattern",
@@ -165,6 +165,7 @@ class AlternativeDatatypeFactory implements ImmutableDatatypeFactory {
                 )
             );
         }
+        return new ImmutableDate(value);
     }
 
     /**

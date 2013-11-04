@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2005-2011, OMEX AG, Switzerland
+ * Copyright (c) 2005-2013, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -85,16 +85,6 @@ public class StandardMetaDataMapper extends AbstractMetaDataMapper {
 
     /**
      * Constructor 
-     *
-     * @param classDef
-     * @param writer
-     * @param model
-     * @param format
-     * @param packageSuffix
-     * @param sliceClassName
-     * @param metaData
-     * @param plugin
-     * @throws ServiceException
      */
     public StandardMetaDataMapper(
         ModelElement_1_0 classDef, 
@@ -104,6 +94,7 @@ public class StandardMetaDataMapper extends AbstractMetaDataMapper {
         String packageSuffix,
 		String sliceClassName, 
         MetaData_1_0 metaData, 
+        PrimitiveTypeMapper primitiveTypeMapper, 
         ObjectRepositoryMetadataPlugin plugin
     ) throws ServiceException {
         super(
@@ -114,6 +105,7 @@ public class StandardMetaDataMapper extends AbstractMetaDataMapper {
             packageSuffix, 
             sliceClassName,
             metaData,
+            primitiveTypeMapper, 
             plugin
         );
 	}
@@ -917,15 +909,15 @@ public class StandardMetaDataMapper extends AbstractMetaDataMapper {
     private boolean process;    
     private final ByteArrayOutputStream streamBasicAttributes = new ByteArrayOutputStream();
     private PrintWriter pwBasicAttributes;
-    private final ByteArrayOutputStream streamTransientAttributes = new ByteArrayOutputStream();;
+    private final ByteArrayOutputStream streamTransientAttributes = new ByteArrayOutputStream();
     private PrintWriter pwTransientAttributes;
-    private final ByteArrayOutputStream streamOneToOneRelationships = new ByteArrayOutputStream();;
+    private final ByteArrayOutputStream streamOneToOneRelationships = new ByteArrayOutputStream();
     private PrintWriter pwOneToOneRelationships;
-    private final ByteArrayOutputStream streamOneToManyRelationships = new ByteArrayOutputStream();;
+    private final ByteArrayOutputStream streamOneToManyRelationships = new ByteArrayOutputStream();
     private PrintWriter pwOneToManyRelationships;
-    private final ByteArrayOutputStream streamManyToOneRelationships = new ByteArrayOutputStream();;
+    private final ByteArrayOutputStream streamManyToOneRelationships = new ByteArrayOutputStream();
     private PrintWriter pwManyToOneRelationships;
-    private final ByteArrayOutputStream streamVersionAttributes = new ByteArrayOutputStream();;
+    private final ByteArrayOutputStream streamVersionAttributes = new ByteArrayOutputStream();
     private PrintWriter pwVersionAttributes;
 
 }

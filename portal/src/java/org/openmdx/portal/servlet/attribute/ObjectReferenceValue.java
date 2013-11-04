@@ -361,8 +361,7 @@ implements Serializable {
                 p.writeEventHandlers("    ", attribute.getEventHandler());
                 p.write("  >");
                 p.write("  <input id=\"", id, "\" name=\"", id, "\" type=\"hidden\" class=\"valueLLocked\" readonly value=\"", (objectReference == null ? "" : objectReference.getXRI()), "\">");
-            }
-            else {
+            } else {
                 autocompleter.paint(                    
                     p,
                     id,
@@ -375,7 +374,8 @@ implements Serializable {
                     this.isMandatory() ? 
                         "class=\"valueL valueAC mandatory\"" : 
                         "class=\"valueL valueAC\"",
-                    null
+                    null, // imgTag
+                    null // onChangeValueScript
                 );                    
             }
             p.write("</td>");
@@ -394,8 +394,8 @@ implements Serializable {
                 }
             }
             p.write("</td>");
-        }
-        else {
+        } else {
+        	// Show
             super.paint(
                 attribute,
                 p,

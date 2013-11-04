@@ -5,10 +5,9 @@
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
  * ====================================================================
  *
- * This software is published under the BSD license
- * as listed below.
+ * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2010, OMEX AG, Switzerland
+ * Copyright (c) 2010-2013, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -167,10 +166,10 @@ public class ExternalIdentifiers {
             int i = wbxmlDocumentId - 0x02;
             if(i < WELL_KNOWN.length) return WELL_KNOWN[i];
         } else if (wbxmlDocumentId >= 0x80 && wbxmlDocumentId <= 0x3FFF) {
-            String xmlDocumentId = REGISTERED.get(wbxmlDocumentId);
+            String xmlDocumentId = REGISTERED.get(Integer.valueOf(wbxmlDocumentId));
             if(xmlDocumentId != null) return xmlDocumentId;
         } else if (wbxmlDocumentId >= 0x4000 && wbxmlDocumentId <= 0x1FFFFF) {
-            String xmlDocumentId = PRIVATE.get(wbxmlDocumentId);
+            String xmlDocumentId = PRIVATE.get(Integer.valueOf(wbxmlDocumentId));
             if(xmlDocumentId != null) return xmlDocumentId;
         }
         throw new ServiceException(
@@ -182,35 +181,35 @@ public class ExternalIdentifiers {
     }
     
     static {
-        REGISTERED.put(0x0FD1, "-//SYNCML//DTD SyncML 1.0//EN");
-        REGISTERED.put(0x0FD2, "-//SYNCML//DTD DevInf 1.0//EN");
-        REGISTERED.put(0x0FD3, "-//SYNCML//DTD SyncML 1.1//EN");
-        REGISTERED.put(0x0FD4, "-//SYNCML//DTD DevInf 1.1//EN");
-        REGISTERED.put(0x1201, "-//SYNCML//DTD SyncML 1.2//EN"); // OMA Data Synchronization (SyncML) Representation Protocol DTD v1.2
-        REGISTERED.put(0x1202, "-//SYNCML//DTD MetaInf 1.2//EN"); // OMA Data Synchronization (SyncML) Meta Information DTD v1.2
-        REGISTERED.put(0x1203, "-//SYNCML//DTD DevInf 1.2//EN"); // OMA Data Synchronization (SyncML) Device Information DTD v1.2
-        REGISTERED.put(0x1205, "-//SyncML//Schema SyncML 2.0//EN"); // OMA Data Synchronization (SyncML) Representation Protocol Schema v2.0
-        REGISTERED.put(0x1206, "-//SyncML//Schema DevInf 2.0//EN"); // OMA Data Synchronization (SyncML) Device Information Schema v2.0
-        REGISTERED.put(0x1100, "-//PHONE.COM//DTD ALERT 1.0//EN"); // intended to inform users of events that may be of relevance to them.
-        REGISTERED.put(0x1101, "-//PHONE.COM//DTD CACHE-OPERATION 1.0//EN"); // to perform user-agent cache invalidation operation.
-        REGISTERED.put(0x1102, "-//PHONE.COM//DTD SIGNAL 1.0//EN"); // to indicate the presence of a pending notifications to be retrieved.
-        REGISTERED.put(0x1103, "-//PHONE.COM//DTD LIST 1.0//EN"); // specifies a List Resource.
-        REGISTERED.put(0x1104, "-//PHONE.COM//DTD LISTCMD 1.0//EN"); // command to manipulate the content of a list.
-        REGISTERED.put(0x1105, "-//PHONE.COM//DTD CHANNEL 1.0//EN"); // specifies a collection of resources that are to be pre-loaded into and made persistent in the user agent cache.
-        REGISTERED.put(0x1106, "-//PHONE.COM//DTD MMC 1.0//EN"); // to read/write arbitrary parameter from/to a device.
-        REGISTERED.put(0x1107, "-//PHONE.COM//DTD BEARER-CHOICE 1.0//EN"); // specifies the bearer selection preference.
-        REGISTERED.put(0x1108, "-//PHONE.COM//DTD WML 1.1//EN"); // defines the Phone.com WML extensions.
-        REGISTERED.put(0x1109, "-//PHONE.COM//DTD CHANNEL 1.1//EN"); // collection of resources that are to be pre-loaded into and made persistent in the user agent cache.
-        REGISTERED.put(0x110A, "-//PHONE.COM//DTD LIST 1.1//EN"); // specifies a List Resource.
-        REGISTERED.put(0x110B, "-//PHONE.COM//DTD LISTCMD 1.1//EN"); // specifies a command to manipulate the content of a list.
-        REGISTERED.put(0x110C, "-//PHONE.COM//DTD MMC 1.1//EN");
-        REGISTERED.put(0x110D, "-//PHONE.COM//DTD WML 1.3//EN");
-        REGISTERED.put(0x110E, "-//PHONE.COM//DTD MMC 2.0//EN"); // Openwave IP-based Over-the-Air-Activation (IOTA) v2.0 protocol document that is exchanged with the mobile device to read/write arbitrary parameters.
-        REGISTERED.put(0x1200, "-//3GPP2.COM//DTD IOTA 1.0//EN"); // 3GPP2 IP-based Over-the-Air Activation (IOTA) v1.0 protocol document that is exchanged with the mobile device to read/write arbitrary parameters.
-        REGISTERED.put(0x1204, "-//NOKIA//DTD LANDMARKS 1.0//EN"); // The document is used for delivering location information between mobile devices or network servers. A landmark object is a waypoint or a point-of-interest. The use of binary format allows for compact transmission through narrow-band bearers (e.g. GSM SMS).", // 0x0 A landmark object may contain the following information: the name of landmark, textual description of the landmark, the geographical coordinates of the location, like latitude and longitude.
-        REGISTERED.put(0x1207, "-//OMA//DTD DRMREL 1.0//EN"); //  We intend to create wbxml to send drm message
-        PRIVATE.put(0x104F52, "-//openMDX//REST 2.0//EN"); // openMDX REST 2.0 data with dynamic code pages
-        PRIVATE.put(0x104F58, "-//openMDX//XMI 1.0//EN"); // openMDX XMI 1.0 data 
+        REGISTERED.put(Integer.valueOf(0x0FD1), "-//SYNCML//DTD SyncML 1.0//EN");
+        REGISTERED.put(Integer.valueOf(0x0FD2), "-//SYNCML//DTD DevInf 1.0//EN");
+        REGISTERED.put(Integer.valueOf(0x0FD3), "-//SYNCML//DTD SyncML 1.1//EN");
+        REGISTERED.put(Integer.valueOf(0x0FD4), "-//SYNCML//DTD DevInf 1.1//EN");
+        REGISTERED.put(Integer.valueOf(0x1201), "-//SYNCML//DTD SyncML 1.2//EN"); // OMA Data Synchronization (SyncML) Representation Protocol DTD v1.2
+        REGISTERED.put(Integer.valueOf(0x1202), "-//SYNCML//DTD MetaInf 1.2//EN"); // OMA Data Synchronization (SyncML) Meta Information DTD v1.2
+        REGISTERED.put(Integer.valueOf(0x1203), "-//SYNCML//DTD DevInf 1.2//EN"); // OMA Data Synchronization (SyncML) Device Information DTD v1.2
+        REGISTERED.put(Integer.valueOf(0x1205), "-//SyncML//Schema SyncML 2.0//EN"); // OMA Data Synchronization (SyncML) Representation Protocol Schema v2.0
+        REGISTERED.put(Integer.valueOf(0x1206), "-//SyncML//Schema DevInf 2.0//EN"); // OMA Data Synchronization (SyncML) Device Information Schema v2.0
+        REGISTERED.put(Integer.valueOf(0x1100), "-//PHONE.COM//DTD ALERT 1.0//EN"); // intended to inform users of events that may be of relevance to them.
+        REGISTERED.put(Integer.valueOf(0x1101), "-//PHONE.COM//DTD CACHE-OPERATION 1.0//EN"); // to perform user-agent cache invalidation operation.
+        REGISTERED.put(Integer.valueOf(0x1102), "-//PHONE.COM//DTD SIGNAL 1.0//EN"); // to indicate the presence of a pending notifications to be retrieved.
+        REGISTERED.put(Integer.valueOf(0x1103), "-//PHONE.COM//DTD LIST 1.0//EN"); // specifies a List Resource.
+        REGISTERED.put(Integer.valueOf(0x1104), "-//PHONE.COM//DTD LISTCMD 1.0//EN"); // command to manipulate the content of a list.
+        REGISTERED.put(Integer.valueOf(0x1105), "-//PHONE.COM//DTD CHANNEL 1.0//EN"); // specifies a collection of resources that are to be pre-loaded into and made persistent in the user agent cache.
+        REGISTERED.put(Integer.valueOf(0x1106), "-//PHONE.COM//DTD MMC 1.0//EN"); // to read/write arbitrary parameter from/to a device.
+        REGISTERED.put(Integer.valueOf(0x1107), "-//PHONE.COM//DTD BEARER-CHOICE 1.0//EN"); // specifies the bearer selection preference.
+        REGISTERED.put(Integer.valueOf(0x1108), "-//PHONE.COM//DTD WML 1.1//EN"); // defines the Phone.com WML extensions.
+        REGISTERED.put(Integer.valueOf(0x1109), "-//PHONE.COM//DTD CHANNEL 1.1//EN"); // collection of resources that are to be pre-loaded into and made persistent in the user agent cache.
+        REGISTERED.put(Integer.valueOf(0x110A), "-//PHONE.COM//DTD LIST 1.1//EN"); // specifies a List Resource.
+        REGISTERED.put(Integer.valueOf(0x110B), "-//PHONE.COM//DTD LISTCMD 1.1//EN"); // specifies a command to manipulate the content of a list.
+        REGISTERED.put(Integer.valueOf(0x110C), "-//PHONE.COM//DTD MMC 1.1//EN");
+        REGISTERED.put(Integer.valueOf(0x110D), "-//PHONE.COM//DTD WML 1.3//EN");
+        REGISTERED.put(Integer.valueOf(0x110E), "-//PHONE.COM//DTD MMC 2.0//EN"); // Openwave IP-based Over-the-Air-Activation (IOTA) v2.0 protocol document that is exchanged with the mobile device to read/write arbitrary parameters.
+        REGISTERED.put(Integer.valueOf(0x1200), "-//3GPP2.COM//DTD IOTA 1.0//EN"); // 3GPP2 IP-based Over-the-Air Activation (IOTA) v1.0 protocol document that is exchanged with the mobile device to read/write arbitrary parameters.
+        REGISTERED.put(Integer.valueOf(0x1204), "-//NOKIA//DTD LANDMARKS 1.0//EN"); // The document is used for delivering location information between mobile devices or network servers. A landmark object is a waypoint or a point-of-interest. The use of binary format allows for compact transmission through narrow-band bearers (e.g. GSM SMS).", // 0x0 A landmark object may contain the following information: the name of landmark, textual description of the landmark, the geographical coordinates of the location, like latitude and longitude.
+        REGISTERED.put(Integer.valueOf(0x1207), "-//OMA//DTD DRMREL 1.0//EN"); //  We intend to create wbxml to send drm message
+        PRIVATE.put(Integer.valueOf(0x104F52), "-//openMDX//REST 2.0//EN"); // openMDX REST 2.0 data with dynamic code pages
+        PRIVATE.put(Integer.valueOf(0x104F58), "-//openMDX//XMI 1.0//EN"); // openMDX XMI 1.0 data 
     }
 
 }

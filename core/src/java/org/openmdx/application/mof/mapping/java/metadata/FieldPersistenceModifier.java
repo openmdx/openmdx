@@ -5,10 +5,9 @@
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
  * ====================================================================
  *
- * This software is published under the BSD license
- * as listed below.
+ * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2007, OMEX AG, Switzerland
+ * Copyright (c) 2007-2013, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -98,7 +97,7 @@ public enum FieldPersistenceModifier {
     ){
         if(xmlFormat == null) {
             return null;
-        };
+        }
         for(FieldPersistenceModifier value : values()) {
             if(value.xmlFormat.equals(xmlFormat)) {
                 return value;

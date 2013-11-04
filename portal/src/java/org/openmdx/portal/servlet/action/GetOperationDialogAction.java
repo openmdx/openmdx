@@ -53,7 +53,6 @@
 package org.openmdx.portal.servlet.action;
 
 import java.io.IOException;
-import java.util.Iterator;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
@@ -159,9 +158,8 @@ public class GetOperationDialogAction extends BoundAction {
                         p.write("  </div>");
                         p.write("</div>");
                     }
-                }
-                // Standard operations
-                else {
+                } else {
+                    // Standard operations
                     p.write("<div id=\"op", operationId, "Dialog\">");
                     p.write("  <div class=\"OperationDialogTitle\">", operationTabControl.getToolTip(), "</div> <!-- name of operation -->");
                     p.write("  <div class=\"bd\">");                        
@@ -211,18 +209,20 @@ public class GetOperationDialogAction extends BoundAction {
                                         // single-valued
                                         if(valueHolder.isSingleValued()) {
                                             if(valueHolder instanceof CodeValue) {
-                                                Map longTextsT = app.getCodes().getLongText(
+                                                @SuppressWarnings("unchecked")
+                                                Map<Object,Object> longTextsT = app.getCodes().getLongText(
                                                     fieldName, 
                                                     app.getCurrentLocaleAsIndex(), 
-                                                    false, // codeAsKey 
+                                                    true, // codeAsKey 
                                                     false
                                                 );
                                                 p.write("<td>");
                                                 p.write("  <select class=\"valueL\" name=\"", fieldId, "\" tabindex=\"", Integer.toString(index), "\">");
-                                                for(Iterator options = longTextsT.entrySet().iterator(); options.hasNext(); ) {
-                                                    Map.Entry option = (Map.Entry)options.next();
+                                                for(Map.Entry<Object,Object> option: longTextsT.entrySet()) {
                                                     String selectedModifier = option.getKey().equals(valueHolder.getValue(false)) ? "selected" : "";
-                                                    p.write("<option ", selectedModifier, " value=\"", option.getKey().toString(), "\">", option.getKey().toString());
+                                                    Short codeValue = (Short)option.getKey();
+                                                    String codeText = (String)option.getValue();
+                                                    p.write("<option ", selectedModifier, " value=\"", Short.toString(codeValue), "\">", codeText);
                                                 }
                                                 p.write("  </select>");
                                                 p.write("</td>");
@@ -276,9 +276,8 @@ public class GetOperationDialogAction extends BoundAction {
                                                 if(autocompleter == null) {
                                                     p.write("  <input type=\"text\" class=\"valueL\" name=\"", fieldId, ".Title\" tabindex=\"", Integer.toString(index), "\" value=\"", (objectReference == null ? "" : objectReference.getTitle()), "\">");
                                                     p.write("  <input type=\"hidden\" class=\"valueLLocked\" name=\"", fieldId, "\" value=\"", (objectReference == null ? "" : objectReference.getXRI()), "\">");
-                                                }
-                                                // Show drop-down with selectable lookup values
-                                                else {
+                                                } else {
+                                                    // Show drop-down with selectable lookup values
                                                     autocompleter.paint(
                                                         p,
                                                         fieldId,
@@ -289,7 +288,8 @@ public class GetOperationDialogAction extends BoundAction {
                                                         null,
                                                         "class=\"autocompleterInput\"",
                                                         "class=\"valueL valueAC\"",
-                                                        null
+                                                        null, // imgTag
+                                                        null // onChangeValueScript
                                                     );                                          
                                                 }
                                                 p.write("</td>");
@@ -336,7 +336,8 @@ public class GetOperationDialogAction extends BoundAction {
                                                     Autocompleter_1_0 autocompleter = app.getPortalExtension().getAutocompleter(
                                                     	app, 
                                                         view.getLookupObject(), 
-                                                        fieldName
+                                                        fieldName,
+                                                        null // restrictToType
                                                     );
                                                     // Predefined, selectable values only allowed for single-valued attributes with spanRow == 1
                                                     // Show drop-down instead of input field
@@ -351,7 +352,8 @@ public class GetOperationDialogAction extends BoundAction {
                                                             null,
                                                             "class=\"autocompleterInput\"",
                                                             "class=\"valueL valueAC\"",
-                                                            null
+                                                            null, // imgTag
+                                                            null // onChangeValueScript
                                                         );
                                                     } else {                                                        
                                                         String inputType = valueHolder instanceof TextValue ? 
@@ -369,9 +371,8 @@ public class GetOperationDialogAction extends BoundAction {
                                                 p.write("</td>");
                                                 p.write("<td class=\"addon\"></td>");
                                             }
-                                        }                              
-                                        // multi-valued
-                                        else {
+                                        } else {
+                                            // multi-valued
                                             p.write("<td ", rowSpanModifier, ">");
                                             p.write("  <textarea class=\"multiString\" name=\"", fieldId, "\" rows=\"" + attribute.getSpanRow(), "\" cols=\"20\" tabindex=\"", Integer.toString(index), "\">", stringifiedValue, "</textarea>");
                                             p.write("</td>");

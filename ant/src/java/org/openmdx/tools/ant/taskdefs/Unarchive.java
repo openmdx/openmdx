@@ -1,16 +1,13 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Unarchive.java,v 1.6 2010/06/04 22:22:48 hburger Exp $
  * Description: Ant Unarchive Task
- * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/06/04 22:22:48 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2010, OMEX AG, Switzerland
+ * Copyright (c) 2004-2013, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without 
@@ -89,7 +86,7 @@ public class Unarchive extends Task {
     private File source; // req
 	private String nameEncoding = null;
     private final PatternSetCollection patternsets = new PatternSetCollection();
-    private Vector filesets = new Vector();
+    private Vector<FileSet> filesets = new Vector<FileSet>();
 
 	/**
      * Sets the character encoding for the archive entry names.
@@ -193,9 +190,9 @@ public class Unarchive extends Task {
     		this.delegate.setSrc(this.source);
     		this.delegate.setOverwrite(this.patternsets.isOverwrite());
     		for(
-    			Enumeration e = this.filesets.elements();
+    			Enumeration<FileSet> e = this.filesets.elements();
     			e.hasMoreElements();
-    		) this.delegate.addFileset((FileSet) e.nextElement());
+    		) this.delegate.addFileset(e.nextElement());
     	}
     	return this.delegate;
     }
@@ -311,7 +308,7 @@ public class Unarchive extends Task {
 	protected static final class PatternSetCollection {
 
 	    private boolean overwrite = true;
-		private final Vector patternsets = new Vector();
+		private final Vector<PatternSet> patternsets = new Vector<PatternSet>();
 		
 	    /**
 	     * Should we overwrite files in dest, even if they are newer than
@@ -368,10 +365,10 @@ public class Unarchive extends Task {
 			} else {
 				String name = canonicalize(entryName, false);
 				for (
-					Enumeration v = patternsets.elements();
+					Enumeration<PatternSet> v = patternsets.elements();
 					v.hasMoreElements();
 				) {
-					PatternSet patternset = (PatternSet) v.nextElement();
+					PatternSet patternset = v.nextElement();
 					if(matches(patternset, name, project)) {
 						if(patternset instanceof UnarchivePatternSet) {
 							UnarchivePatternSet modifier = (UnarchivePatternSet) patternset;
@@ -428,7 +425,7 @@ public class Unarchive extends Task {
 					if (fos != null) try {
 		                fos.close();
 					} catch (IOException e) {
-						// ignore
+						// Ignored close failure
 					}
 				}
 				fileUtils.setFileLastModified(file, entryDate.getTime());

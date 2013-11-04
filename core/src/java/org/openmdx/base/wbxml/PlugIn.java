@@ -86,12 +86,12 @@ public interface PlugIn {
     /**
      * Sets the string table
      * 
-     * @param stringTable
+     * @param stringTable the string table
      * 
      * @throws ServiceException if the plug-in is inapt to handle the string table
      */
     void setStringTable(
-        ByteBuffer stringTable
+        StringSource stringSource
     ) throws ServiceException;
 
     /**
@@ -210,7 +210,7 @@ public interface PlugIn {
      * 
      * @throws ServiceException in case of resolution failure
      */
-    CharSequence resolveString(
+    String resolveString(
         int index
     ) throws ServiceException;
     

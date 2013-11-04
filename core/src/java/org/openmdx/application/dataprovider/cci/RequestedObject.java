@@ -72,20 +72,39 @@ public class RequestedObject
 
     private static final long serialVersionUID = 3257565088054654263L;
 
+    /**
+     * Get object set by onReply(). If object is null throw exception.
+     * 
+     * @return
+     */
     protected ObjectRecord getObject(
     ) {
-        if (this.object == null) {
-            throw new RuntimeServiceException(
-                this.exception == null ?
-                    new ServiceException(
-                        BasicException.Code.DEFAULT_DOMAIN, 
-                        BasicException.Code.ILLEGAL_STATE,
-                        "The corresponding request has not been processed yet"
-                    ) :
-                    this.exception
-            );
+        return this.getObject(true);
+    }
+
+    /**
+     * Get object set by onReply(). if object is null and throwException is true throw exception, otherwise return null.
+     * 
+     * @param throwException
+     * @return
+     */
+    public ObjectRecord getObject(
+        boolean throwException
+    ) {
+        if(this.object == null) {
+            if(throwException) {
+                throw new RuntimeServiceException(
+                    this.exception == null ?
+                        new ServiceException(
+                            BasicException.Code.DEFAULT_DOMAIN, 
+                            BasicException.Code.ILLEGAL_STATE,
+                            "The corresponding request has not been processed yet"
+                        ) :
+                        this.exception
+                );
+            }
         }
-        return this.object;
+        return this.object;        
     }
 
     //------------------------------------------------------------------------

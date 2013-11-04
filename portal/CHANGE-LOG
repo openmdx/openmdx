@@ -4,11 +4,94 @@
                     =====================================
 
 ==============================================================================
-Version 2.11.0                                                      2013-04-15
+Version 2.12.7                                                      2013-11-04
 ==============================================================================
 
 1.    NEW FEATURES
       
+      CR10011700
+      Unify edit and new object. The "New..." object form allows to lookup 
+      (with auto-completer) existing objects. If an object is selected, the form 
+      is pre-filled with the selected object values. After editing the form, the 
+      user can then choose either to "Create" (a new) or "Save" (the existing) object. 
+      If no existing object is selected, the user only can "Create".
+
+      CR10011691
+      Ui1: css classes for UI elements. Custom css classes for UI elements. 
+      Allow to specify different classes for field groups and object containers. 
+      Css classes are customized in UI XML files with the properties cssClassFieldGroup
+      and cssClassObjectContainer, e.g.      
+      
+		<org.openmdx.ui1.ElementDefinition name="org:openmdx:kernel:activity1:Activity:name">
+			<_object>
+				<active>true</active>
+				<toolTip>
+					<_item>Name of activity</_item>
+				</toolTip>
+				<label>
+					<_item>Name</_item>
+				</label>
+				<order>
+					<_item>0</_item>
+					<_item>0</_item>
+					<_item>10</_item>
+				</order>
+				<cssClassFieldGroup>classActivityName1</cssClassFieldGroup>
+				<cssClassObjectContainer>classActivityName2</cssClassObjectContainer>
+			</_object>
+			<_content/>
+		</org.openmdx.ui1.ElementDefinition>
+
+      CR10011280
+      Grids: show total rows. The total rows in a grid are calculated when 
+      going to a page with number > 0. Once calculated, the total rows are
+      displayed for this grid. 
+
+      CR10010108
+      Cascading code fields. Code fields are rendered as cascaded drop-downs for
+      {main category} and {sub category} in case their long texts have the format 
+      {main category}|{sub category}.
+      
+      CR10011631
+      Grids: custom queries for object identities.
+      Grids should support custom-queries for object identities. The search form displays an 
+      additional search field in case PortalExtension.getQuery() returns a non-null query for 
+      the feature 'grid.getReferencedTypeName() + ":" + identity'.
+      
+      Example:
+      Activities are searched for the attributes name, description or detailedDescription 
+      if getQuery() returns the query-extension
+      
+      (UPPER(v.name) LIKE UPPER(" + s0 + ") OR UPPER(v.name) LIKE " + s1 + " OR UPPER(v.description) 
+      LIKE UPPER(" + s2 + ") OR UPPER(v.description) LIKE " + s3 + " OR UPPER(v.detailed_description) 
+      LIKE UPPER(" + s4 + ") OR UPPER(v.detailed_description) LIKE " + s5 + ")"
+       
+      for the feature 'org:opencrx:kernel:activity1:Activity:identity'. 
+      
+      CR10011507
+      JoiningListDataBinding. Data binding which allows to collect objects from 
+      a specified set of reference features and display in a grid.
+            
+2.    CHANGES  
+     
+2.0.  CHANGED FEATURES
+      none
+            
+2.1.  FIXED BUGS
+      none      
+      
+2.2.  DEPRECATED FEATURES
+      none      
+            
+2.3   REMOVED FEATURES
+      none
+
+==============================================================================
+Version 2.11.0                                                      2013-03-07
+==============================================================================
+
+1.    NEW FEATURES
+            
       CR20020327
       Allow "Java Server Faces" wizards (.jsf or .xhtml). The WizardDefinitionFactory
       now also supports "Java Server Faces" wizards.

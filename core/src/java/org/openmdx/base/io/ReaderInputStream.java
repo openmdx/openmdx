@@ -106,16 +106,20 @@ public class ReaderInputStream extends InputStream {
      * @exception IOException if an error occurs
      */
     @Override
-    public synchronized int read(byte[] b, int off, int len)
-        throws IOException {
+    public synchronized int read(
+        byte[] b, 
+        int off, 
+        int len
+    ) throws IOException {
+        int length = len;
         if (in == null) {
             throw new IOException("Stream Closed");
         }
-        if (len == 0) {
+        if (length == 0) {
             return 0;
         }
         while (slack == null) {
-            char[] buf = new char[len]; // might read too much
+            char[] buf = new char[length]; // might read too much
             int n = in.read(buf);
             if (n == -1) {
                 return -1;
@@ -126,17 +130,17 @@ public class ReaderInputStream extends InputStream {
             }
         }
 
-        if (len > slack.length - begin) {
-            len = slack.length - begin;
+        if (length > slack.length - begin) {
+            length = slack.length - begin;
         }
 
-        System.arraycopy(slack, begin, b, off, len);
+        System.arraycopy(slack, begin, b, off, length);
 
-        if ((begin += len) >= slack.length) {
+        if ((begin += length) >= slack.length) {
             slack = null;
         }
 
-        return len;
+        return length;
     }
 
     /**

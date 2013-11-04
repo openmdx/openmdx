@@ -108,6 +108,11 @@ public final class TransactionalState_1 {
     private Map<String,DataObject_1_0> transactionalAspects = null;
 
     /**
+     * Remember an object's unavailability
+     */
+    private Map<String,Set<String>> unavailability = null;
+    
+    /**
      * Aspect Specific Contexts
      */
     private Map<Class<?>,Object> contexts = null;
@@ -175,7 +180,8 @@ public final class TransactionalState_1 {
     
     /**
      * Set Life-Cycle-Event pending.
-     * @param lifeCycleEventPending TODO
+     * 
+     * @param lifeCycleEventPending
      */
     final void setLifeCycleEventPending(
         boolean lifeCycleEventPending
@@ -221,6 +227,26 @@ public final class TransactionalState_1 {
         this.prepared = prepared;
     }
 
+    /**
+     * Remember unavailable children
+     * 
+     * @param boolean readOnly
+     * 
+     * @return the unavailability cache
+     */
+    final Map<String,Set<String>> unavailability(
+        boolean readOnly
+    ){
+        if(this.unavailability == null) {
+            if(readOnly) {
+                return Collections.emptyMap();
+            } else {
+                this.unavailability = new HashMap<String, Set<String>>();
+            }
+        }
+        return this.unavailability;
+    }
+    
     /**
      * The unit of work local value store
      * 
@@ -359,6 +385,9 @@ public final class TransactionalState_1 {
     final void clear(){
         if(this.values != null){
             this.values.clear();
+        }
+        if(this.unavailability != null) {
+            this.unavailability.clear();
         }
         if(this.dirtyFeatures != null) {
             this.dirtyFeatures.clear();

@@ -4,4 +4,5 @@ import javax.jmi.reflect.*;
 
 @SuppressWarnings("unused")
 public interface Classifier extends GeneralizableElement {
+    // Empty block
 }

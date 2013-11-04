@@ -1,12 +1,13 @@
 /*
  * ==================================================================== 
+ * Project:     openMDX/Core, http://www.openmdx.org/
  * Description: RefObject_1 class 
- * Owner: OMEX AG, Switzerland, http://www.omex.ch 
+ * Owner:       OMEX AG, Switzerland, http://www.omex.ch 
  * ====================================================================
  * 
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2012, OMEX AG, Switzerland
+ * Copyright (c) 2004-2013, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -75,7 +76,6 @@ import javax.jmi.reflect.RefObject;
 import javax.jmi.reflect.RefPackage;
 import javax.resource.ResourceException;
 import javax.resource.cci.InteractionSpec;
-import javax.resource.cci.Record;
 
 import org.oasisopen.jmi1.RefContainer;
 import org.openmdx.application.mof.cci.ModelAttributes;
@@ -87,13 +87,9 @@ import org.openmdx.base.accessor.jmi.cci.RefPackage_1_0;
 import org.openmdx.base.accessor.jmi.cci.RefStruct_1_0;
 import org.openmdx.base.accessor.spi.DateMarshaller;
 import org.openmdx.base.accessor.spi.DateTimeMarshaller;
-import org.openmdx.base.accessor.spi.DecimalMarshaller;
 import org.openmdx.base.accessor.spi.DurationMarshaller;
 import org.openmdx.base.accessor.spi.IntegerMarshaller;
-import org.openmdx.base.accessor.spi.LongMarshaller;
 import org.openmdx.base.accessor.spi.PersistenceManager_1_0;
-import org.openmdx.base.accessor.spi.ShortMarshaller;
-import org.openmdx.base.accessor.spi.URIMarshaller;
 import org.openmdx.base.accessor.view.ObjectView_1_0;
 import org.openmdx.base.collection.MarshallingList;
 import org.openmdx.base.collection.MarshallingMap;
@@ -181,10 +177,12 @@ class RefObject_1
         "javax.resource.ResourceException"
     );
     
-    private static final Object[] EMPTY_OBJECT_ARRAY = new Object[] {};
     private transient RefObject metaObject = null;
     private transient ModelElement_1_0 refClassDef = null;
 
+    private static final Object[] EMPTY_OBJECT_ARRAY = new Object[] {};
+    private static final byte[] EMPTY_LARGE_OBJECT = new byte[] {};
+    
     /**
      * @serial
      */
@@ -315,7 +313,7 @@ class RefObject_1
         ModelElement_1_0 featureDef,
         Object qualifier
     ) throws ServiceException {
-    	
+        
         Model_1_0 model = featureDef.getModel();
         boolean isReference = model.isReferenceType(featureDef);
         boolean isAttribute = model.isAttributeType(featureDef);
@@ -350,166 +348,22 @@ class RefObject_1
                 ); 
             }
             Multiplicity multiplicity = ModelHelper.getMultiplicity(featureDef);
-			switch(multiplicity) {
-	            case SINGLE_VALUE: case OPTIONAL: {
-	                Object value = this.object.objGetValue(featureName);
-	                if (PrimitiveTypes.STRING.equals(qualifiedTypeName)) {
-	                    return value;
-	                } else if (PrimitiveTypes.BOOLEAN.equals(qualifiedTypeName)) {
-	                    return value;
-	                } else if (PrimitiveTypes.DATETIME.equals(qualifiedTypeName)) {
-	                    return DateTimeMarshaller.NORMALIZE.marshal(value);
-	                } else if (PrimitiveTypes.DATE.equals(qualifiedTypeName)) {
-	                    return DateMarshaller.NORMALIZE.marshal(value);
-	                } else if (PrimitiveTypes.ANYURI.equals(qualifiedTypeName)) {
-	                    return URIMarshaller.NORMALIZE.marshal(value);
-	                } else if (PrimitiveTypes.DURATION.equals(qualifiedTypeName)) {
-	                    return DurationMarshaller.NORMALIZE.marshal(value);
-	                } else if (PrimitiveTypes.SHORT.equals(qualifiedTypeName)) {
-	                    return ShortMarshaller.NORMALIZE.marshal(value);
-	                } else if (PrimitiveTypes.INTEGER.equals(qualifiedTypeName)) {
-	                    return IntegerMarshaller.NORMALIZE.marshal(value);
-	                } else if (PrimitiveTypes.LONG.equals(qualifiedTypeName)) {
-	                    return LongMarshaller.NORMALIZE.marshal(value);
-	                } else if (PrimitiveTypes.DECIMAL.equals(qualifiedTypeName)) {
-	                    return DecimalMarshaller.NORMALIZING.marshal(value);
-	                } else if (PrimitiveTypes.BINARY.equals(qualifiedTypeName)) {
-	                    return value;
-	                } else if (model.isStructureType(type)) {
-	                    return this.refOutermostPackage().refCreateStruct((Record)value);
-	                } else if (model.isClassType(type) || PrimitiveTypes.OBJECT_ID.equals(qualifiedTypeName)) {
-	                    return this.refOutermostPackage().marshal(value);
-	                } else {
-	                    return value;
-	                }
-	            }
-	            case STREAM: 
-	                return this.object.objGetValue(featureName);
-	            case LIST: {
-	                List values = this.object.objGetList(featureName);
-	                if (PrimitiveTypes.STRING.equals(qualifiedTypeName)) {
-	                    return values;
-	                } else if (PrimitiveTypes.BOOLEAN.equals(qualifiedTypeName)) {
-	                    return values;
-	                } else if (PrimitiveTypes.DATETIME.equals(qualifiedTypeName)) {
-	                    return new MarshallingList(DateTimeMarshaller.NORMALIZE, values);
-	                } else if (PrimitiveTypes.DATE.equals(qualifiedTypeName)) {
-	                    return new MarshallingList(
-	                        DateMarshaller.NORMALIZE,
-	                        values
-	                    );
-	                } else if (PrimitiveTypes.ANYURI.equals(qualifiedTypeName)) {
-	                    return new MarshallingList(
-	                        URIMarshaller.NORMALIZE,
-	                        values
-	                    );
-	                } else if (PrimitiveTypes.DURATION.equals(qualifiedTypeName)) {
-	                    return new MarshallingList(DurationMarshaller.NORMALIZE, values);
-	                } else if (PrimitiveTypes.SHORT.equals(qualifiedTypeName)) {
-	                    return new MarshallingList(ShortMarshaller.NORMALIZE, values);
-	                } else if (PrimitiveTypes.INTEGER.equals(qualifiedTypeName)) {
-	                    return new MarshallingList(IntegerMarshaller.NORMALIZE, values);
-	                } else if (PrimitiveTypes.LONG.equals(qualifiedTypeName)) {
-	                    return new MarshallingList(
-	                        LongMarshaller.NORMALIZE,
-	                        values);
-	                } else if (PrimitiveTypes.DECIMAL.equals(qualifiedTypeName)) {
-	                    return new MarshallingList(DecimalMarshaller.NORMALIZING, values);
-	                } else if (
-	                    model.isStructureType(type) ||
-	                    model.isClassType(type) || 
-	                    PrimitiveTypes.OBJECT_ID.equals(qualifiedTypeName)
-	                ) {
-	                    return new MarshallingList(this.refOutermostPackage(), values);
-	                } else {
-	                    return values;
-	                }
-	            }
-	            case SET: {
-	                Set values = this.object.objGetSet(featureName);
-	                if (PrimitiveTypes.STRING.equals(qualifiedTypeName)) {
-	                    return values;
-	                } else if (PrimitiveTypes.BOOLEAN.equals(qualifiedTypeName)) {
-	                    return values;
-	                } else if (PrimitiveTypes.DATETIME.equals(qualifiedTypeName)) {
-	                    return new MarshallingSet(DateTimeMarshaller.NORMALIZE, values);
-	                } else if (PrimitiveTypes.DATE.equals(qualifiedTypeName)) {
-	                    return new MarshallingSet(
-	                        DateMarshaller.NORMALIZE,
-	                        values
-	                    );
-	                } else if (PrimitiveTypes.ANYURI.equals(qualifiedTypeName)) {
-	                    return new MarshallingSet(
-	                        URIMarshaller.NORMALIZE,
-	                        values
-	                    );
-	                } else if (PrimitiveTypes.DURATION.equals(qualifiedTypeName)) {
-	                    return new MarshallingSet(DurationMarshaller.NORMALIZE, values);
-	                } else if (PrimitiveTypes.SHORT.equals(qualifiedTypeName)) {
-	                    return new MarshallingSet(
-	                        ShortMarshaller.NORMALIZE,
-	                        values
-	                    );
-	                } else if (PrimitiveTypes.INTEGER.equals(qualifiedTypeName)) {
-	                    return new MarshallingSet(IntegerMarshaller.NORMALIZE, values);
-	                } else if (PrimitiveTypes.LONG.equals(qualifiedTypeName)) {
-	                    return new MarshallingSet(
-	                        LongMarshaller.NORMALIZE,
-	                        values
-	                    );
-	                } else if (PrimitiveTypes.DECIMAL.equals(qualifiedTypeName)) {
-	                    return new MarshallingSet(DecimalMarshaller.NORMALIZING, values);
-	                } else if (
-	                    model.isStructureType(type) ||
-	                    model.isClassType(type) || 
-	                    PrimitiveTypes.OBJECT_ID.equals(qualifiedTypeName)
-	                ) {
-	                    return new MarshallingSet(this.refOutermostPackage(), values);
-	                } else {
-	                    return values;
-	                }
-	            }
-	            case SPARSEARRAY: {
-	                SortedMap values = this.object.objGetSparseArray(featureName);
-	                if (PrimitiveTypes.STRING.equals(qualifiedTypeName)) {
-	                    return values;
-	                } else if (PrimitiveTypes.BOOLEAN.equals(qualifiedTypeName)) {
-	                    return values;
-	                } else if (PrimitiveTypes.DATETIME.equals(qualifiedTypeName)) {
-	                    return new MarshallingSortedMap(DateTimeMarshaller.NORMALIZE, values);
-	                } else if (PrimitiveTypes.DATE.equals(qualifiedTypeName)) {
-	                    return new MarshallingSortedMap(DateMarshaller.NORMALIZE, values);
-	                } else if (PrimitiveTypes.ANYURI.equals(qualifiedTypeName)) {
-	                    return new MarshallingSortedMap(URIMarshaller.NORMALIZE, values);
-	                } else if (PrimitiveTypes.DURATION.equals(qualifiedTypeName)) {
-	                    return new MarshallingSortedMap(DurationMarshaller.NORMALIZE, values);
-	                } else if (PrimitiveTypes.SHORT.equals(qualifiedTypeName)) {
-	                    return new MarshallingSortedMap(ShortMarshaller.NORMALIZE, values);
-	                } else if (PrimitiveTypes.INTEGER.equals(qualifiedTypeName)) {
-	                    return new MarshallingSortedMap(IntegerMarshaller.NORMALIZE, values);
-	                } else if (PrimitiveTypes.LONG.equals(qualifiedTypeName)) {
-	                    return new MarshallingSortedMap(LongMarshaller.NORMALIZE, values);
-	                } else if (PrimitiveTypes.DECIMAL.equals(qualifiedTypeName)) {
-	                    return new MarshallingSortedMap(DecimalMarshaller.NORMALIZING, values);
-	                } else if (
-	                    model.isStructureType(type) ||
-	                    model.isClassType(type) || 
-	                    PrimitiveTypes.OBJECT_ID.equals(qualifiedTypeName)
-	                ) {
-	                    return new MarshallingSortedMap(this.refOutermostPackage(), values);
-	                } else {
-	                    return values;
-	                }
-	            }
-	            case MAP: {
-	                Container_1_0 values = this.object.objGetContainer(featureName);
-	                return values == null ? null : new MarshallingMap(
-	                    this.refOutermostPackage(),
-	                    values
-	                );
-	            }
-	            default:
-	                throw new ServiceException(
+            Marshaller marshaller = this.refOutermostPackage().getMarshaller(qualifiedTypeName);
+            switch(multiplicity) {
+                case SINGLE_VALUE: case OPTIONAL:
+                    return marshaller.marshal(this.object.objGetValue(featureName));
+                case STREAM: 
+                    return this.object.objGetValue(featureName);
+                case LIST:
+                    return new MarshallingList(marshaller, this.object.objGetList(featureName));
+                case SET:
+                    return new MarshallingSet(marshaller, this.object.objGetSet(featureName));
+                case SPARSEARRAY:
+                    return new MarshallingSortedMap(marshaller, this.object.objGetSparseArray(featureName));
+                case MAP:
+                    return new MarshallingMap(this.refOutermostPackage(), this.object.objGetContainer(featureName));
+                default:
+                    throw new ServiceException(
                         BasicException.Code.DEFAULT_DOMAIN,
                         BasicException.Code.ASSERTION_FAILURE,
                         "Unsupported multiplicity",
@@ -563,8 +417,8 @@ class RefObject_1
                     ModelHelper.isCompositeEnd(featureDef, true) ||
                     ModelHelper.isSharedEnd(featureDef, true)
                 ) {
-                	TransientContainerId containerId = rootPkg.refPersistenceManager().getContainerId(this);
-                	return containerId == null ? null : rootPkg.refPersistenceManager().getObjectById(containerId.getParent());
+                    TransientContainerId containerId = rootPkg.refPersistenceManager().getContainerId(this);
+                    return containerId == null ? null : rootPkg.refPersistenceManager().getObjectById(containerId.getParent());
                 } 
                 else {
                     if(
@@ -634,11 +488,11 @@ class RefObject_1
                 if (PrimitiveTypes.STRING.equals(qualifiedTypeName)) {
                     CharacterLargeObject largeObject = (CharacterLargeObject) this.object.objGetValue(featureName);
                     largeObject.getContent((java.io.Writer) value, position);
-                    return largeObject.getLength();
+                    return largeObject.getLength().longValue();
                 } else if (PrimitiveTypes.BINARY.equals(qualifiedTypeName)) {
                     BinaryLargeObject largeObject = (BinaryLargeObject) this.object.objGetValue(featureName);
                     largeObject.getContent((java.io.OutputStream) value, position);
-                    return largeObject.getLength();
+                    return largeObject.getLength().longValue();
                 } else {
                     throw new ServiceException(
                         BasicException.Code.DEFAULT_DOMAIN,
@@ -677,88 +531,18 @@ class RefObject_1
          * Attribute or Reference stored as attribute.
          */
         if (this.isAttributeOrReferenceStoredAsAttribute(featureDef)) {
-        	Multiplicity multiplicity = ModelHelper.getMultiplicity(featureDef);
+            Multiplicity multiplicity = ModelHelper.getMultiplicity(featureDef);
             if (multiplicity.isSingleValued() || multiplicity.isStreamValued()) {
-                if (PrimitiveTypes.BOOLEAN.equals(qualifiedTypeName)) {
+                if (this.object.getModel().isClassType(type) && "org:openmdx:base:Aspect:core".equals(featureDef.objGetValue("qualifiedName"))){
                     this.object.objSetValue(
                         featureName, 
-                        value
-                    );
-                } 
-                else if (PrimitiveTypes.DATETIME.equals(qualifiedTypeName)) {
-                    this.object.objSetValue(
-                        featureName, 
-                        DateTimeMarshaller.NORMALIZE.unmarshal(value)
-                    );
-                } 
-                else if (PrimitiveTypes.DATE.equals(qualifiedTypeName)) {
-                    this.object.objSetValue(
-                        featureName, 
-                        DateMarshaller.NORMALIZE.unmarshal(value)
-                    );
-                } 
-                else if (PrimitiveTypes.ANYURI.equals(qualifiedTypeName)) {
-                    this.object.objSetValue(
-                        featureName, 
-                        URIMarshaller.NORMALIZE.unmarshal(value)
-                    );
-                } 
-                else if (PrimitiveTypes.DURATION.equals(qualifiedTypeName)) {
-                    this.object.objSetValue(
-                        featureName, 
-                        DurationMarshaller.NORMALIZE.unmarshal(value)
-                    );
-                } 
-                else if (PrimitiveTypes.SHORT.equals(qualifiedTypeName)) {
-                    this.object.objSetValue(
-                        featureName, 
-                        ShortMarshaller.NORMALIZE.unmarshal(value)
-                    );
-                } 
-                else if (PrimitiveTypes.INTEGER.equals(qualifiedTypeName)) {
-                    this.object.objSetValue(
-                        featureName, 
-                        IntegerMarshaller.NORMALIZE.unmarshal(value)
-                    );
-                } 
-                else if (PrimitiveTypes.LONG.equals(qualifiedTypeName)) {
-                    this.object.objSetValue(
-                        featureName, 
-                        LongMarshaller.NORMALIZE.unmarshal(value)
-                    );
-                } 
-                else if (PrimitiveTypes.DECIMAL.equals(qualifiedTypeName)) {
-                    this.object.objSetValue(
-                        featureName, 
-                        DecimalMarshaller.NORMALIZING.unmarshal(value)
-                    );
-                } 
-                else if (PrimitiveTypes.BINARY.equals(qualifiedTypeName)) {
-                    this.object.objSetValue(
-                        featureName, 
-                        value
-                    );
-                } else if (this.object.getModel().isClassType(type)){
-                	if("org:openmdx:base:Aspect:core".equals(featureDef.objGetValue("qualifiedName"))){
-                        this.object.objSetValue(
-                            featureName, 
-                            this.refOutermostPackage().unmarshalUnchecked(value)
-                        );
-                	} else {
-                        this.object.objSetValue(
-                            featureName, 
-                            this.refOutermostPackage().unmarshal(value)
-                        );
-                	}
-                } else if (this.object.getModel().isStructureType(type)){
-                    this.object.objSetValue(
-                        featureName, 
-                        this.refOutermostPackage().unmarshal(value)
+                        this.refOutermostPackage().unmarshalUnchecked(value)
                     );
                 } else {
+                    Marshaller marshaller = this.refOutermostPackage().getMarshaller(qualifiedTypeName);
                     this.object.objSetValue(
                         featureName, 
-                        value
+                        marshaller.unmarshal(value)
                     );
                 }
             }
@@ -774,17 +558,13 @@ class RefObject_1
                 ) {
                     newValue = new ArrayList();
                     for (int i = 0; i < Array.getLength(value); i++) {
-                        ((List) newValue).add(
-                            (value instanceof short[]) 
-                            ?  new Short(((short[]) value)[i])
-                            : (value instanceof int[]) 
-                            ? new Integer(((int[]) value)[i])
-                            : (value instanceof long[]) 
-                            ? new Long(((long[]) value)[i])
-                            : (value instanceof boolean[]) 
-                            ? Boolean.valueOf(((boolean[]) value)[i])
-                                : ((Object[]) value)[i]
-                        );
+                        final Object element = 
+                            (value instanceof short[]) ?  Short.valueOf(((short[]) value)[i]) : 
+                            (value instanceof int[]) ? Integer.valueOf(((int[]) value)[i]) : 
+                            (value instanceof long[]) ? Long.valueOf(((long[]) value)[i]) : 
+                            (value instanceof boolean[])  ? Boolean.valueOf(((boolean[]) value)[i]) : 
+                            ((Object[]) value)[i];
+                        ((List) newValue).add(element);
                     }
                 } 
                 else {
@@ -792,39 +572,39 @@ class RefObject_1
                 }
                 Object values = this.getValue(featureDef, null);
                 if (values != newValue) {
-                	switch(multiplicity) {
-	                	case SPARSEARRAY: {
-	                        ((SortedMap) values).clear();
-	                        if (newValue instanceof Collection) {
-	                            int i = 0;
-	                            for(
-	                                    Iterator j = ((Collection) newValue).iterator(); 
-	                                    j.hasNext();
-	                            ) {
-	                                ((SortedMap) values).put(
-	                                    new Integer(i++), 
-	                                    j.next()
-	                                );
-	                            }
-	                        } 
-	                        else {
-	                            ((SortedMap) values).putAll((SortedMap) newValue);
-	                        }
-	                    } break;
-	                	case LIST: case SET: {
-	                        Collection target = (Collection) values;
-	                        target.clear();
-	                        target.addAll((Collection) newValue);
-	                    } break;
-	                    default: 
-	                        throw new ServiceException(
+                    switch(multiplicity) {
+                        case SPARSEARRAY: {
+                            ((SortedMap) values).clear();
+                            if (newValue instanceof Collection) {
+                                int i = 0;
+                                for(
+                                        Iterator j = ((Collection) newValue).iterator(); 
+                                        j.hasNext();
+                                ) {
+                                    ((SortedMap) values).put(
+                                        Integer.valueOf(i++), 
+                                        j.next()
+                                    );
+                                }
+                            } 
+                            else {
+                                ((SortedMap) values).putAll((SortedMap) newValue);
+                            }
+                        } break;
+                        case LIST: case SET: {
+                            Collection target = (Collection) values;
+                            target.clear();
+                            target.addAll((Collection) newValue);
+                        } break;
+                        default: 
+                            throw new ServiceException(
                                 BasicException.Code.DEFAULT_DOMAIN,
                                 BasicException.Code.ASSERTION_FAILURE,
                                 "unknown multiplicity",
                                 new BasicException.Parameter("feature", featureDef),
                                 new BasicException.Parameter("multiplicity", multiplicity)
                             );
-                	}
+                    }
                 }
             }
         }
@@ -1009,7 +789,7 @@ class RefObject_1
                 return ((List<?>) value).get(index);
             } 
             else if (value instanceof SortedMap) {
-                return ((SortedMap<Integer,?>) value).get(new Integer(index));
+                return ((SortedMap<Integer,?>) value).get(Integer.valueOf(index));
             } 
             else {
                 throw new JmiServiceException(
@@ -1075,7 +855,7 @@ class RefObject_1
     }
 
     // -------------------------------------------------------------------------
-//  @Override
+    @Override
     final public Object refGetValue(
         String featureName, 
         Object qualifier
@@ -1114,7 +894,7 @@ class RefObject_1
     }
 
     // -------------------------------------------------------------------------
-//  @Override
+    @Override
     final public long refGetValue(
         String featureName,
         Object value,
@@ -1154,7 +934,7 @@ class RefObject_1
                     }
                 } 
                 else if (values instanceof SortedMap) {
-                    ((SortedMap<Integer,Object>) values).put(new Integer(index), value);
+                    ((SortedMap<Integer,Object>) values).put(Integer.valueOf(index), value);
                 } 
                 else {
                     throw new JmiServiceException(
@@ -1197,7 +977,7 @@ class RefObject_1
     }
 
     // -------------------------------------------------------------------------
-//  @Override
+    @Override
     final public void refSetValue(
         String featureName,
         Object newValue,
@@ -1262,7 +1042,7 @@ class RefObject_1
         } 
         else if (value instanceof SortedMap) {
             ((SortedMap<Integer,Object>) values).put(
-                new Integer(((Integer) ((SortedMap) values).lastKey()).intValue() + 1),
+                Integer.valueOf(((Integer) ((SortedMap) values).lastKey()).intValue() + 1),
                 value
             );
         } 
@@ -1300,7 +1080,7 @@ class RefObject_1
             ((List<Object>) values).remove(index);
         } 
         else if (values instanceof SortedMap) {
-            ((SortedMap<Integer,Object>) values).remove(new Integer(index));
+            ((SortedMap<Integer,Object>) values).remove(Integer.valueOf(index));
         } 
         else {
             throw new JmiServiceException(
@@ -1320,7 +1100,7 @@ class RefObject_1
     // -------------------------------------------------------------------------
 
     // -------------------------------------------------------------------------
-//  @Override
+    @Override
     final public boolean refIsInstanceOf(
         RefObject objType,
         boolean considerSubtypes
@@ -1345,14 +1125,14 @@ class RefObject_1
     }
 
     // -------------------------------------------------------------------------
-//  @Override
+    @Override
     final public RefClass refClass(
     ) {
         return this.refClass;
     }
 
     // -------------------------------------------------------------------------
-//  @Override
+    @Override
     final public RefFeatured refImmediateComposite(
     ) {
         Path path = this.refGetPath();
@@ -1362,14 +1142,14 @@ class RefObject_1
     }
 
     // -------------------------------------------------------------------------
-//  @Override
+    @Override
     final public RefFeatured refOutermostComposite(
     ) {
         throw new UnsupportedOperationException();
     }
 
     // -------------------------------------------------------------------------
-//  @Override
+    @Override
     final public void refDelete(
     ) {
         try {
@@ -1385,7 +1165,7 @@ class RefObject_1
     // -------------------------------------------------------------------------
 
     // -------------------------------------------------------------------------
-//  @Override
+    @Override
     final public Object refGetValue(
         RefObject feature
     ) {
@@ -1402,7 +1182,7 @@ class RefObject_1
     }
 
     // -------------------------------------------------------------------------
-//  @Override
+    @Override
     final public Object refGetValue(
         String featureName
     ) {
@@ -1418,7 +1198,7 @@ class RefObject_1
     }
 
     // -------------------------------------------------------------------------
-//  @Override
+    @Override
     final public void refSetValue(
         RefObject feature, 
         Object value
@@ -1435,7 +1215,7 @@ class RefObject_1
     }
 
     // -------------------------------------------------------------------------
-//  @Override
+    @Override
     final public void refSetValue(
         String featureName, 
         Object value
@@ -1535,7 +1315,7 @@ class RefObject_1
     // -------------------------------------------------------------------------
 
     // -------------------------------------------------------------------------
-//  @Override
+    @Override
     final public RefObject refMetaObject(
     ) {
         try {
@@ -1552,7 +1332,7 @@ class RefObject_1
     }
 
     // -------------------------------------------------------------------------
-//  @Override
+    @Override
     final public RefPackage refImmediatePackage(
     ) {
         return "org:openmdx:base:Authority".equals(this.refClass().refMofId())
@@ -1561,14 +1341,14 @@ class RefObject_1
     }
 
     // -------------------------------------------------------------------------
-//  @Override
+    @Override
     final public RefRootPackage_1 refOutermostPackage(
     ) {
         return (RefRootPackage_1) this.refClass().refOutermostPackage();
     }
 
     // -------------------------------------------------------------------------
-//  @Override
+    @Override
     final public String refMofId(
     ) {
         Path identity = this.object.jdoGetObjectId();
@@ -1621,7 +1401,7 @@ class RefObject_1
     // -------------------------------------------------------------------------
 
     // -------------------------------------------------------------------------
-//  @Override
+    @Override
     final public Path refGetPath(
     ) {
         try {
@@ -1632,7 +1412,7 @@ class RefObject_1
     }
 
     // -------------------------------------------------------------------------
-//  @Override
+    @Override
     public Set<String> refDefaultFetchGroup(
     ) {
         try {
@@ -1670,73 +1450,76 @@ class RefObject_1
                     Persistency.getInstance().isPersistentAttribute(featureDef)
                 ) {
                     ModelElement_1_0 type = this.object.getModel().getElementType(featureDef);
-                	switch(ModelHelper.getMultiplicity(featureDef)) {
-	                	case OPTIONAL: {
-	                	    if(setOptionalToNull) {
-	                	        this.setValue(featureDef, null);
-	                	    }
-	                	} break;
-	                	case SINGLE_VALUE: {
-	                        if (setRequiredToNull) {
-	                            this.setValue(featureDef, null);
-	                        } else {
-	                            String qualifiedTypeName = (String) type.objGetValue("qualifiedName");
-	                            if (PrimitiveTypes.STRING.equals(qualifiedTypeName)) {
-	                                this.setValue(featureDef, "");
-	                            } else if (PrimitiveTypes.BOOLEAN.equals(qualifiedTypeName)) {
-	                                this.setValue(featureDef, Boolean.FALSE);
-	                            } else if (PrimitiveTypes.DATETIME.equals(qualifiedTypeName)) {
-	                                this.setValue(
-	                                    featureDef, 
-	                                    DateTimeMarshaller.NORMALIZE.marshal
-	                                    (org.w3c.format.DateTimeFormat.BASIC_UTC_FORMAT.format(new Date()))
-	                                );
-	                            } else if (PrimitiveTypes.DATE.equals(qualifiedTypeName)) {
-	                                this.setValue(
-	                                    featureDef, 
-	                                    DateMarshaller.NORMALIZE.marshal("20000101")
-	                                );
-	                            } else if (PrimitiveTypes.ANYURI.equals(qualifiedTypeName)) {
-	                                this.setValue(featureDef, URI.create("xri://+null"));
-	                            } else if (PrimitiveTypes.DURATION.equals(qualifiedTypeName)) {
-	                                this.setValue(
-	                                    featureDef, 
-	                                    DurationMarshaller.NORMALIZE.marshal("P0M")
-	                                );
-	                            } else if (PrimitiveTypes.SHORT .equals(qualifiedTypeName)) {
-	                                this.setValue(featureDef, new Short((short) 0));
-	                            } else if (PrimitiveTypes.INTEGER.equals(qualifiedTypeName)) {
-	                                this.setValue(featureDef, new Integer(0));
-	                            } else if (PrimitiveTypes.LONG.equals(qualifiedTypeName)) {
-	                                this.setValue(featureDef, new Long(0L));
-	                            } else if (PrimitiveTypes.DECIMAL.equals(qualifiedTypeName)) {
-	                                this.setValue(featureDef, new BigDecimal(0));
-	                            } else if (PrimitiveTypes.BINARY.equals(qualifiedTypeName)) {
-	                                this.setValue(featureDef, new byte[] {});
-	                            } else if (this.object.getModel().isStructureType(type)) {
-	                                throw new UnsupportedOperationException(
-	                                    "Initialization of structs not supported"
-	                                );
-	                            } else if (
-	                                this.object.getModel().isClassType(type) || 
-	                                PrimitiveTypes.OBJECT_ID.equals(qualifiedTypeName)
-	                            ) {
-	                                SysLog.detail("Initialization of object references not supported", featureDef);
-	                            } else if(
-	                                "org:omg:model1:PrimitiveType".equals(qualifiedTypeName)
-	                            ) {
-	                                SysLog.detail("Initialization of user defined primitive types not supported", featureDef);  
-	                            } else {
-	                                throw new UnsupportedOperationException(
-	                                    "unsupported type " + type
-	                                );
-	                            }
-	                        }
-	                    } break;
-	                	case SET: case LIST: case SPARSEARRAY: {
-	                        this.setValue(featureDef, RefObject_1.EMPTY_OBJECT_ARRAY);
-	                    } break;
-                	} 
+                    switch(ModelHelper.getMultiplicity(featureDef)) {
+                        case OPTIONAL: {
+                            if(setOptionalToNull) {
+                                this.setValue(featureDef, null);
+                            }
+                        } break;
+                        case SINGLE_VALUE: {
+                            if (setRequiredToNull) {
+                                this.setValue(featureDef, null);
+                            } else {
+                                String qualifiedTypeName = (String) type.objGetValue("qualifiedName");
+                                if (PrimitiveTypes.STRING.equals(qualifiedTypeName)) {
+                                    this.setValue(featureDef, "");
+                                } else if (PrimitiveTypes.BOOLEAN.equals(qualifiedTypeName)) {
+                                    this.setValue(featureDef, Boolean.FALSE);
+                                } else if (PrimitiveTypes.DATETIME.equals(qualifiedTypeName)) {
+                                    this.setValue(
+                                        featureDef, 
+                                        DateTimeMarshaller.NORMALIZE.marshal
+                                        (org.w3c.format.DateTimeFormat.BASIC_UTC_FORMAT.format(new Date()))
+                                    );
+                                } else if (PrimitiveTypes.DATE.equals(qualifiedTypeName)) {
+                                    this.setValue(
+                                        featureDef, 
+                                        DateMarshaller.NORMALIZE.marshal("20000101")
+                                    );
+                                } else if (PrimitiveTypes.ANYURI.equals(qualifiedTypeName)) {
+                                    this.setValue(featureDef, URI.create("xri://+null"));
+                                } else if (PrimitiveTypes.DURATION.equals(qualifiedTypeName)) {
+                                    this.setValue(
+                                        featureDef, 
+                                        DurationMarshaller.NORMALIZE.marshal("P0M")
+                                    );
+                                } else if (PrimitiveTypes.SHORT .equals(qualifiedTypeName)) {
+                                    this.setValue(featureDef, Short.valueOf((short) 0));
+                                } else if (PrimitiveTypes.INTEGER.equals(qualifiedTypeName)) {
+                                    this.setValue(featureDef, Integer.valueOf(0));
+                                } else if (PrimitiveTypes.LONG.equals(qualifiedTypeName)) {
+                                    this.setValue(featureDef, Long.valueOf(0L));
+                                } else if (PrimitiveTypes.DECIMAL.equals(qualifiedTypeName)) {
+                                    this.setValue(featureDef, BigDecimal.ZERO);
+                                } else if (PrimitiveTypes.BINARY.equals(qualifiedTypeName)) {
+                                    this.setValue(featureDef, EMPTY_LARGE_OBJECT);
+                                } else if (this.object.getModel().isStructureType(type)) {
+                                    throw new UnsupportedOperationException(
+                                        "Initialization of structs not supported"
+                                    );
+                                } else if (
+                                    this.object.getModel().isClassType(type) || 
+                                    PrimitiveTypes.OBJECT_ID.equals(qualifiedTypeName)
+                                ) {
+                                    SysLog.detail("Initialization of object references not supported", featureDef);
+                                } else if(
+                                    "org:omg:model1:PrimitiveType".equals(qualifiedTypeName)
+                                ) {
+                                    SysLog.detail("Initialization of user defined primitive types not supported", featureDef);  
+                                } else {
+                                    throw new UnsupportedOperationException(
+                                        "unsupported type " + type
+                                    );
+                                }
+                            }
+                        } break;
+                        case SET: case LIST: case SPARSEARRAY: {
+                            this.setValue(featureDef, RefObject_1.EMPTY_OBJECT_ARRAY);
+                        } break;
+                        case MAP: case STREAM:
+                            // not initialized
+                            break;
+                    } 
                 }
             }
         } catch (ServiceException e) {
@@ -1843,7 +1626,7 @@ class RefObject_1
     }
 
     // -------------------------------------------------------------------------
-//  @Override
+    @Override
     final public ObjectView_1_0 refDelegate(
     ) {
         return this.object;
@@ -1946,7 +1729,7 @@ class RefObject_1
      * @see javax.jdo.spi.PersistenceCapable#jdoCopyFields(java.lang.Object,
      *      int[])
      */
-//  @Override
+    @Override
     public void jdoCopyFields(
         Object other, 
         int[] fieldNumbers
@@ -1961,7 +1744,7 @@ class RefObject_1
      * @see javax.jdo.spi.PersistenceCapable#jdoCopyKeyFieldsFromObjectId(javax.jdo.spi.PersistenceCapable.ObjectIdFieldConsumer,
      *      java.lang.Object)
      */
-//  @Override
+    @Override
     public void jdoCopyKeyFieldsFromObjectId(
         ObjectIdFieldConsumer fm,
         Object oid
@@ -1975,7 +1758,7 @@ class RefObject_1
      * 
      * @see javax.jdo.spi.PersistenceCapable#jdoCopyKeyFieldsToObjectId(java.lang.Object)
      */
-//  @Override
+    @Override
     public void jdoCopyKeyFieldsToObjectId(
         Object oid
     ) {
@@ -1989,7 +1772,7 @@ class RefObject_1
      * @see javax.jdo.spi.PersistenceCapable#jdoCopyKeyFieldsToObjectId(javax.jdo.spi.PersistenceCapable.ObjectIdFieldSupplier,
      *      java.lang.Object)
      */
-//  @Override
+    @Override
     public void jdoCopyKeyFieldsToObjectId(
         ObjectIdFieldSupplier fm, 
         Object oid
@@ -2003,7 +1786,7 @@ class RefObject_1
      * 
      * @see javax.jdo.spi.PersistenceCapable#jdoGetObjectId()
      */
-//  @Override
+    @Override
     public Object jdoGetObjectId(
     ) {
         return this.object.jdoIsPersistent() ? this.object.jdoGetObjectId() : null;
@@ -2015,7 +1798,7 @@ class RefObject_1
      * 
      * @see javax.jdo.spi.PersistenceCapable#jdoGetPersistenceManager()
      */
-//  @Override
+    @Override
     public PersistenceManager_1_0 jdoGetPersistenceManager(
     ) {
         return refOutermostPackage().refPersistenceManager();
@@ -2027,7 +1810,7 @@ class RefObject_1
      * 
      * @see javax.jdo.spi.PersistenceCapable#jdoGetTransactionalObjectId()
      */
-//  @Override
+    @Override
     public Object jdoGetTransactionalObjectId(
     ) {
         return this.object.jdoGetTransactionalObjectId();
@@ -2039,7 +1822,7 @@ class RefObject_1
      * 
      * @see javax.jdo.spi.PersistenceCapable#jdoGetVersion()
      */
-//  @Override
+    @Override
     public Object jdoGetVersion(
     ) {
         return this.object.jdoGetVersion();
@@ -2051,7 +1834,7 @@ class RefObject_1
      * 
      * @see javax.jdo.spi.PersistenceCapable#jdoIsDeleted()
      */
-//  @Override
+    @Override
     public boolean jdoIsDeleted(
     ) {
         return this.object.jdoIsDeleted();
@@ -2063,7 +1846,7 @@ class RefObject_1
      * 
      * @see javax.jdo.spi.PersistenceCapable#jdoIsDetached()
      */
-//  @Override
+    @Override
     public boolean jdoIsDetached(
     ) {
         return this.object.jdoIsDetached();
@@ -2075,7 +1858,7 @@ class RefObject_1
      * 
      * @see javax.jdo.spi.PersistenceCapable#jdoIsDirty()
      */
-//  @Override
+    @Override
     public boolean jdoIsDirty(
     ) {
         return this.object.jdoIsDirty();
@@ -2087,7 +1870,7 @@ class RefObject_1
      * 
      * @see javax.jdo.spi.PersistenceCapable#jdoIsNew()
      */
-//  @Override
+    @Override
     public boolean jdoIsNew(
     ) {
         return this.object.jdoIsNew();
@@ -2099,7 +1882,7 @@ class RefObject_1
      * 
      * @see javax.jdo.spi.PersistenceCapable#jdoIsPersistent()
      */
-//  @Override
+    @Override
     public boolean jdoIsPersistent(
     ) {
         return this.object.jdoIsPersistent();
@@ -2111,7 +1894,7 @@ class RefObject_1
      * 
      * @see javax.jdo.spi.PersistenceCapable#jdoIsTransactional()
      */
-//  @Override
+    @Override
     public boolean jdoIsTransactional(
     ) {
         return this.object.jdoIsTransactional();
@@ -2123,7 +1906,7 @@ class RefObject_1
      * 
      * @see javax.jdo.spi.PersistenceCapable#jdoMakeDirty(java.lang.String)
      */
-//  @Override
+    @Override
     public void jdoMakeDirty(
         String fieldName
     ) {
@@ -2137,7 +1920,7 @@ class RefObject_1
      * @see javax.jdo.spi.PersistenceCapable#jdoNewInstance(javax.jdo.spi.StateManager,
      *      java.lang.Object)
      */
-//  @Override
+    @Override
     public PersistenceCapable jdoNewInstance(
         StateManager sm, 
         Object oid
@@ -2151,7 +1934,7 @@ class RefObject_1
      * 
      * @see javax.jdo.spi.PersistenceCapable#jdoNewInstance(javax.jdo.spi.StateManager)
      */
-//  @Override
+    @Override
     public PersistenceCapable jdoNewInstance(
         StateManager sm
     ) {
@@ -2164,7 +1947,7 @@ class RefObject_1
      * 
      * @see javax.jdo.spi.PersistenceCapable#jdoNewObjectIdInstance()
      */
-//  @Override
+    @Override
     public Object jdoNewObjectIdInstance(
     ) {
         throw new UnsupportedOperationException("This JDO operation is not supported by openMDX");
@@ -2176,7 +1959,7 @@ class RefObject_1
      * 
      * @see javax.jdo.spi.PersistenceCapable#jdoNewObjectIdInstance(java.lang.Object)
      */
-//  @Override
+    @Override
     public Object jdoNewObjectIdInstance(
         Object o
     ) {
@@ -2189,7 +1972,7 @@ class RefObject_1
      * 
      * @see javax.jdo.spi.PersistenceCapable#jdoProvideField(int)
      */
-//  @Override
+    @Override
     public void jdoProvideField(
         int fieldNumber
     ) {
@@ -2202,7 +1985,7 @@ class RefObject_1
      * 
      * @see javax.jdo.spi.PersistenceCapable#jdoProvideFields(int[])
      */
-//  @Override
+    @Override
     public void jdoProvideFields(
         int[] fieldNumbers
     ) {
@@ -2215,7 +1998,7 @@ class RefObject_1
      * 
      * @see javax.jdo.spi.PersistenceCapable#jdoReplaceField(int)
      */
-//  @Override
+    @Override
     public void jdoReplaceField(
         int fieldNumber
     ) {
@@ -2228,7 +2011,7 @@ class RefObject_1
      * 
      * @see javax.jdo.spi.PersistenceCapable#jdoReplaceFields(int[])
      */
-//  @Override
+    @Override
     public void jdoReplaceFields(
         int[] fieldNumbers
     ) {
@@ -2241,7 +2024,7 @@ class RefObject_1
      * 
      * @see javax.jdo.spi.PersistenceCapable#jdoReplaceFlags()
      */
-//  @Override
+    @Override
     public void jdoReplaceFlags(
     ) {
         throw new UnsupportedOperationException("This JDO operation is not supported by openMDX");
@@ -2253,7 +2036,7 @@ class RefObject_1
      * 
      * @see javax.jdo.spi.PersistenceCapable#jdoReplaceStateManager(javax.jdo.spi.StateManager)
      */
-//  @Override
+    @Override
     public void jdoReplaceStateManager(
         StateManager sm
     ) throws SecurityException {
@@ -2267,7 +2050,7 @@ class RefObject_1
     /* (non-Javadoc)
      * @see org.openmdx.base.persistence.spi.Cloneable#openmdxjdoClone()
      */
-//  @Override
+    @Override
     public RefObject openmdxjdoClone(String... exclude) {
         try {
             return this.refClass().refCreateInstance(

@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2009, OMEX AG, Switzerland
+ * Copyright (c) 2004-2013, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -279,7 +279,7 @@ public class DateTimeFormat extends ThreadLocal<SimpleDateFormat> {
         ) {
             return date;
         } else {
-            int y2 = Integer.valueOf(date.substring(0, 2));
+            int y2 = Integer.parseInt(date.substring(0, 2));
             int y4 = Calendar.getInstance().get(Calendar.YEAR);
             int d = y2 - y4 % 100;
             int c2 = y4 / 100 + (d <= -50 ? 1 : d > 50 ? -1 : 0);
@@ -355,13 +355,16 @@ public class DateTimeFormat extends ThreadLocal<SimpleDateFormat> {
          * @throws ParseException
          */
         private final String adjustToMillisecondAccuracyAndAddTimezone(
-            String text
+            String rawText
         ) throws ParseException {
             //
             // Replace standard compliant fraction separator by canonical one
             //
-            if(text.indexOf(',') > 0) {
-                text = text.replace(',', '.');
+            String text;
+            if(rawText.indexOf(',') > 0) {
+                text = rawText.replace(',', '.');
+            } else {
+                text = rawText;
             }
             //
             // Add missing century in case of a two digit year

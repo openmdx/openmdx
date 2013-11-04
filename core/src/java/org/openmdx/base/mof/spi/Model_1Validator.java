@@ -54,7 +54,7 @@ import java.math.BigInteger;
 import java.net.URL;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.Map;
 import java.util.Properties;
@@ -63,8 +63,10 @@ import java.util.TreeSet;
 
 import javax.xml.datatype.XMLGregorianCalendar;
 
+import org.openmdx.base.collection.Sets;
 import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;
+import org.openmdx.base.mof.cci.ModelBuilder_1_0;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
 import org.openmdx.base.mof.cci.ModelHelper;
 import org.openmdx.base.mof.cci.Model_1_0;
@@ -80,16 +82,26 @@ import org.openmdx.kernel.log.SysLog;
  * Model_1Factory
  */
 public class Model_1Validator {
-    
+
+    /**
+     * The qualified names of the meta data model packages 
+     */
+    private static final Set<String> META_MODEL_PACKAGES = Collections.unmodifiableSet(
+        Sets.asSet(
+            "org:omg:model1",
+            "org:w3c"
+        )
+    );
+
     /**
      * Tells whether the model is valid
      * 
      * @param model the model to be validated
-     * @param retry, i.e. 0 for the initial attempt, 1 for the firest retry and so on
+     * @param retry, i.e. 0 for the initial attempt, 1 for the first retry and so on
      * 
      * @return <code>true</code> if the model is valid, <code>false</code> if the model should be reloaded
      * 
-     * @throws RuntimeServiceException if no retry attemot should be made
+     * @throws RuntimeServiceException if no retry attempt should be made
      */
     static boolean isValid(
         Properties validationProperties, 
@@ -149,20 +161,14 @@ public class Model_1Validator {
 
     private static Model_1_0 getMetaModel(
     ) throws ServiceException{
-        Model_1_0 metaModel;
         try {
-            metaModel = Classes.newApplicationInstance(
-                Model_1_0.class, 
-                "org.openmdx.application.mof.repository.accessor.Model_1"
+            ModelBuilder_1_0 metaModelBuilder = Classes.newApplicationInstance(
+                ModelBuilder_1_0.class, 
+                ModelBuilder_1_0.BUILDER_CLASS_NAME,
+                Boolean.TRUE,
+                META_MODEL_PACKAGES
             );
-            metaModel.addModels(
-                Arrays.asList(
-                    "org:omg:model1",
-                    "org:w3c"
-                ),
-                true
-            );
-            return metaModel;
+            return metaModelBuilder.build();
         } catch (Exception exception) {
             throw new ServiceException(
                 exception,

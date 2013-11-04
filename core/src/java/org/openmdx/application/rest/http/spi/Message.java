@@ -49,6 +49,7 @@ package org.openmdx.application.rest.http.spi;
 
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.rest.spi.RestSource;
+import org.openmdx.base.rest.spi.Target;
 
 /**
  * HTTP Message

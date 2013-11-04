@@ -1354,6 +1354,7 @@ public class TestPerformance {
         );
     }
 
+    @SuppressWarnings("resource")
     protected final OutputStream newOutputStream(
     ) throws IOException {
         return channel = IN_MEMORY ? new ByteArrayOutputStream(
@@ -1362,6 +1363,7 @@ public class TestPerformance {
         );
     }
     
+    @SuppressWarnings("resource")
     protected final InputStream newInputStream(
     ) throws IOException {
         return IN_MEMORY ? new ByteArrayInputStream(

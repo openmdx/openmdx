@@ -1,17 +1,14 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: LightweightXADataSource.jt,v 1.4 2012/06/22 13:37:03 hburger Exp $
+ * Project:     openMDX/Core, http://www.openmdx.org/
  * Description: Lightweight XADataSource
- * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2012/06/22 13:37:03 $
  * ====================================================================
  *
  * This software is published under the BSD license
  * as listed below.
  * 
- * Copyright (c) 2011, OMEX AG, Switzerland
+ * Copyright (c) 2011-2013, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without 
@@ -194,7 +191,7 @@ public class LightweightXADataSource
         DriverManager.setLoginTimeout(seconds);
     }
 
-#if defined(SINCE17)
+#ifdef SINCE17
     //-----------------------------------------------------------------------
     // Since JRE 7
     //-----------------------------------------------------------------------

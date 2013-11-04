@@ -103,6 +103,7 @@ import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.AggregationKind;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
+import org.openmdx.base.mof.cci.ModelHelper;
 import org.openmdx.base.mof.cci.Model_1_0;
 import org.openmdx.base.mof.cci.PrimitiveTypes;
 import org.openmdx.base.naming.Path;
@@ -127,13 +128,13 @@ import org.openmdx.portal.servlet.attribute.TextValue;
 import org.openmdx.portal.servlet.control.Control;
 import org.openmdx.portal.servlet.control.GridControl;
 import org.openmdx.portal.servlet.databinding.CompositeObjectDataBinding;
+import org.openmdx.portal.servlet.databinding.JoiningListDataBinding;
 import org.openmdx.portal.servlet.databinding.ReferencedObjectDataBinding;
 import org.openmdx.portal.servlet.view.Grid;
 import org.openmdx.portal.servlet.view.ObjectView;
 import org.openmdx.portal.servlet.view.ShowObjectView;
 import org.openmdx.ui1.jmi1.FeatureDefinition;
 import org.openmdx.ui1.jmi1.StructuralFeatureDefinition;
-import org.openmdx.ui1.jmi1.ValuedField;
 
 /**
  * DefaultPortalExtension
@@ -291,14 +292,14 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
      */
     @Override
     public org.openmdx.base.query.Filter getQuery(        
-    	org.openmdx.ui1.jmi1.ValuedField field,
+    	String qualifiedFeatureName,
     	String filterValue,
     	int queryFilterStringParamCount,
     	ApplicationContext app
-    ) {
+    ) throws ServiceException {
         return null;
     }
-    
+
     /* (non-Javadoc)
      * @see org.openmdx.portal.servlet.PortalExtension_1_0#getGridPageSize(java.lang.String)
      */
@@ -340,7 +341,8 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
     public Autocompleter_1_0 getAutocompleter(
         ApplicationContext app,
         RefObject_1_0 context,
-        String qualifiedFeatureName
+        String qualifiedFeatureName,
+        String restrictToType
     ) {
         try {
             Model_1_0 model = app.getModel();
@@ -349,16 +351,20 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
             try {
                 ModelElement_1_0 lookupFeature = model.getElement(qualifiedFeatureName);
                 lookupType = model.getElement(lookupFeature.objGetValue("type"));
-            }
-            catch(Exception e) {
+            } catch(Exception e) {
                 try {
                     // Fallback to customized feature definitions
                     FeatureDefinition lookupFeature = app.getFeatureDefinition(qualifiedFeatureName);
                     if(lookupFeature instanceof StructuralFeatureDefinition) {
                         lookupType = model.getElement(((StructuralFeatureDefinition)lookupFeature).getType());
                     }
-                }
-                catch(Exception e0) {}
+                } catch(Exception e0) {}
+            }
+            if(lookupType != null && restrictToType != null) {
+            	ModelElement_1_0 subtype = model.getElement(restrictToType);
+            	if(model.isSubtypeOf(subtype, lookupType)) {
+            		lookupType = subtype;
+            	}
             }
             if(
                 (lookupType != null) && 
@@ -376,18 +382,13 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
                 Map<Integer,String> filterByLabels = new TreeMap<Integer,String>();
                 Map<Integer,String> lookupReferenceNames = new TreeMap<Integer,String>();
                 ModelElement_1_0 lookupObjectClass = ((RefMetaObject_1)lookupObject.refMetaObject()).getElementDef();
-                Map lookupObjectFeatures = model.getStructuralFeatureDefs(lookupObjectClass, true, false, false);
+                Map<String,ModelElement_1_0> lookupObjectFeatures = model.getStructuralFeatureDefs(lookupObjectClass, true, false, false);
                 ModelElement_1_0 extentCapableClass = model.getElement("org:openmdx:base:ExtentCapable");
                 ModelElement_1_0 contextCapableClass = model.getElement("org:openmdx:base:ContextCapable");
                 ModelElement_1_0 basicObjectClass = model.getElement("org:openmdx:base:BasicObject");
                 // Find composite reference of lookup object which references objects of type lookup type
                 int ii = 0;
-                for(
-                    Iterator i = lookupObjectFeatures.values().iterator(); 
-                    i.hasNext();
-                    ii++
-                ) {
-                    ModelElement_1_0 feature = (ModelElement_1_0)i.next();
+                for(ModelElement_1_0 feature: lookupObjectFeatures.values()) {
                     if(model.isReferenceType(feature)) {
                         ModelElement_1_0 referencedEnd = model.getElement(feature.objGetValue("referencedEnd"));
                         ModelElement_1_0 referencedType = model.getElement(feature.objGetValue("type"));
@@ -447,14 +448,14 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
                                         if(field.isActive()) {
                                             int locale = app.getCurrentLocaleAsIndex();
                                             // Order autocompleters by <order referenced type,index,field order>
-                                            order =  field.getOrderObjectContainer().size() > 2 ? 
-                                            	1000000*orderReferencedType + 10000*ii + 100*((Number)field.getOrderObjectContainer().get(1)).intValue() + ((Number)field.getOrderObjectContainer().get(2)).intValue() : 
-                                            		field.getOrder().size() > 2 ? 
-	                                                	1000000*orderReferencedType + 10000*ii + 100*((Number)field.getOrder().get(1)).intValue() + ((Number)field.getOrder().get(2)).intValue() : 
-	                                                		1000000*orderReferencedType + 10000*ii + order;   
-                                            String label = locale < field.getLabel().size() ? 
-                                            	field.getLabel().get(locale) : 
-                                            		field.getLabel().isEmpty() ? attributeName : field.getLabel().get(0);
+                                            order =  field.getOrderObjectContainer().size() > 2 
+                                            	? 1000000*orderReferencedType + 10000*ii + 100*((Number)field.getOrderObjectContainer().get(1)).intValue() + ((Number)field.getOrderObjectContainer().get(2)).intValue() 
+                                            	: field.getOrder().size() > 2 
+                                            		? 1000000*orderReferencedType + 10000*ii + 100*((Number)field.getOrder().get(1)).intValue() + ((Number)field.getOrder().get(2)).intValue() 
+                                            		: 1000000*orderReferencedType + 10000*ii + order;   
+                                            String label = locale < field.getLabel().size() 
+                                            	? field.getLabel().get(locale) 
+                                            	: field.getLabel().isEmpty() ? attributeName : field.getLabel().get(0);
                                             lookupReferenceNames.put(
                                                 new Integer(order), 
                                                 lookupReferenceName
@@ -472,8 +473,7 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
                                             	Boolean.TRUE.equals(field.isSortable()) ? attributeName : ""
                                             );
                                         }
-                                    }
-                                    catch(Exception e) {
+                                    } catch(Exception e) {
                                         lookupReferenceNames.put(
                                             order, 
                                             lookupReferenceName
@@ -492,10 +492,11 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
                                         );
                                     }
                                 }
-                            }                
+                            }
                         }
                     }
-                }                
+                    ii++;
+                }
                 if(
                     (lookupObject != null) &&
                     !lookupReferenceNames.isEmpty()
@@ -514,15 +515,14 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
                         (String[])orderByFeatures.values().toArray(new String[orderByFeatures.size()])
                     );
                 }
-            }        
-        }
-        catch(Exception e) {
+            }
+        } catch(Exception e) {
             SysLog.warning("Error getting autocompleter", Arrays.asList(new String[]{context == null ? "N/A" : context.refMofId(), qualifiedFeatureName}));
             new ServiceException(e).log();
         }
         return null;
     }
-        
+
     /* (non-Javadoc)
      * @see org.openmdx.portal.servlet.PortalExtension_1_0#getFindObjectsBaseFilter(org.openmdx.portal.servlet.ApplicationContext, org.openmdx.base.accessor.jmi.cci.RefObject_1_0, java.lang.String)
      */
@@ -576,6 +576,7 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
 
     /**
      * Get attribute value.
+     * 
      * @param valueHolder
      * @param target
      * @param featureName
@@ -597,6 +598,7 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
 
     /**
      * Set attribute value.
+     * 
      * @param valueHolder
      * @param target
      * @param featureName
@@ -623,1154 +625,1043 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
      */
     @Override
     public void updateObject(
-        Object target,
-        Map<String,String[]> parameterMap,
-        Map<String,Attribute> fieldMap,
-        ApplicationContext app
+    	Object target,
+    	Map<String,String[]> parameterMap,
+    	Map<String,Attribute> fieldMap,
+    	ApplicationContext app
     ) {
     	SysLog.trace("fieldMap", fieldMap);
     	SysLog.trace("parameterMap", parameterMap);
-        Model_1_0 model = app.getModel();
-        int count = 0;
-        // Data bindings require multi-pass update of object
-        Map<String,Attribute> updatedFeatures = new HashMap<String,Attribute>();
-        while(count < 3) {
-            // map object
-            Set<String> modifiedFeatures = new HashSet<String>();
-            for(
-              Iterator i = parameterMap.keySet().iterator(); 
-              i.hasNext(); 
-            ) {
-              Object key = i.next();        
-              // field names are of the form 'feature[index][.false | .true]'
-              // Suffix .true and .false for boolean fields only. 
-              // If .false and .true fields are received ignore .false
-              if(
-                (key instanceof String) &&
-                (((String)key).indexOf("[") >= 0) &&
-                (!((String)key).endsWith(".false") || !parameterMap.keySet().contains(((String)key).substring(0, ((String)key).lastIndexOf(".false")) + ".true"))
-              ) {        
-                // attribute names are of the form <name>[tabIndex]
-                // remove tabIndex to get full qualified feature name
-                String featureName = ((String)key).substring(0, ((String)key).lastIndexOf("["));
-                String featureTypeName = null;
-                // Lookup feature in model repository
-                try {
-                    ModelElement_1_0 featureDef = model.getElement(featureName);
-                    featureTypeName = (String)model.getElement(featureDef.objGetValue("type")).objGetValue("qualifiedName");
-                }             
-                catch(Exception e) {
-                    try {
-                        // Fallback: lookup feature in ui repository as feature definition
-                        FeatureDefinition featureDef = app.getFeatureDefinition(featureName);
-                        if(featureDef instanceof StructuralFeatureDefinition) {
-                            featureTypeName = ((StructuralFeatureDefinition)featureDef).getType();
-                        }
-                    }
-                    catch(Exception e0) {}                
-                }        
-                Attribute feature = (Attribute)fieldMap.get(featureName);
-                if(feature != null) {        
-                  // parse parameter values
-                  List parameterValues = Arrays.asList((Object[])parameterMap.get(key));
-                  StringTokenizer tokenizer = parameterValues.isEmpty() ? 
-                	  new StringTokenizer("", "\n", true) : 
-                		  new StringTokenizer((String)parameterValues.get(0), "\n\r", true);
-                  List<String> newValues = new ArrayList<String>();
-                  boolean lastTokenIsNewLine = false;
-                  while(tokenizer.hasMoreTokens()) {
-                	  String token = tokenizer.nextToken();
-                	  if(!"#NULL".equals(token)) {
-                		  if("\n".equals(token)) {
-                			  if(lastTokenIsNewLine) {
-                				  newValues.add("");
-                			  }
-                			  lastTokenIsNewLine = true;
-                		  } else if("\r".equals(token)) {
-                			  // Skip
-                		  } else {
-                			  newValues.add(token);
-                			  lastTokenIsNewLine = false;
-                		  }
-                	  }
-                  }
-                  // accept?
-                  AttributeValue valueHolder = feature.getValue();
-                  boolean accept =
-                      (valueHolder != null) &&
-                      valueHolder.isChangeable() &&
-                      !modifiedFeatures.contains(featureName);
-                  SysLog.trace("accept feature", featureName + "=" + accept);
-                  SysLog.trace("new values", newValues);        
-                  if(accept) {
-                	updatedFeatures.put(
-                		featureName, 
-                		feature
-                	);
-                    // text
-                    if(valueHolder instanceof TextValue) {
-                      SysLog.trace("Text value " + feature.getLabel(), Arrays.asList((Object[])parameterMap.get(key)));        
-                      // single-valued
-                      if(valueHolder.isSingleValued()) {
-                        // cat all values into one string
-                        String multiLineString = parameterValues.isEmpty() ?
-                            "" :
-                            (String)parameterValues.get(0);
-                        String mappedNewValue = multiLineString.length() == 0 ? null : multiLineString;
-                        if(target instanceof RefObject) {
-                        	Object value = this.getValue(
-                      		  	valueHolder, 
-                      		  	target, 
-                      		  	featureName, 
-                      		  	app
-                        	);
-                    		this.setValue(
-                    			valueHolder, 
-                    			target, 
-                    			featureName, 
-                    			value instanceof Collection ? Collections.singletonList(mappedNewValue) : mappedNewValue, 
-                    			app
-                    		);
-                    		modifiedFeatures.add(featureName);
-                        }
-                        else {
-                            targetAsValueMap(target).put(
-                                featureName,
-                                mappedNewValue
-                            );
-                        }
-                      }        
-                      // multi-valued
-                      else {
-                        Collection<Object> values = null;
-                        if(target instanceof RefObject) {
-                            values = valueAsCollection(
-                            	this.getValue(
-                            		valueHolder, 
-                            		target, 
-                            		featureName, 
-                            		app
-                            	)
-                            );
-                        }
-                        else {
-                            values = valueAsCollection(targetAsValueMap(target).get(featureName));
-                            if(values == null) {
-                                targetAsValueMap(target).put(
-                                  featureName,
-                                  values = new ArrayList<Object>()
-                                );
-                            }
-                        }
-                        List<String> mappedNewValues = newValues;
-                        if(target instanceof RefObject) {
-                        	this.setValue(
-                        		valueHolder, 
-                        		target, 
-                        		featureName, 
-                        		mappedNewValues, 
-                        		app
-                        	);
-                        }
-                        else {
-                            values.clear();
-                            values.addAll(mappedNewValues);
-                        }
-                        modifiedFeatures.add(featureName);
-                      }
-                    }
-        
-                    // number
-                    else if(valueHolder instanceof NumberValue) {
-                      // single-valued
-                      if(valueHolder.isSingleValued()) {
-                        try {    
-                          BigDecimal number = app.parseNumber(
-                              newValues.isEmpty() ? "" : ((String)newValues.get(0)).trim()
-                          );
-                          if(number == null) {
-                              number = valueHolder.isOptionalValued() ? 
-                            	  null : 
-                            	  BigDecimal.ZERO;
-                          }
-                          if(number == null) {
-                              Object mappedNewValue = null;
-                              if(target instanceof RefObject) {
-                            	  Object value = this.getValue(
-                            		  valueHolder, 
-                            		  target, 
-                            		  featureName, 
-                            		  app
-                            	  );
-                        		  this.setValue(
-                        			  valueHolder, 
-                        			  target, 
-                        			  featureName, 
-                        			  value instanceof Collection ? Collections.singletonList(mappedNewValue) : mappedNewValue, 
-                        			  app
-                        		  );
-                        		  modifiedFeatures.add(featureName);
-                              }
-                              else {
-                                  targetAsValueMap(target).put(
-                                      featureName,
-                                      mappedNewValue
-                                  );
-                              }
-                          }
-                          else if(PrimitiveTypes.INTEGER.equals(featureTypeName)) {
-                              Integer mappedNewValue = new Integer(number.intValue());
-                              if(target instanceof RefObject) {
-                            	  Object value = this.getValue(
-                            		  valueHolder, 
-                            		  target, 
-                            		  featureName, 
-                            		  app
-                            	  );
-                        		  this.setValue(
-                        			  valueHolder, 
-                        			  target, 
-                        			  featureName, 
-                        			  value instanceof Collection ? Collections.singletonList(mappedNewValue) : mappedNewValue, 
-                        			  app
-                        		  );
-                        		  modifiedFeatures.add(featureName);
-                              }
-                              else {
-                                  targetAsValueMap(target).put(
-                                      featureName,
-                                      mappedNewValue
-                                  );
-                              }
-                          }
-                          else if(PrimitiveTypes.LONG.equals(featureTypeName)) {
-                              Long mappedNewValue = new Long(number.longValue());
-                              if(target instanceof RefObject) {
-                            	  Object value = this.getValue(
-                            		  valueHolder, 
-                            		  target, 
-                            		  featureName, 
-                            		  app
-                            	  );
-                            	  this.setValue(
-                            		  valueHolder, 
-                            		  target, 
-                            		  featureName, 
-                            		  value instanceof Collection ? Collections.singletonList(mappedNewValue) : mappedNewValue, 
-                            		  app
-                            	  );
-                                  modifiedFeatures.add(featureName);
-                              }
-                              else {
-                                  targetAsValueMap(target).put(
-                                      featureName,
-                                      mappedNewValue
-                                  );
-                              }
-                          }
-                          else if(PrimitiveTypes.DECIMAL.equals(featureTypeName)) {
-                              BigDecimal mappedNewValue = number;
-                              if(target instanceof RefObject) {
-                            	  Object value = this.getValue(
-                            		  valueHolder, 
-                            		  target, 
-                            		  featureName, 
-                            		  app
-                            	  );
-                        		  this.setValue(
-                        			  valueHolder, 
-                        			  target, 
-                        			  featureName, 
-                        			  value instanceof Collection ? Collections.singletonList(mappedNewValue) : mappedNewValue, 
-                          	  		  app
-                        		  );
-                        		  modifiedFeatures.add(featureName);
-                              }
-                              else {
-                                  targetAsValueMap(target).put(
-                                      featureName,
-                                      mappedNewValue
-                                  );
-                              }
-                          }
-                          else {
-                              Short mappedNewValue = new Short(number.shortValue());
-                              if(target instanceof RefObject) {
-                            	  Object value = this.getValue(
-                                	  valueHolder, 
-                                	  target, 
-                                	  featureName, 
-                                	  app
-                        		  );
-                            	  this.setValue(
-                            		  valueHolder, 
-                            		  target, 
-                            		  featureName, 
-                            		  value instanceof Collection ? Collections.singletonList(mappedNewValue) : mappedNewValue, 
-                            		  app
-                            	  );
-                                  modifiedFeatures.add(featureName);
-                              }
-                              else {
-                                  targetAsValueMap(target).put(
-                                      featureName,
-                                      mappedNewValue
-                                  );
-                              }
-                          }
-                        }
-                        catch(Exception e) {
-                        	SysLog.detail(e.getMessage(), e.getCause());
-                        	app.addErrorMessage(
-                        	  app.getTexts().getErrorTextCanNotEditNumber(),
-                            	new String[]{feature.getLabel(), (String)newValues.get(0), "can not parse number"}
-                        	);
-                        }
-                      }
-        
-                      // multi-valued
-                      else {
-                        Collection<Object> values = null;
-                        if(target instanceof RefObject) {
-                            values = valueAsCollection(
-                            	this.getValue(
-                            		valueHolder, 
-                            		target, 
-                            		featureName, 
-                            		app
-                            	)
-                            );
-                        }
-                        else {
-                            values = valueAsCollection(targetAsValueMap(target).get(featureName));
-                            if(values == null) {
-                                targetAsValueMap(target).put(
-                                  featureName,
-                                  values = new ArrayList<Object>()
-                                );
-                            }
-                        }
-                        List<Object> mappedNewValues = new ArrayList<Object>();
-                        for(Iterator j = newValues.iterator(); j.hasNext(); ) {
-                          try {
-                            String numberAsString = ((String)j.next()).trim();
-                            BigDecimal number = app.parseNumber(numberAsString);
-                            if(number != null) {
-                              if(PrimitiveTypes.INTEGER.equals(featureTypeName)) {
-                                mappedNewValues.add(
-                                  new Integer(number.intValue())
-                                );
-                              }
-                              else if(PrimitiveTypes.LONG.equals(featureTypeName)) {
-                                mappedNewValues.add(
-                                  new Long(number.longValue())
-                                );
-                              }
-                              else if(PrimitiveTypes.DECIMAL.equals(featureTypeName)) {
-                                mappedNewValues.add(
-                                  number
-                                );
-                              }
-                              else { // if(PrimitiveTypes.SHORT.equals(featureTypeName)) {
-                                  mappedNewValues.add(
-                                    new Short(number.shortValue())
-                                  );
-                              }
-                            }
-                            else {
-                            	app.addErrorMessage(
-                            		app.getTexts().getErrorTextCanNotEditNumber(),
-                            		new String[]{feature.getLabel(), (String)newValues.get(0), "can not parse number"}
-                            	);
-                            }
-                          }
-                          catch(Exception e) {
-                          	SysLog.detail(e.getMessage(), e.getCause());
-                            app.addErrorMessage(
-                              app.getTexts().getErrorTextCanNotEditNumber(),
-                              new String[]{feature.getLabel(), (String)newValues.get(0), e.getMessage()}
-                            );
-                          }
-                        }
-                        if(target instanceof RefObject) {
-                      	  	this.setValue(
-                      	  		valueHolder, 
-                      	  		target, 
-                      	  		featureName, 
-                      	  		mappedNewValues, 
-                      	  		app
-                      	  	);
-                        }
-                        else {
-                            values.clear();
-                            values.addAll(mappedNewValues);
-                        }
-                        modifiedFeatures.add(featureName);
-                      }
-                    }
-
-                    // date
-                    else if(valueHolder instanceof DateValue) {
-                      SimpleDateFormat dateParser = DateValue.getLocalizedDateFormatter(
-                          featureName, 
-                          true, 
-                          app
-                      );
-                      SimpleDateFormat dateTimeParser = DateValue.getLocalizedDateTimeFormatter(
-                          featureName, 
-                          true, 
-                          app
-                      );
-                      Calendar cal = new GregorianCalendar();
-        
-                      // single-valued
-                      if(valueHolder.isSingleValued()) {
-                        try {
-                          if(newValues.isEmpty()) {
-                            Object mappedNewValue = null;
-                            if(target instanceof RefObject) {
-                            	Object value = this.getValue(
-                        			valueHolder, 
-                        			target, 
-                        			featureName, 
-                        			app
-                        		);
-                          	  	this.setValue(
-                          	  		valueHolder, 
-                          	  		target, 
-                          	  		featureName, 
-                          	  		value instanceof Collection ? Collections.singletonList(mappedNewValue) : mappedNewValue, 
-                          	  		app
-                          	  	);
-                          	  	modifiedFeatures.add(featureName);
-                            }
-                            else {
-                                targetAsValueMap(target).put(
-                                    featureName,
-                                    mappedNewValue
-                                );
-                            }
-                          }
-                          else {
-                            String newValue = (String)newValues.get(0);
-                            Date mappedNewValue = null;
-                            try {
-                                mappedNewValue = dateTimeParser.parse(newValue);
-                            }
-                            catch(ParseException e) {
-                                mappedNewValue = dateParser.parse(newValue);
-                            }                        
-                            if(mappedNewValue != null) {
-                              cal.setTime(mappedNewValue);
-                              if(cal.get(GregorianCalendar.YEAR) < 100) {
-                            	  int currentYear = new GregorianCalendar().get(GregorianCalendar.YEAR);
-                            	  int year = cal.get(GregorianCalendar.YEAR);
-                            	  cal.add(
-                            		  GregorianCalendar.YEAR, 
-                            		  100 * (currentYear / 100 - (Math.abs(currentYear % 100 - year % 100) < 50 ? 0 : 1))
-                            	  );
-                              }
-                              // date
-                              if(PrimitiveTypes.DATE.equals(featureTypeName)) {
-                                XMLGregorianCalendar mappedNewValueDate = DefaultPortalExtension.xmlDatatypeFactory().newXMLGregorianCalendarDate(
-                                    cal.get(Calendar.YEAR),
-                                    cal.get(Calendar.MONTH) + 1,
-                                    cal.get(Calendar.DAY_OF_MONTH),
-                                    DatatypeConstants.FIELD_UNDEFINED
-                                );
-                                if(target instanceof RefObject) {
-                                	Object value = this.getValue(
-                                		valueHolder, 
-                                		target, 
-                                		featureName, 
-                                		app
-                                	);
-                                  	this.setValue(
-                                  		valueHolder, 
-                                		target, 
-                                		featureName, 
-                                		value instanceof Collection ? Collections.singletonList(mappedNewValueDate) : mappedNewValueDate, 
-                                		app
-                                	);
-                                  	modifiedFeatures.add(featureName);
-                                }
-                                else {
-                                    targetAsValueMap(target).put(
-                                        featureName,
-                                        mappedNewValueDate
-                                    );
-                                }
-                              }
-                              // dateTime
-                              else if(PrimitiveTypes.DATETIME.equals(featureTypeName)) {
-                            	  mappedNewValue = cal.getTime();
-                                  if(target instanceof RefObject) {
-                                	  Object value = this.getValue(
-                                		  valueHolder, 
-                                		  target, 
-                                		  featureName, 
-                                		  app
-                                	  );
-                                	  this.setValue(
-                                		  valueHolder, 
-                                		  target, 
-                                		  featureName, 
-                                		  value instanceof Collection ? Collections.singletonList(mappedNewValue) : mappedNewValue, 
-                                		  app
-                                	  );	                                	  
-                                      modifiedFeatures.add(featureName);
-                                  }
-                                  else {
-                                      targetAsValueMap(target).put(
-                                          featureName,
-                                          mappedNewValue
-                                      );
-                                  }
-                              }
-                              else {
-                                app.addErrorMessage(
-                                  app.getTexts().getErrorTextCanNotEditDate(),
-                                  new String[]{feature.getLabel(), featureTypeName, "date type not supported"}
-                                );
-                              }
-                            }
-                            else {
-                              app.addErrorMessage(
-                                app.getTexts().getErrorTextCanNotEditDate(),
-                                new String[]{feature.getLabel(), (String)newValues.get(0), "can not parse date"}
-                              );
-                            }
-                          }
-                        }
-                        catch(Exception e) {
-                        	SysLog.detail(e.getMessage(), e.getCause());
-                        	app.addErrorMessage(
-                        		app.getTexts().getErrorTextCanNotEditDate(),
-                        		new String[]{feature.getLabel(), (String)newValues.get(0), e.getMessage()}
-                        	);
-                        }
-                      }
-        
-                      // multi-valued
-                      else {
-                        Collection<Object> values = null;
-                        if(target instanceof RefObject) {
-                            values = valueAsCollection(
-                            	this.getValue(
-                            		valueHolder, 
-                            		target, 
-                            		featureName, 
-                            		app
-                            	)
-                            );
-                        }
-                        else {
-                            values = valueAsCollection(targetAsValueMap(target).get(featureName));
-                            if(values == null) {
-                                targetAsValueMap(target).put(
-                                  featureName,
-                                  values = new ArrayList<Object>()
-                                );
-                            }
-                        }
-                        List<Object> mappedNewValues = new ArrayList<Object>();
-                        for(Iterator j = newValues.iterator(); j.hasNext(); ) {
-                          try {
-                            String newValue = (String)j.next();
-                            Date dateTime = null;
-                            try {
-                                dateTime = dateTimeParser.parse(newValue);
-                            }
-                            catch(ParseException e) {
-                                dateTime = dateParser.parse(newValue);
-                            }
-                            if(dateTime != null) {
-                              cal.setTime(dateTime);
-                              if(PrimitiveTypes.DATE.equals(featureTypeName)) {
-                                XMLGregorianCalendar date = DefaultPortalExtension.xmlDatatypeFactory().newXMLGregorianCalendarDate(
-                                    cal.get(Calendar.YEAR),
-                                    cal.get(Calendar.MONTH) + 1,
-                                    cal.get(Calendar.DAY_OF_MONTH),
-                                    DatatypeConstants.FIELD_UNDEFINED
-                                );
-                                mappedNewValues.add(date);
-                              }
-                              else if(PrimitiveTypes.DATETIME.equals(featureTypeName)) {
-                                mappedNewValues.add(dateTime);
-                              }
-                              else {
-                                app.addErrorMessage(
-                                  app.getTexts().getErrorTextCanNotEditDate(),
-                                  new String[]{feature.getLabel(), featureTypeName, "date type not supported"}
-                                );
-                              }
-                            }
-                            else {
-                            	app.addErrorMessage(
-                            		app.getTexts().getErrorTextCanNotEditDate(),
-                            		new String[]{feature.getLabel(), (String)newValues.get(0), "can not parse date"}
-                            	);
-                            }
-                          }
-                          catch(Exception e) {
-                          	SysLog.detail(e.getMessage(), e.getCause());
-                            app.addErrorMessage(
-                            	app.getTexts().getErrorTextCanNotEditDate(),
-                            	new String[]{feature.getLabel(), (String)newValues.get(0), e.getMessage()}
-                            );
-                          }
-                        }
-                        if(target instanceof RefObject) {
-                          	  this.setValue(
-                        		  valueHolder, 
-                        		  target, 
-                        		  featureName, 
-                        		  mappedNewValues, 
-                        		  app
-                        	  );
-                        }
-                        else {
-                            values.clear();
-                            values.addAll(mappedNewValues);
-                        }
-                        modifiedFeatures.add(featureName);
-                      }
-                    }
-        
-                    // object reference
-                    else if(valueHolder instanceof ObjectReferenceValue) {
-                      if(!((String)key).endsWith(".Title")) {
-                        // single-valued
-                        if(valueHolder.isSingleValued()) {
-                          String xri = null;
-                          Object[] titleValues = (Object[])parameterMap.get(key + ".Title");
-                          // xri of referenced object entered (manually) as title. If set
-                          // and valid this overrides xri set in field (by lookup inspector).
-                          // If set and invalid and newValues is empty report an error
-                          boolean xriSetAsTitleIsInvalid = false;
-                          if((titleValues != null) && (titleValues.length > 0)) {
-                            if(titleValues[0].toString().isEmpty()) {
-                              xri = ""; // reference removed by user
-                            }
-                            else {
-                              try {
-                                  URL titleUrl = new URL((String)(titleValues[0]));
-                                  if("xri".equals(titleUrl.getProtocol())) {
-                                	  xri = (String)titleValues[0];
-                                  }
-                                  else {
-	                                  String query = URLDecoder.decode(titleUrl.getQuery(), "UTF-8");
-	                                  int parameterPos = -1;
-	                                  if((parameterPos = query.indexOf(WebKeys.REQUEST_PARAMETER + "=")) >= 0) {
-	                                      String parameter = query.substring(parameterPos + 10);
-	                                      if(parameter.indexOf("xri:@openmdx:") >= 0 || parameter.indexOf("xri://@openmdx:") > 0) {
-	                                          xri = Action.getParameter(
-	                                              parameter,
-	                                              Action.PARAMETER_OBJECTXRI
-	                                          );
-	                                      }
-	                                  }
-                                  }
-                              }
-                              catch(MalformedURLException e) {
-                                xriSetAsTitleIsInvalid = true;
-                              }
-                              catch(UnsupportedEncodingException e) {
-                                  xriSetAsTitleIsInvalid = true;
-                              }
-                            }
-                          }
-                          // xri entered as title is valid
-                          if(xriSetAsTitleIsInvalid && newValues.isEmpty()) {
-                              // title N/A (object not available) and N/P (no permission) is set by show object. Ignore.
-                              if(!((String)titleValues[0]).startsWith("N/A") && !((String)titleValues[0]).startsWith("N/P")) {
-                            	  app.addErrorMessage(
-                            		  app.getTexts().getErrorTextInvalidObjectReference(),
-                                      new String[]{feature.getLabel(), (String)titleValues[0]}
-                                  );
-                              }
-                          }
-                          // xri entered as title is either valid or xri is set in field
-                          else {
-                              if((xri == null) && (newValues.size() > 0)) {
-                                xri = (String)newValues.get(0);
-                              }
-                              try {
-                                Object mappedNewValue = (xri == null) || "".equals(xri) ? 
-                                	null : 
-                                		new Path(xri);
-                                if(target instanceof RefObject) {
-                                	mappedNewValue = mappedNewValue == null ?
-                                		null : 
-                                			JDOHelper.getPersistenceManager(target).getObjectById(
-		                                		mappedNewValue
-		                                	);
-                                	this.setValue(
-                                		valueHolder, 
-                                		target, 
-                                		featureName, 
-                                		mappedNewValue, 
-                                		app
-                                	);
-                                	modifiedFeatures.add(featureName);
-                                }
-                                else {
-                                    targetAsValueMap(target).put(
-                                        featureName,
-                                        mappedNewValue
-                                    );
-                                }
-                              }
-                              catch(Exception e) {
-                               	SysLog.detail(e.getMessage(), e.getCause());
-                                app.addErrorMessage(
-                                	app.getTexts().getErrorTextCanNotEditObjectReference(),
-                                	new String[]{feature.getLabel(), (String)newValues.get(0), e.getMessage()}
-                                );
-                              }
-                          }
-                        }
-        
-                        // multi-valued
-                        else {
-                          // not supported yet
-                        }
-        
-                      }
-                    }
-        
-                    // code
-                    else if(valueHolder instanceof CodeValue) {
-                      Map longTexts = ((CodeValue)valueHolder).getLongText(false, false);        
-                      // single-valued
-                      if(valueHolder.isSingleValued()) {
-                        try {
-                          if(longTexts == null) {
-                        	  SysLog.warning("Can not get ValueContainer with name", featureName);
-                              System.err.println("WARNING: can not get CodeValueContainer with name " + featureName + ". Add " + featureName + " to the name list of a CodeValueContainer");
-                              longTexts = new TreeMap();
-                          }
-                          Short mappedNewValue = newValues.isEmpty() ? 
-                        	  (short)0 : 
-                        		  (Short)longTexts.get(newValues.get(0).toString());
-                          if(mappedNewValue != null) {
-                              if(target instanceof RefObject) {
-                            	  Object value = this.getValue(
-                                	  valueHolder, 
-                                	  target, 
-                                	  featureName, 
-                                	  app
-                              	  );
-                            	  this.setValue(
-                            		  valueHolder, 
-                            		  target, 
-                            		  featureName, 
-                            		  value instanceof Collection ? Collections.singletonList(mappedNewValue) : mappedNewValue, 
-                            		  app
-                            	  );
-                                  modifiedFeatures.add(featureName);
-                              }
-                              else {
-                                  targetAsValueMap(target).put(
-                                      featureName,
-                                      mappedNewValue
-                                  );
-                              }
-                          }
-                          else {
-                        	  SysLog.warning("Unable to map code field", Arrays.asList(newValues.get(0).toString(), longTexts));
-                          }
-                        }
-                        catch(Exception e) {
-                        	SysLog.detail(e.getMessage(), e.getCause());
-                        	app.addErrorMessage(
-                        		app.getTexts().getErrorTextCanNotEditCode(),
-                        		new String[]{feature.getLabel(), (String)newValues.get(0), e.getMessage()}
-                        	);
-                        }
-                      }
-        
-                      // multi-valued
-                      else {
-                        Collection<Object> values = null;
-                        if(target instanceof RefObject) {
-                            values = valueAsCollection(
-                            	this.getValue(
-                            		valueHolder, 
-                            		target, 
-                            		featureName, 
-                            		app
-                            	)
-                            );
-                        }
-                        else {
-                          values = valueAsCollection(targetAsValueMap(target).get(featureName));
-                          if(values == null) {
-                              targetAsValueMap(target).put(
-                                  featureName,
-                                  values = new ArrayList<Object>()
-                              );
-                          }
-                        }
-                        List<Object> mappedNewValues = new ArrayList<Object>();
-                        for(Iterator j = newValues.iterator(); j.hasNext(); ) {
-                          try {
-                            String longText = j.next().toString();
-                            Short code = (Short)longTexts.get(longText);
-                            if(code != null) {
-                              mappedNewValues.add(
-                                code
-                              );
-                            }
-                          }
-                          catch(Exception e) {
-                          	SysLog.detail(e.getMessage(), e.getCause());
-                            app.addErrorMessage(
-                            	app.getTexts().getErrorTextCanNotEditCode(),
-                            	new String[]{feature.getLabel(), (String)newValues.get(0), e.getMessage()}
-                            );
-                          }
-                        }
-                        if(target instanceof RefObject) {
-                      	  	this.setValue(
-                      	  		valueHolder, 
-                      	  		target, 
-                      	  		featureName, 
-                      	  		mappedNewValues, 
-                      	  		app
-                      	  	);
-                        }
-                        else {
-                            values.clear();
-                            values.addAll(mappedNewValues);
-                        }
-                        modifiedFeatures.add(featureName);
-                      }
-                    }
-
-                    // boolean
-                    else if(valueHolder instanceof BooleanValue) {
-        
-                      // single-valued
-                      if(valueHolder.isSingleValued()) {
-                        Boolean mappedNewValue =
-                            new Boolean(
-                                (newValues.size() > 0) &&
-                                ("true".equals(newValues.get(0)) ||
-                                "on".equals(newValues.get(0)) ||
-                                app.getTexts().getTrueText().equals(newValues.get(0)))
-                            );
-                        if(target instanceof RefObject) {
-                        	Object value = this.getValue(
-                        		valueHolder, 
-                        		target, 
-                        		featureName, 
-                        		app
-                        	);
-                    		this.setValue(
-                    			valueHolder, 
-                    			target,
-                    			featureName, 
-                    			value instanceof Collection ? Collections.singletonList(mappedNewValue) : mappedNewValue, 
-                    			app
-                    		);
-                    		modifiedFeatures.add(featureName);
-                        }
-                        else {
-                            targetAsValueMap(target).put(
-                                featureName,
-                                mappedNewValue
-                            );
-                        }
-                      }
-        
-                      // multi-valued
-                      else {
-                        Collection<Object> values = null;
-                        if(target instanceof RefObject) {
-                            values = valueAsCollection(
-                            	this.getValue(
-                            		valueHolder, 
-                            		target, 
-                            		featureName, 
-                            		app
-                            	)
-                            );
-                        }
-                        else {
-                          values = valueAsCollection(targetAsValueMap(target).get(featureName));
-                          if(values == null) {
-                              targetAsValueMap(target).put(
-                                  featureName,
-                                  values = new ArrayList<Object>()
-                              );
-                          }
-                        }
-                        List<Object> mappedNewValues = new ArrayList<Object>();
-                        for(Iterator j = newValues.iterator(); j.hasNext(); ) {
-                            Object mappedNewValue = j.next();
-                            mappedNewValues.add(
-                                new Boolean(
-                                    "true".equals(mappedNewValue) ||
-                                    "on".equals(mappedNewValue) ||
-                                    app.getTexts().getTrueText().equals(mappedNewValue)
-                                )
-                            );
-                        }
-                        if(target instanceof RefObject) {
-                        	this.setValue(
-                        		valueHolder, 
-                        		target, 
-                        		featureName, 
-                        		mappedNewValues, 
-                        		app
-                        	);
-                        }
-                        else {
-                            values.clear();
-                            values.addAll(mappedNewValues);
-                        }
-                        modifiedFeatures.add(featureName);
-                      }
-                    }
-
-                    // binary
-                    else if(valueHolder instanceof BinaryValue) {
-                      String fileNameInfo = app.getTempFileName("" + key, ".INFO");
-        
-                      // single-valued
-                      if(valueHolder.isSingleValued()) {
-        
-                        // reset value to null
-                        if(newValues.isEmpty()) {
-        
-                          // reset bytes
-                          try {
-                            if(target instanceof RefObject) {
-                          	  this.setValue(
-                        		  valueHolder, 
-                        		  target, 
-                        		  featureName, 
-                        		  null, 
-                        		  app
-                        	  );
-                            }
-                            else {
-                                targetAsValueMap(target).put(
-                                    featureName,
-                                    null
-                                );
-                            }
-                          } 
-                          catch(Exception e) {}        
-                          // reset name
-                          try {
-                            if(target instanceof RefObject) {
-	                          	  this.setValue(
-	                        		  valueHolder, 
-	                        		  target, 
-	                        		  featureName + "Name", 
-	                        		  null, 
-	                        		  app
-	                        	  );
-                            }
-                            else {
-                                targetAsValueMap(target).put(
-                                    featureName + "Name",
-                                    null
-                                );
-                            }
-                          } 
-                          catch(Exception e) {}        
-                          // reset mimeType
-                          try {
-                            if(target instanceof RefObject) {
-	                          	  this.setValue(
-	                        		  valueHolder, 
-	                        		  target, 
-	                        		  featureName + "MimeType", 
-	                        		  null, 
-	                        		  app
-	                        	  );
-                            }
-                            else {
-                                targetAsValueMap(target).put(
-                                    featureName + "MimeType",
-                                    null
-                                );
-                            }
-                          } 
-                          catch(Exception e) {}
-                        }
-        
-                        // get binary stream and store
-                        else {
-                          modifiedFeatures.add(featureName);
-        
-                          boolean uploadStreamValid = true;
-                          
-                          // get mimeType, name from .INFO
-                          try {
-                            BufferedReader reader =
-                              new BufferedReader(
-                                new InputStreamReader(new FileInputStream(fileNameInfo))
-                              );
-                            String mimeType = reader.readLine();
-                            String name = reader.readLine();
-                            reader.close();
-        
-                            // set mimeType
-                            try {
-                              if(target instanceof RefObject) {
-                            	  this.setValue(
-                            		  valueHolder, 
-                            		  target, 
-                            		  featureName + "MimeType", 
-                            		  mimeType, 
-                            		  app
-                            	  );
-                              }
-                              else {
-                                  targetAsValueMap(target).put(
-                                      featureName + "MimeType",
-                                      mimeType
-                                  );
-                              }
-                            }
-                            catch(Exception e) {
-                              SysLog.warning("can not set mimeType for " + featureName);
-                              new ServiceException(e).log();
-                            }
-        
-                            // set name
-                            try {
-                              if(target instanceof RefObject) {
-                            	  this.setValue(
-                            		  valueHolder, 
-                            		  target, 
-                            		  featureName + "Name", 
-                            		  name, 
-                            		  app
-                            	  );
-                              }
-                              else {
-                                  targetAsValueMap(target).put(
-                                      featureName + "Name",
-                                      name
-                                  );
-                              }
-                            } 
-                            catch(Exception e) {
-                            	SysLog.warning("can not set name for " + featureName);
-                                new ServiceException(e).log();
-                            }
-                          }
-                          catch(FileNotFoundException e) {
-                        	  SysLog.error("can not open info of uploaded stream " + fileNameInfo);
-                              new ServiceException(e).log();
-                              uploadStreamValid = false;
-                          }
-                          catch(IOException e) {
-                        	  SysLog.error("can not read info of uploaded stream " + fileNameInfo);
-                              new ServiceException(e).log();
-                              uploadStreamValid = false;
-                          }
-        
-                          // set bytes
-                          String location = app.getTempFileName((String)key, "");
-                          if(uploadStreamValid) {
-                              if(target instanceof RefObject) {
-                                  try {
-                                	  this.setValue(
-                                		  valueHolder, 
-                                		  target, 
-                                		  featureName, 
-                                		  org.w3c.cci2.BinaryLargeObjects.valueOf(new File(location)), 
-                                		  app
-                                	  );
-                                  }
-                                  catch(Exception e) {
-                                	  SysLog.error("Unable to upload binary content", location);
-                                      new ServiceException(e).log();
-                                  }
-                              }
-                              else {
-                                  try {
-                                      byte[] bytes = null;
-                                      InputStream is = new FileInputStream(location);
-                                      ByteArrayOutputStream os = new ByteArrayOutputStream();
-                                      int b = 0;
-                                      while((b = is.read()) != -1) {
-                                        os.write(b);
-                                      }
-                                      is.close();
-                                      os.close();
-                                      bytes = os.toByteArray();
-                                      targetAsValueMap(target).put(
-                                          featureName,
-                                          bytes
-                                      );
-                                    }
-                                    catch(Exception e) {
-                                    	SysLog.error("Unable to upload binary content", location);
-                                        new ServiceException(e).log();
-                                    }
-                              }
-                          }
-                        }
-                      }
-        
-                      // multi-valued
-                      else {
-                    	 SysLog.error("multi-valued binary not supported for", featureName);
-                      }
-                    }
-        
-                    // unknown
-                    else {
-                    	app.addErrorMessage(
-                    		app.getTexts().getErrorTextAttributeTypeNotSupported(),
-                    		new String[]{feature.getLabel(), feature.getValue() == null ? null : feature.getValue().getClass().getName(), "attribute type not supported"}
-                    	);
-                    }
-                  }
-                }
-              }
-            }
-            if(modifiedFeatures.isEmpty()) break;
-            count++;
-        }
-        // Validate mandatory fields
-        for(Attribute feature: updatedFeatures.values()) {
-            try {
-                if(
-                    feature.getValue().getFieldDef().isMandatory && 
-                    feature.getValue().getFieldDef().isChangeable
-                ) {
-                    Object value = target instanceof RefObject ?
-                        this.getValue(feature.getValue(), target, feature.getName(), app) :
-                        	targetAsValueMap(target).get(feature.getName());
-                    if(
-                        (value == null) || 
-                        (value instanceof String && ((String)value).length() == 0) || 
-                        (value instanceof Collection && ((Collection)value).isEmpty())
-                    ) {
-                    	app.addErrorMessage(
-                    		app.getTexts().getErrorTextMandatoryField(),
-                            new String[]{feature.getLabel()}
-                        );
-                    }
-                }
-            } 
-            catch(Exception e) {}
-        }
+    	Model_1_0 model = app.getModel();
+    	int count = 0;
+    	// Data bindings require multi-pass update of object
+    	Map<String,Attribute> updatedFeatures = new HashMap<String,Attribute>();
+    	while(count < 3) {
+    		// map object
+    		Set<String> modifiedFeatures = new HashSet<String>();
+    		for(
+    			Iterator i = parameterMap.keySet().iterator(); 
+    			i.hasNext(); 
+    		) {
+    			Object key = i.next();        
+    			// field names are of the form 'feature[index][.false | .true]'
+    			// Suffix .true and .false for boolean fields only. 
+    			// If .false and .true fields are received ignore .false
+    			if(
+    				(key instanceof String) &&
+    				(((String)key).indexOf("[") >= 0) &&
+    				(!((String)key).endsWith(".false") || !parameterMap.keySet().contains(((String)key).substring(0, ((String)key).lastIndexOf(".false")) + ".true"))
+    			) {        
+    				// attribute names are of the form <name>[tabIndex]
+    				// remove tabIndex to get full qualified feature name
+    				String featureName = ((String)key).substring(0, ((String)key).lastIndexOf("["));
+    				String featureTypeName = null;
+    				// Lookup feature in model repository
+    				try {
+    					ModelElement_1_0 featureDef = model.getElement(featureName);
+    					featureTypeName = (String)model.getElement(featureDef.objGetValue("type")).objGetValue("qualifiedName");
+    				} catch(Exception e) {
+    					try {
+    						// Fallback: lookup feature in ui repository as feature definition
+    						FeatureDefinition featureDef = app.getFeatureDefinition(featureName);
+    						if(featureDef instanceof StructuralFeatureDefinition) {
+    							featureTypeName = ((StructuralFeatureDefinition)featureDef).getType();
+    						}
+    					} catch(Exception ignore) {}                
+    				}        
+    				Attribute feature = (Attribute)fieldMap.get(featureName);
+    				if(feature != null) {        
+    					// parse parameter values
+    					List parameterValues = Arrays.asList((Object[])parameterMap.get(key));
+    					StringTokenizer tokenizer = parameterValues.isEmpty() ? 
+    						new StringTokenizer("", "\n", true) : 
+    							new StringTokenizer((String)parameterValues.get(0), "\n\r", true);
+						List<String> newValues = new ArrayList<String>();
+						boolean lastTokenIsNewLine = false;
+						while(tokenizer.hasMoreTokens()) {
+							String token = tokenizer.nextToken();
+							if(!"#NULL".equals(token)) {
+								if("\n".equals(token)) {
+									if(lastTokenIsNewLine) {
+										newValues.add("");
+									}
+									lastTokenIsNewLine = true;
+								} else if("\r".equals(token)) {
+									// Skip
+								} else {
+									newValues.add(token);
+									lastTokenIsNewLine = false;
+								}
+							}
+						}
+						// accept?
+						AttributeValue valueHolder = feature.getValue();
+						boolean accept =
+							(valueHolder != null) &&
+							valueHolder.isChangeable() &&
+							!modifiedFeatures.contains(featureName);
+						SysLog.trace("accept feature", featureName + "=" + accept);
+						SysLog.trace("new values", newValues);        
+						if(accept) {
+							updatedFeatures.put(
+								featureName, 
+								feature
+							);
+							// text
+							if(valueHolder instanceof TextValue) {
+								SysLog.trace("Text value " + feature.getLabel(), Arrays.asList((Object[])parameterMap.get(key)));        
+								// single-valued
+								if(valueHolder.isSingleValued()) {
+									// cat all values into one string
+									String multiLineString = parameterValues.isEmpty() ?
+										"" :
+											(String)parameterValues.get(0);
+									String mappedNewValue = multiLineString.length() == 0 ? null : multiLineString;
+									if(target instanceof RefObject) {
+										Object value = this.getValue(
+											valueHolder, 
+											target, 
+											featureName, 
+											app
+										);
+										this.setValue(
+											valueHolder, 
+											target, 
+											featureName, 
+											value instanceof Collection ? Collections.singletonList(mappedNewValue) : mappedNewValue, 
+												app
+										);
+										modifiedFeatures.add(featureName);
+									} else {
+										targetAsValueMap(target).put(
+											featureName,
+											mappedNewValue
+										);
+									}
+								} else {
+									// multi-valued
+									Collection<Object> values = null;
+									if(target instanceof RefObject) {
+										values = valueAsCollection(
+											this.getValue(
+												valueHolder, 
+												target, 
+												featureName, 
+												app
+											)
+										);
+									} else {
+										values = valueAsCollection(targetAsValueMap(target).get(featureName));
+										if(values == null) {
+											targetAsValueMap(target).put(
+												featureName,
+												values = new ArrayList<Object>()
+											);
+										}
+									}
+									List<String> mappedNewValues = newValues;
+									if(target instanceof RefObject) {
+										this.setValue(
+											valueHolder, 
+											target, 
+											featureName, 
+											mappedNewValues, 
+											app
+										);
+									} else {
+										values.clear();
+										values.addAll(mappedNewValues);
+									}
+									modifiedFeatures.add(featureName);
+								}
+							} else if(valueHolder instanceof NumberValue) {
+								// number
+								// single-valued
+								if(valueHolder.isSingleValued()) {
+									try {    
+										BigDecimal number = app.parseNumber(
+											newValues.isEmpty() ? "" : ((String)newValues.get(0)).trim()
+										);
+										if(number == null) {
+											number = valueHolder.isOptionalValued() ? 
+												null : 
+													BigDecimal.ZERO;
+										}
+										if(number == null) {
+											Object mappedNewValue = null;
+											if(target instanceof RefObject) {
+												Object value = this.getValue(
+													valueHolder, 
+													target, 
+													featureName, 
+													app
+												);
+												this.setValue(
+													valueHolder, 
+													target, 
+													featureName, 
+													value instanceof Collection ? Collections.singletonList(mappedNewValue) : mappedNewValue, 
+														app
+												);
+												modifiedFeatures.add(featureName);
+											} else {
+												targetAsValueMap(target).put(
+													featureName,
+													mappedNewValue
+												);
+											}
+										} else if(PrimitiveTypes.INTEGER.equals(featureTypeName)) {
+											Integer mappedNewValue = new Integer(number.intValue());
+											if(target instanceof RefObject) {
+												Object value = this.getValue(
+													valueHolder, 
+													target, 
+													featureName, 
+													app
+												);
+												this.setValue(
+													valueHolder, 
+													target, 
+													featureName, 
+													value instanceof Collection ? Collections.singletonList(mappedNewValue) : mappedNewValue, 
+														app
+												);
+												modifiedFeatures.add(featureName);
+											} else {
+												targetAsValueMap(target).put(
+													featureName,
+													mappedNewValue
+												);
+											}
+										} else if(PrimitiveTypes.LONG.equals(featureTypeName)) {
+											Long mappedNewValue = new Long(number.longValue());
+											if(target instanceof RefObject) {
+												Object value = this.getValue(
+													valueHolder, 
+													target, 
+													featureName, 
+													app
+												);
+												this.setValue(
+													valueHolder, 
+													target, 
+													featureName, 
+													value instanceof Collection ? Collections.singletonList(mappedNewValue) : mappedNewValue, 
+														app
+												);
+												modifiedFeatures.add(featureName);
+											} else {
+												targetAsValueMap(target).put(
+													featureName,
+													mappedNewValue
+												);
+											}
+										} else if(PrimitiveTypes.DECIMAL.equals(featureTypeName)) {
+											BigDecimal mappedNewValue = number;
+											if(target instanceof RefObject) {
+												Object value = this.getValue(
+													valueHolder, 
+													target, 
+													featureName, 
+													app
+												);
+												this.setValue(
+													valueHolder, 
+													target, 
+													featureName, 
+													value instanceof Collection ? Collections.singletonList(mappedNewValue) : mappedNewValue, 
+														app
+												);
+												modifiedFeatures.add(featureName);
+											} else {
+												targetAsValueMap(target).put(
+													featureName,
+													mappedNewValue
+												);
+											}
+										} else {
+											Short mappedNewValue = new Short(number.shortValue());
+											if(target instanceof RefObject) {
+												Object value = this.getValue(
+													valueHolder, 
+													target, 
+													featureName, 
+													app
+												);
+												this.setValue(
+													valueHolder, 
+													target, 
+													featureName, 
+													value instanceof Collection ? Collections.singletonList(mappedNewValue) : mappedNewValue, 
+														app
+												);
+												modifiedFeatures.add(featureName);
+											} else {
+												targetAsValueMap(target).put(
+													featureName,
+													mappedNewValue
+												);
+											}
+										}
+									} catch(Exception e) {
+										SysLog.detail(e.getMessage(), e.getCause());
+										app.addErrorMessage(
+											app.getTexts().getErrorTextCanNotEditNumber(),
+											new String[]{feature.getLabel(), (String)newValues.get(0), "can not parse number"}
+										);
+									}
+								} else {
+									// multi-valued
+									Collection<Object> values = null;
+									if(target instanceof RefObject) {
+										values = valueAsCollection(
+											this.getValue(
+												valueHolder, 
+												target, 
+												featureName, 
+												app
+											)
+										);
+									} else {
+										values = valueAsCollection(targetAsValueMap(target).get(featureName));
+										if(values == null) {
+											targetAsValueMap(target).put(
+												featureName,
+												values = new ArrayList<Object>()
+											);
+										}
+									}
+									List<Object> mappedNewValues = new ArrayList<Object>();
+									for(Iterator j = newValues.iterator(); j.hasNext(); ) {
+										try {
+											String numberAsString = ((String)j.next()).trim();
+											BigDecimal number = app.parseNumber(numberAsString);
+											if(number != null) {
+												if(PrimitiveTypes.INTEGER.equals(featureTypeName)) {
+													mappedNewValues.add(
+														new Integer(number.intValue())
+													);
+												} else if(PrimitiveTypes.LONG.equals(featureTypeName)) {
+													mappedNewValues.add(
+														new Long(number.longValue())
+													);
+												} else if(PrimitiveTypes.DECIMAL.equals(featureTypeName)) {
+													mappedNewValues.add(
+														number
+													);
+												} else { // if(PrimitiveTypes.SHORT.equals(featureTypeName)) {
+													mappedNewValues.add(
+														new Short(number.shortValue())
+													);
+												}
+											} else {
+												app.addErrorMessage(
+													app.getTexts().getErrorTextCanNotEditNumber(),
+													new String[]{feature.getLabel(), (String)newValues.get(0), "can not parse number"}
+												);
+											}
+										} catch(Exception e) {
+											SysLog.detail(e.getMessage(), e.getCause());
+											app.addErrorMessage(
+												app.getTexts().getErrorTextCanNotEditNumber(),
+												new String[]{feature.getLabel(), (String)newValues.get(0), e.getMessage()}
+											);
+										}
+									}
+									if(target instanceof RefObject) {
+										this.setValue(
+											valueHolder, 
+											target, 
+											featureName, 
+											mappedNewValues, 
+											app
+										);
+									} else {
+										values.clear();
+										values.addAll(mappedNewValues);
+									}
+									modifiedFeatures.add(featureName);
+								}
+							} else if(valueHolder instanceof DateValue) {
+								// date
+								SimpleDateFormat dateParser = DateValue.getLocalizedDateFormatter(
+									featureName, 
+									true, 
+									app
+								);
+								SimpleDateFormat dateTimeParser = DateValue.getLocalizedDateTimeFormatter(
+									featureName, 
+									true, 
+									app
+								);
+								Calendar cal = new GregorianCalendar();
+								// single-valued
+								if(valueHolder.isSingleValued()) {
+									try {
+										if(newValues.isEmpty()) {
+											Object mappedNewValue = null;
+											if(target instanceof RefObject) {
+												Object value = this.getValue(
+													valueHolder, 
+													target, 
+													featureName, 
+													app
+												);
+												this.setValue(
+													valueHolder, 
+													target, 
+													featureName, 
+													value instanceof Collection ? Collections.singletonList(mappedNewValue) : mappedNewValue, 
+														app
+												);
+												modifiedFeatures.add(featureName);
+											} else {
+												targetAsValueMap(target).put(
+													featureName,
+													mappedNewValue
+												);
+											}
+										} else {
+											String newValue = (String)newValues.get(0);
+											Date mappedNewValue = null;
+											try {
+												mappedNewValue = dateTimeParser.parse(newValue);
+											} catch(ParseException e) {
+												mappedNewValue = dateParser.parse(newValue);
+											}                        
+											if(mappedNewValue != null) {
+												cal.setTime(mappedNewValue);
+												if(cal.get(GregorianCalendar.YEAR) < 100) {
+													int currentYear = new GregorianCalendar().get(GregorianCalendar.YEAR);
+													int year = cal.get(GregorianCalendar.YEAR);
+													cal.add(
+														GregorianCalendar.YEAR, 
+														100 * (currentYear / 100 - (Math.abs(currentYear % 100 - year % 100) < 50 ? 0 : 1))
+													);
+												}
+												// date
+												if(PrimitiveTypes.DATE.equals(featureTypeName)) {
+													XMLGregorianCalendar mappedNewValueDate = DefaultPortalExtension.xmlDatatypeFactory().newXMLGregorianCalendarDate(
+														cal.get(Calendar.YEAR),
+														cal.get(Calendar.MONTH) + 1,
+														cal.get(Calendar.DAY_OF_MONTH),
+														DatatypeConstants.FIELD_UNDEFINED
+													);
+													if(target instanceof RefObject) {
+														Object value = this.getValue(
+															valueHolder, 
+															target, 
+															featureName, 
+															app
+														);
+														this.setValue(
+															valueHolder, 
+															target, 
+															featureName, 
+															value instanceof Collection ? Collections.singletonList(mappedNewValueDate) : mappedNewValueDate, 
+																app
+														);
+														modifiedFeatures.add(featureName);
+													} else {
+														targetAsValueMap(target).put(
+															featureName,
+															mappedNewValueDate
+														);
+													}
+												} else if(PrimitiveTypes.DATETIME.equals(featureTypeName)) {
+													// dateTime
+													mappedNewValue = cal.getTime();
+													if(target instanceof RefObject) {
+														Object value = this.getValue(
+															valueHolder, 
+															target, 
+															featureName, 
+															app
+														);
+														this.setValue(
+															valueHolder, 
+															target, 
+															featureName, 
+															value instanceof Collection ? Collections.singletonList(mappedNewValue) : mappedNewValue, 
+																app
+														);	                                	  
+														modifiedFeatures.add(featureName);
+													} else {
+														targetAsValueMap(target).put(
+															featureName,
+															mappedNewValue
+														);
+													}
+												} else {
+													app.addErrorMessage(
+														app.getTexts().getErrorTextCanNotEditDate(),
+														new String[]{feature.getLabel(), featureTypeName, "date type not supported"}
+													);
+												}
+											} else {
+												app.addErrorMessage(
+													app.getTexts().getErrorTextCanNotEditDate(),
+													new String[]{feature.getLabel(), (String)newValues.get(0), "can not parse date"}
+												);
+											}
+										}
+									} catch(Exception e) {
+										SysLog.detail(e.getMessage(), e.getCause());
+										app.addErrorMessage(
+											app.getTexts().getErrorTextCanNotEditDate(),
+											new String[]{feature.getLabel(), (String)newValues.get(0), e.getMessage()}
+										);
+									}
+								} else {
+									// multi-valued
+									Collection<Object> values = null;
+									if(target instanceof RefObject) {
+										values = valueAsCollection(
+											this.getValue(
+												valueHolder, 
+												target, 
+												featureName, 
+												app
+											)
+										);
+									} else {
+										values = valueAsCollection(targetAsValueMap(target).get(featureName));
+										if(values == null) {
+											targetAsValueMap(target).put(
+												featureName,
+												values = new ArrayList<Object>()
+											);
+										}
+									}
+									List<Object> mappedNewValues = new ArrayList<Object>();
+									for(Iterator j = newValues.iterator(); j.hasNext(); ) {
+										try {
+											String newValue = (String)j.next();
+											Date dateTime = null;
+											try {
+												dateTime = dateTimeParser.parse(newValue);
+											} catch(ParseException e) {
+												dateTime = dateParser.parse(newValue);
+											}
+											if(dateTime != null) {
+												cal.setTime(dateTime);
+												if(PrimitiveTypes.DATE.equals(featureTypeName)) {
+													XMLGregorianCalendar date = DefaultPortalExtension.xmlDatatypeFactory().newXMLGregorianCalendarDate(
+														cal.get(Calendar.YEAR),
+														cal.get(Calendar.MONTH) + 1,
+														cal.get(Calendar.DAY_OF_MONTH),
+														DatatypeConstants.FIELD_UNDEFINED
+													);
+													mappedNewValues.add(date);
+												} else if(PrimitiveTypes.DATETIME.equals(featureTypeName)) {
+													mappedNewValues.add(dateTime);
+												} else {
+													app.addErrorMessage(
+														app.getTexts().getErrorTextCanNotEditDate(),
+														new String[]{feature.getLabel(), featureTypeName, "date type not supported"}
+													);
+												}
+											} else {
+												app.addErrorMessage(
+													app.getTexts().getErrorTextCanNotEditDate(),
+													new String[]{feature.getLabel(), (String)newValues.get(0), "can not parse date"}
+												);
+											}
+										} catch(Exception e) {
+											SysLog.detail(e.getMessage(), e.getCause());
+											app.addErrorMessage(
+												app.getTexts().getErrorTextCanNotEditDate(),
+												new String[]{feature.getLabel(), (String)newValues.get(0), e.getMessage()}
+											);
+										}
+									}
+									if(target instanceof RefObject) {
+										this.setValue(
+											valueHolder, 
+											target, 
+											featureName, 
+											mappedNewValues, 
+											app
+										);
+									} else {
+										values.clear();
+										values.addAll(mappedNewValues);
+									}
+									modifiedFeatures.add(featureName);
+								}
+							} else if(valueHolder instanceof ObjectReferenceValue) {
+								// object reference
+								if(!((String)key).endsWith(".Title")) {
+									// single-valued
+									if(valueHolder.isSingleValued()) {
+										String xri = null;
+										Object[] titleValues = (Object[])parameterMap.get(key + ".Title");
+										// xri of referenced object entered (manually) as title. If set
+										// and valid this overrides xri set in field (by lookup inspector).
+										// If set and invalid and newValues is empty report an error
+										boolean xriSetAsTitleIsInvalid = false;
+										if((titleValues != null) && (titleValues.length > 0)) {
+											if(titleValues[0].toString().isEmpty()) {
+												xri = ""; // reference removed by user
+											} else {
+												try {
+													URL titleUrl = new URL((String)(titleValues[0]));
+													if("xri".equals(titleUrl.getProtocol())) {
+														xri = (String)titleValues[0];
+													} else {
+														String query = URLDecoder.decode(titleUrl.getQuery(), "UTF-8");
+														int parameterPos = -1;
+														if((parameterPos = query.indexOf(WebKeys.REQUEST_PARAMETER + "=")) >= 0) {
+															String parameter = query.substring(parameterPos + 10);
+															if(parameter.indexOf("xri:@openmdx:") >= 0 || parameter.indexOf("xri://@openmdx:") > 0) {
+																xri = Action.getParameter(
+																	parameter,
+																	Action.PARAMETER_OBJECTXRI
+																);
+															}
+														}
+													}
+												} catch(MalformedURLException e) {
+													xriSetAsTitleIsInvalid = true;
+												} catch(UnsupportedEncodingException e) {
+													xriSetAsTitleIsInvalid = true;
+												}
+											}
+										}
+										// xri entered as title is valid
+										if(xriSetAsTitleIsInvalid && newValues.isEmpty()) {
+											// title N/A (object not available) and N/P (no permission) is set by show object. Ignore.
+											if(!((String)titleValues[0]).startsWith("N/A") && !((String)titleValues[0]).startsWith("N/P")) {
+												app.addErrorMessage(
+													app.getTexts().getErrorTextInvalidObjectReference(),
+													new String[]{feature.getLabel(), (String)titleValues[0]}
+												);
+											}
+										} else {
+											// xri entered as title is either valid or xri is set in field
+											if((xri == null) && (newValues.size() > 0)) {
+												xri = (String)newValues.get(0);
+											}
+											try {
+												Object mappedNewValue = (xri == null) || "".equals(xri) ? 
+													null : 
+														new Path(xri);
+												if(target instanceof RefObject) {
+													mappedNewValue = mappedNewValue == null ?
+														null : 
+															JDOHelper.getPersistenceManager(target).getObjectById(
+																mappedNewValue
+																);
+													this.setValue(
+														valueHolder, 
+														target, 
+														featureName, 
+														mappedNewValue, 
+														app
+													);
+													modifiedFeatures.add(featureName);
+												} else {
+													targetAsValueMap(target).put(
+														featureName,
+														mappedNewValue
+													);
+												}
+											} catch(Exception e) {
+												SysLog.detail(e.getMessage(), e.getCause());
+												app.addErrorMessage(
+													app.getTexts().getErrorTextCanNotEditObjectReference(),
+													new String[]{feature.getLabel(), (String)newValues.get(0), e.getMessage()}
+												);
+											}
+										}
+									} else {
+										// multi-valued
+										// not supported yet
+									}
+								}
+							} else if(valueHolder instanceof CodeValue) {
+								// Code
+								// Single-valued
+								if(valueHolder.isSingleValued()) {
+									try {
+										Short mappedNewValue = null;
+										try {
+											mappedNewValue = newValues.isEmpty() 
+												? (short)0 
+													: Short.valueOf(newValues.get(0).toString());
+										} catch(Exception ignore) {}
+										if(mappedNewValue != null) {
+											if(target instanceof RefObject) {
+												Object value = this.getValue(
+													valueHolder, 
+													target, 
+													featureName, 
+													app
+												);
+												this.setValue(
+													valueHolder, 
+													target, 
+													featureName, 
+													value instanceof Collection ? Collections.singletonList(mappedNewValue) : mappedNewValue, 
+														app
+												);
+												modifiedFeatures.add(featureName);
+											} else {
+												targetAsValueMap(target).put(
+													featureName,
+													mappedNewValue
+												);
+											}
+										} else {
+											SysLog.warning("Unable to map code field", newValues.get(0).toString());
+										}
+									} catch(Exception e) {
+										SysLog.detail(e.getMessage(), e.getCause());
+										app.addErrorMessage(
+											app.getTexts().getErrorTextCanNotEditCode(),
+											new String[]{feature.getLabel(), (String)newValues.get(0), e.getMessage()}
+										);
+									}
+								} else {
+    								// multi-valued
+									Collection<Object> values = null;
+									if(target instanceof RefObject) {
+										values = valueAsCollection(
+											this.getValue(
+												valueHolder, 
+												target, 
+												featureName, 
+												app
+											)
+										);
+									} else {
+										values = valueAsCollection(targetAsValueMap(target).get(featureName));
+										if(values == null) {
+											targetAsValueMap(target).put(
+												featureName,
+												values = new ArrayList<Object>()
+											);
+										}
+									}
+									Map longTexts = ((CodeValue)valueHolder).getLongText(false, false);      
+									List<Object> mappedNewValues = new ArrayList<Object>();                        
+									for(Iterator j = newValues.iterator(); j.hasNext(); ) {
+										try {
+											String longText = j.next().toString();
+											Short code = (Short)longTexts.get(longText);
+											if(code != null) {
+												mappedNewValues.add(
+													code
+												);
+											}
+										} catch(Exception e) {
+											SysLog.detail(e.getMessage(), e.getCause());
+											app.addErrorMessage(
+												app.getTexts().getErrorTextCanNotEditCode(),
+												new String[]{feature.getLabel(), (String)newValues.get(0), e.getMessage()}
+											);
+										}
+									}
+									if(target instanceof RefObject) {
+										this.setValue(
+											valueHolder, 
+											target, 
+											featureName, 
+											mappedNewValues, 
+											app
+										);
+									} else {
+										values.clear();
+										values.addAll(mappedNewValues);
+									}
+									modifiedFeatures.add(featureName);
+								}
+							} else if(valueHolder instanceof BooleanValue) {
+								// Boolean        
+								// single-valued
+								if(valueHolder.isSingleValued()) {
+									Boolean mappedNewValue =
+										new Boolean(
+											(newValues.size() > 0) &&
+											("true".equals(newValues.get(0)) ||
+												"on".equals(newValues.get(0)) ||
+												app.getTexts().getTrueText().equals(newValues.get(0)))
+										);
+									if(target instanceof RefObject) {
+										Object value = this.getValue(
+											valueHolder, 
+											target, 
+											featureName, 
+											app
+										);
+										this.setValue(
+											valueHolder, 
+											target,
+											featureName, 
+											value instanceof Collection ? Collections.singletonList(mappedNewValue) : mappedNewValue, 
+												app
+										);
+										modifiedFeatures.add(featureName);
+									} else {
+										targetAsValueMap(target).put(
+											featureName,
+											mappedNewValue
+										);
+									}
+								} else {
+									// Multi-valued
+									Collection<Object> values = null;
+									if(target instanceof RefObject) {
+										values = valueAsCollection(
+											this.getValue(
+												valueHolder, 
+												target, 
+												featureName, 
+												app
+											)
+										);
+									} else {
+										values = valueAsCollection(targetAsValueMap(target).get(featureName));
+										if(values == null) {
+											targetAsValueMap(target).put(
+												featureName,
+												values = new ArrayList<Object>()
+											);
+										}
+									}
+									List<Object> mappedNewValues = new ArrayList<Object>();
+									for(Iterator j = newValues.iterator(); j.hasNext(); ) {
+										Object mappedNewValue = j.next();
+										mappedNewValues.add(
+											new Boolean(
+												"true".equals(mappedNewValue) ||
+												"on".equals(mappedNewValue) ||
+												app.getTexts().getTrueText().equals(mappedNewValue)
+											)
+										);
+									}
+									if(target instanceof RefObject) {
+										this.setValue(
+											valueHolder, 
+											target, 
+											featureName, 
+											mappedNewValues, 
+											app
+										);
+									} else {
+										values.clear();
+										values.addAll(mappedNewValues);
+									}
+									modifiedFeatures.add(featureName);
+								}
+							} else if(valueHolder instanceof BinaryValue) {
+								// Binary
+								String fileNameInfo = app.getTempFileName("" + key, ".INFO");
+								// single-valued
+								if(valueHolder.isSingleValued()) {
+									// reset value to null
+									if(newValues.isEmpty()) {
+										// reset bytes
+										try {
+											if(target instanceof RefObject) {
+												this.setValue(
+													valueHolder, 
+													target, 
+													featureName, 
+													null, 
+													app
+												);
+											} else {
+												targetAsValueMap(target).put(
+													featureName,
+													null
+												);
+											}
+										} catch(Exception ignore) {}        
+										// reset name
+										try {
+											if(target instanceof RefObject) {
+												this.setValue(
+													valueHolder, 
+													target, 
+													featureName + "Name", 
+													null, 
+													app
+												);
+											} else {
+												targetAsValueMap(target).put(
+													featureName + "Name",
+													null
+												);
+											}
+										} catch(Exception ignore) {}        
+										// reset mimeType
+										try {
+											if(target instanceof RefObject) {
+												this.setValue(
+													valueHolder, 
+													target, 
+													featureName + "MimeType", 
+													null, 
+													app
+												);
+											} else {
+												targetAsValueMap(target).put(
+													featureName + "MimeType",
+													null
+												);
+											}
+										} catch(Exception ignore) {}
+									} else {
+										// get binary stream and store
+										modifiedFeatures.add(featureName);
+										boolean uploadStreamValid = true;
+										// get mimeType, name from .INFO
+										try {
+											BufferedReader reader =
+												new BufferedReader(
+													new InputStreamReader(new FileInputStream(fileNameInfo))
+												);
+											String mimeType = reader.readLine();
+											String name = reader.readLine();
+											reader.close();
+											// set mimeType
+											try {
+												if(target instanceof RefObject) {
+													this.setValue(
+														valueHolder, 
+														target, 
+														featureName + "MimeType", 
+														mimeType, 
+														app
+													);
+												} else {
+													targetAsValueMap(target).put(
+														featureName + "MimeType",
+														mimeType
+													);
+												}
+											} catch(Exception e) {
+												SysLog.warning("can not set mimeType for " + featureName);
+												new ServiceException(e).log();
+											}
+											// set name
+											try {
+												if(target instanceof RefObject) {
+													this.setValue(
+														valueHolder, 
+														target, 
+														featureName + "Name", 
+														name, 
+														app
+													);
+												} else {
+													targetAsValueMap(target).put(
+														featureName + "Name",
+														name
+													);
+												}
+											} catch(Exception e) {
+												SysLog.warning("can not set name for " + featureName);
+												new ServiceException(e).log();
+											}
+										} catch(FileNotFoundException e) {
+											SysLog.error("can not open info of uploaded stream " + fileNameInfo);
+											new ServiceException(e).log();
+											uploadStreamValid = false;
+										} catch(IOException e) {
+											SysLog.error("can not read info of uploaded stream " + fileNameInfo);
+											new ServiceException(e).log();
+											uploadStreamValid = false;
+										}
+										// set bytes
+										String location = app.getTempFileName((String)key, "");
+										if(uploadStreamValid) {
+											if(target instanceof RefObject) {
+												try {
+													this.setValue(
+														valueHolder, 
+														target, 
+														featureName, 
+														org.w3c.cci2.BinaryLargeObjects.valueOf(new File(location)), 
+														app
+													);
+												} catch(Exception e) {
+													SysLog.error("Unable to upload binary content", location);
+													new ServiceException(e).log();
+												}
+											} else {
+												try {
+													byte[] bytes = null;
+													InputStream is = new FileInputStream(location);
+													ByteArrayOutputStream os = new ByteArrayOutputStream();
+													int b = 0;
+													while((b = is.read()) != -1) {
+														os.write(b);
+													}
+													is.close();
+													os.close();
+													bytes = os.toByteArray();
+													targetAsValueMap(target).put(
+														featureName,
+														bytes
+													);
+												} catch(Exception e) {
+													SysLog.error("Unable to upload binary content", location);
+													new ServiceException(e).log();
+												}
+											}
+										}
+									}
+								} else {
+									// multi-valued
+									SysLog.error("multi-valued binary not supported for", featureName);
+								}
+							} else {
+								// unknown
+								app.addErrorMessage(
+									app.getTexts().getErrorTextAttributeTypeNotSupported(),
+									new String[]{feature.getLabel(), feature.getValue() == null ? null : feature.getValue().getClass().getName(), "attribute type not supported"}
+								);
+							}
+						}
+    				}
+    			}
+    		}
+    		if(modifiedFeatures.isEmpty()) break;
+    		count++;
+    	}
+    	// Validate mandatory fields
+    	for(Attribute feature: updatedFeatures.values()) {
+    		try {
+    			if(
+    				feature.getValue().getFieldDef().isMandatory && 
+    				feature.getValue().getFieldDef().isChangeable
+    			) {
+    				Object value = target instanceof RefObject 
+    					? this.getValue(feature.getValue(), target, feature.getName(), app) 
+    					: targetAsValueMap(target).get(feature.getName());
+					if(
+						(value == null) || 
+						(value instanceof String && ((String)value).length() == 0) || 
+						(value instanceof Collection && ((Collection)value).isEmpty())
+					) {
+						app.addErrorMessage(
+							app.getTexts().getErrorTextMandatoryField(),
+							new String[]{feature.getLabel()}
+						);
+					}
+    			}
+    		} catch(Exception ignore) {}
+    	}
     }
-    
+
     /**
      * Returns classes which are in the composition hierarchy of
      * the specified type. Returns a map with the class name as
      * key and a set of reference names as members, whereas the
      * references are composite references of the class.
+     * 
      * @param ofType
      * @param hierarchy
      * @throws ServiceException
@@ -1781,19 +1672,19 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
     ) throws ServiceException {
     	Model_1_0 model = ofType.getModel();        
     	// add ofType to hierarchy
-    	String currentTypeName = (String)ofType.objGetValue("qualifiedName");
-    	if(hierarchy.get(currentTypeName) == null) {
-    		hierarchy.put(
-    			currentTypeName,
-    			new HashSet<String>()
-    		);
-    	}    
+    	String ofTypeName = (String)ofType.objGetValue("qualifiedName");
+    	if(hierarchy.get(ofTypeName) != null) {
+    		return;
+    	}
+		hierarchy.put(
+			ofTypeName,
+			new HashSet<String>()
+		);   
     	// get all types which are involved in composition hierarchy
     	List<ModelElement_1_0> typesToCheck = new ArrayList<ModelElement_1_0>();
     	if(!ofType.objGetList("compositeReference").isEmpty()) {
     		typesToCheck.add(ofType);
-    	}
-    	else {
+    	} else {
     		for(Iterator i = ofType.objGetList("allSubtype").iterator(); i.hasNext(); ) {
     			ModelElement_1_0 subtype = model.getElement(i.next());
     			if(
@@ -1820,6 +1711,29 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
     	}
     }
 
+    /**
+     * Return true if referenceDef is a lookup reference for the given lookup type. Override
+     * for custom-specific behavior. By default a reference is a lookup reference if its
+     * composition type is either composite or shared and if the referenced type is a super 
+     * type of the lookup type. 
+     *
+     * @param referenceDef
+     * @param lookupType
+     * @return
+     * @throws ServiceException
+     */
+    protected boolean isLookupReference(
+    	ModelElement_1_0 referenceDef,
+    	ModelElement_1_0 lookupType
+    ) throws ServiceException {
+    	Model_1_0 model = referenceDef.getModel();
+		ModelElement_1_0 referencedType = model.getElement(referenceDef.objGetValue("type"));
+    	return
+			(ModelHelper.isCompositeEnd(referenceDef, false) || ModelHelper.isSharedEnd(referenceDef, false)) &&
+			!"org:openmdx:base:ExtentCapable".equals(referencedType.objGetValue("qualifiedName")) &&
+			model.isSubtypeOf(lookupType, referencedType);    	
+    }
+
     /* (non-Javadoc)
      * @see org.openmdx.portal.servlet.PortalExtension_1_0#getLookupObject(org.openmdx.model1.accessor.basic.cci.ModelElement_1_0, org.openmdx.base.accessor.jmi.cci.RefObject_1_0, org.openmdx.portal.servlet.ApplicationContext, javax.jdo.PersistenceManager)
      */
@@ -1827,70 +1741,82 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
     public RefObject_1_0 getLookupObject(
     	ModelElement_1_0 lookupType,
     	RefObject_1_0 startFrom,
-    	ApplicationContext application
+    	ApplicationContext app
     ) throws ServiceException {
-    	Model_1_0 model = application.getModel();
+    	Model_1_0 model = app.getModel();
     	PersistenceManager pm = JDOHelper.getPersistenceManager(startFrom);
     	String qualifiedNameLookupType = (String)lookupType.objGetValue("qualifiedName");
-    	Map<String,Set<String>> compositionHierarchy = new HashMap<String,Set<String>>();
-    	this.createCompositionHierarchy(
-    		lookupType,
-    		compositionHierarchy
-    	);
-    	RefObject_1_0 objectToShow = null;        
-    	// get object to show. This is the first object which is member
-    	// of the composition hierarchy of the referenced object.
-    	RefObject_1_0 current = startFrom;
-    	while(true) {
-    		for(
-    			Iterator i = compositionHierarchy.keySet().iterator(); 
-    			i.hasNext(); 
-    		) {
-    			if(
-    				model.isSubtypeOf(current.refClass().refMofId(), i.next()) &&
-    				!model.isSubtypeOf(current.refClass().refMofId(), qualifiedNameLookupType)
-    			) {
-    				objectToShow = current;
-    				break;
+    	ModelElement_1_0 startFromType = model.getElement(startFrom.refClass().refMofId());
+    	// First check whether startFrom has a reference with type lookupType
+    	{
+    		for(Object reference: startFromType.objGetMap("reference").values()) {
+    			ModelElement_1_0 referenceDef = (ModelElement_1_0)reference;
+    			if(this.isLookupReference(referenceDef, lookupType)) {
+    				return startFrom;
     			}
     		}
-    		Path currentIdentity = current.refGetPath();
-    		// In case current is corrupt for some reason
-    		if(currentIdentity == null) {
-    			break;
-    		}
-    		if(
-    			(objectToShow != null) ||
-    			(currentIdentity.size() < 7)
-    		) break;
-    		// go to parent
-    		currentIdentity = currentIdentity.getParent().getParent();
-    		try {
-    			current = (RefObject_1_0)pm.getObjectById(currentIdentity);
-    		}
-    		catch(Exception e) {
-    			SysLog.warning("Can not get object", Arrays.asList((Object)currentIdentity, e.getMessage()));
-    			break;
-    		}
-    	}        
-    	// If not found get root object which is in the composition hierarchy
-    	if(objectToShow == null) {
-    		RefObject[] rootObject = application.getRootObject();
-    		for(int i = 0; i < rootObject.length; i++) {
-    			for(Iterator j = compositionHierarchy.keySet().iterator(); j.hasNext(); ) {
-    				if(model.isSubtypeOf(rootObject[i].refClass().refMofId(), j.next())) {
-    					objectToShow = (RefObject_1_0)rootObject[i];
-    					break;
-    				}
-    			}
-    			if(objectToShow != null) break;
-    		}            
-    	}        
-    	// take first root object if nothing found
-    	if(objectToShow == null) {
-    		objectToShow = (RefObject_1_0)application.getRootObject()[0];
-    	}            
-    	return objectToShow;
+    	}
+    	// Second try to find the start object in the composition hierarchy of the lookup type
+    	{
+	    	Map<String,Set<String>> compositionHierarchy = new HashMap<String,Set<String>>();
+	    	this.createCompositionHierarchy(
+	    		lookupType,
+	    		compositionHierarchy
+	    	);
+	    	RefObject_1_0 objectToShow = null;        
+	    	// get object to show. This is the first object which is member
+	    	// of the composition hierarchy of the referenced object.
+	    	RefObject_1_0 current = startFrom;
+	    	while(true) {
+	    		for(
+	    			Iterator i = compositionHierarchy.keySet().iterator(); 
+	    			i.hasNext(); 
+	    		) {
+	    			if(
+	    				model.isSubtypeOf(current.refClass().refMofId(), i.next()) &&
+	    				!model.isSubtypeOf(current.refClass().refMofId(), qualifiedNameLookupType)
+	    			) {
+	    				objectToShow = current;
+	    				break;
+	    			}
+	    		}
+	    		Path currentIdentity = current.refGetPath();
+	    		// In case current is corrupt for some reason
+	    		if(currentIdentity == null) {
+	    			break;
+	    		}
+	    		if(
+	    			(objectToShow != null) ||
+	    			(currentIdentity.size() < 7)
+	    		) break;
+	    		// go to parent
+	    		currentIdentity = currentIdentity.getParent().getParent();
+	    		try {
+	    			current = (RefObject_1_0)pm.getObjectById(currentIdentity);
+	    		} catch(Exception e) {
+	    			SysLog.warning("Can not get object", Arrays.asList((Object)currentIdentity, e.getMessage()));
+	    			break;
+	    		}
+	    	}   
+	    	// If not found get root object which is in the composition hierarchy
+	    	if(objectToShow == null) {
+	    		RefObject[] rootObject = app.getRootObject();
+	    		for(int i = 0; i < rootObject.length; i++) {
+	    			for(Iterator j = compositionHierarchy.keySet().iterator(); j.hasNext(); ) {
+	    				if(model.isSubtypeOf(rootObject[i].refClass().refMofId(), j.next())) {
+	    					objectToShow = (RefObject_1_0)rootObject[i];
+	    					break;
+	    				}
+	    			}
+	    			if(objectToShow != null) break;
+	    		}            
+	    	}        
+	    	// take first root object if nothing found
+	    	if(objectToShow == null) {
+	    		objectToShow = (RefObject_1_0)app.getRootObject()[0];
+	    	}            
+	    	return objectToShow;
+    	}
     }
       
     /* (non-Javadoc)
@@ -2116,24 +2042,21 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
     public DataBinding getDataBinding(
        String dataBindingName
     ) {
-        if(
-            (dataBindingName != null) && 
-            dataBindingName.startsWith(CompositeObjectDataBinding.class.getName())
-        ) {
+        if((dataBindingName != null) && dataBindingName.startsWith(CompositeObjectDataBinding.class.getName())) {
             return new CompositeObjectDataBinding(
-                dataBindingName.indexOf("?") < 0 ?
-                    "" :
-                    dataBindingName.substring(dataBindingName.indexOf("?") + 1)
+                dataBindingName.indexOf("?") < 0 ? "" : dataBindingName.substring(dataBindingName.indexOf("?") + 1)
             );
-        }
-        else if(ReferencedObjectDataBinding.class.getName().equals(dataBindingName)) {
+        } else if((dataBindingName != null) && dataBindingName.startsWith(JoiningListDataBinding.class.getName())) {
+	        return new JoiningListDataBinding(
+	            dataBindingName.indexOf("?") < 0 ? "" : dataBindingName.substring(dataBindingName.indexOf("?") + 1)            	
+	        );
+        } else if(ReferencedObjectDataBinding.class.getName().equals(dataBindingName)) {
             return new ReferencedObjectDataBinding();
-        }
-        else {
+        } else {
             return new DefaultDataBinding();
         }
     }
-    
+
     /* (non-Javadoc)
      * @see org.openmdx.portal.servlet.PortalExtension_1_0#handleOperationResult(org.openmdx.base.accessor.jmi.cci.RefObject_1_0, java.lang.String, javax.jmi.reflect.RefStruct, javax.jmi.reflect.RefStruct)
      */
@@ -2249,32 +2172,32 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
      * DefaultConditionParser
      *
      */
-    public static class DefaultConditionParser implements ConditionParser {
+    public static class DefaultQueryConditionParser implements QueryConditionParser {
 
 		private int offset;
-    	private final ValuedField field;
+    	private final String qualifiedFeatureName;
     	private final Condition defaultCondition;
 		
-    	public DefaultConditionParser(
-        	final ValuedField field,
+    	public DefaultQueryConditionParser(
+        	final String qualifiedFeatureName,
         	final Condition defaultCondition
         ) {
     		this.offset = 0;
-    		this.field = field;
+    		this.qualifiedFeatureName = qualifiedFeatureName;
     		this.defaultCondition = defaultCondition;
     	}
-		
+
     	@Override
     	public Condition parse(
     		String token
     	) {
-    		String feature = field.getFeatureName();
+    		String featureName = this.qualifiedFeatureName.substring(this.qualifiedFeatureName.lastIndexOf(":") + 1);
     		if(token.startsWith(">=")) {
     			this.offset = 2;
     			return
     				new IsGreaterOrEqualCondition(
     					Quantifier.THERE_EXISTS,
-    					feature,
+    					featureName,
     					true,
     					(Object[])null
     				);
@@ -2283,7 +2206,7 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
     			this.offset = 2;
     			return new IsGreaterCondition(
     				Quantifier.THERE_EXISTS,
-    				feature,
+    				featureName,
     				false,
     				(Object[])null
     			);
@@ -2292,7 +2215,7 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
     			this.offset = 2;
     			return new IsInCondition(
     				Quantifier.THERE_EXISTS,
-    				feature,
+    				featureName,
     				false,
     				(Object[])null
     			);
@@ -2301,7 +2224,7 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
     			this.offset = 1;
     			return new IsGreaterOrEqualCondition(
     				Quantifier.THERE_EXISTS,
-    				feature,
+    				featureName,
     				false,
     				(Object[])null
     			);
@@ -2310,7 +2233,7 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
     			this.offset = 1;
     			return new IsGreaterCondition(
     				Quantifier.THERE_EXISTS,
-    				feature,
+    				featureName,
     				true,
     				(Object[])null
     			);
@@ -2319,7 +2242,7 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
     			this.offset = 1;
     			return new SoundsLikeCondition(
     				Quantifier.THERE_EXISTS,
-    				feature,
+    				featureName,
     				true,
     				(Object[])null
     			);
@@ -2328,7 +2251,7 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
     			this.offset = 2;
     			return new SoundsLikeCondition(
     				Quantifier.THERE_EXISTS,
-    				feature,
+    				featureName,
     				false,
     				(Object[])null
     			);
@@ -2337,7 +2260,7 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
     			this.offset = 1;
     			return new IsLikeCondition(
     				Quantifier.THERE_EXISTS,
-    				feature,
+    				featureName,
     				true,
     				(Object[])null
     			);
@@ -2346,7 +2269,7 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
     			this.offset = 2;
     			return new IsLikeCondition(
     				Quantifier.THERE_EXISTS,
-    				feature,
+    				featureName,
     				false,
     				(Object[])null
     			);
@@ -2355,7 +2278,7 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
     			this.offset = 1;
     			return new IsInCondition(
     				Quantifier.THERE_EXISTS,
-    				feature,
+    				featureName,
     				true,
     				(Object[])null
     			);
@@ -2364,7 +2287,7 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
     			this.offset = 2;
     			return new IsInCondition(
     				Quantifier.THERE_EXISTS,
-    				feature,
+    				featureName,
     				false,
     				(Object[])null
     			);
@@ -2387,12 +2310,12 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
      * @see org.openmdx.portal.servlet.PortalExtension_1_0#getConditionParser(org.openmdx.ui1.jmi1.ValuedField, org.openmdx.base.query.Condition)
      */
     @Override
-    public ConditionParser getConditionParser(
-    	final ValuedField field,
+    public QueryConditionParser getQueryConditionParser(
+    	final String qualifiedFeatureName,
     	final Condition defaultCondition
     ) {
-    	return new DefaultConditionParser(
-    		field,
+    	return new DefaultQueryConditionParser(
+    		qualifiedFeatureName,
     		defaultCondition
     	);
     }

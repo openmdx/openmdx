@@ -336,7 +336,7 @@ public class ModelConstraintsChecker_1 {
             ModelElement_1_0 qualifierType = this.model.getDereferencedType(associationEndDef.objGetValue("qualifierType"));      
             if(
                 !qualifierType.isPrimitiveType() &&
-                !ModelHelper.UNBOUNDED.equals(associationEndDef.objGetValue("multiplicity"))
+                !ModelHelper.UNBOUND.equals(associationEndDef.objGetValue("multiplicity"))
             ) {
                 violations.add(
                     new BasicException.Parameter(
@@ -1012,7 +1012,7 @@ public class ModelConstraintsChecker_1 {
                 AggregationKind.NONE.equals(end1.objGetValue("aggregation")) &&
                 (end1.objGetList("qualifierType").size() >= 1) &&
                 (!this.model.isPrimitiveType(end1.objGetValue("qualifierType")) || !Multiplicity.OPTIONAL.toString().equals(end1.objGetValue("multiplicity"))) &&
-                (!this.model.isClassType(end1.objGetValue("qualifierType")) || !ModelHelper.UNBOUNDED.equals(end1.objGetValue("multiplicity")))      
+                (!this.model.isClassType(end1.objGetValue("qualifierType")) || !ModelHelper.UNBOUND.equals(end1.objGetValue("multiplicity")))      
         ) {
             violations.add(
                 new BasicException.Parameter(
@@ -1032,7 +1032,7 @@ public class ModelConstraintsChecker_1 {
                 !Multiplicity.OPTIONAL.toString().equals(end2.objGetValue("multiplicity"))
             ) && (
                 !this.model.isClassType(end2.objGetValue("qualifierType")) || 
-                !ModelHelper.UNBOUNDED.equals(end2.objGetValue("multiplicity"))
+                !ModelHelper.UNBOUND.equals(end2.objGetValue("multiplicity"))
             )      
         ) {
             violations.add(

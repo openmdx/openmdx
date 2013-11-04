@@ -1,14 +1,13 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
+ * Project:     openMDX, http://www.openmdx.org/
  * Description: MapperFactory_1
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
  * ====================================================================
  *
- * This software is published under the BSD license
- * as listed below.
+ * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2008, OMEX AG, Switzerland
+ * Copyright (c) 2004-2013, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -16,16 +15,16 @@
  * conditions are met:
  * 
  * * Redistributions of source code must retain the above copyright
- * notice, this list of conditions and the following disclaimer.
+ *   notice, this list of conditions and the following disclaimer.
  * 
  * * Redistributions in binary form must reproduce the above copyright
- * notice, this list of conditions and the following disclaimer in
- * the documentation and/or other materials provided with the
- * distribution.
+ *   notice, this list of conditions and the following disclaimer in
+ *   the documentation and/or other materials provided with the
+ *   distribution.
  * 
  * * Neither the name of the openMDX team nor the names of its
- * contributors may be used to endorse or promote products derived
- * from this software without specific prior written permission.
+ *   contributors may be used to endorse or promote products derived
+ *   from this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
  * CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
@@ -46,13 +45,9 @@
  * This product includes software developed by the Apache Software
  * Foundation (http://www.apache.org/).
  */
-
-/**
- * @author wfro
- */ 
 package org.openmdx.application.mof.mapping.spi;
 
-import java.lang.reflect.InvocationTargetException;
+import java.util.Arrays;
 
 import org.openmdx.application.mof.mapping.cci.Mapper_1_0;
 import org.openmdx.application.mof.mapping.cci.MappingTypes;
@@ -76,64 +71,47 @@ public class MapperFactory_1 {
     public static Mapper_1_0 create(
         String format
     ) throws ServiceException {
-        try {
-            //
-            // dynamic loading decouples factory and managed classes. 
-            //
-            if(
-                MappingTypes.CCI2.equals(format) ||
-                MappingTypes.JMI1.equals(format) ||
-                MappingTypes.JPA3.equals(format)
-            ) {
-                return Classes.<Mapper_1_0>getApplicationClass(
-                    org.openmdx.application.mof.mapping.java.Mapper_1.class.getName()
-                ).getConstructor(
-                    MAPPING_FORMAT__PACKAGE_SUFFFIX__FILE_EXTENSION
-                ).newInstance(
-                    format,
-                    format,
-                    "java"            
-                );
-            } else if(
-                format.startsWith(MappingTypes.JPA3 + ':')
-            ) {
-                return Classes.<Mapper_1_0>getApplicationClass(
-                    org.openmdx.application.mof.mapping.java.Mapper_1.class.getName()
-                ).getConstructor(
-                    MAPPING_FORMAT__PACKAGE_SUFFFIX__FILE_EXTENSION
-                ).newInstance(
-                    format,
-                    MappingTypes.JPA3,
-                    "java"            
-                );
-            } else {
-                return Classes.<Mapper_1_0>getApplicationClass(
-                    MappingTypes.XMI1.equals(format) ? org.openmdx.application.mof.mapping.xmi.XMIMapper_1.class.getName() :
-                    MappingTypes.UML_OPENMDX_1.equals(format) ? org.openmdx.application.mof.mapping.xmi.Uml1Mapper_1.class.getName() :
-                    MappingTypes.UML2_OPENMDX_1.equals(format) ? org.openmdx.application.mof.mapping.xmi.Uml2Mapper_1.class.getName() :
-                    format
-                ).getConstructor(
-                ).newInstance();
+        if(
+            MappingTypes.CCI2.equals(format) ||
+            MappingTypes.JMI1.equals(format) ||
+            MappingTypes.JPA3.equals(format)
+        ) {
+            return new org.openmdx.application.mof.mapping.java.Mapper_1(
+                format,
+                format,
+                "java"            
+            );
+        } else if(format.startsWith(MappingTypes.JPA3 + ':')) {
+            return new org.openmdx.application.mof.mapping.java.Mapper_1(
+                format,
+                MappingTypes.JPA3,
+                "java"            
+            );
+        } else if (MappingTypes.XMI1.equals(format)) {
+            return new org.openmdx.application.mof.mapping.xmi.XMIMapper_1();
+        } else if (MappingTypes.UML_OPENMDX_1.equals(format)) {
+            return new org.openmdx.application.mof.mapping.xmi.Uml1Mapper_1();
+        } else if (MappingTypes.UML2_OPENMDX_1.equals(format)) {
+            return new org.openmdx.application.mof.mapping.xmi.Uml2Mapper_1();
+        } else {
+            try {
+                final String className;
+                Object[] arguments;
+                if(format.endsWith(")")){
+                    int open = format.indexOf('(');
+                    int close = format.length() - 1;
+                    className = format.substring(0, open);
+                    arguments = format.substring(open+1, close).split(",");
+                } else {
+                    className = format;
+                    arguments = new String[]{};
+                }
+                System.out.println("className='" + className + "', arguments=" + Arrays.asList(arguments));
+                return Classes.<Mapper_1_0>newApplicationInstance(Mapper_1_0.class, className, arguments);
+            } catch (Exception exception) {
+                throw new ServiceException(exception);
             }
-        } catch(ClassNotFoundException e) {
-            throw new ServiceException(e);
-        } catch(NoSuchMethodException e) {
-            throw new ServiceException(e);
-        } catch(InvocationTargetException e) {
-            throw e.getTargetException() instanceof ServiceException ?
-                (ServiceException)e.getTargetException() :
-                new ServiceException(e);
-        } catch(IllegalAccessException e) {
-            throw new ServiceException(e);
-        } catch(InstantiationException e) {
-            throw new ServiceException(e);
         }
     }
-  
-    final static private Class<?>[] MAPPING_FORMAT__PACKAGE_SUFFFIX__FILE_EXTENSION = new Class[] {
-        String.class, // mappingFormat
-        String.class, // packageSuffix,
-        String.class // fileExtension
-    };
   
 }

@@ -69,7 +69,6 @@ import org.openmdx.portal.servlet.control.Control;
 import org.openmdx.portal.servlet.control.GridControl;
 import org.openmdx.portal.servlet.view.Grid;
 import org.openmdx.portal.servlet.view.ObjectView;
-import org.openmdx.ui1.jmi1.ValuedField;
 
 public interface PortalExtension_1_0 {
 
@@ -158,10 +157,9 @@ public interface PortalExtension_1_0 {
     );
   
     /**
-     * Return query filter clause which must be performed when a user issues a 
-     * find on the object identity. 
+     * Return a custom-query for the given feature.
      * 
-     * @param field return the query for field
+     * @param field return the query for feature.
      * @param filterValue field is queried for this value.
      * @param queryFilterStringParamCount use this count for string parameters for query filters
      * @param app the application context
@@ -169,12 +167,18 @@ public interface PortalExtension_1_0 {
      * @return a filter
      */
     org.openmdx.base.query.Filter getQuery(        
-    	org.openmdx.ui1.jmi1.ValuedField field,
+    	String qualifiedFeatureName,
         String filterValue,
         int queryFilterStringParamCount,
         ApplicationContext app
-    );
-    
+    ) throws ServiceException;
+
+    /**
+     * Get default grid page size.
+     * 
+     * @param referencedTypeName
+     * @return
+     */
     int getGridPageSize(
         String referencedTypeName
     );
@@ -205,16 +209,23 @@ public interface PortalExtension_1_0 {
         GridControl gridControl,
         ApplicationContext app
     );
-    
+
     /**
-     * Get autocompleter for the specified object.
+     * Get auto-completer for the specified object and feature.
      * 
-     * @return null if no autocompleter is available.
+     * @param app
+     * @param context
+     * @param qualifiedFeatureName
+     * @param restrictToType if not null and in case feature is a reference feature 
+     *   restrict the lookup-query to objects which are instance of the specified type. 
+     *   If the specified type is invalid it is ignored.
+     * @return null if no auto-completer is available. 
      */
     Autocompleter_1_0 getAutocompleter(
-        ApplicationContext application,
+        ApplicationContext app,
         RefObject_1_0 context,
-        String qualifiedFeatureName
+        String qualifiedFeatureName,
+        String restrictToType
     );
 
     /**
@@ -437,7 +448,7 @@ public interface PortalExtension_1_0 {
      * 
      */
     
-    public interface ConditionParser {
+    public interface QueryConditionParser {
     	
     	Condition parse(
     		String token
@@ -448,13 +459,14 @@ public interface PortalExtension_1_0 {
     }
     
     /**
-     * Return condition parser for specified field.
-     * @param field
+     * Return a query condition parser for feature.
+     * 
+     * @param qualifiedFeatureName
      * @param defaultCondition
      * @return
      */
-    ConditionParser getConditionParser(
-    	ValuedField field,
+    QueryConditionParser getQueryConditionParser(
+    	String qualifiedFeatureName,
     	Condition defaultCondition
     );
 

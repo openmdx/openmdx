@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2010, OMEX AG, Switzerland
+ * Copyright (c) 2004-2013, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -588,10 +588,13 @@ public final class XRI_2Marshaller
      */
     private static List<Segment> getExtensibleResourceIdentifier(
         boolean lenient, 
-        String xri
+        String resourceIdentifier
     ){
-        if(xri.startsWith(XRI_2Protocols.SCHEME_PREFIX)) {
-            xri = xri.substring(XRI_2Protocols.SCHEME_PREFIX.length());
+        final String xri;
+        if(resourceIdentifier.startsWith(XRI_2Protocols.SCHEME_PREFIX)) {
+            xri = resourceIdentifier.substring(XRI_2Protocols.SCHEME_PREFIX.length());
+        } else {
+            xri = resourceIdentifier;
         }
         if(xri.startsWith("!")) { 
             //

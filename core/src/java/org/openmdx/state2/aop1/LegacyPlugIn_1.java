@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2009-2012, OMEX AG, Switzerland
+ * Copyright (c) 2009-2013, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -113,9 +113,7 @@ public class LegacyPlugIn_1 extends PlugIn_1 {
     		view, 
     		next, 
     		type,
-    		Boolean.valueOf(
-    			LegacyPlugInHelper.isValidTimeUnique(view, next, type)
-    		)
+    		LegacyPlugInHelper.isValidTimeUnique(view, next, type)
     	);
     }
 	

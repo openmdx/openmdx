@@ -69,17 +69,6 @@ public abstract class AbstractMetaDataMapper extends AbstractClassMapper {
 
 	/**
 	 * Constructor
-	 * 
-	 * @param classDef
-	 * @param writer
-	 * @param model
-	 * @param format
-	 * @param packageSuffix
-	 * @param sliceClassName
-	 * @param metaData
-	 * @param plugin
-	 * 
-	 * @throws ServiceException
 	 */
 	protected AbstractMetaDataMapper(
         ModelElement_1_0 classDef, 
@@ -89,6 +78,7 @@ public abstract class AbstractMetaDataMapper extends AbstractClassMapper {
         String packageSuffix,
 		String sliceClassName, 
         MetaData_1_0 metaData, 
+        PrimitiveTypeMapper primitiveTypeMapper, 
         ObjectRepositoryMetadataPlugin plugin
     ) throws ServiceException {
         super(
@@ -97,7 +87,8 @@ public abstract class AbstractMetaDataMapper extends AbstractClassMapper {
             model,
             format, 
             packageSuffix, 
-            metaData
+            metaData, 
+            primitiveTypeMapper
         );
         this.writer = writer;
 		this.sliceClassName = sliceClassName;

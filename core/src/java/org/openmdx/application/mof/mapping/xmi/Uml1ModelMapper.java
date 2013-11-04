@@ -837,7 +837,7 @@ public class Uml1ModelMapper {
     pw.write("\t\t\t<UML:Namespace.ownedElement>\n");
     this.writeStereotype(Multiplicity.OPTIONAL.toString(), "Attribute");
     this.writeStereotype(Multiplicity.SINGLE_VALUE.toString(), "Attribute");
-    this.writeStereotype(ModelHelper.UNBOUNDED, "Attribute");
+    this.writeStereotype(ModelHelper.UNBOUND, "Attribute");
     this.writeStereotype(Multiplicity.LIST.toString(), "Attribute");
     this.writeStereotype(Multiplicity.SET.toString(), "Attribute");
     this.writeStereotype(Multiplicity.SPARSEARRAY.toString(), "Attribute");
@@ -845,7 +845,7 @@ public class Uml1ModelMapper {
     this.writeStereotype(Multiplicity.MAP.toString(), "Attribute");
     this.writeStereotype(Multiplicity.OPTIONAL.toString(), "Parameter");
     this.writeStereotype(Multiplicity.SINGLE_VALUE.toString(), "Parameter");
-    this.writeStereotype(ModelHelper.UNBOUNDED, "Parameter");
+    this.writeStereotype(ModelHelper.UNBOUND, "Parameter");
     this.writeStereotype(Multiplicity.LIST.toString(), "Parameter");
     this.writeStereotype(Multiplicity.SET.toString(), "Parameter");
     this.writeStereotype(Multiplicity.SPARSEARRAY.toString(), "Parameter");

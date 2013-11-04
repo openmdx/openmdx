@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2008-2012, OMEX AG, Switzerland
+ * Copyright (c) 2008-2013, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -128,7 +128,7 @@ abstract class CollectionView<O,C extends Collection<E>,E> implements Collection
             for(C delegate : members.getInvolved(AccessMode.FOR_QUERY)) {
                 reply.set(Boolean.valueOf(delegate.contains(o)));
             }
-            return reply.get();
+            return reply.get().booleanValue();
         } catch (ServiceException exception) {
             throw Throwables.initCause(
                 new IllegalStateException(
@@ -151,7 +151,7 @@ abstract class CollectionView<O,C extends Collection<E>,E> implements Collection
             for(C delegate : members.getInvolved(AccessMode.FOR_QUERY)) {
                 reply.set(Boolean.valueOf(delegate.containsAll(c)));
             }
-            return reply.get();
+            return reply.get().booleanValue();
         } catch (ServiceException exception) {
             throw Throwables.initCause(
                 new IllegalStateException(
@@ -174,7 +174,7 @@ abstract class CollectionView<O,C extends Collection<E>,E> implements Collection
             for(C delegate : members.getInvolved(AccessMode.FOR_QUERY)) {
                 reply.set(Boolean.valueOf(delegate.isEmpty()));
             }
-            return reply.get();
+            return reply.get().booleanValue();
         } catch (ServiceException exception) {
             throw Throwables.initCause(
                 new IllegalStateException(

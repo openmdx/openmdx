@@ -62,17 +62,19 @@ import org.openmdx.portal.servlet.attribute.AttributeValue;
 public interface Autocompleter_1_0 {
     
     /**
-     * Generates the html code for the autocompleter.
+     * Generates the html code for the auto-completer.
+     * 
      * @param p painting area
      * @param id optional id for input field. If none is specified an id is automatically generated.        
      * @param tabIndex field index
-     * @param fieldName name of autocompletion field
-     * @param currentValue current value of autocompletion field
+     * @param fieldName name of auto-completion field
+     * @param currentValue current value of auto-completion field
      * @param numericCompare if a numeric compare should be applied to current value
-     *        and the autocompleter value list
-     * @param tdTag td tag if the autcompleter is embedded in a table. null if no 
+     *        and the auto-completer value list
+     * @param tdTag td tag if the auto-completer is embedded in a table. null if no 
      *        td tag must be generated
-     * @param imgTag optional image tag is placed right after the autocomplete input field
+     * @param imgTag optional image tag is placed right after the auto-complete input field
+     * @param onChangeValueScript
      */
     public void paint(
         ViewPort p,
@@ -84,7 +86,8 @@ public interface Autocompleter_1_0 {
         CharSequence tdTag,
         CharSequence inputFieldDivClass,
         CharSequence inputFieldClass,
-        CharSequence imgTag
+        CharSequence imgTag,
+        CharSequence onChangeValueScript
     ) throws ServiceException;
 
     /**

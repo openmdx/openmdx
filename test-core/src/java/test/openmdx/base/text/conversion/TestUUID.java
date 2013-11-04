@@ -106,6 +106,8 @@ public class TestUUID {
      */
     final static int OUT_LIMIT = 1;
 
+    final static int GENERATOR_COUNT = 3;
+    
     /**
      * Test UUID generation performance
      */
@@ -126,9 +128,12 @@ public class TestUUID {
     @Test
     public void testUUIDs(
     ) throws Exception {
-        UUIDGenerator generator = UUIDs.getGenerator();
+        UUIDGenerator[] generator = new UUIDGenerator[GENERATOR_COUNT];
+        for(int g = 0; g < GENERATOR_COUNT; g++) {
+            generator[g] = UUIDs.getGenerator();
+        }
         for(int i = 0; i < 8; i++){
-            UUID uuid = generator.next();
+            UUID uuid = generator[i % GENERATOR_COUNT].next();
             assertEquals("Leach-Salz variant", uuid.variant(), 2);
             assertEquals("Base36", uuid, UUIDConversion.fromString(UUIDConversion.toUID(uuid)));
             assertEquals("urn", uuid, UUIDConversion.fromString(UUIDConversion.toURN(uuid)));
@@ -136,7 +141,8 @@ public class TestUUID {
         }
         UUID[] uuids = new UUID[500000];
         for(int i=0; i < uuids.length; i++){
-            uuids[i] = generator.next();
+           uuids[i] = generator[i % GENERATOR_COUNT].next();
+           assertEquals("Base36", uuids[i], UUIDConversion.fromString(UUIDConversion.toUID(uuids[i])));
         }
         assertEquals(
             "Duplicates", 
@@ -144,9 +150,9 @@ public class TestUUID {
             new HashSet<UUID>(Arrays.asList(uuids)).size()
         );
     }
-
+    
     /**
-     * Test Java Random UID
+     * Test NIL
      */
     @Test
     public void testNIL(
@@ -173,6 +179,16 @@ public class TestUUID {
             assertEquals("toURN", uuid, UUIDConversion.fromString(UUIDConversion.toURN(uuid)));
             if(OUT_LIMIT > i) log("testJavaRandomUUID", uuid);
         }
+        UUID[] uuids = new UUID[500000];
+        for(int i=0; i < uuids.length; i++){
+            uuids[i] = UUID.randomUUID();
+            assertEquals("Base36", uuids[i], UUIDConversion.fromString(UUIDConversion.toUID(uuids[i])));
+        }
+        assertEquals(
+            "Duplicates", 
+            uuids.length, 
+            new HashSet<UUID>(Arrays.asList(uuids)).size()
+        );
     }
 
     /**
@@ -253,7 +269,8 @@ public class TestUUID {
     ) throws Exception {
         for(int i = 0; i < OBJECT_ID_UUID.length; i++){
             UUID uuid = UUID.fromString(OBJECT_ID_UUID[i]);
-            assertEquals("Oid", new Oid(OBJECT_ID_DOT[i]), UUIDConversion.toOid(uuid));
+            Oid oid = new Oid(OBJECT_ID_DOT[i]);
+            assertEquals("Oid", oid, UUIDConversion.toOid(uuid));
         }
     }
     

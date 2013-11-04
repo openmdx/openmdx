@@ -70,16 +70,6 @@ public class NativeMetaDataMapper extends AbstractMetaDataMapper {
 
 	/**
 	 * Constructor
-	 * 
-	 * @param classDef
-	 * @param writer
-	 * @param model
-	 * @param format
-	 * @param packageSuffix
-	 * @param sliceClassName
-	 * @param metaData
-	 * @param plugin
-	 * @throws ServiceException
 	 */
 	public NativeMetaDataMapper(
         ModelElement_1_0 classDef, 
@@ -89,6 +79,7 @@ public class NativeMetaDataMapper extends AbstractMetaDataMapper {
         String packageSuffix,
 		String sliceClassName, 
         MetaData_1_0 metaData, 
+        PrimitiveTypeMapper primitiveTypeMapper, 
         ObjectRepositoryMetadataPlugin plugin
     ) throws ServiceException {
         super(
@@ -99,6 +90,7 @@ public class NativeMetaDataMapper extends AbstractMetaDataMapper {
             packageSuffix, 
     		sliceClassName, 
             metaData, 
+            primitiveTypeMapper, 
             plugin
         );
 	}

@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2011, OMEX AG, Switzerland
+ * Copyright (c) 2004-2013, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -100,7 +100,7 @@ public class ReferenceDef extends StructuralFeatureDef {
           getQualifierName(referenceDef, model, "referencedEnd"),
           getQualifierTypeName(referenceDef, model, "referencedEnd"),
           (Boolean)referenceDef.objGetValue("isChangeable"),
-          model.referenceIsDerived(referenceDef),
+          Boolean.valueOf(model.referenceIsDerived(referenceDef)),
           getExposedEndName(referenceDef, model),
           getExposedEndQualifiedTypeName(referenceDef, model),
           getQualifierName(referenceDef, model, "exposedEnd"),

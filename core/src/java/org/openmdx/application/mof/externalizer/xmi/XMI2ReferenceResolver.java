@@ -69,15 +69,14 @@ import org.xml.sax.Locator;
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 
-@SuppressWarnings({"rawtypes","unchecked"})
 public class XMI2ReferenceResolver
     implements ContentHandler, XMIReferenceResolver {
 
     //---------------------------------------------------------------------------
     public XMI2ReferenceResolver(
-        Map xmiReferences,
-        Stack scope,
-        Map pathMap,
+        Map<String,String> xmiReferences,
+        Stack<String> scope,
+        Map<String,String> pathMap,
         PrintStream infos,
         PrintStream warnings,
         PrintStream errors, 
@@ -90,57 +89,115 @@ public class XMI2ReferenceResolver
         this.infos = infos;
         this.warnings = warnings;
         this.errors = errors;
-        this.projects = new HashMap();
+        this.projects = new HashMap<String,String>();
     }
 
-    //---------------------------------------------------------------------------
+    /**
+     * Get href as URI.
+     * 
+     * @param href
+     * @return
+     */
+    public URI hrefToURI(
+        String href
+    ) {
+        URI hrefURI = null;
+        String schema = null;
+        String value = null;
+        try {
+            value = href;
+            value = value.replace(" ", "%20");
+            // Convert relative paths to platform resource paths
+            schema = "";
+            while(value.startsWith("../") || value.startsWith("..\\")) {
+                value = value.substring(3);
+                schema = "platform:/resource/";
+            }                 
+            hrefURI = new URI(schema + value);
+        } catch(URISyntaxException e) {
+            this.error("Reference is not a valid URI >" + schema + value + "<");
+        }
+        return hrefURI;
+    }
+
     /**
      * Retrieves the fully qualified name of the model element identified by a 
-     * given xmiId
+     * given xmiId.
+     * 
      * @param xmiId the xmi.id that identifies desired model element
      * @return the fully qualified name of the model element
      */
     public String lookupXMIId(
         String xmiId
     ) {
-        return (String)xmiReferences.get(xmiId);
+        return this.xmiReferences.get(xmiId);
     }
 
-    //---------------------------------------------------------------------------
-    public UML1Generalization lookupGeneralization(String xmiId) {
+    /* (non-Javadoc)
+     * @see org.openmdx.application.mof.externalizer.xmi.XMIReferenceResolver#lookupGeneralization(java.lang.String)
+     */
+    @Override
+    public UML1Generalization lookupGeneralization(
+        String xmiId
+      ) {
         return null;
     }
 
-    //---------------------------------------------------------------------------
-    public UML1Comment lookupComment(String xmiId) {
+    /* (non-Javadoc)
+     * @see org.openmdx.application.mof.externalizer.xmi.XMIReferenceResolver#lookupComment(java.lang.String)
+     */
+    @Override
+    public UML1Comment lookupComment(
+        String xmiId
+    ) {
         return null;
     }
 
-    //---------------------------------------------------------------------------
-    public UML1TagDefinition lookupTagDefinition(String xmiId) {
+    /* (non-Javadoc)
+     * @see org.openmdx.application.mof.externalizer.xmi.XMIReferenceResolver#lookupTagDefinition(java.lang.String)
+     */
+    @Override
+    public UML1TagDefinition lookupTagDefinition(
+        String xmiId
+    ) {
         return null;
     }
 
-	//---------------------------------------------------------------------------
-	public UML1AssociationEnd lookupAssociationEnd(String xmiId) {
+	/* (non-Javadoc)
+	 * @see org.openmdx.application.mof.externalizer.xmi.XMIReferenceResolver#lookupAssociationEnd(java.lang.String)
+	 */
+    @Override
+	public UML1AssociationEnd lookupAssociationEnd(
+	    String xmiId
+	) {
 		return this.umlAssociationEnds == null ? null : this.umlAssociationEnds.get(xmiId);
 	}
 
-	//---------------------------------------------------------------------------
+    /* (non-Javadoc)
+     * @see org.openmdx.application.mof.externalizer.xmi.XMIReferenceResolver#lookupProject(java.lang.String)
+     */
+    @Override
     public String lookupProject(
         String packageName
     ) {
-        return (String)this.projects.get(packageName);
+        return this.projects.get(packageName);
     }
 
-    //---------------------------------------------------------------------------
+    /* (non-Javadoc)
+     * @see org.xml.sax.ContentHandler#startDocument()
+     */
+    @Override
     public void startDocument(
     ) throws SAXException {
         this.hasErrors = false;
-        this.elementStack = this.umlAssociationEnds == null ? null : new Stack();
+        this.elementStack = this.umlAssociationEnds == null ? null : new Stack<Object>();
     }
 
-    //---------------------------------------------------------------------------
+    /**
+     * Write error.
+     * 
+     * @param message
+     */
     private void error(
         String message
     ) {
@@ -148,7 +205,11 @@ public class XMI2ReferenceResolver
         this.hasErrors = true;
     }
 
-    //---------------------------------------------------------------------------
+    /**
+     * Get current scope as qualified name.
+     * 
+     * @return
+     */
     private String getScopeAsQualifiedName(
     ) {
         StringBuilder sb = new StringBuilder();
@@ -159,13 +220,19 @@ public class XMI2ReferenceResolver
         return sb.toString();
     }
 
-    //---------------------------------------------------------------------------
+    /* (non-Javadoc)
+     * @see org.openmdx.application.mof.externalizer.xmi.XMIReferenceResolver#hasErrors()
+     */
+    @Override
     public boolean hasErrors(
     ) {
         return this.hasErrors;
     }
 
-    //---------------------------------------------------------------------------
+    /* (non-Javadoc)
+     * @see org.xml.sax.ContentHandler#startElement(java.lang.String, java.lang.String, java.lang.String, org.xml.sax.Attributes)
+     */
+    @Override
     public void startElement(
         String namespaceURI,
         String localName,
@@ -249,25 +316,12 @@ public class XMI2ReferenceResolver
                     );
                 }
             }
-        }
-        // UML package reference
-        else if(
-        	("importedElement".equals(qName) || "references".equals(qName)) &&
+        } else if(
+        	((XMI2Configuration.importPackage() && "importedPackage".equals(qName)) || "importedElement".equals(qName) || "references".equals(qName)) &&
             ("uml:Package".equals(atts.getValue("xmi:type")) || "uml:Model".equals(atts.getValue("xmi:type"))) 
         ) {
-            URI href = null;
-            try {          
-                String value = atts.getValue("href");
-                // Convert relative paths to platform resource paths
-                String schema = "";
-                while(value.startsWith("../") || value.startsWith("..\\")) {
-                    value = value.substring(3);         
-                    schema = "platform:/resource/";
-                } 
-                href = new URI(schema + value);                   
-            } catch(URISyntaxException e) {
-                this.error("reference is not a valid URI " + atts.getValue("href"));
-            }
+            // UML package reference
+            URI href = this.hrefToURI(atts.getValue("href"));
             if(href != null) {
                 try {
                     String scheme = href.getScheme();
@@ -282,15 +336,13 @@ public class XMI2ReferenceResolver
                             packageName,
                             projectName
                         );
-                    }
-                    else {
+                    } else {
                         packageName = path;
                     }
                     String projectName = this.lookupProject(packageName);
                     if((projectName != null) && (this.pathMap.get(projectName) == null)) {
                         this.error("Referenced project '" + projectName + "' not defined as pathMapSymbol");
-                    }
-                    else {
+                    } else {
                         String packageURI = projectName == null
                             ? this.uri.substring(0, this.uri.lastIndexOf('/') + 1) + packageName
                             : this.pathMap.get(projectName) + packageName;
@@ -306,19 +358,21 @@ public class XMI2ReferenceResolver
                             );
                         nestedReferenceResolver.parse(packageURI);
                     }
-                }
-                catch(Exception e) {
+                } catch(Exception e) {
                     new ServiceException(e).log();
                     this.error("Can not process nested model " + atts.getValue("href") + ". Reason=" + e.getMessage());
                 }
             }
-       }
+        }
     	if(this.elementStack != null) {
     		this.elementStack.push(element);
     	}
     }
 
-    //---------------------------------------------------------------------------
+    /* (non-Javadoc)
+     * @see org.xml.sax.ContentHandler#endElement(java.lang.String, java.lang.String, java.lang.String)
+     */
+    @Override
     public void endElement(
         String namespaceURI,
         String localName,
@@ -336,56 +390,105 @@ public class XMI2ReferenceResolver
         }
     }
 
-    //---------------------------------------------------------------------------
+    /**
+     * Get locator.
+     * 
+     * @return
+     */
     public Locator getLocator(
     ) {
         return this.locator;
     }
 
-    //---------------------------------------------------------------------------
-    public void setDocumentLocator(Locator arg0) {
-        this.locator = arg0;
+    /* (non-Javadoc)
+     * @see org.xml.sax.ContentHandler#setDocumentLocator(org.xml.sax.Locator)
+     */
+    @Override
+    public void setDocumentLocator(
+        Locator locator
+    ) {
+        this.locator = locator;
     }
 
-  //---------------------------------------------------------------------------
-  public void endDocument() throws SAXException {
-      //
-  }
+    /* (non-Javadoc)
+     * @see org.xml.sax.ContentHandler#endDocument()
+     */
+    @Override
+    public void endDocument(
+    ) throws SAXException {
+        //
+    }
 
-  //---------------------------------------------------------------------------
-  public void characters(char[] arg0, int arg1, int arg2) throws SAXException {
+    /* (non-Javadoc)
+     * @see org.xml.sax.ContentHandler#characters(char[], int, int)
+     */
+    @Override
+    public void characters(
+        char[] arg0, 
+        int arg1, 
+        int arg2
+    ) throws SAXException {
       //
-  }
+    }
 
-  //---------------------------------------------------------------------------
-  public void endPrefixMapping(String arg0) throws SAXException {
-      //
-  }
+    /* (non-Javadoc)
+     * @see org.xml.sax.ContentHandler#endPrefixMapping(java.lang.String)
+     */
+    @Override
+    public void endPrefixMapping(
+        String arg0
+    ) throws SAXException {
+        //
+    }
 
-  //---------------------------------------------------------------------------
-  public void ignorableWhitespace(char[] arg0, int arg1, int arg2)
-    throws SAXException {
-      //
-  }
+    /* (non-Javadoc)
+     * @see org.xml.sax.ContentHandler#ignorableWhitespace(char[], int, int)
+     */
+    @Override
+    public void ignorableWhitespace(
+        char[] arg0, 
+        int arg1, 
+        int arg2
+    ) throws SAXException {
+        //
+    }
 
-  //---------------------------------------------------------------------------
-  public void processingInstruction(String arg0, String arg1)
-    throws SAXException {
-      //
-  }
+    /* (non-Javadoc)
+     * @see org.xml.sax.ContentHandler#processingInstruction(java.lang.String, java.lang.String)
+     */
+    @Override
+    public void processingInstruction(
+        String arg0, 
+        String arg1
+    ) throws SAXException {
+        //
+    }
 
-  //---------------------------------------------------------------------------
-  public void skippedEntity(String arg0) throws SAXException {
-      //
-  }
+    /* (non-Javadoc)
+     * @see org.xml.sax.ContentHandler#skippedEntity(java.lang.String)
+     */
+    @Override
+    public void skippedEntity(
+        String arg0
+    ) throws SAXException {
+        //
+    }
 
-  //---------------------------------------------------------------------------
-  public void startPrefixMapping(String arg0, String arg1)
-    throws SAXException {
-      //
-  }
+    /* (non-Javadoc)
+     * @see org.xml.sax.ContentHandler#startPrefixMapping(java.lang.String, java.lang.String)
+     */
+    @Override
+    public void startPrefixMapping(
+        String arg0, 
+        String arg1
+    ) throws SAXException {
+        //
+    }
 
-    //---------------------------------------------------------------------------
+    /* (non-Javadoc)
+     * @see org.openmdx.application.mof.externalizer.xmi.XMIReferenceResolver#parse(java.lang.String)
+     */
+    @Override
     public void parse(
         String uri
     ) throws Exception {
@@ -394,16 +497,14 @@ public class XMI2ReferenceResolver
         try {
             SAXParser parser = SAXParserFactory.newInstance().newSAXParser();
             reader = parser.getXMLReader();
-        }
-        catch (Exception ex) {
+        } catch (Exception ex) {
             ex.printStackTrace(this.errors);
             throw ex;
         }
         try {
             reader.setContentHandler(this);
             reader.parse(uri);
-        }
-        catch(Exception ex) {
+        } catch(Exception ex) {
             if(this.getLocator() != null) {
                 this.error(
                     "Exception occurred while processing line " + this.getLocator().getLineNumber() +
@@ -415,7 +516,9 @@ public class XMI2ReferenceResolver
         }
     }
 
-    //---------------------------------------------------------------------------
+    /* (non-Javadoc)
+     * @see java.lang.Object#toString()
+     */
     @Override
     public String toString(
     ) {
@@ -432,13 +535,13 @@ public class XMI2ReferenceResolver
     private final PrintStream errors;
     private Locator locator = null;
     private String uri = null;
-    private final Stack scope;
-    private final Map xmiReferences;
+    private final Stack<String> scope;
+    private final Map<String,String> xmiReferences;
     private final Map<String, UML1AssociationEnd> umlAssociationEnds;
-    private final Map pathMap;
-    private final Map projects;
+    private final Map<String,String> pathMap;
+    private final Map<String,String> projects;
     private boolean hasErrors = false;
-    private Stack elementStack = null;
+    private Stack<Object> elementStack = null;
     private final static Object DUMMY = new Object();
     
 }

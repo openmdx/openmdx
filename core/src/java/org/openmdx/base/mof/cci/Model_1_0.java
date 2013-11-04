@@ -1,13 +1,13 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Description: Model_1_0 interface
+ * Description: Standard Model Repository Accessor
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2008, OMEX AG, Switzerland
+ * Copyright (c) 2004-2013, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -52,7 +52,6 @@ import java.util.Map;
 
 import org.openmdx.base.accessor.cci.DataObject_1_0;
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.base.io.Externalizable;
 import org.openmdx.base.naming.Path;
 
 /**
@@ -60,35 +59,8 @@ import org.openmdx.base.naming.Path;
  * elements. This interface is a very lightweight version of the MOF model 
  * interface and is used mainly for model-bootstrapping.
  */
-public interface Model_1_0 extends Externalizable {
+public interface Model_1_0 {
 
-    /**
-     * Adds to model the new model elements of the package specified by 
-     * qualifiedPackageNames. The model is loaded from the corresponding XMI resource
-     * without schema validation.
-     * 
-     * @param  qualifiedModelNames names of the packages to be loaded
-     *
-     * @throws ServiceException when model not found or not valid.
-     */
-    public void addModels(
-        Collection<String> qualifiedModelNames
-    ) throws ServiceException;
-
-    /**
-     * Adds to model the new model elements of the package specified by 
-     * qualifiedPackageNames. The model is loaded from the corresponding XMI resource.
-     * 
-     * @param qualifiedModelNames names of the packages to be loaded
-     * @param schemaValidation defines whether schema validation is on or off
-     *  
-     * @throws ServiceException when model not found or not valid.
-     */
-    public void addModels(
-        Collection<String> qualifiedModelNames,
-        boolean schemaValidation
-    ) throws ServiceException;
-    
     /**
      * Returns the specified model element. The returned model elements are
      * org:omg:model1 compliant. Derived attributes are provided as well.

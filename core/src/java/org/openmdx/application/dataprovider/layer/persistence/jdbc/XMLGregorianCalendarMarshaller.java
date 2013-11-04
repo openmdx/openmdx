@@ -453,6 +453,8 @@ public class XMLGregorianCalendarMarshaller {
                 case SECONDS:
                     target.setFractionalSecond(BigDecimal.ZERO);
                     break;
+                default:
+                    break;
             }
             return target;
         } else if (source instanceof Date) {

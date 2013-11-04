@@ -284,6 +284,7 @@ public abstract class FileUploadBase
      * @exception FileUploadException if there are problems reading/parsing
      *                                the request or storing files.
      */
+    @SuppressWarnings("resource")
     public List /* FileItem */ parseRequest(HttpServletRequest req)
         throws FileUploadException
     {

@@ -6,7 +6,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2005-2011, OMEX AG, Switzerland
+ * Copyright (c) 2005-2013, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -82,7 +82,9 @@ import org.openmdx.kernel.exception.BasicException;
 public class InstanceMapper
 extends AbstractClassMapper {
 
-    //-----------------------------------------------------------------------
+    /**
+     * Constructor 
+     */
     @SuppressWarnings({
         "unchecked", "cast"
     })
@@ -93,7 +95,8 @@ extends AbstractClassMapper {
         Model_1_0 model,
         Format format, 
         String packageSuffix,
-        MetaData_1_0 metaData
+        MetaData_1_0 metaData, 
+        PrimitiveTypeMapper primitiveTypeMapper
     ) throws ServiceException {
         super(
             classDef,
@@ -101,7 +104,8 @@ extends AbstractClassMapper {
             model,
             format, 
             packageSuffix, 
-            metaData
+            metaData, 
+            primitiveTypeMapper
         );
         this.pwSlice = writerJdoSlice == null ? null : new PrintWriter(writerJdoSlice);
         this.localFeatures = new HashMap<String,ModelElement_1_0>(
@@ -191,7 +195,7 @@ extends AbstractClassMapper {
                 this.pw.println("   */");
                 this.pw.println("  public void " + this.getMethodName("add" + referenceDef.getBeanGenericName()) + " (");
                 this.pw.println("    boolean " + qualifierName + PERSISTENCY_SUFFIX + ",");            
-                this.pw.println("    " + this.getType(referenceDef.getQualifiedQualifierTypeName()) + " " + qualifierName + ",");
+                this.pw.println("    " + this.getType(referenceDef.getQualifiedQualifierTypeName(), getFormat(), false) + " " + qualifierName + ",");
                 this.pw.println("    " + referenceType + " " + valueHolder);        
                 this.pw.println("  );");
                 this.pw.println();
@@ -214,7 +218,7 @@ extends AbstractClassMapper {
                 this.pw.println("   * @param " + valueHolder + " The element to be appended.");
                 this.pw.println("   */");
                 this.pw.println("  public void " + this.getMethodName("add" + referenceDef.getBeanGenericName()) + " (");
-                this.pw.println("    " + this.getType(referenceDef.getQualifiedQualifierTypeName()) + " " + qualifierName + ",");
+                this.pw.println("    " + this.getType(referenceDef.getQualifiedQualifierTypeName(), getFormat(), false) + " " + qualifierName + ",");
                 this.pw.println("    " + referenceType + " " + valueHolder);        
                 this.pw.println("  );");
                 this.pw.println();
@@ -245,13 +249,16 @@ extends AbstractClassMapper {
 
     // -----------------------------------------------------------------------
     public void mapReferenceRemoveOptional(
-        ReferenceDef referenceDef) throws ServiceException {
+        ReferenceDef referenceDef
+    ) throws ServiceException {
+        // Nothing to do 
     }
 
     // -----------------------------------------------------------------------
     public void mapReferenceRemoveWithQualifier(
         ReferenceDef referenceDef
     ) throws ServiceException {
+        // Nothing to do 
     }
 
     // -----------------------------------------------------------------------
@@ -401,8 +408,8 @@ extends AbstractClassMapper {
         this.pw.println("   * @param " + referenceDef.getQualifierName() + " The container of the objects to be retrieved.");
         this.pw.println("   * @return The members referencing ths object via <code>" + referenceDef.getName() + "</code>.");
         this.pw.println("   */");
-        this.pw.println("  public " + this.getType(referenceDef, "java.util.Collection", Boolean.TRUE, TypeMode.MEMBER) + " " + this.getMethodName(referenceDef.getBeanGetterName()) + "(");
-        this.pw.println("    " + getType(referenceDef.getQualifiedQualifierTypeName(), true) + " " + referenceDef.getQualifierName());
+        this.pw.println("  public " + this.getType(referenceDef, "java.util.Collection", Boolean.TRUE, TypeMode.MEMBER, null) + " " + this.getMethodName(referenceDef.getBeanGetterName()) + "(");
+        this.pw.println("    " + getInterfaceType(referenceDef.getQualifiedQualifierTypeName()) + " " + referenceDef.getQualifierName());
         if(getFormat() == Format.JPA3) {
             this.pw.println("  ){");
             this.pw.println("    throw new java.lang.UnsupportedOperationException(\"Not yet implemented\");"); // TODO
@@ -440,7 +447,7 @@ extends AbstractClassMapper {
                     this.pw.println("   */");
                     this.pw.println("  @SuppressWarnings(\"unused\")");                    
                     this.pw.print("  private transient ");
-                    this.pw.println(getType(referenceDef, "java.util.Set", null, TypeMode.MEMBER) + ' ' + referenceName + ';');
+                    this.pw.println(getType(referenceDef, "java.util.Set", null, TypeMode.MEMBER, null) + ' ' + referenceName + ';');
                     this.pw.println();
                 }
             }
@@ -476,7 +483,7 @@ extends AbstractClassMapper {
             this.pw.println("   * @param query predicate which is applied to the set of referenced objects.");
             this.pw.println("   * @return The objects for which the predicate evaluates to <code>true</code>.");
             this.pw.println("   */");
-            this.pw.println("  public <T extends " + this.getType(referenceDef.getQualifiedTypeName()) + "> java.util.List<T> " + this.getMethodName(referenceDef.getBeanGetterName()) + "(");
+            this.pw.println("  public <T extends " + this.getType(referenceDef.getQualifiedTypeName(), getFormat(), false) + "> java.util.List<T> " + this.getMethodName(referenceDef.getBeanGetterName()) + "(");
             this.pw.println("    " + qualifiedQueryName + " query");
             this.pw.println("  );");
             this.pw.println();
@@ -494,7 +501,7 @@ extends AbstractClassMapper {
             this.pw.println("   */");
             String cast = this.printAnnotationAndReturnCast(referenceDef, collectionType);
             String methodName = this.getMethodName(referenceDef.getBeanGetterName());
-            this.pw.println("  public " + getType(referenceDef, collectionType, Boolean.TRUE, TypeMode.MEMBER) + ' ' + methodName + "(");
+            this.pw.println("  public " + getType(referenceDef, collectionType, Boolean.TRUE, TypeMode.MEMBER, null) + ' ' + methodName + "(");
             if(getFormat() == Format.JPA3) {
                 this.pw.println("  ){");
                 if(referenceDef.isComposition()) {
@@ -554,7 +561,7 @@ extends AbstractClassMapper {
             }
             this.pw.println("   * @return The <code>Collection</code> of referenced objects.");
             this.pw.println("   */");
-            this.pw.println("  public " + this.getType(referenceDef, collectionType, Boolean.TRUE, TypeMode.MEMBER) + " " + methodName + "(");
+            this.pw.println("  public " + this.getType(referenceDef, collectionType, Boolean.TRUE, TypeMode.MEMBER, null) + " " + methodName + "(");
             if(getFormat() == Format.JPA3) {
                 this.pw.println("  ){");
                 this.pw.println("    throw new javax.jdo.JDOFatalUserException(");
@@ -670,7 +677,7 @@ extends AbstractClassMapper {
                 if(i == 0) {
                     this.pw.println("    boolean " + qualifierPersistencyArgumentName + ",");
                 }
-                this.pw.println("    " + this.getType(referenceDef.getQualifiedQualifierTypeName()) + " " + referenceDef.getQualifierName());
+                this.pw.println("    " + this.getType(referenceDef.getQualifiedQualifierTypeName(), getFormat(), false) + " " + referenceDef.getQualifierName());
                 if(format == Format.JPA3) {
                     this.pw.println("  ){");                    
                     this.pw.println("    throw new java.lang.UnsupportedOperationException(\"Not yet implemented\");"); // TODO
@@ -706,8 +713,8 @@ extends AbstractClassMapper {
             this.pw.println("   * @param " + referenceDef.getQualifierName() + " The value for the qualifier attribute that qualifies this reference.");
             this.pw.println("   * @return The non-null value for this reference.");
             this.pw.println("   */");
-            this.pw.println("  public " + this.getType(referenceDef, null, Boolean.TRUE, TypeMode.MEMBER) + " " + this.getMethodName(referenceDef.getBeanGetterName()) + "(");
-            this.pw.println("    " + this.getType(referenceDef.getQualifiedQualifierTypeName()) + " " + referenceDef.getQualifierName());
+            this.pw.println("  public " + this.getType(referenceDef, null, Boolean.TRUE, TypeMode.MEMBER, null) + " " + this.getMethodName(referenceDef.getBeanGetterName()) + "(");
+            this.pw.println("    " + this.getType(referenceDef.getQualifiedQualifierTypeName(), getFormat(), false) + " " + referenceDef.getQualifierName());
             if(getFormat() == Format.JPA3) {
                 this.pw.println("  ){");
                 this.pw.println("    throw new java.lang.UnsupportedOperationException(\"Qualified object retrieval not yet supported by persistence layer\");");
@@ -828,8 +835,6 @@ extends AbstractClassMapper {
     private void mapAuthority(
     ) throws ServiceException {
         switch(getFormat()) {
-            case JPA3:
-                break;
             case CCI2: {
                 this.pw.println("  /**");
                 this.pw.println("   * Object Identity");
@@ -845,6 +850,8 @@ extends AbstractClassMapper {
                 this.pw.println("  }");
                 this.pw.println();            
             } break;
+            default:
+                break;
         }
     }
 
@@ -865,15 +872,13 @@ extends AbstractClassMapper {
         String qualifiedReferenceType = this.directCompositeReference.getExposedEndQualifiedTypeName();
         ClassDef classDef = getClassDef(qualifiedReferenceType);
         String qualifiedQualifierType = this.directCompositeReference.getQualifiedQualifierTypeName();
-        String qualifierArgumentType = getType(qualifiedQualifierType);
+        String qualifierArgumentType = getType(qualifiedQualifierType, getFormat(), false);
         String qualifierValueName = Identifier.ATTRIBUTE_NAME.toIdentifier(qualifierName);
         String objectValueName = Identifier.ATTRIBUTE_NAME.toIdentifier(objectName);
         if(objectValueName.equals(qualifierValueName)) {
             objectValueName = '_' + objectValueName;
         }
         switch(getFormat()) {
-            case JPA3:
-                break;
             case CCI2: 
                 String qualifierTypeAccessorName = Identifier.OPERATION_NAME.toIdentifier(
                     qualifierName, 
@@ -932,6 +937,8 @@ extends AbstractClassMapper {
                 this.pw.println("    public " + qualifierArgumentType + " " + qualifierAccessorName + "();");
                 this.pw.println();            
                 this.pw.println("  }");
+                break;
+            default:
                 break;
         }                
         this.pw.println();            
@@ -1045,7 +1052,7 @@ extends AbstractClassMapper {
             this.pwSlice.println(" */");
             String superClassName = this.isSliceHolder() || this.extendsClassDef == null ? (
                 this.classMetaData != null && this.classMetaData.getBaseClass() != null ? this.classMetaData.getBaseClass() + SLICE_CLASS_NAME : null 
-            ) : this.getType(this.extendsClassDef.getQualifiedName()) + SLICE_CLASS_NAME;
+            ) : this.getType(this.extendsClassDef.getQualifiedName(), getFormat(), false) + SLICE_CLASS_NAME;
             this.pwSlice.println("@SuppressWarnings(\"serial\")");            
             this.pwSlice.print("public class " + this.className + SLICE_CLASS_NAME + " ");
             this.pwSlice.println(superClassName == null ? "implements java.io.Serializable {" : "extends " + superClassName + " {");
@@ -1056,7 +1063,7 @@ extends AbstractClassMapper {
                     this.model.isPrimitiveType(qualifiedName) ||
                     this.model.isStructureType(qualifiedName)
                 ) {
-                    String typeName = getValueType(qualifiedName, true);
+                    String typeName = getType(qualifiedName, getFormat(), true);
                     this.mapDeclareValue(
                         this.pwSlice, 
                         "  ", 
@@ -1216,7 +1223,7 @@ extends AbstractClassMapper {
                 this.classMetaData.getBaseClass() != null ?
                     this.classMetaData.getBaseClass() :                
                     QUALIFIED_ABSTRACT_OBJECT_CLASS_NAME :
-                this.getType(this.extendsClassDef.getQualifiedName());
+                this.getType(this.extendsClassDef.getQualifiedName(), getFormat(), false);
             this.pw.println("@SuppressWarnings(\"serial\")");
             this.pw.print("public class " + this.className); 
             this.pw.println("  extends " + superClassName);
@@ -1254,7 +1261,7 @@ extends AbstractClassMapper {
                     i.hasNext(); 
                     separator = ",\n    "
                 ){
-                    this.pw.print(separator + this.getType(i.next().getQualifiedName()));
+                    this.pw.print(separator + this.getType(i.next().getQualifiedName(), getFormat(), false));
                 }
             }
         }
@@ -1400,11 +1407,13 @@ extends AbstractClassMapper {
     public void mapAttributeSet1_1(
         AttributeDef attributeDef
     ) throws ServiceException {
-        if(getFormat() == Format.JMI1) return;
+        Format format = getFormat();
+        if(format == Format.JMI1) return;
         this.trace("Instance/AttributeSet1_1");
         String attributeName = getFeatureName(attributeDef);
         String modelType = attributeDef.getQualifiedTypeName();
-        String attributeType = this.getType(modelType);
+        boolean primitiveType = this.model.isPrimitiveType(modelType);
+        String attributeType = this.getType(modelType, format == Format.JPA3 && primitiveType ? Format.CCI2 : format, false);
         this.pw.println("  /**");
         this.pw.println("   * Sets a new value for the attribute <code>" + attributeDef.getName() + "</code>.");
         if (!attributeDef.isChangeable()) {
@@ -1419,17 +1428,17 @@ extends AbstractClassMapper {
         this.pw.println("   */");
         this.pw.println("  public void " + this.getMethodName(attributeDef.getBeanSetterName()) + "(");
         this.pw.println("    " + attributeType + ' ' + attributeName);
-        if(getFormat() == Format.JPA3) {
+        if(format == Format.JPA3) {
             this.pw.println("  ){");
             this.pw.println("    super.openmdxjdoMakeDirty();");                        
             this.pw.print("    this." + attributeName + " = ");
             if(this.mapValueType(modelType)) {
-                String source = '(' + getObjectType(modelType) + ')' + attributeName;
-                this.pw.print(getModelType(modelType) + ".toJDO(" + source + ')');
-            } else if (this.model.isPrimitiveType(modelType)){
+                String source = primitiveType ? attributeName : '(' + getType(modelType, format, true) + ')' + attributeName;
+                this.pw.print(getMappingExpression(modelType, Format.CCI2, Format.JPA3, source));
+            } else if (primitiveType){
                 this.pw.print(attributeName);
             } else {
-                String source = '(' + getObjectType(modelType) + ')' + attributeName;
+                String source = '(' + getType(modelType, format, true) + ')' + attributeName;
                 this.pw.print(source);
             }
             this.pw.println(';');
@@ -1444,11 +1453,13 @@ extends AbstractClassMapper {
     public void mapAttributeSet0_1(
         AttributeDef attributeDef
     ) throws ServiceException {
-        if(getFormat() == Format.JMI1) return;
+        Format format = getFormat();
+        if(format == Format.JMI1) return;
         this.trace("Instance/AttributeSet0_1");
         String attributeName = getFeatureName(attributeDef);
         String modelType = attributeDef.getQualifiedTypeName();
-        String attributeType = this.getObjectType(modelType);
+        boolean primitiveType = this.model.isPrimitiveType(modelType);
+        String attributeType = this.getType(modelType, format == Format.JPA3 && primitiveType ? Format.CCI2 : format, true);
         this.pw.println();
         this.pw.println("  /**");
         this.pw.println("   * Sets a new value for the attribute <code>" + attributeDef.getName() + "</code>.");
@@ -1460,17 +1471,17 @@ extends AbstractClassMapper {
         this.pw.println("   */");
         this.pw.println("  public void " + this.getMethodName(attributeDef.getBeanSetterName()) + "(");
         this.pw.println("    " + attributeType + ' ' + attributeName);
-        if(getFormat() == Format.JPA3) {
+        if(format == Format.JPA3) {
             this.pw.println("  ){");           
             this.pw.println("    super.openmdxjdoMakeDirty();");                        
             this.pw.println("    this." + attributeName + " = ");
             if(this.mapValueType(modelType)) {
-                String source = '(' + getObjectType(modelType) + ')' + attributeName;
-                this.pw.print(getModelType(modelType) + ".toJDO(" + source + ')');
-            } else if (this.model.isPrimitiveType(modelType)){
+                String source = primitiveType ? attributeName : '(' + getType(modelType, format, true) + ')' + attributeName;
+                this.pw.print(getMappingExpression(modelType, Format.CCI2, Format.JPA3, source));
+            } else if (primitiveType){
                 this.pw.print(attributeName);
             } else {
-                String source = '(' + getObjectType(modelType) + ')' + attributeName;
+                String source = '(' + getType(modelType, format, true) + ')' + attributeName;
                 this.pw.print(source);
             }
             this.pw.println(';');
@@ -1539,7 +1550,6 @@ extends AbstractClassMapper {
         String attributeName = getFeatureName(attributeDef);
         if(getFormat() == Format.JPA3) {
             this.sliced.put(attributeName, attributeDef.getQualifiedTypeName());
-        } else {
         }
         this.trace("Instance/AttributeGetSparseArray");
         this.pw.println("  /**");
@@ -1554,7 +1564,7 @@ extends AbstractClassMapper {
         this.pw.println("   * @return A SparseArray containing all elements for this attribute.");
         this.pw.println("   */");
         if(getFormat() == Format.JPA3) {
-            this.pw.println("  public " + getType(attributeDef, "org.w3c.cci2.SparseArray", null, TypeMode.MEMBER) + " " + this.getMethodName(attributeDef.getBeanGetterName()) + "(");
+            this.pw.println("  public " + getType(attributeDef, "org.w3c.cci2.SparseArray", null, TypeMode.MEMBER, null) + " " + this.getMethodName(attributeDef.getBeanGetterName()) + "(");
             this.pw.println("  ){");
             this.pw.println("    java.util.SortedMap<java.lang.Integer," + this.className + SLICE_CLASS_NAME + "> slices = openmdxjdoGetSlices();");
             this.pw.println("    return org.w3c.cci2.SortedMaps.asSparseArray(");
@@ -1565,7 +1575,7 @@ extends AbstractClassMapper {
             this.pw.println("  }");
         } 
         else {
-            this.pw.println("  public " + getType(attributeDef, "org.w3c.cci2.SparseArray", Boolean.TRUE, TypeMode.MEMBER) + " " + this.getMethodName(attributeDef.getBeanGetterName()) + "(");
+            this.pw.println("  public " + getType(attributeDef, "org.w3c.cci2.SparseArray", Boolean.TRUE, TypeMode.MEMBER, null) + " " + this.getMethodName(attributeDef.getBeanGetterName()) + "(");
             this.pw.println("  );");
         }
         this.pw.println();
@@ -1587,7 +1597,7 @@ extends AbstractClassMapper {
                 this.sliced.put(attributeName, attributeDef.getQualifiedTypeName());
             } 
             else {
-                String fieldType = getObjectType(attributeDef.getQualifiedTypeName());
+                String fieldType = getType(attributeDef.getQualifiedTypeName(), getFormat(), true);
                 for(
                     int i = 0;
                     i < embedded.intValue();
@@ -1597,8 +1607,6 @@ extends AbstractClassMapper {
                 }
             }
         } 
-        else {
-        }
         this.trace("Instance/AttributeGetSet");
         this.pw.println("  /**");
         this.pw.println(MapperUtils
@@ -1612,7 +1620,7 @@ extends AbstractClassMapper {
         this.pw.println("   * @return A set containing all elements for this attribute.");
         this.pw.println("   */");
         if(getFormat() == Format.JPA3) {
-            this.pw.println("  public " + getType(attributeDef, "java.util.Set", null, TypeMode.MEMBER) + " " + this.getMethodName(attributeDef.getBeanGetterName()) + "(");
+            this.pw.println("  public " + getType(attributeDef, "java.util.Set", null, TypeMode.MEMBER, null) + " " + this.getMethodName(attributeDef.getBeanGetterName()) + "(");
             this.pw.println("  ){");
             if(embedded == null) {
                 this.pw.println("    java.util.SortedMap<java.lang.Integer," + this.className + SLICE_CLASS_NAME + "> slices = openmdxjdoGetSlices();");
@@ -1639,12 +1647,12 @@ extends AbstractClassMapper {
                 this.pw.println("      switch(index){");
                 for(
                     int i = 0;
-                    i < embedded;
+                    i < embedded.intValue();
                     i++
                 ){
                     this.pw.println("         case " + i + ": return " + attributeName + SUFFIX_SEPARATOR + i + ";");
                 }
-                this.pw.println("         default: throw new IndexOutOfBoundsException(\"Index \" + index + \" is not in [0.." + (embedded - 1) + "]\");");
+                this.pw.println("         default: throw new IndexOutOfBoundsException(\"Index \" + index + \" is not in [0.." + (embedded.intValue() - 1) + "]\");");
                 this.pw.println("      }");
                 this.pw.println("    }");
                 this.pw.println();
@@ -1652,12 +1660,12 @@ extends AbstractClassMapper {
                 this.pw.println("      switch(index){");
                 for(
                     int i = 0;
-                    i < embedded;
+                    i < embedded.intValue();
                     i++
                 ){
                     this.pw.println("         case " + i + ": " + attributeName + SUFFIX_SEPARATOR + i + " = element;");
                 }
-                this.pw.println("         default: throw new IndexOutOfBoundsException(\"Index \" + index + \" is not in [0.." + (embedded - 1) + "]\");");
+                this.pw.println("         default: throw new IndexOutOfBoundsException(\"Index \" + index + \" is not in [0.." + (embedded.intValue() - 1) + "]\");");
                 this.pw.println("      }");
                 this.pw.println("    }");
                 this.pw.println();
@@ -1665,7 +1673,7 @@ extends AbstractClassMapper {
                 this.pw.println();
             }
         } else {
-            this.pw.println("  public " + getType(attributeDef, "java.util.Set", Boolean.TRUE, TypeMode.MEMBER) + " " + this.getMethodName(attributeDef.getBeanGetterName()) + "(");
+            this.pw.println("  public " + getType(attributeDef, "java.util.Set", Boolean.TRUE, TypeMode.MEMBER, null) + " " + this.getMethodName(attributeDef.getBeanGetterName()) + "(");
             this.pw.println("  );");
         }
         this.pw.println();
@@ -1716,7 +1724,8 @@ extends AbstractClassMapper {
     ) throws ServiceException {
         this.trace("Instance/AttributeSetList");
         String attributeName = getFeatureName(attributeDef);
-        if(getFormat() == Format.JMI1) {
+        Format format = getFormat();
+        if(format == Format.JMI1) {
             this.pw.println("  /**");
             this.pw.println(MapperUtils
                 .wrapText(
@@ -1739,12 +1748,13 @@ extends AbstractClassMapper {
             this.pw.println("   * @param " + attributeName + " collection to be copied.");
             this.pw.println("   */");
             this.pw.println("  public void " + this.getMethodName(attributeDef.getBeanSetterName()) + "(");
-            this.pw.println("    " + this.getType(attributeDef, "java.util.List", Boolean.FALSE, TypeMode.MEMBER) + ' ' + attributeName);
+            this.pw.println("    " + this.getType(attributeDef, "java.util.List", Boolean.FALSE, TypeMode.MEMBER, null) + ' ' + attributeName);
             this.pw.println("  );");
             this.pw.println();            
         } else {
+            String qualifiedTypeName = attributeDef.getQualifiedTypeName();
+            String elementType = this.getType(qualifiedTypeName, format == Format.JPA3 && this.model.isPrimitiveType(qualifiedTypeName) ? Format.CCI2 : format, false);
             this.pw.println("  /**");
-            String elementType = this.getType(attributeDef.getQualifiedTypeName(), true);
             this.pw.println(MapperUtils
                 .wrapText(
                     "   * ",
@@ -1764,7 +1774,7 @@ extends AbstractClassMapper {
             this.pw.println("   */");
             this.pw.println("  public void " + this.getMethodName(attributeDef.getBeanSetterName()) + "(");
             this.pw.println("    " + elementType + "... " + attributeName);
-            if(getFormat() == Format.JPA3) {
+            if(format == Format.JPA3) {
                 this.pw.println("  ){");
                 this.pw.println("    openmdxjdoSetCollection(");
                 this.pw.println("      " + this.getMethodName(attributeDef.getBeanGetterName()) + "(),");
@@ -1784,7 +1794,8 @@ extends AbstractClassMapper {
     ) throws ServiceException {
         this.trace("Instance/AttributeSetSet");
         String attributeName = getFeatureName(attributeDef);
-        if(getFormat() == Format.JMI1) {
+        Format format = getFormat();
+        if(format == Format.JMI1) {
             this.pw.println("  /**");
             this.pw.println(MapperUtils
                 .wrapText(
@@ -1807,10 +1818,12 @@ extends AbstractClassMapper {
             this.pw.println("   * @param " + attributeName + " collection to be copied.");
             this.pw.println("   */");
             this.pw.println("  public void " + this.getMethodName(attributeDef.getBeanSetterName()) + "(");
-            this.pw.println("    " + this.getType(attributeDef, "java.util.Set", Boolean.FALSE, TypeMode.MEMBER) + ' ' + attributeName);
+            this.pw.println("    " + this.getType(attributeDef, "java.util.Set", Boolean.FALSE, TypeMode.MEMBER, null) + ' ' + attributeName);
             this.pw.println("  );");
             this.pw.println();
         } else {
+            String qualifiedTypeName = attributeDef.getQualifiedTypeName();
+            String elementType = this.getType(qualifiedTypeName, format == Format.JPA3 && this.model.isPrimitiveType(qualifiedTypeName) ? Format.CCI2 : format, false);
             this.pw.println("  /**");
             this.pw.println(MapperUtils
                 .wrapText(
@@ -1819,7 +1832,9 @@ extends AbstractClassMapper {
             this.pw.println("   * <p>");
             this.pw.println("   * This method is equivalent to<pre>");
             this.pw.println("   *   set.clear();");
-            this.pw.println("   *   set.addAll(Arrays.asList(" + attributeName + "));");
+            this.pw.println("   *   for(" + elementType + " e : attributeName){");
+            this.pw.println("   *     set.add(e);");
+            this.pw.println("   *   }");
             this.pw.println("   * </pre>");
             if (attributeDef.getAnnotation() != null) {
                 this.pw.println("   * <p>");
@@ -1828,8 +1843,8 @@ extends AbstractClassMapper {
             this.pw.println("   * @param " + attributeName + " value(s) to be added to <code>" + attributeDef.getName() + "</code>");
             this.pw.println("   */");
             this.pw.println("  public void " + this.getMethodName(attributeDef.getBeanSetterName()) + "(");
-            this.pw.println("    " + this.getType(attributeDef, null, Boolean.FALSE, TypeMode.MEMBER) + "... " + attributeName);
-            if(getFormat() == Format.JPA3) {
+            this.pw.println("    " + elementType + "... " + attributeName);
+            if(format == Format.JPA3) {
                 this.pw.println("  ){");
                 this.pw.println("    openmdxjdoSetCollection(");
                 this.pw.println("      " + this.getMethodName(attributeDef.getBeanGetterName()) + "(),");
@@ -1900,7 +1915,7 @@ extends AbstractClassMapper {
         this.pw.println("   * @param newValue A list containing all the new elements for this reference.");
         this.pw.println("   */");
         this.pw.println("  public void " + this.getMethodName(referenceDef.getBeanSetterName()) + "(");
-        this.pw.println("    " + this.getType(referenceDef, "org.w3c.cci2.SparseArray", Boolean.TRUE, TypeMode.MEMBER) + " newValue");
+        this.pw.println("    " + this.getType(referenceDef, "org.w3c.cci2.SparseArray", Boolean.TRUE, TypeMode.MEMBER, null) + " newValue");
         this.pw.println("  );");
         this.pw.println();
         this.pw.println("  /**");
@@ -1914,7 +1929,7 @@ extends AbstractClassMapper {
         this.pw.println("   * @param newValue An array containing all the new elements for this reference.");
         this.pw.println("   */");
         this.pw.println("  public void " + this.getMethodName(referenceDef.getBeanSetterName()) + "(");
-        this.pw.println("    " + this.getType(referenceDef.getQualifiedTypeName()) + "[] newValue");
+        this.pw.println("    " + this.getType(referenceDef.getQualifiedTypeName(), getFormat(), false) + "[] newValue");
         this.pw.println("  );");
         this.pw.println();
     }
@@ -1933,7 +1948,8 @@ extends AbstractClassMapper {
             valueClass = "java.lang.String";
             mapType = sliceClass + "<java.lang.String," + this.className + SLICE_CLASS_NAME + '>';
         } else {
-            valueClass = getObjectType(modelClass);
+            Format format = getFormat();
+            valueClass = getType(modelClass, format == Format.JPA3 && this.model.isPrimitiveType(modelClass) ? Format.CCI2 : format, true);
             mapType = getMapType(featureDef, sliceClass, Boolean.FALSE, TypeMode.MEMBER, this.className + SLICE_CLASS_NAME);
             if(mapType.indexOf('?') > 0){
                 System.err.println(featureDef);
@@ -1943,12 +1959,12 @@ extends AbstractClassMapper {
         this.pw.println("new " + mapType + "(slices) {");
         this.pw.println(prefix + "@Override");
         this.pw.println(prefix + "protected " + valueClass + " getValue(" + this.className + SLICE_CLASS_NAME + " slice) {");
-        this.pw.println(prefix + " return " + (mapValueType ? getModelType(modelClass) + ".toCCI(slice." + featureDef.getBeanGetterName() + "())" : "slice." + featureDef.getBeanGetterName() + "()") + ";");
+        this.pw.println(prefix + " return " + (mapValueType ? getMappingExpression(modelClass, Format.JPA3, Format.CCI2, "slice." + featureDef.getBeanGetterName() + "()") : "slice." + featureDef.getBeanGetterName() + "()") + ";");
         this.pw.println(prefix + "}");
         this.pw.println(prefix + "@Override");
         this.pw.println(prefix + "protected void setValue(" + this.className + SLICE_CLASS_NAME + " slice, " + valueClass + " value) {");
         this.pw.println(prefix + "  openmdxjdoMakeDirty();");
-        this.pw.println(prefix + "  slice." + featureDef.getBeanSetterName() + "(" + (mapValueType ? getModelType(modelClass) + ".toJDO(value)" : "value") + ");");
+        this.pw.println(prefix + "  slice." + featureDef.getBeanSetterName() + "(" + (mapValueType ? getMappingExpression(modelClass, Format.CCI2, Format.JPA3, "value") : "value") + ");");
         this.pw.println(prefix + "}");
         this.pw.println(prefix + "@Override");
         this.pw.println(prefix + "protected " + this.className + SLICE_CLASS_NAME + " newSlice(int index) {");
@@ -1980,7 +1996,7 @@ extends AbstractClassMapper {
             if(embedded == null) {
                 this.sliced.put(attributeName, attributeDef.getQualifiedTypeName());
             } else {
-                String fieldType = getObjectType(attributeDef.getQualifiedTypeName());
+                String fieldType = getType(attributeDef.getQualifiedTypeName(), getFormat(), true);
                 for(
                     int i = 0;
                     i < embedded.intValue();
@@ -1991,8 +2007,6 @@ extends AbstractClassMapper {
             }
             this.pw.println();
         } 
-        else {
-        }
         this.trace("Instance/AttributeGetList");
         this.pw.println("  /**");
         this.pw.println(MapperUtils
@@ -2006,7 +2020,7 @@ extends AbstractClassMapper {
         this.pw.println("   * @return A list containing all elements for this attribute.");
         this.pw.println("   */");
         if(getFormat() == Format.JPA3) {
-            this.pw.println("  public " + this.getType(attributeDef, "java.util.List", null, TypeMode.MEMBER) + ' ' + this.getMethodName(attributeDef.getBeanGetterName()) + '(');
+            this.pw.println("  public " + this.getType(attributeDef, "java.util.List", null, TypeMode.MEMBER, null) + ' ' + this.getMethodName(attributeDef.getBeanGetterName()) + '(');
             this.pw.println("  ){");
             if(embedded == null) {
                 this.pw.println("    java.util.SortedMap<java.lang.Integer," + this.className + SLICE_CLASS_NAME + "> slices = openmdxjdoGetSlices();");
@@ -2033,12 +2047,12 @@ extends AbstractClassMapper {
                 this.pw.println("      switch(index){");
                 for(
                     int i = 0;
-                    i < embedded;
+                    i < embedded.intValue();
                     i++
                 ){
                     this.pw.println("         case " + i + ": return " + attributeName + SUFFIX_SEPARATOR + i + ";");
                 }
-                this.pw.println("         default: throw new IndexOutOfBoundsException(\"Index \" + index + \" is not in [0.." +  (embedded - 1)  + "]\");");
+                this.pw.println("         default: throw new IndexOutOfBoundsException(\"Index \" + index + \" is not in [0.." +  (embedded.intValue() - 1)  + "]\");");
                 this.pw.println("      }");
                 this.pw.println("    }");
                 this.pw.println();
@@ -2046,12 +2060,12 @@ extends AbstractClassMapper {
                 this.pw.println("      switch(index){");
                 for(
                     int i = 0;
-                    i < embedded;
+                    i < embedded.intValue();
                     i++
                 ){
                     this.pw.println("         case " + i + ": " + attributeName + SUFFIX_SEPARATOR + i + " = element;");
                 }
-                this.pw.println("         default: throw new IndexOutOfBoundsException(\"Index \" + index + \" is not in [0.." +  (embedded - 1)  + "]\");");
+                this.pw.println("         default: throw new IndexOutOfBoundsException(\"Index \" + index + \" is not in [0.." +  (embedded.intValue() - 1)  + "]\");");
                 this.pw.println("      }");
                 this.pw.println("    }");
                 this.pw.println();
@@ -2060,7 +2074,7 @@ extends AbstractClassMapper {
             }
         } 
         else {
-            this.pw.println("  public " + this.getType(attributeDef, "java.util.List", Boolean.TRUE, TypeMode.MEMBER) + ' ' + this.getMethodName(attributeDef.getBeanGetterName()) + '(');
+            this.pw.println("  public " + this.getType(attributeDef, "java.util.List", Boolean.TRUE, TypeMode.MEMBER, null) + ' ' + this.getMethodName(attributeDef.getBeanGetterName()) + '(');
             this.pw.println("  );");
         }
         this.pw.println();
@@ -2070,17 +2084,15 @@ extends AbstractClassMapper {
     public void mapAttributeGet1_1(
         AttributeDef attributeDef
     ) throws ServiceException {
-        if(getFormat() == Format.JMI1) return;
+        Format format = getFormat();
+        if(format == Format.JMI1) return;
         String attributeName = getFeatureName(attributeDef);
         boolean objectIdentity = SystemAttributes.OBJECT_IDENTITY.equals(attributeName);
-        String featureType = objectIdentity ?
-            QUALIFIED_IDENTITY_FEATURE_CLASS_NAME :
-                this.getFeatureType(attributeDef, Boolean.TRUE);        
         String modelType = attributeDef.getQualifiedTypeName();
-        if(getFormat() == Format.JPA3) {
+        if(format == Format.JPA3) {
             mapDeclareValue(
                 "  ", 
-                this.getValueType(modelType, false), 
+                this.getType(modelType, format, false), 
                 attributeName, 
                 attributeDef.isDerived() ? "public" : null
             );
@@ -2095,12 +2107,15 @@ extends AbstractClassMapper {
         this.pw.println("   * @return The non-null value for attribute <code>" + attributeDef.getName() + "</code>.");
         this.pw.println("   */");
         String cast =  printAnnotationAndReturnCast(attributeDef, null);
+        String featureType = objectIdentity ?
+            QUALIFIED_IDENTITY_FEATURE_CLASS_NAME :
+            this.getType(attributeDef, null, Boolean.TRUE, TypeMode.MEMBER, Boolean.FALSE);        
         this.pw.println("  public " + featureType + " " + this.getMethodName(attributeDef.getBeanGetterName()) + "(");
-        if(getFormat() == Format.JPA3) {
+        if(format == Format.JPA3) {
             this.pw.println("  ){");
             this.pw.print("    return ");
             if(this.mapValueType(modelType)) {
-                this.pw.print(getModelType(modelType) + ".toCCI(this." + attributeName + ')');                    
+                this.pw.print(getMappingExpression(modelType, Format.JPA3, Format.CCI2, "this." + attributeName));                    
             } else {
                 this.pw.print(cast + "this." + attributeName);                    
             }
@@ -2119,11 +2134,10 @@ extends AbstractClassMapper {
         if(getFormat() == Format.JMI1) return;
         String attributeName = getFeatureName(attributeDef);
         String modelType = attributeDef.getQualifiedTypeName();
-        String featureType = this.getType(attributeDef, null, Boolean.TRUE, TypeMode.MEMBER);        
         if(getFormat() == Format.JPA3) {
             mapDeclareValue(
                 "  ", 
-                this.getValueType(modelType, true), 
+                this.getType(modelType, this.getFormat(), true), 
                 attributeName, 
                 attributeDef.isDerived() ? "public" : null
             );
@@ -2141,12 +2155,13 @@ extends AbstractClassMapper {
         this.pw.println("   * @return The possibly null value for attribute <code>" + attributeDef.getName() + "</code>.");
         this.pw.println("   */");
         String cast =  printAnnotationAndReturnCast(attributeDef, null);
+        String featureType = this.getType(attributeDef, null, Boolean.TRUE, TypeMode.MEMBER, Boolean.TRUE);        
         this.pw.println("  public " + featureType + " " + this.getMethodName(attributeDef.getBeanGetterName()) + "(");
         if(getFormat() == Format.JPA3) {
             this.pw.println("  ){");
             this.pw.print("    return ");
             if(this.mapValueType(modelType)) {
-                this.pw.print(getModelType(modelType) + ".toCCI(this." + attributeName + ')');                    
+                this.pw.print(getMappingExpression(modelType, Format.JPA3, Format.CCI2, "this." + attributeName));                    
             } else {
                 this.pw.print(cast + "this." + attributeName);                    
             }
@@ -2159,24 +2174,12 @@ extends AbstractClassMapper {
     }
 
     //-----------------------------------------------------------------------
-    protected String getValueType(
-        String qualifiedTypeName, 
-        boolean optional
-    ) throws ServiceException{
-        return
-        PrimitiveTypes.DATE.equals(qualifiedTypeName) ? "java.sql.Date" :
-            PrimitiveTypes.DATETIME.equals(qualifiedTypeName) ? "java.sql.Timestamp" :
-                optional ? getObjectType(qualifiedTypeName) :
-                    getType(qualifiedTypeName);
-    }
-
-    //-----------------------------------------------------------------------
     protected boolean mapValueType(
         String qualifiedTypeName
-    ) {
-        return 
-            PrimitiveTypes.DATE.equals(qualifiedTypeName) ||
-            PrimitiveTypes.DATETIME.equals(qualifiedTypeName);
+    ) throws ServiceException {
+        String cci2Type = this.primitiveTypeMapper.getFeatureType(qualifiedTypeName, Format.CCI2, false);
+        String jpa3Type = this.primitiveTypeMapper.getFeatureType(qualifiedTypeName, Format.JPA3, false);
+        return !cci2Type.equals(jpa3Type);
     }
 
     //-----------------------------------------------------------------------

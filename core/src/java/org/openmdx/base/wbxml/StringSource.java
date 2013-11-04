@@ -1,7 +1,7 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Description: Caching String Source 
+ * Description: String Source 
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
  * ====================================================================
  *
@@ -47,50 +47,20 @@
  */
 package org.openmdx.base.wbxml;
 
-import java.nio.ByteBuffer;
-import java.nio.charset.CharsetDecoder;
-import java.util.HashMap;
-import java.util.Map;
-
 /**
- * Caching String Source
+ * String Source
  */
-public class StringSource extends BasicStringSource {
+public interface StringSource {
 
     /**
-     * Constructor 
-     *
-     * @param decoder
-     * @param stringTable
+     * Resolve a string table entry
+     * 
+     * @param index the index into the string table
+     * 
+     * @return the corresponding value
      */
-    public StringSource(
-        CharsetDecoder decoder, 
-        ByteBuffer stringTable
-    ) {
-        super(decoder, stringTable);
-    }
-
-    /**
-     * The recreated Strings are cached
-     */
-    private final Map<Integer, String> cache = new HashMap<Integer, String>();
-
-    /* (non-Javadoc)
-     * @see org.openmdx.base.wbxml.StringSource#resolveString(int)
-     */
-    @Override
-    CharSequence resolveString(
+    String resolveString(
         int index
-    ){
-        Integer key = Integer.valueOf(index);
-        String string = this.cache.get(key);
-        if(string == null) {
-            this.cache.put(
-                key, 
-                string = super.resolveString(index).toString()
-            );
-        }
-        return string;
-    }
+    );
     
 }

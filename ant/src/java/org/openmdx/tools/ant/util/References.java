@@ -1,17 +1,13 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: References.java,v 1.1 2005/12/05 13:55:11 hburger Exp $
  * Description: openMD/Ant References
- * Revision:    $Revision: 1.1 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2005/12/05 13:55:11 $
  * ====================================================================
  *
- * This software is published under the BSD license
- * as listed below.
+ * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2005, OMEX AG, Switzerland
+ * Copyright (c) 2005-2013, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without 
@@ -92,10 +88,10 @@ public class References {
 		Object object
 	){
 		for(
-			Iterator i = project.getReferences().entrySet().iterator();
+			Iterator<?> i = project.getReferences().entrySet().iterator();
 			i.hasNext();
 		){
-			Map.Entry e = (Entry) i.next();
+			Map.Entry<?,?> e = (Entry<?,?>) i.next();
 			if(e.getValue() == object) return new Reference(
 				project,
 				(String) e.getKey()

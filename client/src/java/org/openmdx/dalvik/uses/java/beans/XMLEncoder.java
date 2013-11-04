@@ -383,7 +383,7 @@ public class XMLEncoder extends Encoder {
             writeln("<?xml version=" + quote("1.0") +
                         " encoding=" + quote(encoding) + "?>");
             writeln("<java version=" + quote(System.getProperty("java.version")) +
-                           " class=" + quote(XMLDecoder.class.getName()) + ">");
+                           " class=" + quote("java.beans.XMLDecoder") + ">");
             preambleWritten = true;
         }
         indentation++;

@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2010, OMEX AG, Switzerland
+ * Copyright (c) 2004-2013, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -188,7 +188,7 @@ public class IsBetweenCondition extends Condition {
     public void setUpper(
         Object upper
     ) {
-        super.setValue(1);
+        super.setValue(1, upper);
     }
 
 }

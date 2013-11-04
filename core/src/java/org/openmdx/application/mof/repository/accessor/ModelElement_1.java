@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2011, OMEX AG, Switzerland
+ * Copyright (c) 2004-2013, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -86,7 +86,6 @@ import org.openmdx.base.rest.spi.Object_2Facade;
 @SuppressWarnings({"rawtypes","unchecked"})
 public class ModelElement_1 implements ModelElement_1_0, Delegating_1_0<ObjectRecord> {
 
-    //-------------------------------------------------------------------------
     public ModelElement_1(
         MappedRecord data,
         Model_1 model
@@ -123,81 +122,81 @@ public class ModelElement_1 implements ModelElement_1_0, Delegating_1_0<ObjectRe
     public boolean isAliasType(
     ) {
         if(this.isAliasType == null) {
-            this.isAliasType = this.data.getObjectClass().equals(ModelAttributes.ALIAS_TYPE);
+            this.isAliasType = Boolean.valueOf(this.data.getObjectClass().equals(ModelAttributes.ALIAS_TYPE));
         }
-        return this.isAliasType;
+        return this.isAliasType.booleanValue();
     }
   
     //-------------------------------------------------------------------------
     public boolean isPrimitiveType(
     ) {
         if(this.isPrimitiveType == null) {
-            this.isPrimitiveType = this.data.getObjectClass().equals(ModelAttributes.PRIMITIVE_TYPE);
+            this.isPrimitiveType = Boolean.valueOf(this.data.getObjectClass().equals(ModelAttributes.PRIMITIVE_TYPE));
         }
-        return this.isPrimitiveType;
+        return this.isPrimitiveType.booleanValue();
     }
     
     //-------------------------------------------------------------------------
     public boolean isStructureType(
     ) {
         if(this.isStructureType == null) {
-            this.isStructureType = this.data.getObjectClass().equals(ModelAttributes.STRUCTURE_TYPE);
+            this.isStructureType = Boolean.valueOf(this.data.getObjectClass().equals(ModelAttributes.STRUCTURE_TYPE));
         }
-        return this.isStructureType;            
+        return this.isStructureType.booleanValue();            
     }
     
     //-------------------------------------------------------------------------
     public boolean isStructureFieldType(
     ) {
         if(this.isStructureFieldType == null) {
-            this.isStructureFieldType = this.data.getObjectClass().equals(ModelAttributes.STRUCTURE_FIELD);
+            this.isStructureFieldType = Boolean.valueOf(this.data.getObjectClass().equals(ModelAttributes.STRUCTURE_FIELD));
         }
-        return this.isStructureFieldType;
+        return this.isStructureFieldType.booleanValue();
     }
     
     //-------------------------------------------------------------------------
     public boolean isClassType(
     ) {
         if(this.isClassType == null) {
-            this.isClassType = this.data.getObjectClass().equals(ModelAttributes.CLASS);
+            this.isClassType = Boolean.valueOf(this.data.getObjectClass().equals(ModelAttributes.CLASS));
         }
-        return this.isClassType;
+        return this.isClassType.booleanValue();
     }
     
     //-------------------------------------------------------------------------
     public boolean isReferenceType(
     ) {
         if(this.isReferenceType == null) {
-            this.isReferenceType = this.data.getObjectClass().equals(ModelAttributes.REFERENCE);
+            this.isReferenceType = Boolean.valueOf(this.data.getObjectClass().equals(ModelAttributes.REFERENCE));
         }
-        return this.isReferenceType;
+        return this.isReferenceType.booleanValue();
     }
     
     //-------------------------------------------------------------------------
     public boolean isAttributeType(
     ) {
         if(this.isAttributeType == null) {
-            this.isAttributeType = this.data.getObjectClass().equals(ModelAttributes.ATTRIBUTE);            
+            this.isAttributeType = Boolean.valueOf(this.data.getObjectClass().equals(ModelAttributes.ATTRIBUTE));            
         }
-        return this.isAttributeType;
+        return this.isAttributeType.booleanValue();
     }
     
     //-------------------------------------------------------------------------
     public boolean isOperationType(
     ) {
         if(this.isOperationType == null) {
-            this.isOperationType = this.data.getObjectClass().equals(ModelAttributes.OPERATION);
+            this.isOperationType = Boolean.valueOf(this.data.getObjectClass().equals(ModelAttributes.OPERATION));
         }
-        return this.isOperationType;
+        return this.isOperationType.booleanValue();
     }
     
     //-------------------------------------------------------------------------
     public boolean isPackageType(
     ) {
         if(this.isPackageType == null) {
-            this.isPackageType = this.data.getObjectClass().equals(ModelAttributes.PACKAGE);
+            this.isPackageType = Boolean.valueOf(this.data.getObjectClass().equals(ModelAttributes.PACKAGE));
         }
-        return this.isPackageType;
+        return this.isPackageType.booleanValue();
     }
     
     //-------------------------------------------------------------------------
@@ -207,9 +206,9 @@ public class ModelElement_1 implements ModelElement_1_0, Delegating_1_0<ObjectRe
     public boolean isAssociationEndType(
     ) {
         if(this.isAssociationEndType == null) {
-            this.isAssociationEndType = this.data.getObjectClass().equals(ModelAttributes.ASSOCIATION_END);
+            this.isAssociationEndType = Boolean.valueOf(this.data.getObjectClass().equals(ModelAttributes.ASSOCIATION_END));
         }
-        return this.isAssociationEndType;
+        return this.isAssociationEndType.booleanValue();
     }
 
     //-------------------------------------------------------------------------
@@ -219,9 +218,9 @@ public class ModelElement_1 implements ModelElement_1_0, Delegating_1_0<ObjectRe
     public boolean isCollectionType(
     ) {
         if(this.isCollectionType == null) {
-            this.isCollectionType = this.data.getObjectClass().equals(ModelAttributes.COLLECTION_TYPE);
+            this.isCollectionType = Boolean.valueOf(this.data.getObjectClass().equals(ModelAttributes.COLLECTION_TYPE));
         }
-        return this.isCollectionType;
+        return this.isCollectionType.booleanValue();
     }
 
     //-------------------------------------------------------------------------
@@ -231,9 +230,9 @@ public class ModelElement_1 implements ModelElement_1_0, Delegating_1_0<ObjectRe
     public boolean isConstantType(
     ) {
         if(this.isConstantType == null) {
-            this.isConstantType = this.data.getObjectClass().equals(ModelAttributes.CONSTANT);
+            this.isConstantType = Boolean.valueOf(this.data.getObjectClass().equals(ModelAttributes.CONSTANT));
         }
-        return this.isConstantType;
+        return this.isConstantType.booleanValue();
     }
 
     //-------------------------------------------------------------------------
@@ -243,9 +242,9 @@ public class ModelElement_1 implements ModelElement_1_0, Delegating_1_0<ObjectRe
     public boolean isConstraintType(
     ) {
         if(this.isConstraintType == null) {
-            this.isConstraintType = this.data.getObjectClass().equals(ModelAttributes.CONSTRAINT);
+            this.isConstraintType = Boolean.valueOf(this.data.getObjectClass().equals(ModelAttributes.CONSTRAINT));
         }
-        return this.isConstraintType;
+        return this.isConstraintType.booleanValue();
     }
 
     //-------------------------------------------------------------------------
@@ -255,9 +254,9 @@ public class ModelElement_1 implements ModelElement_1_0, Delegating_1_0<ObjectRe
     public boolean isEnumerationType(
     ) {
         if(this.isEnumerationType == null) {
-            this.isEnumerationType = this.data.getObjectClass().equals(ModelAttributes.ENUMERATION_TYPE);
+            this.isEnumerationType = Boolean.valueOf(this.data.getObjectClass().equals(ModelAttributes.ENUMERATION_TYPE));
         }
-        return this.isEnumerationType;
+        return this.isEnumerationType.booleanValue();
     }
 
     //-------------------------------------------------------------------------
@@ -289,9 +288,9 @@ public class ModelElement_1 implements ModelElement_1_0, Delegating_1_0<ObjectRe
     public boolean isExceptionType(
     ) {
         if(this.isExceptionType == null) {
-            this.isExceptionType = this.data.getObjectClass().equals(ModelAttributes.EXCEPTION);
+            this.isExceptionType = Boolean.valueOf(this.data.getObjectClass().equals(ModelAttributes.EXCEPTION));
         }
-        return this.isExceptionType;
+        return this.isExceptionType.booleanValue();
     }
 
     //-------------------------------------------------------------------------
@@ -334,9 +333,9 @@ public class ModelElement_1 implements ModelElement_1_0, Delegating_1_0<ObjectRe
     public boolean isImportType(
     ) {
         if(this.isImportType == null) {
-            this.isImportType = this.data.getObjectClass().equals(ModelAttributes.IMPORT);
+            this.isImportType = Boolean.valueOf(this.data.getObjectClass().equals(ModelAttributes.IMPORT));
         }
-        return this.isImportType;
+        return this.isImportType.booleanValue();
     }
 
     //-------------------------------------------------------------------------
@@ -357,9 +356,9 @@ public class ModelElement_1 implements ModelElement_1_0, Delegating_1_0<ObjectRe
     public boolean isParameterType(
     ) {
         if(this.isParameterType == null) {
-            this.isParameterType = this.data.getObjectClass().equals(ModelAttributes.PARAMETER);
+            this.isParameterType = Boolean.valueOf(this.data.getObjectClass().equals(ModelAttributes.PARAMETER));
         }
-        return this.isParameterType;
+        return this.isParameterType.booleanValue();
     }
     
     //-------------------------------------------------------------------------
@@ -391,24 +390,22 @@ public class ModelElement_1 implements ModelElement_1_0, Delegating_1_0<ObjectRe
     
     //-------------------------------------------------------------------------
     public boolean isReferenceStoredAsAttribute(
-        Map elements
     ) throws ServiceException {
-        if(this.isReferenceStoredAsAttribute == null) {
-            ModelElement_1_0 referencedEnd = this.model.getElement(
-                this.objGetValue("referencedEnd"),
-                elements
+        if(this.isReferenceStoredAsAttribute == null){
+            ModelElement_1_0 referencedEnd = model.findElement( 
+                this.objGetValue("referencedEnd")
             );
-            ModelElement_1_0 exposedEnd = this.model.getElement(
-                this.objGetValue("exposedEnd"),
-                elements
+            ModelElement_1_0 exposedEnd = model.findElement(
+                this.objGetValue("exposedEnd")
             );
             List qualifierTypes = referencedEnd.objGetList("qualifierType");
-            this.isReferenceStoredAsAttribute =
+            this.isReferenceStoredAsAttribute = Boolean.valueOf(
                 AggregationKind.NONE.equals(referencedEnd.objGetValue("aggregation")) &&
                 AggregationKind.NONE.equals(exposedEnd.objGetValue("aggregation")) &&
-                (qualifierTypes.isEmpty() || this.model.isPrimitiveType(qualifierTypes.get(0), elements));
+                (qualifierTypes.isEmpty() || this.model.isPrimitiveType(qualifierTypes.get(0)))
+            );
         }
-        return this.isReferenceStoredAsAttribute;
+        return this.isReferenceStoredAsAttribute.booleanValue();
     }
     
     /* (non-Javadoc)
@@ -426,9 +423,7 @@ public class ModelElement_1 implements ModelElement_1_0, Delegating_1_0<ObjectRe
     public List<Object> objGetList(
         String featureName
     ) throws ServiceException {
-        return this.data.attributeValuesAsList(
-            featureName
-        );
+        return this.data.attributeValuesAsList(featureName);
     }
 
     
@@ -458,8 +453,10 @@ public class ModelElement_1 implements ModelElement_1_0, Delegating_1_0<ObjectRe
         }
         else {
             try {
-                this.data.attributeValuesAsList(featureName).clear();
-                this.data.attributeValuesAsList(featureName).add(value);
+                this.data.replaceAttributeValuesAsListBySingleton(
+                    featureName,
+                    value
+                );
             }
             catch(Exception e) {
                 throw new JDOUserException("Unable to set value", e);
@@ -484,6 +481,7 @@ public class ModelElement_1 implements ModelElement_1_0, Delegating_1_0<ObjectRe
      */
     public void openmdxjdoPostInitialize(
     ){
+        // Nothing to do 
     }
 
     //------------------------------------------------------------------------
@@ -495,9 +493,9 @@ public class ModelElement_1 implements ModelElement_1_0, Delegating_1_0<ObjectRe
      */
     public boolean isAssociationType() {
         if(this.isAssociationType == null) {
-            this.isAssociationType = this.data.getObjectClass().equals(ModelAttributes.ASSOCIATION);
+            this.isAssociationType = Boolean.valueOf(this.data.getObjectClass().equals(ModelAttributes.ASSOCIATION));
         }
-        return this.isAssociationType;
+        return this.isAssociationType.booleanValue();
     }
 
     //-------------------------------------------------------------------------
@@ -836,8 +834,8 @@ public class ModelElement_1 implements ModelElement_1_0, Delegating_1_0<ObjectRe
     //-------------------------------------------------------------------------
     // Variables
     //-------------------------------------------------------------------------
-    private final Model_1 model;
     private final Object_2Facade data;
+    private Model_1 model;
     private Boolean isAliasType = null;
     private Boolean isPrimitiveType = null;
     private Boolean isStructureType = null;

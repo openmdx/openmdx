@@ -151,6 +151,7 @@
 			<include name="org/openmdx/application/mof/**/*.java"/>
 			<include name="org/openmdx/base/beans/*.java"/>
 			<include name="org/openmdx/base/mof/stream/*.java"/>
+			<include name="org/openmdx/base/rest/stream/*.java"/>
 			<include name="org/openmdx/base/xml/**/*.java"/>
 			<include name="org/openmdx/base/wbxml/*.java"/>
 			<include name="org/openmdx/uses/gnu/**/*.java"/>
@@ -371,9 +372,6 @@
 				<include name="*-properties.xml"/>
 				<include name=".cvsignore"/>
 				<include name="etc/**"/>
-				<include name="thirdparty/*"/>
-				<include name="thirdparty/bin/**"/>
-				<exclude name="thirdparty/bin/windows/**" if="unix.distribution" />
 			</openmdx:archivefileset>
 			<openmdx:archivefileset 
 				dir="${project.home}" 
@@ -388,6 +386,7 @@
 				<include name="openmdx.version.properties"/>
 				<include name="${build.target.platform}/ant/lib/*"/>
 				<include name="ant/etc/ant/*"/>
+				<include name="ant/thirdparty/**"/>
 				<include name="apache/jre-1.2/contribution/lib/*"/>
 				<include name="osgi/${build.target.platform}/**"/>
 				<exclude name="osgi/${build.target.platform}/**/.settings/*"/>

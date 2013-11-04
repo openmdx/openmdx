@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<uml:Model xmi:version="2.1" xmlns:xmi="http://schema.omg.org/spec/XMI/2.1" xmlns:uml="http://www.eclipse.org/uml2/3.0.0/UML" xmi:id="_riP6UN7EEdmkJO73lqONhA" name="test-base">
+<uml:Model xmi:version="2.1" xmlns:xmi="http://schema.omg.org/spec/XMI/2.1" xmlns:uml="http://www.eclipse.org/uml2/4.0.0/UML" xmi:id="_riP6UN7EEdmkJO73lqONhA" name="test-base">
   <packagedElement xmi:type="uml:Package" xmi:id="_4ku8YINmEd2nyID2xZmdGQPP" name="test">
     <packagedElement xmi:type="uml:Package" xmi:id="_4ku8YINmEd2nyID2xZmdGQP" name="openmdx">
       <packagedElement xmi:type="uml:Package" xmi:id="_4ku8YINmEd2nyID2xZmdGQ" name="base">
@@ -8,8 +8,8 @@
             <general xmi:type="uml:Class" href="../openMDX%202%20~%20Core%20(EMF)/org.openmdx.base.uml#_3C7B8A60016D3FC487C80099"/>
           </generalization>
           <ownedAttribute xmi:id="_p3DmkYPgEd2nyID2xZmdGQ" name="object" type="_5p9nAIPSEd2nyID2xZmdGQ" aggregation="composite" association="_p3DmkIPgEd2nyID2xZmdGQ">
-            <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_z42boYPgEd2nyID2xZmdGQ" value="1"/>
             <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_z42boIPgEd2nyID2xZmdGQ"/>
+            <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_z42boYPgEd2nyID2xZmdGQ" value="1"/>
             <qualifier xmi:id="_G7T_8IPhEd2nyID2xZmdGQ" name="name" visibility="private">
               <type xmi:type="uml:PrimitiveType" href="../openMDX%202%20~%20Core%20(EMF)/org.w3c.uml#_3C7B8A60016D3C8B62E40010"/>
             </qualifier>
@@ -24,8 +24,8 @@
           </generalization>
           <ownedAttribute xmi:id="_QAnXkIPhEd2nyID2xZmdGQ" name="string">
             <type xmi:type="uml:PrimitiveType" href="../openMDX%202%20~%20Core%20(EMF)/org.w3c.uml#_3C7B8A60016D3C8B62E40010"/>
-            <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_Ur-TcYPhEd2nyID2xZmdGQ" value="1"/>
             <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_Ur-TcIPhEd2nyID2xZmdGQ"/>
+            <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_Ur-TcYPhEd2nyID2xZmdGQ" value="1"/>
           </ownedAttribute>
         </packagedElement>
         <packagedElement xmi:type="uml:Association" xmi:id="_p3DmkIPgEd2nyID2xZmdGQ" name="SegmentSupportsAspects" memberEnd="_p3DmkYPgEd2nyID2xZmdGQ _p3DmkoPgEd2nyID2xZmdGQ">
@@ -39,8 +39,8 @@
           </generalization>
           <ownedAttribute xmi:id="_Y2DsMIS7Ed26PpC6Huwbow" name="uri">
             <type xmi:type="uml:PrimitiveType" href="../openMDX%202%20~%20Core%20(EMF)/org.w3c.uml#_3C7B8A60016D3C8B62F20331"/>
-            <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_3SgqwYS_Ed2zJLWLGBG0jA" value="1"/>
             <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_3SgqwIS_Ed2zJLWLGBG0jA"/>
+            <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_3SgqwYS_Ed2zJLWLGBG0jA" value="1"/>
           </ownedAttribute>
           <ownedAttribute xmi:id="_jynicIPhEd2nyID2xZmdGQ" name="prime">
             <eAnnotations xmi:id="_wkZL0IPhEd2nyID2xZmdGQ" source="http://www.eclipse.org/uml2/2.0.0/UML">

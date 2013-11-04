@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2009, OMEX AG, Switzerland
+ * Copyright (c) 2009-2013, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -47,10 +47,7 @@
  */
 package org.openmdx.application.spi;
 
-import java.util.Map;
-
 import org.openmdx.application.cci.ConfigurationProvider_1_0;
-import org.openmdx.application.cci.ConfigurationSpecifier;
 import org.openmdx.application.configuration.Configuration;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.kernel.exception.BasicException;
@@ -125,14 +122,14 @@ public class StandardConfigurationProvider implements ConfigurationProvider_1_0 
     /* (non-Javadoc)
      * @see org.openmdx.application.cci.ConfigurationProvider_1_0#getConfiguration(java.lang.String[], java.util.Map)
      */
+    @Override
     public Configuration getConfiguration(
-        String[] section,
-        Map<String, ConfigurationSpecifier> specification
+        String[] section
     ) throws ServiceException {
         if(this.secondary == null) {
-            return this.primary.getConfiguration(section, specification);
+            return this.primary.getConfiguration(section);
         } else {
-            Configuration configuration = this.secondary.getConfiguration(section, specification);
+            Configuration configuration = this.secondary.getConfiguration(section);
             if(this.primary != null) {
                 this.primary.amendConfiguration(configuration, section);
             }

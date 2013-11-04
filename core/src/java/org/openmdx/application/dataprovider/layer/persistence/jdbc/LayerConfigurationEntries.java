@@ -1,14 +1,13 @@
 /*
- * ==================================================================== Project:
- * openmdx, http://www.openmdx.org/ Name: $Id: LayerConfigurationEntries.java,v
- * 1.37 2006/11/17 16:55:57 hburger Exp $ Description: Generated constants for
- * LayerConfigurationEntries Revision: $Revision: 1.18 $ Owner: OMEX AG,
- * Switzerland, http://www.omex.ch Date: $Date: 2012/01/07 01:37:44 $
+ * ==================================================================== 
+ * Project: openMDX/Core, http://www.openmdx.org/ 
+ * Description: Generated constants for LayerConfigurationEntries 
+ * Owner: OMEX AG, Switzerland, http://www.omex.ch 
  * ====================================================================
  * 
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2006, OMEX AG, Switzerland All rights reserved.
+ * Copyright (c) 2004-2013, OMEX AG, Switzerland All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -40,16 +39,12 @@
  */
 package org.openmdx.application.dataprovider.layer.persistence.jdbc;
 
-
-
-
 /**
  * The <code>PersistenceLayerConfigurationEntries</code> class contains
  * constants identifying the configuration entries of the dataprovider's
  * persistence layer.
  */
 public class LayerConfigurationEntries extends org.openmdx.application.dataprovider.layer.persistence.common.CommonConfigurationEntries {
-
 
   /**
    * Avoid instantiation

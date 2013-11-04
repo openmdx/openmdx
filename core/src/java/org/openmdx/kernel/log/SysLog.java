@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2009, OMEX AG, Switzerland
+ * Copyright (c) 2004-2013, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -562,7 +562,7 @@ public class SysLog {
         String logString, 
         long elapsedTime
     ){
-        log(Level.INFO, "Sys Performance|{0}|Elapsed time: {1} ms", logString, elapsedTime);
+        log(Level.INFO, "Sys Performance|{0}|Elapsed time: {1} ms", logString, Long.valueOf(elapsedTime));
     }
 
     /**

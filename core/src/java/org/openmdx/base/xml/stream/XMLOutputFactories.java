@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2010, OMEX AG, Switzerland
+ * Copyright (c) 2010-2013, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -110,20 +110,16 @@ public class XMLOutputFactories {
      */
     public static XMLOutputFactory newInstance(
         String mimeType
-    ) throws XMLStreamException {
+    ) throws BasicException {
         Class<? extends XMLOutputFactory> factoryClass = XMLOutputFactories.classes.get(mimeType);
         if(factoryClass == null) {
             String factoryName = configuration.getProperty(mimeType);
             if(factoryName == null) {
-                throw BasicException.initHolder(
-                    new XMLStreamException(
-                        "No XMLOutputFactory configured for the given MIME type",
-                        BasicException.newEmbeddedExceptionStack(
-                            BasicException.Code.DEFAULT_DOMAIN,
-                            BasicException.Code.BAD_PARAMETER,
-                            new BasicException.Parameter("mime-type", mimeType)
-                        )
-                   )
+                throw BasicException.newStandAloneExceptionStack(
+                    BasicException.Code.DEFAULT_DOMAIN,
+                    BasicException.Code.BAD_PARAMETER,
+                    "No XMLOutputFactory configured for the given MIME type",
+                    new BasicException.Parameter("mime-type", mimeType)
                );
             }
             try {
@@ -132,17 +128,13 @@ public class XMLOutputFactories {
                     factoryClass = Classes.getApplicationClass(factoryName)
                 );
             } catch (ClassNotFoundException exception) {
-                throw BasicException.initHolder(
-                    new XMLStreamException(
-                        "XMLOutputFactory class for the given MIME type not found",
-                        BasicException.newEmbeddedExceptionStack(
-                            exception,
-                            BasicException.Code.DEFAULT_DOMAIN,
-                            BasicException.Code.BAD_PARAMETER,
-                            new BasicException.Parameter("mime-type", mimeType),
-                            new BasicException.Parameter("class", factoryName)
-                        )
-                   )
+                throw BasicException.newStandAloneExceptionStack(
+                    exception,
+                    BasicException.Code.DEFAULT_DOMAIN,
+                    BasicException.Code.BAD_PARAMETER,
+                    "XMLOutputFactory class for the given MIME type not found",
+                    new BasicException.Parameter("mime-type", mimeType),
+                    new BasicException.Parameter("class", factoryName)
                );
             }
         }
@@ -153,17 +145,13 @@ public class XMLOutputFactories {
             }
             return factory;
         } catch (Exception exception) {
-            throw BasicException.initHolder(
-                new XMLStreamException(
-                    "XMLOutputFactory class for the given MIME type could not be instantiated",
-                    BasicException.newEmbeddedExceptionStack(
-                        exception,
-                        BasicException.Code.DEFAULT_DOMAIN,
-                        BasicException.Code.BAD_PARAMETER,
-                        new BasicException.Parameter("mime-type", mimeType),
-                        new BasicException.Parameter("class", factoryClass.getName())
-                    )
-               )
+            throw BasicException.newStandAloneExceptionStack(
+                exception,
+                BasicException.Code.DEFAULT_DOMAIN,
+                BasicException.Code.BAD_PARAMETER,
+                "XMLOutputFactory class for the given MIME type could not be instantiated",
+                new BasicException.Parameter("mime-type", mimeType),
+                new BasicException.Parameter("class", factoryClass.getName())
            );
         }
     }
@@ -171,7 +159,8 @@ public class XMLOutputFactories {
     /**
      * Retrieve the configuration
      */
-    private static Properties getConfiguration() {
+    private static Properties getConfiguration(
+    ) {
         Properties configuration = new Properties();
         for(URL url : Resources.getMetaInfResources(XMLOutputFactories.class.getClassLoader(), "openmdx-xml-outputfactory.properties")) { 
             try {

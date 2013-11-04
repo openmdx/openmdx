@@ -73,9 +73,7 @@ public class Date {
     public static final java.sql.Date toJDO (
         javax.xml.datatype.XMLGregorianCalendar cciDate
     ){
-        return cciDate == null ? null : java.sql.Date.valueOf(
-            cciDate.toXMLFormat()
-        );
+        return cciDate == null ? null : java.sql.Date.valueOf(cciDate.toXMLFormat());
     }
 
     /**

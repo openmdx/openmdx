@@ -81,19 +81,23 @@ public class TestAdaptiveInputStreamReader {
             true, // xmlDeclarationAware
             true // propagate close
         );
-//      assertEquals("ByteOrderMark", byteOrderMark, r.getByteOrderMark());
-//      assertEquals("XMLDeclaration", xmlDeclaration, String.valueOf(r.getXMLDclaration()));
-        for(
-            int i = 0;
-            i < content.length();
-            i++
-        ) {
-            assertEquals(
-                "Content[" + i + "]", 
-                content.charAt(i),
-                r.read()
-            );
-                
+        try {
+    //      assertEquals("ByteOrderMark", byteOrderMark, r.getByteOrderMark());
+    //      assertEquals("XMLDeclaration", xmlDeclaration, String.valueOf(r.getXMLDclaration()));
+            for(
+                int i = 0;
+                i < content.length();
+                i++
+            ) {
+                assertEquals(
+                    "Content[" + i + "]", 
+                    content.charAt(i),
+                    r.read()
+                );
+                    
+            }
+        } finally {
+            r.close();
         }
     }
 

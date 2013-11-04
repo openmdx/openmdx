@@ -1,16 +1,13 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: XMLDeclaration.java,v 1.4 2010/06/04 22:27:36 hburger Exp $
  * Description: XML Declaration
- * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/06/04 22:27:36 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2005-2010, OMEX AG, Switzerland
+ * Copyright (c) 2005-2013, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without 
@@ -252,7 +249,7 @@ public class XMLDeclaration {
 					if(c == '>'){
 						RegexpMatcher regexpMatcher = regexpFactory.newRegexpMatcher(project);
 						regexpMatcher.setPattern(XML_DECLARATION_PATTERN);
-						Vector v = regexpMatcher.getGroups(b.toString());
+						Vector<?> v = regexpMatcher.getGroups(b.toString());
 						if(v == null) break xmlDeclaration;
 						XMLDeclaration reply = new XMLDeclaration();
 						reply.setQuotedVersion((String)v.get(1));

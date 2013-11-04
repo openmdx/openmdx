@@ -1,11 +1,8 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: ServletPort.java,v 1.23 2012/07/08 13:41:35 wfro Exp $
  * Description: ServletPort 
- * Revision:    $Revision: 1.23 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2012/07/08 13:41:35 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -49,6 +46,7 @@
  * listed in the NOTICE file.
  */
 package test.openmdx.application.rest.http;
+
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -103,12 +101,14 @@ import org.openmdx.base.resource.InteractionSpecs;
 import org.openmdx.base.resource.spi.Port;
 import org.openmdx.base.resource.spi.RestInteractionSpec;
 import org.openmdx.base.rest.spi.RestSource;
-import org.openmdx.base.rest.stream.RestFormatter;
 import org.openmdx.base.rest.stream.RestTarget;
+import org.openmdx.base.rest.stream.StandardRestFormatter;
 import org.openmdx.base.text.conversion.URITransformation;
+import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.id.UUIDs;
 import org.w3c.cci2.CharacterLargeObjects;
 import org.xml.sax.InputSource;
+
 /**
  * Servlet Port
  */
@@ -375,7 +375,12 @@ public class ServletPort
             @Override
             protected XMLStreamWriter newWriter(
             ) throws XMLStreamException {
-                XMLOutputFactory xmlOutputFactory = RestFormatter.getOutputFactory(MIME_TYPE);
+                XMLOutputFactory xmlOutputFactory;
+                try {
+                    xmlOutputFactory = ((StandardRestFormatter)restFormatter).getOutputFactory(MIME_TYPE);
+                } catch (BasicException exception) {
+                    throw new XMLStreamException(exception);
+                }
                 return MIME_TYPE.endsWith("/xml") ? xmlOutputFactory.createXMLStreamWriter(
                     this.body.getCharacterSink()
                 ) : xmlOutputFactory.createXMLStreamWriter(
@@ -427,8 +432,6 @@ public class ServletPort
                 } catch (ServletException exception) {
                     throw new ServiceException(exception);
                 } catch (IOException exception) {
-                    throw new ServiceException(exception);
-                } catch (XMLStreamException exception) {
                     throw new ServiceException(exception);
                 } finally {
                     ServletInteraction.this.session.accessed = System.currentTimeMillis();

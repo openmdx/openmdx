@@ -1,7 +1,7 @@
 /*
  * ==================================================================== 
  * Project:      openMDX, http://www.openmdx.org
- * Description:  JMIClassLevelTemplate Revision: $Revision: 1.8 $ 
+ * Description:  JMI Class Level Template  
  * Owner:        OMEX AG, Switzerland, http://www.omex.ch 
  * ====================================================================
  *
@@ -66,8 +66,7 @@ import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
 import org.openmdx.base.mof.cci.Model_1_0;
 
-public class AbstractClassMapper
-    extends AbstractMapper {
+public abstract class AbstractClassMapper extends AbstractMapper {
 
     //-----------------------------------------------------------------------
     protected AbstractClassMapper(
@@ -76,14 +75,16 @@ public class AbstractClassMapper
         Model_1_0 model,
         Format format, 
         String packageSuffix, 
-        MetaData_1_0 metaData
+        MetaData_1_0 metaData, 
+        PrimitiveTypeMapper primitiveTypeMapper
     ) throws ServiceException {
         super(
             writer, 
             model,
             format, 
             packageSuffix,
-            metaData
+            metaData, 
+            primitiveTypeMapper
         );
         this.classDef = new ClassDef(classDef, model, metaData);
         this.mixIn = this.isRoot(classDef);
@@ -98,10 +99,7 @@ public class AbstractClassMapper
             ModelElement_1_0 compositeReference = model.getCompositeReference(classDef);            
             this.compositeReference = this.directCompositeReference = compositeReference == null ? 
                 null : 
-                new ReferenceDef(
-                    compositeReference, 
-                    model
-                );
+                new ReferenceDef(compositeReference,model);
             this.sliceHolder = requiresSlice; 
         } 
         else {
@@ -113,10 +111,7 @@ public class AbstractClassMapper
             );
             this.compositeReference = compositeReference == null ? 
                 null : 
-                new ReferenceDef(
-                    compositeReference, 
-                    model
-                );
+                new ReferenceDef(compositeReference,model);
             this.sliceHolder = requiresSlice && !(
                 superClassMetaData == null || superClassMetaData.isRequiresSlices()
             );
@@ -298,7 +293,7 @@ public class AbstractClassMapper
     protected final ReferenceDef directCompositeReference;
 
     /**
-     * Direct or indirect comppsite reference
+     * Direct or indirect composite reference
      */
     protected final ReferenceDef compositeReference;
 

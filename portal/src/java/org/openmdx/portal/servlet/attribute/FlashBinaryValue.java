@@ -97,8 +97,12 @@ public class FlashBinaryValue
         String imageId = org.openmdx.kernel.id.UUIDs.newUUID().toString();
         CharSequence imageSrc = p.getEncodedHRef(binaryValueAction);
         p.write(gapModifier); 
+    	String cssClass = DEFAULT_CSS_CLASS;
+    	if(this.getCssClassFieldGroup() != null) {
+    		cssClass = this.getCssClassFieldGroup() + " " + cssClass;
+    	}        
         p.write("<td class=\"label\"><span class=\"nw\">", htmlEncoder.encode(label, false), "</span></td>");
-        p.write("<td ", rowSpanModifier, " class=\"valueL\" ", widthModifier, " id=\"tdImage", imageId, "\">");
+        p.write("<td ", rowSpanModifier, " class=\"", cssClass, "\" ", widthModifier, " id=\"tdImage", imageId, "\">");
         p.write("<div class=\"valuePicture\" ", styleModifier, ">");
         p.write("  <object classid=\"clsid:D27CDB6E-AE6D-11cf-96B8-444553540000\" codebase=\"http://download.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=6,0,29,0\">");
         p.write("    <param name=\"movie\" value=\"", imageSrc, "\">");

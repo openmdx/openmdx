@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2007-2012, OMEX AG, Switzerland
+ * Copyright (c) 2007-2013, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -120,10 +120,10 @@ public class Jmi1QueryInvocationHandler implements Serializable, InvocationHandl
                 return this.query.toString();
             } 
             else if("hashCode".equals(methodName)) {
-                return this.query.hashCode();
+                return Integer.valueOf(this.query.hashCode());
             } 
             else if ("equals".equals(methodName)) {
-                return args[0] == proxy; // Identity
+                return Boolean.valueOf(args[0] == proxy); // Identity
             }
         } 
         else if (

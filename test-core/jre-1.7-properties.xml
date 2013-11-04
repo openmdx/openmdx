@@ -1,16 +1,14 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <!--
 =======================================================================
-= Name:        $Id: jre-1.7-properties.xml,v 1.1 2011/11/02 14:19:48 wfro Exp $
-= Description: openMDX/Test Core jre-1.6 Platform Properties
-= Revision:    $Revision: 1.1 $
-= Date:        $Date: 2011/11/02 14:19:48 $
-= Copyright:   (c) 2011 OMEX AG
+= Project:     openMDX/Test-Core, http://www.openmdx.org/
+= Description: JRE 7 Platform Properties
+= Owner:       OMEX AG, Switzerland, http://www.omex.ch
 =======================================================================
 =
 = This software is published under the BSD license as listed below.
 = 
-= Copyright (c) 2006-2011, OMEX AG, Switzerland
+= Copyright (c) 2006-2013, OMEX AG, Switzerland
 = All rights reserved.
 = 
 = Redistribution and use in source and binary forms, with or without 
@@ -44,4 +42,9 @@
 = POSSIBILITY OF SUCH DAMAGE.
 = 
 -->
-<project name="openmdx-test-core-jre-1.7-properties"/>
+<project name="openmdx-test-core-jre-1.7-properties">
+	<property 
+		name="model.build.formats" 
+		value="--format=xmi1 --format=uml.openmdx-1 --format=uml2.openmdx-1 --format=test.openmdx.application.mof.mapping.java.PrimitiveTypeMapper_1(cci2) --format=test.openmdx.application.mof.mapping.java.PrimitiveTypeMapper_1(jmi1) --format=test.openmdx.application.mof.mapping.java.PrimitiveTypeMapper_1(jpa3)"
+	/>	
+</project>

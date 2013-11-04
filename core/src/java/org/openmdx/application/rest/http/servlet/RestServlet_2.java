@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2008-2012, OMEX AG, Switzerland
+ * Copyright (c) 2008-2013, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -89,6 +89,9 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import javax.xml.stream.XMLOutputFactory;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamWriter;
 
 import org.openmdx.application.rest.adapter.InboundConnectionFactory_2;
 import org.openmdx.base.collection.Sets;
@@ -110,16 +113,14 @@ import org.openmdx.base.rest.cci.MessageRecord;
 import org.openmdx.base.rest.spi.Facades;
 import org.openmdx.base.rest.spi.Object_2Facade;
 import org.openmdx.base.rest.spi.Query_2Facade;
+import org.openmdx.base.rest.spi.RestFormatters;
 import org.openmdx.base.rest.spi.RestParser;
 import org.openmdx.base.rest.spi.RestSource;
-import org.openmdx.base.rest.stream.RestFormatter;
 import org.openmdx.base.rest.stream.RestTarget;
+import org.openmdx.base.rest.stream.StandardRestFormatter;
 import org.openmdx.base.text.conversion.Base64;
 import org.openmdx.base.transaction.Status;
 import org.openmdx.base.xml.stream.XMLOutputFactories;
-import javax.xml.stream.XMLOutputFactory;
-import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamWriter;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.exception.Throwables;
 import org.openmdx.kernel.log.SysLog;
@@ -163,6 +164,11 @@ public class RestServlet_2 extends HttpServlet {
         LoginModuleControlFlag.REQUIRED,
         Collections.<String,Object>emptyMap()
     );
+
+    /**
+     * The eagerly acquired REST formatter instance
+     */
+    protected static final StandardRestFormatter restFormatter = RestFormatters.getFormatter();
     
     /**
      * The REST Servlet's standard login configuration
@@ -291,7 +297,7 @@ public class RestServlet_2 extends HttpServlet {
                     autoCommit = Boolean.TRUE
                 );
             }
-            return autoCommit ? this.newConnection(
+            return autoCommit.booleanValue() ? this.newConnection(
                 "auto-connect",
                 new RequestCallbackHandler(request)
             ) : (Connection)session.getAttribute(
@@ -342,7 +348,7 @@ public class RestServlet_2 extends HttpServlet {
     private Path getXri(
         HttpServletRequest request 
     ) {
-        return RestFormatter.toResourceIdentifier(request.getServletPath());
+        return RestFormatters.toResourceIdentifier(request.getServletPath());
     }
 
     /**
@@ -386,11 +392,11 @@ public class RestServlet_2 extends HttpServlet {
         SysLog.detail("Resource Exception", exceptionStack);
         response.setStatus(toStatusCode(exceptionStack.getExceptionCode()));
         ServletTarget target = new ServletTarget(request, response);
-        RestFormatter.format(target, exceptionStack);
+        restFormatter.format(target, exceptionStack);
         try {
             target.close();
-        } catch (XMLStreamException closeException) {
-            SysLog.warning("Failure upon exception propagation", closeException);
+        } catch (IOException ignored) {
+            SysLog.trace("Ignored close failure", ignored);
         }
     }
 
@@ -411,11 +417,11 @@ public class RestServlet_2 extends HttpServlet {
         request.getSession().removeAttribute(Connection.class.getName());
         response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         ServletTarget target = new ServletTarget(request, response);
-        RestFormatter.format(target, exceptionStack);
+        restFormatter.format(target, exceptionStack);
         try {
             target.close();
-        } catch (XMLStreamException closeException) {
-            SysLog.warning("Failure upon exception propagation", closeException);
+        } catch (IOException ignored) {
+            SysLog.trace("Ignored close failure", ignored);
         }
     }
     
@@ -776,7 +782,7 @@ public class RestServlet_2 extends HttpServlet {
                     } else {
                         response.setStatus(HttpServletResponse.SC_OK);                    
                         ServletTarget target = new ServletTarget(request, response); 
-                        RestFormatter.format(target, Facades.asObject((MappedRecord)output.get(0)));
+                        restFormatter.format(target, Facades.asObject((MappedRecord)output.get(0)));
                         target.close();
                     }
                 }
@@ -823,7 +829,7 @@ public class RestServlet_2 extends HttpServlet {
                 } else {
                     response.setStatus(HttpServletResponse.SC_OK);
                     ServletTarget target = new ServletTarget(request, response); 
-                    RestFormatter.format(target, xri, output);
+                    restFormatter.format(target, xri, output);
                     target.close();
                 }
             }
@@ -957,7 +963,7 @@ public class RestServlet_2 extends HttpServlet {
                         response.setStatus(HttpServletResponse.SC_OK);
                         ServletTarget target = new ServletTarget(request, response);
                         for(Object record : output){
-                            RestFormatter.format(
+                            restFormatter.format(
                                 target, 
                                 Facades.asObject((MappedRecord) record)
                             );
@@ -980,14 +986,14 @@ public class RestServlet_2 extends HttpServlet {
                     } else if(multivalued) {
                        response.setStatus(HttpServletResponse.SC_OK);
                        ServletTarget target = new ServletTarget(request, response);
-                       RestFormatter.format(target, xri, output);
+                       restFormatter.format(target, xri, output);
                        target.close();
                     } else if(output.isEmpty()) {
                        response.setStatus(HttpServletResponse.SC_NOT_FOUND);
                     } else{
                        response.setStatus(HttpServletResponse.SC_OK);
                        ServletTarget target = new ServletTarget(request, response);
-                       RestFormatter.format(target, Facades.asObject((MappedRecord) output.get(0)));
+                       restFormatter.format(target, Facades.asObject((MappedRecord) output.get(0)));
                        target.close();
                     }
                 } else {
@@ -1018,8 +1024,9 @@ public class RestServlet_2 extends HttpServlet {
                             reply.setBody(value);
                         }
                         response.setStatus(HttpServletResponse.SC_OK);
-                        ServletTarget target = new ServletTarget(request, response); 
-                        RestFormatter.format(target, "result", reply);
+                        ServletTarget target = new ServletTarget(request, response);
+                        restFormatter.format(target, "result", reply);
+                        target.close();
                     }
                 }
             } catch(ResourceException exception) {
@@ -1100,7 +1107,7 @@ public class RestServlet_2 extends HttpServlet {
                 response.setStatus(HttpServletResponse.SC_OK);
                 ServletTarget target = new ServletTarget(request, response);
                 for(Object record : output) {
-                    RestFormatter.format(
+                    restFormatter.format(
                         target, 
                         Facades.asObject((MappedRecord) record)
                     );
@@ -1331,7 +1338,7 @@ public class RestServlet_2 extends HttpServlet {
             );
             String mimeType = contentType.getValue();
             String encoding = contentType.getParameterValue("charset", null);
-            InputSource inputSource = RestFormatter.isBinary(mimeType) ? new InputSource(
+            InputSource inputSource = RestFormatters.isBinary(mimeType) ? new InputSource(
                 query ? getQueryInputStream(request) : request.getInputStream()
             ) : new InputSource (
                 query ? getQueryReader(request) : request.getReader()
@@ -1388,8 +1395,8 @@ public class RestServlet_2 extends HttpServlet {
             try {
                 HttpHeaderFieldContent contentType = new HttpHeaderFieldContent(this.response.getContentType());
                 String mimeType = contentType.getValue();
-                XMLOutputFactory xmlOutputFactory = RestFormatter.getOutputFactory(mimeType);
-                if((RestFormatter.isBinary(mimeType))) {
+                XMLOutputFactory xmlOutputFactory = restFormatter.getOutputFactory(mimeType);
+                if((RestFormatters.isBinary(mimeType))) {
                     String characterEncoding = contentType.getParameterValue(
                         "charset",
                         this.response.getCharacterEncoding()
@@ -1406,6 +1413,8 @@ public class RestServlet_2 extends HttpServlet {
                     );
                 }
             } catch (IOException exception) {
+                throw toXMLStreamException(exception);
+            } catch (BasicException exception) {
                 throw toXMLStreamException(exception);
             }
         }

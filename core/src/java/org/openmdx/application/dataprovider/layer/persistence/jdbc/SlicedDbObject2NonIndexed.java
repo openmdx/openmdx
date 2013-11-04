@@ -54,6 +54,7 @@ import javax.resource.cci.MappedRecord;
 
 import org.openmdx.base.accessor.cci.SystemAttributes;
 import org.openmdx.base.exception.ServiceException;
+import org.openmdx.base.mof.spi.Model_1Factory;
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.rest.spi.Object_2Facade;
 import org.openmdx.kernel.exception.BasicException;
@@ -137,6 +138,7 @@ public class SlicedDbObject2NonIndexed extends SlicedDbObject2 {
         if(index == 0) {
             super.createObjectSlice(index, objectClass, object);
         } else {
+            Model_1Factory.getModel(true);
             throw new ServiceException(
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.INVALID_CARDINALITY,
@@ -144,7 +146,6 @@ public class SlicedDbObject2NonIndexed extends SlicedDbObject2 {
                 new BasicException.Parameter("index", index),
                 new BasicException.Parameter(SystemAttributes.OBJECT_CLASS, objectClass),
                 new BasicException.Parameter("value", Object_2Facade.getValue(object))
-                
             );
         }
     }

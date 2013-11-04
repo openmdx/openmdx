@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2006-2011, OMEX AG, Switzerland
+ * Copyright (c) 2006-2013, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -61,11 +61,11 @@ public class ModelHelper {
 	/**
 	 * Constructor
 	 */
-    private ModelHelper() {
+    protected ModelHelper() {
 		// Avoid instantiation
 	}
 
-    public static String UNBOUNDED = "0..n";
+    public static String UNBOUND = "0..n";
     
 	/**
      * Determine multiplicity of feature. In case of an attribute it is
@@ -91,11 +91,11 @@ public class ModelHelper {
                     referencedEnd.objGetValue("qualifierType")
                 );
                 return model.isNumericType(qualifierType) ? Multiplicity.LIST : Multiplicity.MAP;
-            } else if (UNBOUNDED.equals(multiplicity)) {
+            } else if (UNBOUND.equals(multiplicity)) {
                 // map aggregation none, multiplicity 0..n, no qualifier to <<set>>
             	return Multiplicity.SET;
             }
-        } else if (UNBOUNDED.equals(multiplicity)) {
+        } else if (UNBOUND.equals(multiplicity)) {
         	// map 0..n for primitive types to <<list>> (deprecated)
         	return Multiplicity.LIST;
         }
@@ -228,7 +228,7 @@ public class ModelHelper {
     ){
 		if(value == null) {
 			return null;
-		} else if (UNBOUNDED.equals(value)){
+		} else if (UNBOUND.equals(value)){
 			return Multiplicity.LIST;
 		} else {
 			for(Multiplicity candidate : Multiplicity.values()) {
@@ -314,4 +314,33 @@ public class ModelHelper {
         );
     }
 
+
+    /**
+     * Tells whether the classDef refers to an aspect and the given feature is held by its core instance
+     * 
+     * @param classDef
+     * @param featureName
+     * 
+     * @return <code>true</code> if the given feature is is held by its core instance
+     * 
+     * @throws ServiceException
+     */
+    public static boolean isFeatureHeldByCore(
+        ModelElement_1_0 classDef, 
+        String featureName
+    ) throws ServiceException {
+        Model_1_0 model = classDef.getModel();
+        if (model.isSubtypeOf(classDef, "org:openmdx:base:Aspect")) {
+           for (Object superType : classDef.objGetList("allSupertype")) {
+              ModelElement_1_0 superClassDef = model.getElement(superType);
+              if (model.isSubtypeOf(superClassDef, "org:openmdx:base:AspectCapable")) {
+                 if (superClassDef.objGetMap("attribute").containsKey(featureName)) {
+                    return true;
+                 }
+              }
+           }
+        }
+        return false;
+     }
+    
 }

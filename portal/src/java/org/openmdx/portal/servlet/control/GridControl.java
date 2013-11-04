@@ -257,7 +257,7 @@ public class GridControl
     /**
      * @return Returns the initialColumnSortOrders
      */
-    public Map getInitialColumnSortOrders(
+    public Map<String,Short> getInitialColumnSortOrders(
     ) {
         return this.initialColumnSortOrders;
     }

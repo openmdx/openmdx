@@ -1,0 +1,243 @@
+Distribution Name: openMDX/Portal
+Release Name: openMDX/Portal 2.12.7
+Release Date: 2013-11-04
+
+---------------------------------------------------------------------
+Notes:
+
+  This software is published under the BSD license
+  as listed below.
+  
+  Copyright (c) 2006-2013, OMEX AG, Switzerland
+  All rights reserved.
+  
+  Redistribution and use in source and binary forms, with or without 
+  modification, are permitted provided that the following conditions 
+  are met:
+  
+  * Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+  
+  * Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in
+    the documentation and/or other materials provided with the
+    distribution.
+  
+  * Neither the name of OMEX AG nor the names of the contributors
+    to openMDX may be used to endorse or promote products derived
+    from this software without specific prior written permission.
+  
+  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
+  CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
+  INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+  MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+  DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS
+  BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+  EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED
+  TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+  DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+  ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+  OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+  OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+  POSSIBILITY OF SUCH DAMAGE.
+  
+  ------------------
+  
+  This product includes software developed by the Apache Software
+  Foundation (http://www.apache.org/). 
+
+---------------------------------------------------------------------
+Changes:
+
+0.    SUMMARY
+      * Clean up
+      * Refactoring
+      * Bug fixes
+
+
+==============================================================================
+Version 2.12.7                                                      2013-11-04
+==============================================================================
+
+1.    NEW FEATURES
+      
+      CR10011700
+      Unify edit and new object. The "New..." object form allows to lookup 
+      (with auto-completer) existing objects. If an object is selected, the form 
+      is pre-filled with the selected object values. After editing the form, the 
+      user can then choose either to "Create" (a new) or "Save" (the existing) object. 
+      If no existing object is selected, the user only can "Create".
+
+      CR10011691
+      Ui1: css classes for UI elements. Custom css classes for UI elements. 
+      Allow to specify different classes for field groups and object containers. 
+      Css classes are customized in UI XML files with the properties cssClassFieldGroup
+      and cssClassObjectContainer, e.g.      
+      
+		<org.openmdx.ui1.ElementDefinition name="org:openmdx:kernel:activity1:Activity:name">
+			<_object>
+				<active>true</active>
+				<toolTip>
+					<_item>Name of activity</_item>
+				</toolTip>
+				<label>
+					<_item>Name</_item>
+				</label>
+				<order>
+					<_item>0</_item>
+					<_item>0</_item>
+					<_item>10</_item>
+				</order>
+				<cssClassFieldGroup>classActivityName1</cssClassFieldGroup>
+				<cssClassObjectContainer>classActivityName2</cssClassObjectContainer>
+			</_object>
+			<_content/>
+		</org.openmdx.ui1.ElementDefinition>
+
+      CR10011280
+      Grids: show total rows. The total rows in a grid are calculated when 
+      going to a page with number > 0. Once calculated, the total rows are
+      displayed for this grid. 
+
+      CR10010108
+      Cascading code fields. Code fields are rendered as cascaded drop-downs for
+      {main category} and {sub category} in case their long texts have the format 
+      {main category}|{sub category}.
+      
+      CR10011631
+      Grids: custom queries for object identities.
+      Grids should support custom-queries for object identities. The search form displays an 
+      additional search field in case PortalExtension.getQuery() returns a non-null query for 
+      the feature 'grid.getReferencedTypeName() + ":" + identity'.
+      
+      Example:
+      Activities are searched for the attributes name, description or detailedDescription 
+      if getQuery() returns the query-extension
+      
+      (UPPER(v.name) LIKE UPPER(" + s0 + ") OR UPPER(v.name) LIKE " + s1 + " OR UPPER(v.description) 
+      LIKE UPPER(" + s2 + ") OR UPPER(v.description) LIKE " + s3 + " OR UPPER(v.detailed_description) 
+      LIKE UPPER(" + s4 + ") OR UPPER(v.detailed_description) LIKE " + s5 + ")"
+       
+      for the feature 'org:opencrx:kernel:activity1:Activity:identity'. 
+      
+      CR10011507
+      JoiningListDataBinding. Data binding which allows to collect objects from 
+      a specified set of reference features and display in a grid.
+            
+2.    CHANGES  
+     
+2.0.  CHANGED FEATURES
+      none
+            
+2.1.  FIXED BUGS
+      none      
+      
+2.2.  DEPRECATED FEATURES
+      none      
+            
+2.3   REMOVED FEATURES
+      none
+
+==============================================================================
+Version 2.12.0                                                      2013-01-18
+==============================================================================
+
+1.    NEW FEATURES
+      none
+      
+2.    CHANGES  
+     
+2.0.  CHANGED FEATURES
+      none
+             
+2.1.  FIXED BUGS
+      none
+
+2.2.  DEPRECATED FEATURES
+      none
+            
+2.3   REMOVED FEATURES
+
+      CR20020217
+      openmdx-client.jar
+
+      openMDX/Security's java client archive has been replaced by
+      openMDX/Client's java client archives.
+
+       
+==============================================================================
+Version 2.11.0                                                      2012-12-27
+==============================================================================
+
+1.    NEW FEATURES
+      none
+
+2.    CHANGES  
+     
+2.0.  CHANGED FEATURES
+      none
+            
+2.1.  FIXED BUGS
+      none      
+      
+2.2.  DEPRECATED FEATURES
+      
+      CR20020254
+      Portal: deprecate reports. Reports are replaced by wizards.
+      
+            
+2.3   REMOVED FEATURES
+      none
+
+==============================================================================
+Version 2.10.0                                                      2012-08-24
+==============================================================================
+
+1.    NEW FEATURES
+
+      CR10010707
+      JSP tag library. Portal offers the following tags:
+      * portal:showobject
+      * portal:query
+      The tags can be used in wizards and make it easy to render objects and grids. 
+      Example:      
+      
+        <%@ taglib uri="http://www.openmdx.org/tags/openmdx-portal" prefix="portal" %>
+         ...
+         <div id="content-wrap">
+      	   <div id="content" style="padding:10px 0.5em 0px 0.5em;">
+	         <portal:showobject id="AAA" object="<%= userHome %>" showAttributes="true" grids="alert,assignedActivity" navigationTarget="_none">
+	           <portal:query name="assignedActivity" query="<%= activityQuery %>" />
+	         </portal:showobject>
+	         <portal:showobject id="BBB" object="<%= userHome.getContact() %>" showAttributes="true" grids="address" navigationTarget="_none" />
+           </div> <!-- content -->
+        </div>
+
+                                    
+2.    CHANGES  
+     
+2.0.  CHANGED FEATURES
+      
+      CR10010930
+      Unify Texts and Codes. The class Texts now delegates to Codes, i.e. texts
+      are now stored as codes in the CodeValueContainer with name 'TextsBundle'.
+      In case Codes are not defined, Texts falls back to resource bundles. 
+
+      CR10010942
+      Refactoring data bindings. Replace DataBinding_1_0 and DataBinding_2_0 
+      interfaces by DataBinding interface.
+            
+      CR20020010
+      Improve grid search for code columns. Use short and long texts for filter 
+      value to code mapping.
+            
+2.1.  FIXED BUGS
+      none      
+      
+2.2.  DEPRECATED FEATURES
+      none
+            
+2.3   REMOVED FEATURES
+      none
+
+---

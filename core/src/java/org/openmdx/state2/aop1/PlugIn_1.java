@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2009-2012, OMEX AG, Switzerland
+ * Copyright (c) 2009-2013, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -312,7 +312,7 @@ public class PlugIn_1 implements PlugIn_1_0 {
     		view, 
     		next, 
     		type,
-    		Boolean.FALSE
+    		false
     	);
     }
 	

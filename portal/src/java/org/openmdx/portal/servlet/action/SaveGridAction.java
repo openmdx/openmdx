@@ -1,14 +1,14 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Description: ShowObjectView 
+ * Description: SaveGridAction 
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
  * ====================================================================
  *
  * This software is published under the BSD license
  * as listed below.
  * 
- * Copyright (c) 2004-2007, OMEX AG, Switzerland
+ * Copyright (c) 2004-2013, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -79,10 +79,17 @@ import org.openmdx.portal.servlet.view.ObjectView;
 import org.openmdx.portal.servlet.view.ShowObjectView;
 import org.openmdx.portal.servlet.view.ViewMode;
 
+/**
+ * SaveGridAction
+ *
+ */
 public class SaveGridAction extends BoundAction {
 
 	public final static int EVENT_ID = 36;
 
+	/* (non-Javadoc)
+	 * @see org.openmdx.portal.servlet.action.BoundAction#perform(org.openmdx.portal.servlet.view.ObjectView, javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, java.lang.String, javax.servlet.http.HttpSession, java.util.Map, org.openmdx.portal.servlet.ViewsCache, org.openmdx.portal.servlet.ViewsCache)
+	 */
 	@SuppressWarnings("unchecked")
     @Override
     public ActionPerformResult perform(
@@ -98,7 +105,7 @@ public class SaveGridAction extends BoundAction {
 		ShowObjectView currentView = (ShowObjectView)view;
     	ObjectView nextView = currentView;
         ViewPort.Type nextViewPortType = null;
-        ApplicationContext application = currentView.getApplicationContext();
+        ApplicationContext app = currentView.getApplicationContext();
         if (((Object[]) requestParameters.get(Action.PARAMETER_PANE)).length > 0) {
             int paneIndex = Integer.parseInt(((String[])requestParameters.get(Action.PARAMETER_PANE))[0]);
             if (paneIndex < currentView.getReferencePane().length) {
@@ -140,27 +147,27 @@ public class SaveGridAction extends BoundAction {
                             PersistenceManager pm = JDOHelper.getPersistenceManager(parent);
                             EditObjectView editView = null;
                             // Edit existing object
-                            if (objectXri.startsWith("xri://@openmdx") || objectXri.startsWith("xri:@openmdx:")) {
+                            if(objectXri.startsWith("xri://@openmdx") || objectXri.startsWith("xri:@openmdx:")) {
                                 Path objectIdentity = new Path(objectXri);
                                 try {
                                     editView = new EditObjectView(
                                         currentView.getId(),
                                         currentView.getContainerElementId(),
                                         objectIdentity, 
-                                        application, 
+                                        app, 
                                         new LinkedHashMap<Path,Action>(), 
                                         currentView.getLookupType(),
                                         currentView.getResourcePathPrefix(),
                                         currentView.getNavigationTarget(),
                                         ViewMode.STANDARD
                                     );
-                                }
-                                catch(ServiceException e) {
+                                } catch(ServiceException e) {
                                 	SysLog.warning(e.getMessage(), e.getCause());
                                 }
-                            }
-                            // Create new object from existing
-                            else if (objectXri.startsWith("clonedFrom:")) {
+                            } else if (objectXri.startsWith("clonedFrom:")) {
+                            	//
+                                // Create new object from existing
+                            	//
                                 Path objectIdentity = new Path(objectXri.substring("clonedFrom:".length()));
                                 RefObject_1_0 existingObject = (RefObject_1_0)pm.getObjectById(objectIdentity);
                                 RefObject_1_0 newObject = (RefObject_1_0)parent.refOutermostPackage().refClass(existingObject.refClass().refMofId()).refCreateInstance(null);
@@ -171,7 +178,7 @@ public class SaveGridAction extends BoundAction {
                                         currentView.getContainerElementId(),
                                         newObject, 
                                         null, 
-                                        application, 
+                                        app, 
                                         new LinkedHashMap<Path,Action>(), 
                                         currentView.getLookupType(),
                                         parent, 
@@ -180,13 +187,13 @@ public class SaveGridAction extends BoundAction {
                                         currentView.getNavigationTarget(),
                                         ViewMode.STANDARD
                                     );
-                                }
-                                catch(ServiceException e) {
+                                } catch(ServiceException e) {
                                 	SysLog.warning(e.getMessage(), e.getCause());
                                 }
-                            }
-                            // Create new object
-                            else {
+                            } else {
+                            	//
+                                // Create new object
+                            	//
                                 RefObject_1_0 newObject = (RefObject_1_0)parent.refOutermostPackage().refClass(objectXri).refCreateInstance(null);
                                 try {
                                     editView = new EditObjectView(
@@ -194,7 +201,7 @@ public class SaveGridAction extends BoundAction {
                                         currentView.getContainerElementId(),
                                         newObject, 
                                         null, 
-                                        application, 
+                                        app, 
                                         new LinkedHashMap<Path,Action>(), 
                                         currentView.getLookupType(),
                                         parent, 
@@ -203,17 +210,19 @@ public class SaveGridAction extends BoundAction {
                                         currentView.getNavigationTarget(),
                                         ViewMode.STANDARD
                                     );
-                                }
-                                catch(ServiceException e) {
+                                } catch(ServiceException e) {
                                 	SysLog.warning(e.getMessage(), e.getCause());
                                 }
                             }
                             // Process edit request
                             if(editView != null) {
                                 try {
-                                    editView.storeObject(row, new HashMap());
-                                }
-                                catch (Exception e) {
+                                    editView.storeObject(
+                                    	row, 
+                                    	new HashMap(),
+                                    	false
+                                    );
+                                } catch (Exception e) {
                                     ServiceException e0 = new ServiceException(e);
                                     currentView.handleCanNotCommitException(e0.getCause());
                                 }
@@ -222,9 +231,7 @@ public class SaveGridAction extends BoundAction {
                     }
                     try {
                         nextView.refresh(true, true);
-                    }
-                    catch (Exception e) {
-                    }
+                    } catch (Exception e) {}
                 }
             }
         }
@@ -233,5 +240,5 @@ public class SaveGridAction extends BoundAction {
             nextViewPortType
         );
     }
-        
+
 }

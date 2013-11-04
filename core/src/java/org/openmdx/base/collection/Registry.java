@@ -63,6 +63,8 @@ public interface Registry<K,V> {
      *          the value
      *
      * @return  either the old value if it was present or the new one if it was absent 
+     * 
+     * @throws IllegalStateException if the registry is already closed
      */
     V putUnlessPresent(
         K key,
@@ -78,6 +80,8 @@ public interface Registry<K,V> {
      *          the value
      *
      * @return  <code>null</code> unless there is already another object registered with the given key
+     * 
+     * @throws IllegalStateException if the registry is already closed
      */
     V put(
         K key,
@@ -91,6 +95,8 @@ public interface Registry<K,V> {
      *          the key
      * 
      * @return the cached object, or <code>null</code>
+     * 
+     * @throws IllegalStateException if the registry is already closed
      */
     V get(
         K key
@@ -103,6 +109,8 @@ public interface Registry<K,V> {
      *          the key
      * 
      * @return the cached object, or <code>null</code>
+     * 
+     * @throws IllegalStateException if the registry is already closed
      */
     V remove(
         K key
@@ -110,19 +118,24 @@ public interface Registry<K,V> {
     
     /**
      * Retrieve the objects managed by the cache
-     * *
+     * 
      * @return the set of objects managed by the cache
+     * 
+     * @throws IllegalStateException if the registry is already closed
      */
     Set<V> values(
     );
 
     /**
      * Clears the cache
+     * 
+     * @throws IllegalStateException if the registry is already closed
      */
     void clear();
     
     /**
-     * Closes the registry
+     * Closes the registry.
+     * If the registry is already closed then invoking this method has no effect. 
      */
     void close();
 

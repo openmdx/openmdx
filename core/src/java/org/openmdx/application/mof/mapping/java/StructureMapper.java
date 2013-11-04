@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2005-2011, OMEX AG, Switzerland
+ * Copyright (c) 2005-2013, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -64,26 +64,29 @@ import org.openmdx.base.mof.cci.Model_1_0;
 import org.openmdx.base.mof.cci.PrimitiveTypes;
 
 /**
- * StructureMapper
+ * Structure Mapper
  */
-public class StructureMapper
-    extends AbstractMapper {
+public class StructureMapper extends AbstractMapper {
     
-    //-----------------------------------------------------------------------
+    /**
+     * Constructor 
+     */
     public StructureMapper(
         ModelElement_1_0 structDef,
         Writer writer,
         Model_1_0 model,
         Format format, 
         String packageSuffix, 
-        MetaData_1_0 metaData
+        MetaData_1_0 metaData, 
+        PrimitiveTypeMapper primitiveTypeMapper
     ) throws ServiceException {
         super(
             writer,
             model,
             format, 
             packageSuffix,
-            metaData
+            metaData, 
+            primitiveTypeMapper
         );
         this.structDef = new StructDef(
             structDef, 
@@ -111,7 +114,7 @@ public class StructureMapper
         }
         this.pw.println("   * @return A SparseArray containing all elements for this structure field.");
         this.pw.println("   */");
-        String memberType = this.getType(fieldDef, "org.w3c.cci2.SparseArray", Boolean.TRUE, TypeMode.MEMBER);
+        String memberType = this.getType(fieldDef, "org.w3c.cci2.SparseArray", Boolean.TRUE, TypeMode.MEMBER, null);
         this.pw.println("  public " + memberType + " " + this.getMethodName(fieldDef.getBeanGetterName()) + "(");
         this.pw.println("  );");
         this.pw.println();
@@ -134,7 +137,7 @@ public class StructureMapper
         }
         this.pw.println("   * @return A set containing all elements for this structure field.");
         this.pw.println("   */");
-        String memberType = this.getType(fieldDef, "java.util.Set", Boolean.TRUE, TypeMode.MEMBER);
+        String memberType = this.getType(fieldDef, "java.util.Set", Boolean.TRUE, TypeMode.MEMBER, null);
         this.pw.println("  public " + memberType + " " + this.getMethodName(fieldDef.getBeanGetterName()) + "(");
         this.pw.println("  );");        
         this.pw.println();
@@ -158,7 +161,7 @@ public class StructureMapper
             }
             this.pw.println("   * @return A list containing all elements for this structure field.");
             this.pw.println("   */");
-            String memberType = this.getType(fieldDef, "java.util.List", Boolean.TRUE, TypeMode.MEMBER);
+            String memberType = this.getType(fieldDef, "java.util.List", Boolean.TRUE, TypeMode.MEMBER, null);
             this.pw.println("  public " + memberType + " " + this.getMethodName(fieldDef.getBeanGetterName()) + "(");
             this.pw.println("  );");        
             this.pw.println();
@@ -179,7 +182,7 @@ public class StructureMapper
         }
         this.pw.println("   * @return The non-null value for structure field <code>" + structureFieldDef.getName() + "</code>.");
         this.pw.println("   */");
-        String memberType = this.getType(structureFieldDef.getQualifiedTypeName());
+        String memberType = this.getType(structureFieldDef.getQualifiedTypeName(), getFormat(), false);
         this.pw.println("  public " + memberType + " " + this.getMethodName(structureFieldDef.getBeanGetterName()) + "(");
         this.pw.println("  );");        
         this.pw.println();
@@ -200,7 +203,7 @@ public class StructureMapper
         }
         this.pw.println("   * @return The possibly null value for structure field <code>" + structureFieldDef.getName() + "</code>.");
         this.pw.println("   */");
-        String memberType = this.getObjectType(structureFieldDef.getQualifiedTypeName());
+        String memberType = this.getType(structureFieldDef.getQualifiedTypeName(), getFormat(), true);
         this.pw.println("  public " + memberType + " " + this.getMethodName(structureFieldDef.getBeanGetterName()) + "(");
         this.pw.println("  );");        
         this.pw.println();
@@ -276,9 +279,13 @@ public class StructureMapper
             this.pw.println("   */");
             this.pw.println("  enum Member {");
             String delimiter = "    ";
-            for(String member : this.members) {
-                this.pw.println(delimiter + AbstractNames.uncapitalize(member));
-                delimiter = "  , ";
+            if(this.members.isEmpty()) {
+                this.pw.println(delimiter + "// No members");
+            } else {
+                for(String member : this.members) {
+                    this.pw.println(delimiter + AbstractNames.uncapitalize(member));
+                    delimiter = "  , ";
+                }
             }
             this.pw.println("  }");
             this.pw.println();

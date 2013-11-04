@@ -1,16 +1,14 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <!--
 =======================================================================
-= Name:        $Id: jre-1.6-properties.xml,v 1.5 2012/05/01 12:30:03 hburger Exp $
-= Description: openMDX/Test Core jre-1.6 Platform Properties
-= Revision:    $Revision: 1.5 $
-= Date:        $Date: 2012/05/01 12:30:03 $
-= Copyright:   (c) 2006 OMEX AG
+= Project:     openMDX/Test-Core, http://www.openmdx.org/
+= Description: JRE 6 Platform Properties
+= Owner:       OMEX AG, Switzerland, http://www.omex.ch
 =======================================================================
 =
 = This software is published under the BSD license as listed below.
 = 
-= Copyright (c) 2006-2009, OMEX AG, Switzerland
+= Copyright (c) 2006-2013, OMEX AG, Switzerland
 = All rights reserved.
 = 
 = Redistribution and use in source and binary forms, with or without 
@@ -48,5 +46,9 @@
 	<!-- IBM J9 2.6
 		<property name="build.compile.without.bootclasspath" value="true"/>  
 	-->
+	<property 
+		name="model.build.formats" 
+		value="--format=xmi1 --format=uml.openmdx-1 --format=uml2.openmdx-1 --format=test.openmdx.application.mof.mapping.java.PrimitiveTypeMapper_1(cci2) --format=test.openmdx.application.mof.mapping.java.PrimitiveTypeMapper_1(jmi1) --format=test.openmdx.application.mof.mapping.java.PrimitiveTypeMapper_1(jpa3)"
+	/>	
 </project>
 

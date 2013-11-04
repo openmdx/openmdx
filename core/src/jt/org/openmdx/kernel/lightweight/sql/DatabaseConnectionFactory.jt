@@ -1,16 +1,13 @@
 /*
  * ====================================================================
- * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: DatabaseConnectionFactory.jt,v 1.3 2012/03/15 15:08:34 hburger Exp $
+ * Project:     openMDX/Core, http://www.openmdx.org/
  * Description: Database Connection Factory
- * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2012/03/15 15:08:34 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2005-2012, OMEX AG, Switzerland
+ * Copyright (c) 2005-2013, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without 
@@ -55,7 +52,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Collections;
-#if defined(SINCE17)
+#ifdef SINCE17
 import java.util.logging.Logger;
 #endif	    
 
@@ -269,7 +266,7 @@ public class DatabaseConnectionFactory implements DataSource {
         );
     }
 
-#if defined(SINCE17)
+#ifdef SINCE17
     //-----------------------------------------------------------------------
     // Since JRE 7
     //-----------------------------------------------------------------------

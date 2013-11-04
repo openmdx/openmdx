@@ -50,5 +50,6 @@
 package org.openmdx.portal.servlet.view;
 
 public enum ViewMode {
-    STANDARD, EMBEDDED
+    STANDARD, 
+    EMBEDDED
 }

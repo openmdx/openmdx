@@ -1,14 +1,13 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
+ * Project:     openMDX, http://www.openmdx.org/
  * Description: Random Based UUID Provider
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
  * ====================================================================
  *
- * This software is published under the BSD license
- * as listed below.
+ * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2005, OMEX AG, Switzerland
+ * Copyright (c) 2004-2013, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without 
@@ -53,11 +52,7 @@ import java.net.InetAddress;
 import org.openmdx.kernel.id.cci.UUIDGenerator;
 import org.openmdx.kernel.id.spi.TimeBasedIdGenerator;
 
-
 import java.util.UUID;
-
-
-
 
 /**
  * Time Based UUID Provider using IP 4 Address Based Nodes
@@ -91,7 +86,7 @@ public class TimeBasedUUIDGeneratorUsingIP4Address
         } catch(Exception exception){
             exception.printStackTrace();
             System.err.println("Falling back to random based node id");
-            return getRandomBasedNode();
+            return createRandomBasedNode();
         }
     }
 

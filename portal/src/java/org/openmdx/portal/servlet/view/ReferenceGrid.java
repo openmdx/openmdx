@@ -9,7 +9,7 @@
  * This software is published under the BSD license
  * as listed below.
  * 
- * Copyright (c) 2004-2008, OMEX AG, Switzerland
+ * Copyright (c) 2004-2013, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -69,11 +69,19 @@ import org.openmdx.kernel.log.SysLog;
 import org.openmdx.portal.servlet.Filter;
 import org.openmdx.portal.servlet.control.GridControl;
 
-public class ReferenceGrid 
-    extends Grid
-    implements Serializable {
+/**
+ * ReferenceGrid
+ *
+ */
+public class ReferenceGrid extends Grid implements Serializable {
 
-    //-------------------------------------------------------------------------
+    /**
+     * Constructor 
+     *
+     * @param gridControl
+     * @param view
+     * @param lookupType
+     */
     public ReferenceGrid(
         GridControl gridControl,
         ObjectView view,
@@ -86,7 +94,12 @@ public class ReferenceGrid
         );
     }
 
-    //-------------------------------------------------------------------------
+    /**
+     * Get all referenced objects.
+     * 
+     * @param pm
+     * @return
+     */
     @SuppressWarnings("unchecked")
     public Collection<RefObject_1_0> getAllObjects(
     	PersistenceManager pm
@@ -103,10 +116,13 @@ public class ReferenceGrid
         return allObjects;    
     }
     
-    //-------------------------------------------------------------------------
+    /* (non-Javadoc)
+     * @see org.openmdx.portal.servlet.view.Grid#getFilteredObjects(javax.jdo.PersistenceManager, boolean, org.openmdx.portal.servlet.Filter)
+     */
     @Override
     public List<RefObject_1_0> getFilteredObjects(
     	PersistenceManager pm,
+    	boolean preCalcListSize,
         Filter filter
     ) {
         Collection<RefObject_1_0> allObjects = this.getAllObjects(pm);
@@ -118,8 +134,7 @@ public class ReferenceGrid
                 try {
                     RefObject_1_0 object = i.next();
                     filteredObjects.add(object);
-                }
-                catch(Exception e) {
+                } catch(Exception e) {
                     ServiceException e0 = new ServiceException(e);
                     SysLog.warning(
                         "Unable to retrieve object (more info at detail level)", 
@@ -137,9 +152,8 @@ public class ReferenceGrid
         return filteredObjects;
     }
     
-    //-------------------------------------------------------------------------
-    /**
-     * Always show all rows in case of non-composite grids
+    /* (non-Javadoc)
+     * @see org.openmdx.portal.servlet.view.Grid#getPageSize()
      */
     @Override
     public int getPageSize(
@@ -147,6 +161,8 @@ public class ReferenceGrid
         return Integer.MAX_VALUE;
     }
 
+    //-------------------------------------------------------------------------
+    // Members
     //-------------------------------------------------------------------------
     private static final long serialVersionUID = 3978143227574497585L;
 

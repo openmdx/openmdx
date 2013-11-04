@@ -102,7 +102,6 @@ public class CodesLoader extends Loader {
      * @param locale
      * @throws ServiceException
      */
-    @SuppressWarnings("unchecked")
     synchronized public void loadCodes(
         String[] locale
     ) throws ServiceException {

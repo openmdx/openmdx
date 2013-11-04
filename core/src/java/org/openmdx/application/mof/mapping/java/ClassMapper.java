@@ -1,13 +1,13 @@
 /*
  * ==================================================================== 
- * Project: openmdx, http://www.openmdx.org
- * Description: JMIClassLevelTemplate Revision: $Revision: 1.4 $ 
- * Owner: OMEX AG, Switzerland, http://www.omex.ch 
+ * Project:      openmdx, http://www.openmdx.org
+ * Description:  JMIClassLevelTemplate  
+ * Owner:        OMEX AG, Switzerland, http://www.omex.ch 
  * ====================================================================
  * 
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2005, OMEX AG, Switzerland All rights reserved.
+ * Copyright (c) 2005-2013, OMEX AG, Switzerland All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met: *
@@ -55,14 +55,14 @@ import org.openmdx.base.mof.cci.Model_1_0;
 @SuppressWarnings({"rawtypes"})
 public class ClassMapper extends AbstractClassMapper {
 
-    //-----------------------------------------------------------------------
     public ClassMapper(
         ModelElement_1_0 classDef,        
         Writer writer, 
         Model_1_0 model,
         Format format, 
         String packageSuffix,
-        MetaData_1_0 metaData
+        MetaData_1_0 metaData, 
+        PrimitiveTypeMapper primitiveTypeMapper
     ) throws ServiceException {
         super(
             classDef,
@@ -70,7 +70,8 @@ public class ClassMapper extends AbstractClassMapper {
             model,
             format, 
             packageSuffix, 
-            metaData
+            metaData, 
+            primitiveTypeMapper
         );
     }
     
@@ -79,6 +80,7 @@ public class ClassMapper extends AbstractClassMapper {
         ClassDef superclassDef,
         List requiredAttributes
     ) throws ServiceException {
+        // Nothing to do
     }
 
     //-----------------------------------------------------------------------
@@ -86,18 +88,21 @@ public class ClassMapper extends AbstractClassMapper {
         ClassDef superclassDef,
         List attributes
     ) throws ServiceException {
+        // Nothing to do
     }
 
     //-----------------------------------------------------------------------
     public void mapInstanceCreatorRequiredAttributes(
         List requiredAttributes
     ) throws ServiceException {
+        // Nothing to do
     }
 
     //-----------------------------------------------------------------------
     public void mapIntfInstanceCreatorAllAttributes(
         List attributes
     ) throws ServiceException {
+        // Nothing to do
     }
 
     //-----------------------------------------------------------------------

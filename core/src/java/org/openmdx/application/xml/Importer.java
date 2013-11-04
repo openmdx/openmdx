@@ -69,6 +69,7 @@ import org.openmdx.application.xml.jmi.PersistenceManagerTarget;
 import org.openmdx.application.xml.jmi.StateImportPlugIn;
 import org.openmdx.application.xml.spi.DataproviderTarget;
 import org.openmdx.application.xml.spi.ImportHelper;
+import org.openmdx.application.xml.spi.ImportMode;
 import org.openmdx.application.xml.spi.ImportTarget;
 import org.openmdx.application.xml.spi.MapTarget;
 import org.openmdx.base.exception.RuntimeServiceException;
@@ -106,10 +107,11 @@ public class Importer {
         Iterable<InputSource> source,
         ErrorHandler errorHandler
     ) throws ServiceException {
-        importHelper.importObjects(
+        importObjects(
             target, 
             source, 
-            errorHandler
+            errorHandler,
+            ImportMode.SET
         );
     }
 
@@ -125,13 +127,36 @@ public class Importer {
         ImportTarget target,
         Iterable<InputSource> source
     ) throws ServiceException {
+        importObjects(
+            target, 
+            source, 
+            null, // errorHandler
+            ImportMode.SET
+        );
+    }
+
+    /**
+     * Import objects 
+     * 
+     * @param target the object sink
+     * @param source the XML source
+     * 
+     * @throws ServiceException  
+     */
+    public static void importObjects (
+        ImportTarget target,
+        Iterable<InputSource> source,
+        ErrorHandler errorHandler,
+        ImportMode defaultImportMode
+    ) throws ServiceException {
         importHelper.importObjects(
             target, 
             source, 
-            null // errorHandler
+            null, // errorHandler
+            defaultImportMode
         );
     }
-    
+
     /**
      * Input source factory method
      * 

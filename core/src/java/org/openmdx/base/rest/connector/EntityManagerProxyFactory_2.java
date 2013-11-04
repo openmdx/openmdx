@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2009-2012, OMEX AG, Switzerland
+ * Copyright (c) 2009-2013, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -113,10 +113,10 @@ public class EntityManagerProxyFactory_2 extends AbstractPersistenceManagerFacto
             );
             this.optimalFetchSize = (Integer) dataManagerConfiguration.values(
                 "optimalFetchSize"
-            ).get(0);
+            ).get(Integer.valueOf(0));
             this.cacheThreshold = (Integer) dataManagerConfiguration.values(
                 "cacheThreshold"
-            ).get(0);
+            ).get(Integer.valueOf(0));
             SparseArray<?> plugIns = dataManagerConfiguration.values(
                 "plugIn"
             );

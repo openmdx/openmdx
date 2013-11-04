@@ -58,8 +58,9 @@ import org.openmdx.application.rest.http.HttpInteraction;
 import org.openmdx.application.rest.http.spi.Message;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.resource.spi.RestInteractionSpec;
+import org.openmdx.base.rest.spi.RestFormatters;
 import org.openmdx.base.rest.spi.RestSource;
-import org.openmdx.base.rest.stream.RestFormatter;
+import org.openmdx.base.rest.stream.StandardRestFormatter;
 import org.openmdx.base.rest.stream.RestTarget;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
@@ -96,6 +97,7 @@ public class StandardMessage implements Message, Closeable {
     }
 
     final HttpContext httpContext;
+    
     private final HttpInteraction httpInteraction;
     
     /**
@@ -113,6 +115,11 @@ public class StandardMessage implements Message, Closeable {
      */
     private RestSource responseBody = null;
 
+    /**
+     * The eagerly acquired REST formatter instance
+     */
+    protected static final StandardRestFormatter restFormatter = RestFormatters.getFormatter();
+    
     /**
      * Create a request body
      * 
@@ -136,10 +143,12 @@ public class StandardMessage implements Message, Closeable {
                     contentType
                 );
                 try {
-                    return RestFormatter.getOutputFactory(httpContext.getMimeType()).createXMLStreamWriter(
+                    return restFormatter.getOutputFactory(httpContext.getMimeType()).createXMLStreamWriter(
                         urlConnection.getOutputStream()
                     );
                 } catch (IOException exception) {
+                    throw toXMLStreamException(exception);
+                } catch (BasicException exception) {
                     throw toXMLStreamException(exception);
                 }
             }
@@ -170,7 +179,7 @@ public class StandardMessage implements Message, Closeable {
     ) throws ServiceException {
         if(this.requestBody != null) try {
             this.requestBody.close();
-        } catch (XMLStreamException exception) {
+        } catch (IOException exception) {
             throw new ServiceException (
                 exception,
                 BasicException.Code.DEFAULT_DOMAIN,

@@ -1,16 +1,13 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: LateBindingDataSource.jt,v 1.4 2011/11/02 14:21:45 wfro Exp $
  * Description: Late Binding Data Source
- * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/11/02 14:21:45 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2011, OMEX AG, Switzerland
+ * Copyright (c) 2004-2013, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -61,7 +58,7 @@ import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.exception.Throwables;
 import org.openmdx.kernel.log.SysLog;
 
-#if defined(SINCE17)
+#ifdef SINCE17
 import java.util.logging.Logger;
 import java.sql.SQLFeatureNotSupportedException;
 #endif
@@ -179,7 +176,7 @@ class LateBindingDataSource implements DataSource {
         return getClass().getName() + ": " + this.jndiName;
     }
 
-#if defined(SINCE16)
+#ifdef SINCE16
 
     /* (non-Javadoc)
      * @see java.sql.Wrapper#isWrapperFor(java.lang.Class)
@@ -199,7 +196,7 @@ class LateBindingDataSource implements DataSource {
 
 #endif
 
-#if defined(SINCE17)
+#ifdef SINCE17
 
     //-----------------------------------------------------------------------
     // Since JRE 7

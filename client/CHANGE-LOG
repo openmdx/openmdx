@@ -4,7 +4,38 @@
                     =====================================
 
 ==============================================================================
-Version 2.11.0                                                      2013-04-15
+Version 2.12.1+                                                     2013-04-29
+==============================================================================
+
+0.    KNOWN ISSUES
+      none
+      
+1.    NEW FEATURES
+
+      CR10011145
+      Xerces classes required for Dalvik 
+      
+      System.setProperty(
+        "javax.xml.datatype.DatatypeFactory",
+        "org.openmdx.dalvik.uses.org.apache.xerces.jaxp.datatype.DatatypeFactoryImpl"
+      );
+      
+2.    CHANGES  
+     
+2.0.  CHANGED FEATURES
+      none
+
+2.1.  FIXED BUGS
+      none
+          
+2.2.  DEPRECATED FEATURES
+      none
+
+2.3.  REMOVED FEATURES
+      none
+
+==============================================================================
+Version 2.12.0                                                      2013-01-18
 ==============================================================================
 
 0.    KNOWN ISSUES

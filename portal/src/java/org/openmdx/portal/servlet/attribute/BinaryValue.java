@@ -8,7 +8,7 @@
  * This software is published under the BSD license
  * as listed below.
  * 
- * Copyright (c) 2004-2007, OMEX AG, Switzerland
+ * Copyright (c) 2004-2013, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -82,41 +82,43 @@ import org.openmdx.portal.servlet.ViewPort;
 import org.openmdx.portal.servlet.WebKeys;
 import org.w3c.cci2.BinaryLargeObject;
 
-public class BinaryValue 
-    extends AttributeValue
-    implements Serializable {
+/**
+ * BinaryValue
+ *
+ */
+public class BinaryValue extends AttributeValue implements Serializable {
 
-    //-------------------------------------------------------------------------
+    /**
+     * Determine mime type of binary value.
+     * 
+     * @param object
+     * @param feature
+     * @param configuredMimeType
+     * @return
+     */
     public static String getMimeType(
         Object object,
         String feature,
         String configuredMimeType     
     ) {
         String mimeType = null;
-
         // configured mime type overrides instance-level mime type
         if(configuredMimeType != null) {
             mimeType = configuredMimeType;
-        }
-        else {
+        } else {
 	        String mimeTypeFeature = feature + "MimeType";
-	       
 	        // try to get mime type from instance
 	        if(object == null) {
 	            mimeType = null;
-	        }
-	        else if(object instanceof RefObject_1_0) {
+	        } else if(object instanceof RefObject_1_0) {
 	          try {
 	            mimeType = (String)((RefObject_1_0)object).refGetValue(
 	                mimeTypeFeature
 	            );
-	          }
-	          catch(JmiServiceException e) {}
-	        }
-	        else {
+	          } catch(JmiServiceException e) {}
+	        } else {
 	            mimeType = (String)((Map)object).get(mimeTypeFeature);
 	        }
-	      	      
 	        // not defined on object. return default
 	        if(mimeType == null) {
 	            mimeType = DEFAULT_MIME_TYPE;
@@ -125,7 +127,15 @@ public class BinaryValue
         return mimeType;
     }
   
-    //-------------------------------------------------------------------------
+    /**
+     * Create instance of BinaryValue.
+     * 
+     * @param object
+     * @param fieldDef
+     * @param application
+     * @return
+     * @throws ServiceException
+     */
     public static AttributeValue createBinaryValue(
         Object object, 
         FieldDef fieldDef,
@@ -161,7 +171,14 @@ public class BinaryValue
             );
     }
   
-    //-------------------------------------------------------------------------
+    /**
+     * Constructor.
+     *
+     * @param object
+     * @param fieldDef
+     * @param application
+     * @throws ServiceException
+     */
     protected BinaryValue(
         Object object, 
         FieldDef fieldDef,
@@ -188,16 +205,16 @@ public class BinaryValue
         ModelElement_1_0 featureDef = null;
         try {
             featureDef = application.getModel().getElement(this.fieldDef.qualifiedFeatureName);
-        }
-        catch(ServiceException e) {
+        } catch(ServiceException e) {
         	SysLog.warning("can not get feature definition");
         	SysLog.warning(e.getMessage(), e.getCause());
         }
         // For features for type <<stream> binary the binary value 
         // is retrieved on-demand on EVENT_DOWNLOAD
         if(
-            (this.object instanceof RefObject_1_0) &&
-            (featureDef != null)
+            this.object instanceof RefObject_1_0 &&
+            ((RefObject_1_0)this.object).refGetPath() != null &&
+            featureDef != null
         ) {
             Object bytes = super.getValue(false);
             if(bytes == null) {
@@ -211,8 +228,7 @@ public class BinaryValue
                 String encodedName = this.name;
                 try {
                     encodedName = URLEncoder.encode(this.name, "UTF-8");
-                } 
-                catch(Exception e) {}
+                } catch(Exception e) {}
                 this.downloadAction = 
                     new Action(
                         Action.EVENT_DOWNLOAD_FROM_FEATURE,
@@ -226,17 +242,15 @@ public class BinaryValue
                         true
                     );
             }        
-        }
-        // For transient objects the binary value is stored in temporary
-        // file which is returned on EVENT_DOWNLOAD
-        else {
+        } else {
+            // For transient objects the binary value is stored in temporary
+            // file which is returned on EVENT_DOWNLOAD
             String location = null;        
             byte[] bytes = null;
             Object value = super.getValue(false);
             if(value instanceof Collection) {
                 bytes = (byte[])((Collection)value).iterator().next();
-            }
-            else {
+            } else {
                 bytes = (byte[])value;
             }
             SysLog.trace("bytes", "" + (bytes == null ? -1 : bytes.length));
@@ -255,8 +269,7 @@ public class BinaryValue
                     os.write(bytes);
                     os.flush();
                     os.close();
-                }
-                catch(Exception e) {
+                } catch(Exception e) {
                     ServiceException e0 = new ServiceException(e);
                     SysLog.warning(e0.getMessage(), e0.getCause());
                 }
@@ -277,19 +290,29 @@ public class BinaryValue
         }
     }
 
-    //-------------------------------------------------------------------------
+    /**
+     * Render as in-place field.
+     * 
+     * @return
+     */
     public boolean isInPlace(
     ) {
         return this.fieldDef.isInPlace;  
     }
 
-    //-------------------------------------------------------------------------
+    /**
+     * Get mime type for binary value.
+     * 
+     * @return
+     */
     public String getMimeType(
     ) {
         return this.mimeType;  
     }
 
-    //-------------------------------------------------------------------------
+    /* (non-Javadoc)
+     * @see org.openmdx.portal.servlet.attribute.AttributeValue#getValue(boolean)
+     */
     @Override
     public Object getValue(
         boolean shortFormat
@@ -297,13 +320,21 @@ public class BinaryValue
         return this.downloadAction;
     }
   
-    //-------------------------------------------------------------------------
+    /* (non-Javadoc)
+     * @see org.openmdx.portal.servlet.attribute.AttributeValue#getDefaultValue()
+     */
+    @Override
     public Object getDefaultValue(
     ) {
         return null;
     }
 
-    //-------------------------------------------------------------------------
+    /**
+     * Get binary value.
+     * 
+     * @param os
+     * @throws ServiceException
+     */
     public void getBinaryValue(
         OutputStream os
     ) throws ServiceException {
@@ -317,25 +348,22 @@ public class BinaryValue
                 for(int i = 0; i < bytes.length; i++) {
                     os.write(bytes[i]);
                 }
-            }
-            else if(value instanceof InputStream) {
+            } else if(value instanceof InputStream) {
                 InputStream is = (InputStream)value;          
                 int b = 0;
                 while((b = is.read()) != -1) {
                     os.write(b);              
-                }          
-            }
-            else if(value instanceof BinaryLargeObject) {
+                }
+                is.close();
+            } else if(value instanceof BinaryLargeObject) {
                 BinaryLargeObject blob = (BinaryLargeObject)value;
                 blob.getContent(os, 0L);
             }
-        }
-        catch(Exception e) {
+        } catch(Exception e) {
             throw new ServiceException(e);
         }
     }
   
-    //-------------------------------------------------------------------------
     /**
      * Prepares a single stringified Value to append.
      */
@@ -356,14 +384,17 @@ public class BinaryValue
                 forEditing,
                 shortFormat
             );
-        }
-        else {
+        } else {
             Action action = (Action)v;
             return "<a href=\"\" onmouseover=\"javascript:this.href=" + p.getEvalHRef(action) + ";onmouseover=function(){};\">" + htmlEncoder.encode(action.getTitle(), false) + "</a>";
         }
     }
-  
-    //-------------------------------------------------------------------------
+
+    /**
+     * Get mimeType parameters.
+     * 
+     * @return
+     */
     protected Map getMimeTypeParams(
     ) {
         Map<String,String> params = new HashMap<String,String>();
@@ -383,7 +414,12 @@ public class BinaryValue
         return params;
     }
   
-    //-------------------------------------------------------------------------
+    /**
+     * Get accepted mime types for this request.
+     * 
+     * @param request
+     * @return
+     */
     protected Set getAcceptedMimeTypes(
         HttpServletRequest request
     ) {
@@ -395,15 +431,25 @@ public class BinaryValue
             // this allows a startsWith comparison later on
             if(mimeType.indexOf("*") >= 0) {
                 acceptedMimeTypes.add(mimeType.substring(0, mimeType.indexOf("*")));
-            }
-            else {
+            } else {
                 acceptedMimeTypes.add(mimeType);
             }
         }
         return acceptedMimeTypes;
     }
   
-    //-----------------------------------------------------------------------
+    /**
+     * Paint binary value is in-place element.
+     * 
+     * @param p
+     * @param binaryValueAction
+     * @param label
+     * @param gapModifier
+     * @param rowSpanModifier
+     * @param widthModifier
+     * @param styleModifier
+     * @throws ServiceException
+     */
     @SuppressWarnings("unchecked")
     protected void paintInPlace(
         ViewPort p,
@@ -422,24 +468,29 @@ public class BinaryValue
             popupImages.put(imageId, imageSrc);
         }
         // Single-valued BinaryValue in place
+    	String cssClass = DEFAULT_CSS_CLASS;
+    	if(this.getCssClassFieldGroup() != null) {
+    		cssClass = this.getCssClassFieldGroup() + " " + cssClass;
+    	}
     	if(p.getViewPortType() == ViewPort.Type.MOBILE) {
         	p.write("		<label>",  htmlEncoder.encode(label, false), "</label>");                	
-            p.write("       <div class=\"valueL\">");
+            p.write("       <div class=\"", cssClass, "\">");
 	        p.write(p.getImg("class=\"picture\" src=\"", imageSrc, "\" id=\"image", imageId, "\" ondblclick=\"return showImage('divImgPopUp", imageId, "', 'popUpImg", imageId, "', 'tdImage", imageId, "', this.id);\" alt=\"\""));
 	        p.write("</div>");	        
-    	}
-    	else {
+    	} else {
 	        p.write(gapModifier); 
 	        p.write("<td class=\"label\"><span class=\"nw\">", htmlEncoder.encode(label, false), "</span></td>");
-	        p.write("<td ", rowSpanModifier, " class=\"valueL\" ", widthModifier, " id=\"tdImage", imageId, "\">");
+	        p.write("<td ", rowSpanModifier, " class=\"", cssClass, "\" ", widthModifier, " id=\"tdImage", imageId, "\">");
 	        p.write("<div class=\"valuePicture\" ", styleModifier, ">");
 	        p.write(p.getImg("class=\"picture\" src=\"", imageSrc, "\" id=\"image", imageId, "\" ondblclick=\"return showImage('divImgPopUp", imageId, "', 'popUpImg", imageId, "', 'tdImage", imageId, "', this.id);\" alt=\"\""));
 	        p.write("</div>");
 	        p.write("</td>");
     	}
     }
-    
-    //-------------------------------------------------------------------------
+
+    /* (non-Javadoc)
+     * @see org.openmdx.portal.servlet.attribute.AttributeValue#paint(org.openmdx.portal.servlet.attribute.Attribute, org.openmdx.portal.servlet.ViewPort, java.lang.String, java.lang.String, org.openmdx.base.accessor.jmi.cci.RefObject_1_0, int, int, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, boolean)
+     */
     @Override
     public void paint(
         Attribute attribute,
@@ -473,8 +524,12 @@ public class BinaryValue
             }
             p.write("</td>");
             p.write("<td class=\"addon\" ", rowSpanModifier, "></td>");            
-        }
-        else {
+        } else {
+        	// Show
+        	String cssClass = DEFAULT_CSS_CLASS;
+        	if(this.getCssClassFieldGroup() != null) {
+        		cssClass = this.getCssClassFieldGroup() + " " + cssClass;
+        	}  	
         	if(WebKeys.LOCKED_VALUE.equals(stringifiedValue)) {
         		super.paint(
         			attribute, 
@@ -493,8 +548,7 @@ public class BinaryValue
         			stringifiedValue, 
         			forEditing
         		);
-        	} 
-        	else {        	
+        	} else {        	
 	            HttpServletRequest request = p.getHttpServletRequest();          
 	            styleModifier = "style=\"height: " + (1.2+(attribute.getSpanRow()-1)*1.5) + "em\"";
 	            Action binaryValueAction = (Action)this.getValue(false);
@@ -525,17 +579,15 @@ public class BinaryValue
 		            if(forEditing) {
 		            	p.write("<td class=\"addon\" />");
 		            }
-	            }
-	            // Single-valued BinaryValue as link -->
-	            else {
+	            } else {
+		            // Single-valued BinaryValue as link -->
 	            	if(p.getViewPortType() == ViewPort.Type.MOBILE) {
 	                	p.write("		<label>",  htmlEncoder.encode(label, false), "</label>");                	
-		                p.write("       <div class=\"valueL\">", attribute.getStringifiedValue(p, false, false), "</div>");
-	            	}
-	            	else {
+		                p.write("       <div class=\"", cssClass, "\">", attribute.getStringifiedValue(p, false, false), "</div>");
+	            	} else {
 		                p.write(gapModifier);
 		                p.write("<td class=\"label\" title=\"", (title == null ? "" : htmlEncoder.encode(title, false)), "\"><span class=\"nw\">", label, "</span></td>");
-		                p.write("<td ", rowSpanModifier, " class=\"valueL\" ", (forEditing ? "" : widthModifier), ">");
+		                p.write("<td ", rowSpanModifier, " class=\"", cssClass, "\" ", (forEditing ? "" : widthModifier), ">");
 		                p.write("<div class=\"field\">", attribute.getStringifiedValue(p, false, false), "</div>");
 		                p.write("</td>");
 			            if(forEditing) {
@@ -548,6 +600,8 @@ public class BinaryValue
     }
 
     //-------------------------------------------------------------------------
+    // Members
+    //-------------------------------------------------------------------------
     private static final long serialVersionUID = 3761967151120333111L;
 
     protected static final String DEFAULT_MIME_TYPE = "application/octet-stream";
@@ -559,5 +613,3 @@ public class BinaryValue
     protected Action downloadAction = null;
   
 }
-
-//--- End of File -----------------------------------------------------------

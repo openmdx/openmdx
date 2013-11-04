@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2009, OMEX AG, Switzerland
+ * Copyright (c) 2004-2013, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -569,7 +569,7 @@ public final class BasicException extends Exception {
      * @throws IllegalStateException if the cause has already been set
      */
     @Override
-    public BasicException initCause(
+    public synchronized BasicException initCause(
         Throwable throwable
     ){
         setCause(throwable);
@@ -580,7 +580,7 @@ public final class BasicException extends Exception {
      * @see java.lang.Throwable#fillInStackTrace()
      */
     @Override
-    public Throwable fillInStackTrace() {
+    public synchronized Throwable fillInStackTrace() {
         return this; // No stack trace required
     }
 

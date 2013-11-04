@@ -124,6 +124,7 @@ import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 import org.oasisopen.cci2.QualifierType;
 import org.oasisopen.jmi1.RefContainer;
+import org.openmdx.application.mof.repository.accessor.ModelBuilder_1;
 import org.openmdx.application.rest.adapter.InboundConnectionFactory_2;
 import org.openmdx.application.xml.Exporter;
 import org.openmdx.application.xml.Importer;
@@ -142,6 +143,7 @@ import org.openmdx.base.accessor.jmi.spi.DelegatingRefObject_1_0;
 import org.openmdx.base.accessor.jmi.spi.EntityManagerFactory_1;
 import org.openmdx.base.accessor.jmi.spi.RefMetaObject_1;
 import org.openmdx.base.accessor.jmi.spi.RefRootPackage_1;
+import org.openmdx.base.accessor.rest.DirtyObjects;
 import org.openmdx.base.accessor.spi.Delegating_1_0;
 import org.openmdx.base.accessor.view.ObjectView_1_0;
 import org.openmdx.base.aop0.UpdateAvoidance;
@@ -153,6 +155,7 @@ import org.openmdx.base.jmi1.Modifiable;
 import org.openmdx.base.jmi1.Provider;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
 import org.openmdx.base.mof.cci.Model_1_0;
+import org.openmdx.base.mof.spi.Model_1Dumper;
 import org.openmdx.base.mof.spi.Model_1Factory;
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.persistence.cci.ConfigurableProperty;
@@ -253,11 +256,19 @@ import test.openmdx.app1.jmi1.TextDocument;
 import test.openmdx.application.rest.http.ServletPort;
 import test.openmdx.model1.jmi1.ClassContainingOperations;
 import test.openmdx.model1.jmi1.ClassContainingOperationsTestComplexStruct0_1_0_1Params;
+import test.openmdx.model1.jmi1.ClassContainingOperationsTestComplexStruct0_n_0_1Params;
 import test.openmdx.model1.jmi1.ComplexStruct0_1;
+import test.openmdx.model1.jmi1.ComplexStruct0_n;
 import test.openmdx.model1.jmi1.Model1Package;
 import test.openmdx.model1.jmi1.Segment;
 import test.openmdx.model1.jmi1.SimpleStruct0_1;
+import test.openmdx.model1.jmi1.SimpleStruct0_n;
+import test.openmdx.model1.jmi1.SimpleStruct1_1;
+import test.openmdx.model1.jmi1.SimpleStructList;
+import test.openmdx.model1.jmi1.SimpleStructSet;
+import test.openmdx.model1.jmi1.SimpleStructSparseArray;
 import test.openmdx.model1.jmi1.TestComplexStruct0_1_0_1Result;
+import test.openmdx.model1.jmi1.TestComplexStruct0_n_0_1Result;
 
 /**
  * Test Main
@@ -446,6 +457,7 @@ public class TestMain {
         private final boolean VALIDATE_PERSISTENCE_MANAGER = !(this instanceof ProxyConnectionTest); // TODO include Proxy Connections
         private final boolean REMOTE_EXCEPTIONS_ARE_GENERIC = true; // TODO CR20020019
         private final boolean PROXIED_EXTENT_IS_AMENDMENT_AWARE = false; // TODO CR20020326
+        private final boolean INCOMPLETE_OBJECTS_CAN_BE_FLUSHED = false; // TODO CR20020411
         
         protected long id;
 
@@ -669,8 +681,10 @@ public class TestMain {
                     if(!"org.omg.model1.Class".equals(e1.objGetClass())){
                         f1.remove("allFeature");
                         f1.remove("allFeatureWithSubtype");
+                        f1.remove(SystemAttributes.OBJECT_INSTANCE_OF);
                         f2.remove("allFeature");
                         f2.remove("allFeatureWithSubtype");
+                        f2.remove(SystemAttributes.OBJECT_INSTANCE_OF);
                     }
                     f1.remove("dereferencedType");
                     f1.remove("content");
@@ -699,11 +713,11 @@ public class TestMain {
         ) throws FileNotFoundException, ServiceException{
             Model_1_0 model = Model_1Factory.getModel();
             if(binary) {
-              FileOutputStream outputStream =  new FileOutputStream("build/jre-1.6/src/resource/META-INF/openmdxmof.xml");
-              model.save(outputStream, "text/xml");                
+                FileOutputStream outputStream = new FileOutputStream("build/jre-1.6/src/resource/META-INF/openmdxmof.wbxml");
+                Model_1Dumper.save(outputStream, "application/vnd.openmdx-xmi.wbxml", model);
             } else {
-                FileOutputStream outputStream =  new FileOutputStream("build/jre-1.6/src/resource/META-INF/openmdxmof.wbxml");
-                model.save(outputStream, "application/vnd.openmdx-xmi.wbxml");
+                FileOutputStream outputStream =  new FileOutputStream("build/jre-1.6/src/resource/META-INF/openmdxmof.xml");
+                Model_1Dumper.save(outputStream, "text/xml", model);
             }
         }
         
@@ -719,16 +733,18 @@ public class TestMain {
                 Model_1_0 model = Model_1Factory.getModel();
                 Map<Path, ModelElement_1_0> content1 = getContent(model);
                 ByteArrayOutputStream outputStream1 =  new ByteArrayOutputStream();
-                model.save(outputStream1, "application/vnd.openmdx-xmi.wbxml");
+                Model_1Dumper.save(outputStream1, "application/vnd.openmdx-xmi.wbxml", model);
+                model = loadForeignModel("xri://+zip*(xri://+resource/test/opencrx/openmdxmof.wbxml.zip)/openmdxmof.wbxml");
+                model = loadForeignModel("xri://+resource/test/opencrx/openmdxmof.wbxml");
                 ByteArrayInputStream inputStream = new ByteArrayInputStream(outputStream1.toByteArray());
                 long startLoading = System.currentTimeMillis();
-                model.load(inputStream);
+                model = new ModelBuilder_1(false, inputStream).build();
                 long restoreTime = System.currentTimeMillis() - startLoading;
-                Map<Path, ModelElement_1_0> content2 = getContent(model);
-                ByteArrayOutputStream outputStream2 =  new ByteArrayOutputStream();
-                model.save(outputStream2, "application/vnd.openmdx-xmi.wbxml");
-                SysLog.performance("Restoring model", restoreTime);
-                assertRepositoryEquality(content1, content2);
+                SysLog.performance("Restoring app1 model", restoreTime);
+                Map<Path, ModelElement_1_0> content3 = getContent(model);
+                ByteArrayOutputStream outputStream3 =  new ByteArrayOutputStream();
+                Model_1Dumper.save(outputStream3, "application/vnd.openmdx-xmi.wbxml", model);
+                assertRepositoryEquality(content1, content3);
             } finally {
                 super.taskId = null;
             }
@@ -765,6 +781,94 @@ public class TestMain {
                 assertNotNull("CR10011193", out.getResult());
                 assertNotNull("CR10011193", out.getResult().getSimpleStruct0_1Field());
                 assertEquals("CR10011193", out.getResult().getSimpleStruct0_1Field().getStringField());
+            } finally {
+                super.taskId = null;
+            }
+            try {
+                super.taskId = "CR10011473";
+                this.begin();
+                ClassContainingOperations operations = getModelTestOperations();
+                ClassContainingOperationsTestComplexStruct0_n_0_1Params in = Structures.create(
+                    ClassContainingOperationsTestComplexStruct0_n_0_1Params.class,
+                    Structures.create(
+                        ComplexStruct0_n.class,
+                        new SimpleStruct0_1[]{
+                            Structures.create(
+                                SimpleStruct0_1.class, 
+                                null, // binaryField
+                                null, // booleanField
+                                null, // dateTimeField
+                                null, // decimalField
+                                null, // durationField
+                                Integer.valueOf(0), // integerField
+                                null, // longField
+                                null, // shortField
+                                "CR10011473" // stringField
+                            ),
+                            Structures.create(
+                                SimpleStruct0_1.class, 
+                                null, // binaryField
+                                null, // booleanField
+                                null, // dateTimeField
+                                null, // decimalField
+                                null, // durationField
+                                Integer.valueOf(1), // integerField
+                                null, // longField
+                                null, // shortField
+                                "CR10011473bis" // stringField
+                            ),
+                        }, // SimpleStruct0_1Field
+                        new SimpleStruct0_n[]{}, // simpleStruct0_nField
+                        new SimpleStruct1_1[]{}, // simpleStruct1_1Field
+                        new SimpleStructList[]{}, // simpleStructListField
+                        new SimpleStructSet[]{
+                            Structures.create(
+                                SimpleStructSet.class,
+                                new Boolean[]{}, // booleanField
+                                new Date[]{}, // dateTimeField
+                                new BigDecimal[]{}, // decimalField
+                                new Duration[]{}, // durationField
+                                new Integer[]{
+                                   Integer.valueOf(0)
+                                }, // integerField
+                                new Long[]{}, // longField
+                                new Short[]{}, // shortField
+                                new String[]{
+                                    "CR10011473a",
+                                    "CR10011473b"
+                                } // stringField
+                            ),
+                            Structures.create(
+                                SimpleStructSet.class,
+                                new Boolean[]{}, // booleanField
+                                new Date[]{}, // dateTimeField
+                                new BigDecimal[]{}, // decimalField
+                                new Duration[]{}, // durationField
+                                new Integer[]{
+                                    Integer.valueOf(1)
+                                 }, // integerField
+                                 new Long[]{}, // longField
+                                 new Short[]{}, // shortField
+                                 new String[]{
+                                    "CR10011473bis"
+                                } // stringField
+                            )
+                        }, // simpleStructSetField
+                        new SimpleStructSparseArray[]{} // simpleStructSparseArrayField
+                    )
+                );
+                TestComplexStruct0_n_0_1Result out = operations.testComplexStruct0_n_0_1(in);
+                this.commit();
+                assertNotNull("CR10011473", out);
+                assertNotNull("CR10011473", out.getResult());
+                assertNotNull("CR10011473", out.getResult().getSimpleStruct0_1Field());
+                assertEquals("CR10011473", out.getResult().getSimpleStruct0_1Field().get(0).getStringField());
+                assertEquals("CR10011473bis", out.getResult().getSimpleStruct0_1Field().get(1).getStringField());
+                assertEquals(Integer.valueOf(0), out.getResult().getSimpleStruct0_1Field().get(0).getIntegerField());
+                assertEquals(Integer.valueOf(1), out.getResult().getSimpleStruct0_1Field().get(1).getIntegerField());
+                assertEquals(Sets.asSet("CR10011473a","CR10011473b"), out.getResult().getSimpleStructSetField().get(0).getStringField());
+                assertEquals(Collections.singleton(Integer.valueOf(1)), out.getResult().getSimpleStructSetField().get(1).getIntegerField());
+                assertTrue(out.getResult().getSimpleStructSetField().get(1).getShortField().isEmpty());
             } finally {
                 super.taskId = null;
             }
@@ -1360,7 +1464,13 @@ public class TestMain {
                     2
                 );
                 this.begin();
-                invoicePositions.get(0).setProductId("p3");
+                InvoicePosition invoicePosition0 = invoicePositions.get(0);
+                invoicePosition0.setProductId("p3");
+                assertEquals(
+                    "CR10011367", 
+                    Collections.singleton("productId"), 
+                    DirtyObjects.getModifiedFeatures(invoicePosition0)
+                );
                 validateInvoicePositions(
                     invoicePositions,
                     productId,
@@ -3093,6 +3203,9 @@ public class TestMain {
                     "g2",
                     g2
                 );
+                if(!INCOMPLETE_OBJECTS_CAN_BE_FLUSHED){
+                    g1.setName("");
+                }
                 this.entityManager.flush();
                 g1.setName("Group 1");
                 this.commit();
@@ -4607,6 +4720,24 @@ public class TestMain {
                 super.taskId = null;
             }
             
+        }
+
+        /**
+         * @param model
+         * @param opencrxModel
+         * @throws ServiceException
+         * @throws IOException
+         */
+        private Model_1_0 loadForeignModel(
+            String uri
+        ) throws ServiceException, IOException {
+            URL url = new URL(uri);
+            System.out.println(url);
+            long startLoading = System.currentTimeMillis();
+            Model_1_0 model = new ModelBuilder_1(Boolean.FALSE, url).build();
+            long restoreTime = System.currentTimeMillis() - startLoading;
+            SysLog.performance("Restoring openCRX model " + uri, restoreTime);
+            return model;
         }
 
         /**

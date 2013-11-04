@@ -53,6 +53,7 @@ import org.openmdx.portal.servlet.action.AbstractAction;
 import org.openmdx.portal.servlet.action.CancelAction;
 import org.openmdx.portal.servlet.action.DeleteAction;
 import org.openmdx.portal.servlet.action.EditAction;
+import org.openmdx.portal.servlet.action.EditAsNewAction;
 import org.openmdx.portal.servlet.action.FindObjectAction;
 import org.openmdx.portal.servlet.action.FindObjectsAction;
 import org.openmdx.portal.servlet.action.GetOperationDialogAction;
@@ -86,6 +87,7 @@ import org.openmdx.portal.servlet.action.NewObjectAction;
 import org.openmdx.portal.servlet.action.ObjectGetAttributesAction;
 import org.openmdx.portal.servlet.action.ReloadAction;
 import org.openmdx.portal.servlet.action.SaveAction;
+import org.openmdx.portal.servlet.action.CreateAction;
 import org.openmdx.portal.servlet.action.SaveGridAction;
 import org.openmdx.portal.servlet.action.SaveSettingsAction;
 import org.openmdx.portal.servlet.action.SelectAndEditObjectAction;
@@ -196,6 +198,10 @@ public class DefaultActionFactory implements ActionFactory_1_0 {
 				return new GridMoveUpObjectAction();
 			case GetOperationDialogAction.EVENT_ID:
 				return new GetOperationDialogAction();
+			case EditAsNewAction.EVENT_ID:
+				return new EditAsNewAction();
+			case CreateAction.EVENT_ID:
+				return new CreateAction();
 			default:
 				return null;
 		}

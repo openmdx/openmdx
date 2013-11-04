@@ -8,7 +8,7 @@
  * This software is published under the BSD license
  * as listed below.
  * 
- * Copyright (c) 2004-2008, OMEX AG, Switzerland
+ * Copyright (c) 2004-2013, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -48,8 +48,6 @@
  */
 package org.openmdx.application.cci;
 
-import java.util.Map;
-
 import org.openmdx.application.configuration.Configuration;
 import org.openmdx.base.exception.ServiceException;
 
@@ -58,23 +56,22 @@ import org.openmdx.base.exception.ServiceException;
  */
 public interface ConfigurationProvider_1_0 { 
 
-	/**
-	 * Get a specific configuration
-	 *
-	 * @param		section
-	 *				the id of the section to be parsed, must not be be null
-	 * @param		specification
-	 *				a map of id/ConfigurationSpecifier entries, may be null
-	 * 
-	 * @return		the requested configuration
-	 *
-	 * @exception	ServiceException
-	 *				if the actual configuration does not match the 
-	 *				specification
-	 */
-	Configuration getConfiguration(
-		String[] section,
-		Map<String,ConfigurationSpecifier> specification
-	) throws ServiceException;
-	
+    /**
+     * Get a specific configuration
+     *
+     * @param       section
+     *              the id of the section to be parsed, must not be be null
+     * @param       specification
+     *              a map of id/ConfigurationSpecifier entries, may be null
+     * 
+     * @return      the requested configuration
+     *
+     * @exception   ServiceException
+     *              if the actual configuration does not match the 
+     *              specification
+     */
+    Configuration getConfiguration(
+        String[] section
+    ) throws ServiceException;
+
 }

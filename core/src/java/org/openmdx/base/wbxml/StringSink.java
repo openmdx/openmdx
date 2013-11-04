@@ -53,7 +53,6 @@ import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
-import java.nio.charset.CharsetEncoder;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -68,14 +67,21 @@ class StringSink extends ByteArrayOutputStream {
      * @param encoder
      */
     StringSink(
-        CharsetEncoder encoder
+        Charset charset
     ){
-        this.charset = encoder.charset();
-        this.target = new OutputStreamWriter(this, encoder);
+        this.charset = charset;
+        this.target = new OutputStreamWriter(this, charset.newEncoder());
     }
     
-    private final Writer target;
+    /**
+     * The character set
+     */
     private final Charset charset;
+    
+    /**
+     * The target
+     */
+    private final Writer target;
     
     /**
      * The string to token-value cache
@@ -156,7 +162,7 @@ class StringSink extends ByteArrayOutputStream {
     }
 
     @Override
-    public void reset(){
+    public synchronized void reset(){
         super.reset();
         this.cache.clear();
     }

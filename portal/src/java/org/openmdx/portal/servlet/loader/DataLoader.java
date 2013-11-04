@@ -97,7 +97,6 @@ public class DataLoader
 	}
 
     //-------------------------------------------------------------------------
-    @SuppressWarnings("unchecked")
     synchronized public void loadData(
         String location
     ) throws ServiceException {

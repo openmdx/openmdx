@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD licensev as listed below.
  * 
- * Copyright (c) 2010-2012, OMEX AG, Switzerland
+ * Copyright (c) 2010-2013, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -149,16 +149,17 @@ public class WBXMLStreamWriter extends AbstractXMLStreamWriter implements String
     private void appendValue(
         int value
     ) throws IOException{
-        byte[] buf = new byte[5];
+        int source = value;
+        byte[] target = new byte[5];
         int idx = 0;
         do {
-            buf[idx++] = (byte) (value & 0x7f);
-            value = value >> 7;
-        } while (value != 0);
+            target[idx++] = (byte) (source & 0x7f);
+            source >>= 7;
+        } while (source != 0);
         while (idx > 1) {
-            this.out.write(buf[--idx] | 0x80);
+            this.out.write(target[--idx] | 0x80);
         }
-        this.out.write(buf[0]);
+        this.out.write(target[0]);
     }
 
     /**
@@ -345,7 +346,7 @@ public class WBXMLStreamWriter extends AbstractXMLStreamWriter implements String
      * 
      * @throws IOException
      */
-    private void appendSwitchPage(Integer to) throws IOException {
+    private void appendSwitchPage(int to) throws IOException {
         this.out.write(GlobalTokens.SWITCH_PAGE);
         appendValue(to);
     }
@@ -528,7 +529,7 @@ public class WBXMLStreamWriter extends AbstractXMLStreamWriter implements String
                     public void flush(
                     ) throws IOException {
                         out.write(super.buf, 0, super.count);
-                    };
+                    }
 
                 };
                 BinaryLargeObjects.streamCopy(

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<uml:Model xmi:version="2.1" xmlns:xmi="http://schema.omg.org/spec/XMI/2.1" xmlns:uml="http://www.eclipse.org/uml2/3.0.0/UML" xmi:id="_yrxUAN6_EdmkJO73lqONhA" name="authentication1">
+<uml:Model xmi:version="2.1" xmlns:xmi="http://schema.omg.org/spec/XMI/2.1" xmlns:uml="http://www.eclipse.org/uml2/4.0.0/UML" xmi:id="_yrxUAN6_EdmkJO73lqONhA" name="authentication1">
   <packagedElement xmi:type="uml:Package" xmi:id="_3C7B8A60016D3FC4BEDF0244PPP" name="org">
     <packagedElement xmi:type="uml:Package" xmi:id="_3C7B8A60016D3FC4BEDF0244PP" name="openmdx">
       <packagedElement xmi:type="uml:Package" xmi:id="_3C7B8A60016D3FC4BEDF0244P" name="security">
@@ -9,15 +9,15 @@
               <general xmi:type="uml:Class" href="../openMDX%202%20~%20Core%20(EMF)/org.openmdx.base.uml#_3C7B8A60016D3FC487C80099"/>
             </generalization>
             <ownedAttribute xmi:id="_3C7B8A60016D417D0FBB02D8" name="credential" type="_3C7B8A60016D417D211400A3" isUnique="false" aggregation="composite" association="_3C7B8A60016D417D0FBB00E3">
-              <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_hVI0296-EdmkJO73lqONhA" value="1"/>
               <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_hVI02t6-EdmkJO73lqONhA"/>
+              <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_hVI0296-EdmkJO73lqONhA" value="1"/>
               <qualifier xmi:id="_3C7B8A60016D417D0FD80199" name="id" visibility="private">
                 <type xmi:type="uml:PrimitiveType" href="../openMDX%202%20~%20Core%20(EMF)/org.w3c.uml#_3C7B8A60016D3C8B62E40010"/>
               </qualifier>
             </ownedAttribute>
             <ownedAttribute xmi:id="_scldQfJFEdqAh-jti9npDQ" name="authenticationContext" visibility="private" type="_paVNMPJFEdqAh-jti9npDQ" aggregation="composite" association="_scldQPJFEdqAh-jti9npDQ">
-              <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_EgaCofJGEdqAh-jti9npDQ" value="1"/>
               <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_EgaCoPJGEdqAh-jti9npDQ"/>
+              <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_EgaCofJGEdqAh-jti9npDQ" value="1"/>
               <qualifier xmi:id="_HKUEIPJGEdqAh-jti9npDQ" name="id" visibility="private">
                 <type xmi:type="uml:PrimitiveType" href="../openMDX%202%20~%20Core%20(EMF)/org.w3c.uml#_3C7B8A60016D3C8B62E40010"/>
               </qualifier>
@@ -27,8 +27,8 @@
             <generalization xmi:id="_3C7B8A60016D417D3886011C" general="_3C7B8A60016D417D211400A3"/>
             <ownedAttribute xmi:id="_3C7B8A60016D417D2E9B0392" name="password">
               <type xmi:type="uml:PrimitiveType" href="../openMDX%202%20~%20Core%20(EMF)/org.w3c.uml#_3C7B8A60016D3C8B62E40010"/>
-              <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_hVCuNt6-EdmkJO73lqONhA" value="1"/>
               <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_hVCuNd6-EdmkJO73lqONhA"/>
+              <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_hVCuNt6-EdmkJO73lqONhA" value="1"/>
             </ownedAttribute>
             <ownedOperation xmi:id="_3C7B8A60016D414AD86003A3" name="change">
               <ownedParameter xmi:id="_hU8noN6-EdmkJO73lqONhA" direction="return">
@@ -57,8 +57,8 @@
               <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_7OffED1cEeGswrgO6Hs_iQ" value="1"/>
             </ownedAttribute>
             <ownedAttribute xmi:id="_3C7B8A60016D417D43A303D0" name="resetCredential" type="_3C7B8A60016D417D211400A3" isUnique="false" association="_3C7B8A60016D417D439D0056">
-              <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_hVI0496-EdmkJO73lqONhA" value="1"/>
               <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_hVI04t6-EdmkJO73lqONhA"/>
+              <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_hVI0496-EdmkJO73lqONhA" value="1"/>
               <qualifier xmi:id="_3C7B8A60016D417D43D601F2" name="index" visibility="private">
                 <type xmi:type="uml:PrimitiveType" href="../openMDX%202%20~%20Core%20(EMF)/org.w3c.uml#_3C7B8A60016D3CC6A34B0011"/>
               </qualifier>
@@ -89,14 +89,14 @@
           </packagedElement>
           <packagedElement xmi:type="uml:Association" xmi:id="_3C7B8A60016D417D0FBB00E3" name="SegmentHostsCredential" memberEnd="_3C7B8A60016D417D0FBB02D8 _3C7B8A60016D417D0FBB02DA">
             <ownedEnd xmi:id="_3C7B8A60016D417D0FBB02DA" name="segment" type="_3C7B8A60016D417D0F29038C" isUnique="false" association="_3C7B8A60016D417D0FBB00E3">
-              <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_hVI0396-EdmkJO73lqONhA" value="1"/>
               <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_hVI03t6-EdmkJO73lqONhA" value="1"/>
+              <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_hVI0396-EdmkJO73lqONhA" value="1"/>
             </ownedEnd>
           </packagedElement>
           <packagedElement xmi:type="uml:Association" xmi:id="_3C7B8A60016D417D439D0056" name="CredentialCanBeReset" memberEnd="_3C7B8A60016D417D43A303D0 _3C7B8A60016D417D43A303DA">
             <ownedEnd xmi:id="_3C7B8A60016D417D43A303DA" name="credentialToBeReset" type="_3C7B8A60016D417D211400A3" isUnique="false" association="_3C7B8A60016D417D439D0056">
-              <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_hVI0596-EdmkJO73lqONhA" value="*"/>
               <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_hVI05t6-EdmkJO73lqONhA"/>
+              <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_hVI0596-EdmkJO73lqONhA" value="*"/>
             </ownedEnd>
           </packagedElement>
           <packagedElement xmi:type="uml:Class" xmi:id="_paVNMPJFEdqAh-jti9npDQ" name="AuthenticationContext">
@@ -121,8 +121,8 @@
           </packagedElement>
           <packagedElement xmi:type="uml:Association" xmi:id="_scldQPJFEdqAh-jti9npDQ" name="SegmentHostsAuthenticationContext" memberEnd="_scldQfJFEdqAh-jti9npDQ _scldQvJFEdqAh-jti9npDQ">
             <ownedEnd xmi:id="_scldQvJFEdqAh-jti9npDQ" name="segment" visibility="private" type="_3C7B8A60016D417D0F29038C" association="_scldQPJFEdqAh-jti9npDQ">
-              <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_HPo58PJPEdqAh-jti9npDQ" value="1"/>
               <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_GdymQPJPEdqAh-jti9npDQ" value="1"/>
+              <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_HPo58PJPEdqAh-jti9npDQ" value="1"/>
             </ownedEnd>
           </packagedElement>
         </packagedElement>

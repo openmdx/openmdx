@@ -140,12 +140,4 @@ public class PrimitiveTypes {
    */
   static public final String XRI = "org:oasis-open:XRI";
 
-  /**
-   * <code>org:oasis-open:xri</code> is an alias for <code>org:w3c:string</code>.
-   * 
-   * @deprecated
-   */
-  @Deprecated
-  static public final String XRI_ALIAS = "org:oasis-open:xri";
-
 }

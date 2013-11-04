@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2012, OMEX AG, Switzerland
+ * Copyright (c) 2004-2013, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -85,10 +85,7 @@ public class Dataprovider_1 implements Dataprovider_1_0 {
         Configuration dataproviderConfiguration,
         ConfigurationProvider_1_0 configurationProvider
     ) throws ServiceException {
-        this.kernelConfiguration = configurationProvider.getConfiguration(
-            KERNEL_CONFIGURATION_SECTION,
-            null
-        );
+        this.kernelConfiguration = configurationProvider.getConfiguration(KERNEL_CONFIGURATION_SECTION);
         String namespace = this.kernelConfiguration.getFirstValue(
             SharedConfigurationEntries.NAMESPACE_ID
         );
@@ -105,7 +102,7 @@ public class Dataprovider_1 implements Dataprovider_1_0 {
             dataproviderConfiguration.values(
                 SharedConfigurationEntries.NAMESPACE_ID
             ).put(
-                0, 
+                Integer.valueOf(0), 
                 namespace
             );
             //
@@ -205,8 +202,7 @@ public class Dataprovider_1 implements Dataprovider_1_0 {
                 SparseArray<Object> legacyConfiguration = new TreeSparseArray<Object>();
                 legacyConfiguration.put(Integer.valueOf(0), Boolean.TRUE);
                 Configuration layerConfiguration = configurationProvider.getConfiguration(
-                    new String[]{layerName},
-                    null
+                    new String[]{layerName}
                 );
                 Map<String,SparseArray<?>> source = dataproviderConfiguration.entries();
                 Map<String,SparseArray<?>> target = layerConfiguration.entries();
@@ -283,8 +279,7 @@ public class Dataprovider_1 implements Dataprovider_1_0 {
                 new BeanFactory<Layer_1>(
                     "class",
                     configurationProvider.getConfiguration(
-                        new String[]{plugIn},
-                        null
+                        new String[]{plugIn}
                     ).entries()
                 ).instantiate()
             );

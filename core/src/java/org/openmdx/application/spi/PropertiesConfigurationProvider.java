@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2009-2010, OMEX AG, Switzerland
+ * Copyright (c) 2009-2013, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -66,7 +66,6 @@ import java.util.regex.Pattern;
 import javax.jdo.Constants;
 
 import org.openmdx.application.cci.ConfigurationProvider_1_0;
-import org.openmdx.application.cci.ConfigurationSpecifier;
 import org.openmdx.application.configuration.Configuration;
 import org.openmdx.base.collection.TreeSparseArray;
 import org.openmdx.base.exception.ServiceException;
@@ -323,8 +322,7 @@ public class PropertiesConfigurationProvider implements ConfigurationProvider_1_
      * @see org.openmdx.application.cci.ConfigurationProvider_1_0#getConfiguration(java.lang.String[], java.util.Map)
      */
     public Configuration getConfiguration(
-        String[] section,
-        Map<String, ConfigurationSpecifier> specification
+        String[] section
     ) throws ServiceException {
         Configuration configuration = new Configuration();
         amendConfiguration(
@@ -357,8 +355,7 @@ public class PropertiesConfigurationProvider implements ConfigurationProvider_1_
                 Resources.toMetaInfXRI(name + ".properties"),
                 true // strict
             ).getConfiguration(
-                section, 
-                null
+                section
             );
             amendConfiguration(
                 source,

@@ -792,8 +792,160 @@ public class Texts implements Serializable {
 		@Override
 		public String getActionsTitle(
 		) {
-			return this.getObject("ActionsTitle");      
+			return this.getObject("ActionsTitle");  
 		}
+
+		/* (non-Javadoc)
+		 * @see org.openmdx.portal.servlet.Texts_1_0#getOpenTitle()
+		 */
+        @Override
+        public String getOpenTitle() {
+			return this.getObject("OpenTitle");  
+        }
+
+		/* (non-Javadoc)
+		 * @see org.openmdx.portal.servlet.Texts_1_0#getQuitTitle()
+		 */
+        @Override
+        public String getQuitTitle() {
+			return this.getObject("QuitTitle");  
+        }
+
+		/* (non-Javadoc)
+		 * @see org.openmdx.portal.servlet.Texts_1_0#getExitTitle()
+		 */
+        @Override
+        public String getExitTitle() {
+			return this.getObject("ExitTitle");  
+        }
+
+		/* (non-Javadoc)
+		 * @see org.openmdx.portal.servlet.Texts_1_0#getSaveAsTitle()
+		 */
+        @Override
+        public String getSaveAsTitle() {
+			return this.getObject("SaveAsTitle");  
+        }
+
+		/* (non-Javadoc)
+		 * @see org.openmdx.portal.servlet.Texts_1_0#getAcceptTitle()
+		 */
+        @Override
+        public String getAcceptTitle() {
+			return this.getObject("AcceptTitle");  
+        }
+
+		/* (non-Javadoc)
+		 * @see org.openmdx.portal.servlet.Texts_1_0#getDeclineTitle()
+		 */
+        @Override
+        public String getDeclineTitle() {
+			return this.getObject("DeclineTitle");  
+        }
+
+		/* (non-Javadoc)
+		 * @see org.openmdx.portal.servlet.Texts_1_0#getRepeatTitle()
+		 */
+        @Override
+        public String getRepeatTitle() {
+			return this.getObject("RepeatTitle");  
+        }
+
+		/* (non-Javadoc)
+		 * @see org.openmdx.portal.servlet.Texts_1_0#getRetryTitle()
+		 */
+        @Override
+        public String getRetryTitle() {
+			return this.getObject("RetryTitle");  
+        }
+
+		/* (non-Javadoc)
+		 * @see org.openmdx.portal.servlet.Texts_1_0#getNextTitle()
+		 */
+        @Override
+        public String getNextTitle() {
+			return this.getObject("NextTitle");  
+        }
+
+		/* (non-Javadoc)
+		 * @see org.openmdx.portal.servlet.Texts_1_0#getPreviousTitle()
+		 */
+        @Override
+        public String getPreviousTitle() {
+			return this.getObject("PreviousTitle");  
+        }
+
+		/* (non-Javadoc)
+		 * @see org.openmdx.portal.servlet.Texts_1_0#getForwardTitle()
+		 */
+        @Override
+        public String getForwardTitle() {
+			return this.getObject("ForwardTitle");  
+        }
+
+		/* (non-Javadoc)
+		 * @see org.openmdx.portal.servlet.Texts_1_0#getBackTitle()
+		 */
+        @Override
+        public String getBackTitle() {
+			return this.getObject("BackTitle");  
+        }
+
+		/* (non-Javadoc)
+		 * @see org.openmdx.portal.servlet.Texts_1_0#getContinueTitle()
+		 */
+        @Override
+        public String getContinueTitle() {
+			return this.getObject("ContinueTitle");  
+        }
+
+		/* (non-Javadoc)
+		 * @see org.openmdx.portal.servlet.Texts_1_0#getResetTitle()
+		 */
+        @Override
+        public String getResetTitle() {
+			return this.getObject("ResetTitle");  
+        }
+
+		/* (non-Javadoc)
+		 * @see org.openmdx.portal.servlet.Texts_1_0#getCompleteTitle()
+		 */
+        @Override
+        public String getCompleteTitle() {
+			return this.getObject("CompleteTitle");  
+        }
+
+		/* (non-Javadoc)
+		 * @see org.openmdx.portal.servlet.Texts_1_0#getFinishTitle()
+		 */
+        @Override
+        public String getFinishTitle() {
+			return this.getObject("FinishTitle");  
+        }
+
+		/* (non-Javadoc)
+		 * @see org.openmdx.portal.servlet.Texts_1_0#getExpandTitle()
+		 */
+        @Override
+        public String getExpandTitle() {
+			return this.getObject("ExpandTitle");  
+        }
+
+		/* (non-Javadoc)
+		 * @see org.openmdx.portal.servlet.Texts_1_0#getCollapseTitle()
+		 */
+        @Override
+        public String getCollapseTitle() {
+			return this.getObject("CollapseTitle");  
+        }
+
+		/* (non-Javadoc)
+		 * @see org.openmdx.portal.servlet.Texts_1_0#getSelectExistingText()
+		 */
+        @Override
+        public String getSelectExistingText() {
+			return this.getObject("SelectExistingText");  
+        }
 
 		//-------------------------------------------------------------------------
 		// Variables

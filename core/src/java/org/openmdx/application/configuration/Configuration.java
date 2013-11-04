@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2008, OMEX AG, Switzerland
+ * Copyright (c) 2004-2013, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -145,7 +145,7 @@ public class Configuration
         boolean defaultValue
     ){
         if (containsEntry(entryName)) {
-	        final Object value = values(entryName).get(0);
+	        final Object value = values(entryName).get(Integer.valueOf(0));
 	        if(value instanceof Boolean) {
 	        	return ((Boolean)value).booleanValue();
 	        }
@@ -239,7 +239,7 @@ public class Configuration
         // Set the value at its correct position. 
         // Do not allow overwriting 
         final SparseArray<?> list = values(name);
-        if (list.get(index) != null) throw new ServiceException(
+        if (list.get(Integer.valueOf(index)) != null) throw new ServiceException(
             BasicException.Code.DEFAULT_DOMAIN, 
             BasicException.Code.DUPLICATE,
             "Attempt to overwrite " + key,
@@ -247,12 +247,12 @@ public class Configuration
             new BasicException.Parameter("index",index),
             new BasicException.Parameter(
                 "values",
-                list.get(index),
+                list.get(Integer.valueOf(index)),
                 value
             )
         );
         values(name).put(
-            index,
+            Integer.valueOf(index),
             value
         );
     }

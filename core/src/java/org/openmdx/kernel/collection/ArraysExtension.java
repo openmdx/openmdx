@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2012, OMEX AG, Switzerland
+ * Copyright (c) 2004-2013, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -52,16 +52,13 @@ import java.lang.reflect.Array;
 import java.util.AbstractList;
 import java.util.AbstractMap;
 import java.util.AbstractSet;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
-
-import org.openmdx.kernel.exception.BasicException;
-
-import java.util.Arrays;
 
 /**
  * Array Utility Class
@@ -427,14 +424,14 @@ public class ArraysExtension {
             if(!this.keysAreNormalized) {
                 boolean normalizeKeys = false;
                 for(int i = 0; i < keys.length; i++) {
-                    if(keys[i] != this.normalizeKey(keys[i])) {
+                    if(keys[i] != InternalizedKeys.internalize(keys[i])) {
                         normalizeKeys = true;
                         break;
                     }
                 }
                 if(normalizeKeys) {
                     for(int i = 0; i < this.keys.length; i++) {
-                        this.keys[i] = this.normalizeKey(this.keys[i]);
+                        this.keys[i] = InternalizedKeys.internalize(this.keys[i]);
                     }
                 }
                 this.keysAreNormalized = true;
@@ -462,43 +459,11 @@ public class ArraysExtension {
             return new EntrySet();
         }
 
-        private Object normalizeKey(
-            Object key
-        ) {
-            if(key instanceof String) {
-                return ((String)key).intern();
-            } else if (key instanceof Integer) {
-                Integer i = ((Integer) key).intValue();
-                Integer integer = Integer.valueOf(i);
-                if(integer != Integer.valueOf(i)) throw BasicException.initHolder(
-                    new RuntimeException(
-                        "Inappropriate key value, the supported range is implementation and configuration dependent",
-                        BasicException.newEmbeddedExceptionStack(
-                            BasicException.Code.DEFAULT_DOMAIN,
-                            BasicException.Code.BAD_PARAMETER,
-                            new BasicException.Parameter("actual-value", i)
-                        )
-                    )
-                );
-                return integer;
-            } else throw BasicException.initHolder(
-                new RuntimeException(
-                    "Inappropriate key class",
-                    BasicException.newEmbeddedExceptionStack(
-                        BasicException.Code.DEFAULT_DOMAIN,
-                        BasicException.Code.BAD_PARAMETER,
-                        new BasicException.Parameter("supported", String.class.getName(), Integer.class.getName()),
-                        new BasicException.Parameter("actual", key == null ? null : key.getClass().getName())
-                    )
-                )
-            );
-        }
-
         private int slotOf(
-            Object key
+            Object rawKey
         ){
             this.normalizeKeys();
-            key = this.normalizeKey(key);
+            Object key = InternalizedKeys.internalize(rawKey);
             for(
                 int index = 0, iLimit = size();
                 index < iLimit;

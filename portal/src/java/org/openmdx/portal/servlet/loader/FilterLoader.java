@@ -8,7 +8,7 @@
  * This software is published under the BSD license
  * as listed below.
  * 
- * Copyright (c) 2004-2007, OMEX AG, Switzerland
+ * Copyright (c) 2004-2013, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -53,6 +53,7 @@
 package org.openmdx.portal.servlet.loader;
 
 import java.io.ByteArrayOutputStream;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Iterator;
@@ -76,10 +77,20 @@ import org.openmdx.portal.servlet.UiContext;
 import org.openmdx.portal.servlet.WebKeys;
 import org.w3c.cci2.BinaryLargeObjects;
 
+/**
+ * FilterLoader
+ *
+ */
 public class FilterLoader
     extends Loader {
 
-    //-------------------------------------------------------------------------
+    /**
+     * Constructor.
+     *
+     * @param context
+     * @param portalExtension
+     * @param model
+     */
     public FilterLoader(
         ServletContext context,
         PortalExtension_1_0 portalExtension,
@@ -92,12 +103,20 @@ public class FilterLoader
         this.model = model;
     }
 
-    //-------------------------------------------------------------------------
-    @SuppressWarnings("unchecked")
+    /**
+     * Create default filters for given reference.
+     * 
+     * @param qualifiedReferenceName
+     * @param referencedType
+     * @param filterMap
+     * @param uiContext
+     * @param model
+     * @throws ServiceException
+     */
     private void createDefaultFilters(
         String qualifiedReferenceName,
         ModelElement_1_0 referencedType,
-        Map filterMap,
+        Map<String,Filters> filterMap,
         UiContext uiContext,
         Model_1_0 model
     ) throws ServiceException {
@@ -144,65 +163,69 @@ public class FilterLoader
             )
         );
         // Create a filter for each referenced type (only if there is more than one referenced type)
-        Map assertableInspectors = uiContext.getAssertableInspectors(UiContext.MAIN_PERSPECTIVE);
-        if(referencedType.objGetList("allSubtype").size() > 1) {
-            for(Iterator k = referencedType.objGetList("allSubtype").iterator(); k.hasNext(); ) {
-                ModelElement_1_0 subtype = model.getElement(k.next());
-                if(!((Boolean)subtype.objGetValue("isAbstract")).booleanValue()) {
-                    String inspectorQualifiedName = (String)subtype.objGetValue("qualifiedName");
-                    org.openmdx.ui1.jmi1.AssertableInspector inspector =
-                        (org.openmdx.ui1.jmi1.AssertableInspector)assertableInspectors.get(inspectorQualifiedName);
-                    if(inspector == null) {
-                    	SysLog.warning("No inspector found for", inspectorQualifiedName);
-                        System.out.println(consolePrefix + "WARNING: no inspector found for " + inspectorQualifiedName);
-                    } 
-                    else {
-                    	String iconKey = inspector.getIconKey();
-                        iconKey = iconKey == null ? 
-                        	WebKeys.ICON_DEFAULT : 
-                        	iconKey.substring(iconKey.lastIndexOf(":") + 1) + ".gif";
-                        Integer[] order = null;
-                        if(inspector.getOrder() != null) {
-                            order = (Integer[])inspector.getOrder().toArray(new Integer[inspector.getOrder().size()]);
-                        }
-                        if(
-                            (inspector != null) &&
-                            inspector.isFilterable() &&
-                            !inspector.getLabel().isEmpty()
-                        ) {
-                            filters.addFilter(
-                                new Filter(
-                                    (String)inspector.getLabel().get(0),
-                                    (String[])inspector.getLabel().toArray(new String[inspector.getLabel().size()]),
-                                    FILTER_GROUP_NAME_CLASSES,
-                                    iconKey,
-                                    order,
-                                    Collections.singletonList(
-                                        (Condition)new IsInstanceOfCondition(
-                                        	false, // SystemAttributes.OBJECT_CLASS
-                                            (String)subtype.objGetValue("qualifiedName")
-                                        )
-                                    ),
-                                    null, // order
-                                    null, // extension
-                                    this.getClass().getName()                                                        
-                                )
-                            );
-                        }
-                    }
-                }
-            }
-        }        
+        if(!"org:openmdx:base:ExtentCapable".equals(referencedType.objGetValue("qualifiedName"))) {
+	        Map assertableInspectors = uiContext.getAssertableInspectors(UiContext.MAIN_PERSPECTIVE);
+	        if(referencedType.objGetList("allSubtype").size() > 1) {
+	            for(Iterator k = referencedType.objGetList("allSubtype").iterator(); k.hasNext(); ) {
+	                ModelElement_1_0 subtype = model.getElement(k.next());
+	                if(!((Boolean)subtype.objGetValue("isAbstract")).booleanValue()) {
+	                    String inspectorQualifiedName = (String)subtype.objGetValue("qualifiedName");
+	                    org.openmdx.ui1.jmi1.AssertableInspector inspector =
+	                        (org.openmdx.ui1.jmi1.AssertableInspector)assertableInspectors.get(inspectorQualifiedName);
+	                    if(inspector == null) {
+	                    	SysLog.warning("No inspector found for", inspectorQualifiedName);
+	                        System.out.println(consolePrefix + "WARNING: no inspector found for " + inspectorQualifiedName);
+	                    } else {
+	                    	String iconKey = inspector.getIconKey();
+	                        iconKey = iconKey == null 
+	                        	? WebKeys.ICON_DEFAULT 
+	                        	: iconKey.substring(iconKey.lastIndexOf(":") + 1) + ".gif";
+	                        Integer[] order = null;
+	                        if(inspector.getOrder() != null) {
+	                            order = (Integer[])inspector.getOrder().toArray(new Integer[inspector.getOrder().size()]);
+	                        }
+	                        if(
+	                            (inspector != null) &&
+	                            inspector.isFilterable() &&
+	                            !inspector.getLabel().isEmpty()
+	                        ) {
+	                            filters.addFilter(
+	                                new Filter(
+	                                    (String)inspector.getLabel().get(0),
+	                                    (String[])inspector.getLabel().toArray(new String[inspector.getLabel().size()]),
+	                                    FILTER_GROUP_NAME_CLASSES,
+	                                    iconKey,
+	                                    order,
+	                                    Collections.singletonList(
+	                                        (Condition)new IsInstanceOfCondition(
+	                                        	false, // SystemAttributes.OBJECT_CLASS
+	                                            (String)subtype.objGetValue("qualifiedName")
+	                                        )
+	                                    ),
+	                                    null, // order
+	                                    null, // extension
+	                                    this.getClass().getName()                                                        
+	                                )
+	                            );
+	                        }
+	                    }
+	                }
+	            }
+	        }
+        }
     }
-    
-    //-------------------------------------------------------------------------
+
     /**
      * Loads filter configuration. Assumes that ui config is loaded.
+     * 
+     * @param uiContext
+     * @param filterStore
+     * @return
+     * @throws ServiceException
      */
-    @SuppressWarnings("unchecked")
     synchronized public boolean loadFilters(
         UiContext uiContext,
-        Map filterStore
+        Map<String,Filters> filterStore
     ) throws ServiceException {
     	String messagePrefix = new Date() + "  ";
         boolean resetSession = false;
@@ -213,17 +236,13 @@ public class FilterLoader
         if(crc != filterCRC) {
             // load filters from config
             filterStore.clear();
-            Set reourcePaths = this.context.getResourcePaths("/WEB-INF/config/filters/");
+            Set<String> reourcePaths = this.context.getResourcePaths("/WEB-INF/config/filters/");
             if(reourcePaths != null) {
             	System.out.println(messagePrefix + "Loading /WEB-INF/config/filters/");
                 SysLog.info("Loading /WEB-INF/config/filters/");
-                Set filterResources = new TreeSet(reourcePaths);
-                for(
-                    Iterator i = filterResources.iterator(); 
-                    i.hasNext(); 
-                ) {
+                Set<String> filterResources = new TreeSet<String>(reourcePaths);
+                for(String path: filterResources) { 
                     try {
-                        String path = (String)i.next();
                         if(!path.endsWith("/")) {
                             try {
                             	ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -251,33 +270,24 @@ public class FilterLoader
                                         );
                                     }
                                 }
-                            }
-                            catch(Exception e) {
+                            } catch(Exception e) {
                             	new ServiceException(e).log();
                                 System.out.println(messagePrefix + "STATUS: " + e.getMessage() + " (for more info see log)");
                             }
                         }
-                    }
-                    catch(Exception e) {
+                    } catch(Exception e) {
                     	new ServiceException(e).log();
                         System.out.println(messagePrefix + "STATUS: " + e.getMessage() + " (for more info see log)");
                     }
                 }
             }
-
             // Create standard filters for all referenced types
-            for(
-                Iterator i = this.model.getContent().iterator(); 
-                i.hasNext(); 
-            ) {
-                ModelElement_1_0 element = (ModelElement_1_0)i.next();
+            for(ModelElement_1_0 element: this.model.getContent()) {
                 if(element.isClassType()) {
                     // Default filters for all modeled features
-                    for(
-                        Iterator j = element.objGetMap("allFeature").values().iterator(); 
-                        j.hasNext(); 
-                    ) {
-                        ModelElement_1_0 feature = (ModelElement_1_0)j.next();
+                	@SuppressWarnings("unchecked")
+                    Collection<ModelElement_1_0> features = element.objGetMap("allFeature").values();
+                    for(ModelElement_1_0 feature: features) {
                         if(feature.isReferenceType() && !this.model.referenceIsStoredAsAttribute(feature)) {                            
                             String qualifiedReferenceName = element.objGetValue("qualifiedName") + ":" + feature.objGetValue("name");
                             ModelElement_1_0 referencedType = this.model.getDereferencedType(feature.objGetValue("type"));                            
@@ -291,11 +301,7 @@ public class FilterLoader
                         }                        
                     }
                     // Default filters for all customized features
-                    for(
-                        Iterator j = uiContext.getUiSegment(UiContext.MAIN_PERSPECTIVE).getFeatureDefinition().iterator();
-                        j.hasNext();
-                    ) {
-                        org.openmdx.ui1.jmi1.FeatureDefinition featureDefinition = (org.openmdx.ui1.jmi1.FeatureDefinition)j.next();
+                    for(org.openmdx.ui1.jmi1.FeatureDefinition featureDefinition: uiContext.getUiSegment(UiContext.MAIN_PERSPECTIVE).<org.openmdx.ui1.jmi1.FeatureDefinition>getFeatureDefinition()) {
                         if(featureDefinition instanceof org.openmdx.ui1.jmi1.StructuralFeatureDefinition) {
                             org.openmdx.ui1.jmi1.StructuralFeatureDefinition structuralFeature = (org.openmdx.ui1.jmi1.StructuralFeatureDefinition)featureDefinition;
                             String qualifiedReferenceName = structuralFeature.refGetPath().getBase();

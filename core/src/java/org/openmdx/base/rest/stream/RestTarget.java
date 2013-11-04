@@ -52,11 +52,13 @@
 
 package org.openmdx.base.rest.stream;
 
+import java.io.IOException;
+
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 
-import org.openmdx.application.rest.http.spi.Target;
 import org.openmdx.base.naming.Path;
+import org.openmdx.base.rest.spi.Target;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.id.UUIDs;
 
@@ -110,13 +112,18 @@ public abstract class RestTarget implements Target {
 
     /**
      * Terminates and flushes the document
+     * 
+     * @throws BasicException 
      */
-    public void close()
-    throws XMLStreamException {
-        if (this.writer != null) {
+    @Override
+    public void close(
+    ) throws IOException {
+        if (this.writer != null) try {
             this.writer.writeEndDocument();
             this.writer.flush();
             this.writer = null;
+        } catch (XMLStreamException exception) {
+            throw new IOException("Flushing failed", exception);
         }
     }
 

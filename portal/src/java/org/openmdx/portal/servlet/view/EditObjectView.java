@@ -8,7 +8,7 @@
  * This software is published under the BSD license
  * as listed below.
  * 
- * Copyright (c) 2004-2007, OMEX AG, Switzerland
+ * Copyright (c) 2004-2013, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -69,80 +69,194 @@ import org.openmdx.portal.servlet.Action;
 import org.openmdx.portal.servlet.ApplicationContext;
 import org.openmdx.portal.servlet.WebKeys;
 import org.openmdx.portal.servlet.action.CancelAction;
+import org.openmdx.portal.servlet.action.CreateAction;
 import org.openmdx.portal.servlet.action.SaveAction;
 import org.openmdx.portal.servlet.attribute.Attribute;
 import org.openmdx.portal.servlet.control.EditInspectorControl;
 
-public class EditObjectView
-    extends ObjectView
-    implements Serializable {
+/**
+ * EditObjectView
+ *
+ */
+public class EditObjectView extends ObjectView implements Serializable {
   
-    //-------------------------------------------------------------------------
-    /*
-     * Constructor for existing objects.
+    /**
+     * Constructor 
+     *
+     * @param id
+     * @param containerElementId
+     * @param editObjectIdentity
+     * @param app
+     * @param historyActions
+     * @param lookupType
+     * @param resourcePathPrefix
+     * @param navigationTarget
+     * @param viewMode
+     * @throws ServiceException
      */
     public EditObjectView(
         String id,
         String containerElementId,
         Path editObjectIdentity,
-        ApplicationContext application,
+        ApplicationContext app,
         Map<Path,Action> historyActions,
         String lookupType,
         String resourcePathPrefix,
         String navigationTarget,
-        ViewMode mode
+        ViewMode viewMode
+    ) throws ServiceException {
+        this(
+            id,
+            containerElementId,
+            editObjectIdentity,
+            app,
+            historyActions,
+            lookupType,
+            resourcePathPrefix,
+            navigationTarget,
+            viewMode,
+            true // isEditMode
+        );
+    }
+
+    /**
+     * Constructor 
+     *
+     * @param id
+     * @param containerElementId
+     * @param editObjectIdentity
+     * @param app
+     * @param historyActions
+     * @param lookupType
+     * @param resourcePathPrefix
+     * @param navigationTarget
+     * @param viewMode
+     * @param isEditMode
+     * @throws ServiceException
+     */
+    public EditObjectView(
+        String id,
+        String containerElementId,
+        Path editObjectIdentity,
+        ApplicationContext app,
+        Map<Path,Action> historyActions,
+        String lookupType,
+        String resourcePathPrefix,
+        String navigationTarget,
+        ViewMode viewMode,
+        boolean isEditMode
     ) throws ServiceException {
         this(
             id,
             containerElementId,
             // Handle edit with its own persistence manager
-            (RefObject_1_0)application.getNewPmData().getObjectById(editObjectIdentity),
+            (RefObject_1_0)app.getNewPmData().getObjectById(editObjectIdentity),
             editObjectIdentity,
-            application,
+            app,
             historyActions,
             lookupType,
             null, // parent
             null, // forReference
             resourcePathPrefix,
             navigationTarget,
-            mode
+            viewMode,
+            isEditMode
         );
+        if(!isEditMode) {
+        	PersistenceManager pm = JDOHelper.getPersistenceManager(this.getObject());
+        	this.setParent(
+        		(RefObject_1_0)pm.getObjectById(editObjectIdentity.getParent().getParent())
+        	);
+        	this.setForReference(editObjectIdentity.getParent().getBase());
+        }
     }
-  
-    //-------------------------------------------------------------------------
+
     /**
-     * editObjectRefMofId != null ==>
-     * 1. read object with given refMofId
-     * 2. apply changes to this object
-     * 3. commit
-     * <p>
-     * editObjectRefMofId == null ==>
-     *    parent == null (edit mode)
-     *    1. apply changes to object
-     *    2. commit
-     *    parent != null (new mode)
-     *    1. add object to parent.reference
-     *    2. commit
+     * Constructor 
+     *
+     * @param id
+     * @param containerElementId
+     * @param object
+     * @param editObjectIdentity
+     * @param app
+     * @param historyActions
+     * @param lookupType
+     * @param parent
+     * @param forReference
+     * @param resourcePathPrefix
+     * @param navigationTarget
+     * @param viewMode
+     * @throws ServiceException
      */
     public EditObjectView(
         String id,
         String containerElementId,
         RefObject_1_0 object,
         Path editObjectIdentity,
-        ApplicationContext application,
+        ApplicationContext app,
         Map<Path,Action> historyActions,
         String lookupType,
         RefObject_1_0 parent,
         String forReference,
         String resourcePathPrefix,
         String navigationTarget,
-        ViewMode mode
+        ViewMode viewMode
+    ) throws ServiceException {
+    	this(
+    		id, 
+    		containerElementId,
+    		object,
+    		editObjectIdentity, 
+    		app, 
+    		historyActions, 
+    		lookupType, 
+    		parent,
+    		forReference,
+    		resourcePathPrefix, 
+    		navigationTarget,
+    		viewMode,
+    		false
+    	);
+    }
+
+    /**
+     * Constructor 
+     *
+     * @param id
+     * @param containerElementId
+     * @param object
+     * @param editObjectIdentity
+     * @param app
+     * @param historyActions
+     * @param lookupType
+     * @param parent
+     * @param forReference
+     * @param resourcePathPrefix
+     * @param navigationTarget
+     * @param viewMode
+     * @param isEditMode
+     * @throws ServiceException
+     */
+    public EditObjectView(
+        String id,
+        String containerElementId,
+        RefObject_1_0 object,
+        Path editObjectIdentity,
+        ApplicationContext app,
+        Map<Path,Action> historyActions,
+        String lookupType,
+        RefObject_1_0 parent,
+        String forReference,
+        String resourcePathPrefix,
+        String navigationTarget,
+        ViewMode viewMode,
+        boolean isEditMode
     ) throws ServiceException {
         super(
             id,
             containerElementId,
             object,
-            application,
+            app,
             historyActions,
             lookupType,
             resourcePathPrefix,
@@ -151,7 +265,8 @@ public class EditObjectView
         );
         this.editObjectIdentity = editObjectIdentity;    
         this.forReference = forReference;
-        this.mode = mode;
+        this.viewMode = viewMode;
+        this.isEditMode = isEditMode;
         this.parent = parent;
         EditInspectorControl inspectorControl = this.app.createEditInspectorControl(
             id,
@@ -166,20 +281,41 @@ public class EditObjectView
             object
         );
     }
+
+    /**
+     * Return true if view is in edit mode.
+     * 
+     * @return
+     */
+    public boolean isEditMode(
+   	) {
+    	return this.isEditMode;
+    }
+
+    /**
+     * Get parent object of this view.
+     * 
+     * @return
+     */
+    public RefObject_1_0 getParent(
+    ) {
+    	return this.parent;
+    }
   
-  //-------------------------------------------------------------------------
-  public boolean isEditMode(
-  ) {
-    return this.parent == null;
-  }
-  
-  //-------------------------------------------------------------------------
-  public RefObject_1_0 getParent(
-  ) {
-      return this.parent;
-  }
-  
-    //-------------------------------------------------------------------------
+    /**
+	 * Set parent.
+	 * 
+	 * @param parent The parent to set.
+	 */
+	public void setParent(
+		RefObject_1_0 parent
+	) {
+		this.parent = parent;
+	}
+
+  	/* (non-Javadoc)
+  	 * @see org.openmdx.portal.servlet.view.ObjectView#refresh(boolean, boolean)
+  	 */
   	@Override
   	public PersistenceManager refresh(
   		boolean refreshData,
@@ -191,10 +327,17 @@ public class EditObjectView
   		return null;
   	}
 
-	// -------------------------------------------------------------------------
+	/**
+	 * Store object. Map parameter map this view's object.
+	 * 
+	 * @param parameterMap
+	 * @param attributeMap
+	 * @throws ServiceException
+	 */
 	public void storeObject(
-	    Map parameterMap,
-	    Map<String, Attribute> attributeMap
+	    Map<String,String[]> parameterMap,
+	    Map<String, Attribute> attributeMap,
+	    boolean doCreate
 	) throws ServiceException {
 		// Collect all attributes
 		for(AttributeTab tab: this.getAttributePane().getAttributeTab()) {
@@ -206,36 +349,25 @@ public class EditObjectView
 						if((attribute != null) && !attribute.isEmpty()) {
 							attributeMap.put(
 							    attribute.getValue().getName(),
-							    attribute);
+							    attribute
+							);
 						}
 					}
 				}
 			}
 		}
-		RefObject_1_0 target = this.getRefObject();
-		if(this.isEditMode()) {
-			PersistenceManager pm = JDOHelper.getPersistenceManager(target);
-			try {
-				pm.currentTransaction().begin();
-				this.app.getPortalExtension().updateObject(
-				    target,
-				    parameterMap,
-				    attributeMap,
-				    this.app
-				);
-				pm.currentTransaction().commit();
-			} catch(Exception e) {
-				try {
-					pm.currentTransaction().rollback();
-				} catch(Exception e1) {}
-				throw new ServiceException(e);
-			}			
-		} else {
+		if(doCreate) {
 			PersistenceManager pm = JDOHelper.getPersistenceManager(this.parent);
+			// Create a new instance if existing object is persistent
+			if(JDOHelper.isPersistent(this.object)) {
+				this.object = (RefObject_1_0)this.getRefObject().refClass().refCreateInstance(null);
+				((RefObject_1_0)this.object).refInitialize(false, false);				
+			}
+			Object target = this.getObject();
 			try {
 				pm.currentTransaction().begin();
 				this.app.getPortalExtension().updateObject(
-				    target,
+					target,
 				    parameterMap,
 				    attributeMap,
 				    this.app
@@ -246,8 +378,9 @@ public class EditObjectView
 						qualifiers = new String[] {
 							UUIDConversion.toUID(UUIDs.newUUID())
 						};
-					}					
-					pm.refresh(this.parent); // no CONCURRENT_MODIFICATION in case the parent was updated by some other user 
+					}
+					// Prevent CONCURRENT_MODIFICATION in case the parent was updated by some other user
+					pm.refresh(this.parent);
 					Object container = this.parent.refGetValue(this.forReference);
 					((RefContainer)container).refAdd(
 					    org.oasisopen.cci2.QualifierType.REASSIGNABLE,
@@ -255,6 +388,7 @@ public class EditObjectView
 					    target
 					);
 					pm.currentTransaction().commit();
+					this.editObjectIdentity = ((RefObject_1_0)target).refGetPath();
 				} else {
 					try {
 						pm.currentTransaction().rollback();
@@ -265,18 +399,50 @@ public class EditObjectView
 					pm.currentTransaction().rollback();				
 				} catch(Exception e1) {}
 				throw new ServiceException(e);
+			}			
+		} else {
+			PersistenceManager pm = JDOHelper.getPersistenceManager(this.getObject());
+			try {
+				pm.currentTransaction().begin();
+				this.app.getPortalExtension().updateObject(
+					// Update persistent object
+					this.editObjectIdentity == null
+						? this.getObject()
+						: pm.getObjectById(this.editObjectIdentity),
+				    parameterMap,
+				    attributeMap,
+				    this.app
+				);
+				if(this.app.getErrorMessages().isEmpty()) {
+					pm.currentTransaction().commit();
+				} else {
+					try {
+						pm.currentTransaction().rollback();
+					} catch(Exception ignore) {}
+				}
+			} catch(Exception e) {
+				try {
+					pm.currentTransaction().rollback();
+				} catch(Exception e1) {}
+				throw new ServiceException(e);
 			}
 		}
-		this.editObjectIdentity = target.refGetPath();
 	}
-  
-	//-------------------------------------------------------------------------
+
+	/* (non-Javadoc)
+	 * @see org.openmdx.portal.servlet.view.View#getType()
+	 */
+	@Override
 	public String getType(
 	) {
 		return ObjectView.VIEW_EDIT_OBJECT;
 	}
 
-	//-------------------------------------------------------------------------
+	/**
+	 * Get cancel action.
+	 * 
+	 * @return
+	 */
 	public Action getCancelAction(
 	) {
 		return new Action(
@@ -288,69 +454,131 @@ public class EditObjectView
 		); 
 	}
 
-	//-------------------------------------------------------------------------
+	/**
+	 * Get save action.
+	 * 
+	 * @return
+	 */
 	public Action getSaveAction(
 	) {
-		return new Action(
-			SaveAction.EVENT_ID,
-			new Action.Parameter[]{},
-			this.app.getTexts().getSaveTitle(),
-			WebKeys.ICON_SAVE,
-			true
-		);
+		if(this.editObjectIdentity == null) {
+			return null;
+		} else {
+			return new Action(
+				SaveAction.EVENT_ID,
+				new Action.Parameter[]{},
+				this.app.getTexts().getSaveTitle(),
+				WebKeys.ICON_SAVE,
+				true
+			);
+		}
 	}
 
-	// -------------------------------------------------------------------------
+	/**
+	 * Get save as new action.
+	 * 
+	 * @return
+	 */
+	public Action getCreateAction(
+	) {
+		if(this.isEditMode) {
+			return null;
+		} else {
+			return new Action(
+				CreateAction.EVENT_ID,
+				new Action.Parameter[]{},
+				this.app.getTexts().getNewText(),
+				WebKeys.ICON_SAVE,
+				true
+			);
+		}
+	}
+
+	/**
+	 * Get edit inspector control.
+	 * 
+	 * @return
+	 */
 	public EditInspectorControl getEditInspectorControl(
 	) {
 		return (EditInspectorControl)this.inspectorControl;
 	}
 
-    //-------------------------------------------------------------------------
+    /**
+     * Get parent of this view's object.
+     * 
+     * @return
+     */
     public RefObject_1_0 getParentObject(
     ) {
         return this.parent;
     }
     
-    //-------------------------------------------------------------------------
+    /**
+     * Objects are added to this reference.
+     * 
+     * @return
+     */
     public String getForReference(
     ) {
         return this.forReference;
     }
     
-    //-------------------------------------------------------------------------
+    /**
+	 * Set forReference.
+	 * 
+	 * @param forReference The forReference to set.
+	 */
+	public void setForReference(
+		String forReference
+	) {
+		this.forReference = forReference;
+	}
+
+    /**
+     * Get view mode.
+     * 
+     * @return
+     */
     public ViewMode getMode(
     ) {
-        return this.mode;
+        return this.viewMode;
     }
     
-    //-------------------------------------------------------------------------
+    /**
+     * Get edit object identity.
+     * 
+     * @return
+     */
     public Path getEditObjectIdentity(
     ) {
         return this.editObjectIdentity;
     }
     
-    //-------------------------------------------------------------------------
+    /* (non-Javadoc)
+     * @see org.openmdx.portal.servlet.view.ObjectView#getLookupObject()
+     */
     @Override
     public RefObject_1_0 getLookupObject(
     ) {
     	PersistenceManager pm = JDOHelper.getPersistenceManager(this.getRefObject());
-        return this.isEditMode() ? 
-            this.getEditObjectIdentity() != null ?
-                (RefObject_1_0)pm.getObjectById(this.getEditObjectIdentity()) : 
-                	this.getObjectReference().getObject() :
-                		this.getParent();
+        return this.isEditMode() 
+        	?  this.getEditObjectIdentity() != null 
+        		? (RefObject_1_0)pm.getObjectById(this.getEditObjectIdentity()) 
+        		: this.getObjectReference().getObject() 
+        	: this.getParent();
     }
     
     //-------------------------------------------------------------------------
-    // Variables
+    // Members
     //-------------------------------------------------------------------------
     private static final long serialVersionUID = 3258411746451731505L;
 
     private RefObject_1_0 parent = null;
-    private Path editObjectIdentity = null;
+	private Path editObjectIdentity = null;
     private String forReference = null;
-    private ViewMode mode = ViewMode.STANDARD;
+	private final ViewMode viewMode;
+    private final boolean isEditMode;
   
 }
 

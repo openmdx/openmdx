@@ -1,13 +1,13 @@
 /*
  * ====================================================================
- * Project:     openMDX, http://www.openmdx.org/
+ * Project:     openMDX/Core, http://www.openmdx.org/
  * Description: RefContainer_1 class
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2008, OMEX AG, Switzerland
+ * Copyright (c) 2004-2013, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -556,7 +556,8 @@ public class RefContainer_1
      * @see org.oasisopen.jmi1.RefContainer#refGetAll(java.lang.Object)
      */
 //  @Override
-    public List<RefObject_1_0> refGetAll(Object query) {
+    public List<RefObject_1_0> refGetAll(Object rawQuery) {
+        Object query = rawQuery;
         Container_1_0 source = this.container;
         OrderSpecifier[] order = null;
         FetchPlan fetchPlan = null;

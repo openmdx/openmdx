@@ -67,22 +67,26 @@ import org.openmdx.base.mof.cci.Model_1_0;
  * JMI Package template
  */
 @SuppressWarnings({"rawtypes","unchecked"})
-public class PackageMapper
-    extends AbstractMapper {
+public class PackageMapper extends AbstractMapper {
 
-    //-----------------------------------------------------------------------
+    /**
+     * Constructor 
+     */
     public PackageMapper(
         Writer writer,
         Model_1_0 model,
         Format format, 
-        String packageSuffix, MetaData_1_0 metaData
+        String packageSuffix, 
+        MetaData_1_0 metaData, 
+        PrimitiveTypeMapper primitiveTypeMapper
     ) {
         super(
             writer,
             model,
             format, 
             packageSuffix,
-            metaData
+            metaData, 
+            primitiveTypeMapper
         );
     }
 
@@ -116,7 +120,7 @@ public class PackageMapper
         ClassDef classDef
     ) throws ServiceException {
         this.trace("Package/ClassAccessor");
-        this.pw.println("  public " + this.getType(classDef.getQualifiedName()) + "Class " + getMethodName(
+        this.pw.println("  public " + this.getType(classDef.getQualifiedName(), getFormat(), false) + "Class " + getMethodName(
             "get" + MapperUtils.getElementName(classDef.getQualifiedName()) 
         ) + "();");
         this.pw.println();        
@@ -138,7 +142,7 @@ public class PackageMapper
         String packageField = buffer.toString();
         buffer.setLength(buffer.length() - 7);
         String authorityField = buffer.append("Authority").toString();
-        String authorityType = this.getType("org:openmdx:base:Authority");
+        String authorityType = this.getType("org:openmdx:base:Authority", getFormat(), false);
         String xri = MapperUtils.getAuthorityId(nameComponents);
         this.pw.println(" /**");
         this.pw.println(
@@ -196,7 +200,7 @@ public class PackageMapper
             null, // removableSuffix
             null // appendableSuffix
         );
-        this.pw.println("  public " + this.getType(structDef.getQualifiedName()) + " " + methodName + "(");
+        this.pw.println("  public " + this.getType(structDef.getQualifiedName(), getFormat(), false) + " " + methodName + "(");
         int ii = 0;
         for (Iterator<?> i = structDef.getFields().iterator(); i.hasNext(); ii++) {
             StructuralFeatureDef fieldDef = (StructuralFeatureDef) i.next();

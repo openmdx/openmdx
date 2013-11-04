@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2008, OMEX AG, Switzerland
+ * Copyright (c) 2004-2013, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -49,6 +49,7 @@ package org.openmdx.base.collection;
 
 import java.io.Serializable;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.Set;
 
 import org.openmdx.base.marshalling.Marshaller;
@@ -162,4 +163,33 @@ public class MarshallingSet<E>
     	return that.size() == this.size() && this.containsAll(that);  
     }
 
+    /**
+     * Returns the hash code value for this set.  The hash code of a set is
+     * defined to be the sum of the hash codes of the elements in the set,
+     * where the hash code of a <tt>null</tt> element is defined to be zero.
+     * This ensures that <tt>s1.equals(s2)</tt> implies that
+     * <tt>s1.hashCode()==s2.hashCode()</tt> for any two sets <tt>s1</tt>
+     * and <tt>s2</tt>, as required by the general contract of
+     * {@link Object#hashCode}.
+     *
+     * <p>This implementation iterates over the set, calling the
+     * <tt>hashCode</tt> method on each element in the set, and adding up
+     * the results.
+     *
+     * @return the hash code value for this set
+     * @see Object#equals(Object)
+     * @see Set#equals(Object)
+     */
+    @Override
+    public int hashCode() {
+        int h = 0;
+        Iterator<E> i = iterator();
+        while (i.hasNext()) {
+            E obj = i.next();
+                if (obj != null)
+                    h += obj.hashCode();
+            }
+        return h;
+    }
+    
 }

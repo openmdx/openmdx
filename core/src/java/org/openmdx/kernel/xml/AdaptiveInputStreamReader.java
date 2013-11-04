@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license  as listed below.
  * 
- * Copyright (c) 2005-2007, OMEX AG, Switzerland
+ * Copyright (c) 2005-2013, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without 
@@ -76,13 +76,15 @@ public class AdaptiveInputStreamReader extends Reader {
 	 * @param propagateClose tells whether a close request is propagated to the input stream
 	 * @throws IOException 
 	 */
-	public AdaptiveInputStreamReader(
+	@SuppressWarnings("resource")
+    public AdaptiveInputStreamReader(
 		InputStream in,
-		String encoding, 
+		String overriddenEncoding, 
 		boolean byteOrderMarkAware, 
 		boolean xmlDeclarationAware, 
 		boolean propagateClose
 	) throws IOException {
+	    String encoding = overriddenEncoding;
 		if(byteOrderMarkAware || xmlDeclarationAware){
 			InputStream stream = new BufferedInputStream(in);
 			if (byteOrderMarkAware){
@@ -373,7 +375,8 @@ public class AdaptiveInputStreamReader extends Reader {
 	     * 
 	     * @throws IOException  
 	     */
-	    public static XMLDeclaration readXMLDeclaration(
+	    @SuppressWarnings("resource")
+        public static XMLDeclaration readXMLDeclaration(
 	        InputStream in
 	    ) throws IOException {
 	        return readXMLDeclaration(

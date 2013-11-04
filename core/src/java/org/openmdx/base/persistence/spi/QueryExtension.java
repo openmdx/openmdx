@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2010-2011, OMEX AG, Switzerland
+ * Copyright (c) 2010-2013, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -211,7 +211,7 @@ public class QueryExtension implements Extension {
         parameters.clear();
         if(booleanParam != null) {
             for(boolean parameter : booleanParam) {
-                parameters.add(parameter);
+                parameters.add(Boolean.valueOf(parameter));
             }
         }
     }
@@ -275,7 +275,7 @@ public class QueryExtension implements Extension {
         parameters.clear();
         if(integerParam != null) {
             for(int parameter : integerParam) {
-                parameters.add(parameter);
+                parameters.add(Integer.valueOf(parameter));
             }
         }
     }

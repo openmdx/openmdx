@@ -104,7 +104,7 @@ public abstract class AbstractPlugIn implements PlugIn {
      */
     @Override
     public void setStringTable(
-        ByteBuffer stringTable
+        StringSource stringTable
     ) throws ServiceException {
         throw new ServiceException(
             BasicException.Code.DEFAULT_DOMAIN,
@@ -199,7 +199,7 @@ public abstract class AbstractPlugIn implements PlugIn {
      * @see org.openmdx.base.xml.wbxml.spi.PlugIn#resolveString(int)
      */
     @Override
-    public CharSequence resolveString(
+    public String resolveString(
         int index
     ) throws ServiceException {
         throw new ServiceException(

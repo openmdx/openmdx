@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2007, OMEX AG, Switzerland
+ * Copyright (c) 2007-2013, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -359,6 +359,7 @@ public class MetaData_2 implements MetaData_1_0, MetaData_2_0 {
          *
          * @param name
          */
+        @SuppressWarnings("resource")
         Package(
             String name
         ){
@@ -407,6 +408,7 @@ public class MetaData_2 implements MetaData_1_0, MetaData_2_0 {
                     if(documentSource != null) {
                         System.out.println("INFO:    Loading meta data for " + name);
                         document = newDocumentBuilder().parse(documentSource);
+                        documentSource.close();
                     }
                 } catch (IOException exception) {
                     SysLog.log(Level.WARNING,"Could not parse " + documentLocation, exception);
@@ -504,6 +506,7 @@ public class MetaData_2 implements MetaData_1_0, MetaData_2_0 {
              * 
              * @param name
              */
+            @SuppressWarnings("resource")
             Class(
                 String name
             ){
@@ -572,10 +575,10 @@ public class MetaData_2 implements MetaData_1_0, MetaData_2_0 {
                         this.persistenceModifier = ClassPersistenceModifier.fromXMLFormat(
                             getAttribute(classElement, "persistence-modifier")
                         );
-                        this.requiresExtent = Boolean.valueOf(
+                        this.requiresExtent = Boolean.parseBoolean(
                             getAttribute(classElement, "requires-extent")
                         );
-                        this.requiresSlices = Boolean.valueOf(
+                        this.requiresSlices = Boolean.parseBoolean(
                             getAttribute(classElement, "requires-slices")
                         );
                         this.table = getAttribute(classElement, "table");                        

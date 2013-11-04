@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2009, OMEX AG, Switzerland
+ * Copyright (c) 2009-2013, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -80,7 +80,7 @@ public class StandardFetchGroup
             String memberName = (String) member;
             this.members.put(
                 memberName,
-                that.getRecursionDepth(memberName)
+                Integer.valueOf(that.getRecursionDepth(memberName))
             );
         }
     }
@@ -133,7 +133,6 @@ public class StandardFetchGroup
      */
     public FetchGroup addCategory(String categoryName) {
         assertModifiability();
-        // TODO Auto-generated method stub
         return null;
     }
 
@@ -210,7 +209,6 @@ public class StandardFetchGroup
      */
     public FetchGroup removeCategory(String categoryName) {
         assertModifiability();
-        // TODO Auto-generated method stub
         return null;
     }
 

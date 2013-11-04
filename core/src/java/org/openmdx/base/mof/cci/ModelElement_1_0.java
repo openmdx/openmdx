@@ -47,8 +47,6 @@
  */
 package org.openmdx.base.mof.cci;
 
-import java.util.Map;
-
 import org.openmdx.base.accessor.cci.DataObject_1_0;
 import org.openmdx.base.exception.ServiceException;
 
@@ -108,9 +106,7 @@ public interface ModelElement_1_0 extends DataObject_1_0 {
 
     public boolean isBehaviouralFeatureType();
 
-    public boolean isReferenceStoredAsAttribute(
-        Map<String,ModelElement_1_0> elements
-    ) throws ServiceException;
+    public boolean isReferenceStoredAsAttribute() throws ServiceException;
     
     public boolean isSet(String feature);
     

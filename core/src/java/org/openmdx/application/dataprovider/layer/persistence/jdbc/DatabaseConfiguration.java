@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2005-2011, OMEX AG, Switzerland
+ * Copyright (c) 2005-2013, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -200,7 +200,7 @@ public class DatabaseConfiguration {
 					newValue = null;
 				}
 				values.put(
-					index,
+					Integer.valueOf(index),
 					newValue
 				);
 			}
@@ -215,17 +215,17 @@ public class DatabaseConfiguration {
 			if(rs != null) try {
 				rs.close();
 			} catch(Throwable ex) {
-				// ignore
+			    SysLog.trace("Ignored close exception", ex);
 			}
 			if(ps != null) try {  
 				ps.close();
 			} catch(Throwable ex) {
-				// ignore
+                SysLog.trace("Ignored close exception", ex);
 			}      
 			if(conn != null) try {
 				conn.close();
 			} catch(Throwable ex) {
-				// ignore
+                SysLog.trace("Ignored close exception", ex);
 			}
 		}
     }
@@ -240,7 +240,7 @@ public class DatabaseConfiguration {
 			int index = i.nextIndex();
 			this.addColumnNameMapping(
 				(String)i.next(),
-				(String)this.configuration.values(LayerConfigurationEntries.COLUMN_NAME_TO).get(index)
+				(String)this.configuration.values(LayerConfigurationEntries.COLUMN_NAME_TO).get(Integer.valueOf(index))
 			);
 		}
 		SysLog.detail("fromToColumnNameMapping", this.fromToColumnNameMapping);
@@ -257,7 +257,7 @@ public class DatabaseConfiguration {
 			SysLog.detail("Reading configuration for type", type);
 
 			// typeName
-			Object typeName = configuration.values(LayerConfigurationEntries.TYPE_NAME).get(index);
+			Object typeName = configuration.values(LayerConfigurationEntries.TYPE_NAME).get(Integer.valueOf(index));
 			if(typeName == null) {
 				//
 				// if typeName is not configured calculate as MD5 hash or derive it from the index as last resort
@@ -265,36 +265,36 @@ public class DatabaseConfiguration {
 				typeName = newTypeName(type, index);
 			}
 			// dbObject
-			Object dbObject = this.configuration.values(LayerConfigurationEntries.DB_OBJECT).get(index);
+			Object dbObject = this.configuration.values(LayerConfigurationEntries.DB_OBJECT).get(Integer.valueOf(index));
 			// dbObject2
-			Object dbObject2 = normalize(this.configuration.values(LayerConfigurationEntries.DB_OBJECT_2).get(index));
+			Object dbObject2 = normalize(this.configuration.values(LayerConfigurationEntries.DB_OBJECT_2).get(Integer.valueOf(index)));
 			// dbObjectFormat
-			Object dbObjectFormat = this.configuration.values(LayerConfigurationEntries.DB_OBJECT_FORMAT).get(index);
+			Object dbObjectFormat = this.configuration.values(LayerConfigurationEntries.DB_OBJECT_FORMAT).get(Integer.valueOf(index));
 			// pathNormalizeLevel
-			Object pathNormalizeLevel = this.configuration.values(LayerConfigurationEntries.PATH_NORMALIZE_LEVEL).get(index);
+			Object pathNormalizeLevel = this.configuration.values(LayerConfigurationEntries.PATH_NORMALIZE_LEVEL).get(Integer.valueOf(index));
 			// dbObjectForQuery
-			Object dbObjectForQuery = normalize(this.configuration.values(LayerConfigurationEntries.DB_OBJECT_FOR_QUERY).get(index));
+			Object dbObjectForQuery = normalize(this.configuration.values(LayerConfigurationEntries.DB_OBJECT_FOR_QUERY).get(Integer.valueOf(index)));
 			// dbObjectForQuery2
-			Object dbObjectForQuery2 = normalize(this.configuration.values(LayerConfigurationEntries.DB_OBJECT_FOR_QUERY_2).get(index));
+			Object dbObjectForQuery2 = normalize(this.configuration.values(LayerConfigurationEntries.DB_OBJECT_FOR_QUERY_2).get(Integer.valueOf(index)));
 			// dbObjectsForQueryJoinColumn
-			Object dbObjectsForQueryJoinColumn = normalize(this.configuration.values(LayerConfigurationEntries.DB_OBJECTS_FOR_QUERY_JOIN_COLUMN).get(index));
+			Object dbObjectsForQueryJoinColumn = normalize(this.configuration.values(LayerConfigurationEntries.DB_OBJECTS_FOR_QUERY_JOIN_COLUMN).get(Integer.valueOf(index)));
 			// dbObjectHint
-			Object dbObjectHint = normalize(this.configuration.values(LayerConfigurationEntries.DB_OBJECT_HINT).get(index));
+			Object dbObjectHint = normalize(this.configuration.values(LayerConfigurationEntries.DB_OBJECT_HINT).get(Integer.valueOf(index)));
 			// objectIdPattern
-			Object objectIdPattern = normalize(this.configuration.values(LayerConfigurationEntries.OBJECT_ID_PATTERN).get(index));
+			Object objectIdPattern = normalize(this.configuration.values(LayerConfigurationEntries.OBJECT_ID_PATTERN).get(Integer.valueOf(index)));
 			// joinTable
-			Object joinTable = normalize(this.configuration.values(LayerConfigurationEntries.JOIN_TABLE).get(index));
+			Object joinTable = normalize(this.configuration.values(LayerConfigurationEntries.JOIN_TABLE).get(Integer.valueOf(index)));
 			// joinColumnEnd1
-			Object joinColumnEnd1 = normalize(this.configuration.values(LayerConfigurationEntries.JOIN_COLUMN_END1).get(index));
+			Object joinColumnEnd1 = normalize(this.configuration.values(LayerConfigurationEntries.JOIN_COLUMN_END1).get(Integer.valueOf(index)));
 			// joinColumnEnd2
-			Object joinColumnEnd2 = normalize(this.configuration.values(LayerConfigurationEntries.JOIN_COLUMN_END2).get(index));
+			Object joinColumnEnd2 = normalize(this.configuration.values(LayerConfigurationEntries.JOIN_COLUMN_END2).get(Integer.valueOf(index)));
 			// unitOfWorkProvider
-			Object unitOfWorkProvider = normalize(this.configuration.values(LayerConfigurationEntries.UNIT_OF_WORK_PROVIDER).get(index));
+			Object unitOfWorkProvider = normalize(this.configuration.values(LayerConfigurationEntries.UNIT_OF_WORK_PROVIDER).get(Integer.valueOf(index)));
 			// removableRidPrefix
-			Object removableReferenceIdPrefix = normalize(this.configuration.values(LayerConfigurationEntries.REMOVABLE_REFERENCE_ID_PREFIX).get(index));
+			Object removableReferenceIdPrefix = normalize(this.configuration.values(LayerConfigurationEntries.REMOVABLE_REFERENCE_ID_PREFIX).get(Integer.valueOf(index)));
 			// Tells whether one shouldn't try absolute positioning
-			boolean disableAboslutePositioning = Boolean.TRUE.equals(this.configuration.values(LayerConfigurationEntries.DISABLE_ABSOLUTE_POSITIONING).get(index));
-			Object referenceIdPattern = normalize(this.configuration.values(LayerConfigurationEntries.REFERENCE_ID_PATTERN).get(index));
+			boolean disableAboslutePositioning = Boolean.TRUE.equals(this.configuration.values(LayerConfigurationEntries.DISABLE_ABSOLUTE_POSITIONING).get(Integer.valueOf(index)));
+			Object referenceIdPattern = normalize(this.configuration.values(LayerConfigurationEntries.REFERENCE_ID_PATTERN).get(Integer.valueOf(index)));
 			try {
 				SysLog.detail(
 					"Retrieved configuration", 

@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2011, OMEX AG, Switzerland
+ * Copyright (c) 2004-2013, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -97,14 +97,17 @@ public class ImportHandler extends DefaultHandler {
      *
      * @param target
      * @param documentURL 
+     * @param defaultImportMode
      */
     public ImportHandler(
          ImportTarget target, 
-         InputSource source
+         InputSource source,
+         ImportMode defaultImportMode
     ){
         this.target = target;
         this.url = getDocumentURL(source);
         this.binary = isBinary(source);
+        this.defaultImportMode = defaultImportMode;
     }
 
     /**
@@ -165,6 +168,8 @@ public class ImportHandler extends DefaultHandler {
     private final ImportTarget target;
 
     private final URL url;
+    
+    private final ImportMode defaultImportMode;
     
     /**
      * <code>true</code> in case of a WBXML input
@@ -422,50 +427,64 @@ public class ImportHandler extends DefaultHandler {
     }
 
     /**
+     * Load the meta data
      * 
-     * @param _uriSchema
+     * @param uriSchema
+     * 
      * @throws ServiceException
      */
-    private void loadSchema(
+    private void loadMetaData(
         String uriSchema
     ) throws ServiceException {
-        if(uriSchema.indexOf("/xmi/") > 0) throw new ServiceException(
-            BasicException.Code.DEFAULT_DOMAIN,
-            BasicException.Code.NOT_SUPPORTED,
-            "\"/xmi/\" directory no longer supported",
-            new BasicException.Parameter("uri", uriSchema)
-        );
-        if (!ImportHandler.loadedSchemas.contains(uriSchema)) try {
+        if("xri://+resource/org/omg/model1/xmi1/model1.xsd".equals(uriSchema)) {
+            Model1MetaData.amendAttributeTypes(attributeTypes);
+            Model1MetaData.amendAttributeMultiplicities(attributeMultiplicities);
+            Model1MetaData.amendQualifierNames(qualifierNames);
+        } else try {
             org.w3c.dom.Document schemaDocument = DocumentBuilderFactory.newInstance(
             ).newDocumentBuilder(
             ).parse(
                 this.getSchemaInputSource(uriSchema)
             );
             this.initTypes(schemaDocument);
-            ImportHandler.loadedSchemas.add(uriSchema);
-        } catch (javax.xml.parsers.ParserConfigurationException ex) {
+        } catch (Exception exception) {
             throw new ServiceException(
-                ex,
+                exception,
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.INVALID_CONFIGURATION,
-                null
-            ).log();
-        } catch (org.xml.sax.SAXException ex) {
-            throw new ServiceException(
-                ex,
+                "Could not retrieve meta data from schema",
+                new BasicException.Parameter("schema", uriSchema)
+            );
+        }
+        ImportHandler.loadedSchemas.add(uriSchema);
+    }
+    
+    /**
+     * Retrieve the meta data if necessary
+     * 
+     * @param _uriSchema
+     * @throws ServiceException
+     */
+    private void retrieveMetaData(
+        String uriSchema
+    ) throws SAXException {
+        try {
+            if(uriSchema.indexOf("/xmi/") > 0) throw new ServiceException(
                 BasicException.Code.DEFAULT_DOMAIN,
-                BasicException.Code.INVALID_CONFIGURATION,
-                null
-            ).log();
-        } catch (java.io.IOException ex) {
-            throw new ServiceException(
-                ex,
-                BasicException.Code.DEFAULT_DOMAIN,
-                BasicException.Code.INVALID_CONFIGURATION,
-                null
-            ).log();
+                BasicException.Code.NOT_SUPPORTED,
+                "\"/xmi/\" directory no longer supported",
+                new BasicException.Parameter("uri", uriSchema)
+            );
+            synchronized (ImportHandler.loadedSchemas) {
+                if (!ImportHandler.loadedSchemas.contains(uriSchema)) {
+                    loadMetaData(uriSchema);
+                }
+            }
+        } catch (ServiceException exception) {
+            throw new SAXException(exception.log());
         }
     }
+    
 
     // ------------------------------------------------------------------------
     // Implements ContentHandler
@@ -505,11 +524,7 @@ public class ImportHandler extends DefaultHandler {
             i++
         ) {
             if ("noNamespaceSchemaLocation".equals(attributes.getLocalName(i))) {
-                try {
-                    this.loadSchema(attributes.getValue(i));
-                } catch (ServiceException e) {
-                    throw new SAXException(e.log());
-                }
+                this.retrieveMetaData(attributes.getValue(i));
             }
         }
         List<String> element = parseElement(localpart);
@@ -550,7 +565,7 @@ public class ImportHandler extends DefaultHandler {
                     "".equals(attributeValues.get("_operation"))
                 ) {
                     // "set" is the default operation
-                    attributeValues.put("_operation", "set");
+                    attributeValues.put("_operation", this.defaultImportMode.name().toLowerCase());
                 }
                 String qualifier = attributeValues.get(qualifierName);
                 if (qualifier == null) {
@@ -632,7 +647,7 @@ public class ImportHandler extends DefaultHandler {
             Multiplicity.SET.toString().equals(attributeMultiplicity) ||
             Multiplicity.LIST.toString().equals(attributeMultiplicity) ||
             Multiplicity.SPARSEARRAY.toString().equals(attributeMultiplicity) ||
-            ModelHelper.UNBOUNDED.equals(attributeMultiplicity)
+            ModelHelper.UNBOUND.equals(attributeMultiplicity)
         ) {
             try {
                 // multi-valued attribute with attributes 'offset', 'multiplicity' last
@@ -646,11 +661,7 @@ public class ImportHandler extends DefaultHandler {
                 );
                 this.currentAttributeMultiplicity = attributeMultiplicity;
                 this.currentAttributePosition = -1;
-                Facades.asObject(
-                    this.currentObject
-                ).attributeValuesAsList(
-                    this.currentAttributeName
-                ).clear();
+                Facades.asObject(this.currentObject).clearAttributeValuesAsList(this.currentAttributeName);
             } catch (ServiceException exception) {
                 throw new SAXException(exception);
             }
@@ -828,7 +839,7 @@ public class ImportHandler extends DefaultHandler {
                         } else if ("org.w3c.dateTime".equals(attributeType) || "dateTime".equals(attributeType)) {
                             String v = this.currentAttributeValue.toString().trim();
                             if (v.length() > 0) {
-                                value = newDateTime(v);
+                                value = parseDateTime(v);
                             }
                         } else if ("org.w3c.date".equals(attributeType) || "date".equals(attributeType)) {
                             String v = this.currentAttributeValue.toString().trim();
@@ -868,7 +879,7 @@ public class ImportHandler extends DefaultHandler {
                         int absolutePosition = this.currentAttributeOffset + this.currentAttributePosition;
                         if (Multiplicity.SET.toString().equalsIgnoreCase(this.currentAttributeMultiplicity)) {
                             // SET
-                            List<Object> values = facade.attributeValuesAsList(attributeName);
+                            List<Object> values = facade.getAttributeValuesAsGuardedList(attributeName);
                             if (
                                 this.currentAttributeOperation == null || 
                                 "".equals(this.currentAttributeOperation) || 
@@ -882,10 +893,10 @@ public class ImportHandler extends DefaultHandler {
                             }
                         } else if (
                     		Multiplicity.LIST.toString().equalsIgnoreCase(this.currentAttributeMultiplicity) || 
-                    		ModelHelper.UNBOUNDED.equals(this.currentAttributeMultiplicity)
+                    		ModelHelper.UNBOUND.equals(this.currentAttributeMultiplicity)
                         ) {
                             // LIST
-                            List<Object> values = facade.attributeValuesAsList(attributeName);
+                            List<Object> values = facade.getAttributeValuesAsGuardedList(attributeName);
                             if (
                                 this.currentAttributeOperation == null || 
                                 "".equals(this.currentAttributeOperation) || 
@@ -905,7 +916,7 @@ public class ImportHandler extends DefaultHandler {
                         ) {
                             // SPARSEARRAY
                             // In case of v2 format the multiplicity is not set
-                            List<Object> values = facade.attributeValuesAsList(attributeName);
+                            List<Object> values = facade.getAttributeValuesAsGuardedList(attributeName);
                             if (
                                 this.currentAttributeOperation == null || 
                                 "".equals(this.currentAttributeOperation) || 
@@ -998,15 +1009,16 @@ public class ImportHandler extends DefaultHandler {
     /**
      * timePoint is of the form 2001-09-29T15:45:21.798Z
      * 
-     * @param v
+     * @param source the time stamp to be parsed
      * 
      * @return the date/time value
      * 
      * @throws ServiceException 
      */
-    private Date newDateTime(
-        String v
+    private Date parseDateTime(
+        String source
     ) throws ServiceException{
+        String v = source;
         try {
             //
             // Handle UTC date/time value

@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2009-2012, OMEX AG, Switzerland
+ * Copyright (c) 2009-2013, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -49,6 +49,7 @@ package org.openmdx.base.rest.spi;
 
 import java.io.Serializable;
 import java.lang.reflect.Array;
+import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -66,8 +67,13 @@ import javax.resource.cci.MappedRecord;
 import javax.resource.cci.Record;
 
 import org.openmdx.base.collection.TreeSparseArray;
+import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;
+import org.openmdx.base.mof.cci.ModelElement_1_0;
+import org.openmdx.base.mof.cci.ModelHelper;
+import org.openmdx.base.mof.cci.Model_1_0;
 import org.openmdx.base.mof.cci.Multiplicity;
+import org.openmdx.base.mof.spi.Model_1Factory;
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.resource.Records;
 import org.openmdx.base.rest.cci.ObjectRecord;
@@ -283,6 +289,92 @@ public class Object_2Facade {
         );
     }
 
+    public int getSizeOfAttributeValuesAsList(
+        String attributeName
+    ) throws ServiceException{
+        return attributeValuesAsList(attributeName).size();
+    }
+    
+    public void clearAttributeValuesAsList(
+        String attributeName
+    ) throws ServiceException{
+        List<Object> target = attributeValuesAsList(attributeName);
+        target.clear();
+    }
+
+    public Object getSingletonFromAttributeValuesAsList(
+        String attributeName
+    ) throws ServiceException{
+        return attributeValuesAsList(attributeName).get(0);
+        
+    }
+    
+    public void replaceAttributeValuesAsListBySingleton(
+        String attributeName, 
+        Object value
+    ) throws ServiceException{
+        List<Object> target = attributeValuesAsList(attributeName);
+        target.clear();
+        target.add(value);
+    }
+
+    public void replaceAttributeValuesAsList(
+        String attributeName, 
+        Collection<?> values
+    ) throws ServiceException{
+        List<Object> target = attributeValuesAsList(attributeName);
+        target.clear();
+        target.addAll(values);
+    }
+
+    public boolean attributeValuesAsListContains(
+        String attributeName, 
+        Object value
+    ) throws ServiceException{
+        return attributeValuesAsList(attributeName).contains(value);
+    }
+    
+    public void addToAttributeValuesAsList(
+        String attributeName, 
+        Object value
+    ) throws ServiceException{
+        List<Object> target = attributeValuesAsList(attributeName);
+        target.add(value);
+    }
+
+    public void addAllToAttributeValuesAsList(
+        String attributeName, 
+        Collection<?> values
+    ) throws ServiceException{
+        List<Object> target = attributeValuesAsList(attributeName);
+        target.addAll(values);
+    }
+
+    public Object getAttributeValueFromList(
+        String attributeName, 
+        int index
+    ) throws ServiceException{
+        return attributeValuesAsList(attributeName).get(index);
+    }
+
+    public List<Object> getAttributeValuesAsReadOnlyList(
+        String attributeName
+    ) throws ServiceException {
+        return Collections.unmodifiableList(attributeValuesAsList(attributeName));
+    }
+
+    public List<Object> getAttributeValuesAsGuardedList(
+        String attributeName
+    ) throws ServiceException {
+        String objectClass = getObjectClass();
+        List<Object> values = attributeValuesAsList(attributeName);
+        if(objectClass.startsWith("org:omg:model1:") || objectClass.startsWith("org:openmdx:system:")) {
+            return values;
+        } else {
+            return new GuardedList(objectClass, attributeName, values);
+        }
+    }
+    
     public List<Object> attributeValuesAsList(
         String attributeName
     ) throws ServiceException {
@@ -347,7 +439,7 @@ public class Object_2Facade {
             return ((List<Object>)v).get(0);
         }
         else if(v instanceof SparseArray) {
-            return ((SparseArray<Object>)v).get(0);
+            return ((SparseArray<Object>)v).get(Integer.valueOf(0));
         }
         else {
             return v;
@@ -424,6 +516,59 @@ public class Object_2Facade {
         this.delegate.setVersion(version);
     }
 
+    private List assertMultiplicity(
+        MappedRecord object,
+        String featureName,
+        List values
+    ) throws ServiceException {
+        final int size = values.size();
+        if(size > 1) {
+            String type = object.getRecordName();
+            if(!type.startsWith("org:omg:model1:")) {
+                if(isSingleValued(type, featureName)) {
+                    Object singleton = null;
+                    for(Object value : values){
+                        if(value == null) {
+                            // Ignore
+                        } else if(singleton == null) {
+                            singleton = value;
+                        } else if (!singleton.equals(value)) {
+                            throw new ServiceException(
+                                BasicException.Code.DEFAULT_DOMAIN,
+                                BasicException.Code.ASSERTION_FAILURE,
+                                "UNRECOVERABLE MULTIPLICITY FAILURE: Conflicting values for optional or single valued field",
+                                new BasicException.Parameter("xri", this.getPath()),
+                                new BasicException.Parameter("type", type),
+                                new BasicException.Parameter("featureName", featureName),
+                                new BasicException.Parameter("size", size),
+                                new BasicException.Parameter("values", values),
+                                new BasicException.Parameter("object", object)
+                            ).log();
+                        }
+                    }
+                    new ServiceException(
+                        BasicException.Code.DEFAULT_DOMAIN,
+                        BasicException.Code.ASSERTION_FAILURE,
+                        "RECOVERABLE MULTIPLICITY FAILURE: Recoverable value for optional or single valued field",
+                        new BasicException.Parameter("xri", this.getPath()),
+                        new BasicException.Parameter("type", type),
+                        new BasicException.Parameter("featureName", featureName),
+                        new BasicException.Parameter("size", size),
+                        new BasicException.Parameter("values", values),
+                        new BasicException.Parameter("value", singleton),
+                        new BasicException.Parameter("object", object)
+                    ).log();
+                    if(singleton == null) {
+                        return Collections.emptyList();
+                    } else {
+                        return Collections.singletonList(singleton);
+                    }
+                }
+            }
+        }
+        return values;
+    }
+    
     /**
      * Clone the wrapped object 
      * 
@@ -444,7 +589,8 @@ public class Object_2Facade {
 			throw new ServiceException(exception);
 		}
         copy.setVersion(this.getVersion());
-        for(String key: (Set<String>)this.getValue().keySet()) {
+        MappedRecord value = this.getValue();
+        for(String key: (Set<String>)value.keySet()) {
             Object source = this.attributeValues(key);
             if(source instanceof SparseArray) {
                 ((SparseArray)copy.attributeValues(
@@ -458,7 +604,7 @@ public class Object_2Facade {
                     key,
                     Multiplicity.LIST
                 )).addAll(
-                    (List)source
+                    assertMultiplicity(value, key, (List)source)
                 );                
             } else if (source instanceof Map<?,?>){
                 ((Map)copy.attributeValues(
@@ -497,6 +643,46 @@ public class Object_2Facade {
 		} catch (ResourceException e) {
 			throw new ServiceException(e);
 		}
+    }
+    
+    /**
+     * @param type the fully qualified MOF class name
+     * @param featureName the unqualified feature name
+     * 
+     * @throws ServiceException
+     */
+    protected static boolean isSingleValued(
+        String type,
+        String featureName
+    ){
+        Model_1_0 model = Model_1Factory.getModel();
+        try {
+            ModelElement_1_0 classifierDef = model.getElement(type);
+            if(classifierDef != null) {
+                ModelElement_1_0 featureDef = model.getFeatureDef(classifierDef, featureName, false);
+                if(featureDef != null) {
+                    return ModelHelper.getMultiplicity(featureDef).isSingleValued();
+                } else {
+                    throw new ServiceException(
+                        BasicException.Code.DEFAULT_DOMAIN,
+                        BasicException.Code.NOT_FOUND,
+                        "Invalid feature",
+                        new BasicException.Parameter("type", type),
+                        new BasicException.Parameter("feature", featureName)
+                    );
+                }
+            } else {
+                throw new ServiceException(
+                    BasicException.Code.DEFAULT_DOMAIN,
+                    BasicException.Code.NOT_FOUND,
+                    "Class not found",
+                    new BasicException.Parameter("class", type)
+                );
+            }
+        } catch (ServiceException exception) {
+            exception.log();
+            return false;
+        }
     }
     
     
@@ -1234,7 +1420,7 @@ public class Object_2Facade {
                 return (SparseArray<E>)value;
             } else {
                 SparseArray<E> values = new TreeSparseArray<E>();
-                values.put(0, (E)value);
+                values.put(Integer.valueOf(0), (E)value);
                 this.record.put(
                     this.key, 
                     values
@@ -1287,7 +1473,7 @@ public class Object_2Facade {
                         return l.isEmpty();
                     } 
                     else if(l.size() == 1) {
-                        return values.equals(l.get(0));
+                        return values.equals(l.get(Integer.valueOf(0)));
                     }
                     else {
                         return false;
@@ -1617,5 +1803,88 @@ public class Object_2Facade {
         }
         
     }
-    
+
+    //------------------------------------------------------------------------
+    // Class GuardedList
+    //------------------------------------------------------------------------
+
+    /**
+     * GuardedList asserts that only multivalued features may have more than one element
+     */
+    class GuardedList extends AbstractList<Object> {
+
+        GuardedList(String objectClass, String featureName, List<Object> valuesAsList) {
+            this.objectClass = objectClass;
+            this.featureName = featureName;
+            this.delegate = valuesAsList;
+        }
+        
+        private final List<Object> delegate;
+        private final String objectClass;
+        private final String featureName;
+        private Boolean singlevalued;
+        
+        /* (non-Javadoc)
+         * @see java.util.AbstractList#get(int)
+         */
+        @Override
+        public Object get(int index) {
+            return this.delegate.get(index);
+        }
+       
+        /* (non-Javadoc)
+         * @see java.util.AbstractCollection#size()
+         */
+        @Override
+        public int size() {
+            return this.delegate.size();
+        }
+        
+        /* (non-Javadoc)
+         * @see java.util.AbstractList#set(int, java.lang.Object)
+         */
+        @Override
+        public Object set(int index, Object element) {
+            return this.delegate.set(index, element);
+        }
+        
+        private boolean isSinglevalued(){
+            if(this.singlevalued == null) {
+                this.singlevalued = Boolean.valueOf(isSingleValued(getObjectClass(), this.featureName));
+            }
+            return this.singlevalued.booleanValue();
+        }
+
+        /* (non-Javadoc)
+         * @see java.util.AbstractList#add(int, java.lang.Object)
+         */
+        @Override
+        public void add(int index, Object element) {
+            if(this.delegate.isEmpty() || !this.isSinglevalued()) {
+                this.delegate.add(index, element);
+            } else {
+                throw new RuntimeServiceException(
+                    BasicException.Code.DEFAULT_DOMAIN,
+                    BasicException.Code.ASSERTION_FAILURE,
+                    "The maximal cardinality of 1 would be exceeded",
+                    new BasicException.Parameter("objectClass", this.objectClass),
+                    new BasicException.Parameter("featureName", this.featureName),
+                    new BasicException.Parameter("delegate", this.delegate),
+                    new BasicException.Parameter("index", index),
+                    new BasicException.Parameter("value", element)
+                ).log();
+            }
+        }
+        
+        /* (non-Javadoc)
+         * @see java.util.AbstractList#remove(int)
+         */
+        @Override
+        public Object remove(int index) {
+            return this.delegate.remove(index);
+        }
+
+        
+    }
+
 }

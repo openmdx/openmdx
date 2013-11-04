@@ -1,17 +1,13 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: TestAdaptiveInputStreamReader.java,v 1.2 2005/08/24 20:17:02 hburger Exp $
  * Description: Test Adaptive InputStream Reader
- * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2005/08/24 20:17:02 $
  * ====================================================================
  *
- * This software is published under the BSD license
- * as listed below.
+ * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2005, OMEX AG, Switzerland
+ * Copyright (c) 2005-2013, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without 
@@ -88,15 +84,19 @@ public class TestAdaptiveInputStreamReader {
 				true,
 				null
 			);
-			System.out.println("ByteOrderMark = " + r.getByteOrderMark());
-			System.out.println("XMLDeclaration = " + r.getXMLDclaration());
-			System.out.print("Document: ");
-			for(
-				int c = r.read();
-				c > 0;
-				c = r.read()
-			) System.out.print((char)c);
-			System.out.println('\n');
+			try {
+    			System.out.println("ByteOrderMark = " + r.getByteOrderMark());
+    			System.out.println("XMLDeclaration = " + r.getXMLDclaration());
+    			System.out.print("Document: ");
+    			for(
+    				int c = r.read();
+    				c > 0;
+    				c = r.read()
+    			) System.out.print((char)c);
+    			System.out.println('\n');
+			} finally {
+			    r.close();
+			}
 		} catch (IOException exception) {
 			exception.printStackTrace();
 		}		

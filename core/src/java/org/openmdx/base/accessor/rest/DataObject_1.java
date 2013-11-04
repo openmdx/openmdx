@@ -58,6 +58,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
 import java.io.Serializable;
+import java.util.AbstractCollection;
 import java.util.AbstractList;
 import java.util.AbstractMap;
 import java.util.AbstractSet;
@@ -621,7 +622,6 @@ public class DataObject_1
         }        
     }
 
-    @SuppressWarnings("unchecked")
     void setExistence(
         Path identity,
         boolean existence
@@ -638,12 +638,14 @@ public class DataObject_1
                     new BasicException.Parameter("existence", existence)
                 );
             }
-            Set<String> notFound = null;
+            Set<String> notFound;
             TransactionalState_1 state = unitOfWork.getState(DataObject_1.this, existence);
-            if(state != null) {
+            if(state == null) {
+                notFound = null;
+            } else {
                 String feature = identity.get(identity.size() - 2);
-                Map<String,Object> values = state.values(existence);
-                notFound = (Set<String>) values.get(feature);
+                Map<String,Set<String>> values = state.unavailability(existence);
+                notFound = values.get(feature);
                 if(notFound == null && !existence) {
                     values.put(
                         feature,
@@ -983,6 +985,15 @@ public class DataObject_1
     }
     
     /**
+     * Determines whether the object is <code>TRANSIENT</code> or <code>PERSISTENT_NEW</code>
+     * 
+     * @return <code>true</code> if the object is <code>TRANSIENT</code> or <code>PERSISTENT_NEW</code>
+     */
+    protected boolean isTransientOrNew(){
+        return !jdoIsPersistent() || jdoIsNew();
+    }
+    
+    /**
      * Retrieve this object's persistent aspects
      * 
      * @return the persistent aspects
@@ -1009,6 +1020,9 @@ public class DataObject_1
 	                    )
 	                )
 	            );
+	            if(this.aspects instanceof Selection_1 && isTransientOrNew()) {
+	                ((Selection_1)this.aspects).markAsEmpty();
+	            }
 	        }
     	}
         return this.aspects;
@@ -1618,25 +1632,6 @@ public class DataObject_1
     }
 
     /**
-     * Tells whether the feature's cardinality is invalid
-     * 
-     * @param featureDef 
-     * 
-     * @return <code>true</code> if a mandatory feature is missing
-     * 
-     * @throws ServiceException
-     */
-    private boolean cardinalityIsInvalid(
-    	ModelElement_1_0 featureDef
-    ) throws ServiceException{
-    	return 
-    		isMandatory(featureDef) &&
-    		!dataObjectManager.isExemptFromValidation(this, featureDef) &&
-    		isPersistent(featureDef) &&
-    		this.objGetValue((String) featureDef.objGetValue("name")) == null;
-    }
-    
-    /**
      * Validate the object before it is flushed to the data store
      * 
      * @throws ServiceException
@@ -1644,12 +1639,17 @@ public class DataObject_1
     private void validate(
         TransactionalState_1 state
     ) throws ServiceException {
+        if(jdoIsDeleted()) return;
         Collection<String> missing = null;
-        if(jdoIsDeleted()) {
-            // nothing to do
-        } else if(jdoIsNew()) {
-            for(Map.Entry<String, ModelElement_1_0> attribute : getAttributes().entrySet()){
-                if(cardinalityIsInvalid(attribute.getValue())) {
+        ModelElement_1_0 classifier = getClassifier();
+        if(jdoIsNew()) {
+            Map<String, ModelElement_1_0> attributes = classifier.getModel().getAttributeDefs(
+                classifier,
+                false, // sub-types
+                true // includeDerived
+            );
+            for(Map.Entry<String, ModelElement_1_0> attribute : attributes.entrySet()){
+                if(cardinalityIsInvalid(classifier, attribute.getValue())) {
                     if(missing == null) {
                         missing = new ArrayList<String>();
                     }
@@ -1660,7 +1660,7 @@ public class DataObject_1
             Map<String, ModelElement_1_0> attributes = getAttributes();
             for(String feature : state.dirtyFeatures(true)) {
                 ModelElement_1_0 attribute = attributes.get(feature);
-                if(cardinalityIsInvalid(attribute)) {
+                if(cardinalityIsInvalid(classifier, attribute)) {
                     if(missing == null) {
                         missing = new ArrayList<String>();
                     }
@@ -1680,6 +1680,26 @@ public class DataObject_1
         }
     }
 
+    /**
+     * Tells whether the feature's cardinality is invalid
+     * 
+     * @param classDef
+     * @param featureDef
+     *
+     * @return <code>true</code> if a mandatory feature is missing
+     *
+     * @throws ServiceException
+     */
+    private boolean cardinalityIsInvalid(ModelElement_1_0 classDef, ModelElement_1_0 featureDef) throws ServiceException {
+       if (isMandatory(featureDef) && !dataObjectManager.isExemptFromValidation(this, featureDef) && isPersistent(featureDef)) {
+          String featureName = (String) featureDef.objGetValue("name");
+          if(!ModelHelper.isFeatureHeldByCore(classDef, featureName)) {
+              return this.objGetValue(featureName) == null;
+          }
+       }
+       return false;
+    }     
+    
     /**
      * Initialize a newly created object facade
      * 
@@ -2120,6 +2140,8 @@ public class DataObject_1
                     }
                     this.identity = null;
                 }
+                break;
+            default:
                 break;
         }
         Container_1 container = this.getContainer(true);
@@ -2673,15 +2695,18 @@ public class DataObject_1
 	                    } else if(rawValue instanceof Collection<?>) {
 	                        int i = 0;
 	                        for(Object value : (Collection<?>)rawValue) {
-	                            target.put(i++, value);
+	                            target.put(Integer.valueOf(i++), value);
 	                        }
 	                    } else if (rawValue != null) {
-	                        target.put(0, rawValue);
+	                        target.put(Integer.valueOf(0), rawValue);
 	                    }
 	                }
 	                normalizedValue = target;
 	            }
 	        } break;
+            case MAP: case STREAM:
+                // TODO not handled yet
+                break;
         }
         //
         // Cache
@@ -2767,6 +2792,7 @@ public class DataObject_1
      * @return the requested value
      * @throws ServiceException
      */
+    @SuppressWarnings("resource")
     private LargeObject getLargeObjectValue(
         final String featureName,
         final ModelElement_1_0 featureDef
@@ -3010,6 +3036,30 @@ public class DataObject_1
     }
     
     /**
+     * Assert that multi-value requests are model conform
+     * 
+     * @param feature
+     * @param map
+     */
+    private void assertMultivalued(
+        String feature, 
+        Multiplicity requested
+    ) throws ServiceException {
+        Multiplicity multiplicity = ModelHelper.getMultiplicity(getAttributes().get(feature));
+        if(multiplicity != requested) {
+            throw new ServiceException(
+                BasicException.Code.DEFAULT_DOMAIN,
+                BasicException.Code.ILLEGAL_STATE,
+                "The feature's cache contains already a value of another type",
+                ExceptionHelper.newObjectIdParameter("object", this),
+                new BasicException.Parameter("feature", feature),
+                new BasicException.Parameter("multiplicity", ""),
+                new BasicException.Parameter("requested", requested)
+            ).log();
+        }
+    }
+    
+    /**
      * Get a List attribute.
      * <p>
      * This method never returns <code>null</code> as an instance of the
@@ -3032,14 +3082,19 @@ public class DataObject_1
         String feature
     ) throws ServiceException {
     	List<Object> flushable = getFlushable(feature, List.class);
-        return flushable == null ? (List<Object>) Maps.putUnlessPresent(
-            this.flushableValues,
-            feature,
-            new ManagedList(
+    	if(flushable == null) {
+    	    assertMultivalued(feature, Multiplicity.LIST);
+            return (List<Object>) Maps.putUnlessPresent(
+                this.flushableValues,
                 feature,
-                this.getMarshaller(feature)
-            )
-        ) : flushable;
+                new ManagedList(
+                    feature,
+                    this.getMarshaller(feature)
+                )
+            );
+        } else {
+            return flushable;
+        }
     }
 
     /**
@@ -3066,14 +3121,19 @@ public class DataObject_1
         String feature
     ) throws ServiceException {
     	Set<Object> flushable = getFlushable(feature, Set.class);
-        return flushable == null ? (Set<Object>) Maps.putUnlessPresent(
-            this.flushableValues,
-            feature,
-            new ManagedSet(
+    	if(flushable == null) {
+            assertMultivalued(feature, Multiplicity.SET);
+            return (Set<Object>) Maps.putUnlessPresent(
+                this.flushableValues,
                 feature,
-                this.getMarshaller(feature)
-            )
-        ) : flushable;
+                new ManagedSet(
+                    feature,
+                    this.getMarshaller(feature)
+                )
+            );
+        } else {
+            return flushable;
+        }
     }
 
     /**
@@ -3099,14 +3159,19 @@ public class DataObject_1
         String feature
     ) throws ServiceException {
         SortedMap<Integer,Object> flushable = getFlushable(feature, SortedMap.class);
-        return flushable == null ? (SortedMap<Integer,Object>) Maps.putUnlessPresent(
-            this.flushableValues,
-            feature,
-            new ManagedSortedMap(
+        if(flushable == null) {
+            assertMultivalued(feature, Multiplicity.SPARSEARRAY);
+            return (SortedMap<Integer,Object>) Maps.putUnlessPresent(
+                this.flushableValues,
                 feature,
-                this.getMarshaller(feature)
-            )
-        ) : flushable;
+                new ManagedSortedMap(
+                    feature,
+                    this.getMarshaller(feature)
+                )
+            );
+        } else {
+            return flushable;
+        }
     }
 
     /**
@@ -3132,14 +3197,19 @@ public class DataObject_1
         String feature
     ) throws ServiceException {
         Map<String,Object> flushable = getFlushable(feature, Map.class);
-        return flushable == null ? (Map<String,Object>) Maps.putUnlessPresent(
-            this.flushableValues,
-            feature,
-            new ManagedMap(
+        if(flushable == null) {
+            assertMultivalued(feature, Multiplicity.MAP);
+            return (Map<String,Object>) Maps.putUnlessPresent(
+                this.flushableValues,
                 feature,
-                this.getMarshaller(feature)
-            )
-        ) : flushable;
+                new ManagedMap(
+                    feature,
+                    this.getMarshaller(feature)
+                )
+            );
+        } else {
+            return flushable;
+        }
     }
 
     /**
@@ -3646,40 +3716,58 @@ public class DataObject_1
             String aspectClass
         ){
             this.aspectClass = aspectClass;
+            this.cachedAspect = isTransientOrNew() ? new HashMap<String, DataObject_1_0>() : null;
         }
 
         private final String aspectClass;        
-        private transient Container_1_0 standardAspect;
         private Map<String,DataObject_1_0> transientAspect;
         
+        private transient Container_1_0 delegate;
+        private transient Map<String,DataObject_1_0> cachedAspect;
+        private transient Set<Map.Entry<String,DataObject_1_0>> entries;
         private transient Collection<DataObject_1_0> values;
+        private transient Set<String> keys;
         
         int c = 0;
         
+        protected boolean isCache(
+            Map<String,DataObject_1_0> aspect
+        ){
+            return this.cachedAspect == aspect;
+        }
         /**
          * Retrieve the transient or standard delegate.
+         * 
+         * @param toRead
+         * @param cacheRetrieved cache the values if the delegate has been retrieved
          * 
          * @return the transient or standard delegate
          */
         Map<String,DataObject_1_0> getDelegate(
+            boolean toRead, 
+            boolean cacheRetrieved            
         ){
+            if(toRead && this.cachedAspect != null) {
+                return this.cachedAspect;
+            }
         	try {
 				Container_1_0 aspects = DataObject_1.this.objIsContained() ? DataObject_1.this.getAspects() : null;
 				if(aspects != null) {
-					if(this.standardAspect != null && aspects.container() != this.standardAspect.container()) {
-						this.standardAspect = null;
+					if(this.delegate != null && aspects.container() != this.delegate.container()) {
+						this.delegate = null;
 					}
-					if(this.standardAspect == null) {
-						this.standardAspect = aspects.subMap(
+					if(this.delegate == null) {
+						this.delegate = aspects.subMap(
 					        new Filter(
     				            new IsInstanceOfCondition(this.aspectClass)
     				        )
     				    );
 					}
-					if(this.transientAspect != null) {
-	        			move(); // just for security
+					if(cacheRetrieved && this.delegate.isRetrieved()) {
+					    return this.cachedAspect = new HashMap<String, DataObject_1_0>(this.delegate);
+					} else {
+            			return this.delegate;
 					}
-        			return this.standardAspect;
 				} else {
 		        	if(this.transientAspect == null) {
 		    			this.transientAspect = new HashMap<String, DataObject_1_0>();
@@ -3695,7 +3783,10 @@ public class DataObject_1
             Map<String, DataObject_1_0> transientAspect = this.transientAspect;
 			if(transientAspect != null) {
 				this.transientAspect = null;
-				ManagedAspect.this.putAll(transientAspect);
+				putAll(transientAspect);
+				if(this.cachedAspect == null) {
+				    this.cachedAspect = transientAspect;				    
+				}
             }
         }
         
@@ -3703,7 +3794,12 @@ public class DataObject_1
          * @see java.util.AbstractMap#clear()
          */
         public void clear() {
-            this.getDelegate().clear();
+            this.getDelegate(false, false).clear();
+            if(this.cachedAspect == null){
+                this.cachedAspect = new HashMap<String, DataObject_1_0>();
+            } else {
+                this.cachedAspect.clear();
+            }
         }
 
         /* (non-Javadoc)
@@ -3712,7 +3808,7 @@ public class DataObject_1
         public boolean containsKey(
             Object key
         ) {
-            return this.getDelegate().containsKey(key);
+            return this.getDelegate(true, false).containsKey(key);
         }
 
         /* (non-Javadoc)
@@ -3721,7 +3817,7 @@ public class DataObject_1
         public boolean containsValue(
             Object value
         ) {
-            return this.getDelegate().containsValue(value);
+            return this.getDelegate(true, false).containsValue(value);
         }
 
         /* (non-Javadoc)
@@ -3729,7 +3825,10 @@ public class DataObject_1
          */
         public Set<java.util.Map.Entry<String, DataObject_1_0>> entrySet(
         ) {
-            return this.getDelegate().entrySet();
+            if(this.entries == null) {
+                this.entries = new Entries();
+            }
+            return this.entries;
         }
 
         /* (non-Javadoc)
@@ -3748,7 +3847,7 @@ public class DataObject_1
         public DataObject_1_0 get(
             Object key
         ) {
-            return this.getDelegate().get(key);
+            return this.getDelegate(true, false).get(key);
         }
 
         /* (non-Javadoc)
@@ -3757,7 +3856,7 @@ public class DataObject_1
         @Override
         public int hashCode(
         ) {
-            return this.aspectClass.hashCode();
+            return System.identityHashCode(this);
         }
 
         /* (non-Javadoc)
@@ -3765,7 +3864,7 @@ public class DataObject_1
          */
         public boolean isEmpty(
         ) {
-            return this.getDelegate().isEmpty();
+            return this.getDelegate(true, false).isEmpty();
         }
 
         /* (non-Javadoc)
@@ -3773,7 +3872,10 @@ public class DataObject_1
          */
         public Set<String> keySet(
         ) {
-            return this.getDelegate().keySet();
+            if(this.keys == null) {
+                this.keys = new Keys();
+            }
+            return this.keys;
         }
 
         /* (non-Javadoc)
@@ -3808,10 +3910,11 @@ public class DataObject_1
                 //
                 // Save the aspect
                 //
-                return this.getDelegate().put(
-                    DataObject_1.this.getAspects() == null || !DataObject_1.this.isQualified() ? key : this.toObjectId(DataObject_1.this.getQualifier(), key), 
-                    value
-                );
+                String qualifier = DataObject_1.this.getAspects() == null || !DataObject_1.this.isQualified() ? key : this.toObjectId(DataObject_1.this.getQualifier(), key);
+                if(this.cachedAspect != null) {
+                    this.cachedAspect.put(qualifier, value);
+                }
+                return this.getDelegate(false, false).put(qualifier, value);
             } catch (ServiceException exception) {
                 throw new RuntimeServiceException(exception);
             } catch (RuntimeServiceException exception) {
@@ -3825,7 +3928,10 @@ public class DataObject_1
         public DataObject_1_0 remove(
             Object key
         ) {
-            return this.getDelegate().remove(key);
+            if(this.cachedAspect != null) {
+                this.cachedAspect.remove(key);
+            }
+            return this.getDelegate(false, false).remove(key);
         }
 
         /* (non-Javadoc)
@@ -3833,7 +3939,7 @@ public class DataObject_1
          */
         public int size(
         ) {
-            return this.getDelegate().size();
+            return this.getDelegate(true, true).size();
         }
 
         /* (non-Javadoc)
@@ -3869,7 +3975,8 @@ public class DataObject_1
          * @see org.openmdx.compatibility.base.dataprovider.transport.delegation.Evictable#evict()
          */
         public void evict() {
-        	this.standardAspect = null;
+        	this.delegate = null;
+        	this.cachedAspect = null;
         }
 
         /* (non-Javadoc)
@@ -3881,52 +3988,133 @@ public class DataObject_1
 			}
 		}
 
-        
-        //--------------------------------------------------------------------
-        // Class Values
-        //--------------------------------------------------------------------
-        
-
 		/**
-         * Values
-         */
-        class Values implements Collection<DataObject_1_0> {
+		 * Entry Iterator
+		 */
+		class EntryIterator implements Iterator<Map.Entry<String, DataObject_1_0>> {
 
-            private final Collection<DataObject_1_0> getDelegate(){
-                return ManagedAspect.this.getDelegate().values();
+		    private final Map<String, DataObject_1_0> aspect = getDelegate(true, true);
+		    private final Iterator<Map.Entry<String, DataObject_1_0>> delegate = aspect.entrySet().iterator();
+		    private String current;
+		    
+            /* (non-Javadoc)
+             * @see java.util.Iterator#hasNext()
+             */
+            @Override
+            public boolean hasNext() {
+                return delegate.hasNext();
             }
 
+            /* (non-Javadoc)
+             * @see java.util.Iterator#next()
+             */
+            @Override
+            public java.util.Map.Entry<String, DataObject_1_0> next() {
+                java.util.Map.Entry<String, DataObject_1_0> entry = delegate.next();
+                this.current = entry.getKey();
+                return entry;
+            }
+
+            /* (non-Javadoc)
+             * @see java.util.Iterator#remove()
+             */
+            @Override
+            public void remove() {
+                if(isCache(this.aspect)) {
+                    getDelegate(false, false).remove(this.current);
+                }
+                delegate.remove();
+            }
+		    
+		}
+
+		/**
+		 * Value Iterator
+		 */
+        class ValueIterator implements Iterator<DataObject_1_0> {
+
+            final Iterator<Map.Entry<String, DataObject_1_0>> delegate = new EntryIterator();
+            
+            /* (non-Javadoc)
+             * @see java.util.Iterator#hasNext()
+             */
+            @Override
+            public boolean hasNext() {
+                return delegate.hasNext();
+            }
+
+            /* (non-Javadoc)
+             * @see java.util.Iterator#next()
+             */
+            @Override
+            public DataObject_1_0 next() {
+                return delegate.next().getValue();
+            }
+
+            /* (non-Javadoc)
+             * @see java.util.Iterator#remove()
+             */
+            @Override
+            public void remove() {
+                delegate.remove();
+            }
+            
+        }
+		
+        /**
+         * Key Iterator
+         */
+        class KeyIterator implements Iterator<String> {
+
+            final Iterator<Map.Entry<String, DataObject_1_0>> delegate = new EntryIterator();
+            
+            /* (non-Javadoc)
+             * @see java.util.Iterator#hasNext()
+             */
+            @Override
+            public boolean hasNext() {
+                return delegate.hasNext();
+            }
+
+            /* (non-Javadoc)
+             * @see java.util.Iterator#next()
+             */
+            @Override
+            public String next() {
+                return delegate.next().getKey();
+            }
+
+            /* (non-Javadoc)
+             * @see java.util.Iterator#remove()
+             */
+            @Override
+            public void remove() {
+                delegate.remove();
+            }
+            
+        }
+        
+        /**
+         * Values
+         */
+        class Values extends AbstractCollection<DataObject_1_0> {
+
             /**
-             * @param o
+             * @param value
              * 
              * @return <code>true</code> if the collection had to be modified
              * 
              * @see java.util.Collection#add(java.lang.Object)
              */
             public boolean add(
-                DataObject_1_0 o
+                DataObject_1_0 value
             ) {
-                boolean modify = !ManagedAspect.this.containsValue(o);
+                boolean modify = !ManagedAspect.this.containsValue(value);
                 if(modify) {
-                    ManagedAspect.this.put(
-                        PathComponent.createPlaceHolder().toString(),
-                        o
-                    );
+                    String key = PathComponent.createPlaceHolder().toString();
+                    ManagedAspect.this.put(key, value);
                 }
                 return modify;
-            }
-
-            /**
-             * @param c
-             * @return
-             * @see java.util.Collection#addAll(java.util.Collection)
-             */
-            public boolean addAll(Collection<? extends DataObject_1_0> c) {
-                boolean modified = false;
-                for(DataObject_1_0 o : c) {
-                    modified |= this.add(o);
-                }
-                return modified;
             }
 
             /**
@@ -3934,7 +4122,7 @@ public class DataObject_1
              * @see java.util.Collection#clear()
              */
             public void clear() {
-                ManagedAspect.this.getDelegate().clear();
+                ManagedAspect.this.clear();
             }
 
             /**
@@ -3943,16 +4131,7 @@ public class DataObject_1
              * @see java.util.Collection#contains(java.lang.Object)
              */
             public boolean contains(Object o) {
-                return ManagedAspect.this.getDelegate().containsValue(o);
-            }
-
-            /**
-             * @param c
-             * @return
-             * @see java.util.Collection#containsAll(java.util.Collection)
-             */
-            public boolean containsAll(Collection<?> c) {
-                return this.getDelegate().containsAll(c);
+                return ManagedAspect.this.containsValue(o);
             }
 
             /**
@@ -3960,7 +4139,7 @@ public class DataObject_1
              * @see java.util.Collection#isEmpty()
              */
             public boolean isEmpty() {
-                return ManagedAspect.this.getDelegate().isEmpty();
+                return ManagedAspect.this.isEmpty();
             }
 
             /**
@@ -3968,34 +4147,7 @@ public class DataObject_1
              * @see java.util.Collection#iterator()
              */
             public Iterator<DataObject_1_0> iterator() {
-                return this.getDelegate().iterator();
-            }
-
-            /**
-             * @param o
-             * @return
-             * @see java.util.Collection#remove(java.lang.Object)
-             */
-            public boolean remove(Object o) {
-                return this.getDelegate().remove(o);
-            }
-
-            /**
-             * @param c
-             * @return
-             * @see java.util.Collection#removeAll(java.util.Collection)
-             */
-            public boolean removeAll(Collection<?> c) {
-                return this.getDelegate().removeAll(c);
-            }
-
-            /**
-             * @param c
-             * @return
-             * @see java.util.Collection#retainAll(java.util.Collection)
-             */
-            public boolean retainAll(Collection<?> c) {
-                return this.getDelegate().retainAll(c);
+                return new ValueIterator();
             }
 
             /**
@@ -4003,27 +4155,96 @@ public class DataObject_1
              * @see java.util.Collection#size()
              */
             public int size() {
-                return ManagedAspect.this.getDelegate().size();
+                return ManagedAspect.this.size();
+            }
+
+        }
+
+        /**
+         * Keys
+         */
+        class Keys extends AbstractSet<String> {
+
+            /**
+             * 
+             * @see java.util.Collection#clear()
+             */
+            public void clear() {
+                ManagedAspect.this.clear();
+            }
+
+            /**
+             * @param o
+             * @return
+             * @see java.util.Collection#contains(java.lang.Object)
+             */
+            public boolean contains(Object o) {
+                return ManagedAspect.this.containsKey(o);
             }
 
             /**
              * @return
-             * @see java.util.Collection#toArray()
+             * @see java.util.Collection#isEmpty()
              */
-            public Object[] toArray() {
-                return this.getDelegate().toArray();
+            public boolean isEmpty() {
+                return ManagedAspect.this.isEmpty();
             }
 
             /**
-             * @param <T>
-             * @param a
              * @return
-             * @see java.util.Collection#toArray(T[])
+             * @see java.util.Collection#iterator()
              */
-            public <T> T[] toArray(T[] a) {
-                return this.getDelegate().toArray(a);
+            public Iterator<String> iterator() {
+                return new KeyIterator();
             }
-                        
+
+            /**
+             * @return
+             * @see java.util.Collection#size()
+             */
+            public int size() {
+                return ManagedAspect.this.size();
+            }
+
+        }
+
+        /**
+         * Entries
+         */
+        class Entries extends AbstractSet<Map.Entry<String,DataObject_1_0>> {
+
+            /**
+             * 
+             * @see java.util.Collection#clear()
+             */
+            public void clear() {
+                ManagedAspect.this.clear();
+            }
+
+            /**
+             * @return
+             * @see java.util.Collection#isEmpty()
+             */
+            public boolean isEmpty() {
+                return ManagedAspect.this.isEmpty();
+            }
+
+            /**
+             * @return
+             * @see java.util.Collection#iterator()
+             */
+            public Iterator<Map.Entry<String,DataObject_1_0>> iterator() {
+                return new EntryIterator();
+            }
+
+            /**
+             * @return
+             * @see java.util.Collection#size()
+             */
+            public int size() {
+                return ManagedAspect.this.size();
+            }
+
         }
                 
     }
@@ -5228,8 +5449,8 @@ public class DataObject_1
                 int key
             ){
                 if(
-                    (this.from != null && this.from > key) ||
-                    (this.to != null && this.to < key)
+                    (this.from != null && this.from.intValue() > key) ||
+                    (this.to != null && this.to.intValue() < key)
                 ){
                     throw BasicException.initHolder(
                         new IllegalArgumentException(
@@ -5299,7 +5520,7 @@ public class DataObject_1
              * @see java.util.SortedMap#headMap(java.lang.Object)
              */
             public SortedMap<Integer, Object> headMap(Integer toKey) {
-                this.validateKey(toKey);
+                this.validateKey(toKey.intValue());
                 return new SubMap(this.from, toKey);
             }
 
@@ -5317,8 +5538,8 @@ public class DataObject_1
                 Integer fromKey,
                 Integer toKey
             ) {
-                this.validateKey(fromKey);
-                this.validateKey(toKey);
+                this.validateKey(fromKey.intValue());
+                this.validateKey(toKey.intValue());
                 return new SubMap(fromKey, toKey);
             }
 
@@ -5326,11 +5547,11 @@ public class DataObject_1
              * @see java.util.SortedMap#tailMap(java.lang.Object)
              */
             public SortedMap<Integer, Object> tailMap(Integer fromKey) {
-                this.validateKey(fromKey);
+                this.validateKey(fromKey.intValue());
                 return new SubMap(fromKey, null);
             }
             
-        };
+        }
         
         /**
          * Entry Iterator

@@ -209,7 +209,7 @@ public class ModelUtils {
                 new Path(new String[]{ModelAttributes.PRIMITIVE_TYPE}),
                 ModelAttributes.PRIMITIVE_TYPE
             );        
-            e.attributeValuesAsList("supertype").add(ModelAttributes.DATATYPE);
+            e.addToAttributeValuesAsList("supertype",ModelAttributes.DATATYPE);
             modelTypeNames.put(
                 ModelAttributes.PRIMITIVE_TYPE,
                 new ModelElement_1(e.getDelegate(), null)
@@ -220,7 +220,7 @@ public class ModelUtils {
                 new Path(new String[]{ModelAttributes.ENUMERATION_TYPE}),
                 ModelAttributes.ENUMERATION_TYPE
             );                
-            e.attributeValuesAsList("supertype").add(ModelAttributes.DATATYPE);
+            e.addToAttributeValuesAsList("supertype",ModelAttributes.DATATYPE);
             modelTypeNames.put(
                 ModelAttributes.ENUMERATION_TYPE,
                 new ModelElement_1(e.getDelegate(), null)
@@ -231,7 +231,7 @@ public class ModelUtils {
                 new Path(new String[]{ModelAttributes.PRIMITIVE_TYPE}),
                 ModelAttributes.PRIMITIVE_TYPE
             );                
-            e.attributeValuesAsList("supertype").add(ModelAttributes.DATATYPE);
+            e.addToAttributeValuesAsList("supertype",ModelAttributes.DATATYPE);
             modelTypeNames.put(
                 ModelAttributes.STRUCTURE_TYPE,
                 new ModelElement_1(e.getDelegate(), null)            
@@ -242,8 +242,8 @@ public class ModelUtils {
                 new Path(new String[]{ModelAttributes.COLLECTION_TYPE}),
                 ModelAttributes.COLLECTION_TYPE
             );                
-            e.attributeValuesAsList("supertype").add(ModelAttributes.DATATYPE);
-            e.attributeValuesAsList("supertype").add(ModelAttributes.TYPED_ELEMENT);
+            e.addToAttributeValuesAsList("supertype",ModelAttributes.DATATYPE);
+            e.addToAttributeValuesAsList("supertype",ModelAttributes.TYPED_ELEMENT);
             modelTypeNames.put(
                 ModelAttributes.COLLECTION_TYPE,
                 new ModelElement_1(e.getDelegate(), null)            
@@ -254,8 +254,8 @@ public class ModelUtils {
                 new Path(new String[]{ModelAttributes.ALIAS_TYPE}),
                 ModelAttributes.ALIAS_TYPE
             );                
-            e.attributeValuesAsList("supertype").add(ModelAttributes.DATATYPE);
-            e.attributeValuesAsList("supertype").add(ModelAttributes.TYPED_ELEMENT);
+            e.addToAttributeValuesAsList("supertype",ModelAttributes.DATATYPE);
+            e.addToAttributeValuesAsList("supertype",ModelAttributes.TYPED_ELEMENT);
             modelTypeNames.put(
                 ModelAttributes.ALIAS_TYPE,
                 new ModelElement_1(e.getDelegate(), null)            
@@ -266,7 +266,7 @@ public class ModelUtils {
                 new Path(new String[]{ModelAttributes.DATATYPE}),
                 ModelAttributes.DATATYPE
             );                
-            e.attributeValuesAsList("supertype").add(ModelAttributes.CLASSIFIER);
+            e.addToAttributeValuesAsList("supertype",ModelAttributes.CLASSIFIER);
             modelTypeNames.put(
                 ModelAttributes.DATATYPE,
                 new ModelElement_1(e.getDelegate(), null)            
@@ -277,7 +277,7 @@ public class ModelUtils {
                 new Path(new String[]{ModelAttributes.ASSOCIATION}),
                 ModelAttributes.ASSOCIATION
             );                
-            e.attributeValuesAsList("supertype").add(ModelAttributes.CLASSIFIER);
+            e.addToAttributeValuesAsList("supertype",ModelAttributes.CLASSIFIER);
             modelTypeNames.put(
                 ModelAttributes.ASSOCIATION,
                 new ModelElement_1(e.getDelegate(), null)            
@@ -288,8 +288,8 @@ public class ModelUtils {
                 new Path(new String[]{ModelAttributes.CLASS}),
                 ModelAttributes.CLASS
             );                
-            e.attributeValuesAsList(SystemAttributes.OBJECT_CLASS).add(ModelAttributes.CLASS);
-            e.attributeValuesAsList("supertype").add(ModelAttributes.CLASSIFIER);
+            e.addToAttributeValuesAsList(SystemAttributes.OBJECT_CLASS,ModelAttributes.CLASS);
+            e.addToAttributeValuesAsList("supertype",ModelAttributes.CLASSIFIER);
             modelTypeNames.put(
                 ModelAttributes.CLASS,
                 new ModelElement_1(e.getDelegate(), null)            
@@ -300,7 +300,7 @@ public class ModelUtils {
                 new Path(new String[]{ModelAttributes.CLASSIFIER}),
                 ModelAttributes.CLASSIFIER
             );                
-            e.attributeValuesAsList("supertype").add(ModelAttributes.GENERALIZABLE_ELEMENT);
+            e.addToAttributeValuesAsList("supertype",ModelAttributes.GENERALIZABLE_ELEMENT);
             modelTypeNames.put(
                 ModelAttributes.CLASSIFIER,
                 new ModelElement_1(e.getDelegate(), null)            
@@ -311,7 +311,7 @@ public class ModelUtils {
                 new Path(new String[]{ModelAttributes.PACKAGE}),
                 ModelAttributes.PACKAGE
             );                
-            e.attributeValuesAsList("supertype").add(ModelAttributes.GENERALIZABLE_ELEMENT);
+            e.addToAttributeValuesAsList("supertype",ModelAttributes.GENERALIZABLE_ELEMENT);
             modelTypeNames.put(
                 ModelAttributes.PACKAGE,
                 new ModelElement_1(e.getDelegate(), null)            
@@ -322,7 +322,7 @@ public class ModelUtils {
                 new Path(new String[]{ModelAttributes.GENERALIZABLE_ELEMENT}),
                 ModelAttributes.GENERALIZABLE_ELEMENT
             );        
-            e.attributeValuesAsList("supertype").add(ModelAttributes.NAMESPACE);
+            e.addToAttributeValuesAsList("supertype",ModelAttributes.NAMESPACE);
             modelTypeNames.put(
                 ModelAttributes.GENERALIZABLE_ELEMENT,
                 new ModelElement_1(e.getDelegate(), null)            
@@ -333,7 +333,7 @@ public class ModelUtils {
                 new Path(new String[]{ModelAttributes.OPERATION}),
                 ModelAttributes.OPERATION
             );                
-            e.attributeValuesAsList("supertype").add(ModelAttributes.BEHAVIOURAL_FEATURE);
+            e.addToAttributeValuesAsList("supertype",ModelAttributes.BEHAVIOURAL_FEATURE);
             modelTypeNames.put(
                 ModelAttributes.OPERATION,
                 new ModelElement_1(e.getDelegate(), null)            
@@ -344,7 +344,7 @@ public class ModelUtils {
                 new Path(new String[]{ModelAttributes.EXCEPTION}),
                 ModelAttributes.EXCEPTION
             );                
-            e.attributeValuesAsList("supertype").add(ModelAttributes.BEHAVIOURAL_FEATURE);
+            e.addToAttributeValuesAsList("supertype",ModelAttributes.BEHAVIOURAL_FEATURE);
             modelTypeNames.put(
                 ModelAttributes.EXCEPTION,
                 new ModelElement_1(e.getDelegate(), null)            
@@ -355,8 +355,8 @@ public class ModelUtils {
                 new Path(new String[]{ModelAttributes.BEHAVIOURAL_FEATURE}),
                 ModelAttributes.BEHAVIOURAL_FEATURE
             );                
-            e.attributeValuesAsList("supertype").add(ModelAttributes.FEATURE);
-            e.attributeValuesAsList("supertype").add(ModelAttributes.NAMESPACE);
+            e.addToAttributeValuesAsList("supertype",ModelAttributes.FEATURE);
+            e.addToAttributeValuesAsList("supertype",ModelAttributes.NAMESPACE);
             modelTypeNames.put(
                 ModelAttributes.BEHAVIOURAL_FEATURE,
                 new ModelElement_1(e.getDelegate(), null)            
@@ -367,7 +367,7 @@ public class ModelUtils {
                 new Path(new String[]{ModelAttributes.NAMESPACE}),
                 ModelAttributes.NAMESPACE
             );                
-            e.attributeValuesAsList("supertype").add(ModelAttributes.ELEMENT);
+            e.addToAttributeValuesAsList("supertype",ModelAttributes.ELEMENT);
             modelTypeNames.put(
                 ModelAttributes.NAMESPACE,
                 new ModelElement_1(e.getDelegate(), null)            
@@ -378,7 +378,7 @@ public class ModelUtils {
                 new Path(new String[]{ModelAttributes.TAG}),
                 ModelAttributes.TAG
             );                
-            e.attributeValuesAsList("supertype").add(ModelAttributes.ELEMENT);
+            e.addToAttributeValuesAsList("supertype",ModelAttributes.ELEMENT);
             modelTypeNames.put(
                 ModelAttributes.TAG,
                 new ModelElement_1(e.getDelegate(), null)            
@@ -389,7 +389,7 @@ public class ModelUtils {
                 new Path(new String[]{ModelAttributes.IMPORT}),
                 ModelAttributes.IMPORT
             );                
-            e.attributeValuesAsList("supertype").add(ModelAttributes.ELEMENT);
+            e.addToAttributeValuesAsList("supertype",ModelAttributes.ELEMENT);
             modelTypeNames.put(
                 ModelAttributes.IMPORT,
                 new ModelElement_1(e.getDelegate(), null)            
@@ -400,7 +400,7 @@ public class ModelUtils {
                 new Path(new String[]{ModelAttributes.CONSTRAINT}),
                 ModelAttributes.CONSTRAINT
             );                
-            e.attributeValuesAsList("supertype").add(ModelAttributes.ELEMENT);
+            e.addToAttributeValuesAsList("supertype",ModelAttributes.ELEMENT);
             modelTypeNames.put(
                 ModelAttributes.CONSTRAINT,
                 new ModelElement_1(e.getDelegate(), null)            
@@ -411,7 +411,7 @@ public class ModelUtils {
                 new Path(new String[]{ModelAttributes.ATTRIBUTE}),
                 ModelAttributes.ATTRIBUTE
             );                
-            e.attributeValuesAsList("supertype").add(ModelAttributes.STRUCTURAL_FEATURE);
+            e.addToAttributeValuesAsList("supertype",ModelAttributes.STRUCTURAL_FEATURE);
             modelTypeNames.put(
                 ModelAttributes.ATTRIBUTE,
                 new ModelElement_1(e.getDelegate(), null)            
@@ -422,7 +422,7 @@ public class ModelUtils {
                 new Path(new String[]{ModelAttributes.REFERENCE}),
                 ModelAttributes.REFERENCE
             );                
-            e.attributeValuesAsList("supertype").add(ModelAttributes.STRUCTURAL_FEATURE);
+            e.addToAttributeValuesAsList("supertype",ModelAttributes.STRUCTURAL_FEATURE);
             modelTypeNames.put(
                 ModelAttributes.REFERENCE,
                 new ModelElement_1(e.getDelegate(), null)            
@@ -433,8 +433,8 @@ public class ModelUtils {
                 new Path(new String[]{ModelAttributes.STRUCTURAL_FEATURE}),
                 ModelAttributes.STRUCTURAL_FEATURE
             );                
-            e.attributeValuesAsList("supertype").add(ModelAttributes.FEATURE);
-            e.attributeValuesAsList("supertype").add(ModelAttributes.TYPED_ELEMENT);
+            e.addToAttributeValuesAsList("supertype",ModelAttributes.FEATURE);
+            e.addToAttributeValuesAsList("supertype",ModelAttributes.TYPED_ELEMENT);
             modelTypeNames.put(
                 ModelAttributes.STRUCTURAL_FEATURE,
                 new ModelElement_1(e.getDelegate(), null)            
@@ -445,7 +445,7 @@ public class ModelUtils {
                 new Path(new String[]{ModelAttributes.FEATURE}),
                 ModelAttributes.FEATURE
             );                
-            e.attributeValuesAsList("supertype").add(ModelAttributes.ELEMENT);
+            e.addToAttributeValuesAsList("supertype",ModelAttributes.ELEMENT);
             modelTypeNames.put(
                 ModelAttributes.FEATURE,
                 new ModelElement_1(e.getDelegate(), null)            
@@ -456,7 +456,7 @@ public class ModelUtils {
                 new Path(new String[]{ModelAttributes.ASSOCIATION_END}),
                 ModelAttributes.ASSOCIATION_END
             );                
-            e.attributeValuesAsList("supertype").add(ModelAttributes.TYPED_ELEMENT);
+            e.addToAttributeValuesAsList("supertype",ModelAttributes.TYPED_ELEMENT);
             modelTypeNames.put(
                 ModelAttributes.ASSOCIATION_END,
                 new ModelElement_1(e.getDelegate(), null)            
@@ -467,7 +467,7 @@ public class ModelUtils {
                 new Path(new String[]{ModelAttributes.PARAMETER}),
                 ModelAttributes.PARAMETER
             );                
-            e.attributeValuesAsList("supertype").add(ModelAttributes.TYPED_ELEMENT);
+            e.addToAttributeValuesAsList("supertype",ModelAttributes.TYPED_ELEMENT);
             modelTypeNames.put(
                 ModelAttributes.PARAMETER,
                 new ModelElement_1(e.getDelegate(), null)            
@@ -478,7 +478,7 @@ public class ModelUtils {
                 new Path(new String[]{ModelAttributes.CONSTANT}),
                 ModelAttributes.CONSTANT
             );                
-            e.attributeValuesAsList("supertype").add(ModelAttributes.TYPED_ELEMENT);
+            e.addToAttributeValuesAsList("supertype",ModelAttributes.TYPED_ELEMENT);
             modelTypeNames.put(
                 ModelAttributes.CONSTANT,
                 new ModelElement_1(e.getDelegate(), null)            
@@ -489,7 +489,7 @@ public class ModelUtils {
                 new Path(new String[]{ModelAttributes.STRUCTURE_FIELD}),
                 ModelAttributes.STRUCTURE_FIELD
             );                
-            e.attributeValuesAsList("supertype").add(ModelAttributes.TYPED_ELEMENT);
+            e.addToAttributeValuesAsList("supertype",ModelAttributes.TYPED_ELEMENT);
             modelTypeNames.put(
                 ModelAttributes.STRUCTURE_FIELD,
                 new ModelElement_1(e.getDelegate(), null)            
@@ -500,7 +500,7 @@ public class ModelUtils {
                 new Path(new String[]{ModelAttributes.TYPED_ELEMENT}),
                 ModelAttributes.TYPED_ELEMENT
             );                
-            e.attributeValuesAsList("supertype").add(ModelAttributes.ELEMENT);
+            e.addToAttributeValuesAsList("supertype",ModelAttributes.ELEMENT);
             modelTypeNames.put(
                 ModelAttributes.TYPED_ELEMENT,
                 new ModelElement_1(e.getDelegate(), null)            

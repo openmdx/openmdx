@@ -71,7 +71,7 @@ import org.openmdx.base.rest.spi.Object_2Facade;
 import org.openmdx.base.rest.spi.Query_2Facade;
 import org.w3c.format.DateTimeFormat;
 
-@SuppressWarnings({"rawtypes","unchecked"})
+@SuppressWarnings("rawtypes")
 public class Model_1 extends Layer_1 {
 
     //---------------------------------------------------------------------------
@@ -113,15 +113,15 @@ public class Model_1 extends Layer_1 {
                 facade.getObjectClass()
             );
             if(supertype != null) {
-                facade.attributeValuesAsList(SystemAttributes.OBJECT_INSTANCE_OF).clear();
-                facade.attributeValuesAsList(SystemAttributes.OBJECT_INSTANCE_OF).addAll(
+                facade.replaceAttributeValuesAsList(
+                    SystemAttributes.OBJECT_INSTANCE_OF,
                     supertype
                 );
             }
             else {
-                facade.attributeValuesAsList(SystemAttributes.OBJECT_INSTANCE_OF).clear();
-                facade.attributeValuesAsList(SystemAttributes.OBJECT_INSTANCE_OF).addAll(
-                    facade.attributeValuesAsList(SystemAttributes.OBJECT_CLASS)
+                facade.replaceAttributeValuesAsList(
+                    SystemAttributes.OBJECT_INSTANCE_OF,
+                    facade.getAttributeValuesAsReadOnlyList(SystemAttributes.OBJECT_CLASS)
                 );
             }
         }
@@ -231,19 +231,11 @@ public class Model_1 extends Layer_1 {
                 Date at = getTransactionTime(header);
                 Object_2Facade facade = Facades.asObject(request.object());                        
                 if(isNew){
-                    List<Object> createdBy = facade.attributeValuesAsList(SystemAttributes.CREATED_BY);
-                    createdBy.clear();
-                    createdBy.addAll(by);
-                    List<Object> createdAt = facade.attributeValuesAsList(SystemAttributes.CREATED_AT);
-                    createdAt.clear();
-                    createdAt.add(at);
+                    facade.replaceAttributeValuesAsList(SystemAttributes.CREATED_BY,by);
+                    facade.replaceAttributeValuesAsListBySingleton(SystemAttributes.CREATED_AT, at);
                 }
-                List<Object> modifiedBy = facade.attributeValuesAsList(SystemAttributes.MODIFIED_BY);
-                modifiedBy.clear();
-                modifiedBy.addAll(by);
-                List<Object> modifiedAt = facade.attributeValuesAsList(SystemAttributes.MODIFIED_AT);
-                modifiedAt.clear();
-                modifiedAt.add(at);
+                facade.replaceAttributeValuesAsList(SystemAttributes.MODIFIED_BY, by);
+                facade.replaceAttributeValuesAsListBySingleton(SystemAttributes.MODIFIED_AT, at);
             } catch (ParseException exception) {
                 throw new ServiceException(exception);
             }

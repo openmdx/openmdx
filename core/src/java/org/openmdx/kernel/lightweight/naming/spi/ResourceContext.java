@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2009, OMEX AG, Switzerland
+ * Copyright (c) 2009-2013, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -117,6 +117,7 @@ public abstract class ResourceContext extends StringBasedContext {
     public final void destroySubcontext(
         String name
     ) throws NamingException {
+        // Nothing to do
     }
 
     /* (non-Javadoc)

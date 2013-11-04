@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2009-2012, OMEX AG, Switzerland
+ * Copyright (c) 2009-2013, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -81,6 +81,8 @@ public class JavaBeans {
      * @param exceptionListener the (optional) exception listener
      * 
      * @return an XML document representing the graph of java beans
+     * 
+     * @throws ServiceException in case of TRANSFORMATION_FAILURE
      */
     public static String toXML(
         Object javaBean,
@@ -107,11 +109,13 @@ public class JavaBeans {
      * @param javaBean a graph of java beans
      * 
      * @return an XML document representing the graph of java beans
+     * 
+     * @throws ServiceException in case of TRANSFORMATION_FAILURE
      */
     public static String toXML(
         Object javaBean
     ) throws ServiceException {
-        return transformer.encode(
+        return toXML(
             javaBean,
             new JavaBeanExceptionListener(javaBean)
         );
@@ -125,12 +129,23 @@ public class JavaBeans {
      * 
      * @return a graph of java beans; or <code>null</code> if
      * the <code>xmlEncodedJavaBean</code> was <code>null</code>
+     * 
+     * @throws ServiceException in case of TRANSFORMATION_FAILURE
      */
     public static Object fromXML(
         CharSequence xmlEncodedJavaBean,
         ExceptionListener exceptionListener
-    ){
-        return transformer.decode(xmlEncodedJavaBean, exceptionListener);
+    ) throws ServiceException{
+        try {
+            return transformer.decode(xmlEncodedJavaBean, exceptionListener);
+        } catch (RuntimeException exception) {
+            throw new ServiceException(
+                exception,
+                BasicException.Code.DEFAULT_DOMAIN,
+                BasicException.Code.TRANSFORMATION_FAILURE,
+                "Unable to convert Java Bean to XML"
+            );
+        }        
     }
 
     /**
@@ -140,16 +155,19 @@ public class JavaBeans {
      * 
      * @return a graph of java beans; or <code>null</code> if
      * the <code>xmlEncodedJavaBean</code> was <code>null</code>
+     * 
+     * @throws ServiceException in case of TRANSFORMATION_FAILURE
      */
     public static Object fromXML(
         CharSequence xmlEncodedJavaBean
-    ){
+    ) throws ServiceException{
         return fromXML(
             xmlEncodedJavaBean,            
             new JavaBeanExceptionListener(xmlEncodedJavaBean)
         );
     }
 
+    
     //------------------------------------------------------------------------
     // Class JavaBeanExceptionListener
     //------------------------------------------------------------------------

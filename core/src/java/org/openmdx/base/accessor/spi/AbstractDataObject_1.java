@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2011, OMEX AG, Switzerland
+ * Copyright (c) 2004-2013, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -171,7 +171,7 @@ public abstract class AbstractDataObject_1
                             object.jdoGetObjectId(),
                             object.jdoGetTransactionalObjectId(),
                             BasicException.Code.DEFAULT_DOMAIN,
-                            BasicException.Code.NOT_FOUND
+                            Integer.valueOf(BasicException.Code.NOT_FOUND)
                         }
                     ).toString();
                 } else {
@@ -184,7 +184,7 @@ public abstract class AbstractDataObject_1
                             object.jdoGetObjectId(),
                             object.jdoGetTransactionalObjectId(),
                             reason.getExceptionDomain(),
-                            reason.getExceptionCode()
+                            Integer.valueOf(reason.getExceptionCode())
                         }
                     ).toString();
                 }

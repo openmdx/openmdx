@@ -61,9 +61,12 @@ import java.util.List;
 import javax.jdo.PersistenceManager;
 
 import org.oasisopen.jmi1.RefContainer;
+import org.openmdx.application.dataprovider.layer.persistence.jdbc.Database_1_Attributes;
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
 import org.openmdx.base.accessor.jmi.cci.RefQuery_1_0;
 import org.openmdx.base.exception.ServiceException;
+import org.openmdx.base.persistence.spi.QueryExtension;
+import org.openmdx.base.query.Extension;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.log.SysLog;
 import org.openmdx.portal.servlet.Filter;
@@ -113,6 +116,7 @@ public class CompositeGrid extends Grid implements Serializable {
     @Override
     public List<RefObject_1_0> getFilteredObjects(
     	PersistenceManager pm,
+    	boolean preCalcListSize,
         Filter filter
     ) {
         List<RefObject_1_0> filteredObjects = null;
@@ -120,6 +124,13 @@ public class CompositeGrid extends Grid implements Serializable {
 	    	RefObject_1_0 parent = (RefObject_1_0)pm.getObjectById(
 	    		this.view.getObjectReference().getObject().refGetPath()
 	    	);
+	    	if(preCalcListSize) {
+	    		Extension queryExtension = new QueryExtension();
+    	    	queryExtension.setClause(
+    	    		Database_1_Attributes.HINT_COUNT + "(1=1)"
+    	    	);
+	    		filter.getExtension().add(queryExtension);
+	    	}
 	        Object allObjects = this.dataBinding.getValue(
 	            parent, 
 	            this.getGridControl().getObjectContainer().getReferenceName(),

@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2008-2011, OMEX AG, Switzerland
+ * Copyright (c) 2008-2013, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -75,7 +75,7 @@ public class AssociationEndDef extends ElementDef {
         this.associationEndDef = associationEndDef;        
         this.model = model;
         this.aggregation = (String)associationEndDef.objGetValue("aggregation");
-        this.navigable = (Boolean)associationEndDef.objGetValue("isNavigable");
+        this.navigable = ((Boolean)associationEndDef.objGetValue("isNavigable")).booleanValue();
         this.multiplicity = (String)associationEndDef.objGetValue("multiplicity");
         this.type = this.getQualifiedTypeName(associationEndDef.objGetValue("type"));
         this.qualifierType = this.getQualifiedTypeName(associationEndDef.objGetValue("qualifierType"));

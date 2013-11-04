@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2012, OMEX AG, Switzerland
+ * Copyright (c) 2012-2013, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -79,7 +79,7 @@ class XADataSourceContext extends ResourceContext {
     
     private final static String XA_DATA_SOURCE_CLASS_NAME = "bitronix.tm.resource.jdbc.PoolingDataSource";
     
-    private final static int MAX_POOL_SIZE_DEFAULT = Integer.valueOf(8);
+    private final static int MAX_POOL_SIZE_DEFAULT = 8;
 
     private static final List<String> STRING_POOL_PROPERTIES = Arrays.asList(
         "CursorHoldability",
@@ -143,7 +143,7 @@ class XADataSourceContext extends ResourceContext {
         }
         target.put("ClassName", className);
         if(!target.containsKey("MaxPoolSize")){
-            target.put("MaxPoolSize", MAX_POOL_SIZE_DEFAULT);
+            target.put("MaxPoolSize", Integer.valueOf(MAX_POOL_SIZE_DEFAULT));
         }
         if(!target.containsKey("IgnoreRecoveryFailures")){
             target.put("IgnoreRecoveryFailures", Boolean.TRUE);

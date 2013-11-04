@@ -77,12 +77,12 @@ public class StandardBeanIntrospector implements BeanIntrospector {
             setter = propertyDescriptor.getWriteMethod();
         } catch (Exception exception) {
             throw new RuntimeException(
-                javaBeanClass.getName() + ": Unable to acquire the mofifier for the property " + javaBeanClass
+                javaBeanClass.getName() + ": Unable to acquire the modifier for the property " + propertyName
             );
         }
         if(setter == null) {
             throw new RuntimeException(
-                javaBeanClass.getName() + ": No mofifier found for the property " + javaBeanClass
+                javaBeanClass.getName() + ": No modifier found for the property " + propertyName
             );
         }
         return setter;

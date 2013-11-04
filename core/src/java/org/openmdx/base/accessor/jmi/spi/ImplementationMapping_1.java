@@ -131,7 +131,7 @@ class ImplementationMapping_1 implements Mapping_1_0 {
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.jmi.spi.Mapping_1_0#newPackage(org.openmdx.base.accessor.jmi.spi.Jmi1Package_1_0, java.lang.String)
      */
-//  @Override
+    @Override
     public RefPackage newPackage(
         Jmi1Package_1_0 outermostPackage,
         String qualifiedName
@@ -173,7 +173,7 @@ class ImplementationMapping_1 implements Mapping_1_0 {
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.jmi.spi.Mapping_1_0#newStruct(org.openmdx.base.accessor.jmi.spi.Jmi1Package_1_0, javax.resource.cci.MappedRecord)
      */
-//  @Override
+    @Override
     public RefStruct newStruct(
         Jmi1Package_1_0 outermostPackage,
         Record delegate
@@ -209,7 +209,7 @@ class ImplementationMapping_1 implements Mapping_1_0 {
         );
     }
 
-//  @Override
+    @Override
     public FeatureMapper getFeatureMapper(
         String qualifiedClassName,
         FeatureMapper.Type type
@@ -224,7 +224,7 @@ class ImplementationMapping_1 implements Mapping_1_0 {
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.mof.cci.Mapping_1_0#getClassName(java.lang.Class)
      */
-//  @Override
+    @Override
     public String getModelClassName(
         Class<?> javaClass
     ) throws ServiceException {
@@ -234,7 +234,7 @@ class ImplementationMapping_1 implements Mapping_1_0 {
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.jmi.spi.Mapping_1_0#getInstanceInterface(java.lang.Class)
      */
-//  @Override
+    @Override
     public Class<? extends RefObject> getInstanceInterface(
         Class<?> javaClass
     ) throws ServiceException {
@@ -244,7 +244,7 @@ class ImplementationMapping_1 implements Mapping_1_0 {
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.jmi.spi.Mapping_1_0#getClassMapping(java.lang.String)
      */
-//  @Override
+    @Override
     public ImplementationDescriptor getClassMapping(
         String qualifiedClassName
     ) throws ServiceException {
@@ -380,7 +380,7 @@ class ImplementationMapping_1 implements Mapping_1_0 {
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.jmi.spi.Mapping_1_0#getExceptionConstructor(java.lang.String,java.lang.String)
      */
-//  @Override
+    @Override
     public Constructor<? extends RefException> getExceptionConstructor(
         String qualifiedExceptionName,
         String qualifiedPackageName
@@ -457,7 +457,7 @@ class ImplementationMapping_1 implements Mapping_1_0 {
         /* (non-Javadoc)
          * @see org.openmdx.base.accessor.jmi.spi.Jmi1Mapping_1_0#getAspectImplementationDescriptors()
          */
-    //  @Override
+        @Override
         public AspectImplementationDescriptor[] getAspectImplementationDescriptors(
         ) {
             return this.aspectImplementationDescriptors;
@@ -466,7 +466,7 @@ class ImplementationMapping_1 implements Mapping_1_0 {
         /* (non-Javadoc)
          * @see org.openmdx.base.accessor.jmi.spi.Jmi1Mapping_1_0#getInstanceInterface()
          */
-    //  @Override
+        @Override
         public Class<? extends RefObject> getInstanceInterface() {
             return this.interfaceDescriptor.jmi1Interface;
         }
@@ -474,7 +474,7 @@ class ImplementationMapping_1 implements Mapping_1_0 {
         /* (non-Javadoc)
          * @see org.openmdx.base.accessor.jmi.spi.Jmi1Mapping_1_0#isMixedInInterfaces(java.lang.Class)
          */
-    //  @Override
+        @Override
         public boolean isMixedInInterfaces(
             Class<?> declaringClass
         ) {
@@ -507,7 +507,7 @@ class ImplementationMapping_1 implements Mapping_1_0 {
         /* (non-Javadoc)
          * @see org.openmdx.base.accessor.jmi.spi.ClassMapping_1_0#getInstanceClass()
          */
-    //  @Override
+        @Override
         public Class<? extends AbstractObject> getInstanceClass(
         ) throws ServiceException {
             return this.interfaceDescriptor.jpa3Class;
@@ -516,7 +516,7 @@ class ImplementationMapping_1 implements Mapping_1_0 {
         /* (non-Javadoc)
          * @see org.openmdx.base.accessor.jmi.spi.Jmi1Mapping_1_0#newClass(org.openmdx.base.accessor.jmi.spi.Jmi1Package_1_0)
          */
-    //  @Override
+        @Override
         public Jmi1Class_1_0 newClass(
             Jmi1Package_1_0 refPackage
         ) throws ServiceException {
@@ -532,7 +532,7 @@ class ImplementationMapping_1 implements Mapping_1_0 {
         /* (non-Javadoc)
          * @see org.openmdx.base.accessor.jmi.spi.Jmi1Mapping_1_0#newInstance(org.openmdx.base.accessor.jmi.spi.Jmi1Class_1_0, javax.jdo.spi.PersistenceCapable)
          */
-    //  @Override
+        @Override
         public RefObject_1_0 newInstance(
             Jmi1Class_1_0 refClass,
             PersistenceCapable delegate
@@ -546,7 +546,7 @@ class ImplementationMapping_1 implements Mapping_1_0 {
         /* (non-Javadoc)
          * @see org.openmdx.base.accessor.jmi.spi.Jmi1Mapping_1_0#newInstance(InvocationHandler)
          */
-    //  @Override
+        @Override
         public RefQuery_1_0 newQuery(
             InvocationHandler invocationHandler
         ) {
@@ -625,7 +625,7 @@ class ImplementationMapping_1 implements Mapping_1_0 {
         /* (non-Javadoc)
          * @see org.openmdx.base.accessor.jmi.spi.Jmi1Mapping_1_0#getInvocationDescriptor(java.lang.reflect.Method)
          */
-    //  @Override
+        @Override
         public InvocationDescriptor getInvocationDescriptor(
             Method method
         ){

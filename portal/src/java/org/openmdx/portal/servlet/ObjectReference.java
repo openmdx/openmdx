@@ -53,8 +53,6 @@
 package org.openmdx.portal.servlet;
 
 import java.io.Serializable;
-import java.util.regex.Pattern;
-
 import javax.jdo.JDOHelper;
 
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;

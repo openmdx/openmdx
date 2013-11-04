@@ -53,6 +53,7 @@ import java.beans.PersistenceDelegate;
 import java.beans.XMLDecoder;
 import java.beans.XMLEncoder;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.net.URI;
@@ -69,6 +70,7 @@ import org.openmdx.base.naming.Path;
 import org.openmdx.base.query.Quantifier;
 import org.openmdx.base.text.conversion.spi.BeanTransformer;
 import org.openmdx.kernel.exception.BasicException;
+import org.openmdx.kernel.log.SysLog;
 import org.w3c.cci2.ImmutableDate;
 import org.w3c.cci2.ImmutableDateTime;
 import org.w3c.format.DateTimeFormat;
@@ -158,18 +160,25 @@ public class StandardBeanTransformer implements BeanTransformer {
         if(encodedJavaBean == null) {
             return null;
         } else {
+            StringInputStream source = new StringInputStream(
+                encodedJavaBean.toString(),
+                "UTF-8"
+            );
             XMLDecoder decoder = new XMLDecoder(
-                new StringInputStream(
-                    encodedJavaBean.toString(),
-                    "UTF-8"
-                )
+                source
             );
             if(exceptionListener != null) {
                 decoder.setExceptionListener(
                     new ExceptionListenerAdapter(exceptionListener)
                 );
             }
-            return decoder.readObject();
+            Object value = decoder.readObject();
+            try {
+                source.close();
+            } catch (IOException ignored) {
+                SysLog.trace("Ignored close failure", ignored);
+            }
+            return value;
         }
     }
 
@@ -375,7 +384,7 @@ public class StandardBeanTransformer implements BeanTransformer {
                 oldInstance,
                 Date.class,
                 "new", 
-                new Object[]{((Date)oldInstance).getTime()}
+                new Object[]{Long.valueOf(((Date)oldInstance).getTime())}
             );
         }
     }    

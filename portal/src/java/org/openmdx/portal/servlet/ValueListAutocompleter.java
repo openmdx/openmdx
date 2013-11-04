@@ -1,14 +1,14 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Description: ListAutocompleteControl 
+ * Description: ValueListAutocompleter 
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
  * ====================================================================
  *
  * This software is published under the BSD license
  * as listed below.
  * 
- * Copyright (c) 2004-2007, OMEX AG, Switzerland
+ * Copyright (c) 2004-2013, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -61,17 +61,27 @@ import org.openmdx.base.exception.ServiceException;
 import org.openmdx.kernel.log.SysLog;
 import org.openmdx.portal.servlet.attribute.AttributeValue;
 
-public class ValueListAutocompleter
-    implements Autocompleter_1_0, Serializable {
+/**
+ * ValueListAutocompleter
+ *
+ */
+public class ValueListAutocompleter implements Autocompleter_1_0, Serializable {
   
-    //-------------------------------------------------------------------------
+    /**
+     * Constructor 
+     *
+     * @param options
+     */
     public ValueListAutocompleter(
         List options
     ) {
         this.options = options;
     }
     
-    //-----------------------------------------------------------------------
+    /* (non-Javadoc)
+     * @see org.openmdx.portal.servlet.Autocompleter_1_0#paint(org.openmdx.portal.servlet.ViewPort, java.lang.String, int, java.lang.String, org.openmdx.portal.servlet.attribute.AttributeValue, boolean, java.lang.CharSequence, java.lang.CharSequence, java.lang.CharSequence, java.lang.CharSequence, java.lang.CharSequence)
+     */
+    @Override
     public void paint(
         ViewPort p,
         String id,
@@ -82,11 +92,10 @@ public class ValueListAutocompleter
         CharSequence tdTag,
         CharSequence inputFieldDivClass,
         CharSequence inputFieldClass,
-        CharSequence imgTag
+        CharSequence imgTag,
+        CharSequence onChangeValueScript
     ) throws ServiceException {
-        
     	SysLog.detail("> paint");        
-        
         ApplicationContext app = p.getApplicationContext();
         HtmlEncoder_1_0 htmlEncoder = app.getHtmlEncoder();
         id = (id == null) || (id.length() == 0)
@@ -108,16 +117,14 @@ public class ValueListAutocompleter
                     selectedModifier = (d1 != null) && (d2 != null)  
                         ? d1.compareTo(d2) == 0 ? "selected" : ""
                         : option.equals(currentValue.getValue(false)) ? "selected" : "";                                                        
-                }
-                else {
+                } else {
                     selectedModifier = option.equals(currentValue.getValue(false)) ? "selected" : "";                    
                 }
             }
             if(option instanceof ObjectReference) {
                 ObjectReference r = (ObjectReference)option;
                 p.write("  <option ", selectedModifier, " value=\"", r.getXRI(), "\">", r.getTitle());
-            }
-            else {
+            } else {
                 String optionEncoded = htmlEncoder.encode("" + option, false);
                 p.write("  <option ", selectedModifier, " value=\"", optionEncoded, "\">", optionEncoded);                
             }
@@ -125,12 +132,15 @@ public class ValueListAutocompleter
         p.write("</select>");
     }
 
-    //-----------------------------------------------------------------------
+    /* (non-Javadoc)
+     * @see org.openmdx.portal.servlet.Autocompleter_1_0#hasFixedSelectableValues()
+     */
+    @Override
     public boolean hasFixedSelectableValues(
     ) {
         return true;
     }
-        
+
     //-----------------------------------------------------------------------
     // Members
     //-----------------------------------------------------------------------

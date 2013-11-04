@@ -603,9 +603,9 @@ public class PageEpilogControl
 	            	);
 	            	if(!isRevokeShow) {
 	                    int tabIndex = 100 * paneIndex + j;
-                        String gridContentId = view.getContainerElementId() == null ? 
-                        	"G_" + Integer.toString(paneIndex) :  
-                        		view.getContainerElementId() + "_" + Integer.toString(paneIndex);
+                        String gridContentId = view.getContainerElementId() == null 
+                        	? "G_" + Integer.toString(paneIndex) 
+                        	: view.getContainerElementId();
 	                    String tabId = gridContentId + "_" + Integer.toString(tabIndex);
 	                    // Tab grouping. Generate hide/show tabs for each group of
 	                    // tabs having a label starting with >>

@@ -76,19 +76,24 @@ public class Base64OutputStream extends ByteArrayOutputStream {
     ) throws ServiceException{
     	if(data == null) {
     		return "";
-    	} else try {
-    		Base64OutputStream target = new Base64OutputStream();
-    		new java.io.ObjectOutputStream(target).writeObject(data);
-    		return target.toString();
-		} catch (Exception exception) {
-			throw new ServiceException(
-				exception,
-				BasicException.Code.DEFAULT_DOMAIN,
-				BasicException.Code.TRANSFORMATION_FAILURE,
-				"Base-64 encoding failed",
-				new BasicException.Parameter("class", data.getClass().getName())
-			);
-		}
+    	} else {
+    	    try {
+        		Base64OutputStream target = new Base64OutputStream();
+        		java.io.ObjectOutputStream objectOutputStream = new java.io.ObjectOutputStream(target);
+                objectOutputStream.writeObject(data);
+        		String encodedValue = target.toString();
+        		objectOutputStream.close();
+                return encodedValue;
+    		} catch (Exception exception) {
+    			throw new ServiceException(
+    				exception,
+    				BasicException.Code.DEFAULT_DOMAIN,
+    				BasicException.Code.TRANSFORMATION_FAILURE,
+    				"Base-64 encoding failed",
+    				new BasicException.Parameter("class", data.getClass().getName())
+    			);
+    		}
+    	}
     }
     
 }

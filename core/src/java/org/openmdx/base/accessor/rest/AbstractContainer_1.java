@@ -508,6 +508,14 @@ abstract class AbstractContainer_1 implements Container_1_0 {
     }
 
     /**
+     * 
+     * @return
+     */
+    protected boolean hasStored(){
+        return this.stored == null;
+    }
+    
+    /**
      * Proxy access requires the persistent managers to be synchronized
      */
     void synchronize(){
@@ -1278,7 +1286,7 @@ abstract class AbstractContainer_1 implements Container_1_0 {
                 throw new UnsupportedOperationException("Query result is unmodifiable");
             }
 
-        };
+        }
 
     }
 
@@ -2003,7 +2011,6 @@ abstract class AbstractContainer_1 implements Container_1_0 {
         private List<DataObject_1_0> selectionCache;
 
         
-        
         Integer getTotal(
         ) {
             return this.total; 
@@ -2012,7 +2019,10 @@ abstract class AbstractContainer_1 implements Container_1_0 {
         void setTotal(
             int total
         ) {
-            this.total = total;
+            this.total = Integer.valueOf(total);
+            if(total == 0) {
+                this.selectionCache = new ArrayList<DataObject_1_0>();
+            }
         }
 
         /**
@@ -2414,8 +2424,8 @@ abstract class AbstractContainer_1 implements Container_1_0 {
                     this.slice = BatchingList.this.getSlice(index);
                     if(this.slice == null) {
                         Query_2Facade facade = BatchingList.this.newQuery();
-                        facade.setPosition(ascending ? index : -(index+1));
-                        facade.setSize(this.batchSize);
+                        facade.setPosition(Long.valueOf(ascending ? index : -(index+1)));
+                        facade.setSize(Integer.valueOf(this.batchSize));
                         if(this.fetchGroupNames != null) {
                             facade.setGroups(this.fetchGroupNames);
                         }

@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2011, OMEX AG, Switzerland
+ * Copyright (c) 2004-2013, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -329,9 +329,10 @@ public class FeatureMapper implements Serializable {
     //-----------------------------------------------------------------------        
     @SuppressWarnings("rawtypes")
     ModelElement_1_0 getFeature(
-        String methodName,
+        String rawMethodName,
         MethodSignature mode
     ) throws ServiceException {
+        String methodName = rawMethodName;
         String className = (String)this.classDef.objGetValue("qualifiedName");
         ConcurrentMap<String,ModelElement_1_0> features = allFeatures.get(className);
         if(features == null) {

@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2008, OMEX AG, Switzerland
+ * Copyright (c) 2008-2013, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -110,7 +110,7 @@ public class TreeSparseArray<E>
         this();
         int i = 0;
         for(E e : list){
-            put(i++, e);
+            put(Integer.valueOf(i++), e);
         }
     }
 

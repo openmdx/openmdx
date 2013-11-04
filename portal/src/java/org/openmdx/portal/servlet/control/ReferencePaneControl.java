@@ -78,6 +78,7 @@ import org.openmdx.portal.servlet.ObjectReference;
 import org.openmdx.portal.servlet.Texts_1_0;
 import org.openmdx.portal.servlet.ViewPort;
 import org.openmdx.portal.servlet.WebKeys;
+import org.openmdx.portal.servlet.action.GridAddColumnFilterAction;
 import org.openmdx.portal.servlet.action.GridGetRowMenuAction;
 import org.openmdx.portal.servlet.action.GridSelectReferenceAction;
 import org.openmdx.portal.servlet.attribute.AttributeValue;
@@ -252,10 +253,11 @@ public class ReferencePaneControl extends PaneControl implements Serializable {
     	return app.getPortalExtension().getAutocompleter(
     		app,
     		target,
-    		qualifiedFeatureName
+    		qualifiedFeatureName,
+    		null // restrictToType
    		);
     }
-    
+
     /**
      * Paint the filter menus.
      * 
@@ -303,7 +305,7 @@ public class ReferencePaneControl extends PaneControl implements Serializable {
     				}
     				k++;
     			}
-    			boolean hilite = groupHasSelectedFilter && !grid.hasFilterValues();
+    			boolean hilite = groupHasSelectedFilter;
     			// Class filter group
     			if("1".equals(filterGroupName)) {
     				p.write("      <li", (hilite ? " class=\"hilite\"": ""), "><a href=\"#\" style=\"", groupingStyle, "\", onclick=\"javascript:return false;\">", p.getImg("src=\"", p.getResourcePath("images/"), WebKeys.ICON_FILTER_CLASS, "\" border=\"0\" align=\"absmiddle\" alt=\"o\" title=\"", htmlEncoder.encode(texts.getClassFilterTitle(), false), "\""), "</a>");
@@ -317,7 +319,7 @@ public class ReferencePaneControl extends PaneControl implements Serializable {
     		filterGroupName = filter.getGroupName();
     		if(!filter.hasParameter()) {
     			Action action = grid.getSelectFilterAction(filter);
-    			boolean hilite = grid.getCurrentFilter().getName().equals(filter.getName()) && !grid.hasFilterValues();
+    			boolean hilite = grid.getCurrentFilter().getName().equals(filter.getName());
     			if(filterGroupName.equals("0")) {
     				p.write("        <li", (hilite ? " class=\"sfhover\"": ""), "><a href=\"#\" style=\"", groupingStyle, "\" onclick=\"javascript:", updateTabScriptletPre, p.getEvalHRef(action), updateTabScriptletPost, "\">", p.getImg("src=\"", p.getResourcePath("images/"), action.getIconKey(), "\" border=\"0\" align=\"absmiddle\" alt=\"o\" title=\"", htmlEncoder.encode(action.getTitle(), false), "\""), "</a></li>");
     			} else {
@@ -356,7 +358,7 @@ public class ReferencePaneControl extends PaneControl implements Serializable {
      * @param formStyle
      * @param labelStyle
      * @param buttonStyle
-     * @param sortableColumns
+     * @param searchableColumns
      * @param updateTabScriptletPre
      * @param updateTabScriptletPost
      * @throws ServiceException
@@ -368,7 +370,7 @@ public class ReferencePaneControl extends PaneControl implements Serializable {
     	String formStyle,
     	String labelStyle,
     	String buttonStyle,
-    	List<Action> sortableColumns,
+    	List<Action> searchableColumns,
     	String updateTabScriptletPre,
     	String updateTabScriptletPost
     ) throws ServiceException {
@@ -387,12 +389,12 @@ public class ReferencePaneControl extends PaneControl implements Serializable {
     		p.write("      <tr>");
     		p.write("        <td>");
     	}
-    	Action columnFilterAddAction = sortableColumns.get(0);
+    	Action columnFilterAddAction = searchableColumns.get(0);
     	String searchParams = "";
     	int count = 0;
     	int nCols = 1;
-    	for(int i = 0; (!isMobile || (i < gridControl.getShowMaxMember())) && i < sortableColumns.size(); i++) {
-    		Action action = sortableColumns.get(i);
+    	for(int i = 0; (!isMobile || (i < gridControl.getShowMaxMember())) && i < searchableColumns.size(); i++) {
+    		Action action = searchableColumns.get(i);
     		if(action.getTitle() != null && !action.getTitle().trim().isEmpty()) {
     			if(!isMobile) {
     				if(count > 0 && count % 5 == 0) {	        		
@@ -484,15 +486,15 @@ public class ReferencePaneControl extends PaneControl implements Serializable {
     	SysLog.detail("> paint");
     	ShowObjectView view = (ShowObjectView)p.getView();
     	ApplicationContext app = view.getApplicationContext();
-    	ReferencePane referencePane = view.getReferencePane()[this.getPaneIndex()];
+    	int paneIndex = this.getPaneIndex();
+    	ReferencePane referencePane = view.getReferencePane()[paneIndex];
     	Texts_1_0 texts = app.getTexts();
     	HtmlEncoder_1_0 htmlEncoder = app.getHtmlEncoder();
-    	int paneIndex = this.getPaneIndex();
     	String gridContentId = view.getContainerElementId() == null 
     		? "G_" + Integer.toString(paneIndex) 
-    		: view.getContainerElementId() + "_" + Integer.toString(paneIndex);
+    		: view.getContainerElementId();
     		// View
-		int zIndex = (view.getReferencePane().length - this.getPaneIndex()) * 10;
+		int zIndex = (view.getReferencePane().length - paneIndex) * 10;
 		if(FRAME_VIEW.equals(frame)) {
 			int nReferences = this.getSelectReferenceAction().length;
 			if(nReferences > 0) {
@@ -584,9 +586,10 @@ public class ReferencePaneControl extends PaneControl implements Serializable {
 					}
 				}
 			}
-		}
-		// Content
-		else if(FRAME_CONTENT.equals(frame)) {
+		} else if(FRAME_CONTENT.equals(frame)) {
+			//
+			// Content
+			//
 			Grid grid = referencePane.getGrid();
 			GridControl gridControl = grid.getGridControl();
 			int tabIndex = paneIndex*100 + referencePane.getSelectedReference();
@@ -640,13 +643,32 @@ public class ReferencePaneControl extends PaneControl implements Serializable {
 				// Searchable columns
 				List<Action> searchableColumns = new ArrayList<Action>();
 				if(grid.isComposite()) {
+					// Add action if identity is searchable 
+					if(
+						!grid.getGridControl().getObjectContainer().isReferenceIsStoredAsAttribute() &&
+						app.getPortalExtension().getQuery(grid.getGridControl().getObjectContainer().getReferencedTypeName() + ":" + SystemAttributes.OBJECT_IDENTITY, "", 0, app) != null
+					) {
+						Action identitySearchAction = new Action(
+							GridAddColumnFilterAction.EVENT_ID,
+							new Action.Parameter[]{
+								new Action.Parameter(Action.PARAMETER_PANE, Integer.toString(paneIndex)),
+								new Action.Parameter(Action.PARAMETER_REFERENCE, gridControl.getId()),       
+								new Action.Parameter(Action.PARAMETER_NAME, SystemAttributes.OBJECT_IDENTITY)
+							},
+							app.getLabel(grid.getGridControl().getObjectContainer().getReferencedTypeName()),
+							app.getTextsFactory().getTextsBundle(app.getCurrentLocaleAsString()).getSearchIncrementallyText(),
+							WebKeys.ICON_SEARCH_INC,
+							true
+						);
+						searchableColumns.add(identitySearchAction);
+					}
 					for(int j = 0; j < gridControl.getColumnSearchActions().length; j++) {
 						Action action = gridControl.getColumnSearchActions()[j];
 						if((action.getEvent() != Action.EVENT_NONE) && !action.getParameter(Action.PARAMETER_NAME).equals("identity")) {
 							searchableColumns.add(action);
 						}
 					}
-				}                
+				}
 				// Non-composite, multi-valued reference                
 				if(!grid.isComposite()) {
 					if(p.getViewPortType() != ViewPort.Type.MOBILE) {                	
@@ -715,7 +737,8 @@ public class ReferencePaneControl extends PaneControl implements Serializable {
 									"<td class=\"lookupButtons\">",
 									null,
 									"class=\"valueAC\"",
-									imgTag
+									imgTag,
+									null // onChangeValueScript
 								);
 							}
 							p.write("    </td>");
@@ -725,9 +748,10 @@ public class ReferencePaneControl extends PaneControl implements Serializable {
 							p.write("<div class=\"gridSpacerTop\"></div>");                        
 						}
 					}
-				}
-				// Composite objects
-				else {
+				} else {
+					//
+					// Composite objects
+					//
 					if(p.getViewPortType() != ViewPort.Type.MOBILE) {                	
 						p.write("<div id=\"", gridMenuId, "" , "\" class=\"menuOpPanel\">");
 						p.write("  <table cellspacing=\"0\" cellpadding=\"0\" id=\"menuOp\" width=\"100%\">");
@@ -895,7 +919,10 @@ public class ReferencePaneControl extends PaneControl implements Serializable {
 						// Info
 						//
 						p.write("      <td class=\"menuOpPanelInfo\">");
-						p.write("        (", Integer.toString(grid.getCurrentPage()*grid.getPageSize()+1), "-", Integer.toString(grid.getCurrentPage()*grid.getPageSize() + rows.length), ")");
+						if(grid.getCurrentPage() > 0 || rows.length > 0) {
+							int startRow = grid.getCurrentPage() * grid.getPageSize();
+							p.write("        (", Integer.toString(startRow + 1), "-", Integer.toString(startRow + rows.length), (grid.getTotalRows() == null ? "" : "/" + Integer.toString(grid.getTotalRows())), ")");
+						}
 						p.write("      </td>");
 						// 
 						// End of panel
@@ -1122,14 +1149,20 @@ public class ReferencePaneControl extends PaneControl implements Serializable {
 								iconSpacer = p.getImg("src=\"", p.getResourcePath("images/"), "spacer", p.getImgType(), "\" width=\"5\" height=\"0\" align=\"middle\" border=\"0\" alt=\"\"");
 							}
 						}
+						// cssClass
+						String cssClass = "";
+						if(valueHolder.getCssClassObjectContainer() != null) {
+							cssClass = valueHolder.getCssClassObjectContainer();
+						}
 						// Null or empty collection
 						if(stringifiedValue.length() == 0) {
 							stringifiedValue = "&nbsp;";
 						}                        
 						if(value == null) {
 							p.debug("<!-- null -->");
-							p.write("<td>", divBegin, iconTag, iconSpacer, stringifiedValue, divEnd, "</td>");
+							p.write("<td class=\"", cssClass, "\">", divBegin, iconTag, iconSpacer, stringifiedValue, divEnd, "</td>");
 						} else if(valueHolder instanceof BooleanValue) {
+							// Boolean
 							String images = "";
 							if(value instanceof Collection) {
 								for(Iterator e = ((Collection)value).iterator(); e.hasNext(); ) {
@@ -1147,12 +1180,13 @@ public class ReferencePaneControl extends PaneControl implements Serializable {
 								}
 							}
 							p.debug("<!-- BooleanValue -->");
-							p.write("<td>", images, "</td>");
+							p.write("<td class=\"", cssClass, "\">", images, "</td>");
 						} else if(valueHolder instanceof ObjectReferenceValue) {
+							// Object reference
 							// Multi-valued
 							if(value instanceof Collection) {
 								p.write("<!-- ObjectReferenceValue -->"); // used as tag for multi-delete. Do not write as debug!
-								p.write("<td>");
+								p.write("<td class=\"", cssClass, "\">");
 								boolean isFirst = true;
 								Iterator<?> e = ((Collection)value).iterator();
 								while(e.hasNext()) {
@@ -1191,9 +1225,8 @@ public class ReferencePaneControl extends PaneControl implements Serializable {
 									}
 								}                            
 								p.write("</td>");
-							}
-							// Single-valued
-							else {
+							} else {
+								// Single-valued
 								ObjectReference objRef = (ObjectReference)value;
 								Action action = objRef.getSelectObjectAction();                        
 								String navigationTarget = view.getNavigationTarget();
@@ -1206,9 +1239,8 @@ public class ReferencePaneControl extends PaneControl implements Serializable {
 										p.write("<!-- ObjectReferenceValue -->"); // used as tag for multi-delete. Do not write as debug!
 										p.write("<td class=\"gridColTypeIcon-3\"><table id=\"gm\"<tr><td><a href=\"#\"" + (navigationTarget != null && !"_none".equals(navigationTarget) ? "target=\"" + navigationTarget + "\"" : "") + " onmouseover=\"javascript:this.href=", p.getEvalHRef(action), ";onmouseover=function(){};\"" + ("_none".equals(navigationTarget) ? " onclick=\"javascript:return false;\"" : "") + ">", p.getImg("src=\"", p.getResourcePath("images/"), action.getIconKey(), "\" border=\"0\" align=\"bottom\" alt=\"o\" title=\"\""), "</a></td><td><div id=\"", rowId, "_menu\" class=\"gridMenu\" onclick=\"try{this.parentNode.parentNode.onclick();}catch(e){};\"><div class=\"gridMenuIndicator\" onclick=\"javascript:new Ajax.Updater('", rowId, "_menu', ", p.getEvalHRef(this.getRowMenuAction(objRef.getXRI(), rowId)), ", {asynchronous:true, evalScripts: true, onComplete: function(){}});\">", p.getImg("border=\"0\" height=\"16\" width=\"16\" alt=\"\" src=\"", p.getResourcePath("images/"), "spacer.gif\""), "</div>", p.getImg("border=\"0\" align=\"bottom\" alt=\"\" src=\"", p.getResourcePath("images/"), WebKeys.ICON_MENU_DOWN, "\" style=\"display:none;\""), "</div></td></tr></table></td>");
 									}
-								}
-								// only text in columns > 0
-								else {                                    
+								} else {									
+									// only text in columns > 0
 									p.write("<!-- ObjectReferenceValue -->");
 									String title = action.getTitle();
 									String toolTip = "";
@@ -1224,17 +1256,18 @@ public class ReferencePaneControl extends PaneControl implements Serializable {
 										title = title.substring(title.indexOf("/>") + 2);
 									}
 									if(action.getEvent() == Action.EVENT_NONE) {
-										p.write("<td><div title=\"", htmlEncoder.encode(toolTip, false), "\">");
+										p.write("<td class=\"", cssClass, "\"><div title=\"", htmlEncoder.encode(toolTip, false), "\">");
 										app.getPortalExtension().renderTextValue(p, htmlEncoder.encode(title, false), false);
 										p.write("</div></td>");
 									} else {
-										p.write("<td><a href=\"#\"" + (navigationTarget != null && !"_none".equals(navigationTarget) ? "target=\"" + navigationTarget + "\"" : "") + " onmouseover=\"javascript:this.href=", p.getEvalHRef(action), ";onmouseover=function(){};\"" + ("_none".equals(navigationTarget) ? " onclick=\"javascript:return false;\"" : "") + " title=\"", htmlEncoder.encode(toolTip, false), "\">");
+										p.write("<td class=\"", cssClass, "\"><a href=\"#\"" + (navigationTarget != null && !"_none".equals(navigationTarget) ? "target=\"" + navigationTarget + "\"" : "") + " onmouseover=\"javascript:this.href=", p.getEvalHRef(action), ";onmouseover=function(){};\"" + ("_none".equals(navigationTarget) ? " onclick=\"javascript:return false;\"" : "") + " title=\"", htmlEncoder.encode(toolTip, false), "\">");
 										app.getPortalExtension().renderTextValue(p, htmlEncoder.encode(title, false), false);
 										p.write("</a></td>");
 									}
 								}
 							}
 						} else {
+							// Other field types
 							org.openmdx.ui1.jmi1.ValuedField columnDef = gridControl.getColumnDefs().get(k - 1);
 							boolean containsWiki = HtmlEncoder.containsWiki(stringifiedValue);
 							boolean containsHtml = HtmlEncoder.containsHtml(stringifiedValue);
@@ -1245,7 +1278,7 @@ public class ReferencePaneControl extends PaneControl implements Serializable {
 							) {
 								String id = tabId + "-" + rowId + "-" + k;                        	
 								p.debug("<!-- AttributeValue -->");
-								p.write("<td>", divBegin, iconTag, iconSpacer);
+								p.write("<td class=\"", cssClass, "\">", divBegin, iconTag, iconSpacer);
 								p.write("<div id=\"", id, "Value\" style=\'display:none'>");
 								app.getPortalExtension().renderTextValue(p, stringifiedValue, true);
 								p.write("</div>");
@@ -1253,7 +1286,7 @@ public class ReferencePaneControl extends PaneControl implements Serializable {
 								p.write(divEnd, "</td>");
 							} else {
 								p.debug("<!-- AttributeValue -->");
-								p.write("<td>", divBegin, iconTag, iconSpacer);
+								p.write("<td class=\"", cssClass, "\">", divBegin, iconTag, iconSpacer);
 								app.getPortalExtension().renderTextValue(
 									p, 
 									containsHtml ? stringifiedValue : stringifiedValue.replaceAll("\n", "<br />"), 
@@ -1486,9 +1519,8 @@ public class ReferencePaneControl extends PaneControl implements Serializable {
 										p.write("  ", p.getImg("src=\"", p.getResourcePath("images/"), app.getIconKey(forClass), "\" border=\"0\" align=\"bottom\" alt=\"o\" title=\"\""), p.getImg("src=\"", p.getResourcePath("images/"), WebKeys.ICON_CLONE_SMALL, "\" class=\"popUpButton\" border=\"0\" align=\"bottom\" alt=\"o\" title=\"", texts.getCloneTitle(), "\" onclick=\"javascript:rowIndex", tabId, "++;cloneGridRow('editGridTable", tabId, "', this, rowIndex", tabId, "*100, 100);\"", p.getOnMouseOver("javascript:this.className='popUpButtonhover';"), p.getOnMouseOut("javascript:this.className='popUpButton';")), p.getImg("src=\"", p.getResourcePath("images/"), WebKeys.ICON_DELETE_SMALL, "\" class=\"popUpButton\" border=\"0\" align=\"bottom\" alt=\"o\" title=\"", htmlEncoder.encode(texts.getDeleteTitle(), false), "\" onclick=\"javascript:deleteGridRow(this);\"", p.getOnMouseOver("javascript:this.className='popUpButtonhover';"), p.getOnMouseOut("javascript:this.className='popUpButton';")));
 										p.write("  <input type=\"hidden\" name=\"refMofId[", Integer.toString(templateGridFieldIndex), "]\" tabindex=\"", Integer.toString(templateGridFieldIndex), "\" value=\"", forClass, "\">");
 										p.write("</td>");
-									}
-									// columns > 0
-									else {
+									} else {
+										// columns > 0
 										if(isEditable) {
 											String lookupId = org.openmdx.kernel.id.UUIDs.newUUID().toString();
 											Action findObjectAction = view.getFindObjectAction(
@@ -1622,7 +1654,7 @@ public class ReferencePaneControl extends PaneControl implements Serializable {
 							}
 							CharSequence iconTag = valueHolder.getIconKey() == null
 								? ""
-									: "" + p.getImg("src=\"", p.getResourcePath("images/"), valueHolder.getIconKey(), "\" align=\"middle\" border=\"0\" alt=\"\"") + p.getImg("src=\"", p.getResourcePath("images/"), "spacer", p.getImgType(), "\" width=\"5\" height=\"0\" align=\"middle\" border=\"0\" alt=\"\"");
+								: "" + p.getImg("src=\"", p.getResourcePath("images/"), valueHolder.getIconKey(), "\" align=\"middle\" border=\"0\" alt=\"\"") + p.getImg("src=\"", p.getResourcePath("images/"), "spacer", p.getImgType(), "\" width=\"5\" height=\"0\" align=\"middle\" border=\"0\" alt=\"\"");
 							// BooleanValue
 							if(valueHolder instanceof BooleanValue) {
 								if(isEditable) {
@@ -1636,9 +1668,8 @@ public class ReferencePaneControl extends PaneControl implements Serializable {
 									p.debug("<!-- BooleanValue -->");
 									p.write("<td class=\"locked\">",  iconTag, "",  stringifiedValueShow, "</td>");
 								}
-							}
-							// DateValue
-							else if(valueHolder instanceof DateValue) {
+							} else if(valueHolder instanceof DateValue) {
+								// DateValue
 								if(isEditable) {
 									p.debug("<!-- DateValue -->");
 									p.write("<td nowrap>");
@@ -1679,22 +1710,21 @@ public class ReferencePaneControl extends PaneControl implements Serializable {
 									p.debug("<!-- DateValue -->");
 									p.write("<td class=\"locked\">",  iconTag, "",  stringifiedValueShow, "</td>");
 								}
-							}
-							// CodeValue
-							else if(valueHolder instanceof CodeValue) {
+							} else if(valueHolder instanceof CodeValue) {
+								// CodeValue
 								if(isEditable) { // and also isSingleValued()
 									Map longTextsT = ((CodeValue)valueHolder).getLongText(false, false);    
-									String longTextsAsJsArray = "";
-									for(Iterator options = longTextsT.keySet().iterator(); options.hasNext(); ) {
-										longTextsAsJsArray += longTextsAsJsArray.length() == 0 ? "" : ",";
-										longTextsAsJsArray += "'" + options.next() + "'";
-									}
 									p.write("<td>");
 									p.write("  <select class=\"valueLG\" name=\"", feature, "[", Integer.toString(editGridFieldIndex), "]", "\" tabindex=\"", Integer.toString(editGridFieldIndex), "\">");
+									Object selectedCodeText = valueHolder.getValue(false);
 									for(Iterator options = longTextsT.entrySet().iterator(); options.hasNext(); ) {
 										Map.Entry option = (Map.Entry)options.next();
-										String selectedModifier = option.getKey().equals(valueHolder.getValue(false)) ? "selected" : "";
-										p.write("<option ",  selectedModifier, " value=\"", option.getKey().toString(), "\">", option.getKey().toString());
+										short codeValue = ((Number)option.getValue()).shortValue();
+										String codeText = (String)option.getKey();										
+										String selectedModifier = (selectedCodeText != null) && (codeText.equals(selectedCodeText)) 
+											? "selected" 
+											: "";
+										p.write("<option ",  selectedModifier, " value=\"", Integer.toString(codeValue), "\">", codeText);
 									}
 									p.write("  </select>");
 									p.write("</td>");
@@ -1702,9 +1732,8 @@ public class ReferencePaneControl extends PaneControl implements Serializable {
 									p.debug("<!-- CodeValue -->");
 									p.write("<td class=\"locked\">",  iconTag, "", stringifiedValueShow, "</td>");
 								}
-							}
-							// NumberValue
-							else if(valueHolder instanceof NumberValue) {
+							} else if(valueHolder instanceof NumberValue) {
+								// NumberValue
 								if(isEditable) {
 									p.debug("<!-- NumberValue -->");
 									Autocompleter_1_0 autocompleter = valueHolder.getAutocompleter(
@@ -1723,7 +1752,8 @@ public class ReferencePaneControl extends PaneControl implements Serializable {
 											null,
 											null,
 											"class=\"valueL\"",
-											null
+											null, // imgTag
+											null // afterUpdateElementFunction
 										);
 										p.write("</td>");
 									} else {
@@ -1732,9 +1762,8 @@ public class ReferencePaneControl extends PaneControl implements Serializable {
 								} else {
 									p.write("<td class=\"locked\">",  iconTag, "",  stringifiedValueShow, "</td>");
 								}
-							}
-							// ObjectReferenceValue
-							else if(valueHolder instanceof ObjectReferenceValue) {
+							} else if(valueHolder instanceof ObjectReferenceValue) {
+								// ObjectReferenceValue
 								// Image only in first column
 								if(k == 0) {
 									Action action = ((ObjectReference)value).getSelectObjectAction();
@@ -1752,9 +1781,8 @@ public class ReferencePaneControl extends PaneControl implements Serializable {
 									}
 									p.write("  <input type=\"hidden\" name=\"refMofId",  "[", Integer.toString(editGridFieldIndex), "]", "\" tabindex=\"", Integer.toString(editGridFieldIndex), "\" value=\"", objRow.getXRI(), "\">");
 									p.write("</td>");
-								}
-								// columns > 0
-								else {
+								} else {
+									// columns > 0
 									// Multi-valued
 									if(value instanceof Collection) {
 										p.write("<!-- ObjectReferenceValue -->"); // used as tag for multi-delete. Do not write as debug!
@@ -1770,9 +1798,8 @@ public class ReferencePaneControl extends PaneControl implements Serializable {
 											isFirst = false;                                
 										}                            
 										p.write("</td>");
-									}
-									// Single-valued
-									else {
+									} else {
+										// Single-valued
 										if(isEditable) {
 											ObjectReference objectReference = (ObjectReference)valueHolder.getValue(false);
 											String lookupId = org.openmdx.kernel.id.UUIDs.newUUID().toString();
@@ -1792,9 +1819,8 @@ public class ReferencePaneControl extends PaneControl implements Serializable {
 										}
 									}
 								}
-							}
-							// TextValue
-							else {
+							} else {
+								// TextValue
 								if(isEditable) {
 									String inputType = valueHolder instanceof TextValue
 										? ((TextValue)valueHolder).isPassword() ? "password" : "text"
@@ -1814,7 +1840,8 @@ public class ReferencePaneControl extends PaneControl implements Serializable {
 											null,
 											null,
 											"class=\"valueL\"",
-											null
+											null, // imgTag
+											null // afterUpdateElementFunction
 										);
 										p.write("</td>");
 									} else {

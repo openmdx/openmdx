@@ -8,7 +8,7 @@
  * This software is published under the BSD license
  * as listed below.
  * 
- * Copyright (c) 2004-2007, OMEX AG, Switzerland
+ * Copyright (c) 2004-2013, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -53,22 +53,35 @@
 package org.openmdx.portal.servlet.control;
 
 import java.io.Serializable;
-import java.util.Iterator;
 
 import org.openmdx.base.exception.ServiceException;
+import org.openmdx.base.mof.cci.Model_1_0;
+import org.openmdx.kernel.id.UUIDs;
 import org.openmdx.portal.servlet.Action;
 import org.openmdx.portal.servlet.ApplicationContext;
+import org.openmdx.portal.servlet.Autocompleter_1_0;
+import org.openmdx.portal.servlet.HtmlEncoder_1_0;
 import org.openmdx.portal.servlet.Texts_1_0;
 import org.openmdx.portal.servlet.ViewPort;
+import org.openmdx.portal.servlet.WebKeys;
+import org.openmdx.portal.servlet.action.EditAsNewAction;
 import org.openmdx.portal.servlet.view.EditObjectView;
 import org.openmdx.portal.servlet.view.View;
 import org.openmdx.portal.servlet.view.ViewMode;
 
-public class EditObjectControl
-    extends ContainerControl
-    implements Serializable {
+/**
+ * EditObjectControl
+ *
+ */
+public class EditObjectControl extends ContainerControl implements Serializable {
   
-    //-------------------------------------------------------------------------
+    /**
+     * Constructor 
+     *
+     * @param id
+     * @param locale
+     * @param localeAsIndex
+     */
     public EditObjectControl(
         String id,
         String locale,
@@ -81,7 +94,12 @@ public class EditObjectControl
          );
     }
 
-    //-------------------------------------------------------------------------
+    /**
+     * Get form name.
+     * 
+     * @param view
+     * @return
+     */
     public String getFormName(
         View view
     ) {
@@ -91,14 +109,18 @@ public class EditObjectControl
             : formName + "-" + view.getContainerElementId();        
     }
     
-    //-------------------------------------------------------------------------
+    /**
+     * Generic scripts for pop-up functions for multi-valued fields. 
+     * 
+     * @param p
+     * @throws ServiceException
+     */
     public static void paintEditPopups(
-        ViewPort p        
+        ViewPort p
     ) throws ServiceException {
-        ApplicationContext application = p.getApplicationContext();
-        Texts_1_0 texts = application.getTexts();
-        
-        // Popup multi-valued strings
+        ApplicationContext app = p.getApplicationContext();
+        Texts_1_0 texts = app.getTexts();
+        // Pop-up for multi-valued strings
         p.write("<div id=\"popup_", EDIT_STRINGS, "\" class=\"multiEditDialog\">");
         p.write("<div class=\"bd\">");
         p.write("  <form name=\"", EDIT_STRINGS, "\" method=\"post\" action=\"\">");
@@ -117,8 +139,7 @@ public class EditObjectControl
         p.write("  </form>");
         p.write("</div>");
         p.write("</div>");
-
-        // Popup multi-valued numbers
+        // Pop-up for multi-valued numbers
         p.write("<div id=\"popup_", EDIT_NUMBERS, "\" class=\"multiEditDialog\">");
         p.write("<div class=\"bd\">");
         p.write("  <form name=\"", EDIT_NUMBERS, "\" method=\"post\" action=\"\">");
@@ -137,8 +158,7 @@ public class EditObjectControl
         p.write("  </form>");
         p.write("</div>");
         p.write("</div>");
-
-        // Popup multi-valued dates
+        // Pop-up for multi-valued dates
         p.write("<div id=\"popup_", EDIT_DATES, "\" class=\"multiEditDialog\">");
         p.write("<div class=\"bd\">");
         p.write("  <form name=\"", EDIT_DATES, "\" method=\"post\" action=\"\">");
@@ -158,8 +178,7 @@ public class EditObjectControl
         p.write("  </form>");
         p.write("</div>");
         p.write("</div>");
-                    
-        // Popup multi-valued datetime
+        // Pop-up for multi-valued datetime
         p.write("<div id=\"popup_", EDIT_DATETIMES, "\" class=\"multiEditDialog\">");
         p.write("<div class=\"bd\">");
         p.write("  <form name=\"", EDIT_DATETIMES, "\" method=\"post\" action=\"\">");
@@ -179,8 +198,7 @@ public class EditObjectControl
         p.write("  </form>");
         p.write("</div>");
         p.write("</div>");
-                    
-        // Poup multi-valued booleans
+        // Pop-up for multi-valued booleans
         p.write("<div id=\"popup_", EDIT_BOOLEANS, "\" class=\"multiEditDialog\">");
         p.write("<div class=\"bd\">");
         p.write("  <form name=\"", EDIT_BOOLEANS, "\" method=\"post\" action=\"\">");
@@ -199,8 +217,7 @@ public class EditObjectControl
         p.write("  </form>");
         p.write("</div>");
         p.write("</div>");
-        
-        // Popup multi-valued codes
+        // Pop-up for multi-valued codes
         p.write("<div id=\"popup_", EDIT_CODES, "\" class=\"multiEditDialog\">");
         p.write("<div class=\"bd\">");
         p.write("  <form name=\"", EDIT_CODES, "\" method=\"post\" action=\"\">");
@@ -221,28 +238,92 @@ public class EditObjectControl
         p.write("</div>");        
     }
     
-    //-------------------------------------------------------------------------
+    /* (non-Javadoc)
+     * @see org.openmdx.portal.servlet.control.Control#paint(org.openmdx.portal.servlet.ViewPort, java.lang.String, boolean)
+     */
     @Override
     public void paint(
         ViewPort p, 
         String frame,
         boolean forEditing    
     ) throws ServiceException {
-        ApplicationContext application = p.getApplicationContext();
-        Texts_1_0 texts = application.getTexts();
+        ApplicationContext app = p.getApplicationContext();
+        Texts_1_0 texts = app.getTexts();
+        HtmlEncoder_1_0 htmlEncoder = app.getHtmlEncoder();
         if(forEditing) {
             EditObjectView editView =  (EditObjectView)p.getView();
-            
-            String formName = this.getFormName(editView);
-            p.write("<form name=\"", formName, "\" id=\"", formName, "\" enctype=\"multipart/form-data\" accept-charset=\"utf-8\" method=\"post\" action=\"\">");
+            String formId = this.getFormName(editView);
+            Model_1_0 model = app.getModel();
+            // Render lookup field for existing objects
+            boolean hasLookupField = false;
+            if(editView.getMode() == ViewMode.STANDARD) {            	
+	            String forReferenceQualifiedName = null;
+	            try {
+	            	forReferenceQualifiedName = editView.getParent() == null
+		            	? null
+		            	: (String)model.getFeatureDef(model.getElement(editView.getParent().refClass().refMofId()), editView.getForReference(), false).objGetValue("qualifiedName");
+	            } catch(Exception ignore) {}
+	            if(forReferenceQualifiedName != null) {
+		            Autocompleter_1_0 lookupExistingObjectAutocompleter = app.getPortalExtension().getAutocompleter(
+		            	app, 
+		            	editView.getParent(), 
+		            	forReferenceQualifiedName,
+		            	editView.getEditInspectorControl().getInspector().getForClass()
+		            );
+		            if(lookupExistingObjectAutocompleter != null) {
+		            	String fieldId = formId + "LookupExisting";
+		            	String formDetailsId = formId + "_details";
+		            	String label = app.getTexts().getSelectExistingText();		            	
+		            	p.write("<table class=\"tableLayout\" cellspacing=\"8\">");
+		            	p.write("  <tr><td>");
+		            	p.write("  <div class=\"qualifier\" style=\"font-weight:normal;width:100%;padding:10px;\">");
+		            	p.write("    <table class=\"fieldGroup\">");
+		            	p.write("      <tr>");
+		                p.write("        <td class=\"label\" title=\"", htmlEncoder.encode(label, false), "\"><span class=\"nw\">", htmlEncoder.encode(label, false), ":", "</span></td>");            
+		                p.write("        <td>");
+		                String onChangeValueScript =
+		                	"xri=this.value;" +
+		                    "$('" + formDetailsId + "').parentNode.className+=' wait';" +
+		                	"$('" + formDetailsId + "').innerHTML='';" +
+		                    "new Ajax.Updater('" + formDetailsId + "', './'+getEncodedHRef(['" + WebKeys.SERVLET_NAME + "', '" + Action.PARAMETER_REQUEST_ID + "', '" + editView.getRequestId() + "', 'event', '" + EditAsNewAction.EVENT_ID + "', 'parameter', 'xri*('+xri+')*mode*(" + ViewMode.EMBEDDED + ")']), {asynchronous:true, evalScripts: true, onComplete: function(){$('" + formDetailsId + "').parentNode.className='';}});";
+		                lookupExistingObjectAutocompleter.paint(
+		                    p,
+		                    fieldId,
+		                    1, // tabIndex
+		                    forReferenceQualifiedName,
+		                    null, // currentValue
+		                    false,
+		                    null,
+		                    "class=\"autocompleterInput\"",
+		                    "class=\"valueL valueAC\"",
+		                    null, // imgTag
+		                    onChangeValueScript
+		                );
+		                p.write("        </td>");
+		                p.write("        <td class=\"addon\">");
+		                String lookupId = UUIDs.newUUID().toString();
+	                    Action findObjectAction = Action.getFindObjectAction(
+	                    	forReferenceQualifiedName, 
+	                    	lookupId
+	                    );
+	                    p.write("  ", p.getImg("class=\"popUpButton\" border=\"0\" alt=\"Click to open ObjectFinder\" src=\"", p.getResourcePath("images/"), findObjectAction.getIconKey(), "\" onclick=\"javascript:OF.findObject(", p.getEvalHRef(findObjectAction), ", $('", fieldId, ".Title'), $('", fieldId, "'), '", lookupId, "');\""));                    		                
+		                p.write("        </td>");
+		                p.write("      </tr>");
+		                p.write("    </table>");
+		                p.write("  </div>");
+		            	p.write("  <div>&nbsp;</div>");
+		            	p.write("  </td></tr>");
+		            	p.write("</table>");
+		            	p.write("<div style=\"min-height:30px;\">");
+		            	p.write("  <div id=\"", formDetailsId, "\">");
+		            	hasLookupField = true;
+		            }
+	            }
+            }
+            p.write("<form name=\"", formId, "\" id=\"", formId, "\" enctype=\"multipart/form-data\" accept-charset=\"utf-8\" method=\"post\" action=\"\">");
             p.write("  <table cellspacing=\"8\" class=\"tableLayout\">");
             int ii = 0;
-            for(
-                Iterator i = this.controls.iterator();
-                i.hasNext();
-                ii++
-            ) {
-                Control control = (Control)i.next();
+            for(Control control: this.controls) {
                 p.write("    <tr>");
                 p.write("      <td>", (ii > 0 ? "<br />" : ""));
                 control.paint(
@@ -253,13 +334,11 @@ public class EditObjectControl
                 p.write("      </td>");
                 p.write("    </tr>");
             }
-            Action cancelAction = editView.getCancelAction();
-            Action saveAction = editView.getSaveAction();
             if(!editView.isEditMode()) {
                 boolean showQualifier = 
-                    application.getPortalExtension().hasUserDefineableQualifier(
+                    app.getPortalExtension().hasUserDefineableQualifier(
                         editView.getEditInspectorControl().getInspector(), 
-                        application
+                        app
                     );
                 p.write("    <tr>");
                 p.write("      <td class=\"panel\">");
@@ -273,19 +352,33 @@ public class EditObjectControl
             p.write("  <tr>");
             p.write("    <td><br />");
             p.write("      <input type=\"hidden\" name=\"requestId.submit\" value=\"", editView.getRequestId(), "\">");
-            p.write("      <input type=\"hidden\" name=\"event.submit\" value=\"" + saveAction.getEvent(), "\">");
-            // In case of an embedded view submit the form as an Ajax request
-            // and put the attributes pane at the element with id aPanel
+            Action cancelAction = editView.getCancelAction();
+            Action saveAction = editView.getSaveAction();
+            Action createAction = editView.getCreateAction();
+            p.write("      <input type=\"hidden\" id=\"event.submit\" name=\"event.submit\" value=\"\" >");
             String containerElementId = editView.getContainerElementId() == null
                 ? "aPanel"
                 : editView.getContainerElementId();
-            if(editView.getMode() == ViewMode.EMBEDDED) {
-                p.write("      <a id=\"editSave-", containerElementId, "\" class=\"abutton\" href=\"#\" onclick=\"javascript:var editForm = document.forms['", formName, "']; var params = Form.serialize(editForm); new Ajax.Updater('", containerElementId, "', ", p.getEvalHRef(saveAction), ", {asynchronous:true, evalScripts: true, parameters: params, onComplete: function(){}});return false;\">", saveAction.getTitle(), "</a>");
-                p.write("      <a id=\"editCancel-", containerElementId, "\" class=\"abutton\" href=\"#\" onclick=\"javascript:new Ajax.Updater('", containerElementId, "', ", p.getEvalHRef(cancelAction), ", {asynchronous:true, evalScripts: true, onComplete: function(){}});return false;\">", cancelAction.getTitle(), "</a>");
+            if(saveAction != null) {
+            	if(editView.isEditMode()) {
+            		p.write("      <a id=\"editSave-", containerElementId, "\" class=\"abutton\" href=\"#\" onclick=\"javascript:$('event.submit').value='", Integer.toString(saveAction.getEvent()), "';var editForm=document.forms['", formId, "'];var params=Form.serialize(editForm);new Ajax.Updater('", containerElementId, "', ", p.getEvalHRef(saveAction), ", {asynchronous:true, evalScripts: true, parameters: params, onComplete: function(){}});return false;\">", saveAction.getTitle(), "</a>");
+            	} else {
+            		p.write("      <a id=\"editSave-", containerElementId, "\" class=\"abutton\" href=\"#\" onclick=\"javascript:", p.getButtonEffectHighlight(), "$('event.submit').value='", Integer.toString(saveAction.getEvent()), "';document.forms['", formId, "'].submit();\">", saveAction.getTitle(), "</a>");
+            	}
             }
-            else {
-                p.write("      <a id=\"editSave-", containerElementId, "\" class=\"abutton\" href=\"#\" onclick=\"javascript:", p.getButtonEffectHighlight(), "document.forms['", formName, "'].submit();\">", saveAction.getTitle(), "</a>");
-                p.write("      <a id=\"editCancel-", containerElementId, "\" class=\"abutton\" href=\"#\" onclick=\"javascript:", p.getButtonEffectHighlight(), "this.href=", p.getEvalHRef(cancelAction), ";\">", cancelAction.getTitle(), "</a>");                              
+            if(createAction != null) {
+            	if(editView.isEditMode()) {
+            		p.write("      <a id=\"editCreate-", containerElementId, "\" class=\"abutton\" href=\"#\" onclick=\"javascript:$('event.submit').value='", Integer.toString(saveAction.getEvent()), "';var editForm=document.forms['", formId, "'];var params=Form.serialize(editForm);new Ajax.Updater('", containerElementId, "', ", p.getEvalHRef(createAction), ", {asynchronous:true, evalScripts: true, parameters: params, onComplete: function(){}});return false;\">", createAction.getTitle(), "</a>");
+            	} else {
+            		p.write("      <a id=\"editCreate-", containerElementId, "\" class=\"abutton\" href=\"#\" onclick=\"javascript:", p.getButtonEffectHighlight(), "$('event.submit').value='", Integer.toString(createAction.getEvent()), "';document.forms['", formId, "'].submit();\">", createAction.getTitle(), "</a>");
+            	}
+            }
+            if(cancelAction != null) {
+            	if(editView.isEditMode()) {
+            		p.write("      <a id=\"editCancel-", containerElementId, "\" class=\"abutton\" href=\"#\" onclick=\"javascript:new Ajax.Updater('", containerElementId, "', ", p.getEvalHRef(cancelAction), ", {asynchronous:true, evalScripts: true, onComplete: function(){}});return false;\">", cancelAction.getTitle(), "</a>");            	
+            	} else {
+            		p.write("      <a id=\"editCancel-", containerElementId, "\" class=\"abutton\" href=\"#\" onclick=\"javascript:", p.getButtonEffectHighlight(), "this.href=", p.getEvalHRef(cancelAction), ";\">", cancelAction.getTitle(), "</a>");                                          	
+            	}
             }
             p.write("    </td>");
             p.write("  </tr>");       
@@ -293,7 +386,11 @@ public class EditObjectControl
             p.write("</form>");
             if(editView.getContainerElementId() != null) {
                 p.write("<div class=\"gridSpacerBottom\"></div>");                        
-            }                                                            
+            }
+            if(hasLookupField) {
+            	p.write("  </div>");
+            	p.write("</div>");
+            }
         }
     }
 

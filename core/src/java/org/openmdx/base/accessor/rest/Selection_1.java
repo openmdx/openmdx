@@ -97,7 +97,7 @@ final class Selection_1 extends AbstractContainer_1 {
      */
     private final Container_1_0 superMap;
     
-//  @Override
+    @Override
     public void openmdxjdoEvict(
         boolean evictAllMembers, 
         boolean evictAllSubSets // TODO restrict to the SubSet's SubSets
@@ -170,7 +170,7 @@ final class Selection_1 extends AbstractContainer_1 {
     /* (non-Javadoc)
      * @see org.openmdx.base.persistence.spi.PersistenceCapableContainer#openmdxjdoGetPersistenceManager()
      */
-//  @Override
+    @Override
     public PersistenceManager jdoGetPersistenceManager(){
     	return this.container.jdoGetPersistenceManager();
     }
@@ -178,7 +178,7 @@ final class Selection_1 extends AbstractContainer_1 {
     /* (non-Javadoc)
      * @see org.openmdx.base.persistence.spi.PersistenceCapableCollection#openmdxjdoGetContainerId()
      */
-//  @Override
+    @Override
     public Path jdoGetObjectId() {
         throw new UnsupportedOperationException(
             "Query XRIs not yet supported"
@@ -188,7 +188,7 @@ final class Selection_1 extends AbstractContainer_1 {
     /* (non-Javadoc)
      * @see org.openmdx.base.persistence.spi.PersistenceCapableCollection#openmdxjdoGetTransientContainerId()
      */
-//  @Override
+    @Override
     public TransientContainerId jdoGetTransactionalObjectId() {
         throw new UnsupportedOperationException(
             "Query XRIs not yet supported"
@@ -198,7 +198,7 @@ final class Selection_1 extends AbstractContainer_1 {
     /* (non-Javadoc)
      * @see org.openmdx.base.persistence.spi.PersistenceCapableCollection#openmdxjdoIsPersistent()
      */
-//  @Override
+    @Override
     public boolean jdoIsPersistent() {
         return this.container.jdoIsPersistent();
     }
@@ -240,7 +240,7 @@ final class Selection_1 extends AbstractContainer_1 {
     /* (non-Javadoc)
      * @see org.openmdx.base.persistence.spi.PersistenceCapableCollection#openmdxjdoRetrieve(javax.jdo.FetchPlan)
      */
-//  @Override
+    @Override
     public void openmdxjdoRetrieve(
         FetchPlan fetchPlan
     ) {
@@ -254,7 +254,7 @@ final class Selection_1 extends AbstractContainer_1 {
     /* (non-Javadoc)
      * @see java.util.Map#containsKey(java.lang.Object)
      */
-//  @Override
+    @Override
     public boolean containsKey(Object key) {
         DataObject_1_0 candidate = this.superMap.get(key);
         return candidate != null && this.objectFilter.accept(candidate);
@@ -263,7 +263,7 @@ final class Selection_1 extends AbstractContainer_1 {
     /* (non-Javadoc)
      * @see java.util.Map#containsValue(java.lang.Object)
      */
-//  @Override
+    @Override
     public boolean containsValue(Object value) {
         return 
             this.isInContainerOrExtent(value) &&
@@ -274,7 +274,7 @@ final class Selection_1 extends AbstractContainer_1 {
     /* (non-Javadoc)
      * @see java.util.Map#get(java.lang.Object)
      */
-//  @Override
+    @Override
     public DataObject_1_0 get(Object key) {
         DataObject_1_0 candidate = this.superMap.get(key);
         return candidate != null && this.objectFilter.accept(candidate) ? candidate : null;
@@ -283,7 +283,7 @@ final class Selection_1 extends AbstractContainer_1 {
     /* (non-Javadoc)
      * @see java.util.Map#put(java.lang.Object, java.lang.Object)
      */
-//  @Override
+    @Override
     public DataObject_1_0 put(String key, DataObject_1_0 value) {
         if(this.objectFilter.accept(value)) {
             return this.superMap.put(key, value);
@@ -299,6 +299,16 @@ final class Selection_1 extends AbstractContainer_1 {
     public String toString() {
         return getClass().getSimpleName() + " of " + this.container;
     }
-    
+
+    /**
+     * Tell the cache that the selection is empty
+     */
+    void markAsEmpty(
+    ){
+        if(hasStored()) {
+            this.getStored().setTotal(0);
+        }
+    }
+
 }
     

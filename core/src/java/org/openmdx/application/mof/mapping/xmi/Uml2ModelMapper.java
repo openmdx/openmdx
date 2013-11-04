@@ -340,7 +340,7 @@ public class Uml2ModelMapper {
             this.printAttribute("xmi:type", "uml:LiteralInteger");
             pw.println("/>");                        
         }
-        else if(ModelHelper.UNBOUNDED.equals(multiplicity)) {
+        else if(ModelHelper.UNBOUND.equals(multiplicity)) {
             // Upper value
             pw.write(indent, 0, nTabs);
             pw.print("\t<upperValue");

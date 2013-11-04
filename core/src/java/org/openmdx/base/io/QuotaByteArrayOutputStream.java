@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2010, OMEX AG, Switzerland
+ * Copyright (c) 2010-2013, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -79,7 +79,7 @@ public class QuotaByteArrayOutputStream extends java.io.ByteArrayOutputStream {
 		}
 		counter.count++;
 		if(counter.count % 100 == 0) {
-			SysLog.log(Level.WARNING, "{0} has created {1} byte array output streams", id, counter.count);			
+			SysLog.log(Level.WARNING, "{0} has created {1} byte array output streams", id, Integer.valueOf(counter.count));			
 		}
 	}
 	
@@ -99,25 +99,25 @@ public class QuotaByteArrayOutputStream extends java.io.ByteArrayOutputStream {
 
 	
 	@Override
-    public void write(
+    public synchronized void write(
         byte[] b, 
         int off, 
         int len
     ) {
 	    super.write(b, off, len);
 	    if(this.count >> this.div > 0) {
-            SysLog.log(Level.WARNING, "{0} has allocated a byte array output stream which is larger than {1} bytes ", this.id, this.count);
+            SysLog.log(Level.WARNING, "{0} has allocated a byte array output stream which is larger than {1} bytes ", this.id, Integer.valueOf(this.count));
             this.div++;
 	    }
     }
 
     @Override
-    public void write(
+    public synchronized void write(
         int b
     ) {
         super.write(b);
         if(this.count >> this.div > 0) {
-            SysLog.log(Level.WARNING, "{0} has allocated a byte array output stream which is larger than {1} bytes ", this.id, this.count);                     
+            SysLog.log(Level.WARNING, "{0} has allocated a byte array output stream which is larger than {1} bytes ", this.id, Integer.valueOf(this.count));                     
             this.div++;
         }
     }

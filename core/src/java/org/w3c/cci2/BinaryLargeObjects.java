@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2006-2012, OMEX AG, Switzerland
+ * Copyright (c) 2006-2013, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -363,10 +363,12 @@ public class BinaryLargeObjects {
             OutputStream stream, 
             long position
         ) throws IOException {
-            Long length = position + streamCopy(
-                getContent(),
-                position,
-                stream
+            Long length = Long.valueOf(
+                position + streamCopy(
+                    getContent(),
+                    position,
+                    stream
+                )
             );
             this.length = length;
         }
@@ -510,6 +512,7 @@ public class BinaryLargeObjects {
         /* (non-Javadoc)
          * @see org.w3c.cci2.BinaryLargeObject#getContent()
          */
+        @SuppressWarnings("resource")
         public InputStream getContent(
         ) throws IOException {
             return this.file != null ? new FileInputStream(this.file) : newContent();

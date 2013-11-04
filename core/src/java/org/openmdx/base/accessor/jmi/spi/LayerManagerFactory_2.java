@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2009-2010, OMEX AG, Switzerland
+ * Copyright (c) 2009-2013, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -73,8 +73,8 @@ class LayerManagerFactory_2 extends DelegatingPersistenceManagerFactory {
     ){
         this(
             persistenceManagerFactory,
-            (Map<String,String>)plugInConfiguration.values("implementationMap").get(0), 
-            (Map<String,Object>)plugInConfiguration.values("userObjects").get(0)
+            (Map<String,String>)plugInConfiguration.values("implementationMap").get(Integer.valueOf(0)), 
+            (Map<String,Object>)plugInConfiguration.values("userObjects").get(Integer.valueOf(0))
         );
     }
 

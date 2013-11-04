@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2007-2008, OMEX AG, Switzerland
+ * Copyright (c) 2007-2013, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -142,10 +142,10 @@ public class DateStateViewContext
         XMLGregorianCalendar validTo
     ){
         ImmutableDatatypeFactory datatypeFactory = DatatypeFactories.immutableDatatypeFactory();
-        validFrom = datatypeFactory.toDate(validFrom);
-        validTo = datatypeFactory.toDate(validTo);
-        Order.assertTimeRange(validFrom, validTo);
-        return new DateStateViewContext(validFrom, validTo);
+        XMLGregorianCalendar immutableValidFrom = datatypeFactory.toDate(validFrom);
+        XMLGregorianCalendar immutableValidTo = datatypeFactory.toDate(validTo);
+        Order.assertTimeRange(immutableValidFrom, immutableValidTo);
+        return new DateStateViewContext(immutableValidFrom, immutableValidTo);
     }
     
     /**

@@ -620,7 +620,7 @@ public class SlicedDbObject2 extends SlicedDbObject {
                 ) {
                     String attributeName = (String)i.next();
                     if(((excludeAttributes == null) || !excludeAttributes.contains(attributeName)) && attributeName.indexOf(':') < 0) {
-                        List attributeValues = newObjectFacade.attributeValuesAsList(attributeName);   
+                        List attributeValues = newObjectFacade.getAttributeValuesAsReadOnlyList(attributeName);   
                         if(attributeValues.isEmpty()) {
                             String columnName = this.database.getColumnName(this.conn, attributeName, 0, false, true, false);
                             if(dbObjectColumns.contains(columnName)) {
@@ -667,7 +667,7 @@ public class SlicedDbObject2 extends SlicedDbObject {
                 ) {
                     String attributeName = (String)i.next();
                     if(((excludeAttributes == null) || !excludeAttributes.contains(attributeName)) && attributeName.indexOf(':') < 0) {
-                        List attributeValues = oldObjectFacade.attributeValuesAsList(attributeName);
+                        List attributeValues = oldObjectFacade.getAttributeValuesAsReadOnlyList(attributeName);
                         if(attributeValues.isEmpty()) {
                             String columnName = this.database.getColumnName(conn, attributeName, 0, false, true, false);
                             if(dbObjectColumns.contains(columnName)) {
@@ -921,14 +921,16 @@ public class SlicedDbObject2 extends SlicedDbObject {
             Path parentObjectPath = facade.getPath().getPrefix(facade.getPath().size()-2);    
             if(parentObjectPath.size() >= 5) {
                 String name = this.database.getPrivateAttributesPrefix() + "objectParent";
-                normalizedObjectFacade.attributeValuesAsList(this.database.toRid(name)).add(
+                normalizedObjectFacade.addToAttributeValuesAsList(
+                    this.database.toRid(name),
                     this.database.getReferenceId(
                         conn, 
                         parentObjectPath, 
                         true 
                     )
                 );
-                normalizedObjectFacade.attributeValuesAsList(this.database.toOid(name)).add(
+                normalizedObjectFacade.addToAttributeValuesAsList(
+                    this.database.toOid(name),
                     parentObjectPath.getBase()
                 );
             }
@@ -972,35 +974,40 @@ public class SlicedDbObject2 extends SlicedDbObject {
                                 this.database.configuration.useViewsForRedundantColumns() &&
                                 this.getModel().isSubtypeOf(facade.getObjectClass(), "org:openmdx:base:Aspect")
                             ){
-                                normalizedObjectFacade.attributeValuesAsList(this.database.toOid(name)).add(
+                                normalizedObjectFacade.addToAttributeValuesAsList(
+                                    this.database.toOid(name),
                                     objectPath.getBase()
                                 );
                                 if(removeValuesProvidedByView) {
                                     i.remove();
                                 }
                             } else {
-                                normalizedObjectFacade.attributeValuesAsList(this.database.toRid(name)).add(
+                                normalizedObjectFacade.addToAttributeValuesAsList(
+                                    this.database.toRid(name),
                                     this.database.getReferenceId(
                                         this.conn, 
                                         objectPath, 
                                         true
                                     )
                                 );
-                                normalizedObjectFacade.attributeValuesAsList(this.database.toOid(name)).add(
+                                normalizedObjectFacade.addToAttributeValuesAsList(
+                                    this.database.toOid(name),
                                     objectPath.getBase()
                                 );
                                 // add parent of path value
                                 if(pathNormalizeLevel > 2) {
                                     Path parentPath = objectPath.getPrefix(objectPath.size()-2);
                                     if(parentPath.size() >= 5) {
-                                        normalizedObjectFacade.attributeValuesAsList(this.database.toRid(name + "Parent")).add(
+                                        normalizedObjectFacade.addToAttributeValuesAsList(
+                                            this.database.toRid(name + "Parent"),
                                             this.database.getReferenceId(
                                                 conn, 
                                                 parentPath, 
                                                 true
                                             )
                                         );
-                                        normalizedObjectFacade.attributeValuesAsList(this.database.toOid(name + "Parent")).add(
+                                        normalizedObjectFacade.addToAttributeValuesAsList(
+                                            this.database.toOid(name + "Parent"),
                                             parentPath.getBase()
                                         );
                                     }

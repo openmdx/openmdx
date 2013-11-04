@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<uml:Model xmi:version="2.1" xmlns:xmi="http://schema.omg.org/spec/XMI/2.1" xmlns:uml="http://www.eclipse.org/uml2/3.0.0/UML" xmi:id="_wdbxAN67EdmkJO73lqONhA" name="state2" viewpoint="">
+<uml:Model xmi:version="2.1" xmlns:xmi="http://schema.omg.org/spec/XMI/2.1" xmlns:uml="http://www.eclipse.org/uml2/4.0.0/UML" xmi:id="_wdbxAN67EdmkJO73lqONhA" name="state2" viewpoint="">
   <packagedElement xmi:type="uml:Package" xmi:id="_3C7B8A60016D407170B300B4PP" name="org">
     <packagedElement xmi:type="uml:Package" xmi:id="_3C7B8A60016D407170B300B4P" name="openmdx">
       <packagedElement xmi:type="uml:Package" xmi:id="_3C7B8A60016D407170B300B4" name="state2">
@@ -10,13 +10,13 @@
           <generalization xmi:id="_aSukIOc9EdqFRN8NA1-Qnw" general="_NA7W4Oc9EdqFRN8NA1-Qnw"/>
           <ownedAttribute xmi:id="_jftREOc9EdqFRN8NA1-Qnw" name="stateValidFrom">
             <type xmi:type="uml:PrimitiveType" href="org.w3c.uml#_3C7B8A60016D3C8B63230061"/>
-            <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_6g3qIec-EdqFRN8NA1-Qnw" value="1"/>
             <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_6g3qIOc-EdqFRN8NA1-Qnw"/>
+            <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_6g3qIec-EdqFRN8NA1-Qnw" value="1"/>
           </ownedAttribute>
           <ownedAttribute xmi:id="_lKGWUOc9EdqFRN8NA1-Qnw" name="stateValidTo">
             <type xmi:type="uml:PrimitiveType" href="org.w3c.uml#_3C7B8A60016D3C8B63230061"/>
-            <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_7BV58ec-EdqFRN8NA1-Qnw" value="1"/>
             <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_7BV58Oc-EdqFRN8NA1-Qnw"/>
+            <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_7BV58ec-EdqFRN8NA1-Qnw" value="1"/>
           </ownedAttribute>
         </packagedElement>
         <packagedElement xmi:type="uml:Class" xmi:id="_B-kcsOc9EdqFRN8NA1-Qnw" name="DateTimeState" isAbstract="true">
@@ -26,13 +26,13 @@
           <generalization xmi:id="_bAea8Oc9EdqFRN8NA1-Qnw" general="_NA7W4Oc9EdqFRN8NA1-Qnw"/>
           <ownedAttribute xmi:id="_-YmmIOc9EdqFRN8NA1-Qnw" name="stateInvalidFrom">
             <type xmi:type="uml:PrimitiveType" href="org.w3c.uml#_3C7B8A60016D3C8B630802BB"/>
-            <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_8MCLcec-EdqFRN8NA1-Qnw" value="1"/>
             <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_8MCLcOc-EdqFRN8NA1-Qnw"/>
+            <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_8MCLcec-EdqFRN8NA1-Qnw" value="1"/>
           </ownedAttribute>
           <ownedAttribute xmi:id="_7oHbgOc9EdqFRN8NA1-Qnw" name="stateValidFrom">
             <type xmi:type="uml:PrimitiveType" href="org.w3c.uml#_3C7B8A60016D3C8B630802BB"/>
-            <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_7kTdEec-EdqFRN8NA1-Qnw" value="1"/>
             <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_7kTdEOc-EdqFRN8NA1-Qnw"/>
+            <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_7kTdEec-EdqFRN8NA1-Qnw" value="1"/>
           </ownedAttribute>
         </packagedElement>
         <packagedElement xmi:type="uml:Class" xmi:id="_NA7W4Oc9EdqFRN8NA1-Qnw" name="BasicState" isAbstract="true">
@@ -82,8 +82,8 @@
           <generalization xmi:id="_olmpwDlpEeGXmauThx7sfg" general="_-U_-kIC4Ed2lDKTVYu2_Tw"/>
           <ownedAttribute xmi:id="_QWC0YKtGEd2CZJkknFnJMw" name="validTimeUnique" isReadOnly="true">
             <type xmi:type="uml:PrimitiveType" href="org.w3c.uml#_3C7B8A60016D3C8B63180083"/>
-            <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_0IzGEatGEd2CZJkknFnJMw" value="1"/>
             <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_0IzGEKtGEd2CZJkknFnJMw" value="1"/>
+            <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_0IzGEatGEd2CZJkknFnJMw" value="1"/>
           </ownedAttribute>
         </packagedElement>
       </packagedElement>

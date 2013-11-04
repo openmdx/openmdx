@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2008, OMEX AG, Switzerland
+ * Copyright (c) 2008-2013, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -132,7 +132,7 @@ public class PopulationMap<V>
      */
     @Override
     public V put(Integer key, V value) {
-        return getDelegate().put(key.intValue(), value);
+        return getDelegate().put(key, value);
     }
 
     /* (non-Javadoc)
@@ -247,7 +247,7 @@ public class PopulationMap<V>
             Integer to
         ){
             if(from != null) {
-                while(this.delegate.hasNext() && this.delegate.nextIndex() < from) {
+                while(this.delegate.hasNext() && this.delegate.nextIndex() < from.intValue()) {
                     this.delegate.next();
                 }
             }
@@ -269,7 +269,7 @@ public class PopulationMap<V>
          */
         public boolean hasNext() {
             return this.delegate.hasNext() && (
-                to == null || to > this.delegate.nextIndex()
+                to == null || to.intValue() > this.delegate.nextIndex()
             );
         }
 
@@ -278,14 +278,14 @@ public class PopulationMap<V>
          */
         public java.util.Map.Entry<Integer, V> next() {
             final int key = this.delegate.nextIndex();
-            if(to != null && key >= to) {
+            if(to != null && key >= to.intValue()) {
                 throw new NoSuchElementException();
             }
             final V value = this.delegate.next();
             return new Map.Entry<Integer, V>(){
 
                 public Integer getKey() {
-                    return key;
+                    return Integer.valueOf(key);
                 }
 
                 public V getValue() {
@@ -332,7 +332,7 @@ public class PopulationMap<V>
             Integer from,
             Integer to
         ){
-            this.from = from = from != null && from.intValue() != 0 ? from : null;
+            this.from = from != null && from.intValue() != 0 ? from : null;
             this.to = to;
         }
 
@@ -472,7 +472,7 @@ public class PopulationMap<V>
         private void assertRange(
             Integer key
         ){
-            if(!inRange(key)) {
+            if(!inRange(key.intValue())) {
                 throw new IllegalArgumentException(
                     "The given key is outside the head-, sub- or tail-map's range"
                 );
@@ -504,12 +504,12 @@ public class PopulationMap<V>
                 int s = 0;
                 ListIterator<?> i = getDelegate().populationIterator();
                 if(from != null) {
-                    while(i.hasNext() && i.nextIndex() < from) {
+                    while(i.hasNext() && i.nextIndex() < from.intValue()) {
                         i.next();
                     }
                 }
                 for(;i.hasNext();i.next()) {
-                    if(to != null && i.nextIndex() >= to){
+                    if(to != null && i.nextIndex() >= to.intValue()){
                         return s;
                     }
                     s++;
@@ -524,11 +524,11 @@ public class PopulationMap<V>
             public boolean isEmpty() {
                 ListIterator<?> i = getDelegate().populationIterator();
                 if(from != null) {
-                    while(i.hasNext() && i.nextIndex() < from) {
+                    while(i.hasNext() && i.nextIndex() < from.intValue()) {
                         i.next();
                     }
                 }
-                return i.hasNext() && i.nextIndex() < to;
+                return i.hasNext() && i.nextIndex() < to.intValue();
             }
             
         }

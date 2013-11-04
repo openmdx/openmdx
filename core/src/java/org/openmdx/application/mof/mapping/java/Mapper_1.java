@@ -1,13 +1,13 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Description: Mapper class
+ * Description: Standard Mapper
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
  * ====================================================================
  * 
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2011, OMEX AG, Switzerland
+ * Copyright (c) 2004-2013, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -91,13 +91,11 @@ import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.loading.Resources;
 import org.openmdx.kernel.log.SysLog;
 
-// ---------------------------------------------------------------------------
-public class Mapper_1
-    extends AbstractMapper_1
-    implements Mapper_1_1 
-{
+/**
+ * Standard Mapper
+ */
+public class Mapper_1 extends AbstractMapper_1 implements Mapper_1_1 {
 
-    // ---------------------------------------------------------------------------
     /**
      * Constructor.
      * 
@@ -112,25 +110,26 @@ public class Mapper_1
     public Mapper_1(
         String mappingFormat,
         String packageSuffix,
-        String fileExtension)
-        throws ServiceException {
+        String fileExtension
+    ) throws ServiceException {
         super(packageSuffix);
         this.fileExtension = fileExtension;
         if (mappingFormat.startsWith(MappingTypes.JPA3 + ':')) {
             this.format = Format.JPA3;
         } else {
             this.format =
-                MappingTypes.CCI2.equals(mappingFormat) ? Format.CCI2
-                    : MappingTypes.JMI1.equals(mappingFormat) ? Format.JMI1
-                        : MappingTypes.JPA3.equals(mappingFormat) ? Format.JPA3
-                            : null;
+                MappingTypes.CCI2.equals(mappingFormat) ? Format.CCI2 :
+                MappingTypes.JMI1.equals(mappingFormat) ? Format.JMI1 :
+                MappingTypes.JPA3.equals(mappingFormat) ? Format.JPA3 :
+                null;
         }
+        this.primitiveTypeMapper = newPrimitiveTypeMapper();
     }
 
     // ---------------------------------------------------------------------------
     /**
-     * Is called for all ModelAttribute features of a class including suerptyes.
-     * This method must check wheter modelAttribute.container = modelClass and
+     * Is called for all ModelAttribute features of a class including supertypes.
+     * This method must check whether modelAttribute.container = modelClass and
      * behave accordingly.
      * 
      * @param jdoMetaDataMapper
@@ -170,7 +169,7 @@ public class Mapper_1
                         classDef.jdoGetObjectId())) {
                     // query interface
                     if (queryMapper != null) {
-                        queryMapper.mapStructurealFeature(
+                        queryMapper.mapStructuralFeature(
                             mClassDef,
                             mAttributeDef);
                     }
@@ -379,28 +378,23 @@ public class Mapper_1
         // Check whether this reference is stored as attribute
         // required for ...Class.create...() operations
         if (this.model.referenceIsStoredAsAttribute(referenceDef)) {
-            SysLog.trace("the reference is stored as attribute", referenceDef
-                .objGetValue("qualifiedName"));
-            ModelElement_1_0 referenceAsAttribute = null;
-            this.processedAttributes.add(referenceAsAttribute =
-                new ModelElement_1(referenceDef));
+            SysLog.trace("the reference is stored as attribute", referenceDef.objGetValue("qualifiedName"));
+            ModelElement_1_0 referenceAsAttribute = new ModelElement_1(referenceDef);
+            this.processedAttributes.add(referenceAsAttribute);
             if (!qualifierNames.isEmpty()) {
                 SysLog.trace(qualifierNames.toString(), qualifierTypes);
                 String newMultiplicity =
                     qualifierTypes.size() == 1
                         && PrimitiveTypes.STRING.equals(((Path) qualifierTypes
                             .get(0)).getBase()) ? Multiplicity.MAP.toString()
-                        : ModelHelper.UNBOUNDED;
+                        : ModelHelper.UNBOUND;
                 SysLog.trace("Adjust multiplicity to "
-                    + ModelHelper.UNBOUNDED, newMultiplicity);
+                    + ModelHelper.UNBOUND, newMultiplicity);
                 // 0..n association set multiplicity to 0..n, 
                 // this ensures that the instance creator uses a multivalued parameter for this reference attribute
-                referenceAsAttribute.objSetValue(
-                    "multiplicity",
-                    newMultiplicity);
+                referenceAsAttribute.objSetValue("multiplicity", newMultiplicity);
             }
-            referenceAsAttribute.objSetValue("isDerived", association
-                .objGetValue("isDerived"));
+            referenceAsAttribute.objSetValue("isDerived", association.objGetValue("isDerived"));
         }
         try {
             if (VisibilityKind.PUBLIC_VIS.equals(visibility)) {
@@ -416,7 +410,7 @@ public class Mapper_1
                  */
                 boolean isReadOnly = !isChangeable || (isDerived && this.model.referenceIsStoredAsAttribute(referenceDef));
                 if(includeInClass && (queryMapper != null) && !inherited) {
-                    queryMapper.mapStructurealFeature(
+                    queryMapper.mapStructuralFeature(
                         mClassDef,
                         mReferenceDef
                     );
@@ -433,6 +427,9 @@ public class Mapper_1
 	                                    ormSliceMetaDataMapper.mapReference(mReferenceDef);
 	                                    ormMetaDataMapper.mapSize(mReferenceDef);
 	                        		} break;
+                                    case MAP: case STREAM:
+                                        // TODO not mapped yet
+                                        break;
 	                        			
                         		}
                         	}
@@ -895,8 +892,8 @@ public class Mapper_1
 
     // --------------------------------------------------------------------------------
     /**
-     * Is called for all ModelAttribute features of a class including suerptyes.
-     * This method must check wheter modelAttribute.container = modelClass and
+     * Is called for all StructureField features of a class including supertypes.
+     * This method must check whether modelAttribute.container = modelClass and
      * behave accordingly.
      */
     void mapStructureField(
@@ -915,12 +912,8 @@ public class Mapper_1
         // required for ...Class.create...() operations
         this.processedAttributes.add(structureFieldDef);
         try {
-            AttributeDef mStructureFieldDef =
-                new AttributeDef(structureFieldDef, this.model);
-            StructDef mStructDef = new StructDef(
-                classDef, 
-                this.model
-            );
+            AttributeDef mStructureFieldDef = new AttributeDef(structureFieldDef, this.model);
+            StructDef mStructDef = new StructDef(classDef, this.model);
             // getter interface only if modelAttribute.container = modelClass.
             // Otherwise inherit from super interfaces.
             if (this.format == Format.JPA3
@@ -928,7 +921,7 @@ public class Mapper_1
                     classDef.jdoGetObjectId())) {
                 // query interface
                 if (queryMapper != null) {
-                    queryMapper.mapStructurealFeature(
+                    queryMapper.mapStructuralFeature(
                         mStructDef,
                         mStructureFieldDef);
                 }
@@ -1099,6 +1092,7 @@ public class Mapper_1
      * 
      * @throws ServiceException
      */
+    @SuppressWarnings("resource")
     public void externalize(
         String qualifiedPackageName,
         Model_1_0 model,
@@ -1179,7 +1173,8 @@ public class Mapper_1
                                 getModel(),
                                 this.format,
                                 this.packageSuffix,
-                                this.metaData);
+                                this.metaData, 
+                                getPrimitiveTypeMapper());
                         // initialize package
                         this.mapBeginPackage(currentPackageName, packageMapper);
                     }
@@ -1230,41 +1225,44 @@ public class Mapper_1
                                             sliceInstanceFile.reset();
                                             ormSliceMetaDataWriter.reset();
                                         }
-                                        ClassMapper classMapper =
-                                            jmi1 ? new ClassMapper(
-                                                element,
-                                                classWriter,
-                                                getModel(),
-                                                this.format,
-                                                this.packageSuffix,
-                                                this.metaData) : null;
-                                        InstanceMapper instanceMapper =
-                                            new InstanceMapper(
-                                                element,
-                                                instanceWriter,
-                                                sliceInstanceWriter,
-                                                getModel(),
-                                                this.format,
-                                                this.packageSuffix,
-                                                this.metaData);
-                                        InterfaceMapper interfaceMapper =
-                                            jpa3 && instanceMapper.hasSPI() ? new InterfaceMapper(
-                                                element,
-                                                interfaceWriter,
-                                                getModel(),
-                                                Format.SPI2,
-                                                Names.SPI2_PACKAGE_SUFFIX,
-                                                this.metaData)
-                                                : null;
+                                        ClassMapper classMapper = jmi1 ? new ClassMapper(
+                                            element,
+                                            classWriter,
+                                            getModel(),
+                                            this.format,
+                                            this.packageSuffix,
+                                            this.metaData, 
+                                            getPrimitiveTypeMapper()
+                                         ) : null;
+                                        InstanceMapper instanceMapper = new InstanceMapper(
+                                            element,
+                                            instanceWriter,
+                                            sliceInstanceWriter,
+                                            getModel(),
+                                            this.format,
+                                            this.packageSuffix,
+                                            this.metaData, 
+                                            getPrimitiveTypeMapper()
+                                        );
+                                        InterfaceMapper interfaceMapper = jpa3 && instanceMapper.hasSPI() ? new InterfaceMapper(
+                                            element,
+                                            interfaceWriter,
+                                            getModel(),
+                                            Format.SPI2,
+                                            Names.SPI2_PACKAGE_SUFFIX,
+                                            this.metaData, 
+                                            getPrimitiveTypeMapper()
+                                         ) : null;
                                         AbstractMetaDataMapper ormMetaDataMapper = jpa3 ? new StandardMetaDataMapper(
-                                                element,
-                                                ormMetaDataWriter,
-                                                getModel(),
-                                                this.format,
-                                                this.packageSuffix,
-                                                null,
-                                                this.metaData,
-                                                new StandardObjectRepositoryMetadataPlugin()
+                                            element,
+                                            ormMetaDataWriter,
+                                            getModel(),
+                                            this.format,
+                                            this.packageSuffix,
+                                            null,
+                                            this.metaData,
+                                            getPrimitiveTypeMapper(), 
+                                            geObjectRepositoryMetadataPlugin()
                                          ) : cci2 ? new NativeMetaDataMapper(
                                                  element,
                                                  ormMetaDataWriter,
@@ -1273,36 +1271,40 @@ public class Mapper_1
                                                  this.packageSuffix,
                                                  null,
                                                  this.metaData,
-                                                 new StandardObjectRepositoryMetadataPlugin()
+                                                 getPrimitiveTypeMapper(), 
+                                                 geObjectRepositoryMetadataPlugin()
                                           ) : null;
-                                        AbstractMetaDataMapper ormSliceMetaDataMapper =
-                                            jpa3 ? new StandardMetaDataMapper(
-                                                element,
-                                                ormSliceMetaDataWriter,
-                                                getModel(),
-                                                this.format,
-                                                this.packageSuffix,
-                                                InstanceMapper.SLICE_CLASS_NAME,
-                                                this.metaData,
-                                                new StandardObjectRepositoryMetadataPlugin())
-                                                : null;
-                                        QueryMapper queryMapper =
-                                            cci2 ? new QueryMapper(
+                                        AbstractMetaDataMapper ormSliceMetaDataMapper = jpa3 ? new StandardMetaDataMapper(
+                                            element,
+                                            ormSliceMetaDataWriter,
+                                            getModel(),
+                                            this.format,
+                                            this.packageSuffix,
+                                            InstanceMapper.SLICE_CLASS_NAME,
+                                            this.metaData,
+                                            getPrimitiveTypeMapper(), 
+                                            geObjectRepositoryMetadataPlugin()
+                                         ) : null;
+                                        QueryMapper queryMapper = cci2 ? new QueryMapper(
                                                 queryWriter,
                                                 getModel(),
                                                 this.format,
                                                 this.packageSuffix,
-                                                this.metaData) : null;
+                                                this.metaData, 
+                                                getPrimitiveTypeMapper()
+                                        ) : null;
                                         this.mapBeginClass(
                                             element,
                                             classMapper,
                                             instanceMapper,
                                             interfaceMapper,
                                             ormMetaDataMapper,
-                                            ormSliceMetaDataMapper);
+                                            ormSliceMetaDataMapper
+                                        );
                                         this.mapBeginQuery(
                                             classDef,
-                                            queryMapper);
+                                            queryMapper
+                                        );
                                         // Map class features
                                         for (Object f : getFeatures(element, instanceMapper, false)) {
                                             ModelElement_1_0 feature = f instanceof ModelElement_1_0 ? 
@@ -1416,21 +1418,23 @@ public class Mapper_1
                                     structFile.reset();
                                 }
                                 if (cci2) queryFile.reset();
-                                StructureMapper structureMapper =
-                                    jpa3 ? null : new StructureMapper(
+                                StructureMapper structureMapper = jpa3 ? null : new StructureMapper(
                                         element,
                                         structWriter,
                                         getModel(),
                                         this.format,
                                         this.packageSuffix,
-                                        this.metaData);
-                                QueryMapper queryMapper =
-                                    cci2 ? new QueryMapper(
-                                        queryWriter,
-                                        getModel(),
-                                        this.format,
-                                        this.packageSuffix,
-                                        this.metaData) : null;
+                                        this.metaData, 
+                                        getPrimitiveTypeMapper()
+                                );
+                                QueryMapper queryMapper = cci2 ? new QueryMapper(
+                                    queryWriter,
+                                    getModel(),
+                                    this.format,
+                                    this.packageSuffix,
+                                    this.metaData, 
+                                    getPrimitiveTypeMapper()
+                                ) : null;
                                 if (structureMapper != null) {
                                     this.mapBeginStructure(
                                         element,
@@ -1486,32 +1490,32 @@ public class Mapper_1
                                     .jdoGetObjectId());
                                 if (!jpa3) {
                                     exceptionFile.reset();
-                                    Writer exceptionWriter =
-                                        new OutputStreamWriter(exceptionFile);
-                                    ExceptionMapper exceptionMapper =
-                                        new ExceptionMapper(
-                                            element,
-                                            exceptionWriter,
-                                            getModel(),
-                                            this.format,
-                                            packageSuffix,
-                                            this.metaData);
+                                    Writer exceptionWriter = new OutputStreamWriter(exceptionFile);
+                                    ExceptionMapper exceptionMapper = new ExceptionMapper(
+                                        element,
+                                        exceptionWriter,
+                                        getModel(),
+                                        this.format,
+                                        packageSuffix,
+                                        this.metaData, 
+                                        getPrimitiveTypeMapper()
+                                    );
                                     this.mapException(element, exceptionMapper);
                                     exceptionWriter.flush();
-                                    String elementName =
-                                        Identifier.CLASS_PROXY_NAME.toIdentifier(
-                                            (String) element.objGetValue("name"), 
-                                            null, // removablePrefix
-                                            null, // prependablePrefix
-                                            "exception", // removableSuffix
-                                            "exception" // appendableSuffix
-                                        );
+                                    String elementName = Identifier.CLASS_PROXY_NAME.toIdentifier(
+                                        (String) element.objGetValue("name"), 
+                                        null, // removablePrefix
+                                        null, // prependablePrefix
+                                        "exception", // removableSuffix
+                                        "exception" // appendableSuffix
+                                    );
                                     this.addToZip(
                                         zip,
                                         exceptionFile,
                                         element,
                                         elementName,
-                                        "." + this.fileExtension);
+                                        "." + this.fileExtension
+                                     );
                                 }
                             }
                             // org:omg:model1:AssociationType
@@ -1520,16 +1524,16 @@ public class Mapper_1
                                     .jdoGetObjectId());
                                 if (cci2) {
                                     associationFile.reset();
-                                    Writer associationWriter =
-                                        new OutputStreamWriter(associationFile);
-                                    AssociationMapper associationMapper =
-                                        new AssociationMapper(
-                                            element,
-                                            associationWriter,
-                                            getModel(),
-                                            this.format,
-                                            this.packageSuffix,
-                                            this.metaData);
+                                    Writer associationWriter = new OutputStreamWriter(associationFile);
+                                    AssociationMapper associationMapper = new AssociationMapper(
+                                        element,
+                                        associationWriter,
+                                        getModel(),
+                                        this.format,
+                                        this.packageSuffix,
+                                        this.metaData, 
+                                        getPrimitiveTypeMapper()
+                                    );
                                     if (mapAssociation(
                                         element,
                                         associationMapper)) {
@@ -1539,7 +1543,8 @@ public class Mapper_1
                                             associationFile,
                                             element,
                                             associationMapper.associationName,
-                                            "." + this.fileExtension);
+                                            "." + this.fileExtension
+                                        );
                                     }
                                 }
                             } else {
@@ -1662,7 +1667,19 @@ public class Mapper_1
         return (this.format != Format.JPA3) || !classDef.isAbstract()
             || classDef.getSuperClassDef(true) == null;
     }
+    
+    protected PrimitiveTypeMapper newPrimitiveTypeMapper(){
+        return new StandardPrimitiveTypeMapper();
+    }
 
+    protected PrimitiveTypeMapper getPrimitiveTypeMapper(){
+        return this.primitiveTypeMapper;
+    }
+    
+    protected ObjectRepositoryMetadataPlugin geObjectRepositoryMetadataPlugin(){
+        return new StandardObjectRepositoryMetadataPlugin();
+    }
+    
     /**
      * Test whether the given artifact is in an archive
      * 
@@ -1700,6 +1717,8 @@ public class Mapper_1
 
     private final Format format;
 
+    private final PrimitiveTypeMapper primitiveTypeMapper;
+    
 }
 
 // --- End of File -----------------------------------------------------------

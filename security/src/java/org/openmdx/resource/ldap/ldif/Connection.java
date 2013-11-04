@@ -103,44 +103,32 @@ class Connection implements LDAPv3 {
 	) throws ResourceException {
 		this.caseSensitive = caseSensitive;
 		try {
-			LineReader reader = new LineReader(
+			final LineReader reader = new LineReader(
 				new InputStreamReader(
 					source.openStream()
 				)
 			);
-			LDAPEntry entry = null;
-			for(
-				String line = reader.readLine();
-				line != null;
-				line = reader.readLine()
-			){
-				Matcher matcher = commentPattern.matcher(line); 
-				if(!matcher.matches()) {
-					matcher = distinguishedNamePattern.matcher(line); 
-					if(matcher.matches()) {
-						String name = matcher.group(1).trim();
-						entry = new LDAPEntry(name);
-						this.directory.put(
-							this.toKey(name), entry
-						);
-					} else if (entry != null) {
-						matcher = attributePattern.matcher(line);
+			try {
+				LDAPEntry entry = null;
+				for(
+					String line = reader.readLine();
+					line != null;
+					line = reader.readLine()
+				){
+					Matcher matcher = commentPattern.matcher(line); 
+					if(!matcher.matches()) {
+						matcher = distinguishedNamePattern.matcher(line); 
 						if(matcher.matches()) {
 							String name = matcher.group(1).trim();
-							String value = matcher.group(2).trim();
-							LDAPAttribute attribute = entry.getAttribute(name);
-							if(attribute == null) {
-								attribute = new LDAPAttribute(name, value);
-								entry.getAttributeSet().add(attribute);
-							} else {
-								attribute.addValue(value);
-							}
-						} else {
-							matcher = binaryAttributePattern.matcher(line);
+							entry = new LDAPEntry(name);
+							this.directory.put(
+								this.toKey(name), entry
+							);
+						} else if (entry != null) {
+							matcher = attributePattern.matcher(line);
 							if(matcher.matches()) {
 								String name = matcher.group(1).trim();
-								String encoded = matcher.group(2).trim();
-								byte[] value = Base64.decode(encoded);
+								String value = matcher.group(2).trim();
 								LDAPAttribute attribute = entry.getAttribute(name);
 								if(attribute == null) {
 									attribute = new LDAPAttribute(name, value);
@@ -148,10 +136,26 @@ class Connection implements LDAPv3 {
 								} else {
 									attribute.addValue(value);
 								}
+							} else {
+								matcher = binaryAttributePattern.matcher(line);
+								if(matcher.matches()) {
+									String name = matcher.group(1).trim();
+									String encoded = matcher.group(2).trim();
+									byte[] value = Base64.decode(encoded);
+									LDAPAttribute attribute = entry.getAttribute(name);
+									if(attribute == null) {
+										attribute = new LDAPAttribute(name, value);
+										entry.getAttributeSet().add(attribute);
+									} else {
+										attribute.addValue(value);
+									}
+								}
 							}
 						}
 					}
 				}
+			} finally {
+				reader.close();
 			}
 		}  catch (IOException exception) {
 			throw new CommException(
