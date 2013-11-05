@@ -1262,7 +1262,7 @@ input.selimgsubmithover { /* IE :hover workaround */
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  width: 15.5em;
+  width: 17.0em;
 }
 .gridColTypeNormal, td.gridColTypeNormal {
   white-space: nowrap;

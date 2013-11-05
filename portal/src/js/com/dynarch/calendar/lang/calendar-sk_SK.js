@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>// ** I18N
+// ** I18N
 
 // Calendar EN language
 // Author: Mihai Bazon, <mihai_bazon@yahoo.com>
@@ -123,5 +123,5 @@ Calendar._TT["TIME_PART"] = "(Shift-)klikni alebo ťahaj na zmenu hodnoty";
 Calendar._TT["DEF_DATE_FORMAT"] = "%d.%m.%Y";
 Calendar._TT["TT_DATE_FORMAT"] = "%a, %b %e";
 
-Calendar._TT["WK"] = "wk";
+Calendar._TT["WK"] = "týž";
 Calendar._TT["TIME"] = "Čas:";

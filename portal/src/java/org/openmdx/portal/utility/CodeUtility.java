@@ -388,192 +388,178 @@ public class CodeUtility {
 		List locale,
 		File sourceDir,
 		File targetDir
-	) throws ServiceException {
-      String en_US_Dir =  sourceDir.getAbsolutePath() + File.separatorChar + "en_US";
-      System.out.println("sourceDir=" + sourceDir.getAbsolutePath());      
-      File[] en_US_files = new File(en_US_Dir).listFiles();
-      if(en_US_files == null) {
-          System.out.println("ERROR: directory not found: " + en_US_Dir);
-          return;
-      }
-      
-      // process all code files
-      for(int u = 0; u < en_US_files.length; u++) {
-
-          // get all locale specific files for en_US_files[k]
-          Map<Path,MappedRecord> mergedCodes = new TreeMap<Path,MappedRecord>();
-          Set codeValueContainers = new HashSet(); // collect CodeValueContainer which are required in next step
-          for(int i = 0; i < locale.size(); i++) {
-              
-              // read entries
-              File file =  new File(sourceDir.getAbsolutePath() + File.separatorChar + locale.get(i) + File.separatorChar + en_US_files[u].getName());
-              Map<Path,MappedRecord> codes = new HashMap<Path,MappedRecord>();
-              if(file.exists()) {
-                  System.out.println("loading " + file);
-                  try {
-                	  Importer.importObjects(
-                		  Importer.asTarget(codes),
-                		  Importer.asSource(file)
-                	  );
-                  }
-                  catch(ServiceException e) {
-                    e.log();
-                    System.out.println("STATUS: " + e.getMessage());
-                  }
-                  catch(Exception e) {
-                      new ServiceException(e).log();
-                      System.out.println("STATUS: " + e.getMessage());
-                  }
-              }
-              
-              // merge entries
-              Set<Path> keySet = i == 0 ? codes.keySet() : mergedCodes.keySet();
-              try {
-                  for(Iterator<Path> j = keySet.iterator(); j.hasNext(); ) {
-                    Path key = (Path)j.next();
-                    // merge entry
-                    if(mergedCodes.get(key) != null) {
-                      MappedRecord mergedCodeEntry = mergedCodes.get(key);
-                      Object_2Facade mergedCodeEntryFacade = Object_2Facade.newInstance(mergedCodeEntry);
-                      if("org:opencrx:kernel:code1:CodeValueEntry".equals(mergedCodeEntryFacade.getObjectClass())) {
-                          MappedRecord codeEntry = codes.get(key);
-                          Object_2Facade codeEntryFacade = Object_2Facade.newInstance(codeEntry);
-                    	  mergedCodeEntryFacade.attributeValuesAsList("shortText").add(
-                          (codeEntryFacade != null && !codeEntryFacade.attributeValuesAsList("shortText").isEmpty()) ? 
-                        	  codeEntryFacade.attributeValue("shortText") : 
-                        	  "" // empty string as default
-                    	  );
-                    	  mergedCodeEntryFacade.attributeValuesAsList("longText").add(
-                          (codeEntryFacade != null && codeEntryFacade.attributeValuesAsList("longText").isEmpty()) ? 
-                        	  codeEntryFacade.attributeValue("longText") : 
-                        	  ""  // empty string as default
-                    	  );
-                      }
-                    }
-                    // add if it does not exist. Only add for locale=0 (en_US)
-                    else if(i == 0) {
-                        MappedRecord entry = codes.get(key);
-                        if("org:opencrx:kernel:code1:CodeValueContainer".equals(Object_2Facade.getObjectClass(entry))) {
-                            codeValueContainers.add(entry);
-                        }
-                        else {                         
-                            mergedCodes.put(
-                                key,
-                                entry
-                            );
-                        }
-                    }
-                    // locale > 0 requires that locale=0 exists. Complain if it
-                    // does not
-                    else {
-                      System.err.println("entry " + key + " of locale " + locale.get(i) + " has no corresponding entry for locale " + locale.get(0) + ". Not loading");
-                    }
-                  }
-              }
-              catch(Exception e) {
-                  System.err.println("Can not import. Reason is " + e.getMessage());
-              }
-          }
-    
-          // try numeric sort of entries
-          Map sortedCodes = new TreeMap();
-          for(Iterator i = mergedCodes.entrySet().iterator(); i.hasNext(); ) {
-              Entry entry = (Entry)i.next();
-              String codeKey = ((Path)entry.getKey()).getBase();
-              try {
-                  sortedCodes.put(
-                    new Integer(codeKey),
-                    entry.getValue()
-                  );
-              }
-              catch(NumberFormatException e) {
-                  sortedCodes = mergedCodes;
-                  break;
-              }
-          }
-          
-          // dump mergedCodes as UTF-8 encoded XML
-          String outFileName = targetDir.getAbsolutePath() + File.separatorChar + en_US_files[u].getName();
-          try {
-              // rename existing file
-              File outFile = new File(outFileName);
-              if(outFile.exists()) {
-                  File renamed = new File(outFile.getParent() + File.separatorChar + ".#" + outFile.getName());
-                  if(!outFile.renameTo(renamed)) {
-                      System.out.println("WARNING: can not move file " + outFile.getAbsolutePath() + " to " + renamed.getAbsolutePath() + ". Skipping");
-                      continue;
-                  }
-              }
-              else if(!outFile.getParentFile().exists()) {
-                  if(!outFile.getParentFile().mkdir()) {
-                      System.out.println("WARNING: can not create directory " + outFile.getParentFile().getAbsolutePath() + ". Skipping");
-                      continue;                      
-                  }
-              }
-              System.out.println("writing file " + outFileName);
-              Writer w = new OutputStreamWriter(new FileOutputStream(outFileName), "UTF-8");
-              Writer fw = new XMLWriter(w);
-              String s = null;   
-              s = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
-              w.write(s, 0, s.length());
-              s = "<CodeValueContainers>\n";
-              w.write(s, 0, s.length());
-              for(Iterator<MappedRecord> i = codeValueContainers.iterator(); i.hasNext(); ) {
-                  MappedRecord codeValueContainer = i.next();
-                  Path codeValueContainerPath = Object_2Facade.getPath(codeValueContainer);
-                  s = "  <CodeValueContainer name=\"" + codeValueContainerPath.getBase() + "\">\n";
-                  w.write(s, 0, s.length());
-                  for(Iterator<MappedRecord> j = sortedCodes.values().iterator(); j.hasNext(); ) {
-                      MappedRecord entry = j.next();
-                      Object_2Facade entryFacade;
-                      try {
-	                      entryFacade = Object_2Facade.newInstance(entry);
-                      }
-                      catch (ResourceException e) {
-                    	  throw new ServiceException(e);
-                      }
-                      if(codeValueContainerPath.getBase().equals(entryFacade.getPath().getParent().getParent().getBase())) {
-                          s = "    <CodeValueEntry code=\"" + entryFacade.getPath().getBase() + "\">\n";
-                          w.write(s, 0, s.length());
-                          for(int k = 0; k < locale.size(); k++) {
-                              // shortText
-                              s = "      <" + locale.get(k) + "_short>";
-                              w.write(s, 0, s.length());
-                              s = k < entryFacade.attributeValuesAsList("shortText").size() ?
-                            	  (String)entryFacade.attributeValuesAsList("shortText").get(k) :
-                            		  "";
-                              fw.write(s, 0, s.length());
-                              s = "</" + locale.get(k) + "_short>\n";
-                              w.write(s, 0, s.length());
-                              // longText
-                              s = "      <" + locale.get(k) + "_long>";
-                              w.write(s, 0, s.length());
-                              s = k < entryFacade.attributeValuesAsList("longText").size() ?
-                            	  (String)entryFacade.attributeValuesAsList("longText").get(k) :
-                            		  "";
-                              fw.write(s, 0, s.length());
-                              s = "</" + locale.get(k) + "_long>\n";
-                              w.write(s, 0, s.length());
-                          }
-                          s = "    </CodeValueEntry>\n";
-                          w.write(s, 0, s.length());
-                      }
-                  }
-                  s = "  </CodeValueContainer>\n";
-                  w.write(s, 0, s.length());
-              }
-              s = "</CodeValueContainers>\n";         
-              w.write(s, 0, s.length());
-              fw.close();
-          } catch(FileNotFoundException e) {
-              System.err.println("can not create file " + outFileName);
-          } catch(UnsupportedEncodingException e) {
-              System.err.println("can not create file with encoding UTF-8 " + outFileName);
-          } catch(IOException e) {
-              System.err.println("error writing to file " + outFileName);
-          }
-      }
-  }
+		) throws ServiceException {
+		String en_US_Dir =  sourceDir.getAbsolutePath() + File.separatorChar + "en_US";
+		System.out.println("sourceDir=" + sourceDir.getAbsolutePath());      
+		File[] en_US_files = new File(en_US_Dir).listFiles();
+		if(en_US_files == null) {
+			System.out.println("ERROR: directory not found: " + en_US_Dir);
+			return;
+		}
+		// Process all code files
+		for(int u = 0; u < en_US_files.length; u++) {
+			// Get all locale specific files for en_US_files[k]
+			Map<Path,MappedRecord> mergedCodes = new TreeMap<Path,MappedRecord>();
+			Set codeValueContainers = new HashSet(); // collect CodeValueContainer which are required in next step
+			for(int i = 0; i < locale.size(); i++) {              
+				// Read entries
+				File file =  new File(sourceDir.getAbsolutePath() + File.separatorChar + locale.get(i) + File.separatorChar + en_US_files[u].getName());
+				Map<Path,MappedRecord> codes = new HashMap<Path,MappedRecord>();
+				if(file.exists()) {
+					System.out.println("loading " + file);
+					try {
+						Importer.importObjects(
+							Importer.asTarget(codes),
+							Importer.asSource(file)
+							);
+					} catch(ServiceException e) {
+						e.log();
+						System.out.println("STATUS: " + e.getMessage());
+					} catch(Exception e) {
+						new ServiceException(e).log();
+						System.out.println("STATUS: " + e.getMessage());
+					}
+				}
+				// Merge entries
+				Set<Path> keySet = i == 0 ? codes.keySet() : mergedCodes.keySet();
+				try {
+					for(Iterator<Path> j = keySet.iterator(); j.hasNext(); ) {
+						Path key = (Path)j.next();
+						// merge entry
+						if(mergedCodes.get(key) != null) {
+							MappedRecord mergedCodeEntry = mergedCodes.get(key);
+							Object_2Facade mergedCodeEntryFacade = Object_2Facade.newInstance(mergedCodeEntry);
+							if(mergedCodeEntryFacade.getObjectClass().endsWith("CodeValueEntry")) {
+								MappedRecord codeEntry = codes.get(key);
+								Object_2Facade codeEntryFacade = Object_2Facade.newInstance(codeEntry);
+								mergedCodeEntryFacade.attributeValuesAsList("shortText").add(
+									(codeEntryFacade != null && !codeEntryFacade.attributeValuesAsList("shortText").isEmpty()) 
+										? codeEntryFacade.attributeValue("shortText") 
+										: "" // empty string as default
+									);
+								mergedCodeEntryFacade.attributeValuesAsList("longText").add(
+									(codeEntryFacade != null && !codeEntryFacade.attributeValuesAsList("longText").isEmpty()) 
+										? codeEntryFacade.attributeValue("longText") 
+										: ""  // empty string as default
+									);
+							}
+						} else if(i == 0) {
+							// add if it does not exist. Only add for locale=0 (en_US)
+							MappedRecord entry = codes.get(key);
+							if(Object_2Facade.getObjectClass(entry).endsWith("CodeValueContainer")) {
+								codeValueContainers.add(entry);
+							} else {                         
+								mergedCodes.put(
+									key,
+									entry
+								);
+							}
+						} else {
+							// locale > 0 requires that locale=0 exists. Complain if it
+							// does not
+							System.err.println("entry " + key + " of locale " + locale.get(i) + " has no corresponding entry for locale " + locale.get(0) + ". Not loading");
+						}
+					}
+				} catch(Exception e) {
+					System.err.println("Can not import. Reason is " + e.getMessage());
+				}
+			}
+			// Try numeric sort of entries
+			Map sortedCodes = new TreeMap();
+			for(Iterator i = mergedCodes.entrySet().iterator(); i.hasNext(); ) {
+				Entry entry = (Entry)i.next();
+				String codeKey = ((Path)entry.getKey()).getBase();
+				try {
+					sortedCodes.put(
+						new Integer(codeKey),
+						entry.getValue()
+						);
+				} catch(NumberFormatException e) {
+					sortedCodes = mergedCodes;
+					break;
+				}
+			}
+			// Dump mergedCodes as UTF-8 encoded XML
+			String outFileName = targetDir.getAbsolutePath() + File.separatorChar + en_US_files[u].getName();
+			try {
+				// rename existing file
+				File outFile = new File(outFileName);
+				if(outFile.exists()) {
+					File renamed = new File(outFile.getParent() + File.separatorChar + ".#" + outFile.getName());
+					if(!outFile.renameTo(renamed)) {
+						System.out.println("WARNING: can not move file " + outFile.getAbsolutePath() + " to " + renamed.getAbsolutePath() + ". Skipping");
+						continue;
+					}
+				} else if(!outFile.getParentFile().exists()) {
+					if(!outFile.getParentFile().mkdir()) {
+						System.out.println("WARNING: can not create directory " + outFile.getParentFile().getAbsolutePath() + ". Skipping");
+						continue;                      
+					}
+				}
+				System.out.println("writing file " + outFileName);
+				Writer w = new OutputStreamWriter(new FileOutputStream(outFileName), "UTF-8");
+				Writer fw = new XMLWriter(w);
+				String s = null;   
+				s = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
+				w.write(s, 0, s.length());
+				s = "<CodeValueContainers>\n";
+				w.write(s, 0, s.length());
+				for(Iterator<MappedRecord> i = codeValueContainers.iterator(); i.hasNext(); ) {
+					MappedRecord codeValueContainer = i.next();
+					Path codeValueContainerPath = Object_2Facade.getPath(codeValueContainer);
+					s = "  <CodeValueContainer name=\"" + codeValueContainerPath.getBase() + "\">\n";
+					w.write(s, 0, s.length());
+					for(Iterator<MappedRecord> j = sortedCodes.values().iterator(); j.hasNext(); ) {
+						MappedRecord entry = j.next();
+						Object_2Facade entryFacade;
+						try {
+							entryFacade = Object_2Facade.newInstance(entry);
+						}
+						catch (ResourceException e) {
+							throw new ServiceException(e);
+						}
+						if(codeValueContainerPath.getBase().equals(entryFacade.getPath().getParent().getParent().getBase())) {
+							s = "    <CodeValueEntry code=\"" + entryFacade.getPath().getBase() + "\">\n";
+							w.write(s, 0, s.length());
+							for(int k = 0; k < locale.size(); k++) {
+								// shortText
+								s = "      <" + locale.get(k) + "_short>";
+								w.write(s, 0, s.length());
+								s = k < entryFacade.attributeValuesAsList("shortText").size() ?
+									(String)entryFacade.attributeValuesAsList("shortText").get(k) :
+										"";
+									fw.write(s, 0, s.length());
+									s = "</" + locale.get(k) + "_short>\n";
+									w.write(s, 0, s.length());
+									// longText
+									s = "      <" + locale.get(k) + "_long>";
+									w.write(s, 0, s.length());
+									s = k < entryFacade.attributeValuesAsList("longText").size() ?
+										(String)entryFacade.attributeValuesAsList("longText").get(k) :
+											"";
+										fw.write(s, 0, s.length());
+										s = "</" + locale.get(k) + "_long>\n";
+										w.write(s, 0, s.length());
+							}
+							s = "    </CodeValueEntry>\n";
+							w.write(s, 0, s.length());
+						}
+					}
+					s = "  </CodeValueContainer>\n";
+					w.write(s, 0, s.length());
+				}
+				s = "</CodeValueContainers>\n";         
+				w.write(s, 0, s.length());
+				fw.close();
+			} catch(FileNotFoundException e) {
+				System.err.println("can not create file " + outFileName);
+			} catch(UnsupportedEncodingException e) {
+				System.err.println("can not create file with encoding UTF-8 " + outFileName);
+			} catch(IOException e) {
+				System.err.println("error writing to file " + outFileName);
+			}
+		}
+	}
   
 	/**
 	 * Run code utility.
