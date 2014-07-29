@@ -85,12 +85,8 @@ import org.openmdx.base.persistence.spi.PersistenceManagers;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.log.SysLog;
 import org.openmdx.portal.servlet.action.SelectObjectAction;
-import org.openmdx.portal.servlet.attribute.AttributeValue;
-import org.openmdx.portal.servlet.control.Control;
-import org.openmdx.portal.servlet.control.ControlFactory;
-import org.openmdx.portal.servlet.control.EditInspectorControl;
-import org.openmdx.portal.servlet.control.ShowInspectorControl;
-import org.openmdx.portal.servlet.view.LayoutFactory;
+import org.openmdx.portal.servlet.component.LayoutFactory;
+import org.openmdx.portal.servlet.wizards.WizardDefinitionFactory;
 
 /**
  * ApplicationContext holds the state of the current (user) session.
@@ -278,7 +274,7 @@ public final class ApplicationContext implements Serializable {
      * @return
      */
     public static String getOrderAsString(
-        List order
+        List<Integer> order
     ) {
         if(order == null) return "0";
         String orderAsString = "";
@@ -414,7 +410,7 @@ public final class ApplicationContext implements Serializable {
     /**
      * Load quick accessor.
      */
-    private void loadQuickAccessors(
+	private void loadQuickAccessors(
     ) {
         Map<String,QuickAccessor> quickAccessors = new TreeMap<String,QuickAccessor>();    
         String quickAccessorsReference = this.getQuickAccessorsReference();
@@ -435,7 +431,7 @@ public final class ApplicationContext implements Serializable {
             }
             int ii = 0;
             for(
-                Iterator i = quickAccessorsReferences.iterator(); 
+                Iterator<Path> i = quickAccessorsReferences.iterator(); 
                 i.hasNext();
                 ii++
             ) {
@@ -447,7 +443,7 @@ public final class ApplicationContext implements Serializable {
                     );
                     if(parent != null) {
                       for(
-                        Iterator j = ((Collection)parent.refGetValue(quickAccessorsReferenceIdentity.getBase())).iterator();
+                        Iterator<?> j = ((Collection<?>)parent.refGetValue(quickAccessorsReferenceIdentity.getBase())).iterator();
                         j.hasNext();
                       ) {
                         try {
@@ -461,32 +457,28 @@ public final class ApplicationContext implements Serializable {
                             List<String> actionParams = null;
                             try {
                             	target = (RefObject_1_0)quickAccessor.refGetValue("reference");
-                            } 
-                            catch(Exception e) {}
+                            } catch(Exception e) {}
                             try {
                             	name = (String)quickAccessor.refGetValue("name");
-                            } 
-                            catch(Exception e) {}
+                            } catch(Exception e) {}
                             try {
                             	description = (String)quickAccessor.refGetValue("description");
-                            } 
-                            catch(Exception e) {}
+                            } catch(Exception e) {}
                             try {
                             	iconKey = (String)quickAccessor.refGetValue("iconKey");
-                            } 
-                            catch(Exception e) {}
+                            } catch(Exception e) {}
                             try {
                             	actionType = (Number)quickAccessor.refGetValue("actionType");                            
-                            } 
-                            catch(Exception e) {}
+                            } catch(Exception e) {}
                             try {
                             	actionName = (String)quickAccessor.refGetValue("actionName");
                             } 
                             catch(Exception e) {}
                             try {
-                            	actionParams = (List<String>)quickAccessor.refGetValue("actionParam");
-                            }
-                            catch(Exception e) {}
+                            	@SuppressWarnings("unchecked")
+								List<String> params = (List<String>)quickAccessor.refGetValue("actionParam");
+                            	actionParams = params;
+                            } catch(Exception e) {}
                             if(name == null) {
                                 name = new ObjectReference(target, this).getTitle();
                             }           
@@ -651,10 +643,6 @@ public final class ApplicationContext implements Serializable {
             List<Action> actions = new ArrayList<Action>();
             Set<String> labels = new HashSet<String>();
             Set<String> refMofIds = new HashSet<String>();
-            // For each configured root object add the following actions:
-            // * EVENT_SELECT_OBJECT action for root object
-            // * EVENT_SELECT_OBJECT action for all references (tabs) of root object
-            // * EVENT_SELECT_AND_NEW_OBJECT action for all referenced, changeable, non-abstract objects
             for(
                 int i = 0; 
                 i < rootObject.length; 
@@ -665,14 +653,12 @@ public final class ApplicationContext implements Serializable {
                     String label = "-";
                     try {
                         label = this.getLabel(rootObjectClass);
-                    } 
-                    catch(Exception e) {}
+                    } catch(Exception e) {}
                     boolean isEnabled = label != null;
                     String iconKey = WebKeys.ICON_MISSING;
                     try {
                         iconKey =  this.getIconKey(rootObjectClass);
-                    }
-                    catch(ServiceException e) {
+                    } catch(ServiceException e) {
                     	SysLog.detail("can not get icon key", rootObjectClass);
                     	SysLog.detail(e.getMessage(), e.getCause());
                     }
@@ -693,58 +679,6 @@ public final class ApplicationContext implements Serializable {
                     );
                     labels.add(label);
                     refMofIds.add(rootObject[i].refMofId());
-                    // Add EVENT_SELECT_OBJECT for all references and EVENT_SELECT_AND_NEW_OBJECT 
-                    // actions for all changeable, composite objects
-                    try {
-                        org.openmdx.ui1.jmi1.Inspector inspector = this.getInspector(rootObjectClass);
-                        int paneIndex = 0;
-                        for(
-                            Iterator j = inspector.getMember().iterator();
-                            j.hasNext();
-                        ) {
-                            Object paneRef = j.next();
-                            if(paneRef instanceof org.openmdx.ui1.jmi1.ReferencePane) {
-                                int referenceIndex = 0;
-                                for(
-                                    Iterator k = ((org.openmdx.ui1.jmi1.ReferencePane)paneRef).getMember().iterator();
-                                    k.hasNext();
-                                    referenceIndex++
-                                ) {
-                                    org.openmdx.ui1.jmi1.Tab tab = (org.openmdx.ui1.jmi1.Tab )k.next();
-                                    String title = 
-                                        this.getCurrentLocaleAsIndex() < tab.getTitle().size() ? 
-                                            tab.getTitle().get(this.getCurrentLocaleAsIndex()) : 
-                                            	!tab.getTitle().isEmpty() ? 
-                                            		tab.getTitle().get(0) : 
-                                            			"NA";
-                                    if(title != null) {
-                                        if(title.startsWith("\u00BB")) title = title.substring(1);
-                                        if(title.length() > 1) {
-                                            // EVENT_SELECT_OBJECT for reference jj
-                                            actions.add(
-                                                new Action(
-                                                    SelectObjectAction.EVENT_ID,
-                                                    new Action.Parameter[]{
-                                                        new Action.Parameter(Action.PARAMETER_PANE, "" + paneIndex), 
-                                                        new Action.Parameter(Action.PARAMETER_REFERENCE, "" + referenceIndex),
-                                                        new Action.Parameter(Action.PARAMETER_OBJECTXRI, rootObject[i].refGetPath().toXRI())
-                                                    },
-                                                    title,
-                                                    tab.getIconKey(),
-                                                    isEnabled
-                                                )
-                                            );
-                                        }
-                                    }
-                                }
-                                paneIndex++;
-                            }
-                        }
-                    }
-                    catch(ServiceException e) {
-                    	SysLog.detail("can not get inspector", rootObjectClass);
-                    	SysLog.detail(e.getMessage(), e.getCause());
-                    }
                 }
             }
             this.rootObjectActions.put(
@@ -757,11 +691,23 @@ public final class ApplicationContext implements Serializable {
     
     /**
      * Get current ui context.
+     * 
      * @return
      */
     public UiContext getUiContext(
     ) {
-        return this.getControlFactory().getUiContext();
+        return this.uiContext;
+    }
+
+    /**
+     * Set the uiContext.
+     * 
+     * @param uiContext
+     */
+    public void setUiContext(
+    	UiContext uiContext
+    ) {
+    	this.uiContext = uiContext;
     }
 
     /**
@@ -901,14 +847,22 @@ public final class ApplicationContext implements Serializable {
         return this.getTextsFactory().getTextsBundle(this.currentLocaleAsString);
     }
 
-    /**
-     * Get text resource factory.
-     * @return
-     */
-    public Texts getTextsFactory(
-    ) {
-        return this.getControlFactory().getTextsFactory();
-    }
+	/**
+	 * @param textsFactory the textsFactory to set
+	 */
+	public void setTextsFactory(
+		Texts textsFactory
+	) {
+		this.textsFactory = textsFactory;
+	}
+
+	/**
+	 * @return the textsFactory
+	 */
+	public Texts getTextsFactory(
+	) {
+		return this.textsFactory;
+	}
 
     /**
      * Get time zone configured in user settings.
@@ -949,7 +903,7 @@ public final class ApplicationContext implements Serializable {
     public synchronized void setCurrentLocale(
         String locale
     ) {
-        List locales = Arrays.asList(this.getTextsFactory().getLocale());
+        List<String> locales = Arrays.asList(this.getTextsFactory().getLocale());
         if(locales.contains(locale)) {
             this.currentLocaleAsString = locale;
         }
@@ -1077,7 +1031,7 @@ public final class ApplicationContext implements Serializable {
      * Get list of current error messages.
      * @return
      */
-    public List getErrorMessages(
+    public List<String> getErrorMessages(
     ) {
         return this.errorMessages;
     }
@@ -1279,18 +1233,18 @@ public final class ApplicationContext implements Serializable {
     ) {
         Properties settings = new Properties();
 		try {
-			RefObject_1_0 userHomeAdmin = (RefObject_1_0)this.getPmData().getObjectById(userHomeIdentity);
-	        if(userHomeAdmin.refGetValue("settings") != null) {
+			RefObject_1_0 userHome = (RefObject_1_0)this.getPmData().getObjectById(userHomeIdentity);
+	        if(userHome.refGetValue("settings") != null) {
 	            settings.load(
 	                new ByteArrayInputStream(
-	                    ((String)userHomeAdmin.refGetValue("settings")).getBytes("UTF-8")
+	                    ((String)userHome.refGetValue("settings")).getBytes("UTF-8")
 	                )
 	            );
 	        }
 		} catch(Exception e) {}
 		return settings;
     }
-    
+
     /**
      * Get identity under which the given object can be retrieved.
      * @param object
@@ -1302,7 +1256,7 @@ public final class ApplicationContext implements Serializable {
         Path retrievalIdentity = object.refGetPath();
         Path path = object.refGetPath();
         for(
-            Iterator i = this.getRetrieveByPathPatterns().iterator();
+            Iterator<Path> i = this.getRetrieveByPathPatterns().iterator();
             i.hasNext();
         ) {
             Path pattern = (Path)i.next();
@@ -1471,87 +1425,6 @@ public final class ApplicationContext implements Serializable {
     }
     
     /**
-     * Create ui control.
-     * @param id
-     * @param controlClass
-     * @param parameter
-     * @return
-     * @throws ServiceException
-     */
-    public Control createControl(
-        String id,
-        Class<?> controlClass,
-        Object... parameter
-    ) throws ServiceException {
-        return this.getControlFactory().createControl(
-            id,
-            this.getCurrentLocaleAsString(),
-            this.getCurrentLocaleAsIndex(),
-            controlClass
-        );
-    }
-    
-    /**
-     * Create show inspector control for given class.
-     * @param id
-     * @param forClass
-     * @return
-     * @throws ServiceException
-     */
-    public ShowInspectorControl createShowInspectorControl(
-        String id,
-        String forClass
-    ) throws ServiceException {
-        return this.getControlFactory().createShowInspectorControl(
-            id,
-            this.getCurrentPerspective(),
-            this.getCurrentLocaleAsString(),
-            this.getCurrentLocaleAsIndex(),
-            this.getInspector(forClass),
-            forClass
-        );
-    }
-    
-    /**
-     * Create edit inspector control for given class.
-     * @param id
-     * @param forClass
-     * @return
-     * @throws ServiceException
-     */
-    public EditInspectorControl createEditInspectorControl(
-        String id,
-        String forClass
-    ) throws ServiceException {
-        return this.getControlFactory().createEditInspectorControl(
-            id,
-            this.getCurrentPerspective(),
-            this.getCurrentLocaleAsString(),
-            this.getCurrentLocaleAsIndex(),
-            this.getInspector(forClass),
-            forClass
-        );
-    }
-
-    /**
-     * Create attribute control for given field.
-     * @param customizedField
-     * @param object
-     * @return
-     * @throws ServiceException
-     */
-    public AttributeValue createAttributeValue(
-        org.openmdx.ui1.jmi1.ValuedField customizedField,
-        Object object        
-    ) throws ServiceException {
-        return this.getControlFactory().getAttributeValueFactory().getAttributeValue(
-            customizedField,
-            object,
-            this
-        );
-    }
-
-    /**
      * Get ui element definition for given element id.
      * @param id
      * @return
@@ -1709,22 +1582,28 @@ public final class ApplicationContext implements Serializable {
 	}
 
 	/**
-	 * Get control factory.
-	 * @return
+	 * @return the initialScale
 	 */
-	public ControlFactory getControlFactory(
+	public BigDecimal getInitialScale(
 	) {
-		return this.controlFactory;
+		return initialScale;
 	}
 
 	/**
-	 * Set control factory.
-	 * @param controlFactory
+	 * @param initialScale the initialScale to set
 	 */
-	public void setControlFactory(
-		ControlFactory controlFactory
+	public void setInitialScale(
+		BigDecimal initialScale
 	) {
-		this.controlFactory = controlFactory;
+		if(initialScale != null) {
+			if(initialScale.floatValue() >= 0.4 && initialScale.floatValue() <= 3.0) {
+				this.initialScale = initialScale;
+			} else {
+				this.initialScale = BigDecimal.ONE;
+			}
+		} else {
+			this.initialScale = BigDecimal.ONE;
+		}
 	}
 
 	/**
@@ -1788,7 +1667,7 @@ public final class ApplicationContext implements Serializable {
 	 * Get configured retrieveByPath patterns.
 	 * @return
 	 */
-	public List getRetrieveByPathPatterns(
+	public List<Path> getRetrieveByPathPatterns(
 	) {
 		return this.retrieveByPathPatterns;
 	}
@@ -1798,7 +1677,7 @@ public final class ApplicationContext implements Serializable {
 	 * @param retrieveByPathPatterns
 	 */
 	public void setRetrieveByPathPatterns(
-		List retrieveByPathPatterns
+		List<Path> retrieveByPathPatterns
 	) {
 		this.retrieveByPathPatterns = retrieveByPathPatterns;
 	}
@@ -1882,7 +1761,7 @@ public final class ApplicationContext implements Serializable {
 	 * Get filters.
 	 * @return
 	 */
-	public Map getFilters() {
+	public Map<String,Filters> getFilters() {
 		return this.filters;
 	}
 
@@ -1891,7 +1770,7 @@ public final class ApplicationContext implements Serializable {
 	 * @param filters
 	 */
 	public void setFilters(
-		Map filters
+		Map<String,Filters> filters
 	) {
 		this.filters = filters;
 	}
@@ -1991,7 +1870,7 @@ public final class ApplicationContext implements Serializable {
 	 * Get impls for mime types.
 	 * @return
 	 */
-	public Map getMimeTypeImpls(
+	public Map<String,String> getMimeTypeImpls(
 	) {
 		return this.mimeTypeImpls;
 	}
@@ -2001,7 +1880,7 @@ public final class ApplicationContext implements Serializable {
 	 * @param mimeTypeImpls
 	 */
 	public void setMimeTypeImpls(
-		Map mimeTypeImpls
+		Map<String,String> mimeTypeImpls
 	) {
 		this.mimeTypeImpls = mimeTypeImpls;
 	}
@@ -2139,6 +2018,23 @@ public final class ApplicationContext implements Serializable {
 		this.userRole = userRole;
 	}
 
+	/**
+	 * @return the wizardDefinitionFactory
+	 */
+	public WizardDefinitionFactory getWizardDefinitionFactory(
+	) {
+		return wizardDefinitionFactory;
+	}
+
+	/**
+	 * @param wizardDefinitionFactory the wizardDefinitionFactory to set
+	 */
+	public void setWizardDefinitionFactory(
+		WizardDefinitionFactory wizardDefinitionFactory
+	) {
+		this.wizardDefinitionFactory = wizardDefinitionFactory;
+	}
+	
     //-------------------------------------------------------------------------
     // Members
     //-------------------------------------------------------------------------
@@ -2150,24 +2046,27 @@ public final class ApplicationContext implements Serializable {
 	protected String applicationName;
 	protected String locale;
 	protected String timezone;
-	protected ControlFactory controlFactory;
+	protected BigDecimal initialScale = BigDecimal.ONE;
 	protected String sessionId;
 	protected ViewPort.Type viewPortType;
 	protected String loginPrincipal;
 	protected String userRole;
 	protected Path loginRealmIdentity;
-	protected List retrieveByPathPatterns;
+	protected List<Path> retrieveByPathPatterns;
 	protected String userHomeIdentity;
 	protected String[] rootObjectIdentities;
 	protected PortalExtension_1_0 portalExtension;
 	protected HtmlEncoder_1_0 httpEncoder;
-	protected Map filters;
+	protected Map<String,Filters> filters;
+	protected Texts textsFactory;
+	protected UiContext uiContext;
+	protected WizardDefinitionFactory wizardDefinitionFactory;
 	protected Codes codes;
 	protected LayoutFactory layoutFactory;
 	protected File tempDirectory;
 	protected String tempFilePrefix;
 	protected String quickAccessorsReference;
-	protected Map mimeTypeImpls;
+	protected Map<String,String> mimeTypeImpls;
 	protected String exceptionDomain;
 	protected String filterCriteriaField;
 	protected String[] filterValuePatterns;

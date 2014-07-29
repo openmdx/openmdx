@@ -8,7 +8,7 @@
  * This software is published under the BSD license
  * as listed below.
  * 
- * Copyright (c) 2012, OMEX AG, Switzerland
+ * Copyright (c) 2012-2013, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -57,6 +57,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import javax.servlet.jsp.JspException;
 
+import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
 import org.openmdx.base.naming.Path;
 import org.openmdx.kernel.id.UUIDs;
 import org.openmdx.portal.servlet.Action;
@@ -65,13 +66,16 @@ import org.openmdx.portal.servlet.ViewPort;
 import org.openmdx.portal.servlet.ViewPortFactory;
 import org.openmdx.portal.servlet.ViewsCache;
 import org.openmdx.portal.servlet.WebKeys;
-import org.openmdx.portal.servlet.control.Control;
+import org.openmdx.portal.servlet.component.AttributePane;
+import org.openmdx.portal.servlet.component.ReferencePane;
+import org.openmdx.portal.servlet.component.ShowObjectView;
 import org.openmdx.portal.servlet.control.PageEpilogControl;
 import org.openmdx.portal.servlet.control.ReferencePaneControl;
-import org.openmdx.portal.servlet.control.ShowInspectorControl;
-import org.openmdx.portal.servlet.view.ReferencePane;
-import org.openmdx.portal.servlet.view.ShowObjectView;
 
+/**
+ * ShowObjectTag
+ *
+ */
 public class ShowObjectTag extends BaseTag {
 
 	public void setObject(
@@ -133,6 +137,9 @@ public class ShowObjectTag extends BaseTag {
 	    return this.view;
 	}
 
+	/* (non-Javadoc)
+	 * @see javax.servlet.jsp.tagext.TagSupport#doStartTag()
+	 */
 	@Override
     public int doStartTag(
     ) throws JspException {
@@ -145,9 +152,12 @@ public class ShowObjectTag extends BaseTag {
 				this.view = new ShowObjectView(
 					UUIDs.newUUID().toString(),
 					this.getId(), // containerElementId
-					this.getObject(),
+					this.getObject() instanceof Path
+						? (RefObject_1_0)app.getNewPmData().getObjectById((Path)this.getObject())
+						: (RefObject_1_0)this.getObject(),
 					app,
 					new LinkedHashMap<Path,Action>(),
+					null, // nextPrevActions
 					null, // lookupType
 					this.resourcePathPrefix,
 					this.navigationTarget,
@@ -160,7 +170,6 @@ public class ShowObjectTag extends BaseTag {
                 );
 			}
 			// Render
-			ShowInspectorControl inspectorControl = view.getShowInspectorControl();
 			ViewPort p = ViewPortFactory.openPage(
 				this.view,
 				request,
@@ -169,22 +178,22 @@ public class ShowObjectTag extends BaseTag {
 			p.setResourcePathPrefix(this.resourcePathPrefix);
 			if(this.showAttributes) {
 				p.write("<div id=\"", this.getId(), "_attributes\">");
-				Control attributes = inspectorControl.getAttributePaneControl();				
-				attributes.paint(p, false);
-				p.flush();
+				for(AttributePane attributePane: this.view.getChildren(AttributePane.class)) {				
+					attributePane.paint(p, null, false);
+					p.flush();
+				}
 				p.write("</div>");
 			}
 			List<Action> selectGridActions = new ArrayList<Action>();
-			for(ReferencePane referencePane: view.getReferencePane()) {
-				ReferencePaneControl referencePaneControl = referencePane.getReferencePaneControl();
-				referencePaneControl.paint(
+			for(ReferencePane referencePane: view.getChildren(ReferencePane.class)) {
+				referencePane.paint(
 					p,
 					ReferencePaneControl.FRAME_VIEW,
 					false, // forEditing
 					this.grids == null ? null : Arrays.asList(this.grids.split(","))
 				);
 				selectGridActions.add(
-					referencePaneControl.getSelectReferenceAction()[
+					referencePane.getSelectReferenceAction()[
 						referencePane.getSelectedReference()
 					]
 				);
@@ -211,6 +220,8 @@ public class ShowObjectTag extends BaseTag {
 	//-----------------------------------------------------------------------
 	// Members
 	//-----------------------------------------------------------------------
+	private static final long serialVersionUID = 2961253408100529411L;
+
 	private Object object;
 	private boolean showAttributes = false;
 	private String grids = null;

@@ -314,13 +314,13 @@ public class DbObjectConfiguration {
         return this.absolutePositioningDisabled;
     }
     
-    //---------------------------------------------------------------------------
-    public void setAbsolutePositioningDisabled(
-    ) {
-        this.absolutePositioningDisabled = true;
-    }
+    /**
+	 * @param absolutePositioningDisabled the absolutePositioningDisabled to set
+	 */
+	public void setAbsolutePositioningDisabled(boolean absolutePositioningDisabled) {
+		this.absolutePositioningDisabled = absolutePositioningDisabled;
+	}
 
-    //---------------------------------------------------------------------------
     public Map<String, Pattern> getReferenceIdPattern() {
         return this.referenceIdPattern;
     }
@@ -364,7 +364,7 @@ public class DbObjectConfiguration {
     private final Path unitOfWorkProvider;
     private final String removableReferenceIdPrefix;
     private boolean absolutePositioningDisabled;
-    private final Map<String, Pattern> referenceIdPattern;
+	private final Map<String, Pattern> referenceIdPattern;
 
     private static final String[] TO_STRING_FIELDS = {
         "typeName","dbObject","dbObject2","dbObjectFormat","dbObjectForQuery","dbObjectForQuery2","pathNormalizeLevel","dbObjectHint","objectIdPattern","autonumColumns"

@@ -55,6 +55,7 @@ import java.beans.XMLEncoder;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.net.URI;
 import java.util.Date;
@@ -70,6 +71,7 @@ import org.openmdx.base.naming.Path;
 import org.openmdx.base.query.Quantifier;
 import org.openmdx.base.text.conversion.spi.BeanTransformer;
 import org.openmdx.kernel.exception.BasicException;
+import org.openmdx.kernel.loading.Classes;
 import org.openmdx.kernel.log.SysLog;
 import org.w3c.cci2.ImmutableDate;
 import org.w3c.cci2.ImmutableDateTime;
@@ -78,11 +80,26 @@ import org.w3c.spi.DatatypeFactories;
 import org.w3c.spi2.Datatypes;
 
 /**
- * Standard Java Beans Transfomer
+ * Standard Java Beans Transformer
  *
  * @since openMDX 2.12.0
  */
 public class StandardBeanTransformer implements BeanTransformer {
+
+	private static Object xstream = null;
+    private static Method xstreamFromXML = null;
+    private static Method xstreamToXML = null;
+    
+    {
+    	try {
+	    	xstream = Classes.getApplicationClass("com.thoughtworks.xstream.XStream").newInstance();
+	    	xstreamFromXML = xstream.getClass().getMethod("fromXML", String.class);
+	    	xstreamToXML = xstream.getClass().getMethod("toXML", Object.class);
+    		SysLog.info("XStream found. Using java.beans.XMLEncoder / XMLDecoder as fallback");
+    	} catch(Exception e) {
+    		SysLog.info("XStream not found. Fallback to java.beans.XMLEncoder / XMLDecoder");
+    	}
+    }
 
     /* (non-Javadoc)
      * @see org.openmdx.base.text.conversion.spi.JavaBeanTransformer#encode(java.lang.Object, org.openmdx.base.exception.ExceptionListener)
@@ -92,6 +109,13 @@ public class StandardBeanTransformer implements BeanTransformer {
         Object javaBean,
         ExceptionListener exceptionListener
     ) {
+    	if(xstreamToXML != null) {
+    		try {
+	   			return (String)xstreamToXML.invoke(xstream, javaBean);
+	    	} catch(Exception e) {
+	    		throw new RuntimeServiceException(e);
+	    	}
+    	}
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         XMLEncoder encoder = new XMLEncoder(out);
         if(exceptionListener != null) {
@@ -160,25 +184,35 @@ public class StandardBeanTransformer implements BeanTransformer {
         if(encodedJavaBean == null) {
             return null;
         } else {
-            StringInputStream source = new StringInputStream(
-                encodedJavaBean.toString(),
-                "UTF-8"
-            );
-            XMLDecoder decoder = new XMLDecoder(
-                source
-            );
-            if(exceptionListener != null) {
-                decoder.setExceptionListener(
-                    new ExceptionListenerAdapter(exceptionListener)
-                );
-            }
-            Object value = decoder.readObject();
-            try {
-                source.close();
-            } catch (IOException ignored) {
-                SysLog.trace("Ignored close failure", ignored);
-            }
-            return value;
+        	String stringifiedBean = encodedJavaBean.toString();
+        	if(xstreamFromXML != null && !stringifiedBean.startsWith("<?xml")) {
+	    		try {
+		   			return xstreamFromXML.invoke(xstream, stringifiedBean);
+		    	} catch(Exception e) {
+		    		throw new RuntimeServiceException(e);
+		    	}
+	        } else {
+	            StringInputStream source = new StringInputStream(
+	            	stringifiedBean,
+	                "UTF-8"
+	            );
+	            XMLDecoder decoder = new XMLDecoder(
+	                source
+	            );
+	            if(exceptionListener != null) {
+	                decoder.setExceptionListener(
+	                    new ExceptionListenerAdapter(exceptionListener)
+	                );
+	            }
+	            Object value = decoder.readObject();
+	            try {
+	                source.close();
+	            } catch (IOException ignored) {
+	                SysLog.trace("Ignored close failure", ignored);
+	            }
+	            decoder.close();
+	            return value;
+	        }
         }
     }
 

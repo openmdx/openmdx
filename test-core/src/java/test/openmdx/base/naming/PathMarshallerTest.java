@@ -131,23 +131,23 @@ public class PathMarshallerTest extends TestCase {
         };
     }
 
-//    /**
-//     * Write the test case method in the fixture class.
-//     * Be sure to make it public, or it can't be invoked through reflection. 
-//     */
-//    public void testEncode(
-//    ) throws ServiceException {
-//        for (
-//            int index = 0;
-//            index < components.length;
-//            index++
-//        ) assertEquals(
-//            Arrays.asList(components[index]).toString(),
-//            strings[index], 
-//            paths[index].toString()
-//        );
-//    }
-//
+    /**
+     * Write the test case method in the fixture class.
+     * Be sure to make it public, or it can't be invoked through reflection. 
+     */
+    public void testEncode(
+    ) {
+        for (
+            int index = 0;
+            index < components.length;
+            index++
+        ) assertEquals(
+            Arrays.asList(components[index]).toString(),
+            strings[index], 
+            paths[index].toClassicRepresentation()
+        );
+    }
+
     /**
      * Write the test case method in the fixture class.
      * Be sure to make it public, or it can't be invoked through reflection. 

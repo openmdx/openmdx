@@ -69,10 +69,10 @@ import org.openmdx.portal.servlet.ApplicationContext;
 import org.openmdx.portal.servlet.ViewPort;
 import org.openmdx.portal.servlet.ViewsCache;
 import org.openmdx.portal.servlet.attribute.Attribute;
-import org.openmdx.portal.servlet.view.EditObjectView;
-import org.openmdx.portal.servlet.view.ObjectView;
-import org.openmdx.portal.servlet.view.ShowObjectView;
-import org.openmdx.portal.servlet.view.ViewMode;
+import org.openmdx.portal.servlet.component.EditObjectView;
+import org.openmdx.portal.servlet.component.ObjectView;
+import org.openmdx.portal.servlet.component.ShowObjectView;
+import org.openmdx.portal.servlet.component.ViewMode;
 
 /**
  * CreateAction
@@ -110,7 +110,7 @@ public class CreateAction extends BoundAction {
 	                    attributeMap,
 	                    true
 	                );
-	                List errorMessages = app.getErrorMessages();
+	                List<String> errorMessages = app.getErrorMessages();
 	                hasErrors = !errorMessages.isEmpty();
 	                if(hasErrors) {
 	                    errorMessages.clear();                        
@@ -127,10 +127,10 @@ public class CreateAction extends BoundAction {
 	                    RefObject_1_0 workObject = null;
 	                    try {
 	                    	// Try to clone current object and use it as new working object
-	                    	workObject = PersistenceHelper.clone(editView.getRefObject());
+	                    	workObject = PersistenceHelper.clone(editView.getObject());
 	                    } catch(Exception e) {
 	                        // If cloning fails, create a new empty instance
-	                    	workObject = (RefObject_1_0)editView.getRefObject().refClass().refCreateInstance(null);                        	
+	                    	workObject = (RefObject_1_0)editView.getObject().refClass().refCreateInstance(null);                        	
 	                        workObject.refInitialize(false, false);
 	                    }
 	                    // Initialize with received attribute values. This also updates the error messages
@@ -147,6 +147,7 @@ public class CreateAction extends BoundAction {
 	                        editView.getEditObjectIdentity(),
 	                        app,
 	                        editView.getHistoryActions(),
+	                        null, // nextPrevActions
 	                        editView.getLookupType(),
 	                        editView.getParentObject(),
 	                        editView.getForReference(),
@@ -168,9 +169,10 @@ public class CreateAction extends BoundAction {
 		                    nextView = new ShowObjectView(
 		                        currentView.getId(),
 		                        null,
-		                        editView.getRefObject(),
+		                        editView.getObject(),
 		                        app,
 		                        currentView.getHistoryActions(), 
+		                        null, // no nextPrevActions
 		                        null, // no lookupType
 		                        null, // do not propagate resourcePathPrefix
 		                        null, // do not propagate navigationTarget

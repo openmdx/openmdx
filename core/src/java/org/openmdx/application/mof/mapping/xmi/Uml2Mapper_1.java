@@ -133,9 +133,9 @@ public class Uml2Mapper_1
         ) {
             ModelElement_1_0 elementDef = (ModelElement_1_0) i.next();
             if(elementDef.objGetClass().equals(ModelAttributes.PACKAGE)) {
-                String qualifiedName = ((String) elementDef.objGetValue("qualifiedName")).substring(
+                String qualifiedName = ((String) elementDef.getQualifiedName()).substring(
                     0, 
-                    ((String)elementDef.objGetValue("qualifiedName")).lastIndexOf(":")
+                    ((String)elementDef.getQualifiedName()).lastIndexOf(":")
                 );
                 packages.put(qualifiedName, elementDef);
 
@@ -225,7 +225,7 @@ public class Uml2Mapper_1
         ModelElement_1_0 associationEndDef,
         boolean mapAsAttribute
     ) throws ServiceException {
-        ModelElement_1_0 associationEnd1TypeDef = this.model.getElement(associationEndDef.objGetValue("type"));
+        ModelElement_1_0 associationEnd1TypeDef = this.model.getElement(associationEndDef.getType());
         List associationEnd1QualifierTypes = new ArrayList();
         for(
             Iterator i = associationEndDef.objGetList("qualifierType").iterator(); 
@@ -256,7 +256,7 @@ public class Uml2Mapper_1
         }
         // Alias
         else if (elementDef.objGetClass().equals(ModelAttributes.ALIAS_TYPE)) {
-            ModelElement_1_0 typeDef = this.model.getElement(elementDef.objGetValue("type"));
+            ModelElement_1_0 typeDef = this.model.getElement(elementDef.getType());
             boolean refTypeIsPrimitive = typeDef.isPrimitiveType();
             mapper.mapAliasType(elementDef, typeDef, refTypeIsPrimitive);
         }
@@ -296,7 +296,7 @@ public class Uml2Mapper_1
                     ModelElement_1_0 associationEnd2Def = this.model.getElement(candidate.objGetList("content").get(1));
                     // End 1
                     if(
-                        this.model.getElement(associationEnd2Def.objGetValue("type")).equals(elementDef) &&
+                        this.model.getElement(associationEnd2Def.getType()).equals(elementDef) &&
                         ((Boolean)associationEnd1Def.objGetValue("isNavigable")).booleanValue()
                     ) {
                         this.mapAssociationEnd(
@@ -308,7 +308,7 @@ public class Uml2Mapper_1
                     }
                     // End 2
                     if(
-                        this.model.getElement(associationEnd1Def.objGetValue("type")).equals(elementDef) &&
+                        this.model.getElement(associationEnd1Def.getType()).equals(elementDef) &&
                         ((Boolean)associationEnd2Def.objGetValue("isNavigable")).booleanValue()
                     ) {
                         this.mapAssociationEnd(
@@ -324,12 +324,10 @@ public class Uml2Mapper_1
         }
         // Attribute
         else if (elementDef.objGetClass().equals(ModelAttributes.ATTRIBUTE)) {
-            ModelElement_1_0 typeDef = this.model.getElement(elementDef.objGetValue("type"));
+            ModelElement_1_0 typeDef = this.model.getElement(elementDef.getType());
             boolean refTypeIsPrimitive = typeDef.isPrimitiveType();
-            boolean isDerived = ((Boolean) elementDef
-                .objGetValue("isDerived")).booleanValue();
-            boolean isChangeable = ((Boolean) elementDef
-                .objGetValue("isChangeable")).booleanValue();
+            boolean isDerived = ((Boolean) elementDef.isDerived()).booleanValue();
+            boolean isChangeable = ((Boolean) elementDef.isChangeable()).booleanValue();
             mapper.mapAttribute(
                 elementDef,
                 isDerived,
@@ -377,7 +375,7 @@ public class Uml2Mapper_1
             ) {
                 ModelElement_1_0 parameter = this.model.getElement(i.next());
                 if("return".equals(parameter.objGetValue("direction"))) {
-                    returnType = this.model.getElement(parameter.objGetValue("type"));
+                    returnType = this.model.getElement(parameter.getType());
                     break;
                 }
             }
@@ -413,7 +411,7 @@ public class Uml2Mapper_1
         }
         // Parameter
         else if(elementDef.objGetClass().equals(ModelAttributes.PARAMETER)) {
-            ModelElement_1_0 typeDef = this.model.getElement(elementDef.objGetValue("type"));
+            ModelElement_1_0 typeDef = this.model.getElement(elementDef.getType());
             mapper.mapParameter(
                 elementDef, 
                 typeDef
@@ -442,7 +440,7 @@ public class Uml2Mapper_1
         }
         // Structure field
         else if(elementDef.objGetClass().equals(ModelAttributes.STRUCTURE_FIELD)) {
-            ModelElement_1_0 typeDef = this.model.getElement(elementDef.objGetValue("type"));
+            ModelElement_1_0 typeDef = this.model.getElement(elementDef.getType());
             boolean refTypeIsPrimitive = typeDef.isPrimitiveType();
             mapper.mapAttribute(
                 elementDef, 

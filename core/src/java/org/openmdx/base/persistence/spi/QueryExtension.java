@@ -216,6 +216,16 @@ public class QueryExtension implements Extension {
         }
     }
 
+    public void setBooleanParam(Boolean[] booleanParam) {
+        List<Boolean> parameters = this.getBooleanParam();
+        parameters.clear();
+        if(booleanParam != null) {
+            for(boolean parameter : booleanParam) {
+                parameters.add(Boolean.valueOf(parameter));
+            }
+        }
+    }
+
     /* (non-Javadoc)
      * @see org.openmdx.base.query.Extension#setClause(java.lang.String)
      */
@@ -280,6 +290,16 @@ public class QueryExtension implements Extension {
         }
     }
 
+    public void setIntegerParam(Integer[] integerParam) {
+        List<Integer> parameters = this.getIntegerParam();
+        parameters.clear();
+        if(integerParam != null) {
+            for(int parameter : integerParam) {
+                parameters.add(Integer.valueOf(parameter));
+            }
+        }
+    }
+
     /* (non-Javadoc)
      * @see org.openmdx.base.query.Extension#setStringParam(java.lang.String[])
      */
@@ -294,7 +314,6 @@ public class QueryExtension implements Extension {
         }
     }
     
-
     //------------------------------------------------------------------------
     // Is JavaBean
     //------------------------------------------------------------------------

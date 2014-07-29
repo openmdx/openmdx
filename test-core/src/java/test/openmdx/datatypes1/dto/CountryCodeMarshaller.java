@@ -1,11 +1,8 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: $
- * Description: CountryCodeMarshaller 
- * Revision:    $Revision: $
+ * Project:     openMDX, http://www.openmdx.org/
+ * Description: Country Code Marshaller 
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -48,15 +45,13 @@
  * This product includes software developed by other organizations as
  * listed in the NOTICE file.
  */
-
 package test.openmdx.datatypes1.dto;
 
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.marshalling.Marshaller;
 
 /**
- * CountryCodeMarshaller
- *
+ * Country Code Marshaller
  */
 public class CountryCodeMarshaller implements Marshaller {
 

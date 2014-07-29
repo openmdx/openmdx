@@ -270,7 +270,7 @@ public abstract class NameBasedContext extends AbstractContext {
          Name oldName, 
          Name newName
     ) throws NamingException {
-        if(oldName.isEmpty() | newName.isEmpty()) throw new NamingException(NAME_EMPTY);
+        if(oldName.isEmpty() || newName.isEmpty()) throw new NamingException(NAME_EMPTY);
         Object object = lookupLink(oldName);
         bind(newName, object);
         unbind(oldName);

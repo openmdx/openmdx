@@ -483,7 +483,7 @@ public class Object_2Facade {
     /**
      * Set the read lock.
      * 
-     * @param version The lock to set.
+     * @param lock The lock to set.
      */
     public final void setLock(Object lock) {
         this.delegate.setLock(lock);
@@ -690,7 +690,7 @@ public class Object_2Facade {
     // List Facade    
     //-----------------------------------------------------------------------
     
-    private static class ListFacade<E>
+    static class ListFacade<E>
         implements List<E>, Cloneable, Serializable
     {
     
@@ -996,7 +996,7 @@ public class Object_2Facade {
                 return ((List)values).iterator();            
             }
             else {
-                return new NonDelegateIterator();
+                return new NonDelegateIterator(this);
             }
         }
     
@@ -1030,7 +1030,7 @@ public class Object_2Facade {
                 return ((List)values).listIterator();            
             }
             else {
-                return new NonDelegateIterator();
+                return new NonDelegateIterator(this);
             } 
         }
     
@@ -1045,7 +1045,7 @@ public class Object_2Facade {
                 return ((List)values).listIterator(index);            
             }
             else {
-                return new NonDelegateIterator(index);
+                return new NonDelegateIterator(index, this);
             }
         }
     
@@ -1274,123 +1274,108 @@ public class Object_2Facade {
         public String toString() {
             return getList().toString();
         }
-    
-        
-        //------------------------------------------------------------------------
-        // Class NonDelegateIterator
-        //------------------------------------------------------------------------    
-        class NonDelegateIterator implements ListIterator<E> {
-    
-            private int nextIndex;    
-            private int currentIndex;
-            private int previousIndex;
             
-            /**
-             * Constructor
-             *  
-             * @param index
-             */
-            NonDelegateIterator(
-                int index
-            ){
-                this.nextIndex = index;
-                this.currentIndex = -2;
-                this.previousIndex = index -1;
-            }
-    
-            NonDelegateIterator(
-            ){
-                this(0);
-            }
-            
-            /* (non-Javadoc)
-             * @see java.util.ListIterator#nextIndex()
-             */
-            public int nextIndex() {
-                return this.nextIndex;
-            }
-    
-            /* (non-Javadoc)
-             * @see java.util.ListIterator#previousIndex()
-             */
-            public int previousIndex() {
-                return this.previousIndex;
-            }
-    
-            private void invalidateCursor(){
-                if(this.currentIndex != 0) throw new IllegalStateException();
-                this.currentIndex = -2;
-            }
-    
-            private E moveCursor(){
-                this.currentIndex = 0;
-                this.previousIndex = -1;
-                this.nextIndex = 1;
-                return ListFacade.this.get(0);
-            }
-            
-            /* (non-Javadoc)
-             * @see java.util.ListIterator#remove()
-             */
-            public void remove() {
-                invalidateCursor();
-                ListFacade.this.set(0, null);
-            }
-    
-            /* (non-Javadoc)
-             * @see java.util.ListIterator#hasNext()
-             */
-            public boolean hasNext() {
-                return nextIndex() < ListFacade.this.size();
-            }
-    
-            /* (non-Javadoc)
-             * @see java.util.ListIterator#hasPrevious()
-             */
-            public boolean hasPrevious() {
-                return previousIndex() >= 0;
-            }
-    
-            /* (non-Javadoc)
-             * @see java.util.ListIterator#next()
-             */
-            public E next() {
-                if(!hasNext()) throw new NoSuchElementException();
-                return moveCursor();
-            }
-    
-            /* (non-Javadoc)
-             * @see java.util.ListIterator#previous()
-             */
-            public E previous() {
-                if(!hasPrevious()) throw new NoSuchElementException();
-                return moveCursor();
-            }
-    
-            /* (non-Javadoc)
-             * @see java.util.ListIterator#add(java.lang.Object)
-             */
-            public void add(Object o) {
-                throw new UnsupportedOperationException();
-            }
-    
-            /* (non-Javadoc)
-             * @see java.util.ListIterator#set(java.lang.Object)
-             */
-            public void set(E o) {
-                invalidateCursor();
-                ListFacade.this.set(0, o);
-            }
-            
-        }
-                    
     }
 
+    //------------------------------------------------------------------------
+    // Class NonDelegateIterator
+    //------------------------------------------------------------------------    
+    static class NonDelegateIterator<E> implements ListIterator<E> {
+
+        private int index;    
+        private List<E> list;
+        
+        /**
+         * Constructor
+         *  
+         * @param index
+         */
+        NonDelegateIterator(
+            int index,
+            List<E> list
+        ){
+            this.index = index;
+            this.list = list;
+        }
+
+        NonDelegateIterator(
+        	List<E> list
+        ){
+            this(0, list);
+        }
+        
+        /* (non-Javadoc)
+         * @see java.util.ListIterator#nextIndex()
+         */
+        public int nextIndex() {
+            return this.index;
+        }
+
+        /* (non-Javadoc)
+         * @see java.util.ListIterator#previousIndex()
+         */
+        public int previousIndex() {
+            return this.index - 1;
+        }
+
+        /* (non-Javadoc)
+         * @see java.util.ListIterator#remove()
+         */
+        public void remove() {
+            this.list.set(this.index - 1, null);
+        }
+
+        /* (non-Javadoc)
+         * @see java.util.ListIterator#hasNext()
+         */
+        public boolean hasNext() {
+            return nextIndex() < this.list.size();
+        }
+
+        /* (non-Javadoc)
+         * @see java.util.ListIterator#hasPrevious()
+         */
+        public boolean hasPrevious() {
+            return previousIndex() >= 0;
+        }
+
+        /* (non-Javadoc)
+         * @see java.util.ListIterator#next()
+         */
+        public E next() {
+            if(!hasNext()) throw new NoSuchElementException();
+            return this.list.get(this.index++);
+        }
+
+        /* (non-Javadoc)
+         * @see java.util.ListIterator#previous()
+         */
+        public E previous() {
+            if(!hasPrevious()) throw new NoSuchElementException();
+            return this.list.get(--this.index);
+        }
+
+        /* (non-Javadoc)
+         * @see java.util.ListIterator#add(java.lang.Object)
+         */
+        public void add(Object o) {
+            throw new UnsupportedOperationException();
+        }
+
+        /* (non-Javadoc)
+         * @see java.util.ListIterator#set(java.lang.Object)
+         */
+        public void set(E o) {
+            this.list.set(this.index - 1, o);
+        }
+
+    }
+                
     //-----------------------------------------------------------------------
     // Sparse Array Facade
     //-----------------------------------------------------------------------
     
-    private static class SparseArrayFacade<E>
+    static class SparseArrayFacade<E>
         implements SparseArray<E>, Cloneable, Serializable
     {
 
@@ -1811,7 +1796,7 @@ public class Object_2Facade {
     /**
      * GuardedList asserts that only multivalued features may have more than one element
      */
-    class GuardedList extends AbstractList<Object> {
+    static class GuardedList extends AbstractList<Object> {
 
         GuardedList(String objectClass, String featureName, List<Object> valuesAsList) {
             this.objectClass = objectClass;
@@ -1850,7 +1835,7 @@ public class Object_2Facade {
         
         private boolean isSinglevalued(){
             if(this.singlevalued == null) {
-                this.singlevalued = Boolean.valueOf(isSingleValued(getObjectClass(), this.featureName));
+                this.singlevalued = Boolean.valueOf(isSingleValued(this.objectClass, this.featureName));
             }
             return this.singlevalued.booleanValue();
         }

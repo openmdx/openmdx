@@ -1,14 +1,14 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Description: DashboardControl 
+ * Description: WorkspaceDashboardControl 
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
  * ====================================================================
  *
  * This software is published under the BSD license
  * as listed below.
  * 
- * Copyright (c) 2009-2011, OMEX AG, Switzerland
+ * Copyright (c) 2009-2014, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -49,17 +49,21 @@
 package org.openmdx.portal.servlet.control;
 
 import java.io.Serializable;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.TreeMap;
 
+import org.openmdx.portal.servlet.CssClass;
 import org.openmdx.portal.servlet.ViewPort;
 
-public class WorkspaceDashboardControl
-	extends AbstractDashboardControl 
-	implements Serializable {
+/**
+ * WorkspaceDashboardControl
+ *
+ */
+public class WorkspaceDashboardControl extends AbstractDashboardControl  implements Serializable {
 	
-	//-----------------------------------------------------------------------
 	public WorkspaceDashboardControl(
         String id,
         String locale,
@@ -72,17 +76,15 @@ public class WorkspaceDashboardControl
 		);
 	}
 	
-	//-----------------------------------------------------------------------
 	/* (non-Javadoc)
      * @see org.openmdx.portal.servlet.control.AbstractDashboardControl#getDashboardStyle()
      */
     @Override
     protected String getDashboardStyle(
     ) {
-	    return "class=\"workspaceDashboard\"";
+	    return "class=\"" + CssClass.workspaceDashboard + "\"";
     }
 
-	//-----------------------------------------------------------------------
 	/* (non-Javadoc)
      * @see org.openmdx.portal.servlet.control.AbstractDashboardControl#getDashboardIdSuffix(org.openmdx.portal.servlet.ViewPort)
      */
@@ -93,14 +95,18 @@ public class WorkspaceDashboardControl
     	return p.getApplicationContext().getCurrentWorkspace();   	
     }
 
-	//-----------------------------------------------------------------------
+	/* (non-Javadoc)
+	 * @see org.openmdx.portal.servlet.control.AbstractDashboardControl#getMaxHorizontalOrder()
+	 */
 	@Override
     protected int getMaxHorizontalOrder(
     ) {
 		return 1;
     }
 
-	//-----------------------------------------------------------------------
+	/* (non-Javadoc)
+	 * @see org.openmdx.portal.servlet.control.AbstractDashboardControl#getDashboard(org.openmdx.portal.servlet.ViewPort, java.lang.String, java.util.Properties, java.lang.String, java.util.Map, boolean)
+	 */
 	@Override
     protected void getDashboard(    	
     	ViewPort p,
@@ -118,14 +124,14 @@ public class WorkspaceDashboardControl
 	    	dashboard,
 	    	forEditing
 	    );
-	    // Add WorkspacesDashlet
-	    String dashlet = "WorkspacesDashlet";
-		String orderX = "0";
-		String orderY = "9999";
-		String width = "1";
-		String name = "WorkspacesDashlet";
-		String label = "*" + p.getApplicationContext().getTexts().getWorkspacesTitle();
-		if(!forEditing && (dashletFilter == null || label.startsWith(dashletFilter))) {		
+	    // Add public WorkspacesDashlet
+		if(!forEditing && dashletFilter == null) {		
+		    String dashlet = "WorkspacesDashlet";
+			String orderX = "0";
+			String orderY = "9999";
+			String width = "1";
+			String name = "WorkspacesDashlet";
+			String label = "*" + p.getApplicationContext().getTexts().getWorkspacesTitle();
 			if(dashboard.get(orderY) == null) {
 				dashboard.put(
 					orderY, 
@@ -139,5 +145,20 @@ public class WorkspaceDashboardControl
 			);
 		}
     }
-    
+
+	/* (non-Javadoc)
+	 * @see org.openmdx.portal.servlet.control.Control#getChildren(java.lang.Class)
+	 */
+	@Override
+	public <T extends Control> List<T> getChildren(
+		Class<T> type
+	) {
+		return Collections.emptyList();
+	}
+	
+	//-----------------------------------------------------------------------
+	// Members
+	//-----------------------------------------------------------------------
+	private static final long serialVersionUID = -3144855650054555857L;
+
 }

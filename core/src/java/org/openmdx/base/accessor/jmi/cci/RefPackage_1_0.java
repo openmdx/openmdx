@@ -72,7 +72,7 @@ public interface RefPackage_1_0 extends RefPackage {
    * 
    * @return Model_1_0 model assigned to this package.
    */
-  public Model_1_0 refModel(
+  Model_1_0 refModel(
   );
 
   /**
@@ -80,7 +80,7 @@ public interface RefPackage_1_0 extends RefPackage {
    * 
    * @return the package's delegate
    */
-  public PersistenceManager refDelegate(
+  PersistenceManager refDelegate(
   );
     
   /**
@@ -152,11 +152,4 @@ public interface RefPackage_1_0 extends RefPackage {
        InteractionSpec viewContext
    );
 
-   /**
-    * Asserts that the associated persistence manager is open
-    */
-   void assertOpen();
-
 }
-
-//--- End of File -----------------------------------------------------------

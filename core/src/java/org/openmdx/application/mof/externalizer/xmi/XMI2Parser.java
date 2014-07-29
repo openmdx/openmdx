@@ -158,7 +158,7 @@ public class XMI2Parser
     //---------------------------------------------------------------------------
     public Locator getLocator(
     ) {
-        return this.locator;
+        return null;
     }
 
     //---------------------------------------------------------------------------
@@ -892,7 +892,6 @@ public class XMI2Parser
     //-------------------------------------------------------------------------
     private final StringBuffer value = new StringBuffer();
     private String modelUri = null;
-    private Locator locator = null;
     private Stack<String> scope = null;
     private Stack<UML1ModelElement> elementStack = null;
     private Map<String,UML1ModelElement> associationEnds = null;

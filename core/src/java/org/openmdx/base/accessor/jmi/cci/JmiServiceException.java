@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2007, OMEX AG, Switzerland
+ * Copyright (c) 2004-2014, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -50,6 +50,7 @@ package org.openmdx.base.accessor.jmi.cci;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 
+import javax.annotation.Nonnull;
 import javax.jmi.reflect.JmiException;
 import javax.jmi.reflect.RefObject;
 
@@ -108,16 +109,86 @@ public class JmiServiceException extends JmiException
     }
 
     /**
+     * Creates a new <code>ServiceException</code>.
+     *
+     * @param   exceptionDomain
+     *          The exception domain or <code>null</code> for the
+     *          default exception domain containing negative exception codes
+     *          only.
+     * @param   exceptionCode
+     *          The exception code. Negative codes are shared by all exception
+     *          domains, while positive ones are (non-default) exception
+     *          domain specific.
+     * @param   description
+     *          A readable description usually not including the parameters.
+     * @param   parameters
+     *          The exception specific parameters.
+     */
+    public JmiServiceException(
+        String exceptionDomain,
+        int exceptionCode,
+        String description,
+        BasicException.Parameter... parameters
+    ){
+        super.initCause(
+            new BasicException(
+                null, // cause
+                exceptionDomain,
+                exceptionCode,
+                parameters,
+                description,
+                this
+            )
+        );
+    }
+
+    /**
+     * Creates a new <code>ServiceException</code>.
+     *
+     * @param   elementInError
+     * @param   exceptionDomain
+     *          The exception domain or <code>null</code> for the
+     *          default exception domain containing negative exception codes
+     *          only.
+     * @param   exceptionCode
+     *          The exception code. Negative codes are shared by all exception
+     *          domains, while positive ones are (non-default) exception
+     *          domain specific.
+     * @param   description
+     *          A readable description usually not including the parameters.
+     * @param   parameters
+     *          The exception specific parameters.
+     */
+    public JmiServiceException(
+        RefObject elementInError,
+        String exceptionDomain,
+        int exceptionCode,
+        String description,
+        BasicException.Parameter... parameters
+    ){
+        super(null, elementInError);
+        super.initCause(
+            new BasicException(
+                null, // cause
+                exceptionDomain,
+                exceptionCode,
+                parameters,
+                description,
+                this
+            )
+        );
+    }
+    
+    /**
      * Constructor
      * 
      * @param cause a <code>BasicException</code> wrapper
      */
     public JmiServiceException(
-        Throwable cause 
+        @Nonnull Throwable cause 
     ){
-        super(cause.getMessage());
         super.initCause(
-            BasicException.toExceptionStack(cause == null ? this : cause)
+            BasicException.toExceptionStack(cause)
         );
     }
     
@@ -128,20 +199,21 @@ public class JmiServiceException extends JmiException
      * @param elementInError
      */
     public JmiServiceException(
-        Throwable cause,
+        @Nonnull Throwable cause,
         RefObject elementInError
     ) {
-        super(null, elementInError, cause.getMessage());
+        super(null, elementInError);
         super.initCause(
-            BasicException.toExceptionStack(cause == null ? this : cause)
+            BasicException.toExceptionStack(cause)
         );
     }
-    
+
     /**
      * Log the exception at warning level.
      *
-     * @return this RuntimeServiceException
+     * @return the JmiServiceException which just has been logged
      */
+    @Override
     public JmiServiceException log() {
         return BasicException.log(this);
     }
@@ -152,7 +224,7 @@ public class JmiServiceException extends JmiException
      * @return Throwable  The exception cause.
      */
     @Override
-    public final BasicException getCause(
+    public final synchronized BasicException getCause(
     ){
         return (BasicException) super.getCause();
     }
@@ -189,7 +261,7 @@ public class JmiServiceException extends JmiException
      */
     @Override
     public void printStackTrace(PrintStream s) {
-        getCause().printStackTrace(s);
+        getCause().printStackTrace(getClass().getName(), s);
     }
 
     /* (non-Javadoc)
@@ -197,7 +269,7 @@ public class JmiServiceException extends JmiException
      */
     @Override
     public void printStackTrace(PrintWriter s) {
-        getCause().printStackTrace(s);
+        getCause().printStackTrace(getClass().getName(), s);
     }
 
     /* (non-Javadoc)

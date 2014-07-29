@@ -54,6 +54,7 @@ import java.util.Map;
 
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.naming.Path;
+import org.openmdx.base.naming.XRISegment;
 import org.openmdx.kernel.exception.BasicException;
 import org.w3c.format.DateTimeFormat;
 
@@ -137,8 +138,8 @@ public class Qualifiers {
         for (Map.Entry<Path, Path> entry : configuration.getMapping().entrySet()) {
             if (objectId.startsWith(entry.getKey())) {
             	List<String> imageId = new ArrayList<String>();
-            	for(String c : entry.getValue()) {
-            		imageId.add(c);
+            	for(XRISegment c : entry.getValue().getSegments()) {
+            		imageId.add(c.toString());
             	}
                 int iLimit = objectId.size() - 1;
                 for (
@@ -185,8 +186,8 @@ public class Qualifiers {
         for (Map.Entry<Path, Path> entry : configuration.getMapping().entrySet()) {
             if (objectId.startsWith(entry.getKey())) {
                 List<String> imageId = new ArrayList<String>(); 
-                for(String c : entry.getValue()){
-                	imageId.add(c);
+                for(XRISegment c : entry.getValue().getSegments()){
+                	imageId.add(c.toString());
                 }
                 int iLimit = objectId.size() - 1;
                 for (

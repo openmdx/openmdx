@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2009-2013, OMEX AG, Switzerland
+ * Copyright (c) 2009-2014, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -586,7 +586,7 @@ abstract class AbstractContainer_1 implements Container_1_0 {
                     // That's what we expect
                     //
                     cache.put(
-                        object.jdoGetObjectId().getBase(),
+                        object.jdoGetObjectId().getLastSegment().toClassicRepresentation(),
                         object
                     );
                 } else {
@@ -1943,7 +1943,7 @@ abstract class AbstractContainer_1 implements Container_1_0 {
 
                     @Override
                     public String getKey() {
-                        return DatastoreIterator.this.current.jdoGetObjectId().getBase();
+                        return DatastoreIterator.this.current.jdoGetObjectId().getLastSegment().toClassicRepresentation();
                     }
 
                     @Override
@@ -3253,8 +3253,8 @@ abstract class AbstractContainer_1 implements Container_1_0 {
                     return value.equals(ReducedJDOHelper.getTransactionalObjectId(candidate));
                 } else if(value instanceof Path) {
                     Path oid = (Path)value;
-                    if(oid.isTransientObjectId()) {
-                        return oid.toUUID().equals(ReducedJDOHelper.getTransactionalObjectId(candidate));
+                    if(oid.isTransactionalObjectId()) {
+                        return oid.toTransactionalObjectId().equals(ReducedJDOHelper.getTransactionalObjectId(candidate));
                     } else {
                         return oid.equals(ReducedJDOHelper.getObjectId(candidate));
                     }

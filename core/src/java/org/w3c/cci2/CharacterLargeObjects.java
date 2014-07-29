@@ -481,7 +481,6 @@ public class CharacterLargeObjects {
          * @see org.w3c.cci2.CharacterLargeObject#getContent()
          */
         @Override
-        @SuppressWarnings("resource")
         public Reader getContent() throws IOException {
             if(this.url == null) {
                 return newContent();
@@ -558,7 +557,7 @@ public class CharacterLargeObjects {
         /* (non-Javadoc)
          * @see org.w3c.cci2.CharacterLargeObject#getContent()
          */
-        @SuppressWarnings("resource")
+//      @SuppressWarnings("resource")
         public Reader getContent(
         ) throws IOException {
             return this.file != null ? new InputStreamReader(

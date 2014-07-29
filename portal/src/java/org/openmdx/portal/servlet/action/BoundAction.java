@@ -58,7 +58,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.openmdx.portal.servlet.ViewsCache;
-import org.openmdx.portal.servlet.view.ObjectView;
+import org.openmdx.portal.servlet.component.ObjectView;
 
 /**
  * BoundAction. Action which is bound to a view.

@@ -187,7 +187,7 @@ public class AutomaticCache_2 extends PinningCache_2 {
         /**
          * Evictable and non-evictable objects which have been sown.
          */
-        private Map<Path,ObjectRecord> cache;
+        private volatile Map<Path,ObjectRecord> cache;
         
         @Override
         public ObjectRecord peek(

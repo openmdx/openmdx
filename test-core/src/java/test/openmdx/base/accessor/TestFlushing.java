@@ -304,7 +304,7 @@ public class TestFlushing {
          */
         @Override
         public String toString() {
-            return this.jdoObjectId.toXRI() + " (" + JDOHelper.getObjectState(this)+")";
+            return this.jdoObjectId + " (" + JDOHelper.getObjectState(this)+")";
         }
 
     }

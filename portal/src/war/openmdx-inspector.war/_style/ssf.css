@@ -3,37 +3,37 @@
   background:white;
   padding:8px 0 0 10px;
 }
-#topnavi #nav ul {
+#topnavi #ssf-nav ul {
 }
-#topnavi #nav li a img {
+#topnavi #ssf-nav li a img {
   overflow:visible;
 }
-#topnavi #nav li {
+#topnavi #ssf-nav li {
   margin:4px 0 0 0;
   padding:1px 2px 4px 4px;
 }
-#topnavi #nav li a {
+#topnavi #ssf-nav li a {
   font-size: 88%;
 }
-#topnavi #nav li ul li {
+#topnavi #ssf-nav li ul li {
   margin:0;
 	padding: 3px 8px 3px 4px;
 }
 
-#navigation {
+#ssf-navigation {
   overflow:hidden;
   list-style: none;
   margin:0;
   padding:4px 0 0 1px;
   white-space:nowrap;
 }
-#navigation li {
+#ssf-navigation li {
   display:inline-block;
   padding:0;
   list-style: none;
   background-color: white; /* to cater for users without images */
 }
-#navigation a {
+#ssf-navigation a {
   display: block;
   background: url('../images/tableft.gif') left top no-repeat;
   color: #666;
@@ -41,35 +41,35 @@
   margin:0;
   text-decoration: none;
   font-weight: normal;
+  height: 1.9em;
 }
-#navigation span {
+#ssf-navigation span {
   display: block;
   background: url('../images/tabright.gif') right top no-repeat;
   margin-left:0px;
   padding: 5px 9px 4px 4px;
-  font-size:90%;
 }
-#navigation a:hover {
+#ssf-navigation a:hover {
   background-position:0 -42px;
   color: #333;
 }
-#navigation a:hover span {
+#ssf-navigation a:hover span {
   background-position: 100% -42px;
   color: #333;
 }
-#navigation li.selected a {
+#ssf-navigation li.selected a {
   background-position: 0 -42px;
 }
-#navigation li.selected a span {
+#ssf-navigation li.selected a span {
   background-position: 100% -42px;
   font-weight:bold;
 }
 
 /* this is the menu stuff */
-#navigation li:hover, #navigation li.hover { /* IE fix for suckerfish */
+#ssf-navigation li:hover, #ssf-navigation li.hover { /* IE fix for suckerfish */
   position: static;
 }
-#navigation li ul {
+#ssf-navigation li ul {
   position: absolute;
   width:150px;
   overflow:visible;
@@ -82,11 +82,11 @@
   border-left:1px solid black;
   z-index: 10010;
 }
-#navigation li ul li {
+#ssf-navigation li ul li {
 	display:block;
 	float:left;
 }
-#navigation li ul a, #navigation li ul a:link {
+#ssf-navigation li ul a, #ssf-navigation li ul a:link {
   background-image: none;
   background-color: white;
   padding: 2px 4px 2px 6px;
@@ -94,16 +94,16 @@
   font-size: 88%;
   font-weight:normal;
 }
-#navigation li ul a:hover {
+#ssf-navigation li ul a:hover {
   background-color: #ddd;
   color:black;
 }
-#navigation li:hover ul, #navigation li.sfhover ul {
+#ssf-navigation li:hover ul, #ssf-navigation li.sfhover ul {
   left: auto;
 }
 
 /* Support for the "iehover-fix.js" */
-* html ul.navigation iframe {
+* html ul.ssf-navigation iframe {
 	position: absolute;
 	float: left;
 	/* account for the border */
@@ -119,21 +119,21 @@ select.hide { visibility: hidden; }
 /* End Support for the "iehover-fix.js" */
 
 /* horizontal --------------------------------------------------------------------------- */
-#nav, #nav ul { /* all lists */
+#ssf-nav, #ssf-nav ul {
   padding:0;
-	margin:0;
-	list-style:none;
+  margin: 0;
+  list-style:none;
   list-style-position:outside;
- 	line-height: 1;
-	overflow: visible;
+  line-height: 1;
+  overflow: visible;
 }
 
-#nav a {
+#ssf-nav a {
 	display: block;
 	width: auto;
 }
 
-#nav li { /* all list items */
+#ssf-nav li { /* all list items */
   display:inline-block;
 	width: auto; /* width needed or else Opera goes nuts */
 	margin-left: 1px;
@@ -143,7 +143,7 @@ select.hide { visibility: hidden; }
   padding: 4px 2px 4px 2px;
 }
 
-#nav li:hover, #nav li.sfhover {
+#ssf-nav li:hover, #ssf-nav li.sfhover {
   color: black;
 	background:#ddd;
 	margin-left: 1px;
@@ -152,7 +152,7 @@ select.hide { visibility: hidden; }
 	*/
 }
 
-#nav li ul { /* second-level lists */
+#ssf-nav li ul { /* second-level lists */
 	position: absolute;
 	margin-left: -3px;
 	margin-top: 4px;
@@ -167,42 +167,41 @@ select.hide { visibility: hidden; }
   z-index: 10010;
 }
 
-#nav li a {
+#ssf-nav li a {
 	text-decoration: none;
- 	font-size:11px;
  	font-weight:normal;
  	margin-top:-1px;
 }
 
-#nav li ul ul {
+#ssf-nav li ul ul {
 }
 
-#nav li:hover ul, #nav li.sfhover ul { /* lists nested under hovered list items */
+#ssf-nav li:hover ul, #ssf-nav li.sfhover ul { /* lists nested under hovered list items */
 	left: auto;
 }
 
-#nav li:hover ul ul, #nav li.sfhover ul ul {
+#ssf-nav li:hover ul ul, #ssf-nav li.sfhover ul ul {
   left: -999em;
 }
-#nav li:hover ul, #nav li li:hover ul, #nav li.sfhover ul, #nav li li.sfhover ul {
+#ssf-nav li:hover ul, #ssf-nav li li:hover ul, #ssf-nav li.sfhover ul, #ssf-nav li li.sfhover ul {
   left: auto;
 }
 
-#nav li:hover ul ul, #nav li:hover ul ul ul, #nav li.sfhover ul ul, #nav li.sfhover ul ul ul {
+#ssf-nav li:hover ul ul, #ssf-nav li:hover ul ul ul, #ssf-nav li.sfhover ul ul, #ssf-nav li.sfhover ul ul ul {
   left: -999em;
 }
-#nav li:hover ul, #nav li li:hover ul, #nav li li li:hover ul, #nav li.sfhover ul, #nav li li.sfhover ul, #nav li li li.sfhover ul {
+#ssf-nav li:hover ul, #ssf-nav li li:hover ul, #ssf-nav li li li:hover ul, #ssf-nav li.sfhover ul, #ssf-nav li li.sfhover ul, #ssf-nav li li li.sfhover ul {
   left: auto;
 }
 
-#nav li:hover ul ul, #nav li:hover ul ul ul, #nav li:hover ul ul ul ul, #nav li.sfhover ul ul, #nav li.sfhover ul ul ul, #nav li.sfhover ul ul ul ul {
+#ssf-nav li:hover ul ul, #ssf-nav li:hover ul ul ul, #ssf-nav li:hover ul ul ul ul, #ssf-nav li.sfhover ul ul, #ssf-nav li.sfhover ul ul ul, #ssf-nav li.sfhover ul ul ul ul {
   left: -999em;
 }
-#nav li:hover ul, #nav li li:hover ul, #nav li li li:hover ul, #nav li li li li:hover ul, #nav li.sfhover ul, #nav li li.sfhover ul, #nav li li li.sfhover ul, #nav li li li li.sfhover ul {
+#ssf-nav li:hover ul, #ssf-nav li li:hover ul, #ssf-nav li li li:hover ul, #ssf-nav li li li li:hover ul, #ssf-nav li.sfhover ul, #ssf-nav li li.sfhover ul, #ssf-nav li li li.sfhover ul, #ssf-nav li li li li.sfhover ul {
   left: auto;
 }
 
-#nav li ul li { /* second-level entries */
+#ssf-nav li ul li { /* second-level entries */
 	display:block;
   float: none;
 	padding: 3px 8px 3px 2px;
@@ -211,19 +210,19 @@ select.hide { visibility: hidden; }
 	margin-top:-1px;
 }
 
-#nav li ul li a { /* second-level entries */
+#ssf-nav li ul li a { /* second-level entries */
   width: auto;
   white-space: nowrap;
   overflow: visible;
 	font-weight:normal;
 }
 
-#nav li ul li a span { /* disabled second-level entries */
+#ssf-nav li ul li a span { /* disabled second-level entries */
   color: #bbb;
  	font-size:8pt;
 }
 
-#nav li ul li:hover, #nav li ul li.sfhover {
+#ssf-nav li ul li:hover, #ssf-nav li ul li.sfhover {
   color: black;
 	background: #ddd;
 	border-left: none 0px #FFFFFF;
@@ -231,7 +230,7 @@ select.hide { visibility: hidden; }
 
 
 /* Support for the "iehover-fix.js" */
-* html ul.nav iframe {
+* html ul.ssf-nav iframe {
 	position: absolute;
 	float: left;
 	/* account for the border */
@@ -247,7 +246,7 @@ select.hide { visibility: hidden; }
 /* End Support for the "iehover-fix.js" */
 
 /* vertical --------------------------------------------------------------------------- */
-#navv, #navv ul { /* all lists */
+#ssf-navv, #ssf-navv ul { /* all lists */
 	padding: 0;
 	margin: 0;
 	list-style: none;
@@ -258,13 +257,13 @@ select.hide { visibility: hidden; }
 	overflow: visible;
 }
 
-#navv a {
+#ssf-navv a {
 	display: block;
   width: auto;
   color: #888;
 }
 
-#navv li { /* all list items */
+#ssf-navv li { /* all list items */
 /*
 	float : left;
 	line-height: 1.15em;
@@ -272,7 +271,7 @@ select.hide { visibility: hidden; }
 	width: auto; /* width needed or else Opera goes nuts */
 }
 
-#navv li a {
+#ssf-navv li a {
 	text-decoration : none;
 	padding-top: 1px;
 	padding-bottom: 1px;
@@ -281,7 +280,7 @@ select.hide { visibility: hidden; }
   overflow: hidden;
 }
 
-#navv li ul { /* second-level lists */
+#ssf-navv li ul { /* second-level lists */
 	position : absolute;
 	border: solid 1px black;
 	background-color: #FFFFFF;
@@ -293,52 +292,52 @@ select.hide { visibility: hidden; }
   z-index: 10010;
 }
 
-#navv li a {
+#ssf-navv li a {
 	width: 190px;
 }
 
-#navv li:hover, #navv li.sfhover {
+#ssf-navv li:hover, #ssf-navv li.sfhover {
   color: black;
 	background: #ddd;
 }
 
-#navv li ul ul { /* third-and-above-level lists */
+#ssf-navv li ul ul { /* third-and-above-level lists */
 	left: -999em;
 }
 
-#navv li ul li { /* second-level entries */
+#ssf-navv li ul li { /* second-level entries */
 	width: auto;
   float: none;
   display: inline;
 }
 
-#navv li ul li a { /* second-level entries */
+#ssf-navv li ul li a { /* second-level entries */
   width: auto;
 	padding: 2px 8px 2px 2px;
   white-space: nowrap;
   overflow: visible;
 }
 
-#navv li a:hover {
+#ssf-navv li a:hover {
 	color : black;
 	background-color: #ddd;
 	text-decoration: none;
 }
 
-#navv li:hover ul, #navv li.sfhover ul { /* lists nested under hovered list items */
+#ssf-navv li:hover ul, #ssf-navv li.sfhover ul { /* lists nested under hovered list items */
 	left: auto;
 }
 
-#navv li:hover ul ul, #navv li:hover ul ul ul, #navv li.sfHover ul ul, #navv li.sfHover ul ul ul {
+#ssf-navv li:hover ul ul, #ssf-navv li:hover ul ul ul, #ssf-navv li.sfHover ul ul, #ssf-navv li.sfHover ul ul ul {
 	left: -999em;
 }
 
-#navv li:hover ul, #navv li li:hover ul, #navv li li li:hover ul, #navv li.sfHover ul, #navv li li.sfHover ul, #navv li li li.sfHover ul { /* lists nested under hovered list items */
+#ssf-navv li:hover ul, #ssf-navv li li:hover ul, #ssf-navv li li li:hover ul, #ssf-navv li.sfHover ul, #ssf-navv li li.sfHover ul, #ssf-navv li li li.sfHover ul { /* lists nested under hovered list items */
 	left: auto;
 }
 
 /* Support for the "iehover-fix.js" */
-* html ul.navv iframe {
+* html ul.ssf-navv iframe {
 	position: absolute;
 	float: left;
 	/* account for the border */

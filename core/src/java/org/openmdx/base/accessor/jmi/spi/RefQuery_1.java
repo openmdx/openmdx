@@ -55,6 +55,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
+import java.util.EnumSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -72,6 +73,7 @@ import javax.xml.datatype.Duration;
 import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.oasisopen.jmi1.RefContainer;
+import org.openmdx.application.dataprovider.spi.EmbeddedFlags;
 import org.openmdx.application.mof.cci.ModelAttributes;
 import org.openmdx.base.accessor.cci.SystemAttributes;
 import org.openmdx.base.accessor.jmi.cci.JmiServiceException;
@@ -108,6 +110,7 @@ import org.w3c.cci2.ComparableTypePredicate;
 import org.w3c.cci2.MultivaluedFeaturePredicate;
 import org.w3c.cci2.OptionalFeaturePredicate;
 import org.w3c.cci2.PartiallyOrderedTypePredicate;
+import org.w3c.cci2.RegularExpressionFlag;
 import org.w3c.cci2.ResourceIdentifierTypePredicate;
 import org.w3c.cci2.SimpleTypeOrder;
 import org.w3c.cci2.StringTypePredicate;
@@ -246,7 +249,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
                 Path pattern = ((ExtentCollection<?>)operand).getPattern();
                 this.refAddValue(
                     this.quantifier,
-                    pattern.containsWildcard() ? ConditionType.IS_LIKE : ConditionType.IS_IN,
+                    pattern.isPattern() ? ConditionType.IS_LIKE : ConditionType.IS_IN,
                     Collections.singleton(pattern)
                 );
             } else {
@@ -290,7 +293,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
                 Path pattern = ((ExtentCollection<?>)operand).getPattern();
                 this.refAddValue(
                     this.quantifier,
-                    pattern.containsWildcard() ? ConditionType.IS_UNLIKE : ConditionType.IS_NOT_IN,
+                    pattern.isPattern() ? ConditionType.IS_UNLIKE : ConditionType.IS_NOT_IN,
                     Collections.singleton(pattern)
                 );
             } else {
@@ -698,8 +701,8 @@ public class RefQuery_1 implements RefQuery_1_0 {
         ) {
             this.refAddValue(
                 this.quantifier,                    
-                RefQuery_1.toConditionType(flags, true),
-                operand
+                toConditionType(flags, true),
+                embedFlags(RegularExpressionFlag.toFlagSet(flags), operand)
             );
         }
 
@@ -738,8 +741,8 @@ public class RefQuery_1 implements RefQuery_1_0 {
         ) {
             this.refAddValue(
                 this.quantifier,
-                RefQuery_1.toConditionType(flags, false),
-                operand
+                toConditionType(flags, false),
+                embedFlags(RegularExpressionFlag.toFlagSet(flags), operand)
             );
         }
 
@@ -1406,7 +1409,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
     ) {
         try {
             this.assertModifiable();
-            String featureName = (String)featureDef.objGetValue("name");
+            String featureName = (String)featureDef.getName();
             SysLog.log(
                 Level.FINEST, 
                 "{0}|quantifier={1}, feature={2}, conditionType={3}, value={4}", 
@@ -1496,8 +1499,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
                     new BasicException.Parameter("feature", featureName)
                 );
             }
-        }
-        catch(ServiceException e) {
+        } catch(ServiceException e) {
             throw new JmiServiceException(e);
         }
     }
@@ -1511,7 +1513,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
         try {
             this.assertModifiable();            
             this.assertAttributeType(featureDef);
-            String name = (String)featureDef.objGetValue("name"); 
+            String name = (String)featureDef.getName(); 
             SysLog.log(Level.FINEST, "Order by {0} {1}", name, order);
             this.filter.getOrderSpecifier().add(
                 new OrderSpecifier(
@@ -1519,8 +1521,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
                     order
                 )
             );
-        }
-        catch(ServiceException e) {
+        } catch(ServiceException e) {
             throw new JmiServiceException(e);
         }
     }
@@ -1540,7 +1541,6 @@ public class RefQuery_1 implements RefQuery_1_0 {
                     conditionType != ConditionType.IS_IN
                 ){
                     throw new JmiServiceException(
-                        null,
                         BasicException.Code.DEFAULT_DOMAIN,
                         BasicException.Code.ILLEGAL_STATE,
                         SystemAttributes.OBJECT_INSTANCE_OF + " implies THERE_EXISTS/IS_IN",
@@ -1556,7 +1556,6 @@ public class RefQuery_1 implements RefQuery_1_0 {
                     this.filterTypeCondition.setValue(instanceOf);
                 } else {
                     throw new JmiServiceException(
-                        null,
                         BasicException.Code.DEFAULT_DOMAIN,
                         BasicException.Code.ILLEGAL_STATE,
                         "This filter does not allow subclasses",
@@ -1623,8 +1622,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
             return this.refGetOrder(
                 this.getFeature(featureName)
             );
-        } 
-        catch (ServiceException exception) {
+        } catch (ServiceException exception) {
             throw new JmiServiceException(exception);
         }
     }
@@ -1633,8 +1631,8 @@ public class RefQuery_1 implements RefQuery_1_0 {
     private Object refGetOrder(
         ModelElement_1_0 featureDef
     ) throws ServiceException {
-        String multiplicity = (String)featureDef.objGetValue("multiplicity");
-        String featureName = (String)featureDef.objGetValue("qualifiedName");
+        String multiplicity = (String)featureDef.getMultiplicity();
+        String featureName = (String)featureDef.getQualifiedName();
         switch(ModelHelper.getMultiplicity(featureDef)) {
 	        case SINGLE_VALUE: case OPTIONAL:
 	            return new RefSimpleTypeOrder(featureName);
@@ -1657,8 +1655,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
             return this.refGetPredicate(
                 this.getFeature(featureName)
             );
-        } 
-        catch (ServiceException exception) {
+        } catch (ServiceException exception) {
             throw new JmiServiceException(exception);
         }
     }
@@ -1676,12 +1673,12 @@ public class RefQuery_1 implements RefQuery_1_0 {
 	    	case OPTIONAL:
 	    		return new RefOptionalFeaturePredicate(
     	            Quantifier.THERE_EXISTS,
-    	            (String)featureDef.objGetValue("qualifiedName")
+    	            (String)featureDef.getQualifiedName()
     	        );
 	    	default:
 	    		return new RefMultiValuedAttributePredicate(
     	            Quantifier.THERE_EXISTS,
-    	            (String)featureDef.objGetValue("qualifiedName")
+    	            (String)featureDef.getQualifiedName()
     	        );
     	}
     }
@@ -1696,8 +1693,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
                 quantifier,
                 this.getFeature(featureName)
             );
-        } 
-        catch (ServiceException exception) {
+        } catch (ServiceException exception) {
             throw new JmiServiceException(exception);
         }
     }
@@ -1708,13 +1704,13 @@ public class RefQuery_1 implements RefQuery_1_0 {
         ModelElement_1_0 featureDef
     ){
         try {
-            String qualifiedName = (String) featureDef.objGetValue("qualifiedName");
-            String name = (String) featureDef.objGetValue("name");
+            String qualifiedName = (String) featureDef.getQualifiedName();
+            String name = (String) featureDef.getName();
             Model_1_0 model = featureDef.getModel();
             ModelElement_1_0 typeDef = model.getElementType(
                 featureDef
             );
-            String typeName = (String) typeDef.objGetValue("qualifiedName");
+            String typeName = (String) typeDef.getQualifiedName();
             if(model.isPrimitiveType(typeDef)) {
                 return PrimitiveTypes.BOOLEAN.equals(typeName) ? new RefBooleanTypePredicate(
                     quantifier,
@@ -2230,19 +2226,36 @@ public class RefQuery_1 implements RefQuery_1_0 {
      * 
      * @throws IllegalArgumentException
      */
-    protected static ConditionType toConditionType(
+    ConditionType toConditionType(
         int flags,
         boolean fulfils
     ) throws IllegalArgumentException {
-        if(flags == 0) {
+    	if (RegularExpressionFlag.SOUNDS.isSet(flags)) {
+            if(flags != StringTypePredicate.SOUNDS) throw new IllegalArgumentException(
+                "SOUNDS must not be combined with other flags: " + Integer.toHexString(flags)
+            );
+            return fulfils ? ConditionType.SOUNDS_LIKE : ConditionType.SOUNDS_UNLIKE;
+    	} else {
             return fulfils ? ConditionType.IS_LIKE : ConditionType.IS_UNLIKE;
-        } else if(flags == StringTypePredicate.SOUNDS) {
-            return fulfils ? ConditionType.SOUNDS_LIKE : ConditionType.IS_UNLIKE;
-        } else throw new IllegalArgumentException(
-            "No other flag than SOUNDS is supported"
-        );
+    	}
     }
-
+    
+    Collection<String> embedFlags(
+        EnumSet<RegularExpressionFlag> flags,
+    	Collection<String> rawArguments
+    ){
+    	if(flags.isEmpty()) {
+    		return rawArguments;
+    	} else {
+    		EmbeddedFlags embeddedFlags = EmbeddedFlags.getInstance();
+    		List<String> arguments = new ArrayList<String>();
+    		for(String rawArgument : rawArguments) {
+    			arguments.add(embeddedFlags.embedFlags(flags, rawArgument));
+    		}
+    		return arguments;
+    	}
+    }
+    
     /* (non-Javadoc)
      * @see java.lang.Object#clone()
      */

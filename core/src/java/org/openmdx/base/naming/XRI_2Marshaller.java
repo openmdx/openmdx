@@ -1,13 +1,13 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Description: Path/ObjectId Marshaller 
+ * Description: XRI 2 Marshaller 
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2013, OMEX AG, Switzerland
+ * Copyright (c) 2004-2014, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -64,7 +64,7 @@ import org.openmdx.kernel.url.protocol.XRI_2Protocols;
 import org.openmdx.kernel.url.protocol.XriAuthorities;
 
 /**
- * Path/ObjectId Marshaller
+ * XRI 2 Marshaller
  */
 public final class XRI_2Marshaller
     implements Marshaller
@@ -262,6 +262,48 @@ public final class XRI_2Marshaller
         return oid.toString();
     }
 
+	static String xriRepresentationOfGeneralSegment(
+		boolean authority,	
+		String classicRepresentation
+	) {
+		StringBuilder xriRepresentation = new StringBuilder();
+		if(isForeignCrossReference(classicRepresentation)) {
+		    //
+		    // Foreign Cross Reference
+		    //
+		    encode(
+		        classicRepresentation, // source
+		        xriRepresentation, // target
+		        authority, // authority
+		        "", // prefix
+		        "" // suffix
+		    );
+		} else {
+		    //
+		    // No Cross Reference
+		    //
+		    int percent = classicRepresentation.indexOf('%');
+		    if(percent >= 0) {
+	            //
+	            // Embedded Percent Sign (requires escaping)
+	            //
+	            appendCaseExactString(
+	                xriRepresentation,
+	                classicRepresentation
+	            );
+		    } else {
+		        encode(
+		            classicRepresentation, // source
+		            xriRepresentation, // target
+			        authority, // authority
+		            "", // prefix
+		            "" // suffix
+		        );
+		    }
+		}
+		return xriRepresentation.toString();
+	}
+    
     /**
      * The following, then, are the XRI-specific steps required to convert an XRI into a URI.
      * <ol>
@@ -435,7 +477,7 @@ public final class XRI_2Marshaller
                                     ).append(
                                         new Path(
                                             embeddedXri.startsWith(XRI_2Protocols.SCHEME_PREFIX) ? embeddedXri : XRI_2Protocols.SCHEME_PREFIX + embeddedXri
-                                        ).toComponent()
+                                        ).toClassicRepresentation()
                                     );
                                 } else {
                                     target.append(
@@ -489,7 +531,7 @@ public final class XRI_2Marshaller
      * 
      * @return <code>true</code> if the segment could be an XRef
      */
-    private boolean isForeignCrossReference(
+    private static boolean isForeignCrossReference(
         String segment
     ){
         if(
@@ -888,26 +930,7 @@ public final class XRI_2Marshaller
                     // pct-encoded
                     //
                     expectedHexadecimalDigits = 2; 
-                } else if( 
-                    //
-                    // NOT iunrserved
-                    //
-                    !Character.isLetterOrDigit(c) && c != '-' && c != '.' && c != '_' && c != '~' && 
-                    (c < 0xA0 || 0xD7FF < c) && (c < 0xF900 || 0xFDCF < c) && (c < 0xFDF0 || 0xFFEF < c) &&
-                    (c < 0x10000 || 0x1FFFD < c) && (c < 0x20000 || 0x2FFFD < c) && (c < 0x30000 || 0x3FFFD < c) &&
-                    (c < 0x40000 || 0x4FFFD < c) && (c < 0x50000 || 0x5FFFD < c) && (c < 0x60000 || 0x6FFFD < c) &&
-                    (c < 0x70000 || 0x7FFFD < c) && (c < 0x80000 || 0x8FFFD < c) && (c < 0x90000 || 0x9FFFD < c) &&
-                    (c < 0xA0000 || 0xAFFFD < c) && (c < 0xB0000 || 0xBFFFD <c) && (c < 0xC0000 || 0xCFFFD < c) &&
-                    (c < 0xD0000 || 0xDFFFD < c) && (c < 0xE1000 || 0xEFFFD <c) &&
-                    //
-                    // NOT xri-sub.delims
-                    //
-                    c != '&' && c != ';' && c != ',' && c != '\'' && // xri-sub-delims
-                    //
-                    // NOT colon
-                    //
-                    c != ':'
-                ){
+                } else if(!XRISegment.isPChar(c)) { 
                     // 
                     // NOT xri-pchar
                     // 
@@ -952,7 +975,7 @@ public final class XRI_2Marshaller
      * 
      * @return <code>true</code> if the segments match
      */
-    private static boolean isLike(
+    private static boolean segmentMatchesPattern(
         Segment pathSegment,
         Segment patternSegment
     ){
@@ -979,6 +1002,26 @@ public final class XRI_2Marshaller
     }
     
     /**
+     * Determines whether to segments match
+     * 
+     * @param candidate
+     * @param pattern
+     * 
+     * @return <code>true</code> if the segments match
+     */
+    static boolean segmentMatchesPattern(
+        String candidate,
+        String pattern
+    ){
+    	Segment candidateSegment = new Segment(false, true, candidate);
+    	Segment patternSegment = new Segment(false, true, pattern);
+    	return 
+    		candidateSegment.isValid() &&
+    		patternSegment.isValid() &&
+    		segmentMatchesPattern(candidateSegment, patternSegment);
+    }
+    
+    /**
      * Determines whether the path corresponds to the pattern.<ul>
      * <li><code>($.)</code> matches any sub-segment
      * <li><code>($.*&lsaquo;prefix&rsaquo;)</code> matches a re-assignable sub-segment with the given prefix
@@ -992,7 +1035,7 @@ public final class XRI_2Marshaller
      * 
      * @return <code>true</code> if this path matches the pattern
      */
-    static boolean isLike(
+    static boolean pathMatchesPattern(
         String path,
         String pattern
     ){
@@ -1006,7 +1049,7 @@ public final class XRI_2Marshaller
             if("($...)".equals(patternSegment.toString())) {
                 return true;
             }
-            if(i == limit || !isLike(pathSegments.get(i++), patternSegment)) {
+            if(i == limit || !segmentMatchesPattern(pathSegments.get(i++), patternSegment)) {
                 return false;
             }
         }

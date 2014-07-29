@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2013, OMEX AG, Switzerland
+ * Copyright (c) 2004-2014, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without 
@@ -116,40 +116,8 @@
 			<param name="file.name" value="prototype.js"/>
 		</antcall>
 		<antcall target="-compress-and-append-">
-			<param name="in.dir.name" value="${basedir}/src/js/us/scriptaculo"/>
-			<param name="file.name" value="scriptaculous.js"/>
-		</antcall>
-		<antcall target="-compress-and-append-">
-			<param name="in.dir.name" value="${basedir}/src/js/us/scriptaculo"/>
-			<param name="file.name" value="builder.js"/>
-		</antcall>
-		<antcall target="-compress-and-append-">
-			<param name="in.dir.name" value="${basedir}/src/js/us/scriptaculo"/>
-			<param name="file.name" value="effects.js"/>
-		</antcall>
-		<antcall target="-compress-and-append-">
-			<param name="in.dir.name" value="${basedir}/src/js/us/scriptaculo"/>
-			<param name="file.name" value="controls.js"/>
-		</antcall>
-		<antcall target="-compress-and-append-">
-			<param name="in.dir.name" value="${basedir}/src/js/us/scriptaculo"/>
-			<param name="file.name" value="dragdrop.js"/>
-		</antcall>
-		<antcall target="-compress-and-append-">
-			<param name="in.dir.name" value="${basedir}/src/js/us/scriptaculo"/>
-			<param name="file.name" value="slider.js"/>
-		</antcall>
-		<antcall target="-compress-and-append-">
 			<param name="in.dir.name" value="${basedir}/src/js/org/openmdx/portal"/>
 			<param name="file.name" value="ssf.js"/>
-		</antcall>
-		<antcall target="-compress-and-append-">
-			<param name="in.dir.name" value="${basedir}/src/js/com/yahoo/yui"/>
-			<param name="file.name" value="utilities.js"/>
-		</antcall>
-		<antcall target="-compress-and-append-">
-			<param name="in.dir.name" value="${basedir}/src/js/com/yahoo/yui"/>
-			<param name="file.name" value="container.js"/>
 		</antcall>
 		<antcall target="-compress-and-append-">
 			<param name="in.dir.name" value="${basedir}/src/js/com/dynarch/calendar"/>
@@ -158,10 +126,6 @@
 		<antcall target="-compress-and-append-">
 			<param name="in.dir.name" value="${basedir}/src/js/com/dynarch/calendar"/>
 			<param name="file.name" value="calendar-setup.js"/>
-		</antcall>
-		<antcall target="-compress-and-append-">
-			<param name="in.dir.name" value="${basedir}/src/js/org/openmdx/portal"/>
-			<param name="file.name" value="findobject.js"/>
 		</antcall>
 		<antcall target="-compress-and-append-">
 			<param name="in.dir.name" value="${basedir}/src/js/org/openmdx/portal"/>
@@ -180,8 +144,6 @@
 			<param name="file.name" value="wiky.math.js"/>
 		</antcall>
 		<copy file="${build.dir}/src/js/portal-all.js" todir="src/war/openmdx-inspector.war/javascript"/>
-		<copy file="${build.dir}/src/js/findobject.js" todir="src/war/openmdx-inspector.war/javascript"/>
-		<copy file="${build.dir}/src/js/guicontrol.js" todir="src/war/openmdx-inspector.war/javascript"/>		
 	</target>
 	
 	<!-- ******************************************************************* -->
@@ -209,13 +171,11 @@
 			<zipfileset dir="src/js/com/dynarch/calendar/lang" prefix="javascript/calendar/lang" />
 			<zipfileset dir="src/js/org/prototypejs" prefix="javascript" />
 			<zipfileset dir="src/js/com/yahoo/yui/assets" prefix="javascript/yui/build/assets" />
+			<zipfileset dir="src/js/com/bootstrap" prefix="javascript/bootstrap" />
+			<zipfileset dir="src/js/com/jquery" prefix="javascript/jquery" />
 			<zipfileset dir="src/js/org/openmdx/portal" prefix="javascript">
-				<include name="iehover-fix.js"/>
 				<include name="ssf.js"/>
-				<include name="chart.js"/>
-				<include name="diagram.js"/>
-				<include name="diagram_dom.js"/>
-				<include name="diagram_nav.js"/>
+				<include name="guicontrol.js"/>
 			</zipfileset>
 		</openmdx:archive>
 	</target>
@@ -248,7 +208,7 @@
 				<include name="RELEASE-NOTES"/>
 				<include name="project.properties"/>
 				<include name=".cvsignore"/>
-				<include name="*.checkstyle"/>				
+				<include name="*.checkstyle"/>
 				<include name="etc/**"/>
 			</openmdx:archivefileset>
 			<openmdx:archivefileset 
@@ -260,7 +220,7 @@
 				<include name="planetj/${build.target.platform}/compfilter/**"/>
 				<include name="codehaus/${build.target.platform}/groovy/**"/>
 				<include name="tuckey/${build.target.platform}/filters/**"/>
-				<include name="eclipse/${build.target.platform}/${base.dir.name}/**"/>				
+				<include name="eclipse/${build.target.platform}/${base.dir.name}/**"/>
 			</openmdx:archivefileset>
 			<openmdx:archivefileset 
 				dir="${project.home}/eclipse" 
@@ -274,7 +234,7 @@
 			>
 				<include name=".classpath"/>
 				<include name=".project"/>
-			</openmdx:archivefileset>			
+			</openmdx:archivefileset>
 			<openmdx:archivefilterchain>
 				<patternset>
 					<include name="**/.project"/>

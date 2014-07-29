@@ -1,14 +1,14 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Description: ObjectTitleControl
+ * Description: EditObjectTitleControl
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
  * ====================================================================
  *
  * This software is published under the BSD license
  * as listed below.
  * 
- * Copyright (c) 20042007, OMEX AG, Switzerland
+ * Copyright (c) 2004-2014, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without 
@@ -57,16 +57,22 @@
 package org.openmdx.portal.servlet.control;
 
 import java.io.Serializable;
+import java.util.Collections;
+import java.util.List;
 
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.portal.servlet.ViewPort;
-import org.openmdx.portal.servlet.view.ObjectView;
+import org.openmdx.portal.servlet.component.ObjectView;
 
-public class EditObjectTitleControl
-    extends Control
-    implements Serializable {
+public class EditObjectTitleControl extends Control implements Serializable {
 
-    //-------------------------------------------------------------------------
+    /**
+     * Constructor.
+     * 
+     * @param id
+     * @param locale
+     * @param localeAsIndex
+     */
     public EditObjectTitleControl(
         String id,
         String locale,
@@ -79,7 +85,9 @@ public class EditObjectTitleControl
         );
     }
     
-    //---------------------------------------------------------------------------------
+    /* (non-Javadoc)
+     * @see org.openmdx.portal.servlet.control.Control#paint(org.openmdx.portal.servlet.ViewPort, java.lang.String, boolean)
+     */
     @Override
     public void paint(
         ViewPort p,
@@ -90,16 +98,26 @@ public class EditObjectTitleControl
         p.write("<div id=\"etitle\">");
         if(view.getObjectReference().getObject() instanceof org.openmdx.base.jmi1.Segment) {
             p.write("  ", view.getObjectReference().getTitle());            
-        }
-        else {
+        } else {
             p.write("  ", view.getObjectReference().getTitle(), " - ", view.getObjectReference().getLabel());            
         }
         p.write("</div> <!-- etitle -->");
     }
     
+	/**
+	 * @param type
+	 * @return
+	 */
+	@Override
+	public <T extends Control> List<T> getChildren(
+		Class<T> type
+	) {
+		return Collections.emptyList();
+	}
+
     //---------------------------------------------------------------------------------
     // Members
     //---------------------------------------------------------------------------------
     private static final long serialVersionUID = 4455336391780863135L;
-    
+
 }

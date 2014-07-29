@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2013, OMEX AG, Switzerland
+ * Copyright (c) 2004-2014, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -229,7 +229,7 @@ public abstract class AbstractDataObject_1
 		    description, // recordShortDescription
 		    TO_STRING_KEYES, // keys, 
 		    new Object[]{
-		        objectId,
+		        objectId == null ? null : objectId.toXRI(),
 		        objectClass,
 		        ReducedJDOHelper.getObjectState(source),
 		        defaultFetchGroupToString(source)

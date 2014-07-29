@@ -150,7 +150,7 @@ public abstract class AbstractMapper_1 implements Mapper_1_0 {
         zip,
         os,
         element,
-        element == null ? "" : (String)element.objGetValue("name"),
+        element == null ? "" : (String)element.getName(),
         suffix
       );
     }
@@ -167,7 +167,7 @@ public abstract class AbstractMapper_1 implements Mapper_1_0 {
         zip,
         os,
         element,
-        (String)element.objGetValue("name"),
+        (String)element.getName(),
         suffix,
         dereferenceType, 
         this.packageSuffix
@@ -215,7 +215,7 @@ public abstract class AbstractMapper_1 implements Mapper_1_0 {
         String pattern = wildcard 
           ? qualifiedPackageName.substring(0, qualifiedPackageName.indexOf("%"))
           : qualifiedPackageName;
-        String qualifiedName = (String)modelElement.objGetValue("qualifiedName");
+        String qualifiedName = (String)modelElement.getQualifiedName();
         if(
           (!wildcard && qualifiedName.equals(qualifiedPackageName)) ||
           (wildcard && qualifiedName.startsWith(pattern))

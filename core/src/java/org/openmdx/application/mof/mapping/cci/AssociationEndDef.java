@@ -67,18 +67,18 @@ public class AssociationEndDef extends ElementDef {
         Model_1_0 model
     ) throws ServiceException {
         super( 
-            (String)associationEndDef.objGetValue("name"),
-            (String)associationEndDef.objGetValue("qualifiedName"),
+            (String)associationEndDef.getName(),
+            (String)associationEndDef.getQualifiedName(),
             (String)associationEndDef.objGetValue("annotation"),
             new HashSet<Object>(associationEndDef.objGetList("stereotype"))
         );      
         this.associationEndDef = associationEndDef;        
         this.model = model;
-        this.aggregation = (String)associationEndDef.objGetValue("aggregation");
+        this.aggregation = (String)associationEndDef.getAggregation();
         this.navigable = ((Boolean)associationEndDef.objGetValue("isNavigable")).booleanValue();
-        this.multiplicity = (String)associationEndDef.objGetValue("multiplicity");
-        this.type = this.getQualifiedTypeName(associationEndDef.objGetValue("type"));
-        this.qualifierType = this.getQualifiedTypeName(associationEndDef.objGetValue("qualifierType"));
+        this.multiplicity = (String)associationEndDef.getMultiplicity();
+        this.type = this.getQualifiedTypeName(associationEndDef.getType());
+        this.qualifierType = this.getQualifiedTypeName(associationEndDef.getQualifierType());
         this.qualifierName = (String)associationEndDef.objGetValue("qualifierName");
     }
 
@@ -87,7 +87,7 @@ public class AssociationEndDef extends ElementDef {
     ) throws ServiceException{
         return type == null ? 
             null : 
-            (String)this.model.getElement(type).objGetValue("qualifiedName");
+            (String)this.model.getElement(type).getQualifiedName();
     }
 
     private final ModelElement_1_0 associationEndDef;    
@@ -151,7 +151,7 @@ public class AssociationEndDef extends ElementDef {
             Model_1_0 model = this.associationEndDef.getModel();
             for(ModelElement_1_0 element : model.getContent()) {
                 if(model.isReferenceType(element)) {
-                    if(element.objGetValue("referencedEnd").equals(this.associationEndDef.jdoGetObjectId())) {
+                    if(element.getReferencedEnd().equals(this.associationEndDef.jdoGetObjectId())) {
                         this.referenceDef = new ReferenceDef(
                             element,
                             model

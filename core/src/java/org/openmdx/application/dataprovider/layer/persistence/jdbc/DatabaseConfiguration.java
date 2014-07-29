@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2005-2013, OMEX AG, Switzerland
+ * Copyright (c) 2005-2014, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -532,7 +532,7 @@ public class DatabaseConfiguration {
             List<String> rid = equalRid == null ? likeRid : equalRid; 
             return new Path(
             	rid.toArray(new String[rid.size()])
-            ).toString();
+            ).toClassicRepresentation();
         } else {
             return null;
         }
@@ -558,7 +558,7 @@ public class DatabaseConfiguration {
                 target.add("%");
             }
         }
-        return new Path(target.toArray(new String[target.size()])).toString();
+        return new Path(target.toArray(new String[target.size()])).toClassicRepresentation();
     }     
 
     //---------------------------------------------------------------------------

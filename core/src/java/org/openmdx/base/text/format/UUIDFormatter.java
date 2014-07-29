@@ -103,7 +103,7 @@ public class UUIDFormatter {
     public String toString()
     {
         if(this.uuid == null) {
-            return null;
+            return "";
         }
         boolean timeBased = this.uuid.version() == 1;
         return Records.getRecordFactory().asMappedRecord(

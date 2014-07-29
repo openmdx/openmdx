@@ -134,7 +134,7 @@ public class XMI1Parser
   //---------------------------------------------------------------------------
   public Locator getLocator(
   ) {
-    return this.locator;
+    return null;
   }
 
   //---------------------------------------------------------------------------
@@ -1124,8 +1124,6 @@ public class XMI1Parser
     }
   }
 
-  //---------------------------------------------------------------------------
-  private Locator locator = null;
   private List scope = null;
   private Stack classStack = null;
   private Stack referenceStack = null;

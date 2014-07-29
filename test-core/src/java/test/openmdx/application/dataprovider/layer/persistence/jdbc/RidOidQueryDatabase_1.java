@@ -1,11 +1,8 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: $
+ * Project:     openMDX, http://www.openmdx.org/
  * Description: RidOidQueryDatabase_1 
- * Revision:    $Revision: $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -48,7 +45,6 @@
  * This product includes software developed by other organizations as
  * listed in the NOTICE file.
  */
-
 package test.openmdx.application.dataprovider.layer.persistence.jdbc;
 
 import java.sql.PreparedStatement;

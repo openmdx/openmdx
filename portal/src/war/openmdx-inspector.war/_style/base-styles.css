@@ -1,0 +1,1808 @@
+/**
+ * ====================================================================
+ * Project:     openMDX/Portal, http://www.openmdx.org/
+ * Description: Base styles
+ * Owner:       OMEX AG, Switzerland, http://www.omex.ch
+ * License:     This software is published under the BSD license.
+ *
+ * ====================================================================
+ */
+
+/**
+ * Bootstrap styles
+ *
+ */
+.table {
+  margin-bottom: 0px;
+  border-collapse: separate;
+  border-spacing: 0 2px;
+}
+.table thead th {
+  background-color: #EEEEEE;
+}
+.table tr td:first-child,
+.table tr th:first-child {
+  border-top-left-radius: 6px;
+  border-bottom-left-radius: 6px;
+}
+.table tr td:last-child,
+.table tr th:last-child {
+  border-top-right-radius: 6px;
+  border-bottom-right-radius: 6px;
+}
+.table > tbody > tr {
+    page-break-inside:auto;
+}
+.table > tbody > tr > td {
+    border-bottom: 1px solid #DDDDDD;
+    border-top: 0px;
+}
+.nav-tabs > li.active > a {
+  border-left-color:#E5E5E5;
+  border-top-color:#E5E5E5;
+  border-right-color:#E5E5E5;
+  border-bottom-color:#FFFFFF;
+  background-color:#FFFFFF;
+}
+.nav-tabs > li > a {
+  border-color:#E5E5E5;
+  background-color:#F4F4F4;
+}
+.nav-pills > li.active > a {
+  background-color:#EEEEEE;
+}
+.nav-condensed > li > a {
+   padding-top: 6px; 
+   padding-bottom: 6px; 
+}
+@media print { 
+  .table-responsive {
+    overflow: visible;
+  }
+}
+/**
+ * Yui styles
+ * 
+ */
+.loading {
+  background-color:#FFFFFF;
+  position:relative;
+  background-image:url('../images/wait.gif');
+  background-position:5px 10px;
+  background-repeat:no-repeat;
+}
+.loading * {
+  visibility:hidden;
+}
+.udwait {
+  height:30px;
+}
+.wait {
+  position:relative;
+  background-image:url('../images/wait.gif');
+  background-position:10px 5px;
+  background-repeat:no-repeat;
+}
+.loading .gridTable, .loading .gridTableFull,
+.loading .gridTableHeader td, .loading .gridTableHeaderFull td, .loading .gridTableHeaderFullEdit td,
+.loading .gridTableRow td, .loading .gridTableRowFull td, .loading .gridTableRowFullEdit td,
+.loading .filterTable, .loading .lookupTable,
+.loading .gridNavigation,
+.loading {
+  border:0px none #FFFFFF;
+}
+
+/**
+ * Yui-ext styles
+ * 
+ */
+.loading-indicator{
+   font-size:9pt;
+   background-image: url('../images/wait.gif');
+   background-repeat: no-repeat;
+   background-position: left;
+   padding-left:20px;
+   margin-top:5px;
+   display:block;
+   height:18px;
+}
+/**
+ * Portal styles
+ */
+html,
+body {
+  margin:0;
+  padding:0;
+  height:100%;
+  font-family:sans-serif;
+}
+html>body #wrap {
+  height:100%;
+}
+.contentHeaderYes {
+}
+.contentHeaderNo {
+}
+#header {
+  width:100%;
+  background-color:white;
+}
+html>body #header {
+  z-index:9999; /* Prevent certain problems with form controls */
+}
+html>body #eheader {
+  width:100%;
+  position:fixed;
+}
+html>body #econtent {
+  padding:9em 0.5em 0em 0.5em; /* 9em = height of #header and #footer + 1em, 1em = give the content some breathing space */
+}
+#paneLeft {
+  position:absolute;
+  margin-top: 0px;
+  left:0px;
+  height: 100%;
+  overflow: hidden;
+  width: 200px;
+  border-right: 1px #E4E4E4 solid;
+  background-color:#F8F8F8;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  border-radius:4px;
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.05) inset;  
+}
+#Dashboard {
+    margin-top:9px;
+}
+.workspaceDashboard {
+  width:100%;
+  background-color: #F8F8F8;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  border-collapse: collapse;
+  border-radius: 5px;
+}
+.dashlet {
+	/* border-bottom:1px solid #DDDDDD; */
+}
+.dashletTitle {
+  font-weight:bold;
+  padding:2px;
+  background-color:#EEEEEE;
+  height:14px;
+  border-radius:5px;
+  border-collapse:collapse;
+  padding:4px;
+}
+#breadcrum a {
+  font-size:11pt;
+}
+#etitle {
+  padding:11px 0px 25px 7px;
+  background-image: url('../images/bc.png');
+  background-repeat: repeat-x;
+  background-position: left top;
+  background-color:#fff;
+  border-right: 1px solid #ccc;
+  border-left: 1px solid #ccc;
+  font-size:13pt;
+  font-weight: bold;
+}
+#hider {
+  margin:0;
+  padding:0;
+  left:-9999px;
+  width:0px;
+  height:0px;
+  overflow:hidden;
+}
+#rootPanel {
+  width:200px;
+}
+#rootPanel .bd {
+  height:auto;
+}
+.opDialog {
+  width:40em;
+  position:relative;
+  display:none;
+}
+.multiEditDialog {
+  width:31em;
+  position:relative;
+  display:none;
+}
+#OperationDialogHolder{
+  position: absolute;
+  background-color: #EEEEEE;
+  display: none;
+  left: 10%;
+  width: 80%;
+  margin: 10px;
+  padding-right: 10px;  
+  padding-left: 20px;  
+  z-index: 5000;
+  box-shadow: 8px 10px 10px rgba(0,0,0,0.5),inset 8px 10px 10px rgba(255,255,255,0.75);
+  -o-box-shadow: 8px 10px 10px rgba(0,0,0,0.5),inset 8px 10px 10px rgba(255,255,255,0.75);
+  -webkit-box-shadow: 8px 10px 10px rgba(0,0,0,0.5),inset 8px 10px 10px rgba(255,255,255,0.75);
+  -moz-box-shadow: 8px 10px 10px rgba(0,0,0,0.5),inset 8px 10px 10px rgba(255,255,255,0.75);   
+}
+.OperationDialogTitle {
+  text-align: left;
+  text-decoration: none;
+  padding: 4px;
+  color: white;
+  background-color: #555555;  
+}
+.OperationDialogFloat {
+	border:0px;
+	padding-left:5px;
+	padding-right:5px;
+	position:fixed;
+	z-index:1028;
+	top:100px;
+	background-color:#C2C2C2;
+}
+.OperationMenuFloat {
+	position:fixed;
+	z-index:1029;
+	top:50px;
+	background-color:#C2C2C2;
+}
+#OperationDialogEmbedder{
+  float: right;
+  z-index: 5001;
+  cursor: pointer;
+}
+#OperationDialog{
+  width: 100%;
+  clear: both;
+}
+#OperationDialogResponse{
+  display: none;
+}
+td {
+  padding:0;
+  margin:0;
+  border:0;
+}
+a {
+  text-decoration: none;
+}
+a:hover {
+  color: black;
+  background-color: #DDDDDD;
+  text-decoration: none;
+}
+@media print {
+    a:link:after,
+    a:visited:after {
+        content: "" !important;
+    }
+}
+*, * td, * ul {
+  text-decoration: none;
+  line-height: 1.3em;
+}
+.smallFont {
+  font-size:7pt;
+}
+img {
+  border:0;
+}
+.hilite {
+  background-color:#DDDDDD;
+}
+.abutton {
+  border:solid 1px #bbb;
+  padding:2px;
+}
+.abutton:hover{
+  color:#000000;
+  background-color:#fff;
+  border:solid 1px #ccc;
+}
+#head .abutton {
+  border:solid 1px #fff;
+}
+#head .abutton:hover{
+  color:#000000;
+  background-color:#fff;
+  border:solid 1px #ccc;
+}
+.wide{
+  width: 100%;
+}
+#inspIcon{
+  padding-top:5px;
+}
+#inspTitle{
+  padding-left: 5px;
+  width: 100%;
+  font-size:20px;
+}
+#inspClose{
+  border: 1px solid #CCCCCC;
+  font-size:20px;
+}
+#searchButton {
+  width:25px;
+  height:18px;
+  padding:0 8px 0 0;
+  margin:5px 14px 0 6px;
+  float:right;
+  cursor: pointer;
+  background-image: url('../images/searchImg.png');
+  background-repeat: no-repeat;
+  background-position: top right;
+}
+#searchButton:hover {
+  background-image: url('../images/searchImgSelected.png');
+}
+#searchBox {
+  float:right;
+  margin:1px 0 0 0;
+}
+#SearchInput {
+}
+#searchExpression {
+  margin:1px 0px 0px 0px;
+  height:18px;
+}
+#segmentLogo {
+  text-align:center;
+}
+#opMenu{
+  padding-top: 2px;
+  padding-bottom: 3px;
+  margin-left: -2px;
+  margin-top: 2px;
+  border-top: 1px solid #CCCCCC;
+  border-bottom: 1px solid #CCCCCC;
+}
+#inspector{
+  margin-top:0px;
+}
+#info {
+  width:100%;
+  padding:0;
+  margin:0;
+  border-collapse: collapse;
+  border-spacing:0;
+}
+#logoTable {
+  background:#CCCCCC;
+  border-top:3px solid #CCCCCC;
+  border-bottom:3px solid #CCCCCC;
+  padding:0px;
+}
+.logoTable {
+  background:#FFFFFF;
+  border-top:0px;
+  border-bottom:0px;
+  padding:0 9px 1px 9px;
+}
+.logoTableNH {
+  display:none;
+}
+#headerlayout {
+  width: 100%;
+}
+#headerCellLeft {
+  cursor:pointer;
+}
+#headerCellSpacerLeft {
+  padding-left: 4px;
+  background-color: white;
+}
+#headerCellMiddle {
+  width: 100%;
+  background-color: white;
+  padding-top: 2px;
+  padding-left: 0px;
+}
+#headerMiddleLayout {
+  border-collapse: collapse;
+  border-spacing: 2px;
+  width: 100%;
+}
+#headerMiddleLayout tr td {
+  border-left: 1px solid #CCCCCC;
+  border-right: 1px solid #CCCCCC;
+  padding: 2px 5px 1px 10px;
+  width:33%;
+}
+#headerMiddleLayout tr td span {
+  font-size:9pt;
+  padding-left: 3px;
+}
+#hm1 td, #hm2 td {
+  height:25px;
+  white-space:nowrap;
+}
+#hm1 ul {padding-bottom:2px;}
+#hm1 #nav li a {
+  font-size:9pt;
+  font-weight:normal;
+  margin-right:20px;
+}
+#hm2 #nav li a {
+  font-size:9pt;
+  font-weight:normal;
+  overflow:hidden;
+}
+#hm1 .abutton, #hm2 .abutton {
+  white-space:nowrap;
+}
+#headerCellRight {
+  padding-right: 0px;
+}
+#rootMenuAnchor {
+  padding:6px 1px 0px 1px;
+  cursor:pointer;
+}
+#menuFlyIn li ul {
+  margin-top: 0px;
+}
+#menuRoot {
+  display:block;
+  margin-top:10px;
+  margin-bottom:20px;
+}
+#nav-calendar{
+  margin-top:13px;
+}
+#timestamp{
+  font-size: 9px;
+  color: #888;
+  background: #fff;
+}
+#stickyNote{
+  width: 100%;
+  background-color:#F4FD48;
+  border:1px solid #CCCCCC;
+}
+.clicked{
+  border: solid 1px green;
+}
+#reloadIcon {
+  float:left;
+  padding:10px;
+  cursor:pointer;
+}
+#toggleViewPort {
+  float:right;height:20px;width:150px;
+}
+#alertBox {
+  text-align:right;
+  color:#888;
+  background-color:#F5F5F5;
+  width:36px;
+  margin: 7px 8px 0;  
+  padding-right:22px;
+  padding-top:0px;
+  float: right;
+  position:relative;
+  cursor: pointer;
+  background-image: url('../images/mail.gif');
+  background-repeat: no-repeat;
+  background-position: top right;
+}
+#alertBox:hover {
+  color:#000;
+  background-image: url('../images/mailSelected.gif');
+}
+#alertBox div {
+  padding-top:0px;
+}
+#printButton {
+  background-color:#F5F5F5;
+  width:16px;
+  margin:1px 8px 0px 8px;
+  padding-right:5px;
+  padding-top:10px;
+  float: right;
+  position:relative;
+  cursor: pointer;
+  background-image: url('../images/print.gif');
+  background-repeat: no-repeat;
+  background-position: left;
+}
+#printButton:hover {
+  background-image: url('../images/printSelected.gif');
+}
+#nextButton {
+  background-color:#F5F5F5;
+  width:16px;
+  margin:1px 8px 0px 8px;
+  padding-right:5px;
+  padding-top:10px;
+  float: right;
+  position:relative;
+  cursor: pointer;
+  background-image: url('../images/next.gif');
+  background-repeat: no-repeat;
+  background-position: left;
+}
+#prevButton {
+  background-color:#F5F5F5;
+  width:16px;
+  margin:1px 8px 0px 8px;
+  padding-right:5px;
+  padding-top:10px;
+  float: right;
+  position:relative;
+  cursor: pointer;
+  background-image: url('../images/previous.gif');
+  background-repeat: no-repeat;
+  background-position: left;
+}
+#headerShown {
+  background-color:#F5F5F5;
+  width:16px;
+  margin:1px 10px 0px 10px;
+  padding-right:5px;
+  padding-top:10px;
+  float: right;
+  position:relative;
+  cursor: pointer;
+  background-image: url('../images/headerShown.gif');
+  background-repeat: no-repeat;
+  background-position: left;
+}
+#headerShown:hover {
+  background-image: url('../images/headerHide.gif');
+}
+#headerHidden {
+  background-color:#F5F5F5;
+  width:16px;
+  margin:1px 8px 0px 8px;
+  padding-right:5px;
+  padding-top:10px;
+  float: right;
+  position:relative;
+  cursor: pointer;
+  background-image: url('../images/headerHidden.gif');
+  background-repeat: no-repeat;
+  background-position: left;
+}
+#headerHidden:hover {
+  background-image: url('../images/headerShow.gif');
+}
+#perspectiveSelector {
+  margin:0px 10px 0px 10px;
+  padding-top:5px;
+  color:#888;
+  background-color:#F5F5F5;
+  float: right;
+  cursor: pointer;
+}
+#perspectiveSelector #nav li {
+  margin:0px 0 0 0;
+  padding:1px 2px 4px 4px;
+}
+#closeButton {
+  background-color:#F5F5F5;
+  width:16px;
+  margin:0px 10px 0px 10px;
+  padding-top:12px;
+  float:right;
+  position:relative;
+  cursor: pointer;
+  background-image: url('../images/closeInsp.gif');
+  background-repeat: no-repeat;
+  background-position: left;
+}
+#closeButton:hover {
+  background-image: url('../images/closeInspSelected.gif');
+}
+.tab-content{
+  display:none;
+}
+.lookupSelector{
+	padding:5px 3px 2px 3px;
+	border-style:solid;
+	border-width:1px;
+}
+.browserHints {
+  border-collapse: collapse;
+  border-style: ridge;
+  border-width: 2px;
+}
+.browserHints td {
+  border-style: ridge;
+  border-width: 2px;
+  padding: 1px;
+  vertical-align: middle;
+  white-space: nowrap;
+  overflow: hidden;
+}
+.activeXHints {
+  border-collapse: collapse;
+  border-style: ridge;
+  border-width: 2px;
+}
+.activeXHints td {
+  border-style: ridge;
+  border-width: 2px;
+  padding: 1px;
+  vertical-align: top;
+  white-space: nowrap;
+  overflow: hidden;
+}
+.tablePanel {
+  border-collapse: collapse;
+  border-spacing: 0px;
+  padding: 0px;
+  margin: 0px;
+  width: 100%;
+  vertical-align: absbottom;
+ }
+.tablePanel td {
+  vertical-align: absbottom;
+  padding: 0px 4px 0px 2px;
+}
+.tableInfo {
+  border-collapse: collapse;
+  border-spacing: 0px;
+  padding: 0px;
+  width: 100%;
+ }
+.tablePanelTitle {
+  width: 100%;
+ }
+.tableLayout {
+  border-collapse: collapse;
+  border-spacing: 0px;
+  width: 100%;
+  vertical-align: top;
+ }
+.tableLayout td {
+  vertical-align: top;
+  padding: 0px 1px 0px 1px;
+}
+.tableError {
+  border:1px #ccc solid;
+  border-collapse: collapse;
+  border-spacing: 0px;
+  padding: 10px 0px 8px 0px;
+  width: 100%;
+ }
+.tableError td {
+   padding: 5px;
+}
+.cellErrorLeft {
+  font-weight: bold;
+  vertical-align: top;
+}
+.cellErrorRight {
+  vertical-align: top;
+  width:100%;
+}
+.tableLogin {
+  border-collapse: collapse;
+  vertical-align: middle;
+}
+.tableLogin td {
+  padding: 5px;
+  vertical-align: middle;
+}
+td.cellLogin {
+  border-style: solid;
+  border-width: 1px 1px 1px 1px;
+  height: 200px;
+  vertical-align: middle;
+  padding: 5px 50px 5px 50px;
+}
+a.error {
+  border-style: solid solid solid solid;
+  border-width: 1px 1px 1px 1px;
+  margin-top: 2px;
+  margin-left: 5px;
+  padding: 2px 0.5em 2px 0.5em;
+  font-weight: bold;
+  white-space: nowrap;
+}
+.cellHistory {
+  border-collapse: collapse;
+  vertical-align: top;
+  width: 178px;
+  white-space: nowrap;
+  overflow: hidden;
+}
+.cellHistory td {
+  padding-top: 0px;
+  padding-bottom: 1px;
+  font-size: 10px;
+}
+.cellHistory td a {
+  font-size: 10px;
+}
+.historyEntry {
+  width: 175px;
+  vertical-align: bottom;
+  white-space: nowrap;
+  overflow: hidden;
+  text-decoration: none;
+}
+.cellObject {
+  vertical-align: top;
+  line-height: 20px;
+}
+.cellObject p {
+  margin-left: 0px;
+  margin-top: 10px;
+}
+.attributeTitle {
+  width: 100%;
+  border: solid 1px;
+  line-height: 1.1em;
+  padding-left: 8px;
+  padding-right: 5px;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  margin-bottom: 5px;
+}
+.attributeTitle td {
+  vertical-align: middle;
+  font-weight: bold;
+}
+.attributeValue {
+  white-space: normal;
+  word-wrap: normal;
+  width: 100%;
+  vertical-align: middle;
+  overflow: visible;
+}
+.cellGrid {
+  line-height: 20px;
+  vertical-align: top;
+  margin-top: 10px;
+  padding: 5px 0px 0px 0px;
+}
+a.op {
+  border-width: 1px;
+  border-style: solid;
+  padding: 0px 2px 2px 0px;
+  white-space: nowrap;
+}
+a.ophover {
+  border-width: 1px;
+  border-style: solid;
+  padding: 0px 2px 2px 0px;
+  white-space: nowrap;
+}
+input.op {
+  border-width: 1px;
+  border-style: solid;
+  padding: 0px;
+  white-space: nowrap;
+}
+input.ophover {
+  border-width: 1px;
+  border-style: solid;
+  padding: 0px;
+  white-space: nowrap;
+  cursor: pointer;
+}
+a.new {
+  vertical-align: middle;
+  border-width: 1px;
+  border-style: solid;
+  padding: 0px 2px 2px 0px;
+  white-space: nowrap;
+}
+a.backButton {
+  text-decoration: none;
+  border-style: solid;
+  border-width: 1px;
+  padding: 0px 0px 1px 0px;
+  white-space: nowrap;
+  margin-right: 5px;
+  vertical-align: top;
+}
+a.backButton:hover {
+  text-decoration: none;
+}
+a.noIcon {
+  border-style: solid;
+  border-width: 1px 1px 1px 1px;
+  padding: 2px;
+  margin-left: 1px;
+  white-space: nowrap;
+}
+a.noIcon:hover {
+  cursor: pointer;
+}
+a.noIconhover {
+  border-style: solid;
+  border-width: 1px 1px 1px 1px;
+  padding: 2px;
+  margin-left: 1px;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.noIcon {
+  border-style: solid;
+  border-width: 1px 1px 1px 1px;
+  padding: 1px;
+  white-space: nowrap;
+}
+.noIcon:hover {
+  cursor: pointer;
+}
+.noIconhover {
+  border-style: solid;
+  border-width: 1px 1px 1px 1px;
+  padding: 1px;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.flatButton {
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+input.flatsubmit {
+  border-style: solid;
+  border-width: 1px;
+  padding: 0px;
+  white-space: nowrap;
+}
+input.flatsubmit:hover {
+  cursor: pointer;
+}
+input.flatsubmithover {
+  border-style: solid;
+  border-width: 1px;
+  padding: 0px;
+  white-space: nowrap;
+  cursor: pointer;
+}
+input.selflatsubmit {
+  border-style: solid;
+  border-width: 1px;
+  padding: 0px;
+  white-space: nowrap;
+}
+input.selflatsubmit:hover {
+  cursor: pointer;
+}
+input.selflatsubmithover {
+  border-style: solid;
+  border-width: 1px;
+  padding: 0px;
+  white-space: nowrap;
+  cursor: pointer;
+}
+input.classsubmit {
+  border-style: solid;
+  border-width: 0px;
+  padding-left: 3px;
+  padding-right: 1px;
+  padding-top: 0px;
+  padding-bottom: 0px;
+  margin-left: 0px;
+  margin-right: 2px;
+  font-size: 10px;
+  font-weight: bold;
+  text-align: left;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+input.classsubmit:hover {
+  cursor: pointer;
+}
+input.classsubmithover { /* IE :hover workaround */
+  border-style: solid;
+  border-width: 0px;
+  padding-left: 3px;
+  padding-right: 1px;
+  padding-top: 0px;
+  padding-bottom: 0px;
+  margin-left: 0px;
+  margin-right: 2px;
+  font-size: 10px;
+  font-weight: bold;
+  text-align: left;
+  vertical-align: middle;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.borderedimg {
+  border-style: solid;
+  border-color: transparent;
+  border-width: 1px;
+  white-space: nowrap;
+  margin-left: 1px;
+}
+.borderedimg:hover {
+  cursor: pointer;
+}
+.borderedimghover {
+  border-style: solid;
+  border-width: 1px;
+  white-space: nowrap;
+  margin-left: 1px;
+  cursor: pointer;
+}
+.buttonimg {
+  border-collapse: collapse;
+  border-style: solid;
+  border-width: 1px;
+  white-space: nowrap;
+  margin-left: 1px;
+  margin-right: -1px;
+  width: 12px;
+  font-size: 2px;
+  vertical-align: middle;
+}
+.buttonimg:hover {
+  cursor: pointer;
+}
+.buttonimghover {
+  border-collapse: collapse;
+  border-style: solid;
+  border-width: 1px;
+  white-space: nowrap;
+  margin-left: 1px;
+  margin-right: -1px;
+  width: 12px;
+  font-size: 2px;
+  vertical-align: middle;
+  cursor: pointer;
+}
+.filterHeader {
+  border-collapse: collapse;
+  overflow: visible;
+  margin-bottom: 1px;
+  width:100%;
+}
+.filterHeader tr td {
+  border: 0px none #FFFFFF;
+  white-space: nowrap;
+  vertical-align:middle;
+  padding-right:0px;
+  margin-right:0px;
+}
+.filterHeader input[type=checkbox] {
+  margin-top:1px;
+  padding-top:0px;
+  border: none none;
+  width: 12px;
+  height:12px;
+  vertical-align:top;
+}
+.filterCell {
+  width:90%;
+}
+.filterCellhover {
+  width:90%;
+  cursor: pointer;
+  margin-top: 0px;
+}
+.textfilter {
+  padding-left:3px;
+  font-weight:normal;
+  text-decoration:none;
+}
+.imgfilter {
+  border-style: solid;
+  border-width: 0px 1px 1px 0px;
+}
+.imgfilterhover { /* IE :hover workaround */
+  border-style: solid;
+  border-width: 0px 1px 1px 0px;
+  cursor: pointer;
+}
+.selimgfilter {
+  border-style: solid;
+  border-width: 1px 0px 0px 1px;
+}
+.selimgfilterhover { /* IE :hover workaround */
+  border-style: solid;
+  border-width: 1px 0px 0px 1px;
+  cursor: pointer;
+}
+.imgsubmit {
+  border-collapse: collapse;
+  border-style: solid;
+  border-width: 0px 1px 1px 0px;
+  white-space: nowrap;
+}
+input.imgsubmit:hover {
+  cursor: pointer;
+}
+input.imgsubmithover { /* IE :hover workaround */
+  border-collapse: collapse;
+  border-style: solid;
+  border-width: 0px 1px 1px 0px;
+  white-space: nowrap;
+  cursor: pointer;
+}
+input.selimgsubmit {
+  border-collapse: collapse;
+  border-style: solid;
+  border-width: 1px 0px 0px 1px;
+  white-space: nowrap;
+}
+input.selimgsubmit:hover {
+  cursor: pointer;
+}
+input.selimgsubmithover { /* IE :hover workaround */
+  border-collapse: collapse;
+  border-style: solid;
+  border-width: 1px 0px 0px 1px;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.panel {
+  border-style: solid;
+  border-width: 0px;
+  width: 99%;
+  padding-left: 2px;
+  padding-right: 2px;
+  padding-top: 4px;
+  padding-bottom: 0px;
+  margin-top: 0px;
+  margin-bottom: 6px;
+  line-height: normal;
+  overflow: hidden; /*required by Netscape/Mozilla*/
+}
+.opPanel {
+  border-style: solid;
+  border-width: 0px 1px 1px 1px;
+  width: 99%;
+  padding-left: 2px;
+  padding-right: 2px;
+  margin-left:1px;
+  margin-right:5px;
+  overflow: visible; /*required by Netscape/Mozilla*/
+  position: absolute;
+  visibility: hidden;
+  height:0px;
+  z-index: 20;
+}
+.panelResult {
+  width: 99%;
+  padding-left: 4px;
+  padding-right: 4px;
+  padding-top: 10px;
+  padding-bottom: 8px;
+  margin-top: 5px;
+  margin-bottom: 2px;
+  overflow: hidden; /*required by Netscape/Mozilla*/
+  position: relative;
+  z-index: 20;
+  color:black;
+}
+.panelJSWarning {
+  border-style: solid;
+  border-width: 3px;
+  width: 100%;
+  font-size: medium;
+  font-weight: bold;
+  margin-bottom: 10px;
+  padding: 10px;
+  overflow: hidden; /*required by Netscape/Mozilla*/
+  position: relative;
+  z-index: 20;
+}
+.panelCookieWarning {
+  border-style: solid;
+  border-width: 3px;
+  width: 100%;
+  font-size: medium;
+  font-weight: bold;
+  margin-bottom: 10px;
+  padding: 10px;
+  overflow: hidden; /*required by Netscape/Mozilla*/
+  position: relative;
+  z-index: 20;
+}
+.opButton {
+  padding: 5px 1px 2px 0px;
+  margin-bottom: -2px;
+}
+.filterPanel {
+  border-style: none;
+  border-width: 0px;
+  padding-left: 0px;
+  padding-right: 0px;
+  padding-top: 5px;
+  padding-bottom: 0px;
+  position: relative;
+  overflow: hidden; /*required by Netscape/Mozilla*/
+  z-index: 20;
+}
+.gridBlock {
+  margin-top:-5px;
+  line-height: normal;
+  width: 100%;
+  border-style: solid;
+  border-width: 1px;
+  padding-left: 8px;
+  padding-right: 0px;
+  padding-top: 0px;
+  padding-bottom: 5px;
+  overflow: auto;
+}
+.gridBlock td {
+  padding-bottom: 5px;
+}
+.gridTableFull {
+  table-layout: auto;
+  white-space: normal;
+}
+.gridTableFull {
+  text-align: left;
+  border-collapse: collapse;
+  border-top-width: 1px;
+  border-top-style: none;
+  width: 100%;
+  vertical-align: baseline;
+  margin-top: 0px;
+  margin-bottom: 5px;
+}
+.gridTableHeaderFull td {
+  white-space: normal;
+}
+.gridTableHeaderFull {
+  text-align: left;
+  background-image: url('../images/ghbg.png');
+  background-repeat: repeat-x;
+  background-position: left bottom;
+}
+.gridTableHeaderFull td {
+  vertical-align: middle;
+  border-style: none none none none;
+  border-width: 1px;
+  padding:3px 5px 0px 0px;
+}
+.gridTableHeaderFull div {
+  border-width: 0px;
+}
+.gridTableRowFull, .gridTableRowFull td {
+  white-space: normal;
+  overflow: visible;
+}
+.gridTableRowFull td {
+  vertical-align: middle;
+  border-style: solid;
+  border-width: 0px 0px 1px 0px;
+  padding-left: 4px;
+  padding-top: 3px;
+  padding-right: 12px;
+  padding-bottom: 3px;
+}
+.gridAuto {
+  width: 180px;
+}
+.objInfo {
+  margin-top: 2px;
+  margin-bottom: 2px;
+}
+.gridColTypeCheck, td.gridColTypeCheck {
+  white-space: nowrap;
+  overflow: visible;
+  width: 20px;
+  padding-left: 1px;
+  padding-right: 1px;
+}
+.gridColTypeIcon, td.gridColTypeIcon {
+  width: 17px;
+  padding-left: 0px;
+  padding-right: 0px;
+}
+#gm {
+  border-collapse: collapse;
+  border-spacing: 0px;
+}
+#gm td {
+  margin:0;
+  padding:0;
+  border:0;
+}
+.opFieldGroupName {
+  text-align: left;
+  text-decoration: none;
+  font-size: 9px;
+}
+.opFieldGroup {
+  border-collapse: separate;
+  width: 100%;
+  border-style: solid;
+  border-width: 1px;
+  margin-bottom: 2px;
+  empty-cells: hide;
+}
+.fieldGroupName {
+  text-align: left;
+  text-decoration: none;
+  font-size: 9px;
+  border-style: solid;
+  border-width: 1px 0px 0px 0px;
+}
+.fieldGroup {
+  border-spacing: 1px;
+  width: 99%;
+  border-style: solid;
+  border-width: 0px;
+  empty-cells: hide;
+}
+.fieldGroup td {
+  padding: 0px 4px 0px 1px;
+}
+.fieldLabel {
+  text-align: left;
+  text-decoration: none;
+  white-space: nowrap;
+  vertical-align: top;
+  width: 12em;
+}
+td.fieldLabel {
+}
+.nw {
+  white-space: nowrap;
+}
+.field {
+  margin:0;
+  padding:0;
+  white-space: nowrap;
+  width: 100%;
+  vertical-align: top;
+  text-overflow: ellipsis;
+}
+.fieldSpanned {
+  white-space: nowrap;
+  width: 100%;
+  vertical-align: middle;
+  overflow: auto;
+  text-overflow: ellipsis;
+}
+.fieldSpannedFull {
+  padding-left:1px;
+  white-space: normal;
+  width: 100%;
+  font-weight: normal;
+  vertical-align: middle;
+  overflow: visible;
+}
+textarea {
+  border-style: solid;
+  border-width: 1px;
+  padding: 0px;
+  margin: 0px -1px 0px 0px;
+  font-weight: bold;
+  width: 100%;
+  word-wrap: normal;
+  overflow: auto;
+}
+textarea.stringLocked {
+  width: 100%;
+  margin: 0px -1px 0px 0px;
+  white-space: nowrap;
+  word-wrap: normal;
+  overflow: auto;
+}
+textarea.multiString {
+  width: 100%;
+  margin: 0px -1px 0px 0px;
+  word-wrap: normal;
+  overflow: auto;
+}
+textarea.multiStringLocked {
+  width: 100%;
+  margin: 0px -1px 0px 0px;
+  word-wrap: normal;
+  overflow: auto;
+}
+.valuePicture {
+  text-decoration: none;
+  vertical-align: middle;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.valueMulti {
+  text-decoration: none;
+  vertical-align: middle;
+  overflow: auto;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.valueString {
+  text-decoration: none;
+  vertical-align: middle;
+  overflow: auto;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.valueL, .valueLG {
+  border-style: solid;
+  padding: 0px 1px 0px 1px;
+  text-align: left;
+  text-decoration: none;
+  vertical-align: top;
+}
+.valueL {
+  border-width: 1px;
+  margin-right: -1px;
+  font-weight: bold;
+}
+.valueLG {
+  border-width: 0px;
+  margin-right: 0px;
+  overflow: visible;
+}
+.valueLLocked {
+  border-style: solid;
+  border-width: 1px;
+  padding: 0px 1px 0px 1px;
+  margin-right: -1px;
+  text-align: left;
+  text-decoration: none;
+  font-weight: bold;
+  vertical-align: middle;
+  width: 100%;
+  overflow: hidden;
+  white-space: nowrap;
+}
+.valueR, .valueRG {
+  border-style: solid;
+  padding: 0px 1px 0px 1px;
+  text-align: right;
+  text-decoration: none;
+  vertical-align: middle;
+  overflow: hidden;
+}
+.valueR {
+  border-width: 1px;
+  margin-right: -1px;
+  font-weight: bold;
+}
+.valueRG {
+  border-width: 0px;
+  margin-right: 0px;
+}
+.valueRLocked {
+  border-style: solid;
+  border-width: 1px;
+  padding: 0px 1px 0px 1px;
+  margin-right: -1px;
+  text-align: right;
+  text-decoration: none;
+  font-weight: bold;
+  vertical-align: middle;
+  width: 100%;
+  overflow: hidden;
+}
+input.valueL, input.valueR {
+  width: 100%;
+  padding: 1px 0px 1px 0px;
+  font-size: 1em; /* IE bug - see http://www.aplus.co.yu/css/tip-input-sizing-in-ie/ */
+}
+input.valueLG, input.valueRG {
+  padding: 0px 1px 0px 0px;
+  margin: 0px;
+  vertical-align: top;
+  font-size: 1em; /* IE bug - see http://www.aplus.co.yu/css/tip-input-sizing-in-ie/ */
+}
+select.valueL, select.valueR {
+  width: 100%;
+  padding: 0px;
+  margin-bottom: 1px;
+}
+.valueEmpty {
+}
+.addon {
+  vertical-align: baseline;
+  padding-left: 4px;
+  padding-right: 2px;
+  padding-top: 4px;
+  text-align: left;
+  text-decoration: none;
+  width: 40px;
+  white-space: nowrap;
+  overflow: visible;
+}
+.gap {
+  vertical-align: baseline;
+  padding-left: 4px;
+  padding-right: 2px;
+  padding-top: 4px;
+  text-align: left;
+  text-decoration: none;
+  width: 18px;
+  white-space: nowrap;
+  overflow: visible;
+}
+form {
+  margin-top: 0px;
+  margin-bottom: 0px;
+  margin-left: 0px;
+  padding-left: 2px;
+  padding-right: 2px;
+  padding-top: 2px;
+  padding-bottom: 0px;
+}
+form #inspector {
+  background-color:#F4F4F4;
+}
+#menuOp {
+  padding: 2px 0 0 0;
+  white-space:nowrap;
+  background-color:white;
+  margin:2px 5px 0 0px;
+}
+.menuOpPanelActions {
+}
+.menuOpPanel {
+  margin:0;
+  border-right: solid 1px #ccc;
+  border-left:  solid 1px #ccc;
+  padding:0 2px 0 2px;
+}
+.menuOpPanelMenus {
+  padding-bottom: 3px;
+}
+.menuOpPanelInfo{
+  padding-right:5px;
+  text-align:right;
+  font-size: 9px;
+  font-weight: bold;
+  color:#888888;
+  white-space:nowrap;
+}
+.filterTable {
+  width: 100%;
+  background-color: #FFFFFF;
+}
+.filterTable tr td {
+  white-space: nowrap;
+}
+.filterInput {
+  width: 239px;
+}
+.filterAttr label {
+  font-weight: normal;
+  position: absolute;
+  margin: 10px 0 0 7px;
+}
+.filterAttr input {
+  box-sizing: border-box;
+  margin: 2px 0 0 0;
+  padding: 5px 5px 5px 150px;
+  font-size: 16px;
+  font-weight: normal;
+}
+.filterAttr .abutton:hover {
+  cursor: pointer;
+}
+.filterButtons {
+  z-index:1200;
+  font-size:90%;
+}
+.filterGap {
+  float:left;
+  width:35px;
+}
+.lookupTable {
+  position:relative;
+  width: 100%;
+  border-top: 1px solid #CCCCCC;
+}
+.lookupTable tr td {
+  white-space: nowrap;
+}
+.lookupInput {
+  width: 153px;
+}
+.gridNavigation {
+  width: 100%;
+  text-align: left;
+  background-color: #FFFFFF;
+  border-bottom: 1px solid #CCCCCC;
+}
+.popUp {
+  border-style: ridge;
+  border-width: 2px;
+  padding: 5px;
+  overflow: visible; /*required by Netscape/Mozilla*/
+  position: absolute;
+}
+.popUpFrame {
+  border-style: none;
+  border-width: 0px;
+  overflow: auto; /*required by Netscape/Mozilla*/
+  position: absolute;
+}
+.popUpTable {
+  width: 390px;
+  border-collapse: collapse;
+}
+.fieldindex {
+  width: 30px;
+}
+.fieldselection {
+  width: 50px;
+}
+.fieldvalue {
+  width: 300px;
+}
+.popUpButton, .popUpButtonhover {
+  cursor: pointer;
+}
+.qualifierPanel {
+  border-style: solid solid solid solid;
+  border-width: 1px;
+  width: 100%;
+  padding-left: 2px;
+  padding-right: 2px;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  overflow: hidden; /*required by Netscape/Mozilla*/
+  position: relative;
+  z-index: 20;
+}
+.qualifierText {
+  text-align: left;
+  text-decoration: none;
+  font-size: smaller;
+}
+.qualifier {
+  border-style: solid;
+  border-width: 1px;
+  border-color:#ccc;
+  padding: 0px 1px 0px 1px;
+  text-align: left;
+  text-decoration: none;
+  font-weight: bold;
+  vertical-align: middle;
+  overflow: visible;
+  white-space: nowrap;
+  width: 50%;
+  background:#eee;
+}
+.dragable:hover {
+  cursor: pointer;
+}
+.divImgPopUp {
+  border-style: ridge;
+  border-width: 1px;
+  padding: 0px;
+  margin: 0px;
+  overflow: visible; /*required by Netscape/Mozilla*/
+  position: absolute;
+  z-index: 200;
+}
+.popUpImg {
+  border-style: none;
+  border-width: 0px;
+  padding: 0px;
+  margin: 0px;
+}
+.picture {
+  border: none black 0px;
+  overflow: hidden;
+  height: 100%;
+}
+.hh1 {
+  font-weight: bold;
+  margin-top: 20px;
+  margin-bottom: 12px;
+  padding: 0px;
+}
+.hh2 {
+  font-weight: bold;
+  margin-top: 20px;
+  margin-bottom: 2px;
+  padding: 0px;
+}
+.normal {
+  margin-top: 2px;
+  margin-bottom: 2px;
+  padding: 0px;
+}
+.gridMenuIndicator:hover {
+  cursor: pointer;
+  background-image: url('../images/menu_down.gif');
+  background-repeat: no-repeat;
+  background-position: center center;
+  background-color:#ccc;
+}
+.gridSpacerTop {
+  width:100%;
+  margin-top:10px;
+}
+.gridSpacerBottom {
+  width:100%;
+  margin-top:20px;
+}
+.gridCloser {
+  vertical-align:top;
+}
+.imgCloser {
+  cursor:pointer;
+  margin-top: 6px;
+}
+.imgCloser:hover {
+  background-color:#EEEEEE;
+}
+.gridMenu #nav li {
+  padding-top:0px;
+  margin-top:1px;
+  padding-left:0px;
+  padding-right:0px;
+  margin-left:1px;
+}
+.gridMenu #nav li:hover, .gridMenu #nav li.sfhover {
+	z-index: 100000;
+}
+.gridMenu #nav li ul {
+  margin-top:0px;
+  margin-left:-1px;
+}
+.gridMenu #nav li li {
+  padding-top:1px;
+  padding-right:4px;
+  padding-bottom:1px;
+  padding-left:0px;
+  margin-top: 1px;
+}
+.gridMenu #nav ul li ul {
+  margin-top:0px;
+  margin-left:50px;
+}
+.autocompleterMenu {
+  position:absolute;
+}
+.autocompleterMenu #nav li {
+  padding-top:0px;
+  margin-top:1px;
+  padding-left:0px;
+  padding-right:0px;
+  margin-left:1px;
+}
+.autocompleterMenu #nav li:hover, .autocompleterMenu #nav li.sfhover {
+  border-left: none 1px #CCCCCC;
+  z-index: 1000000;
+}
+.autocompleterMenu #nav li ul {
+  border-top: solid 1px #AAAAAA;
+  background-color: #FFFFFF;
+  margin-top:0px;
+  margin-left:-1px;
+}
+.autocompleterMenu #nav li li {
+  padding-top:1px;
+  padding-right:4px;
+  padding-bottom:1px;
+  padding-left:0px;
+	margin-top: 1px;
+}
+.autocompleterMenu #nav ul li ul {
+  margin-top:-1em;
+  margin-left:50px;
+}
+li .selected a span {
+  background-image: url('../images/checkmark.gif');
+  background-repeat: no-repeat;
+  background-position: left;
+}
+.autocompleterInput {
+  padding-right:18px !important; /*moz */
+  padding-right:0px; /*ie*/
+}
+input.valueAC {
+  padding-left:18px;
+  overflow: hidden;
+}
+.lookupButtons .autocomplete {
+  margin-top:0.8em;
+}
+.autocomplete {
+  background-color:white;
+  margin:0px;
+  padding:0px;
+  white-space: nowrap;
+  position: absolute;
+  z-index: 500;
+}
+div.autocomplete ul {
+  border:1px solid #888;
+  list-style-type:none;
+  margin:0px;
+  padding:0px;
+}
+div.autocomplete ul li.selected {
+  background-color: #ffb;
+  padding-left:4px;
+  padding-top:2px;
+}
+div.autocomplete ul li {
+  list-style-type:none;
+  display:block;
+  margin:0px 0px 0px 2px;
+  padding:2px 2px 2px 4px;
+  cursor:pointer;
+}
+#CENTER {
+  width: 100%;
+  margin-right: 0px;
+  position: relative;
+  z-index: 1000;
+}
+.inspContent {
+  width:100%;
+  margin-top:5px;
+  margin-bottom: 15px;  
+}
+.inspContent .active {
+  display:block;
+  border-top:0px;
+  border-left:solid 1px #CCCCCC;
+  border-right:solid 1px #CCCCCC;
+  border-bottom:solid 1px #CCCCCC;
+  padding:2px;
+}
+.inspContent .hidden {
+  display:none;
+}
+.gTabPanel {
+  margin-top: 5px;
+  padding-bottom: 4px;
+  font-size: 90%;
+}
+.gTabPanel a {
+  color: #888888;
+  padding: 4px 3px 4px 3px;
+  border: solid 1px #CCCCCC;
+  font-weight: normal;
+  background-image: url('../images/ghbg.png');
+  background-repeat: repeat-x;
+  background-position: left bottom;
+}
+.gTabPanel a:hover {
+  color: black;
+  background-color: #FFFFFF;
+  position: relative;
+  z-index: 500;
+  text-decoration: none;
+}
+.gTabPanel .selected {
+  color:#444444;
+  background-image: url('../images/ghbgs.png');
+  background-repeat: repeat-x;
+  background-position: left top;
+  background-color: #FFFFFF;
+  padding-bottom: 5px;
+  border-bottom: none 1px #FFFFFF;
+  font-weight: bold;
+  text-decoration: none;
+}
+.gTabPanel .hidden {
+  display:none;
+}
+.gContent {
+  margin-bottom: 20px;
+  border-top: 0px;
+  border-right: solid 1px #FFFFFF;
+  border-left:  solid 0px #FFFFFF;
+  padding:0px 0px 2px 0px;
+}
+#gridPagerBottom {
+  padding:0px 5px 5px 5px;	
+  width:100%;
+  border-bottom:1px solid #CCCCCC;
+}
+fieldset{
+  margin: 1px 5px 3px 5px;
+  padding: 2px;
+  -moz-border-radius: 10px;
+  -webkit-border-radius: 8px;
+  border: 1.5px solid #DDD;
+  background-color: #EEE;}
+legend{
+  border: 1px solid #CCC;
+  -moz-border-radius: 10px;
+  padding: 0 1em;
+  background-color: #CCC;
+}

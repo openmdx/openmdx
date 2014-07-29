@@ -1,13 +1,13 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Description: PersistenceHelper 
+ * Description: Persistence Helper 
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2009-2013, OMEX AG, Switzerland
+ * Copyright (c) 2009-2014, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -154,42 +154,26 @@ public class PersistenceHelper {
     ) {
         if(object instanceof org.openmdx.base.persistence.spi.Cloneable) {
             return ((org.openmdx.base.persistence.spi.Cloneable<T>)object).openmdxjdoClone(exclude);
-        } else if(exclude != null && exclude.length > 0) throw new RuntimeServiceException(
-            BasicException.Code.DEFAULT_DOMAIN,
-            BasicException.Code.BAD_PARAMETER,
-            "Exclude is supported for org.openmdx.base.persistence.spi.Cloneable objects only",
-            new BasicException.Parameter("exclude", (Object[])exclude),
-            new BasicException.Parameter("supported", java.lang.Cloneable.class.getName(), org.openmdx.base.persistence.spi.Cloneable.class.getName()),
-            new BasicException.Parameter("class", object.getClass().getName())
-        );
-        if(object instanceof java.lang.Cloneable) {
-        	try {
-	            return (T) object.getClass(
-	            ).getMethod(
-	                "clone"
-	            ).invoke(
-	                object
-	            );
-	        } catch (RuntimeException exception) {
-	            throw exception;
-	        } catch (Exception exception) {
-	            throw new RuntimeServiceException(
-	                exception,
-	                BasicException.Code.DEFAULT_DOMAIN,
-	                BasicException.Code.GENERIC,
-	                "A class declared as Cloneable can't be cloned",
-	                new BasicException.Parameter("interface", java.lang.Cloneable.class.getName()),
-	                new BasicException.Parameter("class", object.getClass().getName())
-	            );
-	        }
+        } else if(exclude != null && exclude.length > 0) {
+        	throw new RuntimeServiceException(
+	            BasicException.Code.DEFAULT_DOMAIN,
+	            BasicException.Code.BAD_PARAMETER,
+	            "Exclude is supported for org.openmdx.base.persistence.spi.Cloneable objects only",
+	            new BasicException.Parameter("exclude", (Object[])exclude),
+	            new BasicException.Parameter("supported", java.lang.Cloneable.class.getName(), org.openmdx.base.persistence.spi.Cloneable.class.getName()),
+	            new BasicException.Parameter("class", object.getClass().getName())
+	        );
+        } else if(object instanceof java.lang.Cloneable) {
+        	return Classes.clone(object);
+        } else {
+	        throw new RuntimeServiceException(
+	            BasicException.Code.DEFAULT_DOMAIN,
+	            BasicException.Code.NOT_SUPPORTED,
+	            "A class not declared as Cloneable can't be cloned",
+	            new BasicException.Parameter("supported", java.lang.Cloneable.class.getName(), org.openmdx.base.persistence.spi.Cloneable.class.getName()),
+	            new BasicException.Parameter("class", object.getClass().getName())
+	        );
         }
-        throw new RuntimeServiceException(
-            BasicException.Code.DEFAULT_DOMAIN,
-            BasicException.Code.NOT_SUPPORTED,
-            "A class not declared as Cloneable can't be cloned",
-            new BasicException.Parameter("supported", java.lang.Cloneable.class.getName(), org.openmdx.base.persistence.spi.Cloneable.class.getName()),
-            new BasicException.Parameter("class", object.getClass().getName())
-        );
     }
 
     /**
@@ -374,13 +358,13 @@ public class PersistenceHelper {
         for(Map.Entry<String,ModelElement_1_0> e : nonDerivedAttributes.entrySet()){
             ModelElement_1_0 candidate = e.getValue();
             if(
-                ModelHelper.isReference(candidate) && 
+                candidate.isReference() && 
                 !ModelHelper.isStoredAsAttribute(candidate) &&
                 ModelHelper.isCompositeEnd(candidate, false)
             ){
                 Path childPattern = objectId.getDescendant(e.getKey(),":*");
                 ModelElement_1_0 childType = refPackage.refModel().getElementType(candidate);
-                String extentClassName = (String)childType.objGetValue("qualifiedName");
+                String extentClassName = (String)childType.getQualifiedName();
                 Class<?> extentClass;
                 try {
                     extentClass = Classes.getApplicationClass(
@@ -392,8 +376,8 @@ public class PersistenceHelper {
                         BasicException.Code.DEFAULT_DOMAIN, 
                         BasicException.Code.BAD_QUERY_CRITERIA, 
                         "Unable to retrieve extent class",
-                        new BasicException.Parameter("feature", candidate.objGetValue("qualifiedName")),
-                        new BasicException.Parameter("pattern", childPattern.toXRI()),
+                        new BasicException.Parameter("feature", candidate.getQualifiedName()),
+                        new BasicException.Parameter("pattern", childPattern),
                         new BasicException.Parameter("type", extentClassName)
                     );
                 }

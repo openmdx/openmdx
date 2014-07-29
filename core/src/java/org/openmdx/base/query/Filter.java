@@ -82,7 +82,7 @@ import org.w3c.cci2.AnyTypePredicate;
  * @see org.openmdx.base.text.conversion.JavaBeans
  */
 public class Filter
-    implements Serializable, AnyTypePredicate {
+    implements Serializable, AnyTypePredicate, Cloneable {
 
     /**
      * Constructor 

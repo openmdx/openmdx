@@ -108,6 +108,7 @@ public class Texts implements Serializable {
 		/**
 		 * Get object with given key. First try to get object from codes. If it does
 		 * not exist fall back to default bundle.
+		 * 
 		 * @param key
 		 * @return
 		 */
@@ -116,19 +117,15 @@ public class Texts implements Serializable {
 		) {
 			String object = null;
 			if(Texts.this.codes != null) {
-				@SuppressWarnings("unchecked")
-                Map<String,Short> shortTexts = Texts.this.codes.getShortText(
+                Map<String,Short> shortTexts = Texts.this.codes.getShortTextByText(
 					TextsBundle.class.getSimpleName(), 
 					this.localeIndex, 
-					false, // codeAsKey 
 					true // includeAll
 				);
 				if(shortTexts != null && shortTexts.get(key) != null) {
-					@SuppressWarnings("unchecked")
-                    Map<Short,String> longTexts = Texts.this.codes.getLongText(
+                    Map<Short,String> longTexts = Texts.this.codes.getLongTextByCode(
 						TextsBundle.class.getSimpleName(), 
 						this.localeIndex, 
-						true, // codeAsKey 
 						true // includeAll
 					);
 					object = longTexts.get(shortTexts.get(key));
@@ -946,6 +943,15 @@ public class Texts implements Serializable {
         public String getSelectExistingText() {
 			return this.getObject("SelectExistingText");  
         }
+
+		/* (non-Javadoc)
+		 * @see org.openmdx.portal.servlet.Texts_1_0#getWizardsMenuTitle()
+		 */
+		@Override
+		public String getWizardsMenuTitle(
+		) {
+			return this.getObject("WizardsMenuTitle");  
+		}
 
 		//-------------------------------------------------------------------------
 		// Variables

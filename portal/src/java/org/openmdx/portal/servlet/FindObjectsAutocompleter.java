@@ -214,24 +214,24 @@ public class FindObjectsAutocompleter implements Autocompleter_1_0, Serializable
         }
         // Generate id if none is specified
         String acName = "ac_" + fieldName.replace(':', '_').replace('!', '_').replace('*', '_') + Integer.toString(tabIndex);
-        p.write("<div class=\"autocompleterMenu\">");
-        p.write("  <ul id=\"nav\" class=\"nav\" onmouseover=\"sfinit(this);\" >");
+        p.write("<div class=\"", CssClass.autocompleterMenu.toString(), "\">");
+        p.write("  <ul id=\"", CssClass.ssfNav.toString(), "\" class=\"", CssClass.ssfNav.toString(), "\" onmouseover=\"sfinit(this);\" >");
         p.write("    <li><a href=\"#\">", p.getImg("border=\"0\" alt=\"\" src=\"", p.getResourcePath("images/"), WebKeys.ICON_AUTOCOMPLETE_SELECT, "\""), "</a>");
         p.write("      <ul onclick=\"this.style.left='-999em';\" onmouseout=\"this.style.left='';\">");
         for(int i = 0; i < findObjectsActions.length; i++) {
-            p.write("        <li", (i == 0 ? " class=\"selected\"" : ""), "><a href=\"#\" onclick=\"javascript:navSelect(this);", acName, ".url= ", p.getEvalHRef(findObjectsActions[i], false), ";return false;\"><span>&nbsp;&nbsp;&nbsp;</span>", htmlEncoder.encode(findObjectsActions[i].getTitle(), false), "</a></li>");
+            p.write("        <li", (i == 0 ? " class=\"" + CssClass.selected + "\"" : ""), "><a href=\"#\" onclick=\"javascript:navSelect(this);", acName, ".url= ", p.getEvalHRef(findObjectsActions[i], false), ";return false;\"><span>&nbsp;&nbsp;&nbsp;</span>", htmlEncoder.encode(findObjectsActions[i].getTitle(), false), "</a></li>");
         }
         p.write("      </ul>");
         p.write("    </li>");
         p.write("  </ul>");                    
         p.write("</div>");       
         p.write("<div ", (inputFieldDivClass == null ? "" : inputFieldDivClass), "><input type=\"text\" ", (inputFieldClass == null ? "" : inputFieldClass), " id=\"", id, ".Title\" name=\"", id, ".Title\" tabindex=\"", Integer.toString(tabIndex), "\" value=\"", (objectReference == null ? "" : objectReference.getTitle(true)), "\"", " />", (imgTag == null ? "" : "&nbsp;" + imgTag) ,"</div>");
-        p.write("<input type=\"hidden\" class=\"valueLLocked\" id=\"", id, "\" name=\"", id, "\" readonly value=\"", (objectReference == null ? "" : objectReference.getXRI()), "\"", (onChangeValueScript == null ? "" : "onChange=\"javascript:" + onChangeValueScript + "\""), " />");
+        p.write("<input type=\"hidden\" class=\"", CssClass.valueLLocked.toString(), "\" id=\"", id, "\" name=\"", id, "\" readonly value=\"", (objectReference == null ? "" : objectReference.getXRI()), "\" onchange=\"javascript:", (onChangeValueScript == null ? "return false;" : onChangeValueScript), "\" />");
         if(tdTag != null) {
             p.write("</td>");
             p.write(tdTag);
         }
-        p.write("<div class=\"autocomplete\" id=\"", id, ".Update\" style=\"display:none;z-index:500;\"></div>");
+        p.write("<div class=\"", CssClass.autocomplete.toString(), "\" id=\"", id, ".Update\" style=\"display:none;z-index:1200;\"></div>");
         p.write("<script type=\"text/javascript\" language=\"javascript\" charset=\"utf-8\">");
         p.write("  ", acName, " = new Ajax.Autocompleter(");
         p.write("    '", id, ".Title',");

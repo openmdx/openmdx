@@ -50,6 +50,7 @@ package org.openmdx.application.xml.spi;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.logging.Level;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
@@ -170,22 +171,17 @@ public class ImportHelper {
      * @param reader
      * @param feature
      * @param value
+     * @throws ServiceException 
      */
     private static void setFeature(
         XMLReader reader,
         String feature,
         boolean value
-    ) {
+    ) throws ServiceException {
         try {
             reader.setFeature(feature, value);
-        } catch (SAXException e) {
-            new ServiceException(
-                e,
-                BasicException.Code.DEFAULT_DOMAIN,
-                BasicException.Code.INVALID_CONFIGURATION,
-                "Unable to set SAXReader feature",
-                new BasicException.Parameter("feature", feature),
-                new BasicException.Parameter("vaue", value));
+        } catch (SAXException exception) {
+        	SysLog.log(Level.INFO, "Sys|Unable to set SAXReader feature|feature='{0}', value='{1}'", feature, value);
         }
     }
     

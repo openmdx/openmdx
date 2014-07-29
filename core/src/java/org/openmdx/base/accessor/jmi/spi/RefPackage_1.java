@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2010, OMEX AG, Switzerland
+ * Copyright (c) 2004-2014, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -53,10 +53,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.jdo.JDOFatalUserException;
 import javax.jdo.PersistenceManager;
 import javax.jdo.PersistenceManagerFactory;
-import javax.jdo.spi.PersistenceCapable;
-import javax.jmi.reflect.JmiException;
 import javax.jmi.reflect.RefAssociation;
 import javax.jmi.reflect.RefClass;
 import javax.jmi.reflect.RefEnum;
@@ -114,18 +113,32 @@ public class RefPackage_1 implements Jmi1Package_1_0, Serializable {
     }
 
     /**
-     * Asserts that the associated persistence manager is open
+     * Checks whether the persistence manager is already closed
+     * 
+     * @return <code>true</code> if the persistence manager is already closed
      */
-    public void assertOpen(
-    ) throws JmiException {
-        if(((RefPackage_1_0)this.outermostPackage).refPersistenceManager().isClosed()) {
-            throw new JmiServiceException(
-                null,
-                BasicException.Code.DEFAULT_DOMAIN,
-                BasicException.Code.ILLEGAL_STATE,
-                "The persistence manager is closed"
-            );
-        }
+    protected boolean isClosed(){
+    	return ((RefPackage_1_0)this.outermostPackage).refPersistenceManager().isClosed();
+    }
+    
+    /**
+     * Asserts that the associated persistence manager is open
+     * 
+     * @exception JDOFatalUserException
+     */
+    protected void assertOpen(
+    ){
+    	if(isClosed()) {
+			throw BasicException.initHolder(
+		        new JDOFatalUserException(
+		            "The persistence manager is closed",
+		            BasicException.newEmbeddedExceptionStack(
+		                BasicException.Code.DEFAULT_DOMAIN,
+		                BasicException.Code.ILLEGAL_STATE
+		            )
+		        )
+		    );
+		}
     }
 
     /* (non-Javadoc)
@@ -266,12 +279,9 @@ public class RefPackage_1 implements Jmi1Package_1_0, Serializable {
                     toStructValue(entry.getValue())
                 );
             }
-            return target;
-            
-        } else if(source instanceof PersistenceCapable) {
-            return ReducedJDOHelper.isPersistent(source) ? ReducedJDOHelper.getObjectId(source) : ReducedJDOHelper.getTransactionalObjectId(source);
+            return target;            
         } else {
-            return source;
+        	return ReducedJDOHelper.replaceObjectById(source);
         }
     }
         
@@ -329,8 +339,7 @@ public class RefPackage_1 implements Jmi1Package_1_0, Serializable {
                     this.refMofId()
                 )
             );
-        }
-        catch(ServiceException e) {
+        } catch(ServiceException e) {
             throw new JmiServiceException(e);
         }
     }
@@ -444,7 +453,7 @@ public class RefPackage_1 implements Jmi1Package_1_0, Serializable {
                 this.refModel().isStructureType(structType)
             ) {
                 return this.refCreateStruct(
-                    (String)((ModelElement_1_0)structType).objGetValue("qualifiedName"),
+                    (String)((ModelElement_1_0)structType).getQualifiedName(),
                     args
                 );
             }
@@ -456,8 +465,7 @@ public class RefPackage_1 implements Jmi1Package_1_0, Serializable {
                     new BasicException.Parameter("structure type", structType)
                 );
             }
-        }
-        catch(ServiceException e) {
+        } catch(ServiceException e) {
             throw new JmiServiceException(e);
         }
     }

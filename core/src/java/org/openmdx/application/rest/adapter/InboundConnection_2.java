@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2009-2013, OMEX AG, Switzerland
+ * Copyright (c) 2009-2014, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -101,6 +101,7 @@ import org.openmdx.base.mof.cci.Multiplicity;
 import org.openmdx.base.mof.cci.PrimitiveTypes;
 import org.openmdx.base.mof.spi.Model_1Factory;
 import org.openmdx.base.naming.Path;
+import org.openmdx.base.naming.TransactionalSegment;
 import org.openmdx.base.persistence.cci.PersistenceHelper;
 import org.openmdx.base.persistence.cci.Queries;
 import org.openmdx.base.persistence.spi.SharedObjects;
@@ -201,8 +202,8 @@ public class InboundConnection_2
         }
         if(objectId instanceof Path){
             Path xri = (Path) objectId;
-            if(xri.isTransientObjectId()) {
-                objectId = xri.toUUID();
+            if(xri.getLastSegment() instanceof TransactionalSegment) {
+                objectId = ((TransactionalSegment)xri.getLastSegment()).getTransactionalObjectId();
             }
         }
         return (RefObject) getPersistenceManager().getObjectById(objectId);
@@ -784,7 +785,7 @@ public class InboundConnection_2
                             BasicException.Code.DEFAULT_DOMAIN,
                             BasicException.Code.BAD_MEMBER_NAME,
                             "Unknown feature",
-                            new BasicException.Parameter("xri", resourceId.toXRI()),
+                            new BasicException.Parameter("xri", resourceId),
                             new BasicException.Parameter("class", refTarget.refClass().refMofId()),
                             new BasicException.Parameter("feature", featureName)
                         );
@@ -1016,7 +1017,7 @@ public class InboundConnection_2
                     throw new ServiceException(exception);
                 }
                 return true;
-            } else if (xri.isTransientObjectId()) {
+            } else if (xri.isTransactionalObjectId()) {
                 RefPackage refPackage = getObjectByResourceIdentifier(BASE_AUTHORITY).refOutermostPackage();
                 RefObject_1_0 newObject = (RefObject_1_0)refPackage.refClass(input.getObjectClass()).refCreateInstance(
                     Collections.singletonList(xri)
@@ -1045,7 +1046,7 @@ public class InboundConnection_2
                 } else {
                     RefContainer<?> refContainer = (RefContainer<?>) container;
                     refContainer.refAdd(
-                        toAddArguments(refContainer.getClass(), xri.getBase(), refObject)
+                        toAddArguments(refContainer.getClass(), xri.getLastSegment().toClassicRepresentation(), refObject)
                     );
                 }
                 return propagate(refObject, output, null, null);
@@ -1106,7 +1107,7 @@ public class InboundConnection_2
             int featurePosition = newResourceIdentifier.size() - 2;
             RefObject refObject = getObjectByResourceIdentifier(newResourceIdentifier.getPrefix(featurePosition));
             RefContainer<?> refContainer = (RefContainer<?>) refObject.refGetValue(newResourceIdentifier.get(featurePosition));
-            String qualifier = newResourceIdentifier.getBase();
+            String qualifier = newResourceIdentifier.getLastSegment().toClassicRepresentation();
             boolean persistent = qualifier.startsWith("!"); 
             refContainer.refAdd(
                 QualifierType.valueOf(persistent),
@@ -1230,7 +1231,7 @@ public class InboundConnection_2
             IndexedRecord output
         ) throws ServiceException {
             Path xri = input.getPath();
-            if(xri.size() % 2 == 0 || xri.containsWildcard()) {
+            if(xri.size() % 2 == 0 || xri.isPattern()) {
                 try {
                     Query query = this.toRefQuery(input);
                     return query.deletePersistentAll() > 0;
@@ -1292,8 +1293,7 @@ public class InboundConnection_2
                         output.setBody(null);
                     }
                 } else {
-                    int featurePosition = xri.size();
-                    featurePosition -= featurePosition % 2 == 1 ? 2 : 1;
+                    final int featurePosition = xri.size()- (xri.isObjectPath() ? 2 : 1);
                     RefObject refObject = getObjectByResourceIdentifier(xri.getPrefix(featurePosition));
                     RefPackage_1_0 refPackage = (RefPackage_1_0) refObject.refOutermostPackage();
                     MappedRecord arguments = input.getBody();

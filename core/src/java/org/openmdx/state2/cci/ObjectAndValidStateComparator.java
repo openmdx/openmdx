@@ -522,7 +522,7 @@ public class ObjectAndValidStateComparator {
 		            );
                 } else {
     				Object expectedValue = expected.get(feature);
-    				String qualifiedName = (String) featureDef.objGetValue("qualifiedName"); 
+    				String qualifiedName = (String) featureDef.getQualifiedName(); 
     				difference = getFeatureComparator(
     					qualifiedName,
     					aspect

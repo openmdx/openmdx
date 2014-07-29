@@ -4936,6 +4936,37 @@
         <packagedElement xmi:type="uml:Association" xmi:id="_dr7zgKzGEdy7PbMC-l1eSA" name="SegmentContainsAccount" memberEnd="_dr7zgazGEdy7PbMC-l1eSA _dr7zgqzGEdy7PbMC-l1eSA">
           <ownedEnd xmi:id="_dr7zgqzGEdy7PbMC-l1eSA" name="segment" type="_3C7B8A60016D3DA2FFEB018C" association="_dr7zgKzGEdy7PbMC-l1eSA"/>
         </packagedElement>
+        <packagedElement xmi:type="uml:Class" xmi:id="_pCm_4ETREeOj1dH5Xj2W9g" name="X0" isAbstract="true">
+          <eAnnotations xmi:id="_6OzmIETREeOj1dH5Xj2W9g" source="http://www.eclipse.org/uml2/2.0.0/UML">
+            <details xmi:id="_6OzmIUTREeOj1dH5Xj2W9g" key="root"/>
+          </eAnnotations>
+          <ownedAttribute xmi:id="_c1orgES3EeOj1dH5Xj2W9g" name="callback">
+            <eAnnotations xmi:id="_c1orgUS3EeOj1dH5Xj2W9g" source="http://www.eclipse.org/uml2/2.0.0/UML">
+              <details xmi:id="_c1orgkS3EeOj1dH5Xj2W9g" key="list"/>
+            </eAnnotations>
+            <type xmi:type="uml:PrimitiveType" href="../openMDX%202%20~%20Core%20(EMF)/org.w3c.uml#_3C7B8A60016D3C8B62E40010"/>
+          </ownedAttribute>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Class" xmi:id="_rULgEES0EeOj1dH5Xj2W9g" name="X1" isAbstract="true">
+          <eAnnotations xmi:id="_HmrFUES1EeOj1dH5Xj2W9g" source="http://www.eclipse.org/uml2/2.0.0/UML">
+            <details xmi:id="_HmrFUUS1EeOj1dH5Xj2W9g" key="root"/>
+          </eAnnotations>
+          <generalization xmi:id="_TohmcETdEeOj1dH5Xj2W9g" general="_pCm_4ETREeOj1dH5Xj2W9g"/>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Class" xmi:id="_QUpiEES1EeOj1dH5Xj2W9g" name="X2" isAbstract="true">
+          <eAnnotations xmi:id="_VBcoYES1EeOj1dH5Xj2W9g" source="http://www.eclipse.org/uml2/2.0.0/UML">
+            <details xmi:id="_VBcoYUS1EeOj1dH5Xj2W9g" key="root"/>
+          </eAnnotations>
+          <generalization xmi:id="_YZgpMETdEeOj1dH5Xj2W9g" general="_pCm_4ETREeOj1dH5Xj2W9g"/>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Class" xmi:id="_7xM1sETAEeOj1dH5Xj2W9g" name="C4">
+          <generalization xmi:id="_KRG00ETBEeOj1dH5Xj2W9g" general="_3C7B8A60016D3DA6E6D10035"/>
+          <generalization xmi:id="_atCSMES1EeOj1dH5Xj2W9g" general="_rULgEES0EeOj1dH5Xj2W9g"/>
+          <generalization xmi:id="_sONC4ES1EeOj1dH5Xj2W9g" general="_QUpiEES1EeOj1dH5Xj2W9g"/>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Class" xmi:id="_k2tCUETgEeOj1dH5Xj2W9g" name="C41">
+          <generalization xmi:id="_pK8esETgEeOj1dH5Xj2W9g" general="_7xM1sETAEeOj1dH5Xj2W9g"/>
+        </packagedElement>
       </packagedElement>
     </packagedElement>
   </packagedElement>

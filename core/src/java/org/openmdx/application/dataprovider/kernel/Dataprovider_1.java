@@ -276,8 +276,8 @@ public class Dataprovider_1 implements Dataprovider_1_0 {
         for(String plugIn : plugIns) {
             layers.put(
                 plugIn,
-                new BeanFactory<Layer_1>(
-                    "class",
+                BeanFactory.newInstance(
+                	Layer_1.class,
                     configurationProvider.getConfiguration(
                         new String[]{plugIn}
                     ).entries()

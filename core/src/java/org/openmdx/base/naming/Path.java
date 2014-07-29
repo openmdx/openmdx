@@ -1,13 +1,13 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Description: Profile Path 
+ * Description: Path 
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2013, OMEX AG, Switzerland
+ * Copyright (c) 2004-2014, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -47,24 +47,26 @@
  */
 package org.openmdx.base.naming;
 
+import java.io.ObjectStreamException;
 import java.io.Serializable;
 import java.net.URI;
-import java.util.Iterator;
+import java.util.AbstractList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.UUID;
 
 import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.marshalling.Marshaller;
-import org.openmdx.base.text.conversion.UUIDConversion;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.url.protocol.XRI_1Protocols;
 import org.openmdx.kernel.url.protocol.XRI_2Protocols;
 import org.openmdx.kernel.url.protocol.XriAuthorities;
 
 /**
- * The Path class represents a data provider path.
+ * The Path class represents an object's XRI.
  * 
- * The components of a name are numbered. The indexes of a
+ * The components of a name are numbered. The indices of a
  * name with N components range from 0 up to, but not
  * including, N. This range may be written as [0,N). The
  * most significant component is at index 0. An empty name
@@ -75,29 +77,22 @@ import org.openmdx.kernel.url.protocol.XriAuthorities;
  * component. Likewise, methods that return a name or name
  * component never return null. 
  * 
- * An instance of a Path is not synchronized against
- * concurrent multithreaded access if that access is not
- * read-only.
+ * A path is immutable.
  */
-public final class Path
-    implements Comparable<Path>, Cloneable, Serializable, Iterable<String>  
-{
+public final class Path implements Comparable<Path>, Cloneable, Serializable {
 
-    /**
-     * Implements <code>Externalizable</code>
-     * 
-     * @deprecated Do NOT use! 
-     */
-    @Deprecated
-    public Path(
-    ){        
-        // Required for Externalizable and XMLEncoder
-    }
-
+	/**
+	 * Empty path constructor
+	 * 
+	 * @deprecated use Path("") instead
+	 */
+	@Deprecated
+	public Path(){
+		this(0);
+	}
+	
     /**
      * Creates a new path object given by multiple path components.
-     * The path is backed by the components list as long as it is
-     * not modified by an add, addAll or remove method. 
      * 
      * @param components    path components
      *
@@ -109,25 +104,41 @@ public final class Path
     public Path(
         String[] components
     ){
-        this.setComponents(components);
-        this.xri = null;
+    	this(components.length, XRISegment.valueOf(components));
     }
 
-    /**
-     * Constructor 
+	/**
+     * Creates a new path object given by multiple path components.
+     * 
+     * @param components    path components
      *
-     * @param components
-     * @param size
+     * @exception   RuntimeServiceException 
+     *              in case of invalid components
+     * @exception   NullPointerException 
+     *              if components is null
+     */
+    public Path(
+        XRISegment... components
+    ){
+    	this(components.length, components);
+    }
+    
+    /**
+     * Construct a path when the components are already parsed
+     * 
+     * @param components the path components, all components beyond size are ignored
+     * @param size the size of the path
      */
     private Path(
-        String components,
-        int size
+		int size,
+		XRISegment... components
     ) {
-        this.components = components;
-        this.size = size;
-        this.xri = null;
+    	this(
+    		size == 0 ? null : size == 1 ? ROOT : new Path(size - 1, components),
+    		size == 0 ? null : components[size - 1]
+    	);
     }
-
+    
     /**
      * Creates a <code>Path</code> object.
      *
@@ -144,7 +155,7 @@ public final class Path
             charSequence.startsWith(XRI_2Protocols.OPENMDX_PREFIX) ? XRI_2Marshaller.getInstance() :
             charSequence.startsWith(XriAuthorities.OPENMDX_AUTHORITY) ? IRI_2Marshaller.getInstance() :     
             charSequence.startsWith(XRI_1Protocols.OPENMDX_PREFIX) ? XRI_1Marshaller.getInstance() :
-            charSequence.startsWith(URI_1.OPENMDX_PREFIX) ? URI_1.getInstance() : 
+            charSequence.startsWith(URI_1Marshaller.OPENMDX_PREFIX) ? URI_1Marshaller.getInstance() : 
             LegacyMarshaller.getInstance()
         );
     }
@@ -174,32 +185,7 @@ public final class Path
     public Path(
         UUID transactionalObjectId
     ){
-        this(
-            new String[]{
-                "!($t*uuid*" + transactionalObjectId + ")"
-            }
-        );
-    }
-        
-    //-------------------------------------------------------------------------
-    private void setComponents(
-        String[] components
-    ) {
-        this.checkComponents(components);
-        this.size = components.length;
-        StringBuilder tmp = new StringBuilder();
-        for(String component : components) {
-            tmp.append(component).append(COMPONENT_SEPARATOR);
-        }
-        this.components = tmp.toString();
-    }
-
-    //-------------------------------------------------------------------------
-    public String[] getComponents(
-    ) {
-        return this.components.length() == 0 ? 
-            EMPTY_COMPONENTS :
-            this.components.substring(0,this.components.length()-1).split(COMPONENT_SEPARATOR_STRING);
+    	this(ROOT, new TransactionalSegment(0, transactionalObjectId));
     }
 
     /**
@@ -217,82 +203,113 @@ public final class Path
         String charSequence,
         Marshaller marshaller
     ){
-        try {
-            this.setComponents(
-                (String[])marshaller.unmarshal(charSequence)
-            );
-            this.xri = marshaller == XRI_2Marshaller.getInstance() ? charSequence : null;
-        }  catch (ServiceException exception){
-            throw new RuntimeServiceException(exception);
-        }
+    	this(getComponents(charSequence, marshaller));
+    	if(marshaller == XRI_2Marshaller.getInstance()) {
+    		this.xri = charSequence;
+    	}
     }
 
     /**
-     * Creates a <code>Path</code> object.
+     * Clones the given <code>Path</code>
      *
      * @param  that     The new path will consist of this name's components
+     * 
+     * @deprecated usually there is no need to clone a <code>Path</code>
      */ 
+    @Deprecated
     public Path (
         Path that
     ){
-        this.components = that.components;
-        this.size = that.size;
-        this.xri = that.xri;
-    }
-
-    //--------------------------------------------------------------------------
-    // Verification
-    //--------------------------------------------------------------------------
-
-    /**
-     * Checks the path components
-     *
-     * @exception   RuntimeServiceException
-     *              if any of the components is null or empty
-     */
-    private void checkComponents(
-        String[] components
-    ){
-        int size = components.length;
-        for (
-            int index = 0;
-            index < size;
-            index++
-        ) {
-            String component = components[index];
-            if(
-                (component == null) || 
-                (component.length() == 0)
-            ) {
-                throw new RuntimeServiceException(
-                    BasicException.Code.DEFAULT_DOMAIN, 
-                    BasicException.Code.BAD_PARAMETER,
-                    "A path component can neither be null nor empty",
-                    new BasicException.Parameter("index",index),
-                    new BasicException.Parameter("component",component)
-                );
-            }
-        }   
+    	this(that.parent, that.base);
+    	this.xri = that.xri;
     }
 
     /**
-     * Checks the path's state
-     *
-     * @exception   RuntimeServiceException
-     *              if the path is in read only state
+     * Creates a child
+     * 
+     * @param parent the parent path
+     * @param base the last component
      */
-    private void checkState(
+    private Path(
+    	Path parent,
+    	Path base
     ){
-        if(this.readOnly) {
-            throw new RuntimeServiceException(
-                BasicException.Code.DEFAULT_DOMAIN, 
-                BasicException.Code.ILLEGAL_STATE,
-                "This path is in read only state"
-            );
-        } else {
-            this.xri = null;
-        }
+    	this.parent = parent;
+    	this.base = new ClassicCrossReferenceSegment(base);
+    	this.size = parent.size + 1;
     }
+    
+    /**
+     * Creates a child
+     * 
+     * @param parent the parent path
+     * @param base the last component
+     */
+    private Path(
+    	Path parent,
+    	XRISegment base
+    ){
+    	this.parent = parent;
+    	this.base = base;
+    	if(parent == null) {
+    		this.xri = "xri://@openmdx";
+    		this.size = 0;
+    	} else {
+    		this.size = parent.size + 1;
+    	}
+    }
+    
+    private final int size;
+    private final Path parent;
+    private XRISegment base;
+    
+    private transient String xri;
+    private transient int hash;
+
+    private static final Path ROOT = new Path(new String[0]); // not a singleton in the current implementation!
+
+	/**
+	 * Implements <code>Serializable</code>
+	 */
+	private static final long serialVersionUID = -6970183208008259633L;
+
+    /**
+     * Parse the components with the given marshaller
+     * 
+     * @param charSequence
+     * @param marshaller
+     * 
+     * @return the components
+     */
+    private static String[] getComponents(
+		String charSequence,
+		Marshaller marshaller
+	) {
+    	try {
+    		return (String[])marshaller.unmarshal(charSequence);
+    	} catch (ServiceException exception) {
+    		throw new RuntimeServiceException(exception);
+    	}
+    }
+
+    /**
+     * Retrieves the components in their classic representation
+     * 
+     * @return the components in their classic representation
+     * 
+     * @deprecated use {@link #getSegments()}
+     */
+    @Deprecated
+    public String[] getComponents(
+    ) {
+    	String[] result = new String[this.size];
+    	Path current = this;
+    	for(int i = this.size; i > 0; current = current.parent) {
+    		result[--i] = current.getLastSegment().toClassicRepresentation(); 
+    	}
+    	return result;
+    }
+
 
     //--------------------------------------------------------------------------
     // Operations returning a new Path
@@ -308,7 +325,7 @@ public final class Path
      */
     public Path getParent(
     ) {
-        return this.getPrefix(this.size - 1);
+        return this.parent;
     }
 
     /**
@@ -325,10 +342,7 @@ public final class Path
     public Path getChild(
         String component
     ) {
-        return new Path(
-            this.components + component + COMPONENT_SEPARATOR,
-            this.size + 1
-        );
+        return getChild(XRISegment.valueOf(this.size, component));
     }
 
     /**
@@ -336,7 +350,7 @@ public final class Path
      * 
      * @return the legacy path representation
      */
-    String toComponent(){
+    public String toClassicRepresentation(){
         try {
             return LegacyMarshaller.getInstance().marshal(getComponents()).toString();
         } catch (ServiceException exception) {
@@ -359,9 +373,28 @@ public final class Path
         Path crossReference
     ) {
         return new Path(
-            this.components + crossReference.toComponent() + COMPONENT_SEPARATOR,
-            this.size + 1
+        	this,
+        	crossReference
         );
+    }
+    
+    /**
+     * Returns a child path
+     *
+     * @param       xriSegment 
+     *              the last XRI segment of the new Path
+     *
+     * @return      a new path with a size greater by one  
+     *
+     * @exception   NuillPointerException if the xriSegment is <code>null</code>
+     */
+    public Path getChild(
+    	XRISegment xriSegment
+    ){
+    	if(xriSegment == null) {
+    		throw new NullPointerException("An XRI segment may not be null");
+    	}
+        return new Path(this, xriSegment);
     }
     
     /**
@@ -374,9 +407,12 @@ public final class Path
      *
      * @exception   RuntimeServiceException
      *              if the component is null or empty
+     *              
+     * @deprecated             
      */
+    @Deprecated
     public Path getChild(
-        PathComponent component
+   		org.openmdx.base.naming.PathComponent component
     ){
         return this.getChild(component.toString());
     }
@@ -393,16 +429,34 @@ public final class Path
      *              if any of the components is null or empty
      */
     public Path getDescendant(
+        List<XRISegment> suffix
+    ) {
+    	Path result = this;
+    	for(XRISegment component : suffix) {
+    		result = result.getChild(component);
+    	}
+        return result;
+    }
+
+    /**
+     * Returns a descendant path.
+     *
+     * @param       suffix
+     *              the components to be added
+     *
+     * @return      the descendant path.
+     *
+     * @exception   RuntimeServiceException
+     *              if any of the components is null or empty
+     */
+    public Path getDescendant(
         String... suffix
     ) {
-        StringBuilder components = new StringBuilder(this.components);
-        for(int i = 0; i < suffix.length; i++) {
-            components.append(suffix[i]).append(COMPONENT_SEPARATOR);
-        }        
-        return new Path(
-            components.toString(),
-            this.size + suffix.length
-        );
+    	Path result = this;
+    	for(String component : suffix) {
+    		result = result.getChild(component);
+    	}
+        return result;
     }
 
     //--------------------------------------------------------------------------
@@ -412,17 +466,39 @@ public final class Path
     /**
      * Tests, whether the path contains a wildcard
      * 
-     * @return <code>true</code> if the path contains any of the following XRI cross references<ul>
-     * <li>$.
-     * <li>$..
-     * <li>$...
+     * @return <code>true</code> if the path in XRI format contains any of the following XRI cross references<ul>
+     * <li>($.)
+     * <li>($..)
+     * <li>($...)
      * </ul>
      */
-    public boolean containsWildcard(){
-        String xri = toXRI();
-        return 
-            xri.indexOf("($.") >= 0 || 
-            xri.indexOf("($\\.")  >= 0; // TODO to be removed together with the toResourcePattern() method
+    public boolean isPattern(){
+    	return 
+    		this.base != null &&
+    		(this.base.isPattern() || this.parent.isPattern());
+    }
+    
+    /**
+     * Returns the last segment of a path.
+     *
+     * @return  the last path segment.
+     */
+    public XRISegment getLastSegment(
+	) {
+    	return this.base; 
+    }
+
+    /**
+     * Provides a specific XRI segment
+     * 
+     * @param index the index of the requested XRI segment
+     *
+     * @return the requested XRI segment
+     */
+    public XRISegment getSegment(
+    	int index
+	) {
+    	return getPrefix(index + 1).getLastSegment(); 
     }
     
     /**
@@ -430,19 +506,15 @@ public final class Path
      *
      * @return the base path component.
      *
-     * @exception   ArrayIndexOutOfBoundsException
+     * @exception   NullPointerException
      *              if the path is empty
+     *              
+     * @deprecated use {@link Path#getLastSegment()}.toClassicRepresentation()             
      */
+    @Deprecated
     public String getBase(
     ){
-        int pos = this.components.lastIndexOf(
-            COMPONENT_SEPARATOR, 
-            this.components.length() - 2
-        );
-        return this.components.substring(
-            pos + 1,
-            this.components.length() - 1
-        );
+    	return getLastSegment().toClassicRepresentation();
     }
 
     /**
@@ -452,10 +524,13 @@ public final class Path
      *
      * @exception   ArrayIndexOutOfBoundsException
      *              if the path is empty
+     *              
+     * @deprecated             
      */
-    public PathComponent getLastComponent(
+    @Deprecated
+    public org.openmdx.base.naming.PathComponent getLastComponent(
     ) {
-        return this.getComponent(this.size - 1); 
+        return new org.openmdx.base.naming.PathComponent(this.getLastSegment().toClassicRepresentation()); 
     }
 
     /**
@@ -468,11 +543,14 @@ public final class Path
      * 
      * @exception   ArrayIndexOutOfBoundsException
      *              if position is outside the specified range
+     *              
+     * @deprecated             
      */
-    public PathComponent getComponent(
+    @Deprecated
+    public org.openmdx.base.naming.PathComponent getComponent(
         int position
     ) {
-        return new PathComponent(this.get(position)); 
+    	return new org.openmdx.base.naming.PathComponent(this.get(position)); 
     }
 
     /**
@@ -491,7 +569,7 @@ public final class Path
     public String toUri()
     {
         try {
-            return URI_1.getInstance().marshal(this.getComponents()).toString();
+            return URI_1Marshaller.getInstance().marshal(this.getComponents()).toString();
         } catch (ServiceException exception) {
             throw new RuntimeServiceException(exception);
         }
@@ -551,10 +629,15 @@ public final class Path
      */
     public String toXRI(
     ){
-        if(this.xri == null) try {
-            this.xri = XRI_2Marshaller.getInstance().marshal(this.getComponents()).toString();
-        } catch (ServiceException exception) {
-            throw new RuntimeServiceException(exception);
+        if(this.xri == null) {
+        	final String baseRepresentation = this.base.toXRIRepresentation();
+			this.xri = (
+        		this.size == 1 ? (
+        			baseRepresentation.startsWith("!") ? "xri://@openmdx" : "xri://@openmdx*"
+        		) : (
+        			this.parent.toXRI() + "/"
+        		)
+        	) + baseRepresentation;
         }
         return this.xri;
     }
@@ -627,22 +710,19 @@ public final class Path
      * 
      * @return <code>true</code> if this path represents a transient object id
      */
-    public boolean isTransientObjectId(){
-        return 
-            this.size == 1 && 
-            this.components.startsWith("!($t*uuid*") &&
-            this.components.length() == 48;
+    public boolean isTransactionalObjectId(){
+        return this.size == 1 && this.getLastSegment() instanceof TransactionalSegment;
     }
-    
+        
     /**
-     * Retrieve the transient object id represented by this path
+     * Retrieve the transactional object id represented by this path.
      * 
-     * @return the transient object id represented by this path
+     * @return the transactional object id represented by this path
      */
-    public UUID toUUID(
+    public UUID toTransactionalObjectId(
     ){
-        if(isTransientObjectId()) {
-            return UUIDConversion.fromString(this.components.substring(10, 46));
+        if(isTransactionalObjectId()) {
+            return ((TransactionalSegment)this.base).getTransactionalObjectId();
         } else {
             throw new RuntimeServiceException(
                 BasicException.Code.DEFAULT_DOMAIN,
@@ -652,6 +732,7 @@ public final class Path
             );
         }
     }
+    
     
     //--------------------------------------------------------------------------
     // Implements Comparable
@@ -674,7 +755,7 @@ public final class Path
     public int compareTo(
         Path that
     ) {
-        return this.components.compareTo(that.components);
+    	return this.toXRI().compareTo(that.toXRI()); // TODO optimize
     }
 
     //--------------------------------------------------------------------------
@@ -712,23 +793,15 @@ public final class Path
      * 
      * @exception   ArrayIndexOutOfBoundsException
      *              if position is outside the specified range
+     * 
+     * @deprecated use {@link #getSegment(int)}.toClassicRepresentation()            
      */
+    @Deprecated
     public String get(
         int position
     ) {
-        if((position < 0) || (position >= this.size)) {
-            throw new ArrayIndexOutOfBoundsException("position not in 0.." + this.size);
-        }
-        int n = 0;
-        int pos = 0;
-        while(n < position) {
-            pos = this.components.indexOf(COMPONENT_SEPARATOR, pos) + 1;
-            n++;
-        }
-        return this.components.substring(
-            pos,
-            this.components.indexOf(COMPONENT_SEPARATOR, pos)
-        );
+    	validatePosition(position);        
+    	return getPrefix(position + 1).getLastSegment().toClassicRepresentation();
     }
 
     /**
@@ -748,22 +821,12 @@ public final class Path
     public Path getPrefix(
         int position
     ){
-        if (
-            (position < 0) || 
-            (position > this.size)
-        ) {
-            throw new ArrayIndexOutOfBoundsException(BAD_COMPONENT_NUMBER);
+        validateSize(position);
+        Path cursor = this;
+        while(position < cursor.size) {
+        	cursor = cursor.parent;
         }
-        int n = 0;
-        int pos = 0;
-        while(n < position) {
-            pos = this.components.indexOf(COMPONENT_SEPARATOR, pos) + 1;
-            n++;
-        }
-        return new Path(
-            this.components.substring(0, pos),
-            position
-        );
+        return cursor;
     }
 
     /**
@@ -780,39 +843,40 @@ public final class Path
      * 
      * @exception       ArrayIndexOutOfBoundsException
      *                  if position is outside the specified range
+     *                  
+     * @deprecated use {@link #getSegments()}.subList(position,{@link #size()})
      */
+    @Deprecated
     public String[] getSuffix(
         int position
     ){
-        if (
-            (position < 0) || 
-            (position > this.size)
-        ) {
-            throw new ArrayIndexOutOfBoundsException(BAD_COMPONENT_NUMBER);
-        }
-        int n = 0;
-        int len = this.components.length();
-        int start = 0;
-        if(position > 0) {
-            for(int i = 0; i < len; i++) {
-                if(this.components.charAt(i) == COMPONENT_SEPARATOR) {
-                    n++;
-                    if(n == position) {
-                        start = i + 1;
-                        break;
-                    }
-                }            
-            }
-        }
-        if(position == n) {
-            String suffix = this.components.substring(start);
-            return suffix.length() == 0 ?
-                EMPTY_COMPONENTS :
-                    suffix.split(COMPONENT_SEPARATOR_STRING);            
-        }
-        throw new ArrayIndexOutOfBoundsException(BAD_COMPONENT_NUMBER);        
+    	validateSize(position);
+    	final int length = this.size - position;
+		String[] suffix = new String[length];
+    	int i = length;
+    	for(Path cursor = this; i > 0; cursor = cursor.parent) {
+    		suffix[--i] = cursor.getLastSegment().toClassicRepresentation();
+    	}
+    	return suffix;
+    }
+    
+    public List<XRISegment> getSegments(){
+    	return new SegmentList();
     }
 
+    private void validatePosition(int position) {
+    	if (position < 0 || position >= this.size) {
+    		throw new ArrayIndexOutOfBoundsException("The component number must be in the range [0,size())");
+    	}
+    }
+    
+    private void validateSize(int position) {
+    	if (position < 0 || position > this.size) {
+    		throw new ArrayIndexOutOfBoundsException("The component number must be in the range [0,size()]");
+    	}
+    }
+    
+    
     /**
      * Determines whether this path starts with a specified prefix.
      * A string array is a prefix if it is equal to getPrefix(prefix.length).
@@ -820,27 +884,20 @@ public final class Path
      * @param   prefix  the path to check
      * 
      * @return          true if components is a prefix of this path, false otherwise
+     * 
+     * @deprecated use {@link #startsWith(Path)}
      */
+    @Deprecated
     public boolean startsWith(
         String... prefix
     ) {
-        if(prefix.length > this.size) {
-            return false;
-        }
-        int n = 0;
-        int lastPos = 0;
-        int len = this.components.length();
-        for(int i = 0; i < len; i++) {
-            if(this.components.charAt(i) == COMPONENT_SEPARATOR) {
-                String p = prefix[n];
-                if(!this.components.regionMatches(lastPos, p, 0, p.length())) {
-                    return false;
-                }
-                lastPos = i + 1;
-                n++;
-            }            
-        }
-        return true;
+    	if(prefix.length > size){
+    		return false;
+    	}
+    	if(prefix.length < size) {
+    		return getPrefix(prefix.length).startsWith(prefix);
+    	}
+    	return Arrays.equals(prefix, getComponents()); // TODO optimize
     }
 
     /**
@@ -854,7 +911,7 @@ public final class Path
     public boolean startsWith(
         Path prefix
     ) {
-        return this.components.startsWith(prefix.components);
+        return prefix.size <= this.size && prefix.equals(getPrefix(prefix.size));
     }
 
     /**
@@ -869,6 +926,7 @@ public final class Path
     public boolean endsWith(
         String... suffix
     ) {
+    	// TODO optimize
         int offset = size() - suffix.length;
         if (offset < 0) return false;
         for(
@@ -881,325 +939,21 @@ public final class Path
         return true; 
     }
 
-    /**
-     * Adds the elements of a string array -- in order -- to the end of
-     * this path.
-     * 
-     * @param       suffix
-     *              the components to add
-     * 
-     * @return      the updated path (not a new one)
-     * 
-     * @exception   RuntimeServiceException
-     *              if suffix is not a valid name, or if the
-     *              addition of the components would violate the
-     *              syntax rules of this path
-     *              
-     * @deprecated Path modifications should be avoided in openMDX 2             
-     */
-    @Deprecated
-    public Path addAll(
-        String... suffix
-    ){
-        return this.addAll(this.size, suffix);
-    }
-
-    /**
-     * Adds the elements of a string array -- in order -- at a specified
-     * position within this path. Components of this path at or
-     * after the index of the first new component are shifted up
-     * (away from 0) to accommodate the new components.
-     * 
-     * @param   components      the components to add
-     * @param   position    the index in this path at which to add the
-     *                  new components. Must be in the range
-     *                  [0,size()].
-     * 
-     * @return  the updated path (not a new one)
-     * 
-     * @exception   ArrayIndexOutOfBoundsException
-     *              if position is outside the specified range
-     * @exception   RuntimeServiceException
-     *              if components contains invalid path components
-     *              
-     * @deprecated Path modifications should be avoided in openMDX 2             
-     */
-    @Deprecated
-    public Path addAll (
-        int position,
-        String... components
-    ){
-        this.checkState();
-        int n = 0;
-        int end = 0;
-        if(position > 0) {
-            int len = this.components.length();
-            for(int i = 0; i < len; i++) {
-                if(this.components.charAt(i) == COMPONENT_SEPARATOR) {
-                    n++;
-                }
-                if(n == position) {
-                    end = i + 1;
-                    break;
-                }
-            }
-        }
-        if(n == position) {
-            StringBuilder tmp = new StringBuilder(
-                this.components.substring(0, end)
-            );
-            for(String c: components) {
-                tmp.append(c).append(COMPONENT_SEPARATOR);
-            }
-            this.components = tmp.toString();
-            this.size = position + components.length;
-            return this;
-        }
-        throw new ArrayIndexOutOfBoundsException(BAD_COMPONENT_NUMBER + ": components=[" + this.components + "]; position=" + position);                
-    }
-
-    /**
-     * Adds a single component to the end of this path.
-     * 
-     * @param   component   the component to add
-     * 
-     * @return  the updated path (not a new one)
-     * 
-     * @exception   RuntimeServiceException
-     *              if adding component would violate the syntax
-     *              rules of this path
-     *              
-     * @deprecated Path modifications should be avoided in openMDX 2             
-     */
-    @Deprecated
-    public Path add(
-        String component
-    ){
-        this.checkState();
-        this.components += component + COMPONENT_SEPARATOR;
-        this.size++;
-        return this;
-    }
-
-    /**
-     * Adds a single component to the end of this path.
-     * 
-     * @param       component
-     *              the component to add
-     * 
-     * @return      the updated path (not a new one)
-     *
-     * @exception   RuntimeServiceException
-     *              if the component is null or empty
-     *              
-     * @deprecated Path modifications should be avoided in openMDX 2             
-     */
-    @Deprecated
-    public Path add(
-        PathComponent component
-    ){
-        return this.add(component.toString());
-    }
-
-    /**
-     * Adds a single component to the end of this path.
-     * 
-     * @param       crossReference
-     *              the component to add
-     * 
-     * @return      the updated path (not a new one)
-     *
-     * @exception   RuntimeServiceException
-     *              if the component is null or empty
-     *              
-     * @deprecated Path modifications should be avoided in openMDX 2             
-     */
-    @Deprecated
-    public Path add(
-        Path crossReference
-    ){
-        return this.add(crossReference.toComponent());
-    }
     
-    /**
-     * Adds a single component at a specified position within
-     * this path. Components of this path at or after the
-     * index of the new component are shifted up by one (away
-     * from index 0) to accommodate the new component.
-     * 
-     * @param   component   the component to add
-     * @param   position    the index at which to add the new
-     *                  component. Must be in the range
-     *                  [0,size()].
-     * 
-     * @return  the updated path (not a new one)
-     * 
-     * @exception   ArrayIndexOutOfBoundsException
-     *              if position is outside the specified range
-     * @exception   RuntimeServiceException
-     *              if adding component would violate the syntax
-     *              rules of this path
-     *              
-     * @deprecated Path modifications should be avoided in openMDX 2             
-     */
-    @Deprecated
-    public Path add(
-        int position,
-        String component
-    ){
-        return this.addAll(
-            position, 
-            component
-        );
-    }
-
-    /**
-     * Adds a single component at a specified position within
-     * this path. Components of this path at or after the
-     * index of the new component are shifted up by one (away
-     * from index 0) to accommodate the new component.
-     * 
-     * @param       component
-     *              the component to add
-     * @param       position
-     *              the index at which to add the new component.
-     *              Must be in the range [0,size()].
-     * 
-     * @return      the updated path (not a new one)
-     * 
-     * @exception   ArrayIndexOutOfBoundsException
-     *              if position is outside the specified range
-     * @exception   RuntimeServiceException
-     *              if the component is null or empty
-     *              
-     * @deprecated Path modifications should be avoided in openMDX 2             
-     */
-    @Deprecated
-    public Path add(
-        int position,
-        PathComponent component
-    ){
-        return this.add(
-            position, 
-            component.toString()
-        );
-    }       
-    
-    /**
-     * Adds a single component at a specified position within
-     * this path. Components of this path at or after the
-     * index of the new component are shifted up by one (away
-     * from index 0) to accommodate the new component.
-     * 
-     * @param       crossReference
-     *              the component to add
-     * @param       position
-     *              the index at which to add the new component.
-     *              Must be in the range [0,size()].
-     * 
-     * @return      the updated path (not a new one)
-     * 
-     * @exception   ArrayIndexOutOfBoundsException
-     *              if position is outside the specified range
-     * @exception   RuntimeServiceException
-     *              if the component is null or empty
-     *              
-     * @deprecated Path modifications should be avoided in openMDX 2             
-     */
-    @Deprecated
-    public Path add(
-        int position,
-        Path crossReference
-    ){
-        return this.add(
-            position, 
-            crossReference.toComponent()
-        );
-    }       
-
-    
-
-    /**
-     * Removes a component from this path. The component of
-     * this path at the specified position is removed.
-     * Components with indexes greater than this position
-     * are shifted down (toward index 0) by one.
-     * 
-     * @param   position    the index of the component to remove.
-     *                  Must be in the range [0,size()).
-     * 
-     * @return  the component removed (a String)
-     * 
-     * @exception   ArrayIndexOutOfBoundsException
-     *              if position is outside the specified range
-     * @exception   RuntimeServiceException
-     *              if deleting the component would violate the
-     *              syntax rules of the path
-     *              
-     * @deprecated Path modifications should be avoided in openMDX 2             
-     */
-    @Deprecated
-    public String remove(
-        int position
-    ){
-        this.checkState();
-        int n = 0;
-        int lastPos = 0;
-        int len = this.components.length();
-        for(int i = 0; i < len; i++) {
-            if(this.components.charAt(i) == COMPONENT_SEPARATOR) {
-                if(n == position) {
-                    String component = this.components.substring(
-                        lastPos,
-                        i
-                    );
-                    this.components = 
-                        this.components.substring(0, lastPos) +
-                        this.components.substring(i + 1);
-                    this.size--;
-                    return component;
-                }
-                lastPos = i + 1;
-                n++;           
-            }
-        }
-        throw new ArrayIndexOutOfBoundsException(BAD_COMPONENT_NUMBER);                        
-    }
-
-    /**
-     * Set this path to the same value as another one.
-     * Subsequent changes to the components of this path will
-     * not affect the other one, and vice versa.
-     *
-     * @param       source
-     *              This path will have the same components as source.
-     *
-     * @exception   ArrayIndexOutOfBoundsException
-     *              if position is outside the specified range
-     * @exception   RuntimeServiceException
-     *              if deleting the component would violate the
-     *              syntax rules of the path
-     *              
-     * @deprecated Path modifications should be avoided in openMDX 2             
-     */     
-    @Deprecated
-    public void setTo(
-        Path source
-    ) {
-        this.checkState();
-        this.components = source.components;
-        this.size = source.size;
-        this.xri = source.xri;
-    }
+    //--------------------------------------------------------------------------
+    // XRI like
+    //--------------------------------------------------------------------------
 
     /**
      * Make this path object unmodifiable
      * 
      * @return the (now) unmodifiable path
+     * 
+     * @deprecated no need to lock anymore: proxy paths must not be locked and
+     * all other paths are read-only
      */
     public Path lock(
     ) {
-        this.readOnly = true;
         return this;
     }
 
@@ -1210,7 +964,13 @@ public final class Path
      */
     private boolean isCrossReferencePattern(
     ) {
-        return this.components.indexOf("$.") >= 0;
+    	return (
+    		this.base instanceof GeneralSegment &&
+    		this.base.isPattern()
+    	) || (
+    		this.parent != null &&
+			this.parent.isCrossReferencePattern()
+    	);
     }
 
     /**
@@ -1223,73 +983,84 @@ public final class Path
      * <li>Field "%" is only allowed as the last field of the pattern's last 
      *     path component and matches any number of fields and path components 
      *     regardless of their content.
-     * <li>Cross reference pattern {@link Wildcards#isLike(org.openxri.XRIReference, org.openxri.XRIReference)}
+     * <li>Cross reference pattern {@link Wildcards#pathMatchesPattern(org.openxri.XRIReference, org.openxri.XRIReference)}
      * </ul> 
      */
     public boolean isLike(
         Path pattern
     ){
         if(pattern.isCrossReferencePattern()) {
-            return XRI_2Marshaller.isLike(
+            return XRI_2Marshaller.pathMatchesPattern(
                 this.toXRI(),
                 pattern.toXRI()
             );
         } 
-        else {
-            int pos = 0;
-            int posPattern = 0;
-            int lenPattern = pattern.components.length();
-            while(true)  {
-                int index, starIndex;
-                if(
-                    (starIndex = pattern.components.indexOf(WILDCARD_COMPONENT_TERMINATOR, posPattern)) >= posPattern &&
-                    (index = pattern.components.lastIndexOf(':', starIndex)) >= posPattern
-                ) {
-                    int lenRegion = index - posPattern;
-                    if(!this.components.regionMatches(pos, pattern.components, posPattern, lenRegion)) {
-                        return false;
-                    }
-                    pos += lenRegion;
-                    lenRegion = starIndex - index - 1;
-                    if(!this.components.regionMatches(pos, pattern.components, index + 1, lenRegion)) {
-                        return false;
-                    }
-                    pos += lenRegion;
-                    pos = this.components.indexOf(COMPONENT_SEPARATOR, pos) + 1;            
-                    posPattern = starIndex + 2;
-                }
-                else if((index = pattern.components.indexOf(MATCHES_ALL_PATTERN, posPattern)) >= posPattern) {
-                    int lenRegion = index - posPattern;
-                    return this.components.regionMatches(pos, pattern.components, posPattern, lenRegion);                    
-                }
-                else {
-                    int lenRegion = lenPattern - posPattern;
-                    return 
-                        (pos + lenRegion == this.components.length()) &&
-                        this.components.regionMatches(pos, pattern.components, posPattern, lenRegion);
-                }
-            }
+        // Match Classic Wildcards
+        final XRISegment patternBase;
+        if(pattern.size > size) {
+        	if(!(
+        		pattern.size == size + 1 &&
+        		pattern.base instanceof ClassicWildcardMultiSegment &&
+        		((ClassicWildcardMultiSegment)pattern.base).discriminant().isEmpty()
+        	)) {
+        		return false;
+        	}
+        	patternBase = pattern.parent.base;
+        } else if (this.size == 0){
+        	return true;
+        } else {
+    		patternBase = pattern.base;
         }
+        final int nextSize;
+        if(pattern.size < this.size) {
+        	nextSize = pattern.size; 
+        	if(
+        		!(patternBase instanceof ClassicWildcardMultiSegment) ||
+        		!patternBase.toClassicRepresentation().endsWith("%")
+        	) {
+        		return false;
+        	}
+        } else {
+	        nextSize = this.size - 1; 
+	        if(!patternBase.matches(this.base)){
+	        	return false;
+	        }
+        }
+        return this.getPrefix(nextSize).isLike(pattern.getPrefix(nextSize));
     }
 
-    //--------------------------------------------------------------------------
     public boolean isPlaceHolder(
     ) {        
-        return this.components.indexOf(PLACEHOLDER_COMPONENT) >= 0;
+        return this.parent == null || this.getLastSegment() instanceof TransactionalSegment || this.parent.isPlaceHolder();
     }
     
-    //--------------------------------------------------------------------------
-    // Implements Iterable
-    //--------------------------------------------------------------------------
-
-    /* (non-Javadoc)
-     * @see java.lang.Iterable#iterator()
+    /**
+     * Tests whether the path refers to an object
+     *
+     * @return <code>true</code> if the path refers to an object
      */
-    public Iterator<String> iterator() {
-        return new SegmentIterator();
+    public boolean isObjectPath(){
+        return this.size % 2 == 1;
+    }
+    
+    /**
+     * Tests whether the path refers to a container
+     *
+     * @return <code>true</code> if the path refers to a container
+     */
+    public boolean isContainerPath(){
+        return this.size % 2 == 0;
     }
 
-
+    //--------------------------------------------------------------------------
+    // Implements Serializable
+    //--------------------------------------------------------------------------
+    
+    private Object readResolve() throws ObjectStreamException {
+    	return this.parent == null && this.base == null ? ROOT : this; 
+    }
+    
+    
     //--------------------------------------------------------------------------
     // Implements Cloneable
     //--------------------------------------------------------------------------
@@ -1300,40 +1071,14 @@ public final class Path
      * not affect the new copy, and vice versa.
      *
      * @return    a clone of this instance.
+     * 
+     * @deprecated usually there is no need to clone a path
      */
     @Override
+    @Deprecated
     public Object clone(
     ) {   
         return new Path(this);
-    }
-
-    //--------------------------------------------------------------------------
-    // Implements Serializable
-    //--------------------------------------------------------------------------
-
-    /**
-     * Save the components of the <tt>Path</tt> instance to a stream (that
-     * is, serialize it).
-     *
-     * @serialData The array containing the <tt>Path</tt> components is
-     *             emitted.
-     */
-    private void writeObject(
-        java.io.ObjectOutputStream stream
-    ) throws java.io.IOException {
-        stream.writeUTF(this.components);
-        stream.writeInt(this.size);
-    }
-
-    /**
-     * Reconstitute the <tt>Path</tt> instance from a stream (that is,
-     * deserialize it).
-     */
-    private void readObject(
-        java.io.ObjectInputStream stream
-    ) throws java.io.IOException, ClassNotFoundException {
-        this.components = stream.readUTF();
-        this.size = stream.readInt();
     }
 
     //--------------------------------------------------------------------------
@@ -1341,14 +1086,14 @@ public final class Path
     //--------------------------------------------------------------------------
 
     /**
-     * Provides the XRI representation of a path
+     * Provides legacy representation of a path
      *
-     * @return   the XRI 2 representation of a path
+     * @return legacy representation of a path
      */
     @Override
     public String toString(
     ){
-        return LEGACY_STRING_REPRESENTATION.booleanValue() ? toComponent() : toXRI(); 
+        return toXRI(); 
     }
 
     /**
@@ -1361,11 +1106,23 @@ public final class Path
      */
     @Override
     public boolean equals(
-        Object that
+        Object object
     ){
-        return this == that || (
-            that instanceof Path && this.components.equals(((Path)that).components)
-        );
+    	if(this == object) {
+    		return true;
+    	}
+    	if(object instanceof Path) {
+    		Path that = (Path) object;
+    		if(this.size == that.size) {
+    			if(this.size == 0) {
+    				return true;
+    			}
+    			if(this.base.equals(that.base)) {
+    				return this.parent.equals(that.parent);
+    			}
+    		}
+    	}
+		return false;
     }
 
     /**
@@ -1380,99 +1137,33 @@ public final class Path
     @Override
     public int hashCode(
     ) {
-        return this.components.hashCode();
+    	int h = hash;
+    	if (h == 0 && size > 0) {
+    		h = 31 * parent.hashCode() + base.hashCode();
+    		if(! isPlaceHolder()) {
+    			hash = h;
+    		}
+    	}	
+        return h;
     }
 
     
     //--------------------------------------------------------------------------
-    // Variables
+    // Class Segment List
     //--------------------------------------------------------------------------
 
-    /**
-     * The path's components
-     */
-    private transient String components;
-    private transient int size;
-    private transient String xri;
-    private static char COMPONENT_SEPARATOR = '\u0009';
-    private static String PLACEHOLDER_COMPONENT = COMPONENT_SEPARATOR + ":";
-    private static String MATCHES_ALL_PATTERN = "%" + COMPONENT_SEPARATOR;
-    private static String WILDCARD_COMPONENT_TERMINATOR = "*" + COMPONENT_SEPARATOR;
-    private static final String COMPONENT_SEPARATOR_STRING = Character.toString(COMPONENT_SEPARATOR);
-    private static final String[] EMPTY_COMPONENTS = {};
-    private static final Boolean LEGACY_STRING_REPRESENTATION = Boolean.TRUE; // avoid dead code warning
+    private class SegmentList extends AbstractList<XRISegment> {
 
-    /**
-     * Defines, whether the path can be modified or not
-     */
-    private transient boolean readOnly = false;
+		@Override
+		public XRISegment get(int index) {
+			return getSegment(index);
+		}
 
-    //--------------------------------------------------------------------------
-    // Constants
-    //--------------------------------------------------------------------------
-
-    /**
-     * Serial Version UID
-     */
-    static final long serialVersionUID = 8827631310993135122L;
-
-    /**
-     * An error message in case the number of a component is outside the
-     * allowed range.
-     */
-    final static private String BAD_COMPONENT_NUMBER =
-        "The component number must be in the range [0,size()]";
-
-    
-    //--------------------------------------------------------------------------
-    // Class SegmentIterator
-    //--------------------------------------------------------------------------
-
-    /**
-     * Segment Iterator
-     */
-    class SegmentIterator implements Iterator<String> {
-
-        /**
-         * The next element's index
-         */
-        int nextIndex = 0;
-
-        /**
-         * The current element's index
-         */
-        int currentIndex = -1;
-        
-        /* (non-Javadoc)
-         * @see java.util.Iterator#hasNext()
-         */
-        public boolean hasNext() {
-            return this.nextIndex < Path.this.size();
-        }
-
-        /* (non-Javadoc)
-         * @see java.util.Iterator#next()
-         */
-        public String next() {
-            return Path.this.get(
-                this.currentIndex = this.nextIndex++
-            );
-        }
-
-        /* (non-Javadoc)
-         * @see java.util.Iterator#remove()
-         * 
-         * @deprecated Path modifications should be avoided in openMDX 2             
-         */
-        @Deprecated
-        public void remove() {
-            if(this.currentIndex < 0) {
-                throw new IllegalStateException("No current component");
-            }
-            Path.this.remove(this.currentIndex);
-            this.currentIndex = -1;
-        }        
-        
+		@Override
+		public int size() {
+			return Path.this.size;
+		}
+    	
     }
-
+    
 }

@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2013, OMEX AG, Switzerland
+ * Copyright (c) 2004-2014, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -177,7 +177,7 @@ public class SlicedDbObject extends StandardDbObject {
     ) throws SQLException, ServiceException {
         if(this.database.configuration.normalizeObjectIds()) {
             String component = frs.getObject(this.database.OBJECT_OID).toString();
-            return isConvertible(component) ? this.database.configuration.buildResourceIdentifier(component, false).toString() : component;
+            return isConvertible(component) ? this.database.configuration.buildResourceIdentifier(component, false).toClassicRepresentation() : component;
         } else {
             return super.getObjectId(frs);
         }
@@ -457,7 +457,7 @@ public class SlicedDbObject extends StandardDbObject {
                     statement += columnNameTypeName;
                     statementParameters.add(
                         this.database.getObjectId(
-                            this.getReference().getBase()
+                            this.getReference().getLastSegment().toClassicRepresentation()
                         )
                     );
                     k++;
@@ -968,7 +968,7 @@ public class SlicedDbObject extends StandardDbObject {
                     facade.getObjectClass()
                 );
                 for(ModelElement_1_0 feature : getModel().getAttributeDefs(classDef, false, false).values()) {
-                    String featureName = (String)feature.objGetValue("name");                
+                    String featureName = (String)feature.getName();                
                     if(
                         !this.database.embeddedFeatures.containsKey(featureName) &&
                         this.database.isPersistent(feature) &&
@@ -1149,12 +1149,15 @@ public class SlicedDbObject extends StandardDbObject {
                 );
                 normalizedObjectFacade.addToAttributeValuesAsList(
                     this.database.toOid(name),
-                    parentObjectPath.getBase()
+                    parentObjectPath.getLastSegment().toClassicRepresentation()
                 );
             }
+            //
             // add (rid, oid) for all attributes with values of type path
+            //
+            Set<String> processedAttributes = TRUST_INTERNALIZATION ? null : new HashSet<String>();
             if(pathNormalizeLevel > 1) {    
-                for(
+                Attribute: for(
                     Iterator i = facade.getValue().keySet().iterator();
                     i.hasNext();
                 ) {
@@ -1164,17 +1167,31 @@ public class SlicedDbObject extends StandardDbObject {
                     ListIterator valuesIterator = null;
                     if(values instanceof SparseArray) {
                         SparseArray v = (SparseArray)values;
-                        firstValue = v.isEmpty() ?
-                            null :
-                                v.get(v.firstKey());
+                        firstValue = v.isEmpty() ? null : v.get(v.firstKey());
                         valuesIterator = v.populationIterator();
                     }
                     else if(values instanceof List) {
                         List v = (List)values;
-                        firstValue = v.isEmpty() ?
-                            null :
-                                v.get(0);     
+                        firstValue = v.isEmpty() ? null : v.get(0);     
                         valuesIterator = v.listIterator();
+                    }
+                    if(!TRUST_INTERNALIZATION && !processedAttributes.add(attributeName)){
+                        SysLog.error(
+                            "Object value contains duplicate key",
+                            BasicException.newStandAloneExceptionStack(
+                                BasicException.Code.DEFAULT_DOMAIN,
+                                BasicException.Code.ASSERTION_FAILURE,
+                                "Object value contains duplicate key",
+                                new BasicException.Parameter("path", facade.getPath()),
+                                new BasicException.Parameter("attributeNames", facade.getValue().keySet()),
+                                new BasicException.Parameter("processedAttributes", processedAttributes),
+                                new BasicException.Parameter("duplicateAttributeName", attributeName),
+                                new BasicException.Parameter("values", values),
+                                new BasicException.Parameter("firstValueClass", firstValue == null ? "null" : firstValue.getClass().getName()),
+                                new BasicException.Parameter("firstValue", firstValue)
+                            )
+                        );
+                        continue Attribute;
                     }
                     if(firstValue instanceof Path) {
                         while(valuesIterator.hasNext()) {
@@ -1185,7 +1202,7 @@ public class SlicedDbObject extends StandardDbObject {
                                     BasicException.Code.ASSERTION_FAILURE, 
                                     "value of attribute expected to be instance of path",
                                     new BasicException.Parameter("attribute", attributeName),
-                                    new BasicException.Parameter("value class", (v == null ? "null" : v.getClass().getName())),
+                                    new BasicException.Parameter("value class", v == null ? "null" : v.getClass().getName()),
                                     new BasicException.Parameter("value", v)
                                 );
                             }
@@ -1201,7 +1218,7 @@ public class SlicedDbObject extends StandardDbObject {
                             );
                             normalizedObjectFacade.addToAttributeValuesAsList(
                                 this.database.toOid(name),
-                                objectPath.getBase()
+                                objectPath.getLastSegment().toClassicRepresentation()
                             );
                             // add parent of path value
                             if(pathNormalizeLevel > 2) {
@@ -1217,7 +1234,7 @@ public class SlicedDbObject extends StandardDbObject {
                                     );
                                     normalizedObjectFacade.addToAttributeValuesAsList(
                                         this.database.toOid(name + "Parent"),
-                                        parentPath.getBase()
+                                        parentPath.getLastSegment().toClassicRepresentation()
                                     );
                                 }
                             }
@@ -1233,6 +1250,12 @@ public class SlicedDbObject extends StandardDbObject {
     protected static final String COLUMN_TYPE_NAME = "type_name";
 
     protected static final Map dbObjectColumns = new HashMap();
+    
+    /**
+     * Tells whether the internalization shall be trusted or validated
+     */
+    private final static boolean TRUST_INTERNALIZATION = Boolean.getBoolean("org.openmdx.application.dataprovider.layer.persistence.jdbc.SlicedDbObject.TrustInternalization");
+    		
 
 }
 

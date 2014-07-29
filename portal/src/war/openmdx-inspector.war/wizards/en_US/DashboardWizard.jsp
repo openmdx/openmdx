@@ -1,18 +1,15 @@
-﻿<%@  page contentType="text/html;charset=UTF-8" language="java" pageEncoding="UTF-8" %><%
+<%@  page contentType="text/html;charset=UTF-8" language="java" pageEncoding="UTF-8" %><%
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: DashboardWizard.jsp,v 1.9 2012/07/08 13:07:17 wfro Exp $
  * Description: DashboardWizard.jsp
- * Revision:    $Revision: 1.9 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2012/07/08 13:07:17 $
  * ====================================================================
  *
  * This software is published under the BSD license
  * as listed below.
  *
- * Copyright (c) 2004-2011, OMEX AG, Switzerland
+ * Copyright (c) 2004-2014, OMEX AG, Switzerland
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or
@@ -66,7 +63,7 @@ org.openmdx.kernel.id.*,
 org.openmdx.base.accessor.jmi.cci.*,
 org.openmdx.portal.servlet.*,
 org.openmdx.portal.servlet.attribute.*,
-org.openmdx.portal.servlet.view.*,
+org.openmdx.portal.servlet.component.*,
 org.openmdx.portal.servlet.control.*,
 org.openmdx.portal.servlet.wizards.*,
 org.openmdx.base.naming.*
@@ -311,10 +308,10 @@ org.openmdx.base.naming.*
 	<input type="hidden" name="<%= Action.PARAMETER_REQUEST_ID %>" value="<%= requestId %>" />
 	<input type="hidden" name="<%= Action.PARAMETER_OBJECTXRI %>" value="<%= objectXri %>" />
 	<input type="hidden" id="Command" name="Command" value="" />									
-	<table cellspacing="8" class="tableLayout">
+	<table cellspacing="8" class="<%= CssClass.tableLayout %>">
 		<tr>
-			<td class="cellObject">
-				<div class="panel" id="panel<%= FORM_NAME %>" style="display:block">
+			<td class="<%= CssClass.cellObject %>">
+				<div class="<%= CssClass.panel %>" id="panel<%= FORM_NAME %>" style="display:block">
 <%
 					Control dashboard = view.createControl(
 						"DashboardEdit",
@@ -341,10 +338,10 @@ org.openmdx.base.naming.*
 					}
 %>				
 				</select>
-				<input type="submit" class="abutton" name="<%= COMMAND_ADD %>" tabindex="9020" value="+" onclick="javascript:$('Command').value=this.name;" />
+				<input type="submit" class="<%= CssClass.btn.toString() + " " + CssClass.btnDefault.toString() %>" name="<%= COMMAND_ADD %>" tabindex="9020" value="+" onclick="javascript:$('Command').value=this.name;" />
 				&nbsp;&nbsp;&nbsp;&nbsp;
-				<input type="submit" class="abutton" name="<%= COMMAND_APPLY %>" id="<%= COMMAND_APPLY %>" tabindex="9000" value="<%= COMMAND_APPLY %>" onclick="javascript:$('Command').value=this.name;" />
-				<input type="submit" class="abutton" name="<%= COMMAND_CANCEL %>" id="<%= COMMAND_CANCEL %> %>" tabindex="9010" value="<%= app.getTexts().getCancelTitle() %>" onclick="javascript:$('Command').value=this.name;" />
+				<input type="submit" class="<%= CssClass.btn.toString() + " " + CssClass.btnDefault.toString() %>" name="<%= COMMAND_APPLY %>" id="<%= COMMAND_APPLY %>" tabindex="9000" value="<%= COMMAND_APPLY %>" onclick="javascript:$('Command').value=this.name;" />
+				<input type="submit" class="<%= CssClass.btn.toString() + " " + CssClass.btnDefault.toString() %>" name="<%= COMMAND_CANCEL %>" id="<%= COMMAND_CANCEL %> %>" tabindex="9010" value="<%= app.getTexts().getCancelTitle() %>" onclick="javascript:$('Command').value=this.name;" />
 			</td>
 		</tr>
 	</table>

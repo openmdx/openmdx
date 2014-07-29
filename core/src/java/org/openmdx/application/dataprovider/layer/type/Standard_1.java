@@ -364,7 +364,7 @@ public class Standard_1 extends OperationAwareLayer_1 {
                 Object_2Facade facade = Facades.asObject(object);
                 ModelElement_1_0 objClassDef = Standard_1.this.getObjectClass(object);
                 SysLog.trace("create object", object);
-                SysLog.trace("create objClass", objClassDef.objGetValue("qualifiedName"));
+                SysLog.trace("create objClass", objClassDef.getQualifiedName());
                 prepareAndValidateCreateRequest(facade, objClassDef);
                 super.create(
                     ispec, 
@@ -461,7 +461,7 @@ public class Standard_1 extends OperationAwareLayer_1 {
                 ModelElement_1_0 operationDef = null;
                 try {
                     operationDef = getModel().getElement(
-                        classDef.objGetValue("qualifiedName") + ":" + operationName
+                        classDef.getQualifiedName() + ":" + operationName
                     );
                 }
                 catch(Exception e) {
@@ -477,7 +477,7 @@ public class Standard_1 extends OperationAwareLayer_1 {
                         j.hasNext();
                     ) {
                         ModelElement_1_0 e = getModel().getElement(j.next());
-                        if("in".equals(e.objGetValue("name"))) {
+                        if("in".equals(e.getName())) {
                             inParamDef = e;
                         }
                     }

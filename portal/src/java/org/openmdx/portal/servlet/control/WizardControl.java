@@ -8,7 +8,7 @@
  * This software is published under the BSD license
  * as listed below.
  * 
- * Copyright (c) 2004-2007, OMEX AG, Switzerland
+ * Copyright (c) 2004-2014, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -54,23 +54,30 @@ package org.openmdx.portal.servlet.control;
 
 import java.io.Serializable;
 
-import org.openmdx.base.exception.ServiceException;
-import org.openmdx.kernel.log.SysLog;
 import org.openmdx.portal.servlet.Action;
-import org.openmdx.portal.servlet.ViewPort;
+import org.openmdx.portal.servlet.PortalExtension_1_0;
 import org.openmdx.portal.servlet.wizards.WizardDefinition;
 
-//-----------------------------------------------------------------------------
-public class WizardControl
-    extends Control
-    implements Serializable {
+/**
+ * WizardControl
+ *
+ */
+public abstract class WizardControl extends Control implements Serializable {
   
-    //-------------------------------------------------------------------------
+    /**
+     * Constructor.
+     * 
+     * @param id
+     * @param locale
+     * @param localeAsIndex
+     * @param controlFactory
+     * @param wizardDefinitions
+     */
     public WizardControl(
         String id,
         String locale,
         int localeAsIndex,
-        ControlFactory controlFactory,
+        PortalExtension_1_0.ControlFactory controlFactory,
         WizardDefinition[] wizardDefinitions
     ) {
         super(
@@ -78,21 +85,14 @@ public class WizardControl
             locale,
             localeAsIndex
         );
-        this.wizardTabs = new WizardTabControl[wizardDefinitions.length];
-        for(int i = 0; i < wizardDefinitions.length; i++) {
-            this.wizardTabs[i] = controlFactory.createWizardTabControl(
-                null,
-                locale,
-                localeAsIndex,
-                null,
-                wizardDefinitions[i],
-                WIZARD_PANE_INDEX,
-                i                
-            );
-        }
     }
-  
-    //-----------------------------------------------------------------------
+
+    /**
+     * Get action for invoking wizard.
+     * 
+     * @param objectXRI
+     * @return
+     */
     public Action getInvokeWizardAction(
         String objectXRI
     ) {
@@ -109,49 +109,9 @@ public class WizardControl
     }
     
     //-------------------------------------------------------------------------
-    @Override
-    public void paint(
-        ViewPort p,
-        String frame,
-        boolean forEditing
-    ) throws ServiceException {
-    	SysLog.detail("> paint");
-
-        // Wizard menu entries
-        if(frame == null) {
-            if(this.wizardTabs.length > 0) {            
-                p.write("<li><a href=\"#\">Wizards&nbsp;&nbsp;&nbsp;</a>");
-                p.write("  <ul onclick=\"this.style.left='-999em';\" onmouseout=\"this.style.left='';\">");
-                for(
-                    int i = 0; 
-                    i < this.wizardTabs.length; 
-                    i++
-                ) {
-                    this.wizardTabs[i].paint(
-                        p,
-                        frame,
-                        forEditing
-                   );
-                }
-                p.write("  </ul>");
-                p.write("</li>");
-            }
-        }                   
-        SysLog.detail("< paint");        
-    }
-
-    //-------------------------------------------------------------------------
-    public WizardTabControl[] getWizardTabControls(
-    ) {
-    	return this.wizardTabs;
-    }
-    
+    // Members
     //-------------------------------------------------------------------------
     private static final long serialVersionUID = -7785589508766566304L;
-    
-    private static final int WIZARD_PANE_INDEX = 3000;
-    
-    private final WizardTabControl[] wizardTabs;
 }
 
 //--- End of File -----------------------------------------------------------

@@ -157,16 +157,16 @@ public class HardWiredObjects_1 extends Standard_1 {
         Path objectId,
         Map<String,MappedRecord> formats
     ) throws ServiceException {
-        MappedRecord original = formats.get(objectId.getBase());
+        MappedRecord original = formats.get(objectId.getLastSegment().toClassicRepresentation());
         if(original == null) {
-            if("CR20020187".equals(objectId.getBase())) {
+            if("CR20020187".equals(objectId.getLastSegment().toClassicRepresentation())) {
                 throw new RuntimeException("CR20020187");
             } else {
                 throw new ServiceException(
                     BasicException.Code.DEFAULT_DOMAIN,
                     BasicException.Code.NOT_FOUND, 
                     "Format not found",
-                    new BasicException.Parameter("path", objectId)
+                    new BasicException.Parameter("xri", objectId)
                 );        
             }
         }

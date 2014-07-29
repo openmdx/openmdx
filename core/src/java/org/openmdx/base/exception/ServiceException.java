@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2011, OMEX AG, Switzerland
+ * Copyright (c) 2004-2014, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -165,7 +165,7 @@ public final class ServiceException
      * @return Throwable  The exception cause.
      */
     @Override
-    public final BasicException getCause(
+    public final synchronized BasicException getCause(
     ){
         return (BasicException) super.getCause();
     }
@@ -202,7 +202,7 @@ public final class ServiceException
      */
     @Override
     public void printStackTrace(PrintStream s) {
-        getCause().printStackTrace(s);
+        getCause().printStackTrace(getClass().getName(), s);
     }
 
     /* (non-Javadoc)
@@ -210,7 +210,7 @@ public final class ServiceException
      */
     @Override
     public void printStackTrace(PrintWriter s) {
-        getCause().printStackTrace(s);
+        getCause().printStackTrace(getClass().getName(), s);
     }
 
     /* (non-Javadoc)

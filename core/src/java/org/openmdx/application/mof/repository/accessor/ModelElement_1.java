@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2013, OMEX AG, Switzerland
+ * Copyright (c) 2004-2014, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -103,19 +103,15 @@ public class ModelElement_1 implements ModelElement_1_0, Delegating_1_0<ObjectRe
     }
 
     //-------------------------------------------------------------------------
-    /* (non-Javadoc)
-     * @see org.openmdx.base.accessor.spi.Delegating_1_0#objGetDelegate()
-     */
-    @Override
-    public ObjectRecord objGetDelegate(
-    ) throws ServiceException {
-        return this.data.getDelegate();
-    }
-
-    //-------------------------------------------------------------------------
     public Model_1 getModel(
     ) {
         return this.model;
+    }
+
+    @Override
+    public ObjectRecord objGetDelegate(
+    ){
+        return this.data.getDelegate();
     }
 
     //-------------------------------------------------------------------------
@@ -393,15 +389,15 @@ public class ModelElement_1 implements ModelElement_1_0, Delegating_1_0<ObjectRe
     ) throws ServiceException {
         if(this.isReferenceStoredAsAttribute == null){
             ModelElement_1_0 referencedEnd = model.findElement( 
-                this.objGetValue("referencedEnd")
+                this.getReferencedEnd()
             );
             ModelElement_1_0 exposedEnd = model.findElement(
-                this.objGetValue("exposedEnd")
+                this.getExposedEnd()
             );
             List qualifierTypes = referencedEnd.objGetList("qualifierType");
             this.isReferenceStoredAsAttribute = Boolean.valueOf(
-                AggregationKind.NONE.equals(referencedEnd.objGetValue("aggregation")) &&
-                AggregationKind.NONE.equals(exposedEnd.objGetValue("aggregation")) &&
+                AggregationKind.NONE.equals(referencedEnd.getAggregation()) &&
+                AggregationKind.NONE.equals(exposedEnd.getAggregation()) &&
                 (qualifierTypes.isEmpty() || this.model.isPrimitiveType(qualifierTypes.get(0)))
             );
         }
@@ -416,7 +412,7 @@ public class ModelElement_1 implements ModelElement_1_0, Delegating_1_0<ObjectRe
     ) throws ServiceException {
         return this.data.attributeValue(featureName);
     }
-        
+
     /* (non-Javadoc)
      * @see org.openmdx.base.mof.cci.ModelElement_1_0#getValues(java.lang.String)
      */
@@ -426,7 +422,6 @@ public class ModelElement_1 implements ModelElement_1_0, Delegating_1_0<ObjectRe
         return this.data.attributeValuesAsList(featureName);
     }
 
-    
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.cci.DataObject_1_0#objGetMap(java.lang.String)
      */
@@ -828,10 +823,180 @@ public class ModelElement_1 implements ModelElement_1_0, Delegating_1_0<ObjectRe
     @Override
     public String toString(
     ) {
-        return this.data == null ? null : this.data.getPath() + " is " + this.data.getObjectClass() + " having attributes " + this.data.getValue().keySet().toString();
+        return this.data == null ? "" : this.data.getPath() + " is " + this.data.getObjectClass() + " having attributes " + this.data.getValue().keySet().toString();
+    }
+    
+    
+
+    /* (non-Javadoc)
+     * @see org.openmdx.base.mof.cci.ModelElement_1_0#isInstanceOf(java.lang.String)
+     */
+    @Override
+    public boolean isInstanceOf(String qualifiedName) throws ServiceException {
+        for(Object supertype : objGetList("object_instanceof")){
+            if(qualifiedName.equals(supertype)) {
+                return true;
+            }
+        }
+        return false;
     }
 
-    //-------------------------------------------------------------------------
+	/* (non-Javadoc)
+	 * @see org.openmdx.base.mof.cci.ModelElement_1_0#getName()
+	 */
+	@Override
+	public String getName(
+	) throws ServiceException {
+		if(this.name == null) {
+			this.name = (String)this.objGetValue("name");
+		}
+		return this.name;
+	}
+
+	@Override
+	public String getAggregation(
+	) throws ServiceException {
+		if(this.aggregation == null) {
+			this.aggregation = (String)this.objGetValue("aggregation");
+		}
+		return this.aggregation;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.openmdx.base.mof.cci.ModelElement_1_0#getReferencedEnd()
+	 */
+	@Override
+	public Path getReferencedEnd(
+	) throws ServiceException {
+		if(this.referencedEnd == null) {
+			this.referencedEnd = (Path)objGetValue("referencedEnd");
+		}
+		return this.referencedEnd;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.openmdx.base.mof.cci.ModelElement_1_0#getExposedEnd()
+	 */
+	@Override
+	public Path getExposedEnd(
+	) throws ServiceException {
+		if(this.exposedEnd == null) {
+			this.exposedEnd = (Path)objGetValue("exposedEnd");
+		}
+		return this.exposedEnd;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.openmdx.base.mof.cci.ModelElement_1_0#getContainer()
+	 */
+	@Override
+	public Path getContainer(
+	) throws ServiceException {
+		if(this.container == null) {
+			this.container = (Path)objGetValue("container");
+		}
+		return this.container;
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.openmdx.base.mof.cci.ModelElement_1_0#isDerived()
+	 */
+	@Override
+	public Boolean isDerived(
+	) throws ServiceException {
+		if(this.isDerived == null) {
+			this.isDerived = (Boolean)objGetValue("isDerived");
+		}
+		return this.isDerived;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.openmdx.base.mof.cci.ModelElement_1_0#isChangeable()
+	 */
+	@Override
+	public Boolean isChangeable(
+	) throws ServiceException {
+		if(this.isChangeable == null) {
+			this.isChangeable = (Boolean)objGetValue("isChangeable");
+		}
+		return this.isChangeable;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.openmdx.base.mof.cci.ModelElement_1_0#isAbstract()
+	 */
+	@Override
+	public Boolean isAbstract(
+	) throws ServiceException {
+		if(this.isAbstract == null) {
+			this.isAbstract = (Boolean)objGetValue("isAbstract");
+		}
+		return this.isAbstract;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.openmdx.base.mof.cci.ModelElement_1_0#getType()
+	 */
+	@Override
+	public Path getType(
+	) throws ServiceException {	
+		if(this.type == null) {
+			this.type = (Path)objGetValue("type");
+		}
+		return this.type;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.openmdx.base.mof.cci.ModelElement_1_0#getQualifierType()
+	 */
+	@Override
+	public Path getQualifierType(
+	) throws ServiceException {	
+		if(this.qualifierType == null) {
+			this.qualifierType = (Path)objGetValue("qualifierType");
+		}
+		return this.qualifierType;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.openmdx.base.mof.cci.ModelElement_1_0#getQualifiedName()
+	 */
+	@Override
+	public String getQualifiedName(
+	) throws ServiceException {
+		if(this.qualifiedName == null) {
+			this.qualifiedName = (String)objGetValue("qualifiedName");
+		}
+		return this.qualifiedName;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.openmdx.base.mof.cci.ModelElement_1_0#getMultiplicity()
+	 */
+	@Override
+	public String getMultiplicity(
+	) throws ServiceException {
+		if(this.multiplicity == null) {
+			this.multiplicity = (String)objGetValue("multiplicity");
+		}
+		return this.multiplicity;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.openmdx.base.mof.cci.ModelElement_1_0#isReference()
+	 */
+	@Override
+	public boolean isReference(
+	) throws ServiceException {
+		if(this.isReference == null) {
+	    	this.isReference =
+	    		this.isReferenceType() ||
+	    		(this.getExposedEnd() != null && this.getReferencedEnd() != null);
+	    }
+		return this.isReference;	
+	}
+
+	//-------------------------------------------------------------------------
     // Variables
     //-------------------------------------------------------------------------
     private final Object_2Facade data;
@@ -855,6 +1020,20 @@ public class ModelElement_1 implements ModelElement_1_0, Delegating_1_0<ObjectRe
     private Boolean isEnumerationType = null;
     private Boolean isImportType = null;
     private Boolean isParameterType = null;
+    private Boolean isReference = null;
+    private String name = null;
+    private String qualifiedName = null;
+    private String aggregation = null;
+    private Path referencedEnd = null;
+    private Path exposedEnd = null;
+    private Path container = null;
+    private Boolean isDerived = null;
+    private Boolean isChangeable = null;
+    private Boolean isAbstract = null;
+    private Path type = null;
+    private Path qualifierType = null;
+    private String multiplicity = null;
+    
 }
 
 //--- End of File -----------------------------------------------------------

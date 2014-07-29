@@ -191,8 +191,7 @@ public class UnitOfWork_1 implements Serializable, UnitOfWork {
     private Synchronization entityManagerSynchronization = null;
     
     /**
-     * The transaction time represents the date and time when the non-
-     * optimistic part of a unit of work began.
+     * Defines when the unit of work did start.
      */
     private Date transactionTime = null;
 

@@ -97,6 +97,7 @@ public class ExceptionMapper extends AbstractMapper {
         List<AttributeDef> attributes = this.exceptionDef.getParameters();
         this.pw.println("package " + this.getNamespace(namespacePrefix) + ";");
         this.pw.println();
+        this.pw.println("@SuppressWarnings(\"serial\")");
         this.pw.println("public class " + this.exceptionDef.getName() );
         this.pw.print("  extends ");
         if(this.getFormat() == Format.JMI1) {

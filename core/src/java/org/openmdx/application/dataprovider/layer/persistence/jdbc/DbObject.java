@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2012, OMEX AG, Switzerland
+ * Copyright (c) 2004-2014, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -132,8 +132,8 @@ public abstract class DbObject implements Serializable {
 		this.conn = conn;
 		this.database = database;
 		this.resourceIdentifier = accessPath;
-		if(accessPath.size() % 2 == 1) {
-			this.objectId = accessPath.getBase();
+		if(accessPath.isObjectPath()) {
+			this.objectId = accessPath.getLastSegment().toClassicRepresentation();
 			this.reference = accessPath.getParent();
 		}
 		else {

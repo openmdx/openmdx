@@ -60,6 +60,7 @@ import org.openmdx.application.mof.mapping.cci.ElementDef;
 import org.openmdx.application.mof.mapping.cci.MapperTemplate;
 import org.openmdx.application.mof.mapping.cci.MetaData_1_0;
 import org.openmdx.application.mof.mapping.cci.OperationDef;
+import org.openmdx.application.mof.mapping.cci.ReferenceDef;
 import org.openmdx.application.mof.mapping.cci.StructuralFeatureDef;
 import org.openmdx.application.mof.mapping.java.metadata.Visibility;
 import org.openmdx.application.mof.mapping.spi.MapperUtils;
@@ -302,6 +303,22 @@ public abstract class AbstractMapper
     }
     
     // -----------------------------------------------------------------------
+    protected boolean requiresDowncast(
+    	StructuralFeatureDef featureDef
+    ) throws ServiceException {
+    	if(getFormat() == Format.JPA3) {
+    		if(featureDef instanceof ReferenceDef) {
+    			ReferenceDef referenceDef = (ReferenceDef) featureDef;
+    			return !referenceDef.isComposition() && !referenceDef.isShared(); 
+    		} else {
+    			return true;
+    		}
+    	} else {
+        	return false;
+    	}
+    }
+    
+    // -----------------------------------------------------------------------
     protected String printAnnotationAndReturnCast(
         StructuralFeatureDef featureDef, 
         String collectionClass
@@ -310,6 +327,9 @@ public abstract class AbstractMapper
         if(this.model.isPrimitiveType(qualifiedTypeName)) {
             return "";
         } else { 
+            if(requiresDowncast(featureDef)) {
+                this.pw.println("  @SuppressWarnings(\"unchecked\")");
+            } 
             return '(' + (
                 collectionClass == null ? "T" : collectionClass + "<T>"
             ) + ')';
@@ -317,7 +337,7 @@ public abstract class AbstractMapper
     }
 
     // -----------------------------------------------------------------------
-    protected String printAnnotationAndReturnMapCast(
+    protected final String printAnnotationAndReturnMapCast(
         StructuralFeatureDef featureDef, 
         Class<?> keyClass
     ) throws ServiceException {
@@ -923,7 +943,7 @@ public abstract class AbstractMapper
     protected static boolean isDerived(
         ModelElement_1_0 modelElement
     ) throws ServiceException {
-        return Boolean.TRUE.equals(modelElement.objGetValue("isDerived"));
+        return Boolean.TRUE.equals(modelElement.isDerived());
     }
     
     // -----------------------------------------------------------------------

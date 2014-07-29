@@ -199,7 +199,8 @@ public abstract class AbstractUnitOfWork_1 implements UnitOfWork {
     @Override
     public boolean isActive(
     ) {
-        return this.getDelegate().isActive();
+        UnitOfWork delegate = this.getDelegate();
+        return delegate != null && delegate.isActive();
     }
 
     @Override

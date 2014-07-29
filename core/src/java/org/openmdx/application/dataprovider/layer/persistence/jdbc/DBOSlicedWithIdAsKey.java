@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2013, OMEX AG, Switzerland
+ * Copyright (c) 2004-2014, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -126,7 +126,7 @@ extends SlicedDbObject
         this.objectIdColumn.add(database.OBJECT_ID);
         if(isExtent) {
             this.getReferenceValues().clear();
-            String base = accessPath.getBase();
+            String base = accessPath.getLastSegment().toClassicRepresentation();
             this.getReferenceValues().add(
                 base.equals("%") || base.equals(":*") ? 
                     rid + "/%" : 
@@ -229,7 +229,7 @@ extends SlicedDbObject
         FastResultSet frs
     ) throws SQLException {
         if(this.database.configuration.normalizeObjectIds()) {
-            return getResourceIdentifier().getBase();
+            return getResourceIdentifier().getLastSegment().toClassicRepresentation();
         } else {
             String objectId = (String)frs.getObject("object_id");
             if(objectId == null) {
@@ -454,11 +454,11 @@ extends SlicedDbObject
         if(this.database.isSetSizeColumns()) {
             ModelElement_1_0 classDef = model.getElement(facade.getObjectClass());
             for(ModelElement_1_0 feature : model.getAttributeDefs(classDef, false, false).values()) {
-                String featureName = (String)feature.objGetValue("name");
+                String featureName = (String)feature.getName();
                 if(
                     !this.database.embeddedFeatures.containsKey(featureName) &&
                     this.database.isPersistent(feature) &&
-                    ModelHelper.isChangeable(feature) &
+                    ModelHelper.isChangeable(feature) &&
                     ModelHelper.getMultiplicity(feature).isMultiValued()
                 ){
                     facade.replaceAttributeValuesAsListBySingleton(
@@ -503,7 +503,7 @@ extends SlicedDbObject
                         conn, 
                         parentObjectPath, 
                         true 
-                    ) + "/" + parentObjectPath.getBase()
+                    ) + "/" + parentObjectPath.getLastSegment().toClassicRepresentation()
                 );
             }
             // Add id for all attributes with values of type path
@@ -545,7 +545,7 @@ extends SlicedDbObject
                                     conn, 
                                     objectPath, 
                                     true
-                                ) + "/" + objectPath.getBase()
+                                ) + "/" + objectPath.getLastSegment().toClassicRepresentation()
                             );
                             // Add parent id of path value
                             if(pathNormalizeLevel > 2) {
@@ -557,7 +557,7 @@ extends SlicedDbObject
                                             conn, 
                                             parentPath, 
                                             true
-                                        ) + "/" + parentPath.getBase()
+                                        ) + "/" + parentPath.getLastSegment().toClassicRepresentation()
                                     );
                                 }
                             }
@@ -632,7 +632,7 @@ extends SlicedDbObject
         Path path
     ) throws ServiceException {
         Object rid = this.database.getReferenceId(this.conn, path, true);
-        String pathComponentQuery = path.getBase();
+        String pathComponentQuery = path.getLastSegment().toClassicRepresentation();
         return pathComponentQuery.startsWith(":") && pathComponentQuery.endsWith("*") ? 
             rid + "/" + pathComponentQuery.substring(1, pathComponentQuery.length() - 1) + '%' : 
             rid + "/" + pathComponentQuery;

@@ -79,6 +79,11 @@ public class SharedConfigurationEntries {
   static public final String DATABASE_CONNECTION_FACTORY = "datasource";
 
   /**
+   * The DATABASE_CONNECTION_FACTORY_NAME configuration entry  
+   */
+  static public final String DATABASE_CONNECTION_FACTORY_NAME = "datasourceName";
+  
+  /**
    * Key for a JCA <code>ConnectionFactory</code> instance  
    */
   static public final String DATAPROVIDER_CONNECTION_FACTORY = "dataprovider";

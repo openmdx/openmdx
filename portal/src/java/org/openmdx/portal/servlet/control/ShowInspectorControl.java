@@ -8,7 +8,7 @@
  * This software is published under the BSD license
  * as listed below.
  * 
- * Copyright (c) 2004-2012, OMEX AG, Switzerland
+ * Copyright (c) 2004-2014, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -54,14 +54,16 @@ package org.openmdx.portal.servlet.control;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Iterator;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.kernel.log.SysLog;
+import org.openmdx.portal.servlet.PortalExtension_1_0;
 import org.openmdx.portal.servlet.ViewPort;
 import org.openmdx.portal.servlet.WebKeys;
+import org.openmdx.portal.servlet.wizards.WizardDefinition;
 import org.openmdx.portal.servlet.wizards.WizardDefinitionFactory;
 
 /**
@@ -78,8 +80,8 @@ public class ShowInspectorControl extends InspectorControl implements Serializab
      * @param locale
      * @param localeAsIndex
      * @param controlFactory
-     * @param wizardFactory
-     * @param inspector
+     * @param wizardDefinitionFactory
+     * @param inspectorDef
      * @param forClass
      */
     public ShowInspectorControl(
@@ -87,9 +89,9 @@ public class ShowInspectorControl extends InspectorControl implements Serializab
         int perspective,
         String locale,
         int localeAsIndex,
-        ControlFactory controlFactory,
-        WizardDefinitionFactory wizardFactory,
-        org.openmdx.ui1.jmi1.Inspector inspector,
+        PortalExtension_1_0.ControlFactory controlFactory,
+        WizardDefinitionFactory wizardDefinitionFactory,
+        org.openmdx.ui1.jmi1.Inspector inspectorDef,
         String forClass
     ) {
         super(
@@ -97,66 +99,169 @@ public class ShowInspectorControl extends InspectorControl implements Serializab
             locale, 
             localeAsIndex,
             controlFactory,
-            inspector
+            inspectorDef
         );
         SysLog.detail("Preparing operation and reference panes");
-        List<Object> paneOp = new ArrayList<Object>();
-        List<Object> paneRef = new ArrayList<Object>();
-        for(Iterator i = inspector.getMember().iterator(); i.hasNext();) {
-            Object pane = i.next();
+        List<org.openmdx.ui1.jmi1.OperationPane> paneOps = new ArrayList<org.openmdx.ui1.jmi1.OperationPane>();
+        List<org.openmdx.ui1.jmi1.ReferencePane> paneRefs = new ArrayList<org.openmdx.ui1.jmi1.ReferencePane>();
+        for(Object pane: inspectorDef.getMember()) {
             if (pane instanceof org.openmdx.ui1.jmi1.OperationPane) {
-                paneOp.add(pane);
-            }
-            else if (pane instanceof org.openmdx.ui1.jmi1.ReferencePane) {
-                if(((org.openmdx.ui1.jmi1.ReferencePane)pane).getMember().size() > 0) {
-                    paneRef.add(pane);
+                paneOps.add((org.openmdx.ui1.jmi1.OperationPane)pane);
+            } else if (pane instanceof org.openmdx.ui1.jmi1.ReferencePane) {
+                if(!((org.openmdx.ui1.jmi1.ReferencePane)pane).getMember().isEmpty()) {
+                    paneRefs.add((org.openmdx.ui1.jmi1.ReferencePane)pane);
                 }
             }
         }
-        this.paneOp = (org.openmdx.ui1.jmi1.OperationPane[])paneOp.toArray(new org.openmdx.ui1.jmi1.OperationPane[paneOp.size()]);
-        this.paneRef = (org.openmdx.ui1.jmi1.ReferencePane[])paneRef.toArray(new org.openmdx.ui1.jmi1.ReferencePane[paneRef.size()]);
         // Operation pane
         SysLog.detail("Preparing operation panes");
         List<OperationPaneControl> operationPaneControls = new ArrayList<OperationPaneControl>();
-        for (int i = 0; i < this.paneOp.length; i++) {
-            org.openmdx.ui1.jmi1.OperationPane pane = this.paneOp[i];
+        int index = 0;
+        for(org.openmdx.ui1.jmi1.OperationPane pane: paneOps) {
             operationPaneControls.add(
-                controlFactory.createOperationPaneControl(
+                this.newUiOperationPaneControl(
                     pane.refGetPath().getBase(), 
                     locale,
                     localeAsIndex,
-                    pane, 
-                    i,
+                    controlFactory,
+                    pane,
+                    wizardDefinitionFactory,                    
+                    index,
                     forClass
                 )
             );
+            index++;
         }
-        this.operationPaneControl = (OperationPaneControl[])operationPaneControls.toArray(
-            new OperationPaneControl[operationPaneControls.size()]
-        );
+        this.operationPaneControls = operationPaneControls;
         // Reference pane
         SysLog.detail("Preparing reference panes");
-        this.referencePaneControl = new ReferencePaneControl[this.paneRef.length];
-        for(int i = 0; i < this.referencePaneControl.length; i++) {
-            this.referencePaneControl[i] = controlFactory.createReferencePaneControl(
-            	this.paneRef[i].refGetPath().getBase(), 
-                perspective,
-                locale, 
-                localeAsIndex,
-                this.paneRef[i], 
-                i, 
-                forClass
-            );
+        List<ReferencePaneControl> referencePaneControls = new ArrayList<ReferencePaneControl>();
+        index = 0;
+        for(org.openmdx.ui1.jmi1.ReferencePane paneRef: paneRefs) {
+            referencePaneControls.add(
+            	this.newUiReferencePaneControl(
+	            	paneRef.refGetPath().getBase(), 
+	                perspective,
+	                locale, 
+	                localeAsIndex,
+	                controlFactory,
+	                paneRef,
+	                forClass,
+	                index
+	            )
+	        );
+            index++;
         }
+        this.referencePaneControls = referencePaneControls;
         // Wizards
         SysLog.detail("Preparing wizards");
-        this.wizardControl = controlFactory.createWizardControl(
-            null, 
+        this.wizardControl = this.newUiWizardControl(
+            this.uuidAsString(), 
             locale,
             localeAsIndex,
-            wizardFactory.findWizardDefinitions(forClass, locale, null)
+            controlFactory,
+            wizardDefinitionFactory.findWizardDefinitions(forClass, locale, null)
         );
         SysLog.detail("Preparing wizards done");
+    }
+
+    /**
+     * Create new instance of OperationPaneControl. Override
+     * for custom-specific implementation.
+     * 
+     * @param id
+     * @param locale
+     * @param localeAsIndex
+     * @param controlFactory
+     * @param paneDef
+     * @param wizardFactory
+     * @param paneIndex
+     * @param forClass
+     * @return
+     */
+    protected UiOperationPaneControl newUiOperationPaneControl(
+        String id,
+        String locale,
+        int localeAsIndex,
+        PortalExtension_1_0.ControlFactory controlFactory,
+        org.openmdx.ui1.jmi1.OperationPane paneDef,
+        WizardDefinitionFactory wizardFactory,    
+        int paneIndex,
+        String forClass	    		
+    ) {
+    	return new UiOperationPaneControl(
+    		id,
+    		locale,
+    		localeAsIndex,
+    		controlFactory,
+    		paneDef,
+    		wizardFactory,
+    		paneIndex,
+    		forClass
+    	);
+    }
+
+    /**
+     * Create new instance of ReferencePaneControl. Override for
+     * custom-specific implementation.
+     * 
+     * @param id
+     * @param perspective
+     * @param locale
+     * @param localeAsIndex
+     * @param controlFactory
+     * @param paneDef
+     * @param containerClass
+     * @param paneIndex
+     * @return
+     */
+    protected UiReferencePaneControl newUiReferencePaneControl(
+		String id,
+		int perspective,
+		String locale,
+		int localeAsIndex,
+		PortalExtension_1_0.ControlFactory controlFactory,
+		org.openmdx.ui1.jmi1.ReferencePane paneDef,
+		String containerClass,
+		int paneIndex	    		
+    ) {
+    	return new UiReferencePaneControl(
+    		id,
+    		perspective,
+    		locale,
+    		localeAsIndex,
+    		controlFactory,
+    		paneDef,
+    		containerClass,
+    		paneIndex
+    	);
+    }
+
+    /**
+     * Create new instance of WizardControl. Override for
+     * custom-specific implementation.
+     * 
+     * @param id
+     * @param locale
+     * @param localeAsIndex
+     * @param controlFactory
+     * @param wizardDefinitions
+     * @return
+     */
+    protected UiWizardControl newUiWizardControl(
+        String id,
+        String locale,
+        int localeAsIndex,
+        PortalExtension_1_0.ControlFactory controlFactory,
+        WizardDefinition[] wizardDefinitions	    		
+    ) {
+    	return new UiWizardControl(
+    		id,
+    		locale,
+    		localeAsIndex,
+    		controlFactory,
+    		wizardDefinitions
+    	);
     }
 
     /**
@@ -166,41 +271,11 @@ public class ShowInspectorControl extends InspectorControl implements Serializab
      * @return
      */
     public int getPageSizeParameter(
-        Map parameterMap
+        Map<String,Object[]> parameterMap
     ) {
-        Object[] pageSizes = (Object[]) parameterMap.get(WebKeys.REQUEST_PARAMETER_PAGE_SIZE);
+        Object[] pageSizes = parameterMap.get(WebKeys.REQUEST_PARAMETER_PAGE_SIZE);
         String pageSize = pageSizes == null ? null : (pageSizes.length > 0 ? (String) pageSizes[0] : null);
         return pageSize == null ? -1 : Integer.parseInt(pageSize);
-    }
-
-    /**
-     * Get operation panes.
-     * 
-     * @return
-     */
-    public OperationPaneControl[] getOperationPaneControl(
-    ) {
-        return this.operationPaneControl;
-    }
-
-    /**
-     * Get reference panes.
-     * 
-     * @return
-     */
-    public ReferencePaneControl[] getReferencePaneControl(
-    ) {
-        return this.referencePaneControl;
-    }
-
-    /**
-     * Get wizard control.
-     * 
-     * @return
-     */
-    public WizardControl getWizardControl(
-    ) {
-        return this.wizardControl;
     }
 
     /**
@@ -227,16 +302,38 @@ public class ShowInspectorControl extends InspectorControl implements Serializab
         // Do not paint here. For more flexibility paint is implemented in JSP
     }
   
-    // -------------------------------------------------------------------------
+    /* (non-Javadoc)
+	 * @see org.openmdx.portal.servlet.control.InspectorControl#getChildren(java.lang.Class)
+	 */
+	@Override
+	public <T extends Control> List<T> getChildren(
+		Class<T> type
+	) {
+		if(OperationPaneControl.class.isAssignableFrom(type)) {
+			@SuppressWarnings("unchecked")
+			List<T> children = (List<T>)this.operationPaneControls;
+			return children;			
+		} else if(ReferencePaneControl.class.isAssignableFrom(type)) {
+			@SuppressWarnings("unchecked")
+			List<T> children = (List<T>)this.referencePaneControls;
+			return children;			
+		} else if(WizardControl.class.isAssignableFrom(type)) {
+			@SuppressWarnings("unchecked")
+			List<T> children = (List<T>)Collections.singletonList(wizardControl);
+			return children;			
+		} else {
+			return super.getChildren(type);
+		}
+	}
+
+	// -------------------------------------------------------------------------
     // Variables
     // -------------------------------------------------------------------------
     private static final long serialVersionUID = 3257844376976635442L;
     
-    protected OperationPaneControl[] operationPaneControl = null;
-    protected ReferencePaneControl[] referencePaneControl = null;
-    protected WizardControl wizardControl = null;
-    protected org.openmdx.ui1.jmi1.OperationPane[] paneOp = null;
-    protected org.openmdx.ui1.jmi1.ReferencePane[] paneRef = null;
+    protected List<OperationPaneControl> operationPaneControls;
+    protected List<ReferencePaneControl> referencePaneControls;
+    protected WizardControl wizardControl;
 
 }
 

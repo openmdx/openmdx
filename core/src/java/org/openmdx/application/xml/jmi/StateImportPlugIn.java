@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2009-2011, OMEX AG, Switzerland
+ * Copyright (c) 2009-2014, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -132,7 +132,7 @@ public class StateImportPlugIn implements ImportPlugIn {
                                 BasicException.Code.DEFAULT_DOMAIN,
                                 BasicException.Code.NOT_FOUND,
                                 "Could find neither persistent nor transient object for the given id",
-                                new BasicException.Parameter("externalId", externalId.toXRI())
+                                new BasicException.Parameter("externalId", externalId)
                             ); 
                         } catch (JDOException exception) {
                             throw new ServiceException(exception);
@@ -164,7 +164,7 @@ public class StateImportPlugIn implements ImportPlugIn {
                         BasicException.Code.DEFAULT_DOMAIN,
                         BasicException.Code.BAD_PARAMETER,
                         "Missing core value, objectId can't be determined",
-                        new BasicException.Parameter("externalId", facade.getPath().toXRI())
+                        new BasicException.Parameter("externalId", facade.getPath())
                     );
                 }
                 switch(mode) {
@@ -181,8 +181,8 @@ public class StateImportPlugIn implements ImportPlugIn {
                                 BasicException.Code.DEFAULT_DOMAIN,
                                 BasicException.Code.NOT_FOUND,
                                 "Could find no valid state in the given time range",
-                                new BasicException.Parameter("objectId", objectId.toXRI()),
-                                new BasicException.Parameter("externalId", facade.getPath().toXRI())
+                                new BasicException.Parameter("objectId", objectId),
+                                new BasicException.Parameter("externalId", facade.getPath())
                             ); 
                         } catch (JDOException exception) {
                             throw new ServiceException(exception);
@@ -190,7 +190,7 @@ public class StateImportPlugIn implements ImportPlugIn {
                     case SET:
                         try {
                             RefContainer<?> refContainer = (RefContainer<?>) persistenceManager.getObjectById(objectId.getParent());
-                            String qualifier = objectId.getBase();
+                            String qualifier = objectId.getLastSegment().toClassicRepresentation();
                             StateCapable core = qualifier.startsWith("!") ? (StateCapable) refContainer.refGet(
                                 QualifierType.PERSISTENT,
                                 qualifier.substring(1)
@@ -268,7 +268,7 @@ public class StateImportPlugIn implements ImportPlugIn {
         // Make transient instances persistent
         //
         Path containerId = objectId.getParent();
-        String qualifier = objectId.getBase();
+        String qualifier = objectId.getLastSegment().toClassicRepresentation();
         RefContainer<?> refContainer = (RefContainer<?>) persistenceManager.getObjectById(containerId);
         if(qualifier.startsWith("!")) {
             refContainer.refAdd(
@@ -332,7 +332,7 @@ public class StateImportPlugIn implements ImportPlugIn {
 	                    BasicException.Code.DEFAULT_DOMAIN,
 	                    BasicException.Code.BAD_PARAMETER,
 	                    "Missing core value, objectId can't be determined",
-	                    new BasicException.Parameter("externalId", Facades.asObject(objectHolder).getPath().toXRI())
+	                    new BasicException.Parameter("externalId", Facades.asObject(objectHolder).getPath())
 	                );
 	            }
 	            dateState.setCore(

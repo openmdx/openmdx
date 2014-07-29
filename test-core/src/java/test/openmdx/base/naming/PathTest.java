@@ -112,7 +112,6 @@ public class PathTest extends TestCase {
         path4 = new Path( new String[]{ "a", "b;x=0;y=1,2,3,z=false", "c" } );
     }
     
-
     /**
      * Write the test case method in the fixture class.
      * Be sure to make it public, or it can't be invoked through reflection. 
@@ -144,7 +143,6 @@ public class PathTest extends TestCase {
         assertEquals("Path('a/b0//b1/c').getBase()" , "c", base3 );
     }
 
-
     /**
      * Write the test case method in the fixture class.
      * Be sure to make it public, or it can't be invoked through reflection. 
@@ -175,7 +173,8 @@ public class PathTest extends TestCase {
      * Write the test case method in the fixture class.
      * Be sure to make it public, or it can't be invoked through reflection. 
      */
-    public void testClone(
+    @SuppressWarnings("deprecation")
+	public void testClone(
     ) throws Throwable {
         Path   path1_c = (Path)path1.clone();
         Path   path2_c = (Path)path2.clone();
@@ -197,18 +196,12 @@ public class PathTest extends TestCase {
      * Write the test case method in the fixture class.
      * Be sure to make it public, or it can't be invoked through reflection. 
      */    
-    @SuppressWarnings("deprecation")
-	public void testAppend(
+	public void testDescendant(
     ) throws Throwable {
-        Path   path1_c = (Path)path1.clone();
-        Path   path2_c = (Path)path2.clone();
-        Path   path3_c = (Path)path2.clone();
-        Path   path4_c = (Path)path3.clone();
-        
-        path1_c.add("1234");
-        path2_c.add("1234");
-        path3_c.add("1234").add("5678");
-        path4_c.addAll (new String[]{"1234", "5678"});
+        Path   path1_c = path1.getChild("1234"); 
+        Path   path2_c = path2.getChild("1234");
+        Path   path3_c = path2.getChild("1234").getChild("5678");
+        Path   path4_c = path3.getDescendant("1234", "5678");
 
         Path   result1 = new Path( new String[]{"1234"} );
         Path   result2 = new Path( new String[]{"a","1234"} );
@@ -224,10 +217,10 @@ public class PathTest extends TestCase {
         assertNotNull(result3);
         assertNotNull(result4);
         
-        assertEquals("Path('').append({'1234'})", result1, path1_c);
-        assertEquals("Path('a').append({'1234'})", result2, path2_c);
-        assertEquals("Path('a').append({'1234'}).append({'5678'})", result3, path3_c);
-        assertEquals("Path('a/b0//b1/c').append({'1234','5678'})", result4, path4_c);
+        assertEquals("Path('').getDescendant({'1234'})", result1, path1_c);
+        assertEquals("Path('a').getDescendant({'1234'})", result2, path2_c);
+        assertEquals("Path('a').getDescendant({'1234'}).append({'5678'})", result3, path3_c);
+        assertEquals("Path('a/b0//b1/c').getDescendant({'1234','5678'})", result4, path4_c);
     }
 
     /**
@@ -320,7 +313,8 @@ public class PathTest extends TestCase {
      * Write the test case method in the fixture class.
      * Be sure to make it public, or it can't be invoked through reflection. 
      */
-    public void testNull (
+    @SuppressWarnings("deprecation")
+	public void testNull (
     ) throws Throwable {
         
         String      null1   = null;
@@ -402,35 +396,26 @@ public class PathTest extends TestCase {
     @SuppressWarnings("deprecation")
     public void testCrossReferences (
     ) throws Throwable {
-        Path p1 = new Path("xri:@openmdx:a/b/c");
-        Path p2 = new Path("xri:@openmdx:1/2/3");
+    	// Arrange
+    	final Path expected = new Path(new String[]{"a","b","c", "1/2/3"});
+        Path p1 = new Path("xri://@openmdx*a/b/c");
+        Path p2 = new Path("xri://@openmdx*1/2/3");
+        // Act
+        Path recommended = p1.getChild(p2);
+        Path alternative = new Path(p1.toXRI() + "/(" + p2.toXRI().substring(6) + ")");
+        Path legacy = p1.getChild(p2.toClassicRepresentation());
+        // Assert
         assertEquals("p1", new Path(new String[]{"a","b","c"}), p1);
         assertEquals("p2", new Path(new String[]{"1","2","3"}), p2);
         assertEquals("p1", "xri://@openmdx*a/b/c", p1.toXRI());
         assertEquals("p2", "xri://@openmdx*1/2/3", p2.toXRI());
         assertEquals("p1", "xri:@openmdx:a/b/c", p1.toXri());
         assertEquals("p2", "xri:@openmdx:1/2/3", p2.toXri());
-        Path unwise = p1.getChild(p2.toXri());
-        Path recommended = p1.getChild(p2);
-        Path alternative = new Path(p1.toXri() + "/(" + p2.toXri().substring(4) + ')');
-        assertEquals("unwise", new Path(new String[]{"a","b","c", "xri:@openmdx:1/2/3"}), unwise);
-        assertEquals("recommended", new Path(new String[]{"a","b","c", "1/2/3"}), recommended);
-        assertEquals("alternative", new Path(new String[]{"a","b","c", "1/2/3"}), alternative);
-        assertEquals("unwise","xri://@openmdx*a/b/c/(@openmdx*1/2/3)", unwise.toXRI());
-        assertEquals("recommended", "xri://@openmdx*a/b/c/(@openmdx*1/2/3)", recommended.toXRI());
-        assertEquals("alternative", "xri://@openmdx*a/b/c/(@openmdx*1/2/3)", alternative.toXRI());
-        assertEquals("unwise", "xri:@openmdx:a/b/c/(@openmdx:1/2/3)", unwise.toXri());
-        assertEquals("recommended", "xri:@openmdx:a/b/c/(@openmdx:1/2/3)", recommended.toXri());
-        assertEquals("alternative", "xri:@openmdx:a/b/c/(@openmdx:1/2/3)", alternative.toXri());
-        assertEquals("unwise", "spice://a/b/c/xri:@openmdx:1%2f2%2f3", unwise.toUri());
-        assertEquals("recommended", "spice://a/b/c/1%2f2%2f3", recommended.toUri());
-        assertEquals("alternative", "spice://a/b/c/1%2f2%2f3", alternative.toUri());
-        assertEquals("unwise", false, unwise.equals(new Path(unwise.toXri())));
-        assertEquals("recommended", recommended, new Path(recommended.toXri()));
-        assertEquals("alternative", alternative, new Path(alternative.toXri()));
-        assertEquals("unwise", p2, new Path(unwise.getBase()));
-        assertEquals("recommended", p2, new Path(recommended.getBase()));
-        assertEquals("alternative", p2, new Path(alternative.getBase()));
+		assertEquals("recommended", expected, recommended);
+        assertEquals("alternative", expected, alternative);
+        assertEquals("legacy", expected, legacy);
+        assertEquals("expected", "xri://@openmdx*a/b/c/(@openmdx*1/2/3)", expected.toXRI());
+        assertEquals("child", p2, new Path(expected.getLastSegment().toClassicRepresentation()));
     }
     
     public void testURI(

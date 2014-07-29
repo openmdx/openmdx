@@ -95,6 +95,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
+import java.math.BigDecimal;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.util.ArrayList;
@@ -102,11 +103,9 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.StringTokenizer;
 
 import javax.jdo.JDOHelper;
 import javax.jdo.PersistenceManager;
@@ -142,7 +141,10 @@ import org.openmdx.portal.servlet.action.FindObjectsAction;
 import org.openmdx.portal.servlet.action.MacroAction;
 import org.openmdx.portal.servlet.action.ReloadAction;
 import org.openmdx.portal.servlet.action.UnboundAction;
-import org.openmdx.portal.servlet.control.ControlFactory;
+import org.openmdx.portal.servlet.component.EditObjectView;
+import org.openmdx.portal.servlet.component.LayoutFactory;
+import org.openmdx.portal.servlet.component.ObjectView;
+import org.openmdx.portal.servlet.component.ShowObjectView;
 import org.openmdx.portal.servlet.loader.CodesLoader;
 import org.openmdx.portal.servlet.loader.DataLoader;
 import org.openmdx.portal.servlet.loader.FilterLoader;
@@ -150,10 +152,6 @@ import org.openmdx.portal.servlet.loader.LayoutLoader;
 import org.openmdx.portal.servlet.loader.TextsLoader;
 import org.openmdx.portal.servlet.loader.UiLoader;
 import org.openmdx.portal.servlet.loader.WizardsLoader;
-import org.openmdx.portal.servlet.view.EditObjectView;
-import org.openmdx.portal.servlet.view.LayoutFactory;
-import org.openmdx.portal.servlet.view.ObjectView;
-import org.openmdx.portal.servlet.view.ShowObjectView;
 import org.openmdx.portal.servlet.wizards.WizardDefinitionFactory;
 import org.openmdx.uses.org.apache.commons.fileupload.DiskFileUpload;
 import org.openmdx.uses.org.apache.commons.fileupload.FileItem;
@@ -329,7 +327,7 @@ public class ObjectInspectorServlet extends HttpServlet {
                 this.getServletContext(),
                 this.portalExtension
             );
-            this.wizardFactory = this.wizardsLoader.loadWizardDefinitions(
+            this.wizardDefinitionFactory = this.wizardsLoader.loadWizardDefinitions(
                 context,
                 this.locales,
                 this.model
@@ -364,12 +362,6 @@ public class ObjectInspectorServlet extends HttpServlet {
         } catch(ServiceException e) {
             this.log("Loading texts failed", e);
         }
-        // Control factory
-        this.controlFactory = new ControlFactory(
-            this.uiContext,
-            this.texts,
-            this.wizardFactory
-        );      
         // User home
         this.userHomeIdentity = null;
         if(this.getInitParameter(WebKeys.CONFIG_USER_HOME) != null) {
@@ -461,16 +453,6 @@ public class ObjectInspectorServlet extends HttpServlet {
             );
             i++;
         }
-        // Mobile user agents
-        this.mobileUserAgents = new ArrayList<String>();
-        if(this.getInitParameter("mobileUserAgents") != null) {
-        	StringTokenizer tokens = new StringTokenizer(this.getInitParameter("mobileUserAgents"), ";,", false);
-        	while(tokens.hasMoreTokens()) {
-        		this.mobileUserAgents.add(
-        			tokens.nextToken()
-        		);
-        	}
-        }
     }
   
     /**
@@ -515,11 +497,11 @@ public class ObjectInspectorServlet extends HttpServlet {
      * @return
      */
     protected String getParameter(
-        Map parameterMap,
+        Map<String,String[]> parameterMap,
         String name
     ) {
-        Object[] values = (Object[])parameterMap.get(name);
-        return values == null ? null : (values.length > 0 ? (String)values[0] : null);
+        String[] values = parameterMap.get(name);
+        return values == null ? null : (values.length > 0 ? values[0] : null);
     }
 
     /**
@@ -545,23 +527,13 @@ public class ObjectInspectorServlet extends HttpServlet {
         String userRole
     ) throws ServiceException {
     	SysLog.detail("Creating new context", "user=" + request.getRemoteUser());
-		String userAgent = request.getHeader("user-agent");
-        boolean isMobileUserAgent = false;
-        if(userAgent != null) {
-	        for(String mobileUserAgent: this.mobileUserAgents) {        
-	        	if(userAgent.indexOf(mobileUserAgent) >= 0) {
-	        		isMobileUserAgent = true;
-	        		break;
-	        	}
-	        }
-        }
         ApplicationContext app = this.newApplicationContext();
         app.setApplicationName(this.applicationName);
         app.setLocale((String)session.getAttribute(WebKeys.LOCALE_KEY));
         app.setTimezone( (String)session.getAttribute(WebKeys.TIMEZONE_KEY));
-        app.setControlFactory(this.controlFactory);
+        app.setInitialScale((BigDecimal)session.getAttribute(WebKeys.INITIAL_SCALE_KEY));
         app.setSessionId(session.getId());
-        app.setViewPortType(isMobileUserAgent ? ViewPort.Type.MOBILE : ViewPort.Type.STANDARD);
+        app.setViewPortType(ViewPort.Type.STANDARD);
         app.setLoginPrincipal(request.getUserPrincipal() == null ? null : request.getUserPrincipal().getName());
         app.setUserRole(userRole);
         app.setLoginRealmIdentity(this.realmIdentity);
@@ -573,6 +545,9 @@ public class ObjectInspectorServlet extends HttpServlet {
         app.setFilters(this.filters);
         app.setCodes(this.codes);
         app.setLayoutFactory(this.layoutFactory);
+        app.setTextsFactory(this.texts);
+        app.setUiContext(this.uiContext);
+        app.setWizardDefinitionFactory(this.wizardDefinitionFactory);
         app.setTempDirectory((File)this.getServletContext().getAttribute("javax.servlet.context.tempdir"));
         app.setTempFilePrefix(request.getSession().getId() + "-");
         app.setQuickAccessorsReference(this.favoritesReference);
@@ -619,8 +594,8 @@ public class ObjectInspectorServlet extends HttpServlet {
                     this.filters
                 );    
             }    
-            if(this.controlFactory != null) {
-                this.controlFactory.reset();
+            if(this.portalExtension.getControlFactory() != null) {
+            	this.portalExtension.getControlFactory().reset();
             }
             this.uiRefreshedAt = System.currentTimeMillis();
         }
@@ -698,16 +673,15 @@ public class ObjectInspectorServlet extends HttpServlet {
         // Dump header
         if(SysLog.isTraceOn()) {
         	SysLog.trace("HEADER");
-            for(Enumeration i = request.getHeaderNames(); i.hasMoreElements(); ) {
+            for(Enumeration<String> i = request.getHeaderNames(); i.hasMoreElements(); ) {
                 String name = (String)i.nextElement();
-                for(Enumeration j = request.getHeaders(name); j.hasMoreElements(); ) {
+                for(Enumeration<String> j = request.getHeaders(name); j.hasMoreElements(); ) {
                 	SysLog.trace("header", name + "=" + j.nextElement());
                 }
             }        
             // Dump parameter map
             SysLog.trace("PARAMETER");
-            for(Iterator i = request.getParameterMap().keySet().iterator(); i.hasNext(); ) {
-                Object key = i.next();
+            for(String key: request.getParameterMap().keySet()) {
                 SysLog.trace("parameter", key + "=" + Arrays.asList((Object[])request.getParameterMap().get(key)));
             }
         }
@@ -764,20 +738,19 @@ public class ObjectInspectorServlet extends HttpServlet {
         // Do file upload if required. Store received files into
         // temporary folder. handleRequest processes the stored files
         if(FileUpload.isMultipartContent(request)) {
-            parameterMap = new HashMap();
+            parameterMap = new HashMap<String,String[]>();
             SysLog.detail("multi part content");
             DiskFileUpload upload = new DiskFileUpload();
             upload.setHeaderEncoding("UTF-8");
             try {
-                List items = upload.parseRequest(
+                List<FileItem> items = upload.parseRequest(
                     request,
                     this.requestSizeThreshold,
                     this.requestSizeMax,
                     app.getTempDirectory().getPath()
                 );
                 SysLog.detail("request parsed");
-                for(Iterator i = items.iterator(); i.hasNext(); ) {
-                    FileItem item = (FileItem)i.next();
+                for(FileItem item: items) {
                     if(item.isFormField()) {
                         parameterMap.put(
                           item.getFieldName(),
@@ -945,9 +918,10 @@ public class ObjectInspectorServlet extends HttpServlet {
                       view = new ShowObjectView(
                           UUIDs.newUUID().toString(),
                           null,
-                          requestedObjectIdentity,
+                          (RefObject_1_0)app.getNewPmData().getObjectById(requestedObjectIdentity),
                           app,
                           new LinkedHashMap<Path,Action>(),
+                          null, // no nextPrevActions
                           null, // lookupType
                           null, // resourcePathPrefix
                           null, // navigationTarget
@@ -977,9 +951,10 @@ public class ObjectInspectorServlet extends HttpServlet {
                   view = new ShowObjectView(
                       UUIDs.newUUID().toString(),
                       null,
-                      homeObjectIdentity,
+                      (RefObject_1_0)app.getNewPmData().getObjectById(homeObjectIdentity),
                       app,
                       new LinkedHashMap<Path,Action>(),
+                      null, // no nextPrevActions
                       null, // lookupType
                       null, // resourcePathPrefix
                       null, // navigationTarget
@@ -1151,7 +1126,7 @@ public class ObjectInspectorServlet extends HttpServlet {
                     RefObject_1_0 refObj = (RefObject_1_0)pm.getObjectById(objectIdentity);
                     String feature = Action.getParameter(parameter, Action.PARAMETER_FEATURE);
                     ModelElement_1_0 featureDef = app.getModel().getElement(feature);
-                    if(Multiplicity.STREAM.toString().equals(featureDef.objGetValue("multiplicity"))) {
+                    if(Multiplicity.STREAM.toString().equals(featureDef.getMultiplicity())) {
                         long length = refObj.refGetValue(feature, os, 0);
                         response.setContentLength(new Long(length).intValue());       
                     } else {
@@ -1233,9 +1208,10 @@ public class ObjectInspectorServlet extends HttpServlet {
                             nextView = new ShowObjectView(
                                 UUIDs.newUUID().toString(),
                                 null,
-                                app.getRootObject()[0].refGetPath(),
+                                (RefObject_1_0)app.getNewPmData().getObjectById(app.getRootObject()[0].refGetPath()),
                                 app,
                                 new LinkedHashMap<Path,Action>(),
+                                null, // no nextPrevActions
                                 null, // lookupTyp0e
                                 null, // resourcePathPrefix
                                 null, // navigationTarget
@@ -1245,7 +1221,7 @@ public class ObjectInspectorServlet extends HttpServlet {
                         	SysLog.warning("Can not get default view", e.getMessage());
                             new ServiceException(e).log();
                         }
-                    }              
+                    }
                     // Set next view
                     session.setAttribute(
                         WebKeys.CURRENT_VIEW_KEY,
@@ -1274,7 +1250,7 @@ public class ObjectInspectorServlet extends HttpServlet {
                         	request.getContextPath() + 
                         	autostartUrl + 
                         	((hasQuery ? "&" : "?") + Action.PARAMETER_REQUEST_ID + "=" + nextView.getRequestId()) +
-                        	(hasXri ? "" : "&" + Action.PARAMETER_OBJECTXRI + "=" + nextView.getRefObject().refMofId())
+                        	(hasXri ? "" : "&" + Action.PARAMETER_OBJECTXRI + "=" + nextView.getObject().refMofId())
                     	);
                     }
                     // Forward to page renderer JSP
@@ -1343,8 +1319,7 @@ public class ObjectInspectorServlet extends HttpServlet {
     private Codes codes = null;
     private Texts texts = null;
     private LayoutFactory layoutFactory = null;
-    private WizardDefinitionFactory wizardFactory = null;
-    private ControlFactory controlFactory = null;
+    private WizardDefinitionFactory wizardDefinitionFactory = null;
     // In-memory threshold for multi-part forms 
     // Content for fields larger than threshold is written to disk
     private int requestSizeThreshold = 200;  
@@ -1354,7 +1329,6 @@ public class ObjectInspectorServlet extends HttpServlet {
     private String favoritesReference = null;
     private String[] locales;
     private Map<String,String> mimeTypeImpls = null;
-    private List<String> mobileUserAgents = null;
     private String exceptionDomain = null;
     private String filterCriteriaField = null;
     private String[] filterValuePattern = new String[]{"(?i)",  ".*", ".*"};

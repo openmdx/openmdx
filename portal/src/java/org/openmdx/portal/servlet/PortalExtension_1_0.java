@@ -64,11 +64,17 @@ import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.query.Condition;
+import org.openmdx.portal.servlet.action.AbstractAction;
+import org.openmdx.portal.servlet.action.FindSearchFieldValuesAction;
 import org.openmdx.portal.servlet.attribute.Attribute;
+import org.openmdx.portal.servlet.attribute.AttributeValue;
+import org.openmdx.portal.servlet.component.Grid;
+import org.openmdx.portal.servlet.component.ObjectView;
 import org.openmdx.portal.servlet.control.Control;
-import org.openmdx.portal.servlet.control.GridControl;
-import org.openmdx.portal.servlet.view.Grid;
-import org.openmdx.portal.servlet.view.ObjectView;
+import org.openmdx.portal.servlet.control.EditInspectorControl;
+import org.openmdx.portal.servlet.control.ShowInspectorControl;
+import org.openmdx.portal.servlet.control.UiGridControl;
+import org.openmdx.portal.servlet.wizards.WizardDefinitionFactory;
 
 public interface PortalExtension_1_0 {
 
@@ -197,16 +203,7 @@ public interface PortalExtension_1_0 {
      * the grid is displayed.  
      */
     boolean showGridContentOnInit(
-        GridControl gridControl,
-        ApplicationContext app
-    );
-
-    /**
-     * The default implementation shows the search form according to the
-     * user settings. The default value is false if no user setting is found.
-     */
-    boolean showSearchForm(
-        GridControl gridControl,
+        UiGridControl gridControl,
         ApplicationContext app
     );
 
@@ -304,6 +301,7 @@ public interface PortalExtension_1_0 {
      */
     void renderTextValue(
         ViewPort p,
+        AttributeValue attributeValue,
         String value,
         boolean asWiki
     ) throws ServiceException;
@@ -337,6 +335,30 @@ public interface PortalExtension_1_0 {
      */
     TimeZone getTimeZone(
     	String qualifiedFeatureName,
+    	ApplicationContext app
+    );
+
+    /**
+     * Get default CSS class for attributes rendered as field within a field group.
+     * 
+     * @param attributeValue
+     * @param app
+     * @return
+     */
+    String getDefaultCssClassFieldGroup(
+       	AttributeValue attributeValue,
+    	ApplicationContext app
+    );
+
+    /**
+     * Get default CSS class for attributes rendered as cell within an object container.
+     * 
+     * @param attributeValue
+     * @param app
+     * @return
+     */
+    String getDefaultCssClassObjectContainer(
+    	AttributeValue attributeValue,
     	ApplicationContext app
     );
 
@@ -382,11 +404,141 @@ public interface PortalExtension_1_0 {
     	Grid grid
     ) throws ServiceException;
 
+	/**
+	 * ActionFactory_1_0
+	 *
+	 */
+	public interface ActionFactory {
+
+		AbstractAction getAction(
+			short event
+		);
+		
+	}
+	
     /**
      * Get action-factory.
+     * 
      * @return action factory.
      */
-    ActionFactory_1_0 getActionFactory();
+    ActionFactory getActionFactory();
+
+    /**
+     * ControlFactory
+     *
+     */
+    public interface ControlFactory {
+    	
+    	/**
+    	 * Reset the factory.
+    	 * 
+    	 */
+    	public void reset();
+    	
+    	/**
+    	 * Create grid control.
+    	 * 
+    	 * @param id
+    	 * @param perspective
+    	 * @param locale
+    	 * @param localeAsIndex
+    	 * @param tab
+    	 * @param paneIndex
+    	 * @param containerClass
+    	 * @return
+    	 */
+    	UiGridControl createGridControl(
+	        String id,
+	        int perspective,
+	        String locale,
+	        int localeAsIndex,
+	        org.openmdx.ui1.jmi1.Tab tabDef,
+	        int paneIndex,
+	        String containerClass
+	    );    	
+    	
+    	/**
+    	 * Create show inspector control.
+    	 * 
+    	 * @param id
+    	 * @param perspective
+    	 * @param locale
+    	 * @param localeAsIndex
+    	 * @param inspectorDef
+    	 * @param forClass
+    	 * @return
+    	 */
+    	ShowInspectorControl createShowInspectorControl(
+	        String id,
+	        int perspective,
+	        String locale,
+	        int localeAsIndex,
+	        org.openmdx.ui1.jmi1.Inspector inspectorDef,
+	        String forClass,
+	        WizardDefinitionFactory wizardFactory	        
+	    );
+    	
+    	/**
+    	 * Create edit inspector control.
+    	 * 
+    	 * @param id
+    	 * @param perspective
+    	 * @param locale
+    	 * @param localeAsIndex
+    	 * @param inspectorDef
+    	 * @param forClass
+    	 * @return
+    	 */
+    	EditInspectorControl createEditInspectorControl(
+	        String id,
+	        int perspective,
+	        String locale,
+	        int localeAsIndex,
+	        org.openmdx.ui1.jmi1.Inspector inspectorDef,
+	        String forClass
+	    );
+    	
+    	/**
+    	 * Create control.
+    	 * 
+    	 * @param id
+    	 * @param locale
+    	 * @param localeAsIndex
+    	 * @param controlClass
+    	 * @param parameter
+    	 * @return
+    	 */
+    	Control createControl(
+	        String id,
+	        String locale,
+	        int localeAsIndex,
+	        Class<?> controlClass,
+	        Object... parameter
+	    ) throws ServiceException;
+    	
+    	/**
+    	 * Get attribute value.
+    	 * 
+    	 * @param fieldDef
+    	 * @param object
+    	 * @param application
+    	 * @return
+    	 * @throws ServiceException
+    	 */
+    	AttributeValue createAttributeValue(
+	        org.openmdx.ui1.jmi1.ValuedField fieldDef,
+	        Object object,
+	        ApplicationContext app
+	    ) throws ServiceException;    	
+    	
+    }
+    
+    /**
+     * Get control factory.
+     * 
+     * @return
+     */
+    ControlFactory getControlFactory();
 
     /*
      * Get admin principal name for given realm.
@@ -444,10 +596,6 @@ public interface PortalExtension_1_0 {
     	ApplicationContext app
     );
 
-    /**
-     * 
-     */
-    
     public interface QueryConditionParser {
     	
     	Condition parse(
@@ -471,13 +619,60 @@ public interface PortalExtension_1_0 {
     );
 
     /**
-     * Get custom-specific extension.
-     * @return custom-specific extension.
+     * Search form field.
      */
-    Object getExtension(
-    	String name
-    );
+    public abstract class SearchFieldDef {
+    	
+    	public SearchFieldDef(
+			String qualifiedReferenceName,
+			String featureName
+		) {
+			this.qualifiedReferenceName = qualifiedReferenceName;
+			this.featureName = featureName;
+    	}
+    	
+    	public abstract List<String> findValues(
+    		Object object,
+    		String pattern,
+    		ApplicationContext app
+    	) throws ServiceException;
+    
+		public Action getFindValuesAction(
+			Object object,
+			ApplicationContext app
+		) throws ServiceException {
+			return new Action(
+				FindSearchFieldValuesAction.EVENT_ID,
+				new Action.Parameter[]{
+					new Action.Parameter(Action.PARAMETER_OBJECTXRI, object instanceof RefObject_1_0 ? ((RefObject_1_0)object).refGetPath().toXRI() : null),
+					new Action.Parameter(Action.PARAMETER_NAME, this.qualifiedReferenceName),
+					new Action.Parameter(Action.PARAMETER_FILTER_BY_FEATURE, this.featureName),					
+				},
+				"---",
+				true
+			);
+		}
 
+		private final String qualifiedReferenceName;
+		private final String featureName;		
+
+    }
+
+    /**
+     * Get search form field definition for given reference and feature. If defined,
+     * an auto-completer is generated for this field.
+     * 
+     * @param qualifiedReferenceName qualified reference name of search search form.
+     * @param featureName name of search field.
+     * @param app
+     * @return null if no definition is defined for field.
+     * 
+     * @throws ServiceException
+     */
+    public SearchFieldDef getSearchFieldDef(
+		String qualifiedReferenceName,
+		String featureName,
+    	ApplicationContext app
+    ) throws ServiceException;
+    
 }
-
-//--- End of File -----------------------------------------------------------

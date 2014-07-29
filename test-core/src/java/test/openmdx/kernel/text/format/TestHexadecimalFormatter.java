@@ -62,16 +62,14 @@ public class TestHexadecimalFormatter {
     /**
      * Add an instance variable for each part of the fixture 
      */
-    protected byte[] nullBytes;
+    protected static final byte[] NULL_BYTES = null;
     protected byte[] noBytes;
     protected byte[] someBytes;
 
     @Before
     public void setUp() 
     {
-        nullBytes  = null;
-        
-        noBytes = new byte[0];
+    	noBytes = new byte[0];
 
         someBytes = new byte[] { 
             -128, -127, -126, -3, -2, -1, 0, 1, 2, 3, 125, 126, 127 };
@@ -134,17 +132,17 @@ public class TestHexadecimalFormatter {
         assertEquals(
             "HexadecimalFormatter(nullBytes)",
             "null",
-            new HexadecimalFormatter(this.nullBytes).toString()
+            new HexadecimalFormatter(NULL_BYTES).toString()
         );            
         assertEquals(
             "HexadecimalFormatter(nullBytes, 0, 0)",
             "null", 
-            new HexadecimalFormatter(this.nullBytes, 0, 0).toString()
+            new HexadecimalFormatter(NULL_BYTES, 0, 0).toString()
         );
         assertEquals(
             "HexadecimalFormatter(nullBytes, 2, 6)",
             "null", 
-            new HexadecimalFormatter(this.nullBytes, 2, 6).toString()
+            new HexadecimalFormatter(NULL_BYTES, 2, 6).toString()
         );       
     }
     

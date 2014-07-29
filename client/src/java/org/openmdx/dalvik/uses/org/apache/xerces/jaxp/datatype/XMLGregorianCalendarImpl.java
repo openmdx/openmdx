@@ -1829,6 +1829,9 @@ class XMLGregorianCalendarImpl
         else if (typekind == DatatypeConstants.GMONTHDAY) {
             // Fix 4971612: invalid SCCS macro substitution in data string
             formatString = "--%M-%D" +"%z";
+        } else {
+        	// An IllegalStateException should alreeady have been thrown by getXMLSchemaType()
+        	throw new IllegalStateException(); // repeat it to satisfy FindBug
         }
         return format(formatString);
     }

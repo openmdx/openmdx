@@ -156,7 +156,7 @@ public class StandardStringSource implements StringSource {
             }
             int sliceStart = 0;
             for(int sliceIndex = 0; sliceIndex < sliceLimit; sliceIndex++) {
-                int character = binaryData[sliceIndex];
+                int character = binaryData[sliceIndex] & 0x000000ff;
                 if(character == 0) { // end of value
                     Integer key = Integer.valueOf(valueStart);
                     int sliceSize = sliceIndex - sliceStart;

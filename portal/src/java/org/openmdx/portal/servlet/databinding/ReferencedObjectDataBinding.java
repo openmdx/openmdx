@@ -116,16 +116,14 @@ public class ReferencedObjectDataBinding extends DataBinding {
             Object oldValue = referenced.refGetValue(attributeName);
             if(oldValue instanceof Collection) {
                 @SuppressWarnings("unchecked")
-                Collection<Object> values = (Collection)oldValue;
+                Collection<Object> values = (Collection<Object>)oldValue;
                 values.clear();
                 if(newValue instanceof Collection) {
                     values.addAll((Collection<?>)newValue);
-                }
-                else {
+                } else {
                     values.add(newValue);
                 }
-            }
-            else {
+            } else {
                 referenced.refSetValue(
                     attributeName, 
                     newValue

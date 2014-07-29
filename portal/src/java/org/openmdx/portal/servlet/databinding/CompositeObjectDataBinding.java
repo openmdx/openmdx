@@ -340,21 +340,19 @@ public class CompositeObjectDataBinding extends DataBinding {
                     Object value = object.refGetValue(parameter.getKey());
                     if(value instanceof Collection) {
                         @SuppressWarnings("unchecked")
-                        Collection<Object> values = (Collection)value;
+                        Collection<Object> values = (Collection<Object>)value;
                         values.add(
                             this.getParameterValue(parameter.getValue())
                         );
-                    }
-                    else {
+                    } else {
                         object.refSetValue(
                             parameter.getKey(), 
                             this.getParameterValue(parameter.getValue())
                         );
                     }
-                }
-                catch(Exception e) {
+                } catch(Exception e) {
                     SysLog.warning("Can not set value for parameter", parameter);
-                }                    
+                }                   
             }
         }        
     }
@@ -381,7 +379,8 @@ public class CompositeObjectDataBinding extends DataBinding {
             );
             String[] referenceNames = this.getReferenceNames(qualifiedReferenceName);
             RefObject referencedObject = this.getReferencedObject(object, referenceNames);
-            RefContainer container = (RefContainer)referencedObject.refGetValue(
+            @SuppressWarnings("unchecked")
+			RefContainer<RefObject_1_0> container = (RefContainer<RefObject_1_0>)referencedObject.refGetValue(
                 referenceNames[referenceNames.length-1]
             );
             container.refAdd(
@@ -485,15 +484,14 @@ public class CompositeObjectDataBinding extends DataBinding {
                 (composite == null) && 
                 (newValue != null) && 
                 (!newValueIsZero || !this.zeroAsNull) &&
-                !((newValue instanceof Collection) && ((Collection)newValue).isEmpty())
+                !((newValue instanceof Collection) && ((Collection<?>)newValue).isEmpty())
             ) {
                 try {
                     composite = this.createComposite(
                         object,
                         qualifiedFeatureName
                     );
-                }
-                catch(Exception e) {
+                } catch(Exception e) {
                 	SysLog.warning("Unable to create composite object. Can not set value", Arrays.asList(object.refMofId(), qualifiedFeatureName, e.getMessage()));
                 }
             }                
@@ -502,7 +500,7 @@ public class CompositeObjectDataBinding extends DataBinding {
                 Object oldValue = composite.refGetValue(attributeName);
                 if(oldValue instanceof Collection) {
                     @SuppressWarnings("unchecked")
-                    Collection<Object> values = (Collection)oldValue;
+                    Collection<Object> values = (Collection<Object>)oldValue;
                     values.clear();
                     if(newValue instanceof Collection) {
                         values.addAll((Collection<?>)newValue);

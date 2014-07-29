@@ -139,8 +139,8 @@ public class Model_1DiagramDrawer {
                         label += "&gt;&gt;<br />";
                     }
                     // Name
-                    boolean isAbstract = Boolean.TRUE.equals(this.classDef.objGetValue("isAbstract"));
-                    label += "<b>" + (isAbstract ? "<i>" : "") + this.classDef.objGetValue("name") + (isAbstract ? "</i>" : "") + "</b>";
+                    boolean isAbstract = Boolean.TRUE.equals(this.classDef.isAbstract());
+                    label += "<b>" + (isAbstract ? "<i>" : "") + this.classDef.getName() + (isAbstract ? "</i>" : "") + "</b>";
                     // Compartments for attributes and operations
                     if(this.showCompartments) {
                         if(this.classDef != null) {
@@ -163,7 +163,7 @@ public class Model_1DiagramDrawer {
                                 label += "|<table border=\"0\" cellspacing=\"0\" width=\"" + new Double(75.0 * widthInInches).intValue() + "px\">";
                                 for(ModelElement_1_0 attributeDef: attributeDefs) {
                                     label += "<tr><td align=\"left\">";
-                                    label += "+ " + (ModelHelper.isDerived(attributeDef) ? "/" : "") + attributeDef.objGetValue("name") + " : " + model.getElementType(attributeDef).objGetValue("qualifiedName");
+                                    label += "+ " + (ModelHelper.isDerived(attributeDef) ? "/" : "") + attributeDef.getName() + " : " + model.getElementType(attributeDef).getQualifiedName();
                                     Multiplicity multiplicity = ModelHelper.getMultiplicity(attributeDef);
                                     if(multiplicity != Multiplicity.SINGLE_VALUE) {
                                         label += " [" + multiplicity.toString() + "]";
@@ -176,7 +176,7 @@ public class Model_1DiagramDrawer {
                                 label += "|<table border=\"0\" cellspacing=\"0\" width=\"" + new Double(75.0 * widthInInches).intValue() + "px\">";
                                 for(ModelElement_1_0 operationDef: operationDefs) {
                                     label += "<tr><td align=\"left\">";
-                                    label += "+ " + operationDef.objGetValue("name") + "(";
+                                    label += "+ " + operationDef.getName() + "(";
                                     List<Object> params = operationDef.objGetList("content");
                                     String sep = "";
                                     ModelElement_1_0 returnParamDef = null;
@@ -186,11 +186,11 @@ public class Model_1DiagramDrawer {
                                         if(DirectionKind.RETURN_DIR.equals(direction)) {
                                             returnParamDef = paramDef;
                                         } else if(DirectionKind.IN_DIR.equals(direction)) {
-                                            label += sep + paramDef.objGetValue("name") + " : " + model.getElementType(paramDef).objGetValue("qualifiedName");
+                                            label += sep + paramDef.getName() + " : " + model.getElementType(paramDef).getQualifiedName();
                                             sep = ", ";
                                         }
                                     }
-                                    label += ") : " + (returnParamDef == null ? "void" : model.getElementType(returnParamDef).objGetValue("qualifiedName"));
+                                    label += ") : " + (returnParamDef == null ? "void" : model.getElementType(returnParamDef).getQualifiedName());
                                     label += "</td></tr>";
                                 }
                                 label += "</table>";
@@ -199,7 +199,7 @@ public class Model_1DiagramDrawer {
                     }
                     label += "}>";
                     s += "label=" + label;
-                    s += ",tooltip=\"" + this.classDef.objGetValue("qualifiedName") + "\"";
+                    s += ",tooltip=\"" + this.classDef.getQualifiedName() + "\"";
                     for(Map.Entry<String,String> parameter: this.parameters.entrySet()) {
                         s += "," + parameter.getKey() + "=" + parameter.getValue();
                     }
@@ -316,16 +316,16 @@ public class Model_1DiagramDrawer {
                     }
                     String s = 
                         ("forward".equals(dir) 
-                            ? "\"" + exposedEndType.objGetValue("qualifiedName") + "\" -> \"" + referencedEndType.objGetValue("qualifiedName")
-                            : "\"" + referencedEndType.objGetValue("qualifiedName") + "\" -> \"" + exposedEndType.objGetValue("qualifiedName")
+                            ? "\"" + exposedEndType.getQualifiedName() + "\" -> \"" + referencedEndType.getQualifiedName()
+                            : "\"" + referencedEndType.getQualifiedName() + "\" -> \"" + exposedEndType.getQualifiedName()
                         ) +                            
                         "\" [";
-                    s += "label=\"" + this.associationDef.objGetValue("name") + "\"";
-                    s += ",tooltip=\"" + this.associationDef.objGetValue("qualifiedName") + "\"";                    
-                    s += ",headlabel=\"" + exposedEnd.objGetValue("name") + " [" + ModelHelper.getMultiplicity(exposedEnd) + "]\"";
-                    s += ",taillabel=\"" + referencedEnd.objGetValue("name") + " [" + ModelHelper.getMultiplicity(referencedEnd) + "]\"";
-                    s += ",arrowhead=" + (AggregationKind.SHARED.equals(referencedEnd.objGetValue("aggregation")) ? "oboxodiamond" : AggregationKind.COMPOSITE.equals(referencedEnd.objGetValue("aggregation")) ? "oboxdiamond" : Boolean.TRUE.equals(exposedEnd.objGetValue("isNavigable")) ? "vee" : "tee");
-                    s += ",arrowtail=" + (AggregationKind.SHARED.equals(exposedEnd.objGetValue("aggregation")) ? "oboxodiamond" : AggregationKind.COMPOSITE.equals(exposedEnd.objGetValue("aggregation")) ? "oboxdiamond" : Boolean.TRUE.equals(referencedEnd.objGetValue("isNavigable")) ? "vee" : "tee");
+                    s += "label=\"" + this.associationDef.getName() + "\"";
+                    s += ",tooltip=\"" + this.associationDef.getQualifiedName() + "\"";                    
+                    s += ",headlabel=\"" + exposedEnd.getName() + " [" + ModelHelper.getMultiplicity(exposedEnd) + "]\"";
+                    s += ",taillabel=\"" + referencedEnd.getName() + " [" + ModelHelper.getMultiplicity(referencedEnd) + "]\"";
+                    s += ",arrowhead=" + (AggregationKind.SHARED.equals(referencedEnd.getAggregation()) ? "oboxodiamond" : AggregationKind.COMPOSITE.equals(referencedEnd.objGetValue("aggregation")) ? "oboxdiamond" : Boolean.TRUE.equals(exposedEnd.objGetValue("isNavigable")) ? "vee" : "tee");
+                    s += ",arrowtail=" + (AggregationKind.SHARED.equals(exposedEnd.getAggregation()) ? "oboxodiamond" : AggregationKind.COMPOSITE.equals(exposedEnd.objGetValue("aggregation")) ? "oboxdiamond" : Boolean.TRUE.equals(referencedEnd.objGetValue("isNavigable")) ? "vee" : "tee");
                     s += ",color=\"#0000FF\"";
                     boolean hasContraint = false;
                     boolean hasLabelDistance = false;
@@ -398,7 +398,7 @@ public class Model_1DiagramDrawer {
                                         if("name".equals(nv[0])) {
                                             ModelElement_1_0 classDef = model.getElement(nv[1]);
                                             classNode.setClassDef(classDef);
-                                            classNode.setId((String)classDef.objGetValue("qualifiedName"));
+                                            classNode.setId((String)classDef.getQualifiedName());
                                             classNodes.put(
                                                 classNode.getId(),
                                                 classNode
@@ -433,8 +433,8 @@ public class Model_1DiagramDrawer {
                                     List<Object> supertypes = classDef.objGetList("supertype");
                                     for(Object supertype: supertypes) {
                                         ModelElement_1_0 supertypeDef = model.getElement(supertype);
-                                        if(classNodes.containsKey(supertypeDef.objGetValue("qualifiedName"))) {
-                                            instanceOfEdges += "\n\t\"" + classNode.getId() + "\" -> \"" + supertypeDef.objGetValue("qualifiedName") + "\" [dir=forward,arrowtail=onormal];";                                       
+                                        if(classNodes.containsKey(supertypeDef.getQualifiedName())) {
+                                            instanceOfEdges += "\n\t\"" + classNode.getId() + "\" -> \"" + supertypeDef.getQualifiedName() + "\" [dir=forward,arrowtail=onormal];";                                       
                                         }
                                     }
                                 }
@@ -455,7 +455,7 @@ public class Model_1DiagramDrawer {
                                             isWildcard = "*".equals(nv[1]);
                                             if(!isWildcard) {
                                                 ModelElement_1_0 associationDef = model.getElement(nv[1]);
-                                                associationNode.setId((String)associationDef.objGetValue("qualifiedName"));
+                                                associationNode.setId((String)associationDef.getQualifiedName());
                                                 associationNode.setAssociationDef(associationDef);
                                                 associationNodes.put(
                                                     associationNode.getId(), 
@@ -503,12 +503,12 @@ public class Model_1DiagramDrawer {
                                         ModelElement_1_0 end2 = model.getElement(elementDef.objGetList("content").get(1));
                                         ModelElement_1_0 end2Type = model.getElementType(end2);
                                         if(
-                                            classNodes.containsKey(end1Type.objGetValue("qualifiedName")) &&
-                                            classNodes.containsKey(end2Type.objGetValue("qualifiedName")) &&                                
-                                            !associationNodes.containsKey(elementDef.objGetValue("qualifiedName"))
+                                            classNodes.containsKey(end1Type.getQualifiedName()) &&
+                                            classNodes.containsKey(end2Type.getQualifiedName()) &&                                
+                                            !associationNodes.containsKey(elementDef.getQualifiedName())
                                         ) {
                                             GraphvizEdge associationNode = new GraphvizEdge();
-                                            associationNode.setId((String)elementDef.objGetValue("qualifiedName"));
+                                            associationNode.setId((String)elementDef.getQualifiedName());
                                             associationNode.setAssociationDef(elementDef);
                                             associationEdges += "\n\t" + associationNode.toString() + ";";
                                         }

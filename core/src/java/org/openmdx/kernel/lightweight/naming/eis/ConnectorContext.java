@@ -112,10 +112,12 @@ class ConnectorContext extends ResourceContext {
         String uri
     ) throws ResourceException{
         int q = uri.indexOf('?');
-        Factory<ManagedConnectionFactory> managedConnectionFactoryBuilder = q < 0 ? BeanFactory.<ManagedConnectionFactory>newInstance(
+        Factory<ManagedConnectionFactory> managedConnectionFactoryBuilder = q < 0 ? BeanFactory.newInstance(
+    		ManagedConnectionFactory.class,	
             uri.substring(4),
             new HashMap<String, Object>()
-        ) : BeanFactory.<ManagedConnectionFactory>newInstance(
+        ) : BeanFactory.newInstance(
+    		ManagedConnectionFactory.class,	
             uri.substring(4, q),
             getParameters(uri.substring(q + 1))
         );

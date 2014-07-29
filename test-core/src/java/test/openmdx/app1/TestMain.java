@@ -153,6 +153,7 @@ import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.jmi1.Authority;
 import org.openmdx.base.jmi1.Modifiable;
 import org.openmdx.base.jmi1.Provider;
+import org.openmdx.base.jmi1.Segment;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
 import org.openmdx.base.mof.cci.Model_1_0;
 import org.openmdx.base.mof.spi.Model_1Dumper;
@@ -175,6 +176,7 @@ import org.openmdx.base.transaction.Status;
 import org.openmdx.base.transaction.TransactionAttributeType;
 import org.openmdx.generic1.cci2.PropertyQuery;
 import org.openmdx.generic1.cci2.PropertySetHasProperties;
+import org.openmdx.generic1.cci2.StringPropertyQuery;
 import org.openmdx.generic1.cci2.UriPropertyQuery;
 import org.openmdx.generic1.jmi1.BooleanProperty;
 import org.openmdx.generic1.jmi1.DecimalProperty;
@@ -194,6 +196,7 @@ import org.w3c.cci2.BinaryLargeObjects;
 import org.w3c.cci2.CharacterLargeObject;
 import org.w3c.cci2.CharacterLargeObjects;
 import org.w3c.cci2.Container;
+import org.w3c.cci2.RegularExpressionFlag;
 import org.w3c.cci2.SparseArray;
 import org.w3c.cci2.StringTypePredicate;
 import org.w3c.format.DateTimeFormat;
@@ -203,9 +206,12 @@ import org.w3c.spi2.Datatypes;
 import org.w3c.spi2.Structures;
 
 import test.openmdx.app1.aop2.NaturalPerson;
+import test.openmdx.app1.aop2.PriceCalculator;
+import test.openmdx.app1.aop2.PropagatedUserObject;
 import test.openmdx.app1.cci2.AddressQuery;
 import test.openmdx.app1.cci2.CycleMember1Query;
 import test.openmdx.app1.cci2.EmailAddressQuery;
+import test.openmdx.app1.cci2.GenericAddressQuery;
 import test.openmdx.app1.cci2.InvoiceHasInvoicePosition;
 import test.openmdx.app1.cci2.InvoicePositionQuery;
 import test.openmdx.app1.cci2.InvoiceQuery;
@@ -214,6 +220,7 @@ import test.openmdx.app1.cci2.PostalAddressQuery;
 import test.openmdx.app1.cci2.ProductQuery;
 import test.openmdx.app1.cci2.SegmentHasAddress;
 import test.openmdx.app1.cci2.SegmentHasPerson;
+import test.openmdx.app1.cci2.SegmentQuery;
 import test.openmdx.app1.jmi1.Address;
 import test.openmdx.app1.jmi1.AddressFormat;
 import test.openmdx.app1.jmi1.AddressFormatAsParams;
@@ -231,6 +238,7 @@ import test.openmdx.app1.jmi1.EmailAddressClass;
 import test.openmdx.app1.jmi1.EmailAddressSendMessageParams;
 import test.openmdx.app1.jmi1.EmailAddressSendMessageTemplateParams;
 import test.openmdx.app1.jmi1.EmailAddressSendMessageTemplateResult;
+import test.openmdx.app1.jmi1.GenericAddress;
 import test.openmdx.app1.jmi1.InternationalPostalAddress;
 import test.openmdx.app1.jmi1.InternationalPostalAddressClass;
 import test.openmdx.app1.jmi1.Invoice;
@@ -260,7 +268,6 @@ import test.openmdx.model1.jmi1.ClassContainingOperationsTestComplexStruct0_n_0_
 import test.openmdx.model1.jmi1.ComplexStruct0_1;
 import test.openmdx.model1.jmi1.ComplexStruct0_n;
 import test.openmdx.model1.jmi1.Model1Package;
-import test.openmdx.model1.jmi1.Segment;
 import test.openmdx.model1.jmi1.SimpleStruct0_1;
 import test.openmdx.model1.jmi1.SimpleStruct0_n;
 import test.openmdx.model1.jmi1.SimpleStruct1_1;
@@ -298,7 +305,7 @@ public class TestMain {
         DATA_PROVIDER_NAME,
         "segment",
         SEGMENT_NAME
-    ).lock();
+    );
     
     @BeforeClass
     public static void initialize(
@@ -430,7 +437,6 @@ public class TestMain {
 
         /**
          * Constructor 
-         *
          */
         protected RepeatableTest() {
             this.structureCreation = structureCreationSeed;
@@ -447,7 +453,6 @@ public class TestMain {
          */
         private StructureCreation structureCreation; 
         
-        static private final boolean RID_AND_OID_ARE_SEPARATED = true;
         static private final int INSPECTION_COUNT = 250;
         static private final int MEMBER_COUNT = 9;
         static private final int N_PERSONS = 100;
@@ -471,6 +476,12 @@ public class TestMain {
                 REMOTE_EXCEPTIONS_ARE_GENERIC && 
                 this instanceof RemoteConnectionTest;
         }
+        
+        protected boolean testConcurrentAccess(){
+            return true;
+        }
+        
+        
         
         /**
          * Switch back and forth to test both variants
@@ -677,7 +688,7 @@ public class TestMain {
                 assertEquals("Model element class: " + k.toXRI(), e1.objGetClass(), e2.objGetClass());
                 Set<String> f1 = new TreeSet<String>(e1.objDefaultFetchGroup());
                 Set<String> f2 = new TreeSet<String>(e2.objDefaultFetchGroup());
-                if(!e1.jdoGetObjectId().getBase().contains("$UNNAMED$")){ 
+                if(!e1.jdoGetObjectId().getLastSegment().toClassicRepresentation().contains("$UNNAMED$")){ 
                     if(!"org.omg.model1.Class".equals(e1.objGetClass())){
                         f1.remove("allFeature");
                         f1.remove("allFeatureWithSubtype");
@@ -690,6 +701,7 @@ public class TestMain {
                     f1.remove("content");
                     f1.remove("compositeReference");
                     f1.remove(SystemAttributes.OBJECT_IDENTITY);
+                    f2.remove("dereferencedType");
                     f2.remove("content");
                     f2.remove("compositeReference");
                     f2.remove(SystemAttributes.OBJECT_IDENTITY);
@@ -719,6 +731,64 @@ public class TestMain {
                 FileOutputStream outputStream =  new FileOutputStream("build/jre-1.6/src/resource/META-INF/openmdxmof.xml");
                 Model_1Dumper.save(outputStream, "text/xml", model);
             }
+        }
+        
+        class CountryChanger extends Thread {
+
+            private CountryChanger(Path addressId, String countryName, long pause1,long pause2) {
+                this.addressId = addressId;
+                this.countryName = countryName;
+                this.pause1 = pause1;
+                this.pause2 = pause2;
+            }
+            
+            private final Path addressId;
+            private final String countryName;
+            private Boolean committed;
+            private final long pause1;
+            private final long pause2;
+            
+            /* (non-Javadoc)
+             * @see java.lang.Thread#run()
+             */
+            @Override
+            public void run() {
+                pause(pause1);
+                PersistenceManager persistenceManager = entityManager.getPersistenceManagerFactory().getPersistenceManager();
+                InternationalPostalAddress address = (InternationalPostalAddress) persistenceManager.getObjectById(addressId);
+                persistenceManager.currentTransaction().begin();
+                String formerCountryName = address.getCountry();
+                address.setCountry(countryName);
+                pause(pause2);
+                try {
+                    persistenceManager.makeTransactional(address);
+                    persistenceManager.currentTransaction().commit();
+                    System.out.println(Thread.currentThread().getName() + " changes country from " + formerCountryName + " to " + countryName);
+                    committed = Boolean.TRUE;
+                } catch (JDOOptimisticVerificationException exception) {
+                    System.out.println(Thread.currentThread().getName() + " can't change country from " + formerCountryName + " to " + countryName);
+                    committed = Boolean.FALSE;
+                } finally {    
+                    persistenceManager.close();
+                }
+            }
+
+            private synchronized void pause(long pause){
+                if(pause > 0L) try {
+                    System.out.println("Waiting " + pause + " ms");
+                    wait(pause);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+            
+            /**
+             * @return the committed
+             */
+            boolean isCommitted() {
+                return committed.booleanValue();
+            }
+            
         }
         
         @SuppressWarnings("deprecation")
@@ -875,40 +945,9 @@ public class TestMain {
             System.out.println("getting root package...");
             Authority app1 = super.authority;
             RefPackage rootPkg = app1.refOutermostPackage();
-            App1Package app1Package = (App1Package) app1.refOutermostPackage().refPackage(app1.refGetPath().getBase());
+            App1Package app1Package = (App1Package) app1.refOutermostPackage().refPackage(app1.refGetPath().getLastSegment().toClassicRepresentation());
 
             Generic1Package generic1Package = (Generic1Package) rootPkg.refPackage("org:openmdx:generic1");
-
-            // test thread-safety
-            //          Thread r1 = new Thread(new ReadModels());
-            //          Thread r2 = new Thread(new ReadModels());
-            //          Thread r3 = new Thread(new ReadModels());
-            //          Thread r4 = new Thread(new ReadModels());
-            //          Thread r5 = new Thread(new ReadModels());
-            //          Thread w1 = new Thread(new UpdateModels());
-            //          Thread w2 = new Thread(new UpdateModels());
-            //          Thread w3 = new Thread(new UpdateModels());
-            ////        // start
-            //          r1.start();
-            //          r2.start();
-            //          r3.start();
-            //          r4.start();
-            //          r5.start();
-            //          w1.start();
-            //          w2.start();
-            //          w3.start();
-            //          // join
-            //          r1.join();
-            //          r2.join();
-            //          r3.join();
-            //          r4.join();
-            //          r5.join();
-            //          w1.join();
-            //          w2.join();
-            //          w3.join();
-
-            // END test model functions
-            // BEGIN test model functions
             Model_1_0 model = ((RefRootPackage_1)rootPkg).refModel();
             rootPkg.refPackage(
                 "test:openmdx:state2"
@@ -996,6 +1035,22 @@ public class TestMain {
                 super.taskId = null;
             }
             //
+            // CR10011870
+            //
+            try {
+                super.taskId = "CR10011870";
+                PriceCalculator inaccessable = (PriceCalculator) entityManager.getUserObject(PriceCalculator.class.getSimpleName());
+                assertNull("Inaccessable user object", inaccessable);
+                PropagatedUserObject propagated = (PropagatedUserObject) entityManager.getUserObject(PropagatedUserObject.class);
+                if(this instanceof ProxyConnectionTest) {
+                    assertNull("Propagated user object", propagated);
+                } else {
+                    assertNotNull("Propagated user object", propagated);
+                }
+            } finally {
+                super.taskId = null;
+            }
+            //
             // CR20019996
             //
             BooleanProperty booleanProperty;
@@ -1040,6 +1095,32 @@ public class TestMain {
                 this.commit();
                 assertTrue(ReducedJDOHelper.isPersistent(booleanProperty));
                 assertEquals("Persistent object has alread XRI qualifier", "flag", PersistenceHelper.getLastXRISegment(booleanProperty));
+            } finally {
+                super.taskId = null;
+            }
+            //
+            // CR20020449
+            //
+            try {
+                this.taskId = "CR20020449";
+                {
+                    InvoiceQuery invoiceQuery = (InvoiceQuery) entityManager.newQuery(Invoice.class);
+                    invoiceQuery.productGroupId().like(
+                        RegularExpressionFlag.CASE_INSENSITIVE.getFlag(), 
+                        "Pg0"
+                    );
+                    List<Invoice> invoices = segment.getInvoice(invoiceQuery);
+                    assertEquals(1, invoices.size());
+                }
+                {
+                    InvoiceQuery invoiceQuery = (InvoiceQuery) entityManager.newQuery(Invoice.class);
+                    invoiceQuery.thereExistsDescription().like(
+                        RegularExpressionFlag.ACCENT_INSENSITIVE.getFlag(), 
+                        "This is \u00E4n invoice for PG0"
+                    );
+                    List<Invoice> invoices = segment.getInvoice(invoiceQuery);
+                    assertEquals(1, invoices.size());
+                }
             } finally {
                 super.taskId = null;
             }
@@ -1102,9 +1183,7 @@ public class TestMain {
                     InvoiceQuery invoiceQuery = (InvoiceQuery) entityManager.newQuery(Invoice.class);
                     invoiceQuery.thereExistsInvoicePosition().elementOf(PersistenceHelper.asSubquery(invoicePositionQuery));
                     List<Invoice> invoices = segment.getInvoice(invoiceQuery);
-                    if (!RID_AND_OID_ARE_SEPARATED) {
-                        assertFalse("There exist invoices including product P6", invoices.isEmpty());
-                    }
+                    assertFalse("There exist invoices including product P6", invoices.isEmpty());
                     
                 }
             } finally {
@@ -1277,7 +1356,7 @@ public class TestMain {
                 final String propertyValue = "CR20019479";
                 final Integer propertyIndex = Integer.valueOf(1);
                 PropertySetHasProperties.Property<StringProperty> properties = propertyHolder.<StringProperty>getProperty();
-                StringProperty property = properties.get(QualifierType.REASSIGNABLE, propertyId.getBase());
+                StringProperty property = properties.get(QualifierType.REASSIGNABLE, propertyId.getLastSegment().toClassicRepresentation());
                 assertEquals("Property value", propertyValue, property.getStringValue().get(propertyIndex));
                 this.begin();
                 property.getStringValue().put(propertyIndex, propertyValue);
@@ -1445,7 +1524,7 @@ public class TestMain {
                     Product product = invoicePosition.getProduct();
                     String description = product.getDescription();
                     if(description == null) {
-                        description = product.refGetPath().getBase();
+                        description = product.refGetPath().getLastSegment().toClassicRepresentation();
                     }
                     System.out.println("Product " + description + " costs " + product.getPrice());
                 }
@@ -1656,15 +1735,26 @@ public class TestMain {
                 //
                 // Complex query.
                 //
-                if (!RID_AND_OID_ARE_SEPARATED) {
+                {
                     //
-                    // Complex queries only work either with DbObjectWithIdAsKey...
-                    //
+                    // From Cache
+                    // 
                     InvoiceQuery invoiceQuery = (InvoiceQuery)super.entityManager.newQuery(Invoice.class);
                     invoiceQuery.thereExistsInvoicePosition().productId().like("P.*");
                     List<Invoice> matchingInvoices = segment.getInvoice(invoiceQuery);
                     assertEquals("Complex query", 2, matchingInvoices.size());
-                } 
+                }
+                {
+                    //
+                    // From Database
+                    // 
+                    PersistenceManager anotherPersistenceManager = super.entityManager.getPersistenceManagerFactory().getPersistenceManager();
+                    InvoiceQuery invoiceQuery = (InvoiceQuery)anotherPersistenceManager.newQuery(Invoice.class);
+                    invoiceQuery.thereExistsInvoicePosition().productId().like("P.*");
+                    test.openmdx.app1.jmi1.Segment sameSegment = anotherPersistenceManager.getObjectById(test.openmdx.app1.jmi1.Segment.class, segment.refMofId());
+                    List<Invoice> matchingInvoices = sameSegment.getInvoice(invoiceQuery);
+                    assertEquals("Complex query", 2, matchingInvoices.size());
+                }
                 try {
                     //
                     // ... or on transient objects
@@ -1683,8 +1773,8 @@ public class TestMain {
                             for(int j = 0; j < propertyCount; j++) {
                                 IntegerProperty positionProperty = super.entityManager.newInstance(IntegerProperty.class);
                                 String prefix = 
-                                    i % 2 == 0 && j % 2 == 0 ? "EVEN" : 
-                                    i % 2 == 1 && j % 2 == 1 ? "ODD" :
+                                    isEven(i) && isEven(j) ? "EVEN" : 
+                                    isOdd(i) && isOdd(j) ? "ODD" :
                                     "MIXED";
                                 positionProperty.getIntegerValue().put(j, 1000 * i + j);
                                 positionProperty.setDescription(prefix + "[" + i + "," + j + "]");
@@ -2025,7 +2115,7 @@ public class TestMain {
                 Path xri = new Path(original.refMofId()); 
                 @SuppressWarnings("unchecked")
                 RefContainer<Address> container = (RefContainer<Address>) sibling.getObjectById(xri.getParent());
-                Address copy = container.refGet(RefContainer.REASSIGNABLE, xri.getBase());
+                Address copy = container.refGet(RefContainer.REASSIGNABLE, xri.getLastSegment().toClassicRepresentation());
                 assertEquals("Address.id()", "0001", copy.getId());
                 assertNotSame(original, copy);
                 assertEquals(original, copy);
@@ -2427,12 +2517,94 @@ public class TestMain {
                 } catch (JDOObjectNotFoundException exception) {
                     // Person does not yet exist
                 }
-                segment.addPerson(false, personId.getBase(), person);
+                segment.addPerson(false, personId.getLastSegment().toClassicRepresentation(), person);
                 this.commit();
             } finally {
                 super.taskId = null;
             }
-            
+            //
+            // CR20020554
+            //
+            try {
+                super.taskId = "CR20020554";
+                this.begin();
+                GenericAddress address = entityManager.newInstance(GenericAddress.class);
+                StringProperty telexNumber = entityManager.newInstance(StringProperty.class);
+                telexNumber.setDescription("A Swiss telex number of maybe inapproriate length");
+                address.addProperty("telex", telexNumber);
+                segment.addAddress(false, "CR20020554", address);
+                person.getAssignedAddress().add(address);
+                this.commit();
+                {
+                    StringPropertyQuery numberQuery = (StringPropertyQuery) entityManager.newQuery(org.openmdx.generic1.cci2.StringProperty.class);
+                    numberQuery.forAllStringValue().equalTo("45112200");
+                    numberQuery.thereExistsDescription().startsWith("A Swiss");
+                    Collection<StringPropertyQuery> selectedNumbers = PersistenceHelper.asSubquery(numberQuery);
+                    GenericAddressQuery addressQuery = (GenericAddressQuery) entityManager.newQuery(GenericAddress.class); 
+                    addressQuery.thereExistsProperty().elementOf(selectedNumbers);
+                    List<Address> selectedAddresses = segment.getAddress(addressQuery);
+                    assertEquals(1, selectedAddresses.size());
+                }
+                this.begin();
+                telexNumber.getStringValue().put(Integer.valueOf(0), "45112233");
+                this.commit();
+                {
+                    StringPropertyQuery numberQuery = (StringPropertyQuery) entityManager.newQuery(org.openmdx.generic1.cci2.StringProperty.class);
+                    numberQuery.forAllStringValue().equalTo("45112200");
+                    numberQuery.thereExistsDescription().startsWith("A Swiss");
+                    Collection<StringPropertyQuery> selectedNumbers = PersistenceHelper.asSubquery(numberQuery);
+                    GenericAddressQuery addressQuery = (GenericAddressQuery) entityManager.newQuery(GenericAddress.class); 
+                    addressQuery.thereExistsProperty().elementOf(selectedNumbers);
+                    List<Address> selectedAddresses = segment.getAddress(addressQuery);
+                    assertTrue(selectedAddresses.isEmpty());
+                }
+                {
+                    StringPropertyQuery numberQuery = (StringPropertyQuery) entityManager.newQuery(org.openmdx.generic1.cci2.StringProperty.class);
+                    numberQuery.forAllStringValue().equalTo("45112233");
+                    numberQuery.thereExistsDescription().startsWith("A Swiss");
+                    Collection<StringPropertyQuery> selectedNumbers = PersistenceHelper.asSubquery(numberQuery);
+                    GenericAddressQuery addressQuery = (GenericAddressQuery) entityManager.newQuery(GenericAddress.class); 
+                    addressQuery.thereExistsProperty().elementOf(selectedNumbers);
+                    List<Address> selectedAddresses = segment.getAddress(addressQuery);
+                    assertEquals(1, selectedAddresses.size());
+                }
+                {
+                    StringPropertyQuery numberQuery = (StringPropertyQuery) entityManager.newQuery(org.openmdx.generic1.cci2.StringProperty.class);
+                    numberQuery.thereExistsDescription().startsNotWith("A German");
+                    numberQuery.thereExistsStringValue().like("45.*");
+                    Collection<StringPropertyQuery> selectedNumbers = PersistenceHelper.asSubquery(numberQuery);
+                    GenericAddressQuery addressQuery = (GenericAddressQuery) entityManager.newQuery(GenericAddress.class); 
+                    addressQuery.thereExistsProperty().elementOf(selectedNumbers);
+                    List<Address> selectedAddresses = segment.getAddress(addressQuery);
+                    assertEquals(1, selectedAddresses.size());
+                }
+                {
+                    StringPropertyQuery numberQuery = (StringPropertyQuery) entityManager.newQuery(org.openmdx.generic1.cci2.StringProperty.class);
+                    numberQuery.thereExistsStringValue().elementOf("45112200");
+                    Collection<StringPropertyQuery> selectedNumbers = PersistenceHelper.asSubquery(numberQuery);
+                    GenericAddressQuery addressQuery = (GenericAddressQuery) entityManager.newQuery(GenericAddress.class); 
+                    addressQuery.thereExistsProperty().elementOf(selectedNumbers);
+                    List<Address> selectedAddresses = segment.getAddress(addressQuery);
+                    assertTrue(selectedAddresses.isEmpty());
+                }
+                {
+                    StringPropertyQuery numberQuery = (StringPropertyQuery) entityManager.newQuery(org.openmdx.generic1.cci2.StringProperty.class);
+                    numberQuery.thereExistsStringValue().elementOf("45112233","45112234","45112235");
+                    numberQuery.thereExistsDescription().startsWith("A Swiss");
+                    Collection<StringPropertyQuery> selectedNumbers = PersistenceHelper.asSubquery(numberQuery);
+                    GenericAddressQuery addressQuery = (GenericAddressQuery) entityManager.newQuery(GenericAddress.class); 
+                    addressQuery.thereExistsProperty().elementOf(selectedNumbers);
+                    Collection<Address> selectedAddresses = segment.getAddress(addressQuery);
+                    assertEquals(1, selectedAddresses.size());
+                    SegmentQuery segmentQuery = (SegmentQuery) entityManager.newQuery(test.openmdx.app1.jmi1.Segment.class);
+                    selectedAddresses = PersistenceHelper.asSubquery(addressQuery);
+                    segmentQuery.thereExistsAddress().elementOf(selectedAddresses);
+                    List<Segment> selectedSegments = provider.getSegment(segmentQuery);
+                    assertEquals(1, selectedSegments.size());
+                }
+            } finally {
+                super.taskId = null;
+            }
             Path personId = (Path) ReducedJDOHelper.getObjectId(person);
             if(!(this instanceof AbstractContainerManagedTransactionTest)){
                 {
@@ -2685,7 +2857,7 @@ public class TestMain {
                 }
                 System.out.println("assigned address=" + ReducedJDOHelper.getObjectId(address));
             }
-            assertEquals("number of assigned addresses", 5, person.getAssignedAddress().size());
+            assertEquals("number of assigned addresses", 6, person.getAssignedAddress().size());
     
             // assignAddress by operation. This operation does not really
             // perform an assign. It is just there to see whether the operation
@@ -2824,7 +2996,7 @@ public class TestMain {
                     }
                 }
                 this.commit();
-                assertEquals("number of assigned addresses", 4, person.getAssignedAddress().size());
+                assertEquals("number of assigned addresses", 5, person.getAssignedAddress().size());
             } finally {
                 super.taskId = null;
             }
@@ -2836,7 +3008,7 @@ public class TestMain {
                 super.taskId = "CR20018837";
                 System.out.println("Removal test");
                 for(int i = 0; i < 8; i++) {
-                    boolean persistentNew = i % 2 == 0;
+                    boolean persistentNew = isEven(i);
                     String invoiceId = this.taskId + (char)('a' + i);
                     this.begin();
                     Invoice additionalInvoice = this.entityManager.newInstance(Invoice.class);
@@ -2928,13 +3100,13 @@ public class TestMain {
                     assertSame("Step " + i + " Deleted invoice retrieval", additionalInvoice, segment.getInvoice(false, invoiceId));
                     assertTrue("Step " + i + " Additional invoice now deleted", ReducedJDOHelper.isDeleted(additionalInvoice));
                     assertTrue("Step " + i + " Additional invoice still persistent", ReducedJDOHelper.isPersistent(additionalInvoice));
-                    assertEquals("Step " + i + " Additional invoice might be new new", i % 2 == 0, ReducedJDOHelper.isNew(additionalInvoice));
+                    assertEquals("Step " + i + " Additional invoice might be new new", isEven(i), ReducedJDOHelper.isNew(additionalInvoice));
                     assertTrue("Step " + i + " Additional invoice now deleted", ReducedJDOHelper.isDirty(additionalInvoice));
                     assertSame("Step " + i + " Deleted position retrieval", additionalPosition, this.entityManager.getObjectById(positionId));
                     if(persistentNew) {
                         assertTrue("Step " + i + " Additional position now deleted", ReducedJDOHelper.isDeleted(additionalPosition));
                         assertTrue("Step " + i + " Additional position still persistent", ReducedJDOHelper.isPersistent(additionalPosition));
-                        assertEquals("Step " + i + " Additional position might be new", i % 2 == 0, ReducedJDOHelper.isNew(additionalPosition));
+                        assertEquals("Step " + i + " Additional position might be new", isEven(i), ReducedJDOHelper.isNew(additionalPosition));
                         assertTrue("Step " + i + " Additional position now deleted", ReducedJDOHelper.isDirty(additionalPosition));
                     }
                     this.commit();
@@ -2952,7 +3124,52 @@ public class TestMain {
                 super.taskId = null;
             }
             //
-            // CR20018837
+            // CR20020557 Idem-potent Concurrent Access
+            //
+            if(testConcurrentAccess()) try {
+                super.taskId = "CR20020557";
+                Path anAddressId;
+                {
+                    this.begin();
+                    InternationalPostalAddress anAddress = entityManager.newInstance(InternationalPostalAddress.class);
+                    anAddress.setCountry("Deutschland");
+                    anAddress.setCity("Berlin");
+                    anAddress.setHouseNumber("21-24");
+                    anAddress.setPostalCode("10789");
+                    anAddress.setStreet("Tauentzienstrasse");
+                    anAddress.setAddressLine("KaDeWe Berlin", "Betriebsst\u00E4tte der Karstadt Premium GmbH");
+                    segment.addAddress(false, "CR20020557", anAddress);
+                    anAddressId = anAddress.refGetPath();
+                    this.commit();
+                }
+                for(long pause = 50L; pause < 1000L; pause+=50L) {
+                    CountryChanger thread1 = new CountryChanger(anAddressId, "Allemagne" + pause, -1, pause);
+                    CountryChanger thread2 = new CountryChanger(anAddressId, "Germany" + pause, pause, pause);
+                    thread1.start();
+                    thread2.start();
+                    thread1.join();
+                    thread2.join();
+                    assertTrue("One must fail, one succeed", thread1.isCommitted() ^ thread2.isCommitted());
+                }
+                for(long pause = 50L; pause < 1000L; pause+=50L) {
+                    CountryChanger thread1 = new CountryChanger(anAddressId, "Deutschland" + pause, -1, pause);
+                    CountryChanger thread2 = new CountryChanger(anAddressId, "Deutschland" + pause, pause, pause);
+                    thread1.start();
+                    thread2.start();
+                    thread1.join();
+                    thread2.join();
+                    assertTrue(
+                        "Exactly one must succed: With " + pause + " ms pause did thread1 "
+                        + (thread1.isCommitted() ? "commit" : "succeed")
+                        + " and thread2 did " + (thread1.isCommitted() ? "commit" : "roll back"), 
+                        thread1.isCommitted() ^ thread2.isCommitted()
+                    );
+                }
+            } finally {
+                super.taskId = null;
+            }
+            //
+            // CR20018837  Persistent-new-deleted
             //
             try {
                 super.taskId = "CR20018837";
@@ -3474,6 +3691,36 @@ public class TestMain {
                 SysLog.trace("person", p);
             }
 
+            try {
+                super.taskId = "CR20020554";
+                {
+                    //
+                    // From Cache
+                    // 
+                    personQuery = (PersonQuery) this.entityManager.newQuery(Person.class);
+                    personQuery.thereExistsPersonGroup().name().equalTo("Group 0");
+                    List<Person> people = segment.getPerson(personQuery);
+                    assertEquals("Cached complex query", 100, people.size());
+                }
+                {
+                    //
+                    // From Database
+                    // 
+                    PersistenceManager anotherPersistenceManager = super.entityManager.getPersistenceManagerFactory().getPersistenceManager();
+                    personQuery = (PersonQuery) anotherPersistenceManager.newQuery(Person.class);
+                    personQuery.thereExistsPersonGroup().name().equalTo("Group 0");
+                    test.openmdx.app1.jmi1.Segment sameSegment = anotherPersistenceManager.getObjectById(test.openmdx.app1.jmi1.Segment.class, segment.refMofId());
+                    List<Person> people = sameSegment.getPerson(personQuery);
+                    assertEquals("Standard complex query", 100, people.size());
+                }
+                
+                
+                
+            } finally {
+                super.taskId = null;
+            }
+            
+            
             // get persons with SOUNDS like filter
             personQuery = app1Package.createPersonQuery();
             personQuery.lastName().like(
@@ -4087,6 +4334,9 @@ public class TestMain {
                         ((EmailAddress)address).sendMessage(emailAddressSendMessageParams);
                         this.commit();
                     }
+                    else if(address instanceof GenericAddress) {
+                        SysLog.detail("Generic addresses are not sent");
+                    }
                     else {
                         fail("address format " + address.getClass().getName() + " unknown");
                     }
@@ -4528,7 +4778,7 @@ public class TestMain {
                         null,
                         segment.refGetPath()
                     );
-                    System.out.println(segment.refGetPath().toXRI() + " exported to " + file);
+                    System.out.println(segment.refGetPath() + " exported to " + file);
                 }
                 //
                 // Validate date-time values
@@ -4719,15 +4969,24 @@ public class TestMain {
             } finally {
                 super.taskId = null;
             }
-            
         }
 
-        /**
-         * @param model
-         * @param opencrxModel
-         * @throws ServiceException
-         * @throws IOException
-         */
+		/**
+		 * @param i the argument to be tested
+		 * @return <code>true</code> if the argument is odd
+		 */
+		private boolean isOdd(int i) {
+			return !isEven(i);
+		}
+
+		/**
+		 * @param i the argument to be tested
+		 * @return <code>true</code> if the argument ie even
+		 */
+		private boolean isEven(int i) {
+			return i % 2 == 0;
+		}
+
         private Model_1_0 loadForeignModel(
             String uri
         ) throws ServiceException, IOException {
@@ -4878,13 +5137,13 @@ public class TestMain {
          * 
          * @return the Test segment
          */
-        protected Segment getModelTestSegment(
+        protected test.openmdx.model1.jmi1.Segment getModelTestSegment(
         ){
             Provider provider = getModelTestProvider();
-            Segment segment = (Segment) provider.getSegment("Test");
+            test.openmdx.model1.jmi1.Segment segment = (test.openmdx.model1.jmi1.Segment) provider.getSegment("Test");
             if(segment == null) {
                 PersistenceManager persistenceManager = ReducedJDOHelper.getPersistenceManager(provider);
-                segment = persistenceManager.newInstance(Segment.class);
+                segment = persistenceManager.newInstance(test.openmdx.model1.jmi1.Segment.class);
                 provider.addSegment("Test", segment);
             }
             return segment;
@@ -4897,7 +5156,7 @@ public class TestMain {
          */
         protected ClassContainingOperations getModelTestOperations(
         ){
-            Segment segment = getModelTestSegment();
+            test.openmdx.model1.jmi1.Segment segment = getModelTestSegment();
             ClassContainingOperations operations = segment.getClassContainingOperations("Operations");
             if(operations == null) {
                 PersistenceManager persistenceManager = ReducedJDOHelper.getPersistenceManager(segment);
@@ -5049,12 +5308,12 @@ public class TestMain {
             Collection<UnitOfWork> task = AuditQueries.getUnitOfWorkInvolvingObject(from, null, person); 
             String id = "involve Person # ID500012";            
             dumpTask(id + scope, task);
-            assertEquals(id + scope, (1 * create + 7) * factor, task.size());
+            assertEquals(id + scope, (1 * create + 8) * factor, task.size());
             if(scoped || run == 1) {
                 Modifiable lastImage = null;
                 for(UnitOfWork unitOfWork : task){
                     Involvement involvement = unitOfWork.getInvolvement(
-                        person.refGetPath().toString()
+                        person.refGetPath().toClassicRepresentation()
                     );
                     assertNotNull(id, involvement);
                     if(lastImage != null) {
@@ -5081,7 +5340,7 @@ public class TestMain {
                 id = "touch Person # ID500012"; 
                 task = AuditQueries.getUnitOfWorkTouchingObject(from, null, null, person ); 
                 dumpTask(id + scope, task);
-                assertEquals(id + scope, (0 * create + 7) * factor, task.size());
+                assertEquals(id + scope, (0 * create + 8) * factor, task.size());
                 id = "touch specific attributes of Person # ID500012"; 
                 task = AuditQueries.getUnitOfWorkTouchingObject(
                     from, 
@@ -5095,7 +5354,7 @@ public class TestMain {
                     person
                 );
                 dumpTask(id + scope, task);
-                assertEquals(id + scope, (0 * create + 3) * factor, task.size());
+                assertEquals(id + scope, (0 * create + 4) * factor, task.size());
             }
             if(scoped || run == 1) {
                 id = "remove Person # ID500012";
@@ -5106,7 +5365,7 @@ public class TestMain {
             id = "all units of work"; 
             task = AuditQueries.getUnitOfWorkForTimeRange(super.entityManager, from, null);
             dumpTask(id + scope, task);
-            assertEquals(id + scope, (16 * create + 29) * factor, task.size());
+            assertEquals(id + scope, (16 * create + 69) * factor, task.size());
             id = "units of work involving people"; 
             task = AuditQueries.getUnitOfWorkInvolvingObject(
                 from, 
@@ -5117,7 +5376,7 @@ public class TestMain {
                 )
             );
             dumpTask(id + scope, task);
-            assertEquals(id + scope, (3 * create + 13) * factor, task.size());
+            assertEquals(id + scope, (3 * create + 14) * factor, task.size());
             id = "units of work involving deleted object";
             Path addressId = DATA_SEGMENT_ID.getDescendant("address","CR0002096"); 
             task = AuditQueries.getUnitOfWorkInvolvingObject(
@@ -5201,10 +5460,7 @@ public class TestMain {
         protected static String getResourceIdentifier(
             Object pc
         ){
-            return 
-                pc == null ? null:
-                ReducedJDOHelper.isPersistent(pc) ? ((Path)ReducedJDOHelper.getObjectId(pc)).toXRI() :
-                ReducedJDOHelper.getTransactionalObjectId(pc).toString();
+            return pc == null ? null: ReducedJDOHelper.getAnyObjectId(pc).toString();
         }
         
         protected void testInMemoryProvider() throws ServiceException, ParseException {
@@ -5342,6 +5598,10 @@ public class TestMain {
          */
         protected abstract Boolean isOptimistic();
                 
+        protected boolean testConcurrentAccess(){
+            return false;
+        }
+
         /* (non-Javadoc)
          * @see test.openmdx.app1.TestMain.AbstractTest#configuration()
          */

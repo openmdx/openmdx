@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2009-2012, OMEX AG, Switzerland
+ * Copyright (c) 2009-2014, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -52,6 +52,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
 
+import javax.annotation.Nullable;
 import javax.jdo.JDOUserCallbackException;
 import javax.jdo.listener.DeleteLifecycleListener;
 import javax.jdo.listener.InstanceLifecycleEvent;
@@ -105,7 +106,7 @@ public abstract class AbstractPlugIn_1 implements PlugIn_1_0, StoreLifecycleList
     /* (non-Javadoc)
      * @see org.openmdx.base.aop0.PlugIn_1_0#flush(org.openmdx.base.accessor.rest.UnitOfWork_1)
      */
-//  @Override
+    @Override
     public void flush(
         UnitOfWork_1 dataObjectManager, 
         boolean beforeCompletion
@@ -116,7 +117,7 @@ public abstract class AbstractPlugIn_1 implements PlugIn_1_0, StoreLifecycleList
     /* (non-Javadoc)
      * @see org.openmdx.base.aop0.PlugIn_1_0#setCore(org.openmdx.base.accessor.rest.DataObject_1, org.openmdx.base.accessor.rest.DataObject_1)
      */
-//  @Override
+    @Override
     public void postSetCore(
         DataObject_1 target, 
         DataObject_1 core
@@ -236,7 +237,7 @@ public abstract class AbstractPlugIn_1 implements PlugIn_1_0, StoreLifecycleList
                     id
                 );
             } else if (core.jdoIsPersistent()) {
-                StringBuilder aspectQualifier = new StringBuilder(core.jdoGetObjectId().getBase());
+                StringBuilder aspectQualifier = new StringBuilder(core.jdoGetObjectId().getLastSegment().toClassicRepresentation());
                 for(
                     int i = 1;
                     i < pathComponent.size();
@@ -258,7 +259,7 @@ public abstract class AbstractPlugIn_1 implements PlugIn_1_0, StoreLifecycleList
     /* (non-Javadoc)
      * @see org.openmdx.base.aop0.PlugIn_1_0#getQualifier(org.openmdx.base.accessor.rest.DataObject_1, java.lang.String)
      */
-//  @Override
+    @Override
     public String getQualifier(
         DataObject_1 object, 
         String qualifier
@@ -276,7 +277,7 @@ public abstract class AbstractPlugIn_1 implements PlugIn_1_0, StoreLifecycleList
     /* (non-Javadoc)
      * @see org.openmdx.base.aop0.PlugIn_1_0#callbackOnCascadedDeletes()
      */
-    //  @Override
+    @Override
     public boolean requiresCallbackOnCascadedDelete(DataObject_1 object) {
         return false;
     }
@@ -301,7 +302,7 @@ public abstract class AbstractPlugIn_1 implements PlugIn_1_0, StoreLifecycleList
         DataObject_1 object, 
         ModelElement_1_0 feature
     ) throws ServiceException {
-        Object qualifiedFeatureName = feature.objGetValue("qualifiedName");
+        Object qualifiedFeatureName = feature.getQualifiedName();
         return 
             ("org:openmdx:state2:StateCapable:stateVersion".equals(qualifiedFeatureName)) ||
             ("org:openmdx:base:Modifiable:modifiedAt".equals(qualifiedFeatureName) && isStateOnly(object));
@@ -310,8 +311,8 @@ public abstract class AbstractPlugIn_1 implements PlugIn_1_0, StoreLifecycleList
 	/* (non-Javadoc)
 	 * @see org.openmdx.base.aop0.PlugIn_1_0#isAspect(org.openmdx.base.accessor.rest.DataObject_1)
 	 */
-//  @Override
-	public Boolean isAspect(
+    @Override
+	@Nullable public Boolean isAspect(
 		DataObject_1 object
 	) throws ServiceException {
 		return null;
@@ -325,7 +326,7 @@ public abstract class AbstractPlugIn_1 implements PlugIn_1_0, StoreLifecycleList
     /* (non-Javadoc)
      * @see javax.jdo.listener.StoreLifecycleListener#postStore(javax.jdo.listener.InstanceLifecycleEvent)
      */
-    //  @Override
+    @Override
     public void postStore(
         InstanceLifecycleEvent event
     ) {
@@ -333,8 +334,7 @@ public abstract class AbstractPlugIn_1 implements PlugIn_1_0, StoreLifecycleList
     }
 
     /**
-     * 
-     * @param event
+     * Allow the legacy support to inject its valid time unique behaviour
      */
     protected void basicStatePreStore(
         InstanceLifecycleEvent event
@@ -379,7 +379,7 @@ public abstract class AbstractPlugIn_1 implements PlugIn_1_0, StoreLifecycleList
 	/* (non-Javadoc)
      * @see javax.jdo.listener.StoreLifecycleListener#preStore(javax.jdo.listener.InstanceLifecycleEvent)
      */
-    //  @Override
+    @Override
     public void preStore(
         InstanceLifecycleEvent event
     ) {
@@ -389,77 +389,7 @@ public abstract class AbstractPlugIn_1 implements PlugIn_1_0, StoreLifecycleList
                 if(isInstanceOf(persistentInstance, "org:openmdx:state2:BasicState")){
                     basicStatePreStore(event);
                 } else {
-                    Map<String, DataObject_1_0> states = persistentInstance.getAspect("org:openmdx:state2:BasicState");
-                    if(!states.isEmpty()) {
-                        //
-                        // Propagate all core attributes except stateVersion to all states
-                        //
-                        UnitOfWork_1 unitOfWork = persistentInstance.getUnitOfWork();
-                        Set<String> dirtyFeatures = new HashSet<String>(
-                            unitOfWork.getState(persistentInstance,false).dirtyFeatures(true)
-                        );
-                        dirtyFeatures.removeAll(Propagation.NON_PROPAGATED_ATTRIBUTES);
-                        if(persistentInstance.jdoIsNew() || !dirtyFeatures.isEmpty()) {
-                            Model_1_0 model = persistentInstance.jdoGetPersistenceManager().getModel(); 
-                            Map<String, ModelElement_1_0> attributes = model.getAttributeDefs(
-                                model.getElement(persistentInstance.objGetClass()),
-                                false, // sub-types
-                                true // includeDerived
-                            );
-                            for(DataObject_1_0 state: states.values()) {
-                                for(String feature : dirtyFeatures) {
-                                    Multiplicity multiplicity = ModelHelper.getMultiplicity(attributes.get(feature));
-                                    switch(multiplicity) {
-                                        case SINGLE_VALUE: case OPTIONAL: {
-                                            Object source = persistentInstance.objGetValue(feature);
-                                            Object target = state.objGetValue(feature);
-                                            if(source == null ? target != null : !source.equals(target)) {
-                                                state.objSetValue(feature, source);
-                                            }
-                                        }
-                                        break;
-                                        case LIST: {
-                                            SortedMap<Integer,Object> source = persistentInstance.objGetSparseArray(feature); 
-                                            SortedMap<Integer,Object> target = state.objGetSparseArray(feature);
-                                            if(!target.equals(source)) {
-                                                target.clear();
-                                                target.putAll(source);
-                                            }
-                                        }
-                                        break;
-                                        case SET: {
-                                            Set<Object> source = persistentInstance.objGetSet(feature); 
-                                            Set<Object> target = state.objGetSet(feature);
-                                            if(!target.equals(source)) {
-                                                target.clear();
-                                                target.addAll(source);
-                                            }
-                                        }
-                                        break;
-                                        case SPARSEARRAY: {
-                                            SortedMap<Integer,Object> source = persistentInstance.objGetSparseArray(feature); 
-                                            SortedMap<Integer,Object> target = state.objGetSparseArray(feature);
-                                            if(!target.equals(source)) {
-                                                target.clear();
-                                                target.putAll(source);
-                                            }
-                                        }
-                                        break;
-                                        case STREAM:
-                                            // Streams are not propagated to their states
-                                            break;
-                                        default: throw new ServiceException(
-                                            BasicException.Code.DEFAULT_DOMAIN,
-                                            BasicException.Code.NOT_SUPPORTED,
-                                            "The given multiplicity is not supported for core atttributes",
-                                            new BasicException.Parameter("multiplicity", multiplicity),
-                                            new BasicException.Parameter("attribute", feature)
-                                        );
-                                    }
-                                }
-                            }
-                        }
-                    }
+                    corePreStore(persistentInstance);
                 }
             }
         } catch (ServiceException exception) {
@@ -470,5 +400,81 @@ public abstract class AbstractPlugIn_1 implements PlugIn_1_0, StoreLifecycleList
             );
         }
     }
+
+	/**
+	 * Propagate all core attributes except stateVersion to all states
+	 */
+	private void corePreStore(
+		DataObject_1 persistentInstance
+	) throws ServiceException {
+		Map<String, DataObject_1_0> states = persistentInstance.getAspect("org:openmdx:state2:BasicState");
+		if(!states.isEmpty()) {
+		    UnitOfWork_1 unitOfWork = persistentInstance.getUnitOfWork();
+		    Set<String> dirtyFeatures = new HashSet<String>(
+		        unitOfWork.getState(persistentInstance,false).dirtyFeatures(true)
+		    );
+		    dirtyFeatures.removeAll(Propagation.NON_PROPAGATED_ATTRIBUTES);
+		    if(persistentInstance.jdoIsNew() || !dirtyFeatures.isEmpty()) {
+		        Model_1_0 model = persistentInstance.jdoGetPersistenceManager().getModel(); 
+		        Map<String, ModelElement_1_0> attributes = model.getAttributeDefs(
+		            model.getElement(persistentInstance.objGetClass()),
+		            false, // sub-types
+		            true // includeDerived
+		        );
+		        for(DataObject_1_0 state: states.values()) {
+		            for(String feature : dirtyFeatures) {
+		                Multiplicity multiplicity = ModelHelper.getMultiplicity(attributes.get(feature));
+		                switch(multiplicity) {
+		                    case SINGLE_VALUE: case OPTIONAL: {
+		                        Object source = persistentInstance.objGetValue(feature);
+		                        Object target = state.objGetValue(feature);
+		                        if(source == null ? target != null : !source.equals(target)) {
+		                            state.objSetValue(feature, source);
+		                        }
+		                    }
+		                    break;
+		                    case LIST: {
+		                        SortedMap<Integer,Object> source = persistentInstance.objGetSparseArray(feature); 
+		                        SortedMap<Integer,Object> target = state.objGetSparseArray(feature);
+		                        if(!target.equals(source)) {
+		                            target.clear();
+		                            target.putAll(source);
+		                        }
+		                    }
+		                    break;
+		                    case SET: {
+		                        Set<Object> source = persistentInstance.objGetSet(feature); 
+		                        Set<Object> target = state.objGetSet(feature);
+		                        if(!target.equals(source)) {
+		                            target.clear();
+		                            target.addAll(source);
+		                        }
+		                    }
+		                    break;
+		                    case SPARSEARRAY: {
+		                        SortedMap<Integer,Object> source = persistentInstance.objGetSparseArray(feature); 
+		                        SortedMap<Integer,Object> target = state.objGetSparseArray(feature);
+		                        if(!target.equals(source)) {
+		                            target.clear();
+		                            target.putAll(source);
+		                        }
+		                    }
+		                    break;
+		                    case STREAM:
+		                        // Streams are not propagated to their states
+		                        break;
+		                    default: throw new ServiceException(
+		                        BasicException.Code.DEFAULT_DOMAIN,
+		                        BasicException.Code.NOT_SUPPORTED,
+		                        "The given multiplicity is not supported for core atttributes",
+		                        new BasicException.Parameter("multiplicity", multiplicity),
+		                        new BasicException.Parameter("attribute", feature)
+		                    );
+		                }
+		            }
+		        }
+		    }
+		}
+	}
 
 }

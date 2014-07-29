@@ -63,6 +63,7 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
+import javax.jdo.JDOUserException;
 import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.openmdx.base.accessor.cci.DataObject_1_0;
@@ -185,7 +186,7 @@ public class DateState_1
                     )
                 );
                 if(!predecessor.jdoIsNew()) {
-                    states.add(predecessor);
+                    addState(states, predecessor);
                 }
             } else {
                 validFrom = NULL;
@@ -202,10 +203,11 @@ public class DateState_1
                     )
                 );
                 if(!successor.jdoIsNew()) {
-                    states.add(successor);
+                    addState(states, successor);
                 }
             } else {
                 validTo = NULL;
+                
             }
             //
             // Handle the period which is involved
@@ -218,7 +220,7 @@ public class DateState_1
                 target.objSetValue("stateValidTo", validTo);
             }
             if(!target.jdoIsNew()) {
-                states.add(target);
+                addState(states, target);
             }
             //
             // Replace states
@@ -230,6 +232,31 @@ public class DateState_1
             }
         }
     }
+
+	protected boolean addState(
+		Collection<DataObject_1_0> states,
+		DataObject_1_0 state
+	) {
+		try {
+			return states.add(state);
+		} catch (RuntimeException exception) {
+			final BasicException stack = BasicException.toExceptionStack(exception);
+			if(stack.getCause(null).getExceptionCode() == BasicException.Code.DUPLICATE) {
+				final String message = "The technical property stateVersion has probably an incosistent value: It must not be smaller than the largest state number";
+				throw new JDOUserException(
+					message,	
+					BasicException.newStandAloneExceptionStack(
+						stack, 
+						BasicException.Code.DEFAULT_DOMAIN, 
+						BasicException.Code.ASSERTION_FAILURE, 
+						message
+					)
+				);
+			} else {
+				throw exception;
+			}
+		}
+	}
 
     private void invalidate(
         DataObject_1_0 state

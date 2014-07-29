@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2009-2012, OMEX AG, Switzerland
+ * Copyright (c) 2009-2014, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -110,7 +110,7 @@ abstract public class Object_1 extends Interceptor_1 {
                     new BasicException.Parameter("feature", feature)
                 );
             }
-            String type = ((Path)reference.objGetValue("type")).getBase();
+            String type = ((Path)reference.getType()).getLastSegment().toClassicRepresentation();
             //
             // A state capable container is required even if there is no state context  
             // in order to avoid the returning of states not requested explicitly.

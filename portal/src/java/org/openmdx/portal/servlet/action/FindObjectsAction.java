@@ -81,6 +81,7 @@ import org.openmdx.base.query.Quantifier;
 import org.openmdx.base.query.SortOrder;
 import org.openmdx.portal.servlet.Action;
 import org.openmdx.portal.servlet.ApplicationContext;
+import org.openmdx.portal.servlet.CssClass;
 import org.openmdx.portal.servlet.WebKeys;
 
 /**
@@ -162,13 +163,13 @@ public class FindObjectsAction extends UnboundAction {
                 ModelElement_1_0 parentDef = ((RefMetaObject_1)parent.refMetaObject()).getElementDef();                
                 ModelElement_1_0 referenceDef = (ModelElement_1_0)parentDef.objGetMap("reference").get(referenceName);
                 if(referenceDef != null) {
-                    ModelElement_1_0 referencedType = model.getElement(referenceDef.objGetValue("type"));
+                    ModelElement_1_0 referencedType = model.getElement(referenceDef.getType());
                     ModelElement_1_0 filterFeatureDef = model.getFeatureDef(referencedType, filterByFeature, true);
                     if(filterFeatureDef != null) {
-                        boolean filterFeatureIsNumeric = model.isNumericType(filterFeatureDef.objGetValue("type"));
+                        boolean filterFeatureIsNumeric = model.isNumericType(filterFeatureDef.getType());
                         String filterValue = filterValues[0];
                         // Remove trailing "[ text ]". This suffix was most probably by the autocompleter.
-                        if(filterValue.indexOf(" [") >= 0 && filterValue.endsWith("]")) {
+                        if(filterValue.indexOf(" [") > 0) {
                         	filterValue = filterValue.substring(0, filterValue.indexOf(" ["));
                         }
                         conditions.add(
@@ -193,10 +194,10 @@ public class FindObjectsAction extends UnboundAction {
                     SortOrder.ASCENDING
                 );
             }
-            Collection allObjects = (Collection)parent.refGetValue(referenceName);
-            List filteredObjects = null;
+            Collection<?> allObjects = (Collection<?>)parent.refGetValue(referenceName);
+            List<RefObject_1_0> filteredObjects = null;
             try {
-                filteredObjects = ((RefContainer)allObjects).refGetAll(
+                filteredObjects = ((RefContainer<RefObject_1_0>)allObjects).refGetAll(
                     new org.openmdx.base.query.Filter(
                         conditions,
                         s == null ? null : Collections.singletonList(s),
@@ -204,14 +205,14 @@ public class FindObjectsAction extends UnboundAction {
                     )
                 );
             } catch(UnsupportedOperationException e) {
-                filteredObjects = new ArrayList(
-                    ((RefContainer)allObjects).refGetAll(null)
+                filteredObjects = new ArrayList<RefObject_1_0>(
+                    ((RefContainer<RefObject_1_0>)allObjects).refGetAll(null)
                 );
             }
-            pw.print("<ul class=\"autocomplete\" >\n");
+            pw.print("<ul class=\"" + CssClass.dropdownMenu.toString() + "\" style=\"display:block;\">\n");
             int ii = 0;
             for(
-                ListIterator i = filteredObjects.listIterator(position);
+                ListIterator<RefObject_1_0> i = filteredObjects.listIterator(position);
                 i.hasNext() && (ii < size);
                 ii++
             ) {
@@ -231,7 +232,7 @@ public class FindObjectsAction extends UnboundAction {
                 }
                 pw.write(app.getHtmlEncoder().encode(title, false));
                 // Mark non-primary fields as informal 
-                pw.write("<span class=\"informal\">");
+                pw.write("<span>");
                 pw.write("<div style=\"display:none\">");
                 pw.write(response.encodeURL(obj.refMofId()));
                 pw.write("</div>");

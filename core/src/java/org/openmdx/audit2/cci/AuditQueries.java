@@ -154,12 +154,7 @@ public class AuditQueries {
             i < objects.length;
             i++
         ){
-            Object source = objects[i];
-            objectIds[i] = ReducedJDOHelper.isPersistent(source) ? ReducedJDOHelper.getObjectId(
-                source
-            ) : ReducedJDOHelper.getTransactionalObjectId(
-                source
-            );
+            objectIds[i] = ReducedJDOHelper.getAnyObjectId(objects[i]);
         }
         return objectIds;
     }
@@ -352,7 +347,7 @@ public class AuditQueries {
                 Collection<UnitOfWork> unitsOfWork = new ArrayList<UnitOfWork>();
                 Candidate: for(UnitOfWork candidate : getUnitOfWorkInvolvingObject(from, to, touchedObjects)) {
                     for(Modifiable touchedObject : touchedObjects) {
-                        Involvement involvement = candidate.getInvolvement(touchedObject.refGetPath().toString());
+                        Involvement involvement = candidate.getInvolvement(touchedObject.refGetPath().toClassicRepresentation());
                         if(involvement != null && involvement.getAfterImage() != null) {
                             if(attributes == null) {
                                 unitsOfWork.add(candidate);
@@ -579,7 +574,7 @@ public class AuditQueries {
                 Collection<UnitOfWork> unitsOfWork = new ArrayList<UnitOfWork>();
                 Candidate: for(UnitOfWork candidate : getUnitOfWorkInvolvingObject(from, to, removedObjects)) {
                     for(Modifiable touchedObject : removedObjects) {
-                        Involvement involvement = candidate.getInvolvement(touchedObject.refGetPath().toString());
+                        Involvement involvement = candidate.getInvolvement(touchedObject.refGetPath().toClassicRepresentation());
                         if(involvement != null && involvement.getAfterImage() == null) {
                             unitsOfWork.add(candidate);
                             continue Candidate;

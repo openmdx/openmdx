@@ -137,22 +137,6 @@ public class SharedObjects {
     }
 
     /**
-     * Propagate the shared objects from the source ot the target
-     * 
-     * @param target target <code>PersistenceManager</code>
-     * @param source source <code>PersistenceManager</code>
-     */
-    public static void propagate(
-        PersistenceManager target,
-        PersistenceManager source
-    ){
-        target.putUserObject(
-            KEY,
-            source.getUserObject(KEY)
-        );
-    }
-
-    /**
      * Compare the key with the shared object's key
      * 
      * @param key the key to be tested

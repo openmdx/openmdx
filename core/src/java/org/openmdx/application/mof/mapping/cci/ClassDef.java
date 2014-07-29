@@ -1,14 +1,13 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
- * Description: VelocityClassDef class
+ * Project:     openMDX, http://www.openmdx.org/
+ * Description: ClassDef
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
  * ====================================================================
  *
- * This software is published under the BSD license
- * as listed below.
+ * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004, OMEX AG, Switzerland
+ * Copyright (c) 2004-2014, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -16,16 +15,16 @@
  * conditions are met:
  * 
  * * Redistributions of source code must retain the above copyright
- * notice, this list of conditions and the following disclaimer.
+ *   notice, this list of conditions and the following disclaimer.
  * 
  * * Redistributions in binary form must reproduce the above copyright
- * notice, this list of conditions and the following disclaimer in
- * the documentation and/or other materials provided with the
- * distribution.
+ *   notice, this list of conditions and the following disclaimer in
+ *   the documentation and/or other materials provided with the
+ *   distribution.
  * 
  * * Neither the name of the openMDX team nor the names of its
- * contributors may be used to endorse or promote products derived
- * from this software without specific prior written permission.
+ *   contributors may be used to endorse or promote products derived
+ *   from this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
  * CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
@@ -99,11 +98,11 @@ private ClassDef(
       MetaData_1_0 metaData
   ) throws ServiceException {
       this( 
-        (String)classDef.objGetValue("name"),
-        (String)classDef.objGetValue("qualifiedName"),
+        (String)classDef.getName(),
+        (String)classDef.getQualifiedName(),
         (String)classDef.objGetValue("annotation"),
         new HashSet(classDef.objGetList("stereotype")),
-        ((Boolean)classDef.objGetValue("isAbstract")).booleanValue(),
+        ((Boolean)classDef.isAbstract()).booleanValue(),
         lazySuperTypes ? null : getSuperTypes(classDef, model, metaData), 
         classDef.objGetList("allSupertype"),    
         lazySuperTypes ? classDef : null, 
@@ -121,7 +120,7 @@ private ClassDef(
           ListIterator i = this.allSupertypes.listIterator();
           i.hasNext();
       ){
-          if (((Path) i.next()).getBase().equals(qualifiedName)) {
+          if (((Path) i.next()).getLastSegment().toClassicRepresentation().equals(qualifiedName)) {
               return true;
           }
       }

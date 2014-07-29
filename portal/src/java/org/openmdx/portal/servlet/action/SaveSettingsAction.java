@@ -65,7 +65,7 @@ import org.openmdx.portal.servlet.ApplicationContext;
 import org.openmdx.portal.servlet.ViewPort;
 import org.openmdx.portal.servlet.ViewPortFactory;
 import org.openmdx.portal.servlet.ViewsCache;
-import org.openmdx.portal.servlet.view.ObjectView;
+import org.openmdx.portal.servlet.component.ObjectView;
 
 public class SaveSettingsAction extends BoundAction {
 

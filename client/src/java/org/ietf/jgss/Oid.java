@@ -134,6 +134,10 @@ public class Oid {
      * @param other the Oid object that has to be compared to this one
      */
     @SuppressWarnings("deprecation")
+    @edu.umd.cs.findbugs.annotations.SuppressFBWarnings(
+    	value = "EQ_CHECK_FOR_OPERAND_NOT_COMPATIBLE_WITH_THIS", 
+    	justification = "Use original implementation"
+    )
 	public boolean equals(Object other) {
 
         //check if both reference the same object

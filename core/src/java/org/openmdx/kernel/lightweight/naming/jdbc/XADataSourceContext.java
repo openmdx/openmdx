@@ -176,6 +176,7 @@ class XADataSourceContext extends ResourceContext {
     ) throws NamingException {
         Map<String, ?> info = getInfo(uri);
         DataSource poolingDataSource = BeanFactory.<DataSource>newInstance(
+    		DataSource.class,	
             XA_DATA_SOURCE_CLASS_NAME,
             getPoolConfiguration(info, getDataSourceClassName(uri))
         ).instantiate();

@@ -333,7 +333,7 @@ public class PlugIn_1 implements PlugIn_1_0 {
 	/* (non-Javadoc)
 	 * @see org.openmdx.base.aop0.PlugIn_1_0#propagatedEagerly(org.openmdx.base.accessor.rest.DataObject_1, java.lang.String, java.lang.Object)
 	 */
-//  @Override
+    @Override
 	public boolean propagatedEagerly(
 		DataObject_1 object, 
 		String feature,
@@ -354,7 +354,7 @@ public class PlugIn_1 implements PlugIn_1_0 {
     /* (non-Javadoc)
      * @see org.openmdx.base.aop1.PlugIn_1_0#resolveObjectClass(java.lang.String, javax.resource.cci.InteractionSpec)
      */
-//  @Override
+    @Override
     public String resolveObjectClass(
         String objectClass,
         InteractionSpec interactionSpec

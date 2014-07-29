@@ -59,10 +59,11 @@ import java.util.Iterator;
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.portal.servlet.ApplicationContext;
+import org.openmdx.portal.servlet.CssClass;
 import org.openmdx.portal.servlet.HtmlEncoder_1_0;
 import org.openmdx.portal.servlet.ViewPort;
 import org.openmdx.portal.servlet.WebKeys;
-import org.openmdx.portal.servlet.control.EditObjectControl;
+import org.openmdx.portal.servlet.control.EditInspectorControl;
 
 /**
  * BooleanValue
@@ -199,14 +200,14 @@ public class BooleanValue
             id = (id == null) || (id.length() == 0)            
                 ? feature + "[" + Integer.toString(tabIndex) + "]"
                 : id;
-            p.write("<td class=\"label\" title=\"", (title == null ? "" : htmlEncoder.encode(title, false)), "\"><span class=\"nw\">", htmlEncoder.encode(label, false), "</span></td>");            
+            p.write("<td class=\"", CssClass.fieldLabel.toString(), "\" title=\"", (title == null ? "" : htmlEncoder.encode(title, false)), "\"><span class=\"", CssClass.nw.toString(), "\">", htmlEncoder.encode(label, false), "</span></td>");            
             if(this.isSingleValued()) {                
                 // if checked sends (true,false). If not checked sends (false). The hidden field
                 // guarantees that always a value is sent.
                 String checkedModifier = "true".equals(stringifiedValue) ? "checked" : "";
                 p.write("<td ", rowSpanModifier, ">");
                 if(readonlyModifier.isEmpty()) {
-	                p.write("  <input id=\"", id, ".false\" name=\"", id, ".false\" type=\"hidden\" class=\"valueL", lockedModifier, "\" value=\"false\">");
+	                p.write("  <input id=\"", id, ".false\" name=\"", id, ".false\" type=\"hidden\" class=\"", CssClass.valueL.toString(), "", lockedModifier, "\" value=\"false\">");
 	                p.write("  <input id=\"", id, ".true\" name=\"", id, ".true\" type=\"checkbox\" ", checkedModifier, " ", (readonlyModifier.isEmpty() ? "" : "disabled"), " tabindex=\"" + tabIndex, "\" value=\"true\"");
 	                p.writeEventHandlers("    ", attribute.getEventHandler());
 	                p.write("  >");
@@ -214,23 +215,25 @@ public class BooleanValue
                 	p.write(boolImages);
                 }
                 p.write("</td>");
-                p.write("<td class=\"addon\" ", rowSpanModifier, "></td>");
+                p.write("<td class=\"", CssClass.addon.toString(), "\" ", rowSpanModifier, "></td>");
             } else {
                 p.write("<td ", rowSpanModifier, ">");
                 if(readonlyModifier.isEmpty()) {
-                	p.write("  <textarea id=\"", id, "\" name=\"", id, "\" class=\"multiStringLocked\" rows=\"", Integer.toString(attribute.getSpanRow()), "\" cols=\"20\" readonly tabindex=\"" + tabIndex, "\">", stringifiedValue, "</textarea>");
+                	p.write("  <textarea id=\"", id, "\" name=\"", id, "\" class=\"", CssClass.multiStringLocked.toString(), "\" rows=\"", Integer.toString(attribute.getSpanRow()), "\" cols=\"20\" readonly tabindex=\"" + tabIndex, "\">", stringifiedValue, "</textarea>");
                 } else {
                 	p.write(boolImages);                	
                 }
                 p.write("</td>");
-                p.write("<td class=\"addon\" ", rowSpanModifier, ">");
+                p.write("<td class=\"", CssClass.addon.toString(), "\" ", rowSpanModifier, ">");
                 if(this.isChangeable()) {
-                    p.write("    ", p.getImg("class=\"popUpButton\" id=\"", id, ".popup\" border=\"0\" alt=\"Click to edit\" src=\"", p.getResourcePath("images/edit"), p.getImgType(), "\" onclick=\"javascript:multiValuedHigh=", this.getUpperBound("1..10"), "; popup_", EditObjectControl.EDIT_BOOLEANS, " = ", EditObjectControl.EDIT_BOOLEANS, "_showPopup(event, this.id, popup_", EditObjectControl.EDIT_BOOLEANS, ", 'popup_", EditObjectControl.EDIT_BOOLEANS, "', $('", id, "'), new Array());\""));
+    				p.write("<a role=\"button\" data-toggle=\"modal\" href=\"#popup_", EditInspectorControl.EDIT_BOOLEANS, "\" onmouseover=\"javascript:multiValuedHigh=", this.getUpperBound("1..10"), "; ", EditInspectorControl.EDIT_BOOLEANS, "_showPopup(event, this.id, popup_", EditInspectorControl.EDIT_BOOLEANS, ", 'popup_", EditInspectorControl.EDIT_BOOLEANS, "', $('", id, "'), new Array());\">");
+    				p.write("    ", p.getImg("class=\"", CssClass.popUpButton.toString(), "\" id=\"", id, ".popup\" border=\"0\" alt=\"Click to edit\" src=\"", p.getResourcePath("images/edit"), p.getImgType(), "\" "));
+    				p.write("</a>");                	
                 }
                 p.write("</td>");
             }
         } else {
-        	String cssClass = DEFAULT_CSS_CLASS;
+        	String cssClass = this.app.getPortalExtension().getDefaultCssClassFieldGroup(this, this.app);
         	if(this.getCssClassFieldGroup() != null) {
         		cssClass = this.getCssClassFieldGroup() + " " + cssClass;
         	}        	
@@ -254,15 +257,10 @@ public class BooleanValue
                 );
             } else {
                 styleModifier += "\"";
-                if(p.getViewPortType() == ViewPort.Type.MOBILE) {
-                	p.write("		<label>",  htmlEncoder.encode(label, false), "</label>");                	
-                	p.write("       <div class=\"", cssClass, "\" title=\"", stringifiedValue, "\">", boolImages, "</div>");
-                } else {
-	                p.debug("<!-- BooleanValue -->");
-	                p.write(gapModifier);
-	                p.write("<td class=\"label\" title=\"", (title == null ? "" : htmlEncoder.encode(title, false)), "\"><span class=\"nw\">", htmlEncoder.encode(label, false), "</span></td>");
-	                p.write("<td ",  rowSpanModifier, " class=\"", cssClass, "\" ",  widthModifier, " ",  styleModifier, "><div class=\"field\" title=\"", stringifiedValue, "\">",  boolImages, "</div></td>");
-                }
+                p.debug("<!-- BooleanValue -->");
+                p.write(gapModifier);
+                p.write("<td class=\"", CssClass.fieldLabel.toString(), "\" title=\"", (title == null ? "" : htmlEncoder.encode(title, false)), "\"><span class=\"", CssClass.nw.toString(), "\">", htmlEncoder.encode(label, false), "</span></td>");
+                p.write("<td ",  rowSpanModifier, " class=\"", cssClass, "\" ",  widthModifier, " ",  styleModifier, "><div class=\"", CssClass.field.toString(), "\" title=\"", stringifiedValue, "\">",  boolImages, "</div></td>");
             }
         }
     }

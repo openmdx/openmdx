@@ -1,14 +1,13 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Description: ObjectRecord 
+ * Description: Message Record 
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
  * ====================================================================
  *
- * This software is published under the BSD license
- * as listed below.
+ * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2010, OMEX AG, Switzerland
+ * Copyright (c) 2010-2014, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -209,7 +208,7 @@ public class MessageRecord
      * @return <code>true</code> if the message id is set
      */
     private final boolean hasId(){
-        return this.path != null && this.path.size() % 2 == 1;
+        return this.path != null && this.path.isObjectPath();
     }
     
     /* (non-Javadoc)
@@ -225,7 +224,7 @@ public class MessageRecord
      */
 //  @Override
     public String getMessageId() {
-        return this.hasId() ? this.path.getBase() : null;
+        return this.hasId() ? this.path.getLastSegment().toClassicRepresentation() : null;
     }
 
     /* (non-Javadoc)

@@ -66,7 +66,7 @@ import org.openmdx.base.exception.ServiceException;
 import org.openmdx.kernel.log.SysLog;
 import org.openmdx.portal.servlet.ViewPort;
 import org.openmdx.portal.servlet.ViewsCache;
-import org.openmdx.portal.servlet.view.ObjectView;
+import org.openmdx.portal.servlet.component.ObjectView;
 
 public class DeleteAction extends BoundAction {
 
@@ -86,11 +86,11 @@ public class DeleteAction extends BoundAction {
     	ObjectView nextView = currentView;
         ViewPort.Type nextViewPortType = null;
     	PersistenceManager pm = JDOHelper.getPersistenceManager(
-    		currentView.getRefObject()
+    		currentView.getObject()
     	);
         try {
             pm.currentTransaction().begin();
-            currentView.getRefObject().refDelete();
+            currentView.getObject().refDelete();
             pm.currentTransaction().commit();
             nextView = currentView.getPreviousView(null);
         }

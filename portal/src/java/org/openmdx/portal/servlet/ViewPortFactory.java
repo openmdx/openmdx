@@ -55,7 +55,7 @@ import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.openmdx.portal.servlet.view.View;
+import org.openmdx.portal.servlet.component.View;
 
 /**
  * ViewPortFactory

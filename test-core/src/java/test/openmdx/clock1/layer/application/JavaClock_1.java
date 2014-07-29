@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004.2010, OMEX AG, Switzerland
+ * Copyright (c) 2004.2014, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without 
@@ -170,7 +170,7 @@ public class JavaClock_1 extends Layer_1 {
         ) throws ServiceException {
     	    try {
     	        Path target = input.getTarget();
-        	    String operationName = target.getBase();
+        	    String operationName = target.getLastSegment().toClassicRepresentation();
         	    Path accessPath = target.getParent();
         		if(
         			!accessPath.isLike(A_SEGMENT_PATH) ||

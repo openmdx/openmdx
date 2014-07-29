@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2013, OMEX AG, Switzerland
+ * Copyright (c) 2013-2014, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -87,7 +87,7 @@ class AssociationDef {
             i.hasNext(); 
         ) {
             this.allReferencedTypes.add(
-                ((Path)i.next()).getBase()
+                ((Path)i.next()).getLastSegment().toClassicRepresentation()
             );
         }
         // add all supertypes of referenced types
@@ -103,7 +103,7 @@ class AssociationDef {
                     j.hasNext(); 
                 ) {
                     allSupertypes.add(
-                        ((Path)j.next()).getBase()
+                        ((Path)j.next()).getLastSegment().toClassicRepresentation()
                     );
                 }
             }

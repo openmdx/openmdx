@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2013, OMEX AG, Switzerland
+ * Copyright (c) 2004-2014, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -173,7 +173,7 @@ public class Model_1 extends Layer_1 {
             // qualified name
             elementFacade.replaceAttributeValuesAsListBySingleton(
                 "qualifiedName",
-                elementFacade.getPath().getBase()
+                elementFacade.getPath().getLastSegment().toClassicRepresentation()
             );
         }
 
@@ -555,7 +555,7 @@ public class Model_1 extends Layer_1 {
         Object_2Facade facade = Facades.asObject(object);
         // qualifiedName = last path component
         // name = last component of qualifiedName
-        String qualifiedName = facade.getPath().getBase();
+        String qualifiedName = facade.getPath().getLastSegment().toClassicRepresentation();
         facade.replaceAttributeValuesAsListBySingleton(
             "qualifiedName",
             qualifiedName
@@ -685,7 +685,7 @@ public class Model_1 extends Layer_1 {
             // get ModelElement by 'content' reference
             if("content".equals(Model_1.this.getReferenceName(request))) {
                 Facades.asObject(request.object()).setPath(
-				    accessPath.getPrefix(accessPath.size()-3).getChild(accessPath.getBase())
+				    accessPath.getPrefix(accessPath.size()-3).getChild(accessPath.getLastSegment().toClassicRepresentation())
 				);
                 super.get(
                     ispec,
@@ -843,7 +843,7 @@ public class Model_1 extends Layer_1 {
         ) throws ServiceException {
             ServiceHeader header = this.getServiceHeader();
             Path target = input.getTarget();
-            String operationName = target.getBase();
+            String operationName = target.getLastSegment().toClassicRepresentation();
             Object_2Facade paramsFacade;
             paramsFacade = Facades.newObject(input.getPath());
 			paramsFacade.setValue(input.getBody());
@@ -963,10 +963,10 @@ public class Model_1 extends Layer_1 {
             else if("externalizePackage".equals(operationName)) {
                 try {
                     SysLog.trace("activating model");
-                    Model_1_0 model = new ModelBuilder_1(false, Model_1.this).build();
+                    Model_1_0 model = new ModelBuilder_1(Boolean.FALSE, Model_1.this).build();
                     // check whether the desired package to externalize exists in the  model repository or not
                     Path modelPackagePath = input.getPath().getParent().getParent();
-                    String qualifiedPackageName = modelPackagePath.getBase();
+                    String qualifiedPackageName = modelPackagePath.getLastSegment().toClassicRepresentation();
     
                     // only test for existence if not wildcard export
                     if(
@@ -998,7 +998,7 @@ public class Model_1 extends Layer_1 {
                             mapper instanceof Mapper_1_1
                         ){
                             ((Mapper_1_1)mapper).externalize(
-                                modelPackagePath.getBase(),
+                                modelPackagePath.getLastSegment().toClassicRepresentation(),
                                 model,
                                 zip,
                                 Model_1.this.openmdxjdoMetadataDirectory
@@ -1006,7 +1006,7 @@ public class Model_1 extends Layer_1 {
                         } 
                         else {
                             mapper.externalize(
-                                modelPackagePath.getBase(),
+                                modelPackagePath.getLastSegment().toClassicRepresentation(),
                                 model,
                                 zip
                             );

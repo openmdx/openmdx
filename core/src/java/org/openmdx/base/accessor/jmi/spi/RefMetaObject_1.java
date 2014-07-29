@@ -58,6 +58,7 @@ import javax.jmi.reflect.RefObject;
 import javax.jmi.reflect.RefPackage;
 
 import org.openmdx.base.accessor.jmi.cci.JmiServiceException;
+import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
 
 //---------------------------------------------------------------------------
@@ -149,10 +150,11 @@ public class RefMetaObject_1
   ) throws JmiException {
       try {
           return this.elementDef.objGetList(featureName);
-      }
-      catch(Exception e) {
-          throw new JmiServiceException(e);
-      }
+      } catch(RuntimeException exception) {
+          throw new JmiServiceException(exception);
+      } catch (ServiceException exception) {
+          throw new JmiServiceException(exception);
+    }
   }
 
   //-------------------------------------------------------------------------

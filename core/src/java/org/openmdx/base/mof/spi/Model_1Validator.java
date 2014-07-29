@@ -1,13 +1,13 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Description: Model_1Factory
+ * Description: Model Validator
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2006-2013, OMEX AG, Switzerland
+ * Copyright (c) 2006-2014, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -79,7 +79,7 @@ import org.openmdx.kernel.loading.Resources;
 import org.openmdx.kernel.log.SysLog;
 
 /**
- * Model_1Factory
+ * Model Validator
  */
 public class Model_1Validator {
 
@@ -232,11 +232,11 @@ public class Model_1Validator {
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.VALIDATION_FAILURE,
                 "Unexpected null value",
-                new BasicException.Parameter("elementType", attribute.objGetValue("type")),
-                new BasicException.Parameter("elementName", attribute.objGetValue("qualifiedName"))
+                new BasicException.Parameter("elementType", attribute.getType()),
+                new BasicException.Parameter("elementName", attribute.getQualifiedName())
             );
         } else {
-            String type = ((Path)attribute.objGetValue("type")).getBase();
+            String type = ((Path)attribute.getType()).getLastSegment().toClassicRepresentation();
             if(PrimitiveTypes.DATE.equals(type)) {
                 if(!(value instanceof XMLGregorianCalendar)) {
                     throw new ServiceException(
@@ -373,7 +373,7 @@ public class Model_1Validator {
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.ASSERTION_FAILURE,
                 "Missing feature in classifier",
-                new BasicException.Parameter("xri", classifier.jdoGetObjectId().toXRI()),
+                new BasicException.Parameter("xri", classifier.jdoGetObjectId()),
                 new BasicException.Parameter("feature", feature)
             );
         }
@@ -396,9 +396,9 @@ public class Model_1Validator {
         Set<String> modelElements = new TreeSet<String>();
         for(ModelElement_1_0 element : model.getContent()){
             if(model.isClassType(element)) {
-                modelElements.add((String)element.objGetValue("qualifiedName"));
+                modelElements.add((String)element.getQualifiedName());
                 for(Object featureId : element.objGetList("feature")) {
-                    modelElements.add((String)model.getElement(featureId).objGetValue("qualifiedName")); 
+                    modelElements.add((String)model.getElement(featureId).getQualifiedName()); 
                 }
             }
         }

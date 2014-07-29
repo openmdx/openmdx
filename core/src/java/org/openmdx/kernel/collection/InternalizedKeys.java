@@ -47,7 +47,12 @@
  */
 package org.openmdx.kernel.collection;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.openmdx.kernel.exception.BasicException;
+
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 /**
  * Internalized Keys
@@ -60,7 +65,40 @@ public class InternalizedKeys {
     public InternalizedKeys() {
         // Avoid instantiation
     }
+    
+    /**
+     * Short Cache extension
+     */
+    private static Map<Short,Short> shortCache = new HashMap<Short,Short>();
+    
+    /**
+     * Integer Cache Extension
+     */
+    private static Map<Integer,Integer> integerCache = new HashMap<Integer,Integer>();
 
+    /**
+     * Long Cache Extension
+     */
+    private static Map<Long,Long> longCache = new HashMap<Long,Long>();
+
+    /**
+     * Dertermines whether the given key is internalizable
+     * 
+     * @param key
+     * 
+     * @return <code>true</code> if the given key is internalizable
+     */
+    public static boolean isInternalizable(
+        Object key
+    ){
+        return 
+            key == null ||
+            key instanceof String || 
+            key instanceof Integer || 
+            key instanceof Long || 
+            key instanceof Short;
+    }
+        
     /**
      * Normalize the key to use an identity hash map.
      * <p>
@@ -68,6 +106,7 @@ public class InternalizedKeys {
      * <li><code>String</code>s
      * <li><code>Integer</code>s in the range <code>-128</code> to <code>128</code>
      * </ul>
+     * @param <T>
      * 
      * @param key the key to be normalized
      * 
@@ -81,28 +120,20 @@ public class InternalizedKeys {
      * @exception NullPointerException if the key is <code>null</code>
      * @exception IllegalArgumentException if the key can't be internalized
      */
-    public static Object internalize(
-        Object key
+    @SuppressWarnings("unchecked")
+    public static <T> T internalize(
+        T key
     ) {
         if(key == null) {
             return null;
         } else if(key instanceof String) {
-            return ((String)key).intern();
+            return (T) ((String)key).intern();
         } else if (key instanceof Integer) {
-            Integer integerKey = (Integer) key;
-            Integer normalizedKey = Integer.valueOf(integerKey.intValue());
-            if(normalizedKey == integerKey || normalizedKey == Integer.valueOf(integerKey.intValue())) {
-                return normalizedKey;
-            } else throw BasicException.initHolder(
-                new IllegalArgumentException(
-                    "Inappropriate key value, the supported key range is implementation and configuration dependent",
-                    BasicException.newEmbeddedExceptionStack(
-                        BasicException.Code.DEFAULT_DOMAIN,
-                        BasicException.Code.BAD_PARAMETER,
-                        new BasicException.Parameter("key", key)
-                    )
-                ) 
-            );
+            return (T) internalize((Integer) key);
+        } else if (key instanceof Long) {
+            return (T) internalize((Long) key);
+        } else if (key instanceof Short) {
+            return (T) internalize((Short) key);
         } else {
             throw BasicException.initHolder(
                 new IllegalArgumentException(
@@ -118,6 +149,77 @@ public class InternalizedKeys {
             );
         }
     }
-        
+
+    /**
+     * Internalize an Short
+     * 
+     * @param actual the actual value
+     * 
+     * @return an internalized Short
+     */
+    @SuppressFBWarnings(value = "RC_REF_COMPARISON", justification = "Short's cache size is unknown")
+    private static Short internalize(Short actual) {
+        Short candidate = Short.valueOf(actual.shortValue());
+        if(candidate == actual || candidate == Short.valueOf(actual.shortValue())) {
+            return candidate;
+        }
+        synchronized(shortCache) {
+            Short cached = shortCache.get(candidate);
+            if(cached == null) {
+                shortCache.put(candidate, candidate);
+                return candidate;
+            } else {
+                return cached;
+            }
+        }
+    }
+    
+    /**
+     * Internalize an Integer
+     * 
+     * @param actual the actual value
+     * 
+     * @return an internalized Integer
+     */
+    @SuppressFBWarnings(value = "RC_REF_COMPARISON", justification = "Integer's cache size is unknown")
+    private static Integer internalize(Integer actual) {
+        Integer candidate = Integer.valueOf(actual.intValue());
+        if(candidate == actual || candidate == Integer.valueOf(actual.intValue())) {
+            return candidate;
+        }
+        synchronized(integerCache) {
+            Integer cached = integerCache.get(candidate);
+            if(cached == null) {
+                integerCache.put(candidate, candidate);
+                return candidate;
+            } else {
+                return cached;
+            }
+        }
+    }
+
+    /**
+     * Internalize a Long
+     * 
+     * @param actual the actual value
+     * 
+     * @return an internalized Long
+     */
+    @SuppressFBWarnings(value = "RC_REF_COMPARISON", justification = "Long's cache size is unknown")
+    private static Long internalize(Long actual) {
+        Long candidate = Long.valueOf(actual.intValue());
+        if(candidate == actual || candidate == Long.valueOf(actual.longValue())) {
+            return candidate;
+        }
+        synchronized(longCache) {
+            Long cached = longCache.get(candidate);
+            if(cached == null) {
+                longCache.put(candidate, candidate);
+                return candidate;
+            } else {
+                return cached;
+            }
+        }
+    }
     
 }

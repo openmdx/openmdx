@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2013, OMEX AG, Switzerland
+ * Copyright (c) 2004-2014, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -273,18 +273,7 @@ public class ImportHandler extends DefaultHandler {
         String publicId, 
         String systemId
     ) throws SAXException {
-        try {
-            return this.getSchemaInputSource(systemId);
-        } catch (ServiceException e) {
-            new ServiceException(
-                e,
-                BasicException.Code.DEFAULT_DOMAIN,
-                BasicException.Code.NOT_FOUND,
-                "Entity resolution failed",
-                new BasicException.Parameter("publicId", publicId),
-                new BasicException.Parameter("systemId", systemId));
-            return null;
-        }
+        return this.getSchemaInputSource(systemId);
     }
 
     /**
@@ -612,7 +601,7 @@ public class ImportHandler extends DefaultHandler {
 				            BasicException.Code.DEFAULT_DOMAIN,
 				            BasicException.Code.NOT_SUPPORTED,
 				            "No longer supported _operation argument",
-				            new BasicException.Parameter("xri", objectId.toXRI()),
+				            new BasicException.Parameter("xri", objectId),
 				            new BasicException.Parameter("unsupported","operation","remove"),
 				            new BasicException.Parameter("requested", operation)
 				        );
@@ -624,7 +613,7 @@ public class ImportHandler extends DefaultHandler {
 				            BasicException.Code.DEFAULT_DOMAIN,
 				            BasicException.Code.NOT_SUPPORTED,
 				            "Unsupported _operation argument",
-				            new BasicException.Parameter("xri", objectId.toXRI()),
+				            new BasicException.Parameter("xri", objectId),
 				            new BasicException.Parameter("supported", "", "null", "set", "create", "update"),
 				            new BasicException.Parameter("requested", operation)
 				        );
@@ -801,7 +790,7 @@ public class ImportHandler extends DefaultHandler {
                     if (this.currentAttributeValue != null) {
                         Object_2Facade facade = Facades.asObject(this.currentObject);
                         // attribute name
-                        String attributeName = this.currentPath.getBase();
+                        String attributeName = this.currentPath.getLastSegment().toClassicRepresentation();
                         String qualifiedClassName = facade.getValue().getRecordName();
                         // attribute type
                         String attributeType = ImportHandler.attributeTypes.get(qualifiedClassName + ":" + this.currentAttributeName);
@@ -1170,11 +1159,12 @@ public class ImportHandler extends DefaultHandler {
     }
 
     /**
+     * @throws SAXException 
      * 
      */
     private InputSource getSchemaInputSource(
         String schemaUri
-    ) throws ServiceException {
+    ) throws SAXException{
         URL schemaUrl = null;
         try {
             if (this.url != null) {
@@ -1211,11 +1201,15 @@ public class ImportHandler extends DefaultHandler {
             } else if (schemaUri.startsWith("xri://+resource/")) {
                 schemaUrl = new URL(schemaUri);
             } else if (schemaUrl == null) {
-                throw new ServiceException(
-                    BasicException.Code.DEFAULT_DOMAIN,
-                    BasicException.Code.INVALID_CONFIGURATION,
-                    "Schema access failed. xsi:noNamespaceSchemaLocation must be an URL supported by openMDX, i.e. http:/, file:/, xri://+resource/, ...",
-                    new BasicException.Parameter("schema URI", schemaUri)
+                throw BasicException.initHolder(
+            		new SAXException(
+                        "Schema access failed. xsi:noNamespaceSchemaLocation must be an URL supported by openMDX, i.e. http:/, file:/, xri://+resource/, ...",
+    	            	BasicException.newEmbeddedExceptionStack(
+	                        BasicException.Code.DEFAULT_DOMAIN,
+	                        BasicException.Code.INVALID_CONFIGURATION,
+	                        new BasicException.Parameter("schema URI", schemaUri)
+    	                )
+    	            )
                 );
             }
             SysLog.detail("Document URL", this.url);
@@ -1223,13 +1217,17 @@ public class ImportHandler extends DefaultHandler {
             SysLog.detail("Schema URL", schemaUrl);
             return new InputSource(schemaUrl.openStream());
         } catch (IOException exception) {
-            throw new ServiceException(
-                exception,
-                BasicException.Code.DEFAULT_DOMAIN,
-                BasicException.Code.INVALID_CONFIGURATION,
-                "Schema access failed",
-                new BasicException.Parameter("document", this.url),
-                new BasicException.Parameter("schema",schemaUrl)
+            throw BasicException.initHolder(
+        		new SAXException(
+	        		"Schema access failed",
+	            	BasicException.newEmbeddedExceptionStack(
+	                    exception,
+	                    BasicException.Code.DEFAULT_DOMAIN,
+	                    BasicException.Code.INVALID_CONFIGURATION,
+	                    new BasicException.Parameter("document", this.url),
+	                    new BasicException.Parameter("schema",schemaUrl)
+	                )
+	            )
             );
         }
     }

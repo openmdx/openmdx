@@ -76,8 +76,7 @@ public class AdaptiveInputStreamReader extends Reader {
 	 * @param propagateClose tells whether a close request is propagated to the input stream
 	 * @throws IOException 
 	 */
-	@SuppressWarnings("resource")
-    public AdaptiveInputStreamReader(
+	public AdaptiveInputStreamReader(
 		InputStream in,
 		String overriddenEncoding, 
 		boolean byteOrderMarkAware, 
@@ -375,8 +374,7 @@ public class AdaptiveInputStreamReader extends Reader {
 	     * 
 	     * @throws IOException  
 	     */
-	    @SuppressWarnings("resource")
-        public static XMLDeclaration readXMLDeclaration(
+	    public static XMLDeclaration readXMLDeclaration(
 	        InputStream in
 	    ) throws IOException {
 	        return readXMLDeclaration(

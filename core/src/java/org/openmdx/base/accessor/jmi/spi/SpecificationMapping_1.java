@@ -222,7 +222,7 @@ class SpecificationMapping_1  {
         Model_1_0 model = Model_1Factory.getModel();
         for(ModelElement_1_0 element: model.getContent()) {
             if(model.isClassType(element)) {
-                String qualifiedName = (String)element.objGetValue("qualifiedName");
+                String qualifiedName = (String)element.getQualifiedName();
                 SpecificationDescriptor candidate = this.descriptorsForName.get(qualifiedName);
                 if(candidate == null) try {
                     candidate = newSpecificationDescriptor(qualifiedName);

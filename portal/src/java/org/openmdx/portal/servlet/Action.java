@@ -479,11 +479,13 @@ public final class Action
     public static final String PARAMETER_FORMAT = "format";
     public static final String PARAMETER_SIZE = "size";
     public static final String PARAMETER_MODE = "mode";
+    public static final String PARAMETER_ORIGIN = "origin";
     public static final String PARAMETER_VIEW_PORT = "viewport";
     public static final String PARAMETER_FILTER_BY_FEATURE = "filterByFeature";
     public static final String PARAMETER_FILTER_BY_TYPE = "filterByType";
     public static final String PARAMETER_FILTER_OPERATOR = "filterOperator";
     public static final String PARAMETER_ORDER_BY_FEATURE = "orderByFeature";
+    public static final String PARAMETER_SWAP_GRID_COLUMNS = "swapGridColumns";
     
     //-------------------------------------------------------------------------
     // Events

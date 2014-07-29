@@ -51,6 +51,7 @@ import javax.resource.ResourceException;
 import javax.resource.cci.Connection;
 import javax.resource.cci.Interaction;
 import javax.resource.spi.ResourceAllocationException;
+import javax.sql.DataSource;
 
 import org.openmdx.application.cci.ConfigurationProvider_1_0;
 import org.openmdx.application.configuration.Configuration;
@@ -81,9 +82,14 @@ public class EmbeddedDataprovider_1 implements Port {
     private String configuration;
 
     /**
+     * The data source
+     */
+    private DataSource datasource;
+    
+    /**
      * The data source URL
      */
-    private String datasource;
+    private String datasourceName;
 
     /**
      * The connections' factory
@@ -123,24 +129,42 @@ public class EmbeddedDataprovider_1 implements Port {
     }
         
     /**
-     * Retrieve datasource.
+     * Retrieve the data source name.
      *
-     * @return Returns the datasource.
+     * @return Returns the data source name.
      */
-    public String getDatasource() {
-        return this.datasource;
+    public String getDatasourceName() {
+        return this.datasourceName;
     }
 
     /**
-     * Set datasource.
+     * Set the data source name.
      * 
-     * @param datasource The datasource to set.
+     * @param datasourceName The data source name to set.
      */
-    public void setDatasource(String datasource) {
-        this.datasource = datasource;
+    public void setDatasourceName(String datasourceName) {
+        this.datasourceName = datasourceName;
     }
 
     /**
+     * Retrieve the data source.
+     *
+	 * @return the data source
+	 */
+	public DataSource getDatasource() {
+		return datasource;
+	}
+
+	/**
+	 * Set the data source
+	 * 
+	 * @param datasource the datasource to set
+	 */
+	public void setDatasource(DataSource datasource) {
+		this.datasource = datasource;
+	}
+
+	/**
      * Set configuration.
      * 
      * @param configuration The configuration to set.
@@ -180,12 +204,12 @@ public class EmbeddedDataprovider_1 implements Port {
                 Integer.valueOf(0),
                 this.dataprovider
             );
-            if(this.datasource != null && this.datasource.length() > 0) {
+            if(this.datasourceName != null) {
                 configuration.values(
-                    SharedConfigurationEntries.DATABASE_CONNECTION_FACTORY
+                    SharedConfigurationEntries.DATABASE_CONNECTION_FACTORY_NAME
                 ).put(
-                    Integer.valueOf(0), 
-                    new LateBindingDataSource(this.datasource)
+                    Integer.valueOf(0),
+                    this.datasourceName
                 );
             }
             this.delegate = new Dataprovider_1(

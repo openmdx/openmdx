@@ -69,8 +69,8 @@ extends FeatureDef {
         Model_1_0 model 
     ) throws ServiceException {
         this(
-            mapName((String)exceptionDef.objGetValue("name")),
-            (String)exceptionDef.objGetValue("qualifiedName"),
+            mapName((String)exceptionDef.getName()),
+            (String)exceptionDef.getQualifiedName(),
             (String)exceptionDef.objGetValue("annotation"),
             new HashSet<Object>(exceptionDef.objGetList("stereotype")),
             (String)exceptionDef.objGetValue("visibility"),
@@ -98,7 +98,7 @@ extends FeatureDef {
         ) {
             ModelElement_1_0 param = model.getElement(i.next());
             params.put(
-                (String)param.objGetValue("name"),
+                (String)param.getName(),
                 param
             );
         }

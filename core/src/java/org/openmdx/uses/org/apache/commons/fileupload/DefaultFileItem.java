@@ -437,7 +437,7 @@ public class DefaultFileItem
                     {
                         try
                         {
-                            in.close();
+                            if(in != null) in.close();
                         }
                         catch (IOException e)
                         {
@@ -445,7 +445,7 @@ public class DefaultFileItem
                         }
                         try
                         {
-                            out.close();
+                        	if(out != null) out.close();
                         }
                         catch (IOException e)
                         {

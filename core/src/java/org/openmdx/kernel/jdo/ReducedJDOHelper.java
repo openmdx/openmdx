@@ -1926,4 +1926,33 @@ public class ReducedJDOHelper implements Constants {
         }
     }
 
+    /**
+     * This method is used mainly for logging or exception parameters
+     * 
+     * @param pc a persistence capable instance
+     * 
+     * @return its object id or the transactional object id in its absence
+     */
+    public static Object getAnyObjectId(
+        Object pc
+    ){
+    	return 
+    		pc == null ? null :
+    		isPersistent(pc) ? getObjectId(pc) : 
+    		getTransactionalObjectId(pc);
+    }
+
+    /**
+     * This method replaces object values by their id and leaves other values
+     * 
+     * @param value a persistence capable instance of another value
+     * 
+     * @return the id in case of a persistence capable value, the value itself otherwise
+     */
+    public static Object replaceObjectById(
+        Object value
+    ){
+    	return value instanceof PersistenceCapable ? getAnyObjectId(value) : value;
+    }
+    
 }

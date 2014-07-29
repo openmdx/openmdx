@@ -187,7 +187,7 @@ public class HashMapContext extends NameBasedContext {
             }
             if(obj instanceof HashMapContext){
                 HashMapContext subContext = (HashMapContext) obj;
-                if(AbstractContext.nameParser.equals(nameParser)) subContext.namePrefix = this;
+                subContext.namePrefix = this;
             }
         } else {
             super.bind(name, obj);

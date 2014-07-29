@@ -76,14 +76,16 @@ public class XMLGregorianCalendarMarshaller {
     /**
      * Constructor 
      *
-     * @param dateTimeZone
+     * @param dateTimeStandardTimeZone
+     * @param dateTimeDaylightSavingTimeZone TODO
      * @param sqlDataTypes
      * @param dateTimePrecision 
      * @throws ServiceException
      */
     protected XMLGregorianCalendarMarshaller(
-        String dateTimeZone,
-        DataTypes sqlDataTypes,
+        String dateTimeStandardTimeZone,
+        String dateTimeDaylightSavingTimeZone,
+        DataTypes sqlDataTypes, 
         TimeUnit dateTimePrecision
     ) throws ServiceException {
         this.sqlDataTypes = sqlDataTypes;
@@ -97,8 +99,9 @@ public class XMLGregorianCalendarMarshaller {
             "yyyy-MM-dd HH:mm:ss"
         );
         this.dateTimeFormatSince1970.setTimeZone(
-            TimeZone.getTimeZone(dateTimeZone)
+            TimeZone.getTimeZone(dateTimeStandardTimeZone)
         );
+        this.dateTimeDaylightSavingTimeZone = dateTimeDaylightSavingTimeZone;
         this.dateTimePrecision = dateTimePrecision;
     }
 
@@ -106,6 +109,11 @@ public class XMLGregorianCalendarMarshaller {
      * The precision used for date/time values since <code>1970-01-01T00:00:00Z</code>.
      */
     private final TimeUnit dateTimePrecision;
+    
+    /**
+     * 
+     */
+    private final String dateTimeDaylightSavingTimeZone;
     
     /**
      * 
@@ -186,14 +194,10 @@ public class XMLGregorianCalendarMarshaller {
      */
     private final SimpleDateFormat dateTimeFormatBefore1970;
 
+    
     /**
      * Factory method
      * 
-     * @param timeType
-     * @param dateType
-     * @param dateTimeType
-     * @param dateTimeZone 
-     * @param dateTimePrecision TODO
      * @return a new XML GregorianCalendar Marshaller Instance
      * 
      * @throws ServiceException
@@ -202,8 +206,9 @@ public class XMLGregorianCalendarMarshaller {
         String timeType,
         String dateType,
         String dateTimeType, 
-        String dateTimeZone, 
-        String dateTimePrecision,
+        String dateTimeStandardTimeZone, 
+        String dateTimeDaylightSavingTimeZone,
+        String dateTimePrecision, 
         DataTypes sqlDataTypes
     ) throws ServiceException{
         if(!TIME_TYPES.contains(timeType)) throw new ServiceException(
@@ -241,8 +246,9 @@ public class XMLGregorianCalendarMarshaller {
             );
         }
         return new XMLGregorianCalendarMarshaller(
-            dateTimeZone,
-            sqlDataTypes,
+            dateTimeStandardTimeZone,
+            dateTimeDaylightSavingTimeZone,
+            sqlDataTypes, 
             precision
         );
     }
@@ -337,8 +343,7 @@ public class XMLGregorianCalendarMarshaller {
             } else throw new ServiceException(
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.TRANSFORMATION_FAILURE,
-                getClass().getName() +
-                " supports only the XML datatypes [time, datetime, date]",
+                getClass().getName() + " supports only the XML datatypes [time, datetime, date]",
                 new BasicException.Parameter("value", value)
             );
         } else {
@@ -393,9 +398,9 @@ public class XMLGregorianCalendarMarshaller {
         XMLGregorianCalendar xmlDateTime,
         boolean withTimeZone
     ){
-        long millisecondsSince1970 = xmlDateTime.toGregorianCalendar().getTimeInMillis();
-        SimpleDateFormat format;
-        String part1;
+    	final long millisecondsSince1970 = xmlDateTime.toGregorianCalendar().getTimeInMillis();
+    	final SimpleDateFormat format;
+    	final String part1;
         if(millisecondsSince1970 < 0){
             format = this.dateTimeFormatBefore1970; // including fractional part in MILLISECONDS precision
             part1 = "";
@@ -415,10 +420,20 @@ public class XMLGregorianCalendarMarshaller {
                     part1 = "";
             }
         }
-        String part2 = withTimeZone ? " " + format.getTimeZone().getID() : ""; 
-        String part0 = format.format(new Date(millisecondsSince1970));
+        final Date dateTime = new Date(millisecondsSince1970);
+        final String part2 = withTimeZone ? (" " + getTimeZone(format.getTimeZone(), dateTime)) : ""; 
+        final String part0 = format.format(dateTime);
         return part0 + part1 + part2;
     }
+
+	/**
+	 * Build the time zone information
+	 * 
+	 * @return the time zone region and including DST information
+	 */
+	private  String getTimeZone(TimeZone standardTimeZone, Date dateTime) {
+		return standardTimeZone.inDaylightTime(dateTime) ? this.dateTimeDaylightSavingTimeZone : standardTimeZone.getID();
+	}
 
     /**
      * 

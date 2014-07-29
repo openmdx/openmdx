@@ -1,14 +1,14 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Description: ShowObjectView 
+ * Description: GetObjectAction 
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
  * ====================================================================
  *
  * This software is published under the BSD license
  * as listed below.
  * 
- * Copyright (c) 2004-2007, OMEX AG, Switzerland
+ * Copyright (c) 2004-2013, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -54,6 +54,7 @@ package org.openmdx.portal.servlet.action;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -71,11 +72,18 @@ import org.openmdx.portal.servlet.Action;
 import org.openmdx.portal.servlet.ApplicationContext;
 import org.openmdx.portal.servlet.ViewPort;
 import org.openmdx.portal.servlet.ViewsCache;
-import org.openmdx.portal.servlet.view.EditObjectView;
-import org.openmdx.portal.servlet.view.ObjectView;
-import org.openmdx.portal.servlet.view.ShowObjectView;
-import org.openmdx.portal.servlet.view.ViewMode;
+import org.openmdx.portal.servlet.component.EditObjectView;
+import org.openmdx.portal.servlet.component.Grid;
+import org.openmdx.portal.servlet.component.ObjectView;
+import org.openmdx.portal.servlet.component.ReferencePane;
+import org.openmdx.portal.servlet.component.ShowObjectView;
+import org.openmdx.portal.servlet.component.UiGrid;
+import org.openmdx.portal.servlet.component.ViewMode;
 
+/**
+ * GetObjectAction
+ *
+ */
 public abstract class GetObjectAction extends BoundAction {
 
 	protected abstract boolean isGetAndEdit(
@@ -112,19 +120,39 @@ public abstract class GetObjectAction extends BoundAction {
             String referenceName = Action.getParameter(parameter, Action.PARAMETER_REFERENCE_NAME);
             String forReference = Action.getParameter(parameter, Action.PARAMETER_FOR_REFERENCE);
             String forClass = Action.getParameter(parameter, Action.PARAMETER_FOR_CLASS);
-            String requestId = Action.getParameter(parameter, Action.PARAMETER_REQUEST_ID);           
-            Map<Path,Action> historyActions = (requestId == null) || (requestId.length() == 0) ? 
-            	currentView.createHistoryAppendCurrent() : 
-            		new HashMap<Path,Action>();
+            String requestId = Action.getParameter(parameter, Action.PARAMETER_REQUEST_ID);
+            String origin = Action.getParameter(parameter, Action.PARAMETER_ORIGIN);
+            Map<Path,Action> nextPrevActions = currentView.getNextPrevActions();
+            Map<Path,Action> historyActions = null;
+            if(requestId == null || requestId.isEmpty()) {
+            	if(nextPrevActions != null && nextPrevActions.containsKey(objectIdentity)) {
+            		historyActions = currentView.getHistoryActions();
+            	} else {
+            		historyActions = currentView.createHistoryAppendCurrent();
+            	}
+            } else {
+            	historyActions = new HashMap<Path,Action>();
+            }
+            if(origin != null && !origin.isEmpty()) {
+            	try {
+	            	int originPaneIndex = Integer.valueOf(origin);
+	            	Grid selectedGrid = currentView.getChildren(ReferencePane.class).get(originPaneIndex).getGrid();
+	            	if(selectedGrid instanceof UiGrid) {
+                    	UiGrid selectedUiGrid = (UiGrid)selectedGrid;	            		
+	            		nextPrevActions = new LinkedHashMap<Path,Action>();
+	            		nextPrevActions.putAll(
+            				selectedUiGrid.getSelectRowObjectActions()
+	            		);
+	            	}
+            	} catch(Exception ignore) {}
+            } 
             // Go back to requested view
             if(
                 (requestId != null) && 
                 showViewsCache.containsView(requestId)
             ) {
                nextView = showViewsCache.getView(requestId);
-            }
-            // EVENT_SELECT_AND_EDIT_OBJECT
-            else if(this.isGetAndEdit()) {
+            } else if(this.isGetAndEdit()) {
             	PersistenceManager pm = app.getNewPmData();
                 RefObject_1_0 object = (RefObject_1_0)pm.getObjectById(objectIdentity);                    
                 nextView = new EditObjectView(
@@ -133,14 +161,13 @@ public abstract class GetObjectAction extends BoundAction {
                     object.refGetPath(),
                     app,
                     historyActions,
+                    nextPrevActions,
                     currentView.getLookupType(),
                     null, // do not propagate resourcePathPrefix
                     null, // do not propagate navigationTarget
                     ViewMode.STANDARD
                 );
-            }
-            // EVENT_SELECT_AND_NEW_OBJECT
-            else if(this.isGetAndNew() && (forClass.length() > 0) && (forReference.length() > 0)) {
+            } else if(this.isGetAndNew() && (forClass.length() > 0) && (forReference.length() > 0)) {
             	PersistenceManager pm = app.getNewPmData();
                 RefObject_1_0 parent = (RefObject_1_0)pm.getObjectById(objectIdentity);
                 RefObject_1_0 newObject = (RefObject_1_0)parent.refOutermostPackage().refClass(forClass).refCreateInstance(null);
@@ -151,6 +178,7 @@ public abstract class GetObjectAction extends BoundAction {
                     null,
                     app,
                     historyActions,
+                    nextPrevActions,
                     currentView.getLookupType(),
                     parent,
                     forReference,
@@ -158,14 +186,14 @@ public abstract class GetObjectAction extends BoundAction {
                     null, // do not propagate navigationTarget
                     ViewMode.STANDARD
                 );
-            }
-            else {
+            } else {
                 nextView = new ShowObjectView(
                     currentView.getId(),
                     null,
-                    objectIdentity,
+                    (RefObject_1_0)app.getNewPmData().getObjectById(objectIdentity),
                     app,
-                    historyActions,                    
+                    historyActions,
+                    nextPrevActions,
                     currentView.getLookupType(),
                     null, // do not propagate resourcePathPrefix
                     null, // do not propagate navigationTarget
@@ -175,42 +203,41 @@ public abstract class GetObjectAction extends BoundAction {
                 if(this.isReload()) {
                     ShowObjectView showNextView = (ShowObjectView)nextView;
                     showNextView.refresh(true, true);
-                    if(showNextView.getReferencePane().length == currentView.getReferencePane().length) {
-                        for (int i = 0; i < currentView.getReferencePane().length; i++) {
-                        	showNextView.getReferencePane()[i].selectReference(currentView.getReferencePane()[i].getSelectedReference());
+                    List<ReferencePane> nextViewReferencePanes = showNextView.getChildren(ReferencePane.class);
+                    List<ReferencePane> currentViewReferencePanes = currentView.getChildren(ReferencePane.class);
+                    if(nextViewReferencePanes.size() == currentViewReferencePanes.size()) {
+                        for (int i = 0; i < currentViewReferencePanes.size(); i++) {
+                        	nextViewReferencePanes.get(i).selectReference(currentViewReferencePanes.get(i).getSelectedReference());
                         }
                     }
-                }
-                // SELECT_OBJECT and reference pane (specified with
-                // reference and pane index)
-                else if ((referenceAsString.length() > 0) && (paneIndexAsString.length() > 0)) {
+                } else if ((referenceAsString.length() > 0) && (paneIndexAsString.length() > 0)) {
+                    // SELECT_OBJECT and reference pane (specified with reference and pane index)
                     int reference = Integer.parseInt(referenceAsString);
                     int paneIndex = Integer.parseInt(paneIndexAsString);
                     ShowObjectView showNextView = (ShowObjectView)nextView;
-                    if (paneIndex < showNextView.getReferencePane().length) {
+                    List<ReferencePane> nextViewReferencePanes = showNextView.getChildren(ReferencePane.class);
+                    if (paneIndex < nextViewReferencePanes.size()) {
                     	showNextView.selectReferencePane(paneIndex);
-                    	showNextView.getReferencePane()[paneIndex].selectReference(reference);
+                    	nextViewReferencePanes.get(paneIndex).selectReference(reference);
                     }
-                }
-                // SELECT_OBJECT and reference pane (specified with
-                // reference name)
-                else if (referenceName.length() > 0) {
+                } else if (referenceName.length() > 0) {
+                    // SELECT_OBJECT and reference pane (specified with reference name)
                     ShowObjectView showNextView = (ShowObjectView) nextView;
-                    for(int i = 0; i < showNextView.getReferencePane().length; i++) {
-                    	List<Action> selectReferenceActions = showNextView.getReferencePane()[i].getSelectReferenceActions();
+                    List<ReferencePane> nextViewReferencePanes = showNextView.getChildren(ReferencePane.class);
+                    for(int i = 0; i < nextViewReferencePanes.size(); i++) {
+                    	List<Action> selectReferenceActions = nextViewReferencePanes.get(i).getSelectReferenceActions();
                         for(int j = 0; j < selectReferenceActions.size(); j++) {
                             Action selectReferenceAction = selectReferenceActions.get(j);
                             if (selectReferenceAction.getParameter(Action.PARAMETER_REFERENCE_NAME).endsWith(referenceName)) {
                             	showNextView.selectReferencePane(i);
-                            	showNextView.getReferencePane()[i].selectReference(j);
+                            	nextViewReferencePanes.get(i).selectReference(j);
                                 break;
                             }
                         }
                     }
                 }
             }
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             ServiceException e0 = new ServiceException(e);
             SysLog.warning(e0.getMessage(), e0.getCause());
             app.addErrorMessage(
@@ -223,5 +250,5 @@ public abstract class GetObjectAction extends BoundAction {
             nextViewPortType
         );
     }
-        
+
 }

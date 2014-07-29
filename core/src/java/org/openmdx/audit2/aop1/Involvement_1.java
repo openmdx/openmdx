@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2009-2011, OMEX AG, Switzerland
+ * Copyright (c) 2009-2014, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -133,7 +133,7 @@ public class Involvement_1 extends Interceptor_1 {
         for(ModelElement_1_0 attribute : nonDerivedAttributes.values()) {
             if(isFeatureModified(attribute, beforeImage, afterImage)){
                 modifiedFeatures.add(
-                    attribute.objGetValue("qualifiedName")
+                    attribute.getQualifiedName()
                 );
             }
         }
@@ -152,7 +152,7 @@ public class Involvement_1 extends Interceptor_1 {
         ObjectView_1_0 beforeImage,
         ObjectView_1_0 afterImage
     ) throws ServiceException {
-        String featureName = (String) feature.objGetValue("name");
+        String featureName = (String) feature.getName();
         switch(ModelHelper.getMultiplicity(feature)){
 	        case OPTIONAL: case SINGLE_VALUE: 
 	            return !areEqual(beforeImage.objGetValue(featureName), afterImage.objGetValue(featureName));
@@ -185,7 +185,7 @@ public class Involvement_1 extends Interceptor_1 {
      */
     protected Path getObjectPath(
     ){
-        return new Path(self.jdoGetObjectId().getBase());
+        return new Path(self.jdoGetObjectId().getLastSegment().toClassicRepresentation());
     }
 
     /**
@@ -315,7 +315,7 @@ public class Involvement_1 extends Interceptor_1 {
             "objectId".equals(feature) ? getObjectPath().toXRI() :
             "taskId".equals(feature) ? getUnitOfWork().objGetValue("taskId") :
             "unitOfWork".equals(feature) ? getUnitOfWork() :
-            "unitOfWorkId".equals(feature) ? getUnitOfWorkPath().getBase() :
+            "unitOfWorkId".equals(feature) ? getUnitOfWorkPath().getLastSegment().toClassicRepresentation() :
             "afterImage".equals(feature) ? getAfterImage() :    
             super.objGetValue(feature);
     }

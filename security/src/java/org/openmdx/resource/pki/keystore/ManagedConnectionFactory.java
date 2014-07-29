@@ -107,11 +107,6 @@ public class ManagedConnectionFactory extends AbstractManagedConnectionFactory {
     private String algorithm;
     
     /**
-     * Overrides a credential's user name
-     */
-    private String alias;
-    
-    /**
      * 
      */
     private boolean revocationEnabled = false;
@@ -292,10 +287,10 @@ public class ManagedConnectionFactory extends AbstractManagedConnectionFactory {
     	char[][] passPhrases;
         PasswordCredential credential = getCredential(subject);
         if(credential == null) {
-            alias = this.alias;
+            alias = null;
             passPhrases = NO_PASS_PHRASES;
         } else {
-            alias = this.alias == null ? credential.getUserName() : this.alias;
+            alias = credential.getUserName();
             passPhrases = getPassPhrases(credential);
         }
         String keyStoreType = getKeyStoreType();

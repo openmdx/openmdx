@@ -50,7 +50,7 @@
 package org.openmdx.portal.servlet.action;
 
 import org.openmdx.portal.servlet.ViewPort;
-import org.openmdx.portal.servlet.view.ObjectView;
+import org.openmdx.portal.servlet.component.ObjectView;
 
 /**
  * HandleEventStatus

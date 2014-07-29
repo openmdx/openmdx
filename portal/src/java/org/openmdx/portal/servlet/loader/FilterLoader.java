@@ -163,13 +163,13 @@ public class FilterLoader
             )
         );
         // Create a filter for each referenced type (only if there is more than one referenced type)
-        if(!"org:openmdx:base:ExtentCapable".equals(referencedType.objGetValue("qualifiedName"))) {
+        if(!"org:openmdx:base:ExtentCapable".equals(referencedType.getQualifiedName())) {
 	        Map assertableInspectors = uiContext.getAssertableInspectors(UiContext.MAIN_PERSPECTIVE);
 	        if(referencedType.objGetList("allSubtype").size() > 1) {
 	            for(Iterator k = referencedType.objGetList("allSubtype").iterator(); k.hasNext(); ) {
 	                ModelElement_1_0 subtype = model.getElement(k.next());
-	                if(!((Boolean)subtype.objGetValue("isAbstract")).booleanValue()) {
-	                    String inspectorQualifiedName = (String)subtype.objGetValue("qualifiedName");
+	                if(!((Boolean)subtype.isAbstract()).booleanValue()) {
+	                    String inspectorQualifiedName = (String)subtype.getQualifiedName();
 	                    org.openmdx.ui1.jmi1.AssertableInspector inspector =
 	                        (org.openmdx.ui1.jmi1.AssertableInspector)assertableInspectors.get(inspectorQualifiedName);
 	                    if(inspector == null) {
@@ -199,7 +199,7 @@ public class FilterLoader
 	                                    Collections.singletonList(
 	                                        (Condition)new IsInstanceOfCondition(
 	                                        	false, // SystemAttributes.OBJECT_CLASS
-	                                            (String)subtype.objGetValue("qualifiedName")
+	                                            (String)subtype.getQualifiedName()
 	                                        )
 	                                    ),
 	                                    null, // order
@@ -289,8 +289,8 @@ public class FilterLoader
                     Collection<ModelElement_1_0> features = element.objGetMap("allFeature").values();
                     for(ModelElement_1_0 feature: features) {
                         if(feature.isReferenceType() && !this.model.referenceIsStoredAsAttribute(feature)) {                            
-                            String qualifiedReferenceName = element.objGetValue("qualifiedName") + ":" + feature.objGetValue("name");
-                            ModelElement_1_0 referencedType = this.model.getDereferencedType(feature.objGetValue("type"));                            
+                            String qualifiedReferenceName = element.getQualifiedName() + ":" + feature.getName();
+                            ModelElement_1_0 referencedType = this.model.getDereferencedType(feature.getType());                            
                             this.createDefaultFilters(
                                 qualifiedReferenceName, 
                                 referencedType, 
@@ -313,7 +313,7 @@ public class FilterLoader
                             ) {
                                 ModelElement_1_0 referencedType = this.model.getElement(structuralFeature.getType());                            
                                 this.createDefaultFilters(
-                                    element.objGetValue("qualifiedName") + ":" + qualifiedReferenceName.substring(qualifiedReferenceName.lastIndexOf(":") + 1), 
+                                    element.getQualifiedName() + ":" + qualifiedReferenceName.substring(qualifiedReferenceName.lastIndexOf(":") + 1), 
                                     referencedType, 
                                     filterStore, 
                                     uiContext, 

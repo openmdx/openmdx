@@ -406,7 +406,6 @@ public class ManagedDatabaseConnection
     /* (non-Javadoc)
      * @see org.openmdx.kernel.application.container.spi.resource.Validatable#validate()
      */
-    @SuppressWarnings("resource")
     public boolean validate() {
         if(this.connectionRequestInfo instanceof DatabaseConnectionRequestInfo) {
             String validationStatement = ((DatabaseConnectionRequestInfo)connectionRequestInfo).getValidationStatement();

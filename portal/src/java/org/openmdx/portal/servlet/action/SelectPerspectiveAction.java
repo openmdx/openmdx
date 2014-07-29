@@ -1,14 +1,14 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Description: ShowObjectView 
+ * Description: SelectPerspectiveAction 
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
  * ====================================================================
  *
  * This software is published under the BSD license
  * as listed below.
  * 
- * Copyright (c) 2004-2007, OMEX AG, Switzerland
+ * Copyright (c) 2004-2013, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -60,19 +60,27 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.kernel.log.SysLog;
 import org.openmdx.portal.servlet.Action;
 import org.openmdx.portal.servlet.ApplicationContext;
 import org.openmdx.portal.servlet.ViewPort;
 import org.openmdx.portal.servlet.ViewsCache;
-import org.openmdx.portal.servlet.view.ObjectView;
-import org.openmdx.portal.servlet.view.ShowObjectView;
+import org.openmdx.portal.servlet.component.ObjectView;
+import org.openmdx.portal.servlet.component.ShowObjectView;
 
+/**
+ * SelectPerspectiveAction
+ *
+ */
 public class SelectPerspectiveAction extends BoundAction {
 
 	public final static int EVENT_ID = 48;
 
+	/* (non-Javadoc)
+	 * @see org.openmdx.portal.servlet.action.BoundAction#perform(org.openmdx.portal.servlet.view.ObjectView, javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, java.lang.String, javax.servlet.http.HttpSession, java.util.Map, org.openmdx.portal.servlet.ViewsCache, org.openmdx.portal.servlet.ViewsCache)
+	 */
 	@Override
     public ActionPerformResult perform(
         ObjectView currentView,
@@ -94,16 +102,16 @@ public class SelectPerspectiveAction extends BoundAction {
             nextView = new ShowObjectView(
                 currentView.getId(),
                 currentView.getContainerElementId(),
-                currentView.getRefObject().refGetPath(),
+                (RefObject_1_0)app.getNewPmData().getObjectById(currentView.getObject().refGetPath()),
                 app,
                 currentView.getHistoryActions(),
+                null, // no nextPrevActions
                 currentView.getLookupType(),
                 null, // do not propagate resourcePathPrefix
                 null, // do not propagate navigationTarget
                 null // do not propagate isReadOnly
             );
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             ServiceException e0 = new ServiceException(e);
             SysLog.warning(e0.getMessage(), e0.getCause());
             app.addErrorMessage(

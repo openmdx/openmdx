@@ -81,7 +81,7 @@ public class AssociationMapper
     ) throws ServiceException {
         super(writer, model, format, packageSuffix, metaData, primitiveTypeMapper);
         this.associationName = Identifier.CLASS_PROXY_NAME.toIdentifier(
-            (String)element.objGetValue("name"),
+            (String)element.getName(),
             null, // removablePrefix
             null, // prependablePrefix
             null, // removableSuffix

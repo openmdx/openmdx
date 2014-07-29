@@ -1,9 +1,534 @@
-
                     =====================================
                              CHANGE LOG openMDX
                     =====================================
 
+==============================================================================
+Version 2.13.0                                                      2014-08-01
+==============================================================================
 
+0.    KNOWN ISSUES
+
+      NONE
+
+1.    NEW FEATURES
+      
+      NONE
+        
+2.    CHANGES  
+     
+2.0.  CHANGED FEATURES
+
+      CR20024879
+      Implementation StandardBeanTransformer. Support for XStream if found on 
+      class path.
+
+      CR20024878
+      ModelElement_1 implementation. Caching of runtime-features: e.g. name, qualifiedName, type.
+
+      CR20023803
+      Path Implementation
+      
+      A path consists now of it sparent ant its typed base component.
+
+      CR20023803
+      Path Wildcard
+      
+      The expression
+        new Path("xri://@openmdx*A/provider/P").isLike(
+          new Path(""xri://@openmdx*A/provider/($..)/($..)/($...)")
+        )
+      returns false in future.
+
+2.1.  FIXED BUGS
+
+      NONE
+      
+2.2.  DEPRECATED FEATURES
+
+      CR20023803
+      PathComponent
+      
+      The former org.openmdx.base.naming.PathComponent class has been 
+      deprecated and moved to org.openmdx.base.naming.legacy.PathComponent.
+
+      CR20023803
+      Path Locking
+      
+      It is no longer necessary to invoke Path.lock() as a path is unmodifiable
+      in general.
+      
+2.3.  REMOVED FEATURES
+      
+      CR20023803
+      Path & PathComponent
+      
+      Paths and their components are now unmodifiable except for placeholders
+      in proxy paths being replaced by their final identity component provided 
+      by the remote persistence manager.
+
+      
+==============================================================================
+Version 2.12.13                                                     2014-06-23
+==============================================================================
+
+0.    KNOWN ISSUES
+
+      NONE
+
+1.    NEW FEATURES
+      
+      CR20021834
+      BasicException.Holder stack trace
+      
+      The class name of a BasicException.Holder shall be included in its stack
+      trace.
+        
+2.    CHANGES  
+     
+2.0.  CHANGED FEATURES
+
+      NONE
+
+2.1.  FIXED BUGS
+
+      CR20023809
+      NullPointerException in PersistenceManager.close()
+      
+      CR20022958
+      Uninitialized primitive value access
+      
+      System.out.println() invocation removed
+      
+2.2.  DEPRECATED FEATURES
+
+      NONE
+      
+2.3.  REMOVED FEATURES
+      
+      NONE
+
+      
+==============================================================================
+Version 2.12.12                                                     2014-06-17
+==============================================================================
+
+0.    KNOWN ISSUES
+
+      NONE
+
+1.    NEW FEATURES
+      
+      CR20022958
+      Uninitialized primitive value access
+      
+      The NullPointerException thrown when a mandatory but non-initialized 
+      primitive value such as
+      * org::w3c::boolean
+      * org::w3c::short
+      * org::w3c::integer
+      * org::w3c::long
+      is accessed has been amended by the follwoing pieces of information:
+      * the "interaction-spec", e.g. the date state context
+      * the "xri", i.e. a persistent object's refMofId
+      * the "transient-object-id", a UUID
+      * "object-class", i.e. the refClass' refMofId
+      * "feature-name", the feature unqualified name
+      * "multiplicity", the value "1..1"
+      
+      CR20022115
+      Path properties
+      
+      There have two new methods been added to Path
+      * isObjectPath
+        Returns true is size() is odd
+      * isContainerPath
+        true is size() is odd
+        Retuns true is size() is even
+        
+2.    CHANGES  
+     
+2.0.  CHANGED FEATURES
+
+      NONE
+
+2.1.  FIXED BUGS
+
+      CR20021835
+      Missing redundant core feature values in states
+      
+      Features added to a transient object are not exposed as dirty features
+      when the object is made persistent later on.
+      
+      CR20022114
+      NonRepairingNamespaceContext
+      
+      Implementation corrected
+      
+2.2.  DEPRECATED FEATURES
+
+      NONE
+      
+2.3.  REMOVED FEATURES
+      
+      CR20022127
+      supportsSqlNumericNullCast
+      
+      Unused feature has been removed.
+
+      CR20022127
+      XMI Parser's locator
+      
+      Unused feature has been removed.
+
+      
+==============================================================================
+Version 2.12.11                                                     2014-04-10
+==============================================================================
+
+0.    KNOWN ISSUES
+
+      CR20021835	 
+      Missing core attribute redundancy
+      
+      CR20020815
+      Children of new states
+      
+      Navigation to children of newly emerging states leads to null 
+      references.
+      
+      CR20020817	 
+      MOF Repository Access Failure
+      
+      Recovery should be replaced by elimination of cause.
+      
+      20021839
+      Subquerys in InMemory-Provider
+      
+      Subqueries are passed correctly to the Databse but are incorrectly 
+      handled by the in-memory provider.
+      
+1.    NEW FEATURES
+      
+      CR20020814
+      Invalid stateVersion detection
+      
+      Detect an invalid state version condition and throw an appropriate
+      exception.
+      
+      CR20021849
+      Daylight Saving Time Zone 
+      
+      The daylight saving time zone has to be added to the last
+      hour of summer time for ORACLE's TIMESTAMP WITH TIMEZONE fields.
+      
+      The time zone configuration entries dateTimeZone and 
+      daylightSavingZone should both be set, e.g.
+      * PERSISTENCE/dateTimeZone=Europe Zurich
+      * PERSISTENCE/dateTimeDaylightZone=Europe/Zurich CEST
+
+      CR20021836
+      DateStateViews.retrieveAll()
+      
+2.    CHANGES  
+     
+2.0.  CHANGED FEATURES
+
+      NONE
+
+2.1.  FIXED BUGS
+
+      CR20021836
+      DateStateViews.getValidities()
+      
+      The method is now static
+      
+2.2.  DEPRECATED FEATURES
+
+      NONE
+      
+2.3.  REMOVED FEATURES
+      
+      NONE
+
+      
+==============================================================================
+Version 2.12.10                                                     2014-03-25
+==============================================================================
+
+0.    KNOWN ISSUES
+
+      CR20021835	 
+      Missing core attribute redundancy
+      
+      CR20020815
+      Children of new states
+      
+      Navigation to children of newly emerging states leads to null 
+      references.
+      
+      CR20020817	 
+      MOF Repository Access Failure
+      
+      Recovery should be replaced by elimination of cause.
+      
+      20021839
+      Subquerys in InMemory-Provider
+      
+      Subqueries are passed correctly to the Databse but are incorrectly 
+      handled by the in-memory provider.
+      
+      
+1.    NEW FEATURES
+      
+      CR20021836
+      DateStateViews.getValidities()
+
+      This method Provides a container's core objects and the validities of 
+      their states.
+
+      CR20020554
+      Subquery Support for RID/OID
+
+      Subqueries on composite and non-composite references are now supprted
+      for RID/OID databases.
+
+      CR20021077
+      DataSource Selection
+      
+      Replace the jdoconfig.xml entry
+      
+          connection-factory-name="java:comp/env/jdbc/DataSource"
+
+      by the dataprovider configuration entries
+          
+          PERSISTENCE/datasourceName[0]=java:comp/env/jdbc/DataSource0
+          PERSISTENCE/datasourceName[1]=java:comp/env/jdbc/DataSource1      
+          PERSISTENCE/datasourceName[2]=java:comp/env/jdbc/DataSource2
+      
+2.    CHANGES  
+     
+2.0.  CHANGED FEATURES
+
+      CR20021837	 
+      DateStateViews for transient objects
+            
+      CR20021833
+      Closed Persistence Manager
+      
+      A closed persistence manager is now signalled by a JDOFatalUserException
+      * In JMI-APIs it had been signalled by a JMIServiceException before
+      * In JDO APIs it had been signalled by a NullPointerException before
+
+      CR20020411
+      Multi-valued access to single-valued field
+      
+      * Enhanced Object_2Facade
+      * TRY_TO_FORGET does no longer re-load the model
+
+      CR20021077
+      DataSource Selection
+      
+      The 
+          datasource
+      configuration entry is now used for datasources only while the
+          datasourceName
+      is used for the data sources' JNDI names.
+
+      CR20020449
+      LIKE Flavours
+      
+      The enum is now the common denominator.
+
+2.1.  FIXED BUGS
+
+      CR20020810
+      Update Avoidance
+      
+      UpdateAvoidance_1 calls makePersistentCleanWhenUnmodified too often.
+      
+      CR20020809
+      Persistence Manager Finalization
+	
+      Git rid of NullPointerException in persistence manager finalization.
+      
+2.2.  DEPRECATED FEATURES
+
+      NONE
+      
+2.3.  REMOVED FEATURES
+      
+      CR20020804
+      containsWildcard
+      
+      The Path method containsWildcard ignores now escaoed dots, e.g. "($\.)"-
+
+      
+==============================================================================
+Version 2.12.9.1                                                    2014-01-31
+==============================================================================
+
+0.    KNOWN ISSUES
+
+      CR20020817
+      MOF Repository Access Failure
+      
+      Catch the IndexOutOfBoundsException and repeat the cache statement.
+
+==============================================================================
+Version 2.12.9                                                      2014-01-06
+==============================================================================
+
+0.    KNOWN ISSUES
+
+      NONE
+
+1.    NEW FEATURES
+
+      CR20020556
+      Internalization Validation
+
+      The trust system properties may be used to switch off the validation
+      * org.openmdx.kernel.collection.InternalizedKeyMap.TrustInternalization
+      * org.openmdx.application.dataprovider.layer.persistence.jdbc.
+        SlicedDbObject.TrustInternalization      
+      
+      CR10011870
+      aop2 User Objects
+      
+      When a user object is defined the classic way, i.e. by its "class"
+      only then it has the following properties:
+      * It should be treated as immutable configuration object
+      * All plug-In instances of a persistence manager factory share the
+        same configuration object
+      * The configuration object is visible for its own plug-in only 
+        the the string lookup key as defined by the persistece manager factory
+        configuration.
+      
+      When a user object is defined in the enhanced way, i.e. by its "class"
+      as well as its "interface" then it has the following properties:
+      * The persistence manager factory holds a user object factory rather
+        than a user object instance.
+      * Each plug-in, hence each persistence manager instance, holds its
+        own user object instance.
+      * The user object is visible not only for its own plug-in but 
+        accessible throughout the whole stacj, i.e. through its entity 
+        manager, too. In any case its the interface class to be used as
+        lookup key.
+      
+      CR20020567
+      Absolute Positioning
+      
+      TYPE_INSENSITIVE_SCROLLING may be enabled independently of
+      TYPE_SENSITIVE_SCROLLING.
+      
+      CR20020449
+      LIKE Flavours
+      
+      The RegularExpressionFlag enumeration exposes the flags supported by
+      openMDX:
+      * SOUNDS
+      * LITERAL
+      * POSIX_EXPRESSION (with selected databases only)
+      * ACCENT_INSENSITIVE (with selected databases only)
+      * CASE_INSENSITIVE
+      * UNICODE_CASE
+      
+      CR20020556
+      getConnectionSpec()
+
+      The interface org.openmdx.base.rest.cci.RestConnectionMetaData provides
+      a getConnectionSpec() method.
+      
+2.    CHANGES  
+     
+2.0.  CHANGED FEATURES
+
+      CR10011870
+      BeanFactory
+      
+      The API of the class org.openmdx.kernel.loading.org.openmdx.kernel.
+      loading.BeanFactory hat to be refactored in order to control the
+      bean instance class information.
+      
+      CR20020567
+      Absolute Positioning
+      
+      An absolute positioning failure does no longer disable absolute 
+      positioning for the whole database object.
+
+      CR20019860
+      Path
+      
+      Stick to former implementation for Java 6
+
+2.1.  FIXED BUGS
+
+      CR20020556
+      Invalid cardinality warning
+	
+      Erroneous warnining "Unable to recover from invalid cardinality due to 
+      value mismatch" removed.
+      
+2.2.  DEPRECATED FEATURES
+
+      CR20020556
+      getConnectionSpec()
+      
+      org.openmdx.base.rest.spi.AbstractConnection.getConnectionSpec() is
+      now deprecated in favour of org.openmdx.base.rest.spi.AbstractConnection.
+      getMetaDtata().getConnectionSpec()
+      
+2.3.  REMOVED FEATURES
+      
+      CR20020556
+      Classes
+      
+      The deprecated getXXXResource methods have been removed.
+
+        
+==============================================================================
+Version 2.12.8                                                      2013-12-07
+==============================================================================
+
+0.    KNOWN ISSUES
+
+      NONE
+
+1.    NEW FEATURES
+
+      NONE
+      
+2.    CHANGES  
+     
+2.0.  CHANGED FEATURES
+
+      CR20020411
+      Multi-valued access to single-valued field
+      
+      Guard the jeopardized statements
+      
+      CR20020557
+      Optimistic locking with audit or update avoidance plug-in
+      
+      The audit and update avoidance plug-in support no optimistic locking for
+      dirty objects with idempotent value setting, too.
+
+2.1.  FIXED BUGS
+      
+      CR20020528
+      RSM models
+      
+      RSM models brought up to date
+      
+2.2.  DEPRECATED FEATURES
+
+      NONE      
+
+2.3.  REMOVED FEATURES
+
+      NONE
+
+        
 ==============================================================================
 Version 2.12.7                                                      2013-11-04
 ==============================================================================

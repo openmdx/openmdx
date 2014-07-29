@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2009, OMEX AG, Switzerland
+ * Copyright (c) 2009-2014, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -96,7 +96,7 @@ public class MapTarget implements ImportTarget {
                         BasicException.Code.DEFAULT_DOMAIN,
                         BasicException.Code.NOT_FOUND,
                         "There is no object with the given id in the map",
-                        new BasicException.Parameter("xri", objectId.toXRI()),
+                        new BasicException.Parameter("xri", objectId),
                         new BasicException.Parameter("mode", mode)
                     );
                 }
@@ -119,7 +119,7 @@ public class MapTarget implements ImportTarget {
                         BasicException.Code.DEFAULT_DOMAIN,
                         BasicException.Code.DUPLICATE,
                         "There is already an object with the given id in the map",
-                        new BasicException.Parameter("xri", objectId.toXRI()),
+                        new BasicException.Parameter("xri", objectId),
                         new BasicException.Parameter("mode", mode)
                     );
                 }

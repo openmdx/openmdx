@@ -1,13 +1,13 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
+ * Project:     openMDX, http://www.openmdx.org/
  * Description: XMI Model Importer
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2011, OMEX AG, Switzerland
+ * Copyright (c) 2004-2014, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -488,9 +488,10 @@ implements UML1Consumer {
         UML1AssociationEnd umlAssociationEnd,
         MappedRecord associationDef
     ) throws Exception {
-        this.verifyAssociationEndName(
+        final String associationEndName = umlAssociationEnd.getName();
+		this.verifyAssociationEndName(
             associationDef,
-            umlAssociationEnd == null ? null : umlAssociationEnd.getName()
+            associationEndName
         );
         if(XMI_FORMAT_POSEIDON == this.xmiFormat) {
             // Note: 
@@ -506,7 +507,7 @@ implements UML1Consumer {
             // representation, therefore the internal qualifier representation has 
             // to be mapped
             for(
-                Iterator it = this.toAssociationEndQualifiers(umlAssociationEnd.getName()).iterator();
+                Iterator it = this.toAssociationEndQualifiers(associationEndName).iterator();
                 it.hasNext();
             ) {
                 Qualifier qualifier = (Qualifier)it.next();
@@ -515,18 +516,18 @@ implements UML1Consumer {
                 umlAssociationEnd.getQualifier().add(attribute);
             }
             umlAssociationEnd.setName(
-                this.toAssociationEndName(umlAssociationEnd.getName())
+                this.toAssociationEndName(associationEndName)
             );
         }
         Object_2Facade associationEndDefFacade = Object_2Facade.newInstance(
             newFeaturePath(
                 Object_2Facade.getPath(associationDef),
-                umlAssociationEnd.getName()
+                associationEndName
             ),
             ModelAttributes.ASSOCIATION_END
         );
         // name
-        associationEndDefFacade.addToAttributeValuesAsList("name",umlAssociationEnd.getName());
+        associationEndDefFacade.addToAttributeValuesAsList("name",associationEndName);
         // annotation
         String annotation = this.getAnnotation(umlAssociationEnd);
         if (annotation.length() != 0) {
@@ -540,7 +541,7 @@ implements UML1Consumer {
                 "type is null for association",
                 new BasicException.Parameter("association", umlAssociationEnd.getQualifiedName()),
         		new BasicException.Parameter("id", umlAssociationEnd.getId()),
-        		new BasicException.Parameter("name", umlAssociationEnd.getName()),
+        		new BasicException.Parameter("name", associationEndName),
         		new BasicException.Parameter("qualifiedName", umlAssociationEnd.getQualifiedName())
             );
         }
@@ -1101,7 +1102,7 @@ implements UML1Consumer {
                 /**
                  * Case 2: Parameter with name 'in'. Create object as PARAMETER.
                  */
-                String fullQualifiedParameterName = Object_2Facade.getPath(parameterDef).getBase();
+                String fullQualifiedParameterName = Object_2Facade.getPath(parameterDef).getLastSegment().toClassicRepresentation();
                 if("in".equals(fullQualifiedParameterName.substring(fullQualifiedParameterName.lastIndexOf(':') + 1))) {
                     // 'in' is the only allowed parameter
                     if(parametersCreated) {

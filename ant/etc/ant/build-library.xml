@@ -8,7 +8,7 @@
 =
 = This software is published under the BSD license as listed below.
 = 
-= Copyright (c) 2004-2013, OMEX AG, Switzerland
+= Copyright (c) 2004-2014, OMEX AG, Switzerland
 = All rights reserved.
 = 
 = Redistribution and use in source and binary forms, with or without 
@@ -179,6 +179,13 @@
 		</condition>
 		<available file="${env.JRE_17}" type="dir" value="[+] ${env.JRE_17}" property="JRE_17.info"/>
 		<property name="JRE_17.info" value="[-] ${env.JRE_17}"/>
+		<condition property="JRE_18.info" value="[-]">
+			<not>
+				<isset property="env.JRE_18"/>
+			</not>
+		</condition>
+		<available file="${env.JRE_18}" type="dir" value="[+] ${env.JRE_18}" property="JRE_18.info"/>
+		<property name="JRE_18.info" value="[-] ${env.JRE_18}"/>
 		<condition property="unix.distribution.is-set">
 			<isset property="unix.distribution"/>
 		</condition>
@@ -206,6 +213,7 @@
 		<echo message="JRE_15                         = ${JRE_15.info}"/>
 		<echo message="JRE_16                         = ${JRE_16.info}"/>
 		<echo message="JRE_17                         = ${JRE_17.info}"/>
+		<echo message="JRE_18                         = ${JRE_18.info}"/>
 		<echo/>
 		<echo message="ant.version                    = ${ant.version}"/>
 		<echo message="ant.java.version               = ${ant.java.version}"/>
@@ -346,6 +354,7 @@
 				<equals arg1="${ant.java.version}" arg2="1.5"/>
 				<equals arg1="${ant.java.version}" arg2="1.6"/>
 				<equals arg1="${ant.java.version}" arg2="1.7"/>
+				<equals arg1="${ant.java.version}" arg2="1.8"/>
 			</or>
 		</condition>
 		<fail 
@@ -365,6 +374,7 @@
 				<equals arg1="${ant.java.version}" arg2="1.5"/>
 				<equals arg1="${ant.java.version}" arg2="1.6"/>
 				<equals arg1="${ant.java.version}" arg2="1.7"/>
+				<equals arg1="${ant.java.version}" arg2="1.8"/>
 			</or>
 		</condition>
 		<fail 
@@ -383,6 +393,7 @@
 				<equals arg1="${ant.java.version}" arg2="1.5"/>
 				<equals arg1="${ant.java.version}" arg2="1.6"/>
 				<equals arg1="${ant.java.version}" arg2="1.7"/>
+				<equals arg1="${ant.java.version}" arg2="1.8"/>
 			</or>
 		</condition>
 		<fail 
@@ -400,6 +411,7 @@
 			<or>
 				<equals arg1="${ant.java.version}" arg2="1.6"/>
 				<equals arg1="${ant.java.version}" arg2="1.7"/>
+				<equals arg1="${ant.java.version}" arg2="1.8"/>
 			</or>
 		</condition>
 		<fail 
@@ -414,12 +426,29 @@
 			</or>
 		</condition>
 		<condition property="build.supports.jre17">
-			<equals arg1="${ant.java.version}" arg2="1.7"/>
+			<or>
+				<equals arg1="${ant.java.version}" arg2="1.7"/>
+				<equals arg1="${ant.java.version}" arg2="1.8"/>
+			</or>
 		</condition>
 		<fail 
 			message="Building for source version ${build.source.version} and target version ${build.target.version} requires Ant running under JRE 7 or later" 
 			if="build.requires.jre17" 
 			unless="build.supports.jre17"
+		/>
+		<condition property="build.requires.jre17">
+			<or>
+				<equals arg1="${build.source.version}" arg2="1.8"/>
+				<equals arg1="${build.target.version}" arg2="1.8"/>
+			</or>
+		</condition>
+		<condition property="build.supports.jre18">
+			<equals arg1="${ant.java.version}" arg2="1.8"/>
+		</condition>
+		<fail 
+			message="Building for source version ${build.source.version} and target version ${build.target.version} requires Ant running under JRE 8 or later" 
+			if="build.requires.jre18" 
+			unless="build.supports.jre18"
 		/>
 		<condition property="build.requires.rmi.compiler">
 			<or>
@@ -470,7 +499,7 @@
 					srcfile="@{source-file}"
 					destfile="${target-file}"
 					incdir="${basedir}/src/jt/org/openmdx/base/accessor/jmi/spi"
-					defs="${preprocess-jt.tag1},${preprocess-jt.tag2},${preprocess-jt.tag3},${preprocess-jt.tag4},${preprocess-jt.tag5},${project.build.preprocess.tag1},${project.build.preprocess.tag2}" />
+					defs="${preprocess-jt.tag1},${preprocess-jt.tag2},${preprocess-jt.tag3},${preprocess-jt.tag4},${preprocess-jt.tag5},${preprocess-jt.tag6},${preprocess-jt.tag7},${project.build.preprocess.tag1},${project.build.preprocess.tag2}" />
 				<!--<echo>diff @{source-file} ${target-file} </echo>-->
 			</sequential>
 		</antcontrib:for>
@@ -486,7 +515,9 @@
 						<property name="preprocess-jt.tag2" value="BEFORE14"/>
 						<property name="preprocess-jt.tag3" value="BEFORE15"/>
 						<property name="preprocess-jt.tag4" value="BEFORE16"/>
-						<property name="preprocess-jt.tag5" value="OPENMDX1"/>
+						<property name="preprocess-jt.tag5" value="BEFORE17"/>
+						<property name="preprocess-jt.tag6" value="BEFORE18"/>
+						<property name="preprocess-jt.tag7" value="OPENMDX1"/>
 					</antcontrib:then>
 				</antcontrib:if>
 				<antcontrib:if>
@@ -496,7 +527,9 @@
 						<property name="preprocess-jt.tag2" value="SINCE14"/>
 						<property name="preprocess-jt.tag3" value="BEFORE15"/>
 						<property name="preprocess-jt.tag4" value="BEFORE16"/>
-						<property name="preprocess-jt.tag5" value="OPENMDX1"/>
+						<property name="preprocess-jt.tag5" value="BEFORE17"/>
+						<property name="preprocess-jt.tag6" value="BEFORE18"/>
+						<property name="preprocess-jt.tag7" value="OPENMDX1"/>
 					</antcontrib:then>
 				</antcontrib:if>
 				<antcontrib:if>
@@ -506,7 +539,9 @@
 						<property name="preprocess-jt.tag2" value="SINCE14"/>
 						<property name="preprocess-jt.tag3" value="SINCE15"/>
 						<property name="preprocess-jt.tag4" value="BEFORE16"/>
-						<property name="preprocess-jt.tag5" value="OPENMDX1"/>
+						<property name="preprocess-jt.tag5" value="BEFORE17"/>
+						<property name="preprocess-jt.tag6" value="BEFORE18"/>
+						<property name="preprocess-jt.tag7" value="OPENMDX1"/>
 					</antcontrib:then>
 				</antcontrib:if>
 				<antcontrib:if>
@@ -516,7 +551,9 @@
 						<property name="preprocess-jt.tag2" value="SINCE14"/>
 						<property name="preprocess-jt.tag3" value="SINCE15"/>
 						<property name="preprocess-jt.tag4" value="SINCE16"/>
-						<property name="preprocess-jt.tag5" value="OPENMDX2"/>
+						<property name="preprocess-jt.tag5" value="BEFORE17"/>
+						<property name="preprocess-jt.tag6" value="BEFORE18"/>
+						<property name="preprocess-jt.tag7" value="OPENMDX2"/>
 					</antcontrib:then>
 				</antcontrib:if>
 				<antcontrib:if>
@@ -527,7 +564,20 @@
 						<property name="preprocess-jt.tag3" value="SINCE15"/>
 						<property name="preprocess-jt.tag4" value="SINCE16"/>
 						<property name="preprocess-jt.tag5" value="SINCE17"/>
-						<property name="preprocess-jt.tag6" value="OPENMDX2"/>
+						<property name="preprocess-jt.tag6" value="BEFORE18"/>
+						<property name="preprocess-jt.tag7" value="OPENMDX2"/>
+					</antcontrib:then>
+				</antcontrib:if>
+				<antcontrib:if>
+					<equals arg1="${build.source.version}" arg2="1.8"/>
+					<antcontrib:then>
+						<property name="preprocess-jt.tag1" value="SINCE13"/>
+						<property name="preprocess-jt.tag2" value="SINCE14"/>
+						<property name="preprocess-jt.tag3" value="SINCE15"/>
+						<property name="preprocess-jt.tag4" value="SINCE16"/>
+						<property name="preprocess-jt.tag5" value="SINCE17"/>
+						<property name="preprocess-jt.tag6" value="SINCE18"/>
+						<property name="preprocess-jt.tag7" value="OPENMDX2"/>
 					</antcontrib:then>
 				</antcontrib:if>
 			</antcontrib:then>

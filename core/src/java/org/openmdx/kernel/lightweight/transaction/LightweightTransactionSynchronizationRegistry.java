@@ -77,7 +77,7 @@ public final class LightweightTransactionSynchronizationRegistry
     /**
      * The transaction synchronization registry instance may be shared
      */
-    private static TransactionSynchronizationRegistry instance;
+    private static volatile TransactionSynchronizationRegistry instance;
     
     /**
      * A transaction synchronization registry instance may be shared

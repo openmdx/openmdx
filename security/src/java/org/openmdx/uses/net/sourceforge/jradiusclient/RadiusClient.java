@@ -995,7 +995,7 @@ public class RadiusClient
             Arrays.equals(this.getHostname(), that.getHostname()) &&
             Arrays.equals(this.getAuthPort(), that.getAuthPort()) &&
             Arrays.equals(this.getAcctPort(), that.getAcctPort()) &&
-            this.getSharedSecret().equals(that.getSharedSecret());
+            Arrays.equals(this.getSharedSecret(), that.getSharedSecret());
     }
     /**
      * @return int the hashCode for this <code>RadiusClient</code>
@@ -1005,7 +1005,7 @@ public class RadiusClient
         InetAddress[] x1 = this.getHostname();
         int[] x2 = this.getAcctPort();
         int[] x3 = this.getAuthPort();
-        int h = this.getSharedSecret().hashCode();
+        int h = Arrays.hashCode(this.getSharedSecret());
         for(
             int i = 0; 
             i < x1.length; 

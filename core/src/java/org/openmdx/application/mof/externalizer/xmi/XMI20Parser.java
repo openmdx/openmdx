@@ -158,7 +158,7 @@ public class XMI20Parser implements XMIParser {
     //---------------------------------------------------------------------------
     public Locator getLocator(
     ) {
-        return this.locator;
+        return null;
     }
 
     //---------------------------------------------------------------------------
@@ -1011,7 +1011,6 @@ public class XMI20Parser implements XMIParser {
     //-------------------------------------------------------------------------
     private final StringBuffer value = new StringBuffer();
     private String modelUri = null;
-    private Locator locator = null;
     private Stack scope = null;
     private Stack elementStack = null;
     private XMIImporter_1 importer = null;

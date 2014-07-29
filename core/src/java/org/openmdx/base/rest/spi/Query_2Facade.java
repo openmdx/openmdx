@@ -532,7 +532,7 @@ public class Query_2Facade {
     public boolean isFindRequest(
     ){
         Path xri = getPath();
-        return xri.size() % 2 == 0 || xri.containsWildcard();
+        return xri.size() % 2 == 0 || xri.isPattern();
     }
 
     /* (non-Javadoc)

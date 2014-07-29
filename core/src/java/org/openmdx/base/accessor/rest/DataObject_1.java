@@ -1,12 +1,13 @@
 /*
  * ====================================================================
+ * Project:     openMDX/Core, http://www.openmdx.org/
  * Description: Object_1 class
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2012, OMEX AG, Switzerland
+ * Copyright (c) 2004-2014, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -58,6 +59,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
 import java.io.Serializable;
+import java.io.UnsupportedEncodingException;
+import java.text.ParseException;
 import java.util.AbstractCollection;
 import java.util.AbstractList;
 import java.util.AbstractMap;
@@ -67,6 +70,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.ConcurrentModificationException;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -81,7 +85,10 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.logging.Level;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
+import javax.annotation.Nullable;
 import javax.jdo.FetchPlan;
 import javax.jdo.JDOException;
 import javax.jdo.JDOFatalInternalException;
@@ -169,6 +176,7 @@ import org.w3c.cci2.CharacterLargeObjects;
 import org.w3c.cci2.LargeObject;
 import org.w3c.cci2.SortedMaps;
 import org.w3c.cci2.SparseArray;
+import org.w3c.format.DateTimeFormat;
 
 /**
  * DataObject_1_0 implementation
@@ -188,7 +196,7 @@ public class DataObject_1
         this.transientObjectId = null;
         this.detached = true;
         this.untouchable = false;
-        this.digest = version;
+        this.version = version;
     }
     
     /**
@@ -253,7 +261,7 @@ public class DataObject_1
             DataObject_1.getRecordName(that, false), 
             beforeImage
         );
-        this.digest = null;
+        this.version = null;
         Set<String> notToBeCloned = Sets.asSet(exclude);
         if(that.jdoIsPersistent() && !that.jdoIsNew()) {
 		    that.objRetrieve(
@@ -444,7 +452,7 @@ public class DataObject_1
     /**
      * @serial the write lock
      */
-    protected Object digest = null;
+    protected Object version = null;
 
     /**
      * @serial the read lock
@@ -498,6 +506,11 @@ public class DataObject_1
 
     private static final String ANONYMOUS_XRI = "";
     
+    private static final Pattern WRITE_LOCK_PATTERN = Pattern.compile(
+    		"(" + SystemAttributes.CREATED_AT + "|" + SystemAttributes.MODIFIED_AT + ")=" +
+    		"([0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}[.][0-9]{3})000Z"
+    );
+
     /**
      * Valdidate the object's state and retrieve its class
      * 
@@ -557,15 +570,27 @@ public class DataObject_1
     }
     
     /**
-     * Tells whether the object is an instance of Modifiable
+     * Tells whether the object is an instance of <code>org::openmdx::base::Modifiable</code>
      * 
-     * @return <code>true</code> if the object is an instance of Modifiable
+     * @return <code>true</code> if the object is an instance of <code>org::openmdx::base::Modifiable</code>
      * 
      * @throws ServiceException
      */
     public boolean isModifiable(
     ) throws ServiceException {
         return getModel().isInstanceof(this, "org:openmdx:base:Modifiable");
+    }
+
+    /**
+     * Tells whether the object is an instance of <code>org::openmdx::base::Creatable</code>
+     * 
+     * @return <code>true</code> if the object is an instance of <code>org::openmdx::base::Creatable</code>
+     * 
+     * @throws ServiceException
+     */
+    public boolean isCreatable(
+    ) throws ServiceException {
+        return getModel().isInstanceof(this, "org:openmdx:base:Creatable");
     }
     
     /**
@@ -763,7 +788,7 @@ public class DataObject_1
                 //
                 if(this.persistentValues == null) {
                     this.persistentValues = facade.getValue();
-                    this.digest = facade.getVersion();
+                    this.version = facade.getVersion();
                 } else {
                     MappedRecord source = facade.getValue();
                     MappedRecord persistentValues = newRecord(source.getRecordName());
@@ -811,7 +836,7 @@ public class DataObject_1
             // Just ignore it
         }
         this.clear();
-        this.digest = null;
+        this.version = null;
         this.persistentValues = null;
         this.created = false;
         this.identity = null;
@@ -859,7 +884,7 @@ public class DataObject_1
             setInaccessibilityReason(exception);
         }
         if(throwNotFoundException || this.notFound == null){
-            throw getInaccessibilityReason(); // inaccessable
+            throw getInaccessibilityReason(); // inaccessible
         } else {
             return null; // not found
         }
@@ -921,7 +946,7 @@ public class DataObject_1
     public void evictUnconditionally(
     ){
         clear();
-        this.digest = null;
+        this.version = null;
         this.persistentValues = null;
     }
     
@@ -1034,7 +1059,7 @@ public class DataObject_1
     
     String getQualifier(
     ){
-        return this.jdoIsPersistent() ? this.jdoGetObjectId().getBase() : this.qualifier;
+        return this.jdoIsPersistent() ? this.jdoGetObjectId().getLastSegment().toClassicRepresentation() : this.qualifier;
     }
 
     /**
@@ -1148,7 +1173,7 @@ public class DataObject_1
                     true // throwNotFoundException
                 );
             } else {
-                unitOfWork.getState(this,false).setValues(this.transientValues);
+                unitOfWork.getState(this,false).setValues(this.transientValues, this.jdoIsNew());
                 this.transientValues = null;
             }
             if(
@@ -1242,17 +1267,19 @@ public class DataObject_1
                 "The container is null"
             );
         } 
-        if (this.jdoIsPersistent()) {
-            throw new ServiceException(
+        final Container_1_0 newContainer = there.container();
+		if (this.jdoIsPersistent()) {
+            final Container_1 oldContainer = this.getContainer(true);
+			throw new ServiceException(
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.ILLEGAL_STATE,
                 "Attempt to move a persistent object",
                 ExceptionHelper.newObjectIdParameter("id", this),
-                new BasicException.Parameter("old", ReducedJDOHelper.getTransactionalObjectId(this.getContainer(true))),
-                new BasicException.Parameter("new", ReducedJDOHelper.getTransactionalObjectId(there.container()))
+                new BasicException.Parameter("old", ReducedJDOHelper.getTransactionalObjectId(oldContainer), ReducedJDOHelper.getObjectId(oldContainer)),
+                new BasicException.Parameter("new", ReducedJDOHelper.getTransactionalObjectId(newContainer), ReducedJDOHelper.getObjectId(newContainer))
             );
         }
-        this.container = (Container_1) there.container();
+        this.container = (Container_1) newContainer;
         //
         // Set the container
         //
@@ -1269,7 +1296,7 @@ public class DataObject_1
                     ExceptionHelper.newObjectIdParameter("id", this),
                     new BasicException.Parameter("criteria", criteria)
                 );
-            }
+            }            
             Path identity = this.container.jdoGetObjectId().getChild(qualifier);
             boolean flushed = false;
             if(PathComponent.isPlaceHolder(qualifier)) {
@@ -1281,7 +1308,7 @@ public class DataObject_1
                     this.created = true;
                     this.dataObjectManager.currentUnitOfWork().flush(false);
                     flushed = true;
-                    qualifier = identity.getBase();
+                    qualifier = identity.getLastSegment().toClassicRepresentation();
                 } else {
                     throw new ServiceException(
                         BasicException.Code.DEFAULT_DOMAIN,
@@ -1307,7 +1334,7 @@ public class DataObject_1
                             BasicException.Code.DEFAULT_DOMAIN,
                             BasicException.Code.DUPLICATE,
                             "There is already an object with the same qualifier in the container",
-                            new BasicException.Parameter("resourceIdentifier",identity.toXRI())
+                            new BasicException.Parameter("xri",identity)
                         );
                     }                    
                 }
@@ -1502,7 +1529,7 @@ public class DataObject_1
                     for(Map.Entry<String, ModelElement_1_0> e : ((Map<String, ModelElement_1_0>)getClassifier().objGetMap("allFeature")).entrySet()){
                         ModelElement_1_0 featureDef = e.getValue();
                         if(model.isReferenceType(featureDef)) {
-                            if(AggregationKind.COMPOSITE.equals(model.getElement(featureDef.objGetValue("referencedEnd")).objGetValue("aggregation"))){
+                            if(AggregationKind.COMPOSITE.equals(model.getElement(featureDef.getReferencedEnd()).getAggregation())){
                                 this.dataObjectManager.deletePersistentAll(
                                     this.objGetContainer(e.getKey()).values()
                                 );
@@ -1536,14 +1563,13 @@ public class DataObject_1
         if(updateCache) {
             Container_1 container = this.getContainer(true);
             if(container != null) {
-                container.removeFromChache(this.identity.getBase());
+                container.removeFromChache(this.identity.getLastSegment().toClassicRepresentation());
             }
         }
     }
 
     /**
      * Prepare the object for flushing
-     * @param transactionTime
      * 
      * @throws ServiceException
      */
@@ -1595,7 +1621,7 @@ public class DataObject_1
                 Object_2Facade persistent = Object_2Facade.newInstance(
                     (MappedRecord)((IndexedRecord)reply).get(0)
                 );
-                this.identity.setTo(persistent.getPath());
+                this.identity = persistent.getPath();
             } else {
                 interaction.execute(
                     InteractionSpecs.getRestInteractionSpecs(false).CREATE,
@@ -1692,7 +1718,7 @@ public class DataObject_1
      */
     private boolean cardinalityIsInvalid(ModelElement_1_0 classDef, ModelElement_1_0 featureDef) throws ServiceException {
        if (isMandatory(featureDef) && !dataObjectManager.isExemptFromValidation(this, featureDef) && isPersistent(featureDef)) {
-          String featureName = (String) featureDef.objGetValue("name");
+          String featureName = (String) featureDef.getName();
           if(!ModelHelper.isFeatureHeldByCore(classDef, featureName)) {
               return this.objGetValue(featureName) == null;
           }
@@ -1811,7 +1837,7 @@ public class DataObject_1
                 }
                 Object_2Facade input;
                 if(this.isProxy()) {
-                    if(PathComponent.isPlaceHolder(this.identity.getBase())) {
+                    if(PathComponent.isPlaceHolder(this.identity.getLastSegment().toClassicRepresentation())) {
                     	input = newInput(
                     		true,
                     		this.persistentValues
@@ -1833,7 +1859,7 @@ public class DataObject_1
                         Object_2Facade persistent = Object_2Facade.newInstance(
                             (MappedRecord)((IndexedRecord)reply).get(0)
                         );
-                        this.identity.setTo(persistent.getPath());
+                        this.identity  = persistent.getPath();
                     } else {
                     	input = newInput(
                     		false,
@@ -1870,7 +1896,7 @@ public class DataObject_1
                 this.transientOnRollback = true;
                 state.setLifeCycleEventPending(false);
             } else if(
-                (this.jdoIsDirty() || (this.jdoIsPersistent() && this.digest != null)) &&
+                (this.jdoIsDirty() || (this.jdoIsPersistent() && this.version != null)) &&
                 this.jdoGetObjectId().size() > 4 // exclude Authorities and Providers
             ){
                 MappedRecord beforeImage = this.persistentValues;
@@ -1961,7 +1987,7 @@ public class DataObject_1
             "Before image should have been set"
         );
         Multiplicity multiplicity = ModelHelper.getMultiplicity(feature);
-        String featureName = (String) feature.objGetValue("name");
+        String featureName = (String) feature.getName();
         switch(multiplicity) {
         	case SINGLE_VALUE: case OPTIONAL: 
         		return !equal(this.beforeImage.objGetValue(featureName), this.objGetValue(featureName));
@@ -1978,7 +2004,7 @@ public class DataObject_1
                     "the feature {1} in the object {2} as therefore treated as modified", 
                     multiplicity, 
                     featureName, 
-                    this.jdoIsPersistent() ? this.jdoGetObjectId().toXRI() : this.jdoGetTransactionalObjectId()
+                    ReducedJDOHelper.getAnyObjectId(this)
                 );
                 return true;
         	    
@@ -1988,20 +2014,25 @@ public class DataObject_1
                     "Unsupported Multiplicity {0}, treat the feature {1} in the object {2} as modified", 
                     multiplicity, 
                     featureName, 
-                    this.jdoIsPersistent() ? this.jdoGetObjectId().toXRI() : this.jdoGetTransactionalObjectId()
+                    ReducedJDOHelper.getAnyObjectId(this)
                 );
                 return true;
         }
     }
-    
-    /**
+
+	/**
      * Tests whether some non-derived features have been modified
+     * and removes idempotent modifications
+     * 
+     * @param beforeImage the object's before-image
      * 
      * @return <code>true</code> if some non-derived features have been modified
      * 
      * @throws ServiceException
      */
-    public boolean thereRemainDirtyFeaturesAfterRemovingTheUnmodifiedOnes() throws ServiceException{
+    public boolean thereRemainDirtyFeaturesAfterRemovingTheUnmodifiedOnes(
+    	DataObject_1_0 beforeImage
+    ) throws ServiceException{
         TransactionalState_1 state = this.getState(false);
         Map<String,ModelElement_1_0> attributes = getAttributes();
         boolean dirty = state.isTouched();
@@ -2016,6 +2047,9 @@ public class DataObject_1
             } else if(!ModelHelper.isDerived(attribute)) {
                 dirty = true;
             }
+        }
+        if(!dirty) {
+        	detectConcurrentModification(beforeImage);
         }
         return dirty;
     }
@@ -2064,7 +2098,7 @@ public class DataObject_1
     private static boolean isStreamed(
         ModelElement_1_0 attribute
     ) throws ServiceException {
-        return  ModelHelper.getMultiplicity(attribute).isStreamValued();
+        return  isStreamedValue(attribute);
     }
     
     /**
@@ -2103,11 +2137,109 @@ public class DataObject_1
     
     public void makePersistentCleanWhenUnmodified(
     ) throws ServiceException{
-        getBeforeImage(); // prerequisite for objIsModified()
-        thereRemainDirtyFeaturesAfterRemovingTheUnmodifiedOnes(); // this invocation removes idempotent modifications
+        thereRemainDirtyFeaturesAfterRemovingTheUnmodifiedOnes(getBeforeImage());
         evictBeforeImage(); // free memory
+        
+    }
+
+    /**
+     * Check the locks before releasing the object from the unit of work
+     * 
+     * @param beforeImage the object's before image
+     * 
+     * @throws ServiceException
+     */
+    private void detectConcurrentModification(
+    	DataObject_1_0 beforeImage
+    ) throws ServiceException {
+    	String writeLockAssertion = getWriteLockAssertion();
+    	if(writeLockAssertion != null){
+    		assertWriteLock(beforeImage, writeLockAssertion);
+    	}
+    	if(LockAssertions.isReadLockAssertion(this.lock)){
+    		assertReadLock(beforeImage, LockAssertions.getTransactionTime(this.lock));
+    	}
+    }
+
+    /**
+     * Assert that the object has not been updated concurrently through another persistence manager during this unit of work
+     * 
+     * @param beforeImage the object's before image
+     * @param lockValue the read lock value
+     * 
+     * @throws ServiceException
+     */
+    private void assertReadLock(
+    	DataObject_1_0 beforeImage, 
+    	Date lockValue
+    ) throws ServiceException{
+    	Date currentValue = (Date) beforeImage.objGetValue(SystemAttributes.MODIFIED_AT);
+    	if(currentValue != null) {
+    		if(currentValue.after(lockValue)) {
+				throw new ServiceException(
+					BasicException.Code.DEFAULT_DOMAIN,
+					BasicException.Code.CONCURRENT_ACCESS_FAILURE,
+					"Object has been updated by another persistence manager during this unit of work",
+					new BasicException.Parameter("xri", ReducedJDOHelper.getAnyObjectId(this)),
+					new BasicException.Parameter("lockAssertion", this.lock),
+					new BasicException.Parameter(SystemAttributes.MODIFIED_AT, DateTimeFormat.EXTENDED_UTC_FORMAT.format(currentValue))
+		    	);
+    		}
+    	}
     }
     
+	/**
+     * Assert that the object has not been updated concurrently through another persistence manager since it has been cached
+     * 
+     * @param beforeImage the object's before image
+	 * @param lockAssertion the write lock assertion
+	 * 
+	 * @throws ServiceException
+	 */
+	private void assertWriteLock(
+		DataObject_1_0 beforeImage, 
+		String lockAssertion
+	) throws ServiceException {
+		Matcher lockMatcher = WRITE_LOCK_PATTERN.matcher(lockAssertion);
+		if(lockMatcher.matches()) try {
+			String lockFeature = lockMatcher.group(1);
+			Date currentValue = (Date) beforeImage.objGetValue(lockFeature);
+			if(currentValue != null) {
+				Date lockValue = DateTimeFormat.EXTENDED_UTC_FORMAT.parse(lockMatcher.group(2) + "Z");
+				if(!lockValue.equals(currentValue)) {
+					throw new ServiceException(
+						BasicException.Code.DEFAULT_DOMAIN,
+						BasicException.Code.CONCURRENT_ACCESS_FAILURE,
+						"Object has been updated by another persistence manager since it has been cached",
+						new BasicException.Parameter("xri", ReducedJDOHelper.getAnyObjectId(this)),
+						new BasicException.Parameter("lockAssertion", lockAssertion),
+						new BasicException.Parameter(lockFeature, DateTimeFormat.EXTENDED_UTC_FORMAT.format(currentValue))
+			    	);
+				}
+			}
+		} catch (ParseException exception) {
+			SysLog.warning("Unable to validate lock assertion for object " + ReducedJDOHelper.getAnyObjectId(this), lockAssertion);
+		}
+	}
+    
+    private String getWriteLockAssertion(
+    ) throws ServiceException{
+    	if(this.version instanceof byte[]) {
+        	try {
+    			return new String((byte[])this.version, "UTF-8");
+    		} catch (UnsupportedEncodingException exception) {
+    			throw new ServiceException(
+    				exception,
+    				BasicException.Code.DEFAULT_DOMAIN,
+    				BasicException.Code.ASSERTION_FAILURE,
+    				"UTF-8 should be supported"
+    			);
+    		}
+    	} else {
+    		return null;
+    	}
+    }
+
     void afterCompletion(
         Status status
     ) throws ServiceException {
@@ -2134,7 +2266,7 @@ public class DataObject_1
                         this.dataObjectManager.makeTransient(this);
                     }
                     if(this.container != null) {
-                        this.container.removeFromChache(this.identity.getBase());
+                        this.container.removeFromChache(this.identity.getLastSegment().toClassicRepresentation());
                         this.container = null;
                         this.aspects = null;
                     }
@@ -2164,7 +2296,7 @@ public class DataObject_1
      * Reset the write lock
      */
     private void evictWriteLock(){
-        this.digest = null;
+        this.version = null;
     }
     
     /**
@@ -2560,7 +2692,7 @@ public class DataObject_1
                 true // throwNotFoundException
             );
             return true;
-        } else if (this.isProxy() && Boolean.TRUE.equals(this.getFeature(name).objGetValue("isDerived"))) {
+        } else if (this.isProxy() && Boolean.TRUE.equals(this.getFeature(name).isDerived())) {
             this.objMakeTransactional();
             TransactionalState_1 state = this.getState(false);
             if(!state.isFlushed()) {
@@ -2670,10 +2802,9 @@ public class DataObject_1
 	                    if (rawValue instanceof Collection<?>) {
 	                        target.addAll((Collection<?>)rawValue);
 	                    } else if (rawValue instanceof Map<?,?>) {
-	                        target.addAll(
-	                            SortedMaps.asSparseArray(
-	                                rawValue instanceof SortedMap<?,?> ? (SortedMap<Integer,?>) rawValue : new TreeMap<Integer,Object>((Map<Integer,?>)rawValue)
-	                            ).asList()
+	                        SortedMap<Integer, ? extends Object> sortedValue = rawValue instanceof SortedMap<?,?> ? (SortedMap<Integer,?>) rawValue : new TreeMap<Integer,Object>((Map<Integer,?>)rawValue);
+							target.addAll(
+	                            SortedMaps.asSparseArray(sortedValue).asList()
 	                        );
 	                    } else if(rawValue != null) {
 	                        target.add(rawValue);
@@ -2792,12 +2923,11 @@ public class DataObject_1
      * @return the requested value
      * @throws ServiceException
      */
-    @SuppressWarnings("resource")
     private LargeObject getLargeObjectValue(
         final String featureName,
         final ModelElement_1_0 featureDef
     ) throws ServiceException{
-        String type = (String) featureDef.getModel().getDereferencedType(featureDef.objGetValue("type")).objGetValue("qualifiedName");
+        String type = (String) featureDef.getModel().getDereferencedType(featureDef.getType()).getQualifiedName();
         Object persistentValue = this.getPersistentAttribute(
             featureName, 
             true, // stream 
@@ -2956,7 +3086,7 @@ public class DataObject_1
             }
             ModelElement_1_0 featureDef = this.getFeature(feature);
             Object transactionalValue;
-            if(ModelHelper.getMultiplicity(featureDef).isStreamValued()){
+            if(isStreamedValue(featureDef)){
                 transactionalValue = this.getLargeObjectValue(feature, featureDef);
             } else {
                 Object nonTransactionalValue = this.getPersistentAttribute(
@@ -2983,7 +3113,7 @@ public class DataObject_1
             } else {
                 ModelElement_1_0 featureDef = this.getFeature(feature);
                 Object transientValue;
-                if(ModelHelper.getMultiplicity(featureDef).isStreamValued()){
+                if(isStreamedValue(featureDef)){
                     transientValue = this.getLargeObjectValue(feature, featureDef);
                 } else {
                     Object clonedValue = this.getPersistentAttribute(
@@ -3005,6 +3135,15 @@ public class DataObject_1
             }
         }
     }
+
+	/**
+	 * Null-safe streamable test
+	 */
+	private static boolean isStreamedValue(
+		@Nullable ModelElement_1_0 featureDef
+	) throws ServiceException {
+		return featureDef != null && ModelHelper.getMultiplicity(featureDef).isStreamValued();
+	}
 
     /**
      * Cast the value of a given feature
@@ -3410,7 +3549,7 @@ public class DataObject_1
      * Reconstitute the <tt>Object_1_0</tt> instance from a stream (that is,
      * deserialize it).
      */
-    private synchronized void readObject(
+    private void readObject(
         java.io.ObjectInputStream stream
     ) throws java.io.IOException, ClassNotFoundException {
         stream.defaultReadObject();
@@ -3462,7 +3601,7 @@ public class DataObject_1
         ModelElement_1_0 feature
     ) throws ServiceException{
         Marshaller marshaller = feature == null ? null : DataObject_1.dataTypeMarshaller.get(
-            feature.getModel().getDereferencedType(feature.objGetValue("type")).objGetValue("qualifiedName")
+            feature.getModel().getDereferencedType(feature.getType()).getQualifiedName()
         );
         return marshaller == null ? this.dataObjectManager : marshaller;
     }
@@ -3580,7 +3719,7 @@ public class DataObject_1
      * @see javax.jdo.spi.PersistenceCapable#jdoGetVersion()
      */
     public Object jdoGetVersion() {
-        return this.digest;
+        return this.version;
     }
 
     /* (non-Javadoc)

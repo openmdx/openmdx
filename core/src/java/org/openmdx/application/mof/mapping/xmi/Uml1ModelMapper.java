@@ -99,7 +99,7 @@ public class Uml1ModelMapper {
   public void writeExceptionHeader(
     ModelElement_1_0 exceptionDef
   ) throws ServiceException {
-    String name = (String)exceptionDef.objGetValue("name");
+    String name = (String)exceptionDef.getName();
     
     pw.write(indent, 0, nTabs); pw.write("<UML:Operation xmi.id = '"); pw.write(this.createId()); pw.write("' name = '"); pw.write(name); pw.write("'\n");
     pw.write(indent, 0, nTabs); pw.write("\tvisibility = 'public' isSpecification = 'false' ownerScope = 'instance'\n");
@@ -137,7 +137,7 @@ public class Uml1ModelMapper {
     ModelElement_1_0 operationDef,
     List exceptions
   ) throws ServiceException {
-    String name = (String)operationDef.objGetValue("name");
+    String name = (String)operationDef.getName();
     boolean isQuery = ((Boolean)operationDef.objGetValue("isQuery")).booleanValue();
     String visibility = this.toXMIVisibility((String)operationDef.objGetValue("visibility"));
 
@@ -168,7 +168,7 @@ public class Uml1ModelMapper {
         index < nExceptions;
         index++
       ) {
-        sb.append(this.toMOFSyntax((String)((ModelElement_1_0)exceptions.get(index)).objGetValue("qualifiedName")));
+        sb.append(this.toMOFSyntax((String)((ModelElement_1_0)exceptions.get(index)).getQualifiedName()));
         if (index < nExceptions-1)
         {
           sb.append("; ");
@@ -200,10 +200,10 @@ public class Uml1ModelMapper {
     ModelElement_1_0 parameterTypeDef,
     boolean parameterTypeIsPrimitive
   ) throws ServiceException {
-    String name = (String)parameterDef.objGetValue("name");
-    String typeQualifiedName = (String)parameterTypeDef.objGetValue("qualifiedName");
+    String name = (String)parameterDef.getName();
+    String typeQualifiedName = (String)parameterTypeDef.getQualifiedName();
     String direction = this.toXMIParameterKind((String)parameterDef.objGetValue("direction"));
-    String multiplicity = (String)parameterDef.objGetValue("multiplicity");
+    String multiplicity = (String)parameterDef.getMultiplicity();
 
     pw.write(indent, 0, nTabs); pw.write("<UML:Parameter xmi.id = '"); pw.write(this.createId()); pw.write("' name = '"); pw.write(name); pw.write("'\n");
     pw.write(indent, 0, nTabs); pw.write("\tisSpecification = 'false' kind = '"); pw.write(direction); pw.write("'>\n");
@@ -244,9 +244,9 @@ public class Uml1ModelMapper {
   public void writeAssociationHeader(
     ModelElement_1_0 associationDef
   ) throws ServiceException {
-    String name = (String)associationDef.objGetValue("name");
-    boolean isAbstract = ((Boolean)associationDef.objGetValue("isAbstract")).booleanValue();
-    boolean isDerived = ((Boolean)associationDef.objGetValue("isDerived")).booleanValue();
+    String name = (String)associationDef.getName();
+    boolean isAbstract = ((Boolean)associationDef.isAbstract()).booleanValue();
+    boolean isDerived = ((Boolean)associationDef.isDerived()).booleanValue();
     
     pw.write(indent, 0, nTabs); pw.write("<UML:Association xmi.id = '"); pw.write(this.createId()); pw.write("' name = '"); pw.write(name); pw.write("'\n");
     pw.write(indent, 0, nTabs); pw.write("\tisSpecification = 'false' isRoot = 'false' isLeaf = 'false' isAbstract = '"); pw.print(isAbstract); pw.write("'>\n");
@@ -290,14 +290,14 @@ public class Uml1ModelMapper {
     List associationEnd2QualifierTypes
   ) throws ServiceException {
     boolean assEnd1IsNavigable = ((Boolean)associationEnd1Def.objGetValue("isNavigable")).booleanValue();
-    boolean assEnd1IsChangeable = ((Boolean)associationEnd1Def.objGetValue("isChangeable")).booleanValue();
-    String assEnd1TypeQualifiedName = (String)associationEnd1TypeDef.objGetValue("qualifiedName");
-    String assEnd1Aggregation = (String)associationEnd1Def.objGetValue("aggregation");
+    boolean assEnd1IsChangeable = ((Boolean)associationEnd1Def.isChangeable()).booleanValue();
+    String assEnd1TypeQualifiedName = (String)associationEnd1TypeDef.getQualifiedName();
+    String assEnd1Aggregation = (String)associationEnd1Def.getAggregation();
 
     boolean assEnd2IsNavigable = ((Boolean)associationEnd2Def.objGetValue("isNavigable")).booleanValue();
-    boolean assEnd2IsChangeable = ((Boolean)associationEnd2Def.objGetValue("isChangeable")).booleanValue();
-    String assEnd2TypeQualifiedName = (String)associationEnd2TypeDef.objGetValue("qualifiedName");
-    String assEnd2Aggregation = (String)associationEnd2Def.objGetValue("aggregation");
+    boolean assEnd2IsChangeable = ((Boolean)associationEnd2Def.isChangeable()).booleanValue();
+    String assEnd2TypeQualifiedName = (String)associationEnd2TypeDef.getQualifiedName();
+    String assEnd2Aggregation = (String)associationEnd2Def.getAggregation();
     
     // Note:
     // Aggregation and qualifier assignments must be changed to comply.
@@ -308,7 +308,7 @@ public class Uml1ModelMapper {
       // use Poseidon specific association end name (not XMI/UML compliant)
       // which includes qualfiers beside the association end name
       assEnd1Name = this.toPoseidonAssociationEndName(
-        (String)associationEnd1Def.objGetValue("name"),
+        (String)associationEnd1Def.getName(),
         associationEnd2Def.objGetList("qualifierName"),
         associationEnd2QualifierTypes
       );
@@ -316,7 +316,7 @@ public class Uml1ModelMapper {
     else
     {
       // use XMI/UML compliant association end name
-      assEnd1Name = (String)associationEnd1Def.objGetValue("name");
+      assEnd1Name = (String)associationEnd1Def.getName();
     }
     pw.write(indent, 0, nTabs); pw.write("<UML:AssociationEnd xmi.id = '"); pw.write(this.createId()); pw.write("' name = '"); pw.write(assEnd1Name); pw.write("'\n");
     pw.write(indent, 0, nTabs); pw.write("\tvisibility = 'public' isSpecification = 'false' isNavigable = '"); pw.print(assEnd1IsNavigable); pw.write("' ordering = 'unordered'\n");
@@ -335,7 +335,7 @@ public class Uml1ModelMapper {
     
     pw.write(indent, 0, nTabs); pw.write("\t<UML:AssociationEnd.multiplicity>\n");
     nTabs = nTabs + 2;
-    this.writeAssociationEndMultiplicity((String)associationEnd1Def.objGetValue("multiplicity"));
+    this.writeAssociationEndMultiplicity((String)associationEnd1Def.getMultiplicity());
     nTabs = nTabs - 2;
     pw.write(indent, 0, nTabs); pw.write("\t</UML:AssociationEnd.multiplicity>\n");
 
@@ -349,7 +349,7 @@ public class Uml1ModelMapper {
         index++
       ) {
         String qualifierName = (String)associationEnd1Def.objGetList("qualifierName").get(index);
-        String qualifierTypeName = (String)((ModelElement_1_0)associationEnd1QualifierTypes.get(index)).objGetValue("qualifiedName");
+        String qualifierTypeName = (String)((ModelElement_1_0)associationEnd1QualifierTypes.get(index)).getQualifiedName();
         pw.write(indent, 0, nTabs); pw.write("\t\t<UML:Attribute xmi.id = '"); pw.write(this.createId()); pw.write("' name = '"); pw.write(qualifierName); pw.write("'\n");
         pw.write(indent, 0, nTabs); pw.write("\t\t\tvisibility = 'public' isSpecification = 'false' ownerScope = 'instance'\n");
         pw.write(indent, 0, nTabs); pw.write("\t\t\tchangeability = 'changeable'>\n");
@@ -381,7 +381,7 @@ public class Uml1ModelMapper {
       // use Poseidon specific association end name (not XMI/UML compliant)
       // which includes qualfiers beside the association end name
       assEnd2Name = this.toPoseidonAssociationEndName(
-        (String)associationEnd2Def.objGetValue("name"),
+        (String)associationEnd2Def.getName(),
         associationEnd1Def.objGetList("qualifierName"),
         associationEnd1QualifierTypes
       );
@@ -389,7 +389,7 @@ public class Uml1ModelMapper {
     else
     {
       // use XMI/UML compliant association end name
-      assEnd2Name = (String)associationEnd2Def.objGetValue("name");
+      assEnd2Name = (String)associationEnd2Def.getName();
     }
     pw.write(indent, 0, nTabs); pw.write("<UML:AssociationEnd xmi.id = '"); pw.write(this.createId()); pw.write("' name = '"); pw.write(assEnd2Name); pw.write("'\n");
     pw.write(indent, 0, nTabs); pw.write("\tvisibility = 'public' isSpecification = 'false' isNavigable = '"); pw.print(assEnd2IsNavigable); pw.write("' ordering = 'unordered'\n");
@@ -408,7 +408,7 @@ public class Uml1ModelMapper {
     
     pw.write(indent, 0, nTabs); pw.write("\t<UML:AssociationEnd.multiplicity>\n");
     nTabs = nTabs + 2;
-    this.writeAssociationEndMultiplicity((String)associationEnd2Def.objGetValue("multiplicity"));
+    this.writeAssociationEndMultiplicity((String)associationEnd2Def.getMultiplicity());
     nTabs = nTabs - 2;
     pw.write(indent, 0, nTabs); pw.write("\t</UML:AssociationEnd.multiplicity>\n");
 
@@ -422,7 +422,7 @@ public class Uml1ModelMapper {
         index++
       ) {
         String qualifierName = (String)associationEnd2Def.objGetList("qualifierName").get(index);
-        String qualifierTypeName = (String)((ModelElement_1_0)associationEnd2QualifierTypes.get(index)).objGetValue("qualifiedName");
+        String qualifierTypeName = (String)((ModelElement_1_0)associationEnd2QualifierTypes.get(index)).getQualifiedName();
         pw.write(indent, 0, nTabs); pw.write("\t\t<UML:Attribute xmi.id = '"); pw.write(this.createId()); pw.write("' name = '"); pw.write(qualifierName); pw.write("'\n");
         pw.write(indent, 0, nTabs); pw.write("\t\t\tvisibility = 'public' isSpecification = 'false' ownerScope = 'instance'\n");
         pw.write(indent, 0, nTabs); pw.write("\t\t\tchangeability = 'changeable'>\n");
@@ -454,10 +454,10 @@ public class Uml1ModelMapper {
   public void writePrimitiveType(
     ModelElement_1_0 primitiveTypeDef
   ) throws ServiceException {
-    String name = (String)primitiveTypeDef.objGetValue("name");
+    String name = (String)primitiveTypeDef.getName();
     String visibility = this.toXMIVisibility((String)primitiveTypeDef.objGetValue("visibility"));
-    boolean isAbstract = ((Boolean)primitiveTypeDef.objGetValue("isAbstract")).booleanValue();
-    String typeId = this.getDataTypeId((String)primitiveTypeDef.objGetValue("qualifiedName"));
+    boolean isAbstract = ((Boolean)primitiveTypeDef.isAbstract()).booleanValue();
+    String typeId = this.getDataTypeId((String)primitiveTypeDef.getQualifiedName());
 
     pw.write(indent, 0, nTabs); pw.write("<UML:DataType xmi.id = '"); pw.write(typeId); pw.write("' name = '"); pw.write(name); pw.write("'\n");
     pw.write(indent, 0, nTabs); pw.write("\tvisibility = '"); pw.write(visibility); pw.write("' isSpecification = 'false' isRoot = 'false' isLeaf = 'false'\n");
@@ -489,11 +489,11 @@ public class Uml1ModelMapper {
     ModelElement_1_0 typeDef,
     boolean referencedTypeIsPrimitive
   ) throws ServiceException {
-    String name = (String)attributeDef.objGetValue("name");
-    String typeQualifiedName = (String)typeDef.objGetValue("qualifiedName");
+    String name = (String)attributeDef.getName();
+    String typeQualifiedName = (String)typeDef.getQualifiedName();
     String visibility = this.toXMIVisibility((String)attributeDef.objGetValue("visibility"));
     String changeability = this.toXMIChangeability(isChangeable);
-    String multiplicity = (String)attributeDef.objGetValue("multiplicity");
+    String multiplicity = (String)attributeDef.getMultiplicity();
     int maxLength = ((Number)attributeDef.objGetValue("maxLength")).intValue();
     
     pw.write(indent, 0, nTabs); pw.write("<UML:Attribute xmi.id = '"); pw.write(this.createId()); pw.write("' name = '"); pw.write(name); pw.write("'\n");
@@ -548,11 +548,11 @@ public class Uml1ModelMapper {
     ModelElement_1_0 typeDef,
     boolean referencedTypeIsPrimitive
   ) throws ServiceException {
-    String name = (String)aliasTypeDef.objGetValue("name");
-    String qualifiedName = (String)aliasTypeDef.objGetValue("qualifiedName");
+    String name = (String)aliasTypeDef.getName();
+    String qualifiedName = (String)aliasTypeDef.getQualifiedName();
     String visibility = this.toXMIVisibility((String)aliasTypeDef.objGetValue("visibility"));
-    boolean isAbstract = ((Boolean)aliasTypeDef.objGetValue("isAbstract")).booleanValue();
-    String typeQualifiedName = (String)typeDef.objGetValue("qualifiedName");
+    boolean isAbstract = ((Boolean)aliasTypeDef.isAbstract()).booleanValue();
+    String typeQualifiedName = (String)typeDef.getQualifiedName();
     String classId = this.getClassId(qualifiedName);
 
     pw.write(indent, 0, nTabs); pw.write("<UML:Class xmi.id = '"); pw.write(classId); pw.write("' name = '"); pw.write(name); pw.write("' visibility = '"); pw.write(visibility); pw.write("'\n");
@@ -600,7 +600,7 @@ public class Uml1ModelMapper {
   public void writePackageHeader(
     ModelElement_1_0 packageDef
   ) throws ServiceException {
-    pw.write(indent, 0, nTabs); pw.write("<UML:Package xmi.id = '"); pw.write(this.createId()); pw.write("' name = '"); pw.write((String)packageDef.objGetValue("name")); pw.write("' visibility = 'public'\n");
+    pw.write(indent, 0, nTabs); pw.write("<UML:Package xmi.id = '"); pw.write(this.createId()); pw.write("' name = '"); pw.write((String)packageDef.getName()); pw.write("' visibility = 'public'\n");
     pw.write(indent, 0, nTabs); pw.write("\tisSpecification = 'false' isRoot = 'false' isLeaf = 'false' isAbstract = 'false'>\n");   
     pw.write(indent, 0, nTabs); pw.write("\t<UML:Namespace.ownedElement>\n");
 
@@ -633,16 +633,16 @@ public class Uml1ModelMapper {
     ModelElement_1_0 classDef,
     List subtypeDefs
   ) throws ServiceException {
-    String parentTypeId = this.getClassId((String)classDef.objGetValue("qualifiedName"));
+    String parentTypeId = this.getClassId((String)classDef.getQualifiedName());
     for(
       Iterator it = subtypeDefs.iterator();
       it.hasNext();
     ) {
       ModelElement_1_0 childDef = (ModelElement_1_0)it.next();
-      String childTypeId = this.getClassId((String)childDef.objGetValue("qualifiedName"));
+      String childTypeId = this.getClassId((String)childDef.getQualifiedName());
       String generalizationId = this.getGeneralizationId(
-        (String)classDef.objGetValue("qualifiedName"),
-        (String)childDef.objGetValue("qualifiedName")
+        (String)classDef.getQualifiedName(),
+        (String)childDef.getQualifiedName()
       );
       pw.write(indent, 0, nTabs); pw.write("<UML:Generalization xmi.id = '"); pw.write(generalizationId); pw.write("' isSpecification = 'false'>\n");
       pw.write(indent, 0, nTabs); pw.write("\t<UML:Generalization.child>\n");
@@ -660,10 +660,10 @@ public class Uml1ModelMapper {
     ModelElement_1_0 structureTypeDef,
     boolean hasStructureFields
   ) throws ServiceException {
-    String name = (String)structureTypeDef.objGetValue("name");
-    String classId = this.getClassId((String)structureTypeDef.objGetValue("qualifiedName"));
+    String name = (String)structureTypeDef.getName();
+    String classId = this.getClassId((String)structureTypeDef.getQualifiedName());
     String visibility = this.toXMIVisibility((String)structureTypeDef.objGetValue("visibility"));
-    boolean isAbstract = ((Boolean)structureTypeDef.objGetValue("isAbstract")).booleanValue();
+    boolean isAbstract = ((Boolean)structureTypeDef.isAbstract()).booleanValue();
     
     pw.write(indent, 0, nTabs); pw.write("<UML:Class xmi.id = '"); pw.write(classId); pw.write("' name = '"); pw.write(name); pw.write("'\n");
     pw.write(indent, 0, nTabs); pw.write("\tvisibility = '"); pw.write(visibility); pw.write("' isSpecification = 'false' isRoot = 'false' isLeaf = 'false'\n"); 
@@ -729,10 +729,10 @@ public class Uml1ModelMapper {
     List supertypeDefs,
     boolean hasStructuralFeatures
   ) throws ServiceException {
-    String name = (String)classDef.objGetValue("name");
-    String classId = this.getClassId((String)classDef.objGetValue("qualifiedName"));
+    String name = (String)classDef.getName();
+    String classId = this.getClassId((String)classDef.getQualifiedName());
     String visibility = this.toXMIVisibility((String)classDef.objGetValue("visibility"));
-    boolean isAbstract = ((Boolean)classDef.objGetValue("isAbstract")).booleanValue();
+    boolean isAbstract = ((Boolean)classDef.isAbstract()).booleanValue();
 
     pw.write(indent, 0, nTabs); pw.write("<UML:Class xmi.id = '"); pw.write(classId); pw.write("' name = '"); pw.write(name); pw.write("'\n");
     pw.write(indent, 0, nTabs); pw.write("\tvisibility = '"); pw.write(visibility); pw.write("' isSpecification = 'false' isRoot = 'false' isLeaf = 'false'\n"); 
@@ -766,8 +766,8 @@ public class Uml1ModelMapper {
     ) {
       ModelElement_1_0 parentDef = (ModelElement_1_0)it.next();
       String generalizationId = this.getGeneralizationId(
-        (String)parentDef.objGetValue("qualifiedName"),
-        (String)classDef.objGetValue("qualifiedName")
+        (String)parentDef.getQualifiedName(),
+        (String)classDef.getQualifiedName()
       );
       pw.write(indent, 0, nTabs); pw.write("\t<UML:GeneralizableElement.generalization>\n");
       pw.write(indent, 0, nTabs); pw.write("\t\t<UML:Generalization xmi.idref = '"); pw.write(generalizationId); pw.write("'/>\n");
@@ -935,7 +935,7 @@ public class Uml1ModelMapper {
         index < nQualifiers;
         index++
       ) {
-        String qualifierTypeName = (String)((ModelElement_1_0)qualifierTypes.get(index)).objGetValue("qualifiedName");
+        String qualifierTypeName = (String)((ModelElement_1_0)qualifierTypes.get(index)).getQualifiedName();
         sb.append(qualifierNames.get(index));
         sb.append(":");
         sb.append(this.toMOFSyntax(qualifierTypeName));

@@ -1,6 +1,6 @@
 Distribution Name: openMDX/Portal
-Release Name: openMDX/Portal 2.12.7
-Release Date: 2013-11-04
+Release Name: openMDX/Portal 2.13.0
+Release Date: 2014-08-01
 
 ---------------------------------------------------------------------
 Notes:
@@ -8,7 +8,7 @@ Notes:
   This software is published under the BSD license
   as listed below.
   
-  Copyright (c) 2006-2013, OMEX AG, Switzerland
+  Copyright (c) 2006-2014, OMEX AG, Switzerland
   All rights reserved.
   
   Redistribution and use in source and binary forms, with or without 
@@ -47,13 +47,204 @@ Notes:
   Foundation (http://www.apache.org/). 
 
 ---------------------------------------------------------------------
-Changes:
 
-0.    SUMMARY
-      * Clean up
-      * Refactoring
-      * Bug fixes
+==============================================================================
+Version 2.13.0                                                      2014-08-01
+==============================================================================
 
+1.    NEW FEATURES
+      
+      CR10012252
+      User-defined ordering of grid columns. Based on an existing UI customization, 
+      the user is be able to re-order grid columns (columns defined up to maxMember).
+      The grid menu 'View' offers the column order operators. The ordering is
+      stored in the user settings per grid.
+
+      CR10012238
+      Search field definitions. Allow to customize the behaviour of search fields, 
+      e.g. show pre-defined drop down values for code fields. The method 
+      PortalExtension_1_0.getSearchFieldDef() returns a SearchFieldDef for a given 
+      search field. In defined, an auto-completer is rendered for this field. When 
+      triggered, the action FindSearchFieldValuesAction is invoked which finally calls 
+      the method SearchFieldDef.findFieldValues(). By default, code fields are handled 
+      by CodeSearchFieldDef.
+
+      CR20021569
+      Support for jquery, bootstrap. Portal now supports the jquery and bootstrap
+      libraries. Existing wizards, etc. must be migrated as follows:
+
+      The following class names are be renamed in ssf.css
+      * nav -> ssf-nav
+      * navv -> ssf-navv
+      * navigation -> ssf-navigation
+
+      The following class names are renamed in n2default.css
+      * label -> fieldLabel
+
+      The following styles must be included in non-inplace wizards:
+
+		<link rel="stylesheet" href="../../javascript/bootstrap/css/bootstrap.min.css">	
+		<link rel="stylesheet" href="../../_style/colors.css">
+		<link rel="stylesheet" href="../../_style/n2default.css">
+		<link rel="stylesheet" href="../../_style/ssf.css"
+
+      Custom n2default.css must be migrated as follows:
+
+		@import url('base-styles.css');
+
+		/* Add custom styles below */
+		...
+      
+      CR20020830
+      Inject user-defined components. Custom control factories are defined in 
+      the portal extension, e.g. In the example below MyControlFactory returns 
+      MyShowInspectorControl for all object types. MyShowInspectorControl adds 
+      an additional attribute pane to the inspectors of all object types:
+
+		public static class MyShowInspectorControl extends ShowInspectorControl {
+
+			public MyShowInspectorControl(
+				String id, 
+				int perspective,
+				String locale,
+				int localeAsIndex,
+				PortalExtension_1_0.ControlFactory controlFactory,
+				WizardDefinitionFactory wizardDefinitionFactory,
+				org.openmdx.ui1.jmi1.Inspector inspectorDef,
+				String forClass
+			) {
+				super(
+					id,
+					perspective,
+					locale,
+					localeAsIndex,
+					controlFactory,
+					wizardDefinitionFactory,
+					inspectorDef,
+					forClass
+				);
+				int paneIndex = this.attributePaneControls.size();
+				this.attributePaneControls.add(
+					0,
+					new UserAttributePaneControl(
+						"./wizards/MyUserAttributePaneControl.jsp",
+						locale,
+						localeAsIndex,
+						controlFactory,
+						paneIndex++
+					)
+				);
+			}
+
+		}
+
+		public static class MyControlFactory extends DefaultControlFactory {
+
+			@Override
+			protected ShowInspectorControl newShowInspectorControl(
+				String id,
+				int perspective, 
+				String locale, 
+				int localeAsIndex,
+				ControlFactory controlFactory,
+				WizardDefinitionFactory wizardDefinitionFactory,
+				Inspector inspectorDef, 
+				String forClass
+			) {
+				return new MyShowInspectorControl(
+					id,
+					perspective,
+					locale,
+					localeAsIndex,
+					controlFactory,
+					wizardDefinitionFactory,
+					inspectorDef,
+					forClass        
+				);
+			}
+
+		}
+
+		@Override
+		protected ControlFactory newControlFactory(
+		) {  
+			return new MyControlFactory();
+		}
+
+      The UserAttributePaneControl is rendered by the JSP MyUserAttributePaneControl.jsp:
+
+		<%@page contentType="text/html;charset=UTF-8" language="java" pageEncoding="UTF-8" %>
+		<%@taglib prefix="t" tagdir="/WEB-INF/tags" %>
+		<%@ page session="true" import="
+		java.util.*,
+		java.io.*,
+		java.text.*,
+		org.opencrx.kernel.portal.*,
+		org.openmdx.kernel.id.cci.*,
+		org.opencrx.kernel.activity1.jmi1.*,
+		org.opencrx.kernel.backend.*,
+		org.opencrx.kernel.portal.wizard.*,
+		org.openmdx.kernel.id.*,
+		org.openmdx.base.accessor.jmi.cci.*,
+		org.openmdx.base.exception.*,
+		org.openmdx.portal.servlet.*,
+		org.openmdx.portal.servlet.attribute.*,
+		org.openmdx.portal.servlet.component.*,
+		org.openmdx.portal.servlet.control.*,
+		org.openmdx.portal.servlet.wizards.*,
+		org.openmdx.base.naming.*,
+		org.openmdx.kernel.log.*,
+		org.openmdx.kernel.exception.*
+		"%>
+		<%!
+
+		public static class MyUserAttributePaneController extends org.openmdx.portal.servlet.AbstractWizardController {
+
+			public void doRefresh(
+			) {
+			}
+
+		}
+
+		%>
+		<%
+			MyUserAttributePaneController wc = new MyUserAttributePaneController();
+		%>
+		<t:wizardHandleCommand controller='<%= wc %>' defaultCommand='Refresh' />
+		<%
+			ApplicationContext app = wc.getApp();
+			javax.jdo.PersistenceManager pm = wc.getPm();
+			RefObject_1_0 obj = wc.getObject();
+			String paneId = wc.getRequestParameter("paneId");
+		%>
+		<div id="userPane<%= paneId %>">
+			<pre>
+				Name: <%= this.getClass().getName() %>
+				Xri: <%= wc.getObject().refMofId() %>
+				RequestId: <%= wc.getRequestId() %>
+			</pre>
+		</div>
+
+      CR10011897
+      Portal: Next / Prev. Next / Prev allows to iterate the content of a grid 
+      at inspector-level.
+      
+2.    CHANGES  
+     
+2.0.  CHANGED FEATURES
+      none
+            
+2.1.  FIXED BUGS
+      none      
+      
+2.2.  DEPRECATED FEATURES
+      
+      CR20021827
+      Deprecate MOBILE mode. Replace MOBILE mode by bootstrap fluid grid system.
+
+            
+2.3   REMOVED FEATURES
+      none
 
 ==============================================================================
 Version 2.12.7                                                      2013-11-04
@@ -138,106 +329,5 @@ Version 2.12.7                                                      2013-11-04
 2.3   REMOVED FEATURES
       none
 
-==============================================================================
-Version 2.12.0                                                      2013-01-18
-==============================================================================
+~ ~ ~
 
-1.    NEW FEATURES
-      none
-      
-2.    CHANGES  
-     
-2.0.  CHANGED FEATURES
-      none
-             
-2.1.  FIXED BUGS
-      none
-
-2.2.  DEPRECATED FEATURES
-      none
-            
-2.3   REMOVED FEATURES
-
-      CR20020217
-      openmdx-client.jar
-
-      openMDX/Security's java client archive has been replaced by
-      openMDX/Client's java client archives.
-
-       
-==============================================================================
-Version 2.11.0                                                      2012-12-27
-==============================================================================
-
-1.    NEW FEATURES
-      none
-
-2.    CHANGES  
-     
-2.0.  CHANGED FEATURES
-      none
-            
-2.1.  FIXED BUGS
-      none      
-      
-2.2.  DEPRECATED FEATURES
-      
-      CR20020254
-      Portal: deprecate reports. Reports are replaced by wizards.
-      
-            
-2.3   REMOVED FEATURES
-      none
-
-==============================================================================
-Version 2.10.0                                                      2012-08-24
-==============================================================================
-
-1.    NEW FEATURES
-
-      CR10010707
-      JSP tag library. Portal offers the following tags:
-      * portal:showobject
-      * portal:query
-      The tags can be used in wizards and make it easy to render objects and grids. 
-      Example:      
-      
-        <%@ taglib uri="http://www.openmdx.org/tags/openmdx-portal" prefix="portal" %>
-         ...
-         <div id="content-wrap">
-      	   <div id="content" style="padding:10px 0.5em 0px 0.5em;">
-	         <portal:showobject id="AAA" object="<%= userHome %>" showAttributes="true" grids="alert,assignedActivity" navigationTarget="_none">
-	           <portal:query name="assignedActivity" query="<%= activityQuery %>" />
-	         </portal:showobject>
-	         <portal:showobject id="BBB" object="<%= userHome.getContact() %>" showAttributes="true" grids="address" navigationTarget="_none" />
-           </div> <!-- content -->
-        </div>
-
-                                    
-2.    CHANGES  
-     
-2.0.  CHANGED FEATURES
-      
-      CR10010930
-      Unify Texts and Codes. The class Texts now delegates to Codes, i.e. texts
-      are now stored as codes in the CodeValueContainer with name 'TextsBundle'.
-      In case Codes are not defined, Texts falls back to resource bundles. 
-
-      CR10010942
-      Refactoring data bindings. Replace DataBinding_1_0 and DataBinding_2_0 
-      interfaces by DataBinding interface.
-            
-      CR20020010
-      Improve grid search for code columns. Use short and long texts for filter 
-      value to code mapping.
-            
-2.1.  FIXED BUGS
-      none      
-      
-2.2.  DEPRECATED FEATURES
-      none
-            
-2.3   REMOVED FEATURES
-      none
-
----

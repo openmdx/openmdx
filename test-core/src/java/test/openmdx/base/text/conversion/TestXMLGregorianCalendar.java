@@ -27,7 +27,7 @@ public class TestXMLGregorianCalendar {
    /**
     * The expected query
     */
-   private static final String[] expected = {
+   private static final String[] EXPECTED_XML_DECODER = {
         "<?xml version=\"1.0\" encoding=\"UTF-8\"?>", 
         "<java version=\"...\" class=\"java.beans.XMLDecoder\">", 
          "<object class=\"org.openmdx.base.query.Filter\">", 
@@ -81,6 +81,47 @@ public class TestXMLGregorianCalendar {
          "</object>", 
         "</java>", 
     };
+   
+   private static final String[] EXPECTED_XML_STREAM = {
+	   "<org.openmdx.base.query.Filter>",
+	   "<conditions>",
+	     "<org.openmdx.base.query.IsGreaterOrEqualCondition>",
+	       "<quantifier>THERE_EXISTS</quantifier>",
+	       "<feature>stateValidFrom</feature>",
+	       "<values>",
+	         "<com.sun.org.apache.xerces.internal.jaxp.datatype.XMLGregorianCalendarImpl>",
+	           "<year>2000</year>",
+	           "<month>4</month>",
+	           "<day>1</day>",
+	           "<timezone>-2147483648</timezone>",
+	           "<hour>-2147483648</hour>",
+	           "<minute>-2147483648</minute>",
+	           "<second>-2147483648</second>",
+	         "</com.sun.org.apache.xerces.internal.jaxp.datatype.XMLGregorianCalendarImpl>",
+	       "</values>",
+	       "<fulfils>true</fulfils>",
+	     "</org.openmdx.base.query.IsGreaterOrEqualCondition>",
+	     "<org.openmdx.base.query.IsGreaterCondition>",
+	       "<quantifier>THERE_EXISTS</quantifier>",
+	       "<feature>stateValidTo</feature>",
+	       "<values>",
+	         "<org.w3c.cci2.ImmutableDate resolves-to=\"com.sun.org.apache.xerces.internal.jaxp.datatype.XMLGregorianCalendarImpl\">",
+	           "<year>2049</year>",
+	           "<month>12</month>",
+	           "<day>31</day>",
+	           "<timezone>-2147483648</timezone>",
+	           "<hour>-2147483648</hour>",
+	           "<minute>-2147483648</minute>",
+	           "<second>-2147483648</second>",
+	         "</org.w3c.cci2.ImmutableDate>",
+	       "</values>",
+	       "<fulfils>false</fulfils>",
+	     "</org.openmdx.base.query.IsGreaterCondition>",
+	   "</conditions>",
+	   "<orderSpecifiers/>",
+	   "<extensions/>",
+	 "</org.openmdx.base.query.Filter>"
+   };
 
    private Map<?,String> parse(String line) {
        line = line.trim();
@@ -111,17 +152,25 @@ public class TestXMLGregorianCalendar {
         String query
     ) throws IOException{
         BufferedReader actual = new BufferedReader(new StringReader(query));
-        Assert.assertEquals("<?xml...", expected[0], actual.readLine().trim());
-        String line1 = actual.readLine().trim();
-        Assert.assertTrue(
-            "<java version=\"...\" class=\"java.beans.XMLDecoder\">", 
-            line1.startsWith("<java version=\"") && line1.endsWith("\" class=\"java.beans.XMLDecoder\">")
-        );
-        for(int i = 2; i < expected.length; i++) {
-            Assert.assertEquals("Line " + i, parse(expected[i]), parse(actual.readLine()));
+        String line0 = actual.readLine().trim();
+        if(line0.startsWith("<?xml")) {
+	        Assert.assertEquals("<?xml...", EXPECTED_XML_DECODER[0], line0);
+	        String line1 = actual.readLine().trim();
+	        Assert.assertTrue(
+	            "<java version=\"...\" class=\"java.beans.XMLDecoder\">", 
+	            line1.startsWith("<java version=\"") && line1.endsWith("\" class=\"java.beans.XMLDecoder\">")
+	        );
+	        for(int i = 2; i < EXPECTED_XML_DECODER.length; i++) {
+	            Assert.assertEquals("Line " + i, parse(EXPECTED_XML_DECODER[i]), parse(actual.readLine()));
+	        }
+        } else {
+	        Assert.assertEquals("<org.openmdx.base.query.Filter>", EXPECTED_XML_STREAM[0], line0);
+	        for(int i = 1; i < EXPECTED_XML_STREAM.length; i++) {
+	            Assert.assertEquals("Line " + i, parse(EXPECTED_XML_STREAM[i]), parse(actual.readLine()));
+	        }
         }
     }
-    
+
     @Test
     public void testEncodingAndDecoding() throws ServiceException, IOException {
        Filter original = new Filter(

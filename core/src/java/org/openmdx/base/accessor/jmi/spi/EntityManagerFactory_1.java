@@ -220,8 +220,8 @@ public class EntityManagerFactory_1
                     properties,
                     toSection(i.next())
                 );  
-                Factory<PlugIn_1_0> viewPlugInFactory = new BeanFactory<PlugIn_1_0>(
-                    "class",
+                Factory<PlugIn_1_0> viewPlugInFactory = BeanFactory.newInstance(
+                	PlugIn_1_0.class,
                     viewPlugInConfiguration.entries()
                 );
                 viewManagerPlugIns.add(viewPlugInFactory.instantiate());
@@ -463,14 +463,13 @@ public class EntityManagerFactory_1
                 properties,
                 section
             );  
-            Factory<?> userObjectFactory = new BeanFactory<Object>(
-                "class",
+            Factory<?> userObjectFactory = BeanFactory.newInstance(
                 userObjectConfiguration.entries()
             );
-            Object userObject = userObjectFactory.instantiate();
+            final boolean shared = !userObjectFactory.getInstanceClass().isInterface();
             userObjects.put(
                 section[section.length - 1],
-                userObject
+                shared ? userObjectFactory.instantiate() : userObjectFactory
             );
         } catch (Exception exception) {
             throw new ServiceException(

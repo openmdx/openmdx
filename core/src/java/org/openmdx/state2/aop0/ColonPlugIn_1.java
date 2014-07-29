@@ -1,13 +1,13 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Description: org::openmdx::state2 Plug-In
+ * Description: org::openmdx::state2 Colon Plug-In
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2010-2012, OMEX AG, Switzerland
+ * Copyright (c) 2010-2014, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or

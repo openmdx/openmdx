@@ -1,13 +1,13 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Description: Abstract org::openmdx::state2 Plug-In
+ * Description: Abstract org::openmdx::state2 Legacy Plug-In
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2012, OMEX AG, Switzerland
+ * Copyright (c) 2012-2014, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -49,6 +49,7 @@ package org.openmdx.state2.aop0;
 
 import java.util.List;
 
+import javax.annotation.Nullable;
 import javax.jdo.listener.InstanceLifecycleEvent;
 
 import org.openmdx.base.accessor.cci.SystemAttributes;
@@ -139,8 +140,8 @@ public class LegacyPlugIn_1 extends ColonPlugIn_1 implements LegacyConfiguration
      */
     public String getValidTimeUniquePattern(
         int index
-        ) {
-        return this.validTimeUniquePattern[index].toXRI();
+    ) {
+    	return this.validTimeUniquePattern[index].toXRI();
     }
 
     /**
@@ -174,10 +175,10 @@ public class LegacyPlugIn_1 extends ColonPlugIn_1 implements LegacyConfiguration
     /* (non-Javadoc)
      * @see org.openmdx.state2.spi.Configuration#isValidTimeUnique(org.openmdx.base.naming.Path)
      */
-//  @Override
+    @Override
     public boolean isValidTimeUnique(Path xri) {
         if(this.validTimeUniquePattern != NO_XRIS){
-            Path oid = xri.size() % 2 == 1 ? xri : xri.getChild("-");
+            Path oid = xri.isObjectPath() ? xri : xri.getChild("-");
             for(Path validTimeUniqePattern : this.validTimeUniquePattern) {
                 if(oid.isLike(validTimeUniqePattern)) {
                     return true;
@@ -190,18 +191,18 @@ public class LegacyPlugIn_1 extends ColonPlugIn_1 implements LegacyConfiguration
     /* (non-Javadoc)
      * @see org.openmdx.state2.spi.Configuration#isTheChildrensValidTimeUnique(org.openmdx.base.accessor.view.ObjectView_1_0)
      */
-//  @Override
+    @Override
     public boolean isTheChildrensValidTimeUnique(ModelElement_1_0 parentClassifierDef) throws ServiceException {
         if(this.validTimeUniqueTypes != NO_TYPES) {
             for(String validTimeUniqueType : this.validTimeUniqueTypes) {
-                if(validTimeUniqueType.equals(parentClassifierDef.objGetValue("qualifiedName"))){
+                if(validTimeUniqueType.equals(parentClassifierDef.getQualifiedName())){
                     return true;
                 }
                 for(Object subType : parentClassifierDef.objGetList("supertype")) {
-                    if(((Path)subType).getBase().equals(validTimeUniqueType)) {
+                    if(((Path)subType).getLastSegment().toClassicRepresentation().equals(validTimeUniqueType)) {
                         return true;
                     }
-                }            
+                }
             }
         }
         return false;
@@ -210,7 +211,7 @@ public class LegacyPlugIn_1 extends ColonPlugIn_1 implements LegacyConfiguration
     /* (non-Javadoc)
      * @see org.openmdx.base.aop0.PlugIn_1_0#getPlugInObject(java.lang.Class)
      */
-//  @Override
+    @Override
     public <T> T getPlugInObject(Class<T> type) {
         return LegacyConfiguration.class == type ? type.cast(this) : null;
     }
@@ -258,12 +259,12 @@ public class LegacyPlugIn_1 extends ColonPlugIn_1 implements LegacyConfiguration
         ModelElement_1_0 feature
     ) throws ServiceException {
         return super.isExemptFromValidation(object, feature) || ( 
-            "org:openmdx:base:Aspect:core".equals(feature.objGetValue("qualifiedName")) && isValidTimeUnqiue(object)
+            "org:openmdx:base:Aspect:core".equals(feature.getQualifiedName()) && isValidTimeUnqiue(object)
         );
     }
 
-    /* (non-Javadoc)
-     * @see org.openmdx.state2.aop0.AbstractPlugIn_1#basicStatePreStore(org.openmdx.base.accessor.rest.DataObject_1)
+    /**
+     * The legacy support injects its valid time unique behaviour
      */
     @Override
     protected void basicStatePreStore(
@@ -285,7 +286,7 @@ public class LegacyPlugIn_1 extends ColonPlugIn_1 implements LegacyConfiguration
 	 * @see org.openmdx.base.aop0.PlugIn_1_0#isAspect(org.openmdx.base.accessor.rest.DataObject_1)
 	 */
     @Override
-	public Boolean isAspect(
+	@Nullable public Boolean isAspect(
 		DataObject_1 object
 	) throws ServiceException {
 		return LegacyPlugInHelper.isValidTimeUnique(object, object.getModel()) ? Boolean.FALSE : null;

@@ -359,7 +359,6 @@ public class MetaData_2 implements MetaData_1_0, MetaData_2_0 {
          *
          * @param name
          */
-        @SuppressWarnings("resource")
         Package(
             String name
         ){
@@ -506,7 +505,6 @@ public class MetaData_2 implements MetaData_1_0, MetaData_2_0 {
              * 
              * @param name
              */
-            @SuppressWarnings("resource")
             Class(
                 String name
             ){

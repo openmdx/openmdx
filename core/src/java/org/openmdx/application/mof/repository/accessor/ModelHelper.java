@@ -76,22 +76,32 @@ class ModelHelper extends org.openmdx.base.mof.cci.ModelHelper {
         // Avoid instantiation
     }
 
+    static ModelElement_1_0 getElementType(
+        ModelElement_1_0 elementDef,
+        Map<String,ModelElement_1_0> elements
+    ) throws ServiceException {
+        Object type = elementDef.getType();
+        if(type == null) {
+            throw new ServiceException(
+                ModelExceptions.MODEL_DOMAIN,
+                ModelExceptions.REFERENCED_ELEMENT_TYPE_NOT_FOUND_IN_REPOSITORY,
+                "Element has undefined type",
+                new BasicException.Parameter("element", elementDef)
+            );
+        }
+        return ModelHelper.getDereferencedType(
+            type,
+            elements
+        );
+    }
+    
     static ModelElement_1_0 getDereferencedType(
         java.lang.Object element,
         Map<String,ModelElement_1_0> elements
     ) throws ServiceException {
-        java.lang.Object current = element;
         Set<ModelElement_1_0> visitedElements = null;
-        while(true) {
-            ModelElement_1_0 modelElement = findElement(current, elements);
-            if(modelElement == null) {
-                throw new ServiceException (
-                    BasicException.Code.DEFAULT_DOMAIN, 
-                    BasicException.Code.NOT_FOUND, 
-                    "element not found in repository. Can not dereference type",
-                    new BasicException.Parameter("element", current)
-                );
-            }
+        for(java.lang.Object current = element;;) {
+            ModelElement_1_0 modelElement = getElement(current, elements);
             if(modelElement.isAliasType()) {
                 if(visitedElements == null) {
                     visitedElements = new HashSet<ModelElement_1_0>();
@@ -105,7 +115,7 @@ class ModelHelper extends org.openmdx.base.mof.cci.ModelHelper {
                     );
                 }
                 visitedElements.add(modelElement);
-                current = modelElement.objGetValue("type");
+                current = modelElement.getType();
             } else {
                 return modelElement;
             }
@@ -119,7 +129,7 @@ class ModelHelper extends org.openmdx.base.mof.cci.ModelHelper {
         if(element instanceof ModelElement_1_0) {
             return (ModelElement_1_0)element;
         } else if(element instanceof Path) {
-            return elements.get(((Path)element).getBase());
+            return elements.get(((Path)element).getLastSegment().toClassicRepresentation());
         } else if(element instanceof List<?>) {
             String qualifiedElementName = "";
             int ii = 0;
@@ -174,11 +184,11 @@ class ModelHelper extends org.openmdx.base.mof.cci.ModelHelper {
             elements
         );
         ModelElement_1_0 referencedEnd = findElement(
-            reference.objGetValue("referencedEnd"),
+            reference.getReferencedEnd(),
             elements
         );
         ModelElement_1_0 association = findElement(
-            referencedEnd.objGetValue("container"),
+            referencedEnd.getContainer(),
             elements
         );
         if(association.objGetList("isDerived").size() < 1) {
@@ -189,7 +199,7 @@ class ModelHelper extends org.openmdx.base.mof.cci.ModelHelper {
                 new BasicException.Parameter("association", association)
             );
         }
-        return ((Boolean)association.objGetValue("isDerived")).booleanValue();
+        return ((Boolean)association.isDerived()).booleanValue();
     }
 
     //---------------------------------------------------------------------------  

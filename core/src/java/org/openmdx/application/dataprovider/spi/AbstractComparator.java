@@ -86,6 +86,10 @@ public abstract class AbstractComparator<E> implements Comparator<E> {
      * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
      */
     @SuppressWarnings({"unchecked", "rawtypes"})
+    @edu.umd.cs.findbugs.annotations.SuppressFBWarnings(
+		value = "NS_DANGEROUS_NON_SHORT_CIRCUIT", 
+		justification="non short-circuit required in iteration"
+    )
     public int compare(E left, E right) {
         specifications: for(
             int i = 0;
@@ -114,7 +118,9 @@ public abstract class AbstractComparator<E> implements Comparator<E> {
             ){
                 if(!ln) return -greaterThanResult;
                 if(!rn) return +greaterThanResult;
-                if((lv = li.next()) != null | (rv = ri.next()) != null) {
+                lv = li.next();
+                rv = ri.next();
+                if(lv != null || rv != null) {
                     if(lv == null) return -greaterThanResult;
                     if(rv == null) return +greaterThanResult;
                     int c = ((Comparable)lv).compareTo(rv);

@@ -177,7 +177,7 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
     private Mapping_1_0 getMapping(){
         return ((Jmi1Package_1_0)this.refClass.refOutermostPackage()).refMapping(); 
     }
-    
+  
     /**
      * Retrieve the feature mapper
      * 
@@ -293,11 +293,6 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
 
     /**
      * Replace the content of the target map
-     * 
-     * @param target
-     * @param source
-     * 
-     * @exception JmiServiceException
      */
     @SuppressWarnings({
         "rawtypes", "unchecked"
@@ -324,7 +319,6 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
                     }
                 } else {
                     throw new JmiServiceException(
-                        null,
                         BasicException.Code.DEFAULT_DOMAIN,
                         BasicException.Code.BAD_PARAMETER,
                         "The given value is incompatible to the target",
@@ -334,7 +328,6 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
                 }
             } else {
                 throw new JmiServiceException(
-                    null,
                     BasicException.Code.DEFAULT_DOMAIN,
                     BasicException.Code.BAD_PARAMETER,
                     "The given value is incompatible to the target",
@@ -371,7 +364,6 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
                 target.addAll(ArraysExtension.asList(source));
             } else {
                 throw new JmiServiceException(
-                    null,
                     BasicException.Code.DEFAULT_DOMAIN,
                     BasicException.Code.BAD_PARAMETER,
                     "The given value is incompatible to the target",
@@ -483,7 +475,7 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
                                 FeatureMapper.MethodSignature.DEFAULT
                         );
                         boolean operation = feature.objGetClass().equals(ModelAttributes.OPERATION);
-                        String featureName = (String)feature.objGetValue("name");
+                        String featureName = (String)feature.getName();
                         // Getters
                         if(!operation && methodName.startsWith("get")) {
                             if((args == null) || (args.length == 0)) {      
@@ -792,7 +784,7 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
                                 if(methodName.startsWith("add")) {
                                     RefContainer<?> container = (RefContainer<?>) this.invokeCci(
                                         proxy,
-                                        getFeatureMapper().getAccessor(feature.objGetValue("name")), 
+                                        getFeatureMapper().getAccessor(feature.getName()), 
                                         null, 
                                         this.refClass.getMarshaller(), 
                                         FeatureMapper.Kind.METHOD
@@ -803,7 +795,7 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
                                     if(args.length != 1 || !(args[0] instanceof RefObject)) {
                                         RefContainer<?> container = (RefContainer<?>) this.invokeCci(
                                             proxy,
-                                            getFeatureMapper().getAccessor(feature.objGetValue("name")), 
+                                            getFeatureMapper().getAccessor(feature.getName()), 
                                             null, 
                                             this.refClass.getMarshaller(), 
                                             FeatureMapper.Kind.METHOD
@@ -892,7 +884,7 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
     private Object marshal(
         Object value,
         String featureName,
-        Class<?> returnType_
+        Class<?> returnType
     ) throws ServiceException {
         if(value instanceof InputStream){
             return new Jmi1BinaryLargeObject(
@@ -905,31 +897,10 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
                 (SortedMap<Integer,?>)value
             );
         }
-        Class<?> returnType = returnType_;
         if(value instanceof RefContainer){
-            if(returnType == null) try {
-                returnType = this.refClass.getDelegateClass().getMethod(
-                    Identifier.OPERATION_NAME.toIdentifier(
-                        featureName,
-                        null, // removablePrefix
-                        "get", // prependablePrefix 
-                        null, // removableSuffix 
-                        null // appendableSuffix            
-                    )
-                ).getReturnType();
-            } catch (NoSuchMethodException exception) {
-                throw new ServiceException(
-                    exception,
-                    BasicException.Code.DEFAULT_DOMAIN,
-                    BasicException.Code.TRANSFORMATION_FAILURE,
-                    "Unable to determine the container interface",
-                    new BasicException.Parameter("parent-class", this.refClass.getDelegateClass().getName()),
-                    new BasicException.Parameter("feature", featureName)
-                );
-            }
             return Classes.newProxyInstance(
                 new Jmi1ContainerInvocationHandler(this.getValidator(), (RefContainer<?>)value),
-                returnType, 
+                returnType == null ? getReturnType(featureName) : returnType, 
                 RefContainer.class, 
                 PersistenceCapableCollection.class,
                 Serializable.class
@@ -944,6 +915,32 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
         getValidator().validate(value);
         return value;
     }
+
+	/**
+	 * Determine the feature's return type
+	 */
+	private Class<?> getReturnType(String featureName) throws ServiceException {
+		try {
+		    return this.refClass.getDelegateClass().getMethod(
+		        Identifier.OPERATION_NAME.toIdentifier(
+		            featureName,
+		            null, // removablePrefix
+		            "get", // prependablePrefix 
+		            null, // removableSuffix 
+		            null // appendableSuffix            
+		        )
+		    ).getReturnType();
+		} catch (NoSuchMethodException exception) {
+		    throw new ServiceException(
+		        exception,
+		        BasicException.Code.DEFAULT_DOMAIN,
+		        BasicException.Code.TRANSFORMATION_FAILURE,
+		        "Unable to determine the container interface",
+		        new BasicException.Parameter("parent-class", this.refClass.getDelegateClass().getName()),
+		        new BasicException.Parameter("feature", featureName)
+		    );
+		}
+	}
     
     /**
      * Validate an XRI sub-segment
@@ -952,14 +949,13 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
      * 
      * @return the validated XRI sub-segment
      * 
-     * @exception JmiServiceException BAD_PARAMETER if the sub-segment is <code>null</code>Y
+     * @exception JmiException BAD_PARAMETER if the sub-segment is <code>null</code>Y
      */
     private static Object validateSubSegment(
     	Object subSegment
     ){
     	if(subSegment == null) {
 	    	throw new JmiServiceException(
-	    		null, // cause	
 	    		BasicException.Code.DEFAULT_DOMAIN,
 	    		BasicException.Code.BAD_PARAMETER,
 	    		"Null is an invalid value for an XRI sub-segment"
@@ -976,6 +972,7 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
      * 
      * @return the corresponding RefContainer arguments
      */
+    @edu.umd.cs.findbugs.annotations.SuppressFBWarnings(value = "IM_BAD_CHECK_FOR_ODD", justification="i is a natural number")
     private static Object[] jmiToRef(
         Object[] source
     ){
@@ -1619,8 +1616,7 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
         ) {
             Path objectId = refGetPath();
             return 
-                objectId == null ? null : 
-                objectId.toXRI();
+                objectId == null ? null : objectId.toXRI();
         }
     
         /* (non-Javadoc)
@@ -1709,7 +1705,6 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
          * must be of the same class or a subtype of the target.
          * 
          * @param existing existing object.
-         * @throws JmiServiceException thrown if object can not be initialized. 
          * 
          * @deprecated use {@link PersistenceHelper#clone(Object, String...)}
          */

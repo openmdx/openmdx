@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2013, OMEX AG, Switzerland
+ * Copyright (c) 2013-2014, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -54,8 +54,7 @@ import java.util.logging.Level;
 
 import javax.jmi.reflect.RefObject;
 
-import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
-import org.openmdx.base.accessor.jmi.spi.DelegatingRefObject_1_0;
+import org.openmdx.base.accessor.cci.DataObject_1_0;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
 import org.openmdx.base.mof.cci.ModelHelper;
@@ -64,7 +63,7 @@ import org.openmdx.kernel.log.SysLog;
 
 
 /**
- * Dirty Features
+ * Dirty Objects
  */
 public class DirtyObjects {
 
@@ -127,7 +126,7 @@ public class DirtyObjects {
         DataObject_1 beforeImage
     ) throws ServiceException {
         Multiplicity multiplicity = ModelHelper.getMultiplicity(feature);
-        String featureName = (String) feature.objGetValue("name");
+        String featureName = (String) feature.getName();
         switch(multiplicity) {
             case SINGLE_VALUE: case OPTIONAL: 
                 return !equal(beforeImage.objGetValue(featureName), afterImage.objGetValue(featureName));
@@ -144,7 +143,7 @@ public class DirtyObjects {
                     "the feature {1} in the object {2} as therefore treated as modified", 
                     multiplicity, 
                     featureName, 
-                    afterImage.jdoIsPersistent() ? afterImage.jdoGetObjectId().toXRI() : afterImage.jdoGetTransactionalObjectId()
+                    afterImage.jdoIsPersistent() ? afterImage.jdoGetObjectId() : afterImage.jdoGetTransactionalObjectId()
                 );
                 return true;
                 
@@ -154,27 +153,12 @@ public class DirtyObjects {
                     "Unsupported Multiplicity {0}, treat the feature {1} in the object {2} as modified", 
                     multiplicity, 
                     featureName, 
-                    afterImage.jdoIsPersistent() ? afterImage.jdoGetObjectId().toXRI() : afterImage.jdoGetTransactionalObjectId()
+                    afterImage.jdoIsPersistent() ? afterImage.jdoGetObjectId() : afterImage.jdoGetTransactionalObjectId()
                 );
                 return true;
         }
     }
             
-    /**
-     * Retrieve the data object associated with a given JMI object
-     * 
-     * @return the data object associated with the given JMI object
-     * 
-     * @throws ServiceException
-     */
-    private static DataObject_1 getDataObject(
-        RefObject refObject
-    ) throws ServiceException {
-        return (DataObject_1) (
-            (RefObject_1_0) (refObject instanceof DelegatingRefObject_1_0 ? ((DelegatingRefObject_1_0)refObject).openmdxjdoGetDataObject() : refObject)
-        ).refDelegate().objGetDelegate();
-    }
-
     /**
      * Determines which features have been modified
      * 
@@ -183,8 +167,9 @@ public class DirtyObjects {
      * @throws ServiceException
      */
     public static Set<String> getModifiedFeatures(
-        DataObject_1 afterImage
+        DataObject_1_0 dataObject
     ) throws ServiceException {
+        DataObject_1 afterImage = (DataObject_1) dataObject;
         Set<String> dirtyFeatures = new HashSet<String>();
         DataObject_1 beforeImage = afterImage.getBeforeImage();
         Map<String,ModelElement_1_0> attributes = getAttributeDefs(afterImage);
@@ -206,7 +191,7 @@ public class DirtyObjects {
     public static Set<String> getModifiedFeatures(
         RefObject refObject
     ) throws ServiceException {
-        return getModifiedFeatures(getDataObject(refObject));
+        return getModifiedFeatures(DataObjects.getDataObject(refObject));
     }
     
     /** 
@@ -219,7 +204,8 @@ public class DirtyObjects {
     public static void touch( 
         RefObject refObject 
     ) throws ServiceException { 
-        getDataObject(refObject).touch(); 
+        final DataObject_1 dataObject = (DataObject_1) DataObjects.getDataObject(refObject);
+		dataObject.touch(); 
     } 
  
 }

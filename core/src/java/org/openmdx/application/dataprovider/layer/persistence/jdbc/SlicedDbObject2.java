@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2011, OMEX AG, Switzerland
+ * Copyright (c) 2011-2014, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -384,7 +384,7 @@ public class SlicedDbObject2 extends SlicedDbObject {
                         statement += columnNameTypeName;
                         statementParameters.add(
                             this.database.getObjectId(
-                                this.getReference().getBase()
+                                this.getReference().getLastSegment().toClassicRepresentation()
                             )
                         );
                         k++;
@@ -517,7 +517,7 @@ public class SlicedDbObject2 extends SlicedDbObject {
                 null,
                 new BasicException.Parameter("path", facade.getPath()),
                 new BasicException.Parameter("statement", currentStatement),
-                new BasicException.Parameter("values", statementParameters),
+                new BasicException.Parameter("values", (List<?>) statementParameters),
                 new BasicException.Parameter("types", statementParameterTypes),
                 new BasicException.Parameter("sqlErrorCode", ex.getErrorCode()), 
                 new BasicException.Parameter("sqlState", sqlState)
@@ -931,7 +931,7 @@ public class SlicedDbObject2 extends SlicedDbObject {
                 );
                 normalizedObjectFacade.addToAttributeValuesAsList(
                     this.database.toOid(name),
-                    parentObjectPath.getBase()
+                    parentObjectPath.getLastSegment().toClassicRepresentation()
                 );
             }
             // add (rid, oid) for all attributes with values of type path
@@ -976,7 +976,7 @@ public class SlicedDbObject2 extends SlicedDbObject {
                             ){
                                 normalizedObjectFacade.addToAttributeValuesAsList(
                                     this.database.toOid(name),
-                                    objectPath.getBase()
+                                    objectPath.getLastSegment().toClassicRepresentation()
                                 );
                                 if(removeValuesProvidedByView) {
                                     i.remove();
@@ -992,7 +992,7 @@ public class SlicedDbObject2 extends SlicedDbObject {
                                 );
                                 normalizedObjectFacade.addToAttributeValuesAsList(
                                     this.database.toOid(name),
-                                    objectPath.getBase()
+                                    objectPath.getLastSegment().toClassicRepresentation()
                                 );
                                 // add parent of path value
                                 if(pathNormalizeLevel > 2) {
@@ -1008,7 +1008,7 @@ public class SlicedDbObject2 extends SlicedDbObject {
                                         );
                                         normalizedObjectFacade.addToAttributeValuesAsList(
                                             this.database.toOid(name + "Parent"),
-                                            parentPath.getBase()
+                                            parentPath.getLastSegment().toClassicRepresentation()
                                         );
                                     }
                                 }

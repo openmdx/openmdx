@@ -67,42 +67,61 @@ import org.openmdx.portal.servlet.ViewPort;
 import org.openmdx.portal.servlet.UiContext;
 import org.openmdx.portal.servlet.attribute.Attribute;
 
-public class FormControl
-    extends TabControl
-    implements Serializable {
+/**
+ * FormControl
+ *
+ */
+public class FormControl extends UiTabControl implements Serializable {
   
-    //-------------------------------------------------------------------------
+	/**
+     * Constructor.
+     * 
+     * @param id
+     * @param locale
+     * @param localeAsIndex
+     * @param uiContext
+     * @param formDef
+     */
     public FormControl(
         String id,
         String locale,
         int localeAsIndex,
         UiContext uiContext,
-        org.openmdx.ui1.jmi1.FormDefinition formDefinition
+        org.openmdx.ui1.jmi1.FormDefinition formDef
     ) {
         super(
             id,
             locale,
             localeAsIndex,
-            formDefinition,
+            formDef,
             FormControl.getFieldGroupControls(
                 id,
                 locale,
                 localeAsIndex,
                 uiContext,
-                formDefinition
+                formDef
             )
         );
     }
 
-    //-------------------------------------------------------------------------
-    protected static List<FieldGroupControl> getFieldGroupControls(
+    /**
+     * Get field group controls.
+     * 
+     * @param id
+     * @param locale
+     * @param localeAsIndex
+     * @param uiContext
+     * @param formDefinition
+     * @return
+     */
+    protected static List<UiFieldGroupControl> getFieldGroupControls(
         String id,
         String locale,
         int localeAsIndex,
         UiContext uiContext,
         org.openmdx.ui1.jmi1.FormDefinition formDefinition
     ) {
-        List<FieldGroupControl> formFieldGroupControls = new ArrayList<FieldGroupControl>();
+        List<UiFieldGroupControl> formFieldGroupControls = new ArrayList<UiFieldGroupControl>();
         org.openmdx.ui1.cci2.FormFieldGroupDefinitionQuery query = 
             (org.openmdx.ui1.cci2.FormFieldGroupDefinitionQuery)JDOHelper.getPersistenceManager(formDefinition).newQuery(org.openmdx.ui1.jmi1.FormFieldGroupDefinition.class);
         query.orderByOrder().ascending();
@@ -110,7 +129,7 @@ public class FormControl
         int index = 0;
         for(org.openmdx.ui1.jmi1.FormFieldGroupDefinition formFieldGroupDefinition: formFieldGroupDefinitions) {
             formFieldGroupControls.add(
-                new FieldGroupControl(
+                new UiFieldGroupControl(
                     id + "[" + index + "]",
                     locale,
                     localeAsIndex,
@@ -123,19 +142,16 @@ public class FormControl
         return formFieldGroupControls;
     }
     
-    //-------------------------------------------------------------------------
+    /* (non-Javadoc)
+     * @see org.openmdx.portal.servlet.control.Control#paint(org.openmdx.portal.servlet.ViewPort, java.lang.String, boolean)
+     */
     @Override
     public void paint(
         ViewPort p,
         String frame,
         boolean forEditing        
     ) throws ServiceException {
-        for(
-            int i = 0; 
-            i < this.getFieldGroupControl().length; 
-            i++
-        ) {
-            FieldGroupControl fieldGroup = this.getFieldGroupControl()[i];
+        for(Control fieldGroup: this.getChildren(UiFieldGroupControl.class)) {
             fieldGroup.paint(
                 p,
                 frame,
@@ -143,17 +159,24 @@ public class FormControl
             );
         }
     }
-    
-    //-------------------------------------------------------------------------
+
+    /**
+     * Map parameter map to object.
+     * 
+     * @param parameterMap
+     * @param object
+     * @param app
+     * @param pm
+     */
     public void updateObject(
         Map<String,String[]> parameterMap,
         Object object,
-        ApplicationContext application,
+        ApplicationContext app,
         PersistenceManager pm
     ) {
-        for(FieldGroupControl fieldGroupControl: this.fieldGroupControls) {
+        for(UiFieldGroupControl fieldGroupControl: this.getChildren(UiFieldGroupControl.class)) {
             Map<String,Attribute> attributesAsMap = new HashMap<String,Attribute>();
-            Attribute[][] attributes = fieldGroupControl.getAttribute(object, application);
+            Attribute[][] attributes = fieldGroupControl.getAttribute(object, app);
             for(Attribute[] column: attributes) {
                 for(Attribute attribute: column) {
                     if((attribute != null) && !attribute.isEmpty()) {
@@ -164,18 +187,20 @@ public class FormControl
                     }
                 }
             }
-            application.getPortalExtension().updateObject(
+            app.getPortalExtension().updateObject(
                 object, 
                 parameterMap, 
                 attributesAsMap, 
-                application
+                app
             );
         }
     }
         
     //-------------------------------------------------------------------------
-    // Variables
+    // Members
     //-------------------------------------------------------------------------
+	private static final long serialVersionUID = 3404842425846192954L;
+
 }
 
 //--- End of File -----------------------------------------------------------

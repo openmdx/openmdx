@@ -221,6 +221,12 @@
             </ownedParameter>
           </ownedOperation>
         </packagedElement>
+        <packagedElement xmi:type="uml:Class" xmi:id="_TMMl0HZsEeOiYelByXymuw" name="GenericAddress">
+          <generalization xmi:id="_c93UMHZsEeOiYelByXymuw" general="_3C7B8A60016D3DA87BB60220"/>
+          <generalization xmi:id="_saokMHZsEeOiYelByXymuw">
+            <general xmi:type="uml:Class" href="../openMDX%202%20~%20Core%20(EMF)/org.openmdx.generic1.uml#_3C7B8A60016D3DC93385006B"/>
+          </generalization>
+        </packagedElement>
         <packagedElement xmi:type="uml:Class" xmi:id="_3C7B8A60016D3DA87BB60220" name="Address" isAbstract="true">
           <generalization xmi:id="_3C7B8A60016D3FF14D050362">
             <general xmi:type="uml:Class" href="../openMDX%202%20~%20Core%20(EMF)/org.openmdx.base.uml#_3C7B8A60016D3FB3D6450214"/>

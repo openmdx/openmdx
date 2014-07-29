@@ -153,7 +153,7 @@ class NonRepairingNamespaceContext implements NamespaceContext {
     /* (non-Javadoc)
      * @see javax.xml.namespace.NamespaceContext#getNamespaceURI(java.lang.String)
      */
-//  @Override
+    @Override
     public String getNamespaceURI(
         String prefix
     ) {
@@ -170,7 +170,7 @@ class NonRepairingNamespaceContext implements NamespaceContext {
     /* (non-Javadoc)
      * @see javax.xml.namespace.NamespaceContext#getPrefix(java.lang.String)
      */
-//  @Override
+    @Override
     public String getPrefix(String namespaceURI) {
         if(namespaceURI == null) throw new IllegalArgumentException();
         for(Map.Entry<String, String> e : mapping.entrySet()) {
@@ -188,7 +188,7 @@ class NonRepairingNamespaceContext implements NamespaceContext {
     /* (non-Javadoc)
      * @see javax.xml.namespace.NamespaceContext#getPrefixes(java.lang.String)
      */
-//  @Override
+    @Override
     public Iterator<?> getPrefixes(
         final String namespaceURI
     ) {
@@ -196,63 +196,65 @@ class NonRepairingNamespaceContext implements NamespaceContext {
         return
             XMLConstants.XML_NS_URI.equals(namespaceURI) ? Collections.singleton(XMLConstants.XML_NS_PREFIX).iterator() :
             XMLConstants.XMLNS_ATTRIBUTE_NS_URI.equals(namespaceURI) ? Collections.singleton(XMLConstants.XMLNS_ATTRIBUTE).iterator() :
-            new Prefixes(namespaceURI, this.mapping, this.next);
+            new Concatenation(getPrimaryPrefixes(namespaceURI), getSecondaryPrefixes(namespaceURI));
+    }
+
+    private Iterator<String> getPrimaryPrefixes(
+        final String namespaceURI
+    ){
+        List<String> mappedPrefixes = new ArrayList<String>();
+        for(Map.Entry<String, String> e : mapping.entrySet()) {
+            if(namespaceURI.equals(e.getValue())) {
+            	mappedPrefixes.add(e.getKey());
+            }
+        }
+        return mappedPrefixes.iterator();
+    }
+    
+    private Iterator<?> getSecondaryPrefixes(
+        final String namespaceURI
+    ){
+    	return this.next.getPrefixes(namespaceURI);
     }
 
     
     //------------------------------------------------------------------------
-    // Class Prefixes
+    // Class Concatenation
     //------------------------------------------------------------------------
     
-    /**
-     * Prefixes
-     */
-    private class Prefixes implements Iterator<Object> {
+    private static class Concatenation implements Iterator<Object> {
 
-        /**
-         * Constructor 
-         *
-         * @param namespaceURI
-         * @param primary 
-         * @param NamespaceContext 
-         */
-        Prefixes(
-            String namespaceURI, 
-            Map<String, String> primary, 
-            NamespaceContext secondary
+        Concatenation(
+    		Iterator<String> primary, 
+    		Iterator<?> secondary
         ){
-            this.primary = new ArrayList<String>();
-            this.delegate = secondary.getPrefixes(namespaceURI);
-            for(Map.Entry<String, String> e : primary.entrySet()) {
-                if(namespaceURI.equals(e.getValue())) {
-                    this.primary.add(e.getValue());
-                }
-            }
+        	this.primary = primary;
+        	this.secondary = secondary;
         }
         
-        private final List<String> primary;
-        private final Iterator<?> delegate;
+        private final Iterator<String> primary;
+        private final Iterator<?> secondary;
 
         /* (non-Javadoc)
          * @see java.util.Iterator#hasNext()
          */
-    //  @Override
+        @Override
         public boolean hasNext() {
-            return !this.primary.isEmpty() || this.delegate.hasNext();
+            return this.primary.hasNext() || this.secondary.hasNext();
         }
 
         /* (non-Javadoc)
          * @see java.util.Iterator#next()
          */
-    //  @Override
+        @Override
         public Object next() {
-            return this.primary.isEmpty() ? this.delegate.next() : this.primary.get(0);
+            return this.primary.hasNext() ? this.primary.next() : this.secondary.next();
         }
 
         /* (non-Javadoc)
          * @see java.util.Iterator#remove()
          */
-    //  @Override
+        @Override
         public void remove() {
             throw new UnsupportedOperationException();
         }

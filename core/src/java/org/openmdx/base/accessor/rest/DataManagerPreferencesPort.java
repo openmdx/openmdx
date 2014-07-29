@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2012, OMEX AG, Switzerland
+ * Copyright (c) 2012-2014, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -109,37 +109,37 @@ class DataManagerPreferencesPort implements Port {
      */
     static final Path SEGMENTS_ID = new Path(
         "xri://@openmdx*org:openmdx:preferences2/provider/(@openmdx!configuration)/segment"
-    ).lock();
+    );
     
     /**
      * xri://@openmdx*org:openmdx:preferences1/provider/(@openmdx!configuration)/segment/org.openmdx.jdo.DataManager
      */
-    static final Path SEGMENT_ID = SEGMENTS_ID.getChild("org.openmdx.jdo.DataManager").lock();
+    static final Path SEGMENT_ID = SEGMENTS_ID.getChild("org.openmdx.jdo.DataManager");
     
     /**
      * xri://@openmdx*org:openmdx:preferences1/provider/(@openmdx!configuration)/segment/org.openmdx.jdo.DataManager/($...)
      */
-    static final Path EXPOSED_PATH = SEGMENT_ID.getDescendant("%").lock();
+    static final Path EXPOSED_PATH = SEGMENT_ID.getDescendant("%");
 
     /**
      * xri://@openmdx*org:openmdx:preferences1/provider/(@openmdx!configuration)/segment/org.openmdx.jdo.DataManager/preferences
      */
-    static final Path PREFERENCES_ID = SEGMENT_ID.getChild("preferences").lock(); 
+    static final Path PREFERENCES_ID = SEGMENT_ID.getChild("preferences"); 
 
     /** 
      * xri://@openmdx*org:openmdx:preferences1/provider/(@openmdx!configuration)/segment/org.openmdx.jdo.DataManager/preferences/($..)
      */
-    static final Path PREFERENCES_PATTERN = PREFERENCES_ID.getChild(":*").lock();
+    static final Path PREFERENCES_PATTERN = PREFERENCES_ID.getChild(":*");
 
     /**
      * xri://@openmdx*org:openmdx:preferences1/provider/(@openmdx!configuration)/segment/org.openmdx.jdo.DataManager/preferences/($..)/property
      */
-    static final Path PROPERTY_ID = PREFERENCES_PATTERN.getChild("property").lock();
+    static final Path PROPERTY_ID = PREFERENCES_PATTERN.getChild("property");
 
     /**
      * xri://@openmdx*org:openmdx:preferences1/provider/(@openmdx!configuration)/segment/org.openmdx.jdo.DataManager/preferences/($..)/property/($..)
      */
-    static final Path PROPERTY_PATTERN = PROPERTY_ID.getChild(":*").lock();
+    static final Path PROPERTY_PATTERN = PROPERTY_ID.getChild(":*");
     
     /**
      * Build the preferences object lazily
@@ -183,7 +183,7 @@ class DataManagerPreferencesPort implements Port {
                             for(Object rawNode : (IndexedRecord)nodes){
                                 ObjectRecord node = (ObjectRecord) rawNode;
                                 Path nodeId = node.getPath();
-                                nodesContainer.put(nodeId.getBase(), node);
+                                nodesContainer.put(nodeId.getLastSegment().toClassicRepresentation(), node);
                                 //
                                 // Entries
                                 //
@@ -197,7 +197,7 @@ class DataManagerPreferencesPort implements Port {
                                 for(Object rawEntry : (IndexedRecord)entries){
                                     ObjectRecord entry = (ObjectRecord) rawEntry;
                                     Path entryId = entry.getPath();
-                                    entriesContainer.put(entryId.getBase(), entry);
+                                    entriesContainer.put(entryId.getLastSegment().toClassicRepresentation(), entry);
                                 }
                             }
                         }
@@ -224,7 +224,7 @@ class DataManagerPreferencesPort implements Port {
         );
         MappedRecord values = object.getValue();
         values.put("description", "openMDX Configuration Preferences");
-        to.put(object.getPath().getBase(), object.getDelegate());
+        to.put(object.getPath().getLastSegment().toClassicRepresentation(), object.getDelegate());
     }
 
     /**
@@ -248,7 +248,7 @@ class DataManagerPreferencesPort implements Port {
         );
         MappedRecord values = object.getValue();
         values.put("type", "system");
-        to.put(object.getPath().getBase(), object.getDelegate());
+        to.put(object.getPath().getLastSegment().toClassicRepresentation(), object.getDelegate());
         return object.getPath().getChild("node");
     }
     
@@ -308,7 +308,7 @@ class DataManagerPreferencesPort implements Port {
             try {
                 Map<String,ObjectRecord> container = getContainers(getConnection()).get(xri.getParent());
                 if(container != null) {
-                    ObjectRecord object = container.get(xri.getBase());
+                    ObjectRecord object = container.get(xri.getLastSegment().toClassicRepresentation());
                     if(object != null) {
                         output.add(object);
                         return true;

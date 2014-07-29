@@ -75,7 +75,7 @@ public interface Jmi1Class_1_0 extends RefClass {
     boolean isTerminal();
 
     /**
-     * Retrievve the corresponding marshaller.
+     * Retrieve the corresponding marshaller.
      * 
      * @return this Jmi1Class' marshaller
      */

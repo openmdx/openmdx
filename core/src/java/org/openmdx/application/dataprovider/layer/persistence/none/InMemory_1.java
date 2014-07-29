@@ -1,13 +1,13 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
+ * Project:     openMDX, http://www.openmdx.org/
  * Description: InMemory_1 class
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2013, OMEX AG, Switzerland
+ * Copyright (c) 2004-2014, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -513,7 +513,7 @@ public class InMemory_1 extends AbstractPersistence_1 {
                     input.isPreferringNotFoundException()
                 );
                 MappedRecord source = reference == null ? null : reference.get(
-                    path.getBase()
+                    path.getLastSegment().toClassicRepresentation()
                 );
                 if(source == null) {
                     if(input.isPreferringNotFoundException()) {
@@ -618,7 +618,7 @@ public class InMemory_1 extends AbstractPersistence_1 {
 //                              @Override
                                 public String next() {
                                     Path superType = (Path) this.delegate.next();
-                                    return superType.getBase();
+                                    return superType.getLastSegment().toClassicRepresentation();
                                 }
 
 //                              @Override
@@ -655,13 +655,13 @@ public class InMemory_1 extends AbstractPersistence_1 {
                                     Map<String, MappedRecord> container = InMemory_1.this.referenceMap.get(
                                         path.getParent()
                                     );
-                                    MappedRecord object = container == null ? null : container.get(path.getBase());
+                                    MappedRecord object = container == null ? null : container.get(path.getLastSegment().toClassicRepresentation());
                                     if(object == null) {
                                         throw new RuntimeServiceException(
                                             BasicException.Code.DEFAULT_DOMAIN,
                                             BasicException.Code.NOT_FOUND,
                                             "Referenced object not found",
-                                            new BasicException.Parameter("xri", path.toXRI())
+                                            new BasicException.Parameter("xri", path)
                                         );
                                     } else {
                                         return object;
@@ -686,7 +686,7 @@ public class InMemory_1 extends AbstractPersistence_1 {
                 List<MappedRecord> objects = new ArrayList<MappedRecord>();
                 List<MappedRecord> sortedObjects = new ArrayList<MappedRecord>();
                 Collection unfiltered = null;
-                boolean isExtent = (request.path().size() == 6) && "extent".equals(request.path().getBase());
+                boolean isExtent = (request.path().size() == 6) && "extent".equals(request.path().getLastSegment().toClassicRepresentation());
                 if(isExtent) {
                     unfiltered = new ArrayList();
                     for(Iterator i = referenceMap.values().iterator(); i.hasNext(); ) {
@@ -820,13 +820,13 @@ public class InMemory_1 extends AbstractPersistence_1 {
                         container = new HashMap(INITIAL_REFERENCE_MAP_CAPACITY)
                     ); // createReferencesOnDemand
                 }
-                String objectId = path.getBase();
+                String objectId = path.getLastSegment().toClassicRepresentation();
                 if(container.containsKey(objectId)) {
                     throw new ServiceException(
                         BasicException.Code.DEFAULT_DOMAIN,
                         BasicException.Code.DUPLICATE,
-                        "Object \u00ab" + path + "\u00bb already exists",
-                        new BasicException.Parameter("path",path)
+                        "Object already exists",
+                        new BasicException.Parameter("xri",path)
                     );
                 }
                 try {
@@ -900,7 +900,7 @@ public class InMemory_1 extends AbstractPersistence_1 {
                 );
                 MappedRecord source = reference == null 
                     ? null 
-                    : reference.remove(path.getBase());
+                    : reference.remove(path.getLastSegment().toClassicRepresentation());
                 for(
                     Iterator iterator = referenceMap.keySet().iterator();
                     iterator.hasNext();
@@ -947,13 +947,21 @@ public class InMemory_1 extends AbstractPersistence_1 {
                     true, // referenceMustExist 
                     true // isPreferringNotFoundException
                 );
-                Object_2Facade target = Facades.asObject(container.get(path.getBase()));
+                if(path == null) {
+                    throw new ServiceException(
+                        BasicException.Code.DEFAULT_DOMAIN,
+                        BasicException.Code.NOT_FOUND,
+                        "Object not found",
+                        new BasicException.Parameter("path")
+                    );
+                }
+                Object_2Facade target = Facades.asObject(container.get(path.getLastSegment().toClassicRepresentation()));
                 if(target == null) {
                     throw new ServiceException(
                         BasicException.Code.DEFAULT_DOMAIN,
                         BasicException.Code.NOT_FOUND,
                         "Object not found",
-                        new BasicException.Parameter("path",path == null ? null : path.toXRI())
+                        new BasicException.Parameter("xri", path)
                     );
                 }
                 target.getValue().putAll(source.getValue());

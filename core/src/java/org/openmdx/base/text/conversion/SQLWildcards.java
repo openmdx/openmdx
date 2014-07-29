@@ -1,12 +1,11 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
+ * Project:     openMDX, http://www.openmdx.org/
  * Description: SQL Wildcards 
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
  * ====================================================================
  *
- * This software is published under the BSD license
- * as listed below.
+ * This software is published under the BSD license as listed below.
  * 
  * Copyright (c) 2006, OMEX AG, Switzerland
  * All rights reserved.
@@ -51,12 +50,10 @@ package org.openmdx.base.text.conversion;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Iterator;
 
 /**
  * SQL Wildcards
  */
-@SuppressWarnings({"rawtypes","unchecked"})
 public class SQLWildcards {
 
     /**
@@ -153,16 +150,13 @@ public class SQLWildcards {
      * 
      * @return the corresponding SQL expression collectioon
      */
-    public Collection fromJDO(
-        Collection jdoExpressions
+    public Collection<String> fromJDO(
+        Collection<String> jdoExpressions
     ){
-        Collection sqlExpressions = new ArrayList();
-        for(
-            Iterator i = jdoExpressions.iterator();
-            i.hasNext();
-        ) sqlExpressions.add(
-            fromJDO(i.next().toString())
-        );
+        Collection<String> sqlExpressions = new ArrayList<String>(jdoExpressions.size());
+        for(String jdoExpression : jdoExpressions){
+        	sqlExpressions.add(fromJDO(jdoExpression));
+        }
         return sqlExpressions;
     }
 
@@ -240,16 +234,14 @@ public class SQLWildcards {
      * 
      * @return the corresponding JDO expression collectioon
      */
-    public Collection toJDO(
-        Collection sqlExpressions
+    public Collection<String> toJDO(
+        Collection<String> sqlExpressions
     ){
-        Collection jdoExpressions = new ArrayList();
-        for(
-            Iterator i = sqlExpressions.iterator();
-            i.hasNext();
-        ) jdoExpressions.add(
-            fromJDO((String)i.next())
-        );
+        Collection<String> jdoExpressions = new ArrayList<String>(sqlExpressions.size());
+        for(String sqlExpression : sqlExpressions) {
+        	jdoExpressions.add(fromJDO(sqlExpression));
+        }
         return jdoExpressions;
     }
+    
 }

@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2011-2013, OMEX AG, Switzerland
+ * Copyright (c) 2011-2014, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -86,7 +86,16 @@ public class RidOidQueryDatabase_1 extends Database_1 {
         return objectIdColumn.lastIndexOf('.') < 0 ? objectIdColumn : objectIdColumn.substring(objectIdColumn.lastIndexOf('.') + 1);
     }
     
+    
     /* (non-Javadoc)
+	 * @see org.openmdx.application.dataprovider.layer.persistence.jdbc.AbstractDatabase_1#toMultiValueView(java.lang.String)
+	 */
+	@Override
+	protected String toMultiValueView(String singleValueView) {
+		return singleValueView;
+	}
+
+	/* (non-Javadoc)
      * @see org.openmdx.application.dataprovider.layer.persistence.jdbc.Database_1#isAspectBaseClass(java.lang.String)
      */
     @Override
@@ -176,13 +185,13 @@ public class RidOidQueryDatabase_1 extends Database_1 {
             for(Object value : values) {
                 clause.append(operator).append("(");
                 Path uri = new Path(this.externalizePathValue(connection,(Path)value));
-                String ridValue = uri.getParent().toString();
-                if("org:openmdx:base:Aspect:core".equals(filterPropertyDef.objGetValue("qualifiedName"))) {
+                String ridValue = uri.getParent().toClassicRepresentation();
+                if("org:openmdx:base:Aspect:core".equals(filterPropertyDef.getQualifiedName())) {
                     clause.append(tableAlias).append(".").append(this.OBJECT_RID).append(" = ?");
                     clauseValues.add(ridValue);
                 } else {
                     Map<String, Pattern> referenceIdPatterns = dbObject.getConfiguration().getReferenceIdPattern();
-                    Pattern referenceIdPattern = referenceIdPatterns == null ? null : referenceIdPatterns.get(filterPropertyDef.objGetValue("name")); 
+                    Pattern referenceIdPattern = referenceIdPatterns == null ? null : referenceIdPatterns.get(filterPropertyDef.getName()); 
                     if(referenceIdPattern == null) {
                         clause.append(toRid(tableAlias, columnName)).append(" = ?");
                         clauseValues.add(ridValue);
@@ -204,7 +213,7 @@ public class RidOidQueryDatabase_1 extends Database_1 {
                                 BasicException.Code.DEFAULT_DOMAIN,
                                 BasicException.Code.BAD_QUERY_CRITERIA,
                                 "Reference id patern mismatch",
-                                new BasicException.Parameter("feature", filterPropertyDef.objGetValue("qualifiedName")),
+                                new BasicException.Parameter("feature", filterPropertyDef.getQualifiedName()),
                                 new BasicException.Parameter("ridValue", ridValue),
                                 new BasicException.Parameter("pattern", referenceIdPattern.pattern())
                             );
@@ -212,7 +221,7 @@ public class RidOidQueryDatabase_1 extends Database_1 {
                     }
                 }
                 clause.append(" AND ").append(oidColumn).append(" = ?)");
-                clauseValues.add(uri.getBase());
+                clauseValues.add(uri.getLastSegment().toClassicRepresentation());
                 operator = " OR ";
             }
             clause.append(")");
@@ -257,10 +266,10 @@ public class RidOidQueryDatabase_1 extends Database_1 {
                 );
                 String escapeClause = getEscapeClause(connection) ;
                 Path uri = new Path(externalized);
-                String oidValue = uri.getBase();
-                String ridValue = uri.getParent().toString();
+                String oidValue = uri.getLastSegment().toClassicRepresentation();
+                String ridValue = uri.getParent().toClassicRepresentation();
                 Map<String, Pattern> referenceIdPatterns = dbObject.getConfiguration().getReferenceIdPattern();
-                Pattern referenceIdPattern = referenceIdPatterns == null ? null : referenceIdPatterns.get(filterPropertyDef.objGetValue("name")); 
+                Pattern referenceIdPattern = referenceIdPatterns == null ? null : referenceIdPatterns.get(filterPropertyDef.getName()); 
                 String ridColumn = toRid(tableAlias, columnName);
                 if(referenceIdPattern == null) {
                     clause.append(ridColumn);
@@ -298,7 +307,7 @@ public class RidOidQueryDatabase_1 extends Database_1 {
                             BasicException.Code.DEFAULT_DOMAIN,
                             BasicException.Code.BAD_QUERY_CRITERIA,
                             "Reference id patern mismatch",
-                            new BasicException.Parameter("feature", filterPropertyDef.objGetValue("qualifiedName")),
+                            new BasicException.Parameter("feature", filterPropertyDef.getQualifiedName()),
                             new BasicException.Parameter("ridValue", ridValue),
                             new BasicException.Parameter("pattern", referenceIdPattern.pattern())
                         );
@@ -336,12 +345,6 @@ public class RidOidQueryDatabase_1 extends Database_1 {
         }
     }    
 
-    /**
-     * @param to
-     * @param viewAliasName
-     * @param joinObject
-     * @param joinWithState TODO
-     */
     private void addIdColumns(
         List<String> to,
         String viewAliasName,
@@ -361,10 +364,6 @@ public class RidOidQueryDatabase_1 extends Database_1 {
         }
     }
 
-    /**
-     * @param to
-     * @param joinViewAliasName
-     */
     private void addParentIdColumns(
         List<String> to,
         String joinViewAliasName
@@ -373,18 +372,6 @@ public class RidOidQueryDatabase_1 extends Database_1 {
         to.add(this.toOid(joinViewAliasName, "object_parent"));
     }
 
-    /**
-     * @param conn
-     * @param dbObject
-     * @param reference
-     * @param viewAliasName
-     * @param filterProperty
-     * @param filterPropertyDef
-     * @param columnName
-     * @param clauseValues
-     * @param clause
-     * @throws ServiceException
-     */
     @Override
     protected void addComplexFilter(
         Connection conn,
@@ -398,125 +385,35 @@ public class RidOidQueryDatabase_1 extends Database_1 {
         List<Object> clauseValues, 
         StringBuilder clause
     ) throws ServiceException {
-        ModelElement_1_0 referencedType = getReferenceType(filterPropertyDef);
-        String joinClauseBegin;
-        String joinClauseEnd;
+        ModelElement_1_0 referencedType = getReferenceType(filterPropertyDef);        
         String joinViewAliasName = viewAliasName + "v";
         List<String> joinColumns1 = new ArrayList<String>();
         List<String> joinColumns2 = new ArrayList<String>();
-        DbObject joinObject;
-        boolean fixedViewAliasName;
-        boolean joinWithState = false;
         List<FilterProperty> allFilterProperties = FilterProperty.getFilterProperties(
             (Filter)filterProperty.getValue(0)
         );
-        // Replace instance_of IN ... by object_class IN ...
-        FilterProperty objectClassFilterProperty = null;
-        for(Iterator<FilterProperty> i = allFilterProperties.iterator(); i.hasNext(); ) {
-            FilterProperty p = i.next();
-            if(SystemAttributes.OBJECT_INSTANCE_OF.equals(p.name()) && !p.values().isEmpty()) {
-                String instanceOf = (String)p.getValue(0);
-                Set<String> allSubtypes = this.getAllSubtypes(instanceOf);
-                if(allSubtypes != null) {
-                    objectClassFilterProperty = new FilterProperty(
-                        p.quantor(),
-                        SystemAttributes.OBJECT_CLASS,
-                        p.operator(),
-                        allSubtypes.toArray()
-                    );
-                    joinWithState |= isStated(filterPropertyDef.getModel(), instanceOf);
-                }
-                i.remove();
-            }
-        }
-        if(objectClassFilterProperty != null) {
-            allFilterProperties.add(objectClassFilterProperty);
-        }
-        // Reference
-        if(filterPropertyDef.getModel().referenceIsStoredAsAttribute(filterPropertyDef)) {
-            Path identityPattern = filterPropertyDef.getModel().getIdentityPattern(referencedType);
-            if(identityPattern == null) {
-                throw new ServiceException(
-                    BasicException.Code.DEFAULT_DOMAIN,
-                    BasicException.Code.NOT_IMPLEMENTED,
-                    "Joining descendants of root classes is not yet implemented for RID/OID DBs",
-                    new BasicException.Parameter("filter.property", filterProperty),
-                    new BasicException.Parameter("filter.definition", filterPropertyDef)
-                );
-            }
-            joinObject = this.getDbObject(
-                conn,
-                null, // dbObjectConfiguration
-                applyProvider(identityPattern, reference),
-                null, // filter
-                true
-            );
-            joinClauseBegin = "";
-            joinClauseEnd = "";
-            int dot = columnName.indexOf('.');
-            String joinColumn1 = dot < 0  ? columnName : columnName.substring(dot + 1);
-            joinColumns1.add(toRid(viewAliasName, joinColumn1));
-            joinColumns1.add(toOid(viewAliasName, joinColumn1));
-            addIdColumns(joinColumns2, joinViewAliasName, joinObject, joinWithState);
-            fixedViewAliasName = false;
-            if(joinColumns1.size() != joinColumns2.size()) {
-                throw new ServiceException(
-                    BasicException.Code.DEFAULT_DOMAIN,
-                    BasicException.Code.NOT_SUPPORTED,
-                    "Column count mismatch between reference coumns and RID/OID columns",
-                    new BasicException.Parameter("filter.property", filterProperty),
-                    new BasicException.Parameter("filter.definition", filterPropertyDef),
-                    new BasicException.Parameter("join1.ColumnExpression", joinColumns1),
-                    new BasicException.Parameter("join2.ColumnName", joinColumns2)
-                );
-            }
-        }
-        // Composite parent
-        else if(ModelHelper.isCompositeEnd(filterPropertyDef, true)) {
-            joinObject = this.getDbObject(
-                conn, 
-                applyProvider(filterPropertyDef.getModel().getIdentityPattern(referencedType), reference), 
-                null, // filter
-                true
-            );            
-            joinClauseBegin = "";
-            joinClauseEnd = "";
-            addParentIdColumns(joinColumns1, viewAliasName);
-            addIdColumns(joinColumns2, joinViewAliasName, joinObject, joinWithState);
-            fixedViewAliasName = true;
-        }
-        // Composite
-        else if(ModelHelper.isCompositeEnd(filterPropertyDef, false)) {
-            joinObject = this.getDbObject(
-                conn, 
-                reference.getDescendant(":*", filterProperty.name()), 
-                null, 
-                true
-            );
-            addIdColumns(joinColumns1, viewAliasName, dbObject, joinFromState);
-            addParentIdColumns(joinColumns2, joinViewAliasName);
-            fixedViewAliasName = true;
-            joinClauseBegin = "";
-            joinClauseEnd = "";
-        }
-        // Shared
-        else if(ModelHelper.isSharedEnd(filterPropertyDef, false)) {
-            throw new ServiceException(
-                BasicException.Code.DEFAULT_DOMAIN,
-                BasicException.Code.NOT_IMPLEMENTED,
-                "Join with shared association not yet implemented",
-                new BasicException.Parameter("filter.property", filterProperty),
-                new BasicException.Parameter("filter.definition", filterPropertyDef)                                
-            );
-        } else {
-            throw new ServiceException(
-                BasicException.Code.DEFAULT_DOMAIN,
-                BasicException.Code.NOT_SUPPORTED,
-                "Unsupported aggregation",
-                new BasicException.Parameter("filter.property", filterProperty),
-                new BasicException.Parameter("filter.definition", filterPropertyDef)                                
-            );
-        }
+        final boolean joinWithState = getJoinWithState(
+            filterPropertyDef,
+            allFilterProperties
+        );
+        final boolean storedAsAttribute = filterPropertyDef.getModel().referenceIsStoredAsAttribute(filterPropertyDef);
+        final boolean fixedViewAliasName = !storedAsAttribute;
+        final DbObject joinObject = this.getJoinObject(
+            conn,
+            dbObject,
+            joinFromState,
+            reference,
+            viewAliasName,
+            filterProperty,
+            filterPropertyDef,
+            columnName,
+            referencedType,
+            joinViewAliasName,
+            joinColumns1,
+            joinColumns2,
+            joinWithState,
+            storedAsAttribute
+        );
         List<FilterProperty> primaryFilterProperties = this.getPrimaryFilterProperties(
             referencedType, 
             allFilterProperties
@@ -539,7 +436,7 @@ public class RidOidQueryDatabase_1 extends Database_1 {
             joinViewAliasName, 
             view1, 
             view2, 
-            JoinType.SPECIFIED_COLUMN_WITH_OBJECT_ID, 
+            JoinType.OBJECT_RID_AND_OID, 
             getUnqualifiedObjectIdColumn(joinColumns2), 
             fixedViewAliasName, 
             referencedType, 
@@ -551,12 +448,12 @@ public class RidOidQueryDatabase_1 extends Database_1 {
             excludingFilterValues
         );
         boolean isForAll = filterProperty.quantor() == Quantifier.FOR_ALL.code();
-        clause.append(joinClauseBegin).append("(").append(isForAll ? "NOT " : "").append("EXISTS (SELECT 1 FROM ").append(view1).append(" ").append(joinViewAliasName).append(" WHERE (");
+        clause.append("(").append(isForAll ? "NOT " : "").append("EXISTS (SELECT 1 FROM ").append(view1).append(" ").append(joinViewAliasName).append(" WHERE (");
         for(int i = 0; i < joinColumns1.size(); i++) {
             clause.append(i == 0 ? "" : " AND ").append(joinColumns1.get(i)).append(" = ").append(joinColumns2.get(i));
         }
-        clause.append(") AND").append(isForAll ? "((1=0)" : "((1=1)");
-        for(int i = 0; i < includingFilterClauses.size(); i++) {
+        clause.append(") AND (").append(isForAll ? "(1=0)" : "(1=1)");
+        for(int i = 0, iLimit = includingFilterClauses.size(); i < iLimit; i++) {
             if(includingFilterClauses.get(i).length() > 0) {
                 clause.append(
                     isForAll ? " OR NOT " : " AND "
@@ -568,7 +465,7 @@ public class RidOidQueryDatabase_1 extends Database_1 {
                 );
             }
         }
-        clause.append(")))").append(joinClauseEnd);
+        
         // Negative clauses
         includingFilterClauses.clear();
         includingFilterValues.clear();
@@ -592,15 +489,145 @@ public class RidOidQueryDatabase_1 extends Database_1 {
             excludingFilterClauses, 
             excludingFilterValues
         );
-        if(!excludingFilterClauses.isEmpty()) {
+        for(int i = 0, iLimit = excludingFilterClauses.size(); i < iLimit; i++) {
+            clause.append(
+                ") AND ("
+            ).append(
+                excludingFilterClauses.get(i)
+            );
+            clauseValues.addAll(
+                excludingFilterValues.get(i)
+            );
+        }
+        clause.append(")))");
+    }
+
+    /**
+     * Replace instance_of IN ... by object_class IN ...
+     */
+    private boolean getJoinWithState(
+        ModelElement_1_0 filterPropertyDef,
+        List<FilterProperty> allFilterProperties
+    ) throws ServiceException {
+        boolean joinWithState = false;
+        FilterProperty objectClassFilterProperty = null;
+        for(Iterator<FilterProperty> i = allFilterProperties.iterator(); i.hasNext(); ) {
+            FilterProperty p = i.next();
+            if(SystemAttributes.OBJECT_INSTANCE_OF.equals(p.name()) && !p.values().isEmpty()) {
+                String instanceOf = (String)p.getValue(0);
+                Set<String> allSubtypes = this.getAllSubtypes(instanceOf);
+                if(allSubtypes != null) {
+                    objectClassFilterProperty = new FilterProperty(
+                        p.quantor(),
+                        SystemAttributes.OBJECT_CLASS,
+                        p.operator(),
+                        allSubtypes.toArray()
+                    );
+                    joinWithState |= isStated(filterPropertyDef.getModel(), instanceOf);
+                }
+                i.remove();
+            }
+        }
+        if(objectClassFilterProperty != null) {
+            allFilterProperties.add(objectClassFilterProperty);
+        }
+        return joinWithState;
+    }
+
+    private DbObject getJoinObject(
+        Connection conn,
+        DbObject dbObject,
+        boolean joinFromState,
+        Path reference,
+        String viewAliasName,
+        FilterProperty filterProperty,
+        ModelElement_1_0 filterPropertyDef,
+        String columnName,
+        ModelElement_1_0 referencedType,
+        String joinViewAliasName,
+        List<String> joinColumns1,
+        List<String> joinColumns2,
+        boolean joinWithState,
+        final boolean storedAsAttribute
+    ) throws ServiceException {
+        final DbObject joinObject;
+        // Reference
+        if(storedAsAttribute) {
+            Path identityPattern = filterPropertyDef.getModel().getIdentityPattern(referencedType);
+            if(identityPattern == null) {
+                throw new ServiceException(
+                    BasicException.Code.DEFAULT_DOMAIN,
+                    BasicException.Code.NOT_IMPLEMENTED,
+                    "Joining descendants of root classes is not yet implemented for RID/OID DBs",
+                    new BasicException.Parameter("filter.property", filterProperty),
+                    new BasicException.Parameter("filter.definition", filterPropertyDef)
+                );
+            }
+            joinObject = this.getDbObject(
+                conn,
+                null, // dbObjectConfiguration
+                applyProvider(identityPattern, reference),
+                null, // filter
+                true
+            );
+            int dot = columnName.indexOf('.');
+            String joinColumn1 = dot < 0  ? columnName : columnName.substring(dot + 1);
+            joinColumns1.add(toRid(viewAliasName, joinColumn1));
+            joinColumns1.add(toOid(viewAliasName, joinColumn1));
+            addIdColumns(joinColumns2, joinViewAliasName, joinObject, joinWithState);
+            if(joinColumns1.size() != joinColumns2.size()) {
+                throw new ServiceException(
+                    BasicException.Code.DEFAULT_DOMAIN,
+                    BasicException.Code.NOT_SUPPORTED,
+                    "Column count mismatch between reference coumns and RID/OID columns",
+                    new BasicException.Parameter("filter.property", filterProperty),
+                    new BasicException.Parameter("filter.definition", filterPropertyDef),
+                    new BasicException.Parameter("join1.ColumnExpression", joinColumns1),
+                    new BasicException.Parameter("join2.ColumnName", joinColumns2)
+                );
+            }
+        }
+        // Composite parent
+        else if(ModelHelper.isCompositeEnd(filterPropertyDef, true)) {
+            joinObject = this.getDbObject(
+                conn, 
+                applyProvider(filterPropertyDef.getModel().getIdentityPattern(referencedType), reference), 
+                null, // filter
+                true
+            );            
+            addParentIdColumns(joinColumns1, viewAliasName);
+            addIdColumns(joinColumns2, joinViewAliasName, joinObject, joinWithState);
+        }
+        // Composite
+        else if(ModelHelper.isCompositeEnd(filterPropertyDef, false)) {
+            joinObject = this.getDbObject(
+                conn, 
+                reference.getDescendant(":*", filterProperty.name()), 
+                null, 
+                true
+            );
+            addIdColumns(joinColumns1, viewAliasName, dbObject, joinFromState);
+            addParentIdColumns(joinColumns2, joinViewAliasName);
+        }
+        // Shared
+        else if(ModelHelper.isSharedEnd(filterPropertyDef, false)) {
             throw new ServiceException(
                 BasicException.Code.DEFAULT_DOMAIN,
-                BasicException.Code.ASSERTION_FAILURE,
-                "Nested queries not supported for sliced tables",
+                BasicException.Code.NOT_IMPLEMENTED,
+                "Join with shared association not yet implemented",
+                new BasicException.Parameter("filter.property", filterProperty),
+                new BasicException.Parameter("filter.definition", filterPropertyDef)                                
+            );
+        } else {
+            throw new ServiceException(
+                BasicException.Code.DEFAULT_DOMAIN,
+                BasicException.Code.NOT_SUPPORTED,
+                "Unsupported aggregation",
                 new BasicException.Parameter("filter.property", filterProperty),
                 new BasicException.Parameter("filter.definition", filterPropertyDef)                                
             );
         }
+        return joinObject;
     }
 
     /* (non-Javadoc)
@@ -623,11 +650,7 @@ public class RidOidQueryDatabase_1 extends Database_1 {
         boolean negate,
         List<Object> statementParameters
      ) throws ServiceException {
-        boolean joinByRidAndOid = 
-                !viewIsPrimary &&  
-                joinType == JoinType.SPECIFIED_COLUMN_WITH_OBJECT_ID &&
-                dbObject.isExtent() &&
-                dbObject.getConfiguration().hasDbObject2();
+        boolean joinByRidAndOid = !viewIsPrimary && dbObject.getConfiguration().hasDbObject2();
         return super.filterToSqlClause(
             conn,
             dbObject,

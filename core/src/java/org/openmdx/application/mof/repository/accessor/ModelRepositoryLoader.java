@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2013, OMEX AG, Switzerland
+ * Copyright (c) 2013-2014, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -114,7 +114,7 @@ class ModelRepositoryLoader implements ModelLoader {
         for(Map.Entry<Path, MappedRecord> entry : getContent().entrySet()) {
             if(!"org:omg:model1:Segment".equals(Object_2Facade.getObjectClass(entry.getValue()))){
                 target.put(
-                    entry.getKey().getBase(),
+                    entry.getKey().getLastSegment().toClassicRepresentation(),
                     new ModelElement_1(entry.getValue(), model)
                 );
             }
@@ -152,7 +152,7 @@ class ModelRepositoryLoader implements ModelLoader {
             if(element.isClassType()) {
                 List<Object> objectInstanceOf = element.objGetList(SystemAttributes.OBJECT_INSTANCE_OF);
                 for(Object p : element.objGetList("allSupertype")) {
-                    String superType = ((Path)p).getBase();
+                    String superType = ((Path)p).getLastSegment().toClassicRepresentation();
                     if(!objectInstanceOf.contains(superType)) {
                         objectInstanceOf.add(superType);
                     }

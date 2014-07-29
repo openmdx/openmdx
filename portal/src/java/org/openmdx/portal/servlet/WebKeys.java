@@ -62,6 +62,7 @@ public class WebKeys {
     public static final String CURRENT_VIEW_KEY = WebKeys.SERVLET_NAME + ".View";
     public static final String LOCALE_KEY = "locale";
     public static final String TIMEZONE_KEY = "timezone";
+    public static final String INITIAL_SCALE_KEY = "initialScale";
     public static final String REQUEST_ID = "requestId";
     public static final String REQUEST_EVENT = "event";
     public static final String REQUEST_PARAMETER = "parameter";
@@ -70,8 +71,9 @@ public class WebKeys {
     public static final String REQUEST_PARAMETER_FILTER_VALUES = "filtervalues";
     public static final String REQUEST_PARAMETER_PAGE_SIZE = "pagesize";  
     public static final String REQUEST_PARAMETER_LOCALE = "locale";      
-	public static final String REQUEST_PARAMETER_SHOW_SEARCH_FORM = "showSearchForm";    
-    
+	public static final String REQUEST_PARAMETER_SHOW_SEARCH_FORM = "showSearchForm";
+	public static final String REQUEST_PARAMETER_RESET_FILTER = "resetFilter";
+
     // Icons
     public static final String ICON_TYPE = ".gif";
     public static final String ICON_DEFAULT = "default" + WebKeys.ICON_TYPE;

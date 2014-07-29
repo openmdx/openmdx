@@ -63,10 +63,11 @@ import java.util.Set;
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.portal.servlet.ApplicationContext;
+import org.openmdx.portal.servlet.CssClass;
 import org.openmdx.portal.servlet.HtmlEncoder_1_0;
 import org.openmdx.portal.servlet.ViewPort;
 import org.openmdx.portal.servlet.WebKeys;
-import org.openmdx.portal.servlet.control.EditObjectControl;
+import org.openmdx.portal.servlet.control.EditInspectorControl;
 
 /**
  * CodeValue
@@ -141,7 +142,7 @@ public class CodeValue extends AttributeValue implements Serializable {
      * @param includeAll
      * @return
      */
-    public Map getLongText(
+    public Map<?,?> getLongText(
         boolean codeAsKey,
         boolean includeAll
     ) {
@@ -160,7 +161,7 @@ public class CodeValue extends AttributeValue implements Serializable {
      * @param includeAll
      * @return
      */
-    public Map getShortText(
+    public Map<?,?> getShortText(
         boolean codeAsKey,
         boolean includeAll
     ) {
@@ -262,7 +263,7 @@ public class CodeValue extends AttributeValue implements Serializable {
     		return null;
     	} else if(value instanceof Collection) {
     		List<String> values = new ArrayList<String>();
-    		for(Iterator i = ((Collection)value).iterator(); i.hasNext(); ) {
+    		for(Iterator<?> i = ((Collection<?>)value).iterator(); i.hasNext(); ) {
     			Object code = i.next();
     			if(code instanceof Number) {
     				Short codeAsShort = new Short(((Number)code).shortValue());
@@ -346,10 +347,10 @@ public class CodeValue extends AttributeValue implements Serializable {
     	Number selectedCodeValue,
     	String filterByCodeGroup,
     	HtmlEncoder_1_0 htmlEncoder,
-    	Map<Object,Object> longTextsT
+    	Map<?,?> longTextsT
     ) throws ServiceException {
-		p.write("    <select id=\"", id, "\" name=\"", id, "\" class=\"valueL", lockedModifier, "\"", " ", (disabledModifier == null ? "" : disabledModifier), " ", (styleModifier == null ? "" : styleModifier), " tabindex=\"", Integer.toString(tabIndex), "\">");
-		for(Map.Entry option: longTextsT.entrySet()) {
+		p.write("    <select id=\"", id, "\" name=\"", id, "\" class=\"", CssClass.valueL.toString(), "", lockedModifier, "\"", " ", (disabledModifier == null ? "" : disabledModifier), " ", (styleModifier == null ? "" : styleModifier), " tabindex=\"", Integer.toString(tabIndex), "\">");
+		for(Map.Entry<?,?> option: longTextsT.entrySet()) {
 			short codeValue = ((Number)option.getValue()).shortValue();
 			String selectedModifier = (selectedCodeValue != null) && (codeValue == selectedCodeValue.shortValue()) 
 				? "selected" 
@@ -399,14 +400,13 @@ public class CodeValue extends AttributeValue implements Serializable {
     		id = (id == null) || (id.length() == 0)
     			? feature + "[" + Integer.toString(tabIndex) + "]"
     			: id;
-    		p.write("<td class=\"label\" title=\"", (title == null ? "" : htmlEncoder.encode(title, false)), "\"><span class=\"nw\">", htmlEncoder.encode(label, false), "</span></td>");            
-    		@SuppressWarnings("unchecked")
-            Map<Object,Object> longTextsT = this.getLongText(false, false);
+    		p.write("<td class=\"", CssClass.fieldLabel.toString(), "\" title=\"", (title == null ? "" : htmlEncoder.encode(title, false)), "\"><span class=\"", CssClass.nw.toString(), "\">", htmlEncoder.encode(label, false), "</span></td>");
+            Map<?,?> longTextsT = this.getLongText(false, false);
     		if(this.isSingleValued()) {
     			Object value = super.getValue(false);
     			Number codeValue = null;
     			if(value instanceof Collection) {
-    				Collection values = (Collection)value;
+    				Collection<?> values = (Collection<?>)value;
     				codeValue = values.isEmpty() ? null : (Number)values.iterator().next();
     			} else {
     				codeValue = (Number)value;
@@ -417,7 +417,7 @@ public class CodeValue extends AttributeValue implements Serializable {
     				List<String> codeGroups = new ArrayList<String>();
     				String selectedCodeGroup = "";
     				boolean hasEmptyCodeGroup = false;
-    				for(Map.Entry option: longTextsT.entrySet()) {
+    				for(Map.Entry<?,?> option: longTextsT.entrySet()) {
     					short optionValue = ((Number)option.getValue()).shortValue();
     					String optionText = (String)option.getKey();
     					if(optionText.indexOf("|") > 0) {
@@ -452,7 +452,7 @@ public class CodeValue extends AttributeValue implements Serializable {
     						codeGroups.add(0, "");
     					}
     					// Group drop-down
-	    				p.write("    <select id=\"G-", id, "\" class=\"valueL", lockedModifier, "\"", " tabindex=\"", Integer.toString(tabIndex), "\" onchange=\"javascript:for(i=0;i<", Integer.toString(codeGroups.size()), ";i++){eId='", id, "' + i;$(eId).style.display='none';$(eId).disabled=true;};eId='", id, "' + this.selectedIndex;$(eId).style.display='block';$(eId).removeAttribute('disabled');\">");
+	    				p.write("    <select id=\"G-", id, "\" class=\"", CssClass.valueL.toString(), "", lockedModifier, "\"", " tabindex=\"", Integer.toString(tabIndex), "\" onchange=\"javascript:for(i=0;i<", Integer.toString(codeGroups.size()), ";i++){eId='", id, "' + i;$(eId).style.display='none';$(eId).disabled=true;};eId='", id, "' + this.selectedIndex;$(eId).style.display='block';$(eId).removeAttribute('disabled');\">");
 	    				int groupId = 0;
 	    				for(String codeGroup: codeGroups) {
 	    					String selectedModifier = codeGroup.equals(selectedCodeGroup) ? "selected" : "";
@@ -480,13 +480,13 @@ public class CodeValue extends AttributeValue implements Serializable {
     				}
     			} else {
     				// In case of read-only render as input field. However, without id and name attributes                        	
-    				p.write("    <input type=\"text\" class=\"valueL", lockedModifier, "\" ", readonlyModifier, " tabindex=\"", Integer.toString(tabIndex), "\" value=\"", stringifiedValue, "\">");
+    				p.write("    <input type=\"text\" class=\"", CssClass.valueL.toString(), "", lockedModifier, "\" ", readonlyModifier, " tabindex=\"", Integer.toString(tabIndex), "\" value=\"", stringifiedValue, "\">");
     			}
     			p.write("</td>");
-    			p.write("<td class=\"addon\" ", rowSpanModifier, "></td>");
+    			p.write("<td class=\"", CssClass.addon.toString(), "\" ", rowSpanModifier, "></td>");
     		} else {
         		StringBuilder longTextsAsJsArray = new StringBuilder();
-        		Set<Object> optionTexts = longTextsT.keySet();
+        		Set<?> optionTexts = longTextsT.keySet();
         		for(Object optionText: optionTexts) {
         			(longTextsAsJsArray.length() > 0 
         				? longTextsAsJsArray.append(",") 
@@ -501,21 +501,23 @@ public class CodeValue extends AttributeValue implements Serializable {
         		}
     			p.write("<td ", rowSpanModifier, ">");
     			if(readonlyModifier.isEmpty()) {
-    				p.write("  <textarea id=\"", id, "\" name=\"", id, "\" class=\"multiStringLocked\" rows=\"", Integer.toString(attribute.getSpanRow()), "\" cols=\"20\" readonly tabindex=\"", Integer.toString(tabIndex), "\">", stringifiedValue, "</textarea>");
+    				p.write("  <textarea id=\"", id, "\" name=\"", id, "\" class=\"", CssClass.multiStringLocked.toString(), "\" rows=\"", Integer.toString(attribute.getSpanRow()), "\" cols=\"20\" readonly tabindex=\"", Integer.toString(tabIndex), "\">", stringifiedValue, "</textarea>");
     			} else {
     				// In case of read-only render as input field. However, without id and name attributes                        	
-    				p.write("  <textarea class=\"multiStringLocked\" rows=\"", Integer.toString(attribute.getSpanRow()), "\" cols=\"20\" readonly tabindex=\"", Integer.toString(tabIndex), "\">", stringifiedValue, "</textarea>");                	
+    				p.write("  <textarea class=\"", CssClass.multiStringLocked.toString(), "\" rows=\"", Integer.toString(attribute.getSpanRow()), "\" cols=\"20\" readonly tabindex=\"", Integer.toString(tabIndex), "\">", stringifiedValue, "</textarea>");                	
     			}
     			p.write("</td>");
-    			p.write("<td class=\"addon\" ", rowSpanModifier, ">");
+    			p.write("<td class=\"", CssClass.addon.toString(), "\" ", rowSpanModifier, ">");
     			if(readonlyModifier.isEmpty()) {
-    				p.write("    ", p.getImg("class=\"popUpButton\" id=\"", id, ".popup\" border=\"0\" alt=\"Click to edit\" src=\"", p.getResourcePath("images/edit"), p.getImgType(), "\" onclick=\"javascript:multiValuedHigh=", this.getUpperBound("1..10"), "; popup_", EditObjectControl.EDIT_CODES, " = ",  EditObjectControl.EDIT_CODES, "_showPopup(event, this.id, popup_", EditObjectControl.EDIT_CODES, ", 'popup_", EditObjectControl.EDIT_CODES, "', $('", id, "'), new Array(", longTextsAsJsArray.toString(), "));\""));
+    				p.write("<a role=\"button\" data-toggle=\"modal\" href=\"#popup_", EditInspectorControl.EDIT_CODES, "\" onclick=\"javascript:multiValuedHigh=", this.getUpperBound("1..10"), "; ", EditInspectorControl.EDIT_CODES, "_showPopup(event, this.id, popup_", EditInspectorControl.EDIT_CODES, ", 'popup_", EditInspectorControl.EDIT_CODES, "', $('", id, "'), new Array(", longTextsAsJsArray.toString(), "));\">");
+    				p.write("    ", p.getImg("class=\"", CssClass.popUpButton.toString(), "\" id=\"", id, ".popup\" border=\"0\" alt=\"Click to edit\" src=\"", p.getResourcePath("images/edit"), p.getImgType(), "\" "));
+    				p.write("</a>");
     			}
     			p.write("</td>");
     		}
     	} else {
     		// Show
-        	String cssClass = DEFAULT_CSS_CLASS;
+        	String cssClass = this.app.getPortalExtension().getDefaultCssClassFieldGroup(this, this.app);
         	if(this.getCssClassFieldGroup() != null) {
         		cssClass = this.getCssClassFieldGroup() + " " + cssClass;
         	}    		
@@ -543,17 +545,12 @@ public class CodeValue extends AttributeValue implements Serializable {
     			} else {
     				styleModifier += "height:" + (1.2+(attribute.getSpanRow()-1)*1.35) + "em;\"";
     			}
-    			if(p.getViewPortType() == ViewPort.Type.MOBILE) {
-    				p.write("		<label>", htmlEncoder.encode(label, false), "</label>");                	
-    				p.write("       <div class=\"", cssClass, "\">");                	
-    			} else {
-    				p.write(gapModifier);
-    				p.write("<td class=\"label\" title=\"", (title == null ? "" : htmlEncoder.encode(title, false)), "\"><span class=\"nw\">", htmlEncoder.encode(label, false), "</span></td>");
-    				p.write("<td class=\"", cssClass, "\" ", rowSpanModifier, " ", widthModifier, " ", styleModifier, ">");
-    				if(!this.isSingleValued()) {
-    					p.write("  <div class=\"valueMulti\" ", styleModifier, ">");
-    				}
-    			}
+				p.write(gapModifier);
+				p.write("<td class=\"", CssClass.fieldLabel.toString(), "\" title=\"", (title == null ? "" : htmlEncoder.encode(title, false)), "\"><span class=\"", CssClass.nw.toString(), "\">", htmlEncoder.encode(label, false), "</span></td>");
+				p.write("<td class=\"", cssClass, "\" ", rowSpanModifier, " ", widthModifier, " ", styleModifier, ">");
+				if(!this.isSingleValued()) {
+					p.write("  <div class=\"", CssClass.valueMulti.toString(), "\" ", styleModifier, ">");
+				}
     			Object v = super.getValue(false);
     			Collection<Object> values = new ArrayList<Object>();
     			if(v instanceof Collection) {
@@ -561,7 +558,7 @@ public class CodeValue extends AttributeValue implements Serializable {
     			} else {
     				values.add(v);
     			}
-    			for(Iterator i = values.iterator(); i.hasNext(); ) {
+    			for(Iterator<?> i = values.iterator(); i.hasNext(); ) {
     				Short codeValue = new Short(((Number)i.next()).shortValue());
     				String codeText = (String)this.getLongText(true, true).get(codeValue);
     				String color = (String)this.app.getCodes().getColors(
@@ -586,18 +583,19 @@ public class CodeValue extends AttributeValue implements Serializable {
     					p.write("<img src=\"", p.getResourcePath("images/"), "spacer.gif\" width=\"5\" height=\"0\" align=\"bottom\" border=\"0\" alt=\"\" />");
     				}
     				if(codeText != null) {
-    					this.app.getPortalExtension().renderTextValue(p, htmlEncoder.encode(codeText, false), false);
+    					this.app.getPortalExtension().renderTextValue(
+    						p, 
+    						this,
+    						htmlEncoder.encode(codeText, false), 
+    						false
+    					);
     				}
     				p.write("</div>");
     			}
-    			if(p.getViewPortType() == ViewPort.Type.MOBILE) {
-    				p.write("       </div>"); // valueMulti                	
-    			} else {
-    				if(!this.isSingleValued()) {
-    					p.write("  </div>"); // valueMulti
-    				}
-    				p.write("</td>");
-    			}
+				if(!this.isSingleValued()) {
+					p.write("  </div>"); // valueMulti
+				}
+				p.write("</td>");
     		}
     	}
     }

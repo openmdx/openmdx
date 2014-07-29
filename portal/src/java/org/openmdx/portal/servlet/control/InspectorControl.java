@@ -1,14 +1,14 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Description: View 
+ * Description: InspectorControl 
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
  * ====================================================================
  *
  * This software is published under the BSD license
  * as listed below.
  * 
- * Copyright (c) 2004-2007, OMEX AG, Switzerland
+ * Copyright (c) 2004-2014, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -54,8 +54,8 @@ package org.openmdx.portal.servlet.control;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -67,57 +67,98 @@ import org.openmdx.base.mof.cci.ModelElement_1_0;
 import org.openmdx.base.mof.cci.Model_1_0;
 import org.openmdx.kernel.log.SysLog;
 import org.openmdx.portal.servlet.Action;
+import org.openmdx.portal.servlet.PortalExtension_1_0;
 import org.openmdx.portal.servlet.action.SetPanelStateAction;
 
-//---------------------------------------------------------------------------
-public abstract class InspectorControl
-    extends Control
-    implements Serializable {
+/**
+ * InspectorControl
+ *
+ */
+public abstract class InspectorControl extends Control implements Serializable {
   
-    //-------------------------------------------------------------------------
-    public InspectorControl(
+	/**
+     * Constructor.
+     * 
+     * @param id
+     * @param locale
+     * @param localeAsIndex
+     * @param controlFactory
+     * @param inspectorDef
+     */
+	public InspectorControl(
+		String id,
+		String locale,
+		int localeAsIndex,
+		PortalExtension_1_0.ControlFactory controlFactory,
+		org.openmdx.ui1.jmi1.Inspector inspectorDef
+		) {
+		super(
+			id,
+			locale,
+			localeAsIndex
+		);
+		this.inspector = inspectorDef;
+		// Inspector
+		SysLog.detail("inspector valid", "" + (inspectorDef != null));
+		// Attribute pane
+		SysLog.detail("Preparing attribute pane");
+		org.openmdx.ui1.jmi1.AttributePane paneAttr = null;
+		for(Object pane: inspectorDef.getMember()) {
+			if(pane instanceof org.openmdx.ui1.jmi1.AttributePane) {
+				paneAttr = (org.openmdx.ui1.jmi1.AttributePane) pane;
+			}
+		} 
+		this.attributePaneControls = new ArrayList<AttributePaneControl>(
+			Collections.singletonList(
+				this.newUiAttributePaneControl(
+					this.uuidAsString(),
+					locale,
+					localeAsIndex,
+					controlFactory,
+					paneAttr, 
+					0
+				)
+			)
+		);
+	}
+
+    /**
+     * Create new instance of AttributePaneControl. Override for
+     * custom-specific implementation.
+     * 
+     * @param id
+     * @param locale
+     * @param localeAsIndex
+     * @param controlFactory
+     * @param paneDef
+     * @param paneIndex
+     * @return
+     */
+    protected AttributePaneControl newUiAttributePaneControl(
         String id,
         String locale,
         int localeAsIndex,
-        ControlFactory controlFactory,
-        org.openmdx.ui1.jmi1.Inspector inspector
+        PortalExtension_1_0.ControlFactory controlFactory,
+        org.openmdx.ui1.jmi1.AttributePane paneDef,
+        int paneIndex	    		
     ) {
-      super(
-          id,
-          locale,
-          localeAsIndex
-      );
-      this.inspector = inspector;
-      
-      // Inspector
-      SysLog.detail("inspector valid", "" + (inspector != null));
-      
-      // Attribute pane
-      SysLog.detail("Preparing attribute pane");
-      org.openmdx.ui1.jmi1.AttributePane paneAttr = null;
-      for(Iterator i = inspector.getMember().iterator(); i.hasNext();) {
-          Object pane = i.next();
-          if (pane instanceof org.openmdx.ui1.jmi1.AttributePane) {
-              paneAttr = (org.openmdx.ui1.jmi1.AttributePane) pane;
-          }
-      }      
-      this.attributePaneControl =
-          controlFactory.createAttributePaneControl(
-              null,
-              locale,
-              localeAsIndex,
-              paneAttr, 
-              0
-          );
+    	return new UiAttributePaneControl(
+    		id,
+    		locale,
+    		localeAsIndex,
+    		controlFactory,
+    		paneDef,
+    		paneIndex
+    	);
     }
 
-    // -------------------------------------------------------------------------
-    public AttributePaneControl getAttributePaneControl(
-    ) {
-        return this.attributePaneControl;
-    }
-
-    //-------------------------------------------------------------------------  
+    /**
+     * Get SetPanelState action.
+     * 
+     * @param panelName
+     * @param panelState
+     * @return
+     */
     public Action getSetPanelStateAction(
         String panelName,
         int panelState
@@ -133,7 +174,6 @@ public abstract class InspectorControl
         );      
     }
   
-    //-------------------------------------------------------------------------  
     /**
      * Each view has an id and a childId. Normally all views of the same
      * 'layer' have the same id, i.e. a view which creates a 'next' view
@@ -149,96 +189,121 @@ public abstract class InspectorControl
         return this.id;
     }
   
-    //-------------------------------------------------------------------------  
     /**
      * Returns classes which are in the composition hierarchy of
      * the specified type. Returns a map with the class name as
      * key and a set of reference names as members, whereas the
      * references are composite references of the class.
+     * 
+     * @param ofType
+     * @param hierarchy
+     * @throws ServiceException
      */
-    @SuppressWarnings("unchecked")
     public void createCompositionHierarchy(
-        ModelElement_1_0 ofType,
-        Map hierarchy
-    ) throws ServiceException {
-
-        Model_1_0 model = ofType.getModel();
-        
-        // add ofType to hierarchy
-        String currentTypeName = (String)ofType.objGetValue("qualifiedName");
-        if(hierarchy.get(currentTypeName) == null) {
-          hierarchy.put(
-            currentTypeName,
-            new HashSet()
-          );
-        }
-    
-        // get all types which are involved in composition hierarchy
-        List<ModelElement_1_0> typesToCheck = new ArrayList<ModelElement_1_0>();
-        if(!ofType.objGetList("compositeReference").isEmpty()) {
-          typesToCheck.add(ofType);
-        }
-        else {
-          for(Iterator i = ofType.objGetList("allSubtype").iterator(); i.hasNext(); ) {
-            ModelElement_1_0 subtype = model.getElement(i.next());
-            if(
-              !ofType.objGetValue("qualifiedName").equals(subtype.objGetValue("qualifiedName")) &&
-              !subtype.objGetList("compositeReference").isEmpty()
-             ) {
-              typesToCheck.add(subtype);
-            }
-          }
-        }
-        
-        for(Iterator i = typesToCheck.iterator(); i.hasNext(); ) {
-          ModelElement_1_0 type = (ModelElement_1_0)i.next();
-          ModelElement_1_0 compositeReference = model.getElement(type.objGetValue("compositeReference"));
-          ModelElement_1_0 exposingType = model.getElement(compositeReference.objGetValue("container"));
-          this.createCompositionHierarchy(
-            exposingType,
-            hierarchy
-          );
-          ((Set)hierarchy.get(
-            exposingType.objGetValue("qualifiedName")
-          )).add(
-            compositeReference.objGetValue("name")
-          );
-        }
+		ModelElement_1_0 ofType,
+		Map<String,Set<String>> hierarchy
+	) throws ServiceException {
+    	Model_1_0 model = ofType.getModel();
+    	// Add ofType to hierarchy
+    	String currentTypeName = (String)ofType.getQualifiedName();
+    	if(hierarchy.get(currentTypeName) == null) {
+    		hierarchy.put(
+				currentTypeName,
+				new HashSet<String>()
+			);
+    	}
+    	// Get all types which are involved in composition hierarchy
+    	List<ModelElement_1_0> typesToCheck = new ArrayList<ModelElement_1_0>();
+    	if(!ofType.objGetList("compositeReference").isEmpty()) {
+    		typesToCheck.add(ofType);
+    	} else {
+    		@SuppressWarnings({ "unchecked", "rawtypes" })
+    		List<ModelElement_1_0> subtypes = (List)ofType.objGetList("allSubtype");
+    		for(ModelElement_1_0 subtype: subtypes) {
+    			if(
+					!ofType.getQualifiedName().equals(subtype.getQualifiedName()) &&
+					!subtype.objGetList("compositeReference").isEmpty()
+				) {
+    				typesToCheck.add(subtype);
+    			}
+    		}
+    	}
+    	for(ModelElement_1_0 type: typesToCheck) {
+    		ModelElement_1_0 compositeReference = model.getElement(type.objGetValue("compositeReference"));
+    		ModelElement_1_0 exposingType = model.getElement(compositeReference.getContainer());
+    		this.createCompositionHierarchy(
+				exposingType,
+				hierarchy
+			);
+    		hierarchy.get(
+				exposingType.getQualifiedName()
+			).add(
+				(String)compositeReference.getName()
+			);
+    	}
     }
 
-    //-------------------------------------------------------------------------
-    @SuppressWarnings("unchecked")
+    /**
+     * Map struct to map.
+     * 
+     * @param from
+     * @param to
+     * @param structDef
+     * @throws ServiceException
+     */
     public void structToMap(
-        RefStruct from,
-        Map to,
-        ModelElement_1_0 structDef
-    ) throws ServiceException {
-        for(Iterator i = structDef.objGetMap("field").values().iterator(); i.hasNext(); ) {
-          ModelElement_1_0 field = (ModelElement_1_0)i.next();
-          String fieldName = (String)field.objGetValue("qualifiedName");
-          try {
-            to.put(
-              fieldName,
-              from.refGetValue(fieldName)
-            );
-          }
-          catch(Exception e) {
-            to.put(fieldName, null);
-          }
-        }
+		RefStruct from,
+		Map<String,Object> to,
+		ModelElement_1_0 structDef
+	) throws ServiceException {
+    	@SuppressWarnings("unchecked")
+    	List<ModelElement_1_0> fields = (List<ModelElement_1_0>)structDef.objGetMap("field").values();
+    	for(ModelElement_1_0 field: fields) {
+    		String fieldName = (String)field.getQualifiedName();
+    		try {
+    			to.put(
+					fieldName,
+					from.refGetValue(fieldName)
+				);
+    		} catch(Exception e) {
+    			to.put(fieldName, null);
+    		}
+    	}
     }
-  
-    //-------------------------------------------------------------------------
+
+    /**
+     * Get inspector definition.
+     * 
+     * @return
+     */
     public org.openmdx.ui1.jmi1.Inspector getInspector(
     ) {
         return this.inspector;
     }
     
+    /* (non-Javadoc)
+	 * @see org.openmdx.portal.servlet.control.Control#getChildren(java.lang.Class)
+	 */
+	@Override
+	public <T extends Control> List<T> getChildren(
+		Class<T> type
+	) {
+		if(type == AttributePaneControl.class) {
+			@SuppressWarnings("unchecked")
+			List<T> children = (List<T>)this.attributePaneControls;
+			return children;			
+		} else {
+			return Collections.emptyList();
+		}
+	}
+
+	//-------------------------------------------------------------------------
+    // Members
     //-------------------------------------------------------------------------
-    // Variables
-    //-------------------------------------------------------------------------
-    protected final org.openmdx.ui1.jmi1.Inspector inspector;
-    protected final AttributePaneControl attributePaneControl;
+	private static final long serialVersionUID = -8832256948156958703L;
+
+	protected final org.openmdx.ui1.jmi1.Inspector inspector;
+    protected final List<AttributePaneControl> attributePaneControls;
 
 }
 

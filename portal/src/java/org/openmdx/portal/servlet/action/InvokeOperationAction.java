@@ -60,7 +60,6 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.StringTokenizer;
 
 import javax.jdo.PersistenceManager;
@@ -81,21 +80,19 @@ import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.log.SysLog;
 import org.openmdx.portal.servlet.Action;
 import org.openmdx.portal.servlet.ApplicationContext;
-import org.openmdx.portal.servlet.ObjectReference;
-import org.openmdx.portal.servlet.Texts_1_0;
 import org.openmdx.portal.servlet.ViewPort;
 import org.openmdx.portal.servlet.ViewPortFactory;
 import org.openmdx.portal.servlet.ViewsCache;
 import org.openmdx.portal.servlet.attribute.Attribute;
-import org.openmdx.portal.servlet.attribute.AttributeValue;
-import org.openmdx.portal.servlet.attribute.TextValue;
+import org.openmdx.portal.servlet.component.Grid;
+import org.openmdx.portal.servlet.component.ObjectView;
+import org.openmdx.portal.servlet.component.OperationPane;
+import org.openmdx.portal.servlet.component.UiOperationParam;
+import org.openmdx.portal.servlet.component.UiOperationTab;
+import org.openmdx.portal.servlet.component.ReferencePane;
+import org.openmdx.portal.servlet.component.ShowObjectView;
+import org.openmdx.portal.servlet.component.UiGrid;
 import org.openmdx.portal.servlet.control.ShowErrorsControl;
-import org.openmdx.portal.servlet.view.FieldGroup;
-import org.openmdx.portal.servlet.view.Grid;
-import org.openmdx.portal.servlet.view.ObjectView;
-import org.openmdx.portal.servlet.view.OperationTab;
-import org.openmdx.portal.servlet.view.ReferencePane;
-import org.openmdx.portal.servlet.view.ShowObjectView;
 
 public class InvokeOperationAction extends BoundAction {
 
@@ -109,80 +106,14 @@ public class InvokeOperationAction extends BoundAction {
 	 * @throws ServiceException
 	 */
 	public void paintOperationResult(
-		OperationTab operationResult,
+		UiOperationTab operationResult,
 		ShowObjectView view,
 		ViewPort p
 	) throws ServiceException {
-		ApplicationContext app = p.getApplicationContext();
-		Texts_1_0 texts = app.getTexts();
-        // Operation result (if any) and result has fields		
-        FieldGroup fieldGroup = operationResult.getFieldGroup()[1];
-        Attribute[][] attributes = fieldGroup.getAttribute();
-        int nCols = attributes.length;
-        int nRows = nCols > 0 ? attributes[0].length : 0;
-        if((nCols > 0) && (nRows > 0)) {
-            p.write("<div class=\"panelResult\" style=\"display: block;\">");
-            p.write("  <table class=\"fieldGroup\">");
-            for(int v = 0; v < nRows; v++) {
-                p.write("<tr>");
-                for(int u = 0; u < nCols; u++) {
-                    Attribute attribute = attributes[u][v];
-                    if(attribute == null) continue;
-                    if(attribute.isEmpty()) {
-                        p.write("<td class=\"label\"></td>");
-                    }                                
-                    else {
-                        String label = attribute.getLabel();
-                        AttributeValue valueHolder = attribute.getValue();
-                        Object value = valueHolder.getValue(false);
-                        String stringifiedValue = attribute.getStringifiedValue(
-                            p, 
-                            false, 
-                            false
-                        );
-                        stringifiedValue = valueHolder instanceof TextValue
-                        ? ((TextValue)valueHolder).isPassword() ? "*****" : stringifiedValue
-                            : stringifiedValue;
-                        String widthModifier = "";                                    
-                        String readonlyModifier = valueHolder.isChangeable() ? "" : "readonly";
-                        String lockedModifier = valueHolder.isChangeable() ? "" : "Locked";
-                        String styleModifier = "style=\"";
-                        // ObjectReference
-                        if(value instanceof ObjectReference) {
-                            Action selectAction = ((ObjectReference)value).getSelectObjectAction();
-                            Action selectAndEditAction = ((ObjectReference)value).getSelectAndEditObjectAction();
-                            p.write("<td class=\"label\"><span class=\"nw\">", label, ":</span></td>");
-                            p.write("<td class=\"valueL\" ", widthModifier, "><div class=\"field\" title=\"", selectAction.getToolTip(), "\"><a href=\"\" onmouseover=\"javascript:this.href=", p.getEvalHRef(selectAction), ";onmouseover=function(){};\">", selectAction.getTitle(), "</a> [<a href=\"\" onclick=\"javascript:this.href=", p.getEvalHRef(selectAndEditAction), ";\">", texts.getEditTitle(), "</a>]</div></td>");
-                        }
-                        // other types
-                        else {
-                            valueHolder.paint(
-                                attribute,
-                                p,
-                                null, // default id
-                                null, // default label
-                                view.getLookupObject(),
-                                nCols,
-                                0,
-                                "",
-                                styleModifier,
-                                widthModifier,
-                                "",
-                                readonlyModifier,
-                                lockedModifier,
-                                stringifiedValue,
-                                false // forEditing
-                            );
-                        }
-                    }
-                }
-                p.write("</tr>");
-            }
-            p.write("  </table>");
-            p.write("</div>");
-        } else {
-        	p.write("<div />");
-        }
+        UiOperationParam result = operationResult.getChildren(UiOperationParam.class).get(1);
+        result.paintOperationResult(
+        	p
+        );
 	}
 
 	/* (non-Javadoc)
@@ -208,41 +139,36 @@ public class InvokeOperationAction extends BoundAction {
 	        pm = app.getNewPmData();        
 	        int tabIndex = Integer.parseInt(Action.getParameter(parameter, Action.PARAMETER_TAB));
 	        int paneIndex = Integer.parseInt(Action.getParameter(parameter, Action.PARAMETER_PANE));
-	        OperationTab operationResult = null;
-	        OperationTab operationTab = null;
-	        if(paneIndex < currentView.getOperationPane().length) {
-	            if (tabIndex >= currentView.getOperationPane()[paneIndex].getOperationTab().length) {
+	        UiOperationTab operationResult = null;
+	        UiOperationTab operationTab = null;
+	        List<OperationPane> operationPanes = currentView.getChildren(OperationPane.class);
+	        List<ReferencePane> referencePanes = currentView.getChildren(ReferencePane.class);
+	        if(paneIndex < operationPanes.size()) {
+	            if (tabIndex >= operationPanes.get(paneIndex).getChildren(UiOperationTab.class).size()) {
 	                String message = "undefined operation";
-	                String toolTip =  currentView.getOperationPane()[paneIndex].getOperationPaneControl().getToolTip();
+	                String toolTip =  operationPanes.get(paneIndex).getToolTip();
 	                String cause = "pane=" + toolTip + "; paneIndex=" + paneIndex + "; tabIndex=" + tabIndex;
 	                SysLog.error(message, cause);
 	                app.addErrorMessage(
 	                    app.getTexts().getErrorTextCanNotInvokeOperation(), 
 	                    new String[] {
-	                        currentView.getRefObject().refMofId(), 
+	                        currentView.getObject().refMofId(), 
 	                        toolTip, 
 	                        message + "; " + cause 
 	                    }
 	                );
 	            } else {
-	                operationTab = currentView.getOperationPane()[paneIndex].getOperationTab()[tabIndex];
+	                operationTab = operationPanes.get(paneIndex).getChildren(UiOperationTab.class).get(tabIndex);
 	                try {
 	                    // only field group containing input parameter fields
-	                    Map fieldMap = new HashMap();
-	                    for (int j = 0; j < 1; j++) {
-	                        FieldGroup fieldGroup = operationTab.getFieldGroup()[j];
-	                        Attribute[][] attributes = fieldGroup.getAttribute();
-	                        for (int u = 0; u < attributes.length; u++) {
-	                            for (int v = 0; v < attributes[u].length; v++) {
-	                                Attribute attribute = attributes[u][v];
-	                                if ((attribute != null) && !attribute.isEmpty()) {
-	                                    fieldMap.put(attribute.getValue().getName(), attribute);
-	                                }
-	                            }
-	                        }
-	                    }
+	                    Map<String,Attribute> fieldMap = new HashMap<String,Attribute>();
+	                    UiOperationParam operationParam = operationTab.getChildren(UiOperationParam.class).get(0);
+                        operationParam.initAttributeMap(
+                        	fieldMap, 
+                        	app
+                        );
 	                    // map request to parameter values
-	                    Map paramValuesMap = new HashMap();
+	                    Map<String,String> paramValuesMap = new HashMap<String,String>();
 	                    app.getPortalExtension().updateObject(
 	                        paramValuesMap,
 	                        requestParameters,
@@ -271,23 +197,26 @@ public class InvokeOperationAction extends BoundAction {
 	                        }
 	                        // Add currently active grid filters if not
 	                        // submitted
-	                        for (int i = 0; i < currentView.getReferencePane().length; i++) {
-	                            ReferencePane pane = currentView.getReferencePane()[i];
+	                        for (int i = 0; i < referencePanes.size(); i++) {
+	                            ReferencePane pane = referencePanes.get(i);
 	                            Grid currentGrid = pane.getGrid();
-	                            if ((currentGrid != null) && (currentGrid.getCurrentFilter() != null)) {
-	                                if(!attributeFiltersAsMap.keySet().contains(currentGrid.getGridControl().getObjectContainer().getReferenceName())) {
-	                                    String filterAsXml = JavaBeans.toXML(currentGrid.getCurrentFilter());
-	                                    attributeFiltersAsMap.put(
-	                                        currentGrid.getGridControl().getObjectContainer().getReferenceName(), 
-	                                        Base64.encode(filterAsXml.getBytes())
-	                                    );
-	                                }
+	                            if(currentGrid instanceof UiGrid) {
+	                            	UiGrid currentUiGrid = (UiGrid)currentGrid;                    	
+		                            if (currentUiGrid.getCurrentFilter() != null) {
+		                                if(!attributeFiltersAsMap.keySet().contains(currentUiGrid.getReferenceName())) {
+		                                    String filterAsXml = JavaBeans.toXML(currentUiGrid.getCurrentFilter());
+		                                    attributeFiltersAsMap.put(
+		                                        currentUiGrid.getReferenceName(), 
+		                                        Base64.encode(filterAsXml.getBytes())
+		                                    );
+		                                }
+		                            }
 	                            }
 	                        }
 	                        String attributeFilters = "";
 	                        int ii = 0;
-	                        for (Iterator i = attributeFiltersAsMap.entrySet().iterator(); i.hasNext(); ii++) {
-	                            Entry e = (Entry) i.next();
+	                        for (Iterator<Map.Entry<String,String>> i = attributeFiltersAsMap.entrySet().iterator(); i.hasNext(); ii++) {
+	                            Map.Entry<String,String> e = i.next();
 	                            if (ii > 0)
 	                                attributeFilters += ", ";
 	                            attributeFilters += e.getKey() + "=" + e.getValue();
@@ -295,29 +224,29 @@ public class InvokeOperationAction extends BoundAction {
 	                        paramValuesMap.put(app.getFilterCriteriaField(), attributeFilters);
 	                    }
 	                    // get parameter definition
-	                    Model_1_0 model = ((RefPackage_1_0) currentView.getRefObject().refOutermostPackage()).refModel();
+	                    Model_1_0 model = ((RefPackage_1_0) currentView.getObject().refOutermostPackage()).refModel();
 	                    ModelElement_1_0 paramDef = null;
 	                    if (fieldMap.values().size() > 0) {
 	                        ModelElement_1_0 fieldDef = model.getElement(((Attribute) fieldMap.values().iterator().next())
 	                                .getValue()
 	                                .getName());
-	                        paramDef = model.getElement(fieldDef.objGetValue("container"));
+	                        paramDef = model.getElement(fieldDef.getContainer());
 	                    }
 	                    // no input parameters --> Void
 	                    else {
 	                        paramDef = model.getElement("org:openmdx:base:Void");
 	                    }
 	                    // prepare parameter values
-	                    List paramValues = new ArrayList();
-	                    for (Iterator j = paramDef.objGetList("content").iterator(); j.hasNext();) {
+	                    List<Object> paramValues = new ArrayList<Object>();
+	                    for(Iterator<Object> j = paramDef.objGetList("content").iterator(); j.hasNext();) {
 	                        ModelElement_1_0 fieldDef = model.getElement(j.next());
-	                        paramValues.add(paramValuesMap.get(fieldDef.objGetValue("qualifiedName")));
+	                        paramValues.add(paramValuesMap.get(fieldDef.getQualifiedName()));
 	                    }
 	                    RefObject_1_0 target = (RefObject_1_0)pm.getObjectById(
-	                    	currentView.getRefObject().refGetPath()
+	                    	currentView.getObject().refGetPath()
 	                    );
 	                    RefStruct param = ((RefPackage_1_0)target.refImmediatePackage()).refCreateStruct(
-	                        (String)paramDef.objGetValue("qualifiedName"), 
+	                        (String)paramDef.getQualifiedName(), 
 	                        paramValues
 	                    );
 	                    RefStruct result = null;
@@ -326,29 +255,29 @@ public class InvokeOperationAction extends BoundAction {
 	                        app.getErrorMessages().clear();
 	                        pm.currentTransaction().begin();
 	                        result = (RefStruct)target.refInvokeOperation(
-	                            operationTab.getOperationTabControl().getOperationName(), 
+	                            operationTab.getOperationName(), 
 	                            Arrays.asList(new Object[]{param})
 	                        );
 	                        pm.currentTransaction().commit();
 	                        // Handle operation result only if it must be displayed
-	                        if(operationTab.getOperationTabControl().displayOperationResult()) {
+	                        if(operationTab.displayOperationResult()) {
 		                        try {
 		                            app.getPortalExtension().handleOperationResult(
 		                                target, 
-		                                operationTab.getOperationTabControl().getOperationName(), 
+		                                operationTab.getOperationName(), 
 		                                param, 
 		                                result
 		                            );
 		                            try {
 		                                currentView.structToMap(
 		                                    param, 
-		                                    (Map)operationTab.getFieldGroup()[0].getObject(), 
+		                                    (Map<String,Object>)operationTab.getChildren(UiOperationParam.class).get(0).getObject(), 
 		                                    model.getElement(param.refTypeName()),
 		                                    false // do only map primitive type fields for input (prevents closed pm problems)
 		                                );
 		                                currentView.structToMap(
 		                                    result, 
-		                                    (Map)operationTab.getFieldGroup()[1].getObject(), 
+		                                    (Map<String,Object>)operationTab.getChildren(UiOperationParam.class).get(1).getObject(), 
 		                                    model.getElement(result.refTypeName()),
 		                                    true // map all field types for result
 		                                );
@@ -366,8 +295,8 @@ public class InvokeOperationAction extends BoundAction {
 		                                app.addErrorMessage(
 		                                    app.getTexts().getErrorTextCanNotSetOperationResult(), 
 		                                    new String[] {
-		                                    	currentView.getRefObject().refMofId(), 
-		                                    	operationTab.getOperationTabControl().getOperationName(), 
+		                                    	currentView.getObject().refMofId(), 
+		                                    	operationTab.getOperationName(), 
 		                                    	cause.getMessage()
 		                                    }
 		                                );
@@ -389,7 +318,7 @@ public class InvokeOperationAction extends BoundAction {
 	                        } catch (Exception ignore) {}
 	                        currentView.handleCanNotInvokeOperationException(
 	                            e0,
-	                            operationTab.getOperationTabControl().getOperationName()
+	                            operationTab.getOperationName()
 	                        );
 	                    }
 	                } catch (ServiceException e) {
@@ -397,8 +326,8 @@ public class InvokeOperationAction extends BoundAction {
 	                    app.addErrorMessage(
 	                        app.getTexts().getErrorTextCanNotInvokeOperation(), 
 	                        new String[] {
-	                            currentView.getRefObject().refMofId(), 
-	                            operationTab.getOperationTabControl().getOperationName(), 
+	                            currentView.getObject().refMofId(), 
+	                            operationTab.getOperationName(), 
 	                            e.getMessage() 
 	                        }
 	                    );
@@ -407,7 +336,7 @@ public class InvokeOperationAction extends BoundAction {
 	        }
 	        // Paint operation result and/or errors
 	        if(
-	        	(operationTab == null || operationTab.getOperationTabControl().displayOperationResult()) &&
+	        	(operationTab == null || operationTab.displayOperationResult()) &&
 	        	(operationResult != null || !app.getErrorMessages().isEmpty())
 	        ) {
 		        ViewPort p = ViewPortFactory.openPage(

@@ -159,7 +159,7 @@ public class VariableSizeIndexedRecord
      *
      * @return  String representing name of the Record
      */
-//  @Override
+    @Override
     public final String getRecordName(
     ){
         return this.recordName;
@@ -171,7 +171,7 @@ public class VariableSizeIndexedRecord
      * @param name
      *        Name of the Record
      */
-//  @Override
+    @Override
     public final void setRecordName(
         String name
     ){
@@ -184,7 +184,7 @@ public class VariableSizeIndexedRecord
      *
      * @return   String representing a short description of the Record
      */
-//  @Override
+    @Override
     public final String getRecordShortDescription(
     ){
         return this.description;
@@ -197,7 +197,7 @@ public class VariableSizeIndexedRecord
      * @param description
      *        Description of the Record
      */
-//  @Override
+    @Override
     public final void setRecordShortDescription(
         String description
     ){

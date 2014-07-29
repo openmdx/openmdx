@@ -1,14 +1,14 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Description: UiBasedOperationPaneControl class
+ * Description: OperationPaneControl
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
  * ====================================================================
  *
  * This software is published under the BSD license
  * as listed below.
  * 
- * Copyright (c) 2004-2007, OMEX AG, Switzerland
+ * Copyright (c) 2004-2014, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -53,24 +53,16 @@
 package org.openmdx.portal.servlet.control;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
 
-import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
-import org.openmdx.base.exception.ServiceException;
-import org.openmdx.kernel.log.SysLog;
-import org.openmdx.portal.servlet.ViewPort;
-import org.openmdx.portal.servlet.attribute.AttributeValueFactory;
-import org.openmdx.portal.servlet.view.EditObjectView;
-import org.openmdx.portal.servlet.view.ObjectView;
-import org.openmdx.portal.servlet.wizards.WizardDefinition;
-import org.openmdx.portal.servlet.wizards.WizardDefinitionFactory;
+import org.openmdx.portal.servlet.PortalExtension_1_0;
+import org.openmdx.portal.servlet.component.ObjectView;
+import org.openmdx.portal.servlet.component.OperationPane;
 
 /**
  * OperationPaneControl
  *
  */
-public class OperationPaneControl extends PaneControl implements Serializable {
+public abstract class OperationPaneControl extends PaneControl implements Serializable {
   
     /**
      * Constructor 
@@ -79,8 +71,6 @@ public class OperationPaneControl extends PaneControl implements Serializable {
      * @param locale
      * @param localeAsIndex
      * @param controlFactory
-     * @param pane
-     * @param wizardFactory
      * @param valueFactory
      * @param paneIndex
      * @param forClass
@@ -89,10 +79,7 @@ public class OperationPaneControl extends PaneControl implements Serializable {
         String id,
         String locale,
         int localeAsIndex,
-        ControlFactory controlFactory,
-        org.openmdx.ui1.jmi1.OperationPane pane,
-        WizardDefinitionFactory wizardFactory,    
-        AttributeValueFactory valueFactory,
+        PortalExtension_1_0.ControlFactory controlFactory,
         int paneIndex,
         String forClass
     ) {
@@ -100,107 +87,27 @@ public class OperationPaneControl extends PaneControl implements Serializable {
             id,
             locale,
             localeAsIndex,
-            pane,
             paneIndex
         );
-        int tabIndex = 0;
-        // Operations
-        List<OperationTabControl> operationTabs = new ArrayList<OperationTabControl>();
-        for(
-            int i = 0; 
-            i < pane.getMember().size(); 
-            i++
-        ) {
-            org.openmdx.ui1.jmi1.OperationTab tab = (org.openmdx.ui1.jmi1.OperationTab)pane.getMember().get(i);
-            // Lookup a wizard which implements the operation
-            WizardDefinition[] wizardDefinitions = wizardFactory.findWizardDefinitions(
-                forClass, 
-                locale, 
-                tab.getOperationName().indexOf("?") > 0 ? 
-                    tab.getOperationName().substring(0, tab.getOperationName().indexOf("?")) :
-                    tab.getOperationName()
-            );
-            // Wizard implements operation
-            if(wizardDefinitions.length > 0) {
-                operationTabs.add(
-                    controlFactory.createWizardTabControl(
-                        null,
-                        locale,
-                        localeAsIndex,
-                        tab,
-                        (WizardDefinition)wizardDefinitions[0],
-                        paneIndex,
-                        tabIndex++               
-                    )
-                );                
-            } else {
-                operationTabs.add(
-                    controlFactory.createOperationTabControl(
-                        null,
-                        locale,
-                        localeAsIndex,
-                        tab,
-                        paneIndex,
-                        tabIndex++
-                    )
-                );
-            }
-        }   
-        this.operationTabControl = (OperationTabControl[])operationTabs.toArray(new OperationTabControl[operationTabs.size()]);        
     }
 
     /**
-     * Get view's autocomplete target.
+     * Create new component.
      * 
      * @param view
      * @return
      */
-    public RefObject_1_0 getAutocompleteTarget(
-        ObjectView view
-    ) {
-        return view instanceof EditObjectView
-            ? ((EditObjectView)view).isEditMode()
-                ? view.getObjectReference().getObject()
-                : ((EditObjectView)view).getParent()
-            : view.getObjectReference().getObject();
-    }
-    
-    /* (non-Javadoc)
-     * @see org.openmdx.portal.servlet.control.Control#paint(org.openmdx.portal.servlet.ViewPort, java.lang.String, boolean)
-     */
-    @Override
-    public void paint(
-        ViewPort p,
-        String frame,
-        boolean forEditing        
-    ) throws ServiceException {
-    	SysLog.detail("> paint");
-        // Operation menues
-        if(frame == null) {
-            p.write("<li><a href=\"#\" onclick=\"javascript:return false;\">", this.getToolTip(), "&nbsp;&nbsp;&nbsp;</a>");
-            p.write("  <ul onclick=\"this.style.left='-999em';\" onmouseout=\"this.style.left='';\">");
-            for(int j = 0; j < this.getOperationTabControl().length; j++) {
-                this.getOperationTabControl()[j].paint(
-                    p, 
-                    frame,
-                    forEditing
-                );
-            }
-            p.write("  </ul>");
-            p.write("</li>");
-        }
-        SysLog.detail("< paint");
-    }
-
+    public abstract OperationPane newComponent(
+    	ObjectView view
+    );
+        
     /**
-     * Get operation tag controls.
+     * Get localized tool tip for this pane.
      * 
      * @return
      */
-    public OperationTabControl[] getOperationTabControl(
-    ) {
-        return this.operationTabControl;
-    }
+    public abstract String getToolTip(
+    );
     
     //-------------------------------------------------------------------------
     // Members
@@ -209,9 +116,7 @@ public class OperationPaneControl extends PaneControl implements Serializable {
  
     public static final String FRAME_PARAMETERS = "Parameters";
     public static final String FRAME_RESULTS = "Results";
-    
-    private OperationTabControl[] operationTabControl;
-    
+
 }
 
 //--- End of File -----------------------------------------------------------

@@ -55,17 +55,27 @@ package org.openmdx.portal.servlet.control;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.kernel.log.SysLog;
 import org.openmdx.portal.servlet.ViewPort;
 
-public class PagePrologControl
-    extends Control
-    implements Serializable {
+/**
+ * PagePrologControl
+ *
+ */
+public class PagePrologControl extends Control implements Serializable {
   
-    //-------------------------------------------------------------------------
+    /**
+     * Constructor.
+     * 
+     * @param id
+     * @param locale
+     * @param localeAsIndex
+     */
     public PagePrologControl(
         String id,
         String locale,
@@ -78,7 +88,9 @@ public class PagePrologControl
         );
     }
 
-    //-------------------------------------------------------------------------
+    /* (non-Javadoc)
+     * @see org.openmdx.portal.servlet.control.Control#paint(org.openmdx.portal.servlet.ViewPort, java.lang.String, boolean)
+     */
     @Override
     public void paint(
         ViewPort p,
@@ -89,19 +101,29 @@ public class PagePrologControl
         if(FRAME_PRE_PROLOG.equals(frame)) {
             p.setProperty(
                 ViewPort.PROPERTY_POPUP_IMAGES,
-                new HashMap()
+                new HashMap<String,String>()
             );
             p.setProperty(
                 ViewPort.PROPERTY_CALENDAR_IDS,
-                new ArrayList()
+                new ArrayList<String>()
             );        
-        }
-        else if(FRAME_POST_PROLOG.equals(frame)) {
+        } else if(FRAME_POST_PROLOG.equals(frame)) {
+        	// no-op
         }
         SysLog.detail("< paint");        
     }
+	
+	/* (non-Javadoc)
+	 * @see org.openmdx.portal.servlet.control.Control#getChildren(java.lang.Class)
+	 */
+	@Override
+	public <T extends Control> List<T> getChildren(
+		Class<T> type
+	) {
+		return Collections.emptyList();
+	}
 
-    //-------------------------------------------------------------------------
+	//-------------------------------------------------------------------------
     // Members
     //-------------------------------------------------------------------------
     private static final long serialVersionUID = -1459865229401460381L;

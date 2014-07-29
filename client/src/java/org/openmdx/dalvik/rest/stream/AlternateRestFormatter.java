@@ -628,15 +628,9 @@ public class AlternateRestFormatter implements RestFormatter {
                             BasicException.Code.DEFAULT_DOMAIN,
                             BasicException.Code.PROCESSING_FAILURE,
                             "Unable to retrieve feature value",
-                            new BasicException.Parameter(
-                                "hrefContext",
-                                target.getBase()),
-                            new BasicException.Parameter("xri", xri
-                                .toXRI()),
-                            new BasicException.Parameter(
-                                "feature",
-                                feature
-                            )
+                            new BasicException.Parameter("href-context", target.getBase()),
+                            new BasicException.Parameter("xri", xri),
+                            new BasicException.Parameter("feature", feature)
                         )
                     );
                 }
@@ -695,14 +689,8 @@ public class AlternateRestFormatter implements RestFormatter {
                                     "hrefContext",
                                     target.getBase()
                                 ),
-                                new BasicException.Parameter(
-                                    "xri",
-                                    xri == null ? null : xri.toXRI()
-                                ),
-                                new BasicException.Parameter(
-                                    "feature",
-                                    feature
-                                )
+                                new BasicException.Parameter("xri", xri),
+                                new BasicException.Parameter("feature", feature)
                             )
                         );
                     }
@@ -754,14 +742,8 @@ public class AlternateRestFormatter implements RestFormatter {
                                         "hrefContext",
                                         target.getBase()
                                     ),
-                                    new BasicException.Parameter(
-                                        "xri",
-                                        xri == null ? null : xri.toXRI()
-                                    ),
-                                    new BasicException.Parameter(
-                                        "feature",
-                                        feature)
-                                    )
+                                    new BasicException.Parameter("xri", xri),
+                                    new BasicException.Parameter("feature", feature))
                              );
                         }
                     }

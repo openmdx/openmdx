@@ -1,13 +1,13 @@
 /*
  * ==================================================================== 
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Description: RefObject_1 class 
+ * Description: RefObject_1 class
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch 
  * ====================================================================
  * 
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2013, OMEX AG, Switzerland
+ * Copyright (c) 2004-2014, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -113,6 +113,7 @@ import org.openmdx.base.query.IsInCondition;
 import org.openmdx.base.query.Quantifier;
 import org.openmdx.base.resource.InteractionSpecs;
 import org.openmdx.kernel.exception.BasicException;
+import org.openmdx.kernel.exception.Throwables;
 import org.openmdx.kernel.jdo.ReducedJDOHelper;
 import org.openmdx.kernel.log.SysLog;
 import org.w3c.cci2.BinaryLargeObject;
@@ -193,6 +194,17 @@ class RefObject_1
      */
     private RefClass refClass;
 
+    /**
+     * Accessing a mandatory but uninitialized value leads to a 
+     * <code>NullPointerException</code> in case of the following types:
+     */
+    private static final List<String> NULL_AVERSE_TYPES = Arrays.asList(
+    	PrimitiveTypes.BOOLEAN,
+    	PrimitiveTypes.SHORT,
+    	PrimitiveTypes.INTEGER,
+    	PrimitiveTypes.LONG
+    );
+    
     @Deprecated
     private static final List<String> excludeFromInitialization = Arrays.asList(
         "org:openmdx:base:Aspect:core",
@@ -329,8 +341,8 @@ class RefObject_1
         }
 
         ModelElement_1_0 type = this.getType(featureDef);
-        String qualifiedTypeName = (String) type.objGetValue("qualifiedName");
-        String featureName = (String) featureDef.objGetValue("name");
+        String qualifiedTypeName = (String) type.getQualifiedName();
+        String featureName = (String) featureDef.getName();
 
         /**
          * Attribute or Reference stored as attribute. Don't care about
@@ -350,7 +362,28 @@ class RefObject_1
             Multiplicity multiplicity = ModelHelper.getMultiplicity(featureDef);
             Marshaller marshaller = this.refOutermostPackage().getMarshaller(qualifiedTypeName);
             switch(multiplicity) {
-                case SINGLE_VALUE: case OPTIONAL:
+                case SINGLE_VALUE: {
+					final Object mandatoryValue = this.object.objGetValue(featureName);
+					if(mandatoryValue == null && NULL_AVERSE_TYPES.contains(qualifiedTypeName)){
+						throw Throwables.initCause(
+							new NullPointerException(
+								"The primitive type's value is not yet set and returning null is not possible"
+							),
+							null, // cause 
+							BasicException.Code.DEFAULT_DOMAIN,
+							BasicException.Code.ILLEGAL_STATE,
+							new BasicException.Parameter("interaction-spec", this.object.getInteractionSpec()),
+							new BasicException.Parameter("xri", this.object.jdoGetObjectId()),
+							new BasicException.Parameter("transactional-object-id", this.object.jdoGetTransactionalObjectId()),
+							new BasicException.Parameter("object-class", this.object.objGetClass()),
+							new BasicException.Parameter("feature-name", featureName),
+							new BasicException.Parameter("feature-type", qualifiedTypeName),
+							new BasicException.Parameter("multiplicity",  multiplicity)
+						);
+					}
+					return marshaller.marshal(mandatoryValue);
+                }
+                case OPTIONAL:
                     return marshaller.marshal(this.object.objGetValue(featureName));
                 case STREAM: 
                     return this.object.objGetValue(featureName);
@@ -387,10 +420,10 @@ class RefObject_1
                  * used to construct the reference filter:
                  */
                 String exposedEndName = (String) model.getElement(
-                    featureDef.objGetValue("exposedEnd")
-                ).objGetValue("name");
+                    featureDef.getExposedEnd()
+                ).getName();
                 String qualifierName = removeContainerSuffix(
-                    (String) model.getElement(featureDef.objGetValue("referencedEnd")).objGetValue("qualifierName")
+                    (String) model.getElement(featureDef.getReferencedEnd()).objGetValue("qualifierName")
                 );
                 Container_1_0 container = ((RefObject_1_0)qualifier).refDelegate().objGetContainer(
                     qualifierName
@@ -428,7 +461,7 @@ class RefObject_1
                         return rootPkg.marshal(
                             ((DataObjectManager_1_0) rootPkg.refDelegate()).getObjectById(
                                 this.refGetPath().getDescendant(
-                                    (String)featureDef.objGetValue("name"), 
+                                    (String)featureDef.getName(), 
                                     (String) qualifier
                                 )
                             )
@@ -448,12 +481,9 @@ class RefObject_1
                             //
                             if(
                                 e.getExceptionCode() != BasicException.Code.NOT_FOUND || 
-                                !Multiplicity.OPTIONAL.toString().equals(featureDef.objGetValue("multiplicity"))
+                                !Multiplicity.OPTIONAL.toString().equals(featureDef.getMultiplicity())
                             ) { 
-                                throw new JmiServiceException(
-                                    e,
-                                    this
-                                ); 
+                                throw new JmiServiceException(e, this); 
                             }
                         }
                     }
@@ -479,8 +509,8 @@ class RefObject_1
             ); 
         }
         ModelElement_1_0 type = this.getType(featureDef);
-        String qualifiedTypeName = (String) type.objGetValue("qualifiedName");
-        String featureName = (String) featureDef.objGetValue("name");
+        String qualifiedTypeName = (String) type.getQualifiedName();
+        String featureName = (String) featureDef.getName();
         
         // STREAM
         if (ModelHelper.getMultiplicity(featureDef).isStreamValued()) {
@@ -524,8 +554,8 @@ class RefObject_1
         this.assertStructuralFeature(featureDef);
         
         ModelElement_1_0 type = this.getType(featureDef);
-        String qualifiedTypeName = (String) type.objGetValue("qualifiedName");
-        String featureName = (String) featureDef.objGetValue("name");
+        String qualifiedTypeName = (String) type.getQualifiedName();
+        String featureName = (String) featureDef.getName();
 
         /**
          * Attribute or Reference stored as attribute.
@@ -533,7 +563,7 @@ class RefObject_1
         if (this.isAttributeOrReferenceStoredAsAttribute(featureDef)) {
             Multiplicity multiplicity = ModelHelper.getMultiplicity(featureDef);
             if (multiplicity.isSingleValued() || multiplicity.isStreamValued()) {
-                if (this.object.getModel().isClassType(type) && "org:openmdx:base:Aspect:core".equals(featureDef.objGetValue("qualifiedName"))){
+                if (this.object.getModel().isClassType(type) && "org:openmdx:base:Aspect:core".equals(featureDef.getQualifiedName())){
                     this.object.objSetValue(
                         featureName, 
                         this.refOutermostPackage().unmarshalUnchecked(value)
@@ -643,8 +673,8 @@ class RefObject_1
         
         // STREAM
         if (ModelHelper.getMultiplicity(featureDef).isStreamValued()) {
-            String qualifiedTypeName = (String) type.objGetValue("qualifiedName");
-            String featureName = (String) featureDef.objGetValue("name");
+            String qualifiedTypeName = (String) type.getQualifiedName();
+            String featureName = (String) featureDef.getName();
             if (PrimitiveTypes.STRING.equals(qualifiedTypeName)) {
                 this.object.objSetValue(
                     featureName,
@@ -702,11 +732,11 @@ class RefObject_1
         ) {
             ModelElement_1_0 paramDef = this.object.getModel().getElement(i.next());
             ModelElement_1_0 paramDefType = this.getType(paramDef);
-            if ("in".equals(paramDef.objGetValue("name"))) {
-                qualifiedNameInParamType = (String) paramDefType.objGetValue("qualifiedName");
+            if ("in".equals(paramDef.getName())) {
+                qualifiedNameInParamType = (String) paramDefType.getQualifiedName();
             } 
-            else if ("result".equals(paramDef.objGetValue("name"))) {
-                qualifiedNameResultType = (String) paramDefType.objGetValue("qualifiedName");
+            else if ("result".equals(paramDef.getName())) {
+                qualifiedNameResultType = (String) paramDefType.getQualifiedName();
             }
         }
         if (qualifiedNameInParamType == null) { 
@@ -737,7 +767,7 @@ class RefObject_1
         try {
             this.object.execute(
                 InteractionSpecs.newMethodInvocationSpec(
-                    (String) featureDef.objGetValue("name"),
+                    (String) featureDef.getName(),
                     this.getInteractionVerb(Boolean.TRUE.equals(featureDef.objGetValue("isQuery")))
                 ),
                 input.refDelegate(),
@@ -793,13 +823,11 @@ class RefObject_1
             } 
             else {
                 throw new JmiServiceException(
-                    new ServiceException(
-                        BasicException.Code.DEFAULT_DOMAIN,
-                        BasicException.Code.NOT_SUPPORTED,
-                        "operation only supported for features instanceof [List|SparseArray]",
-                        new BasicException.Parameter("value", value)
-                    ),
-                    this
+                    this,
+                    BasicException.Code.DEFAULT_DOMAIN,
+                    BasicException.Code.NOT_SUPPORTED,
+                    "operation only supported for features instanceof [List|SparseArray]",
+                    new BasicException.Parameter("value", value)
                 );
             }
         }
@@ -812,13 +840,12 @@ class RefObject_1
         // index > 0 not supported
         else {
             throw new JmiServiceException(
-                new ServiceException(
-                    BasicException.Code.DEFAULT_DOMAIN,
-                    BasicException.Code.NOT_SUPPORTED,
-                    "index must be 0 in case of a non-collection value",
-                    new BasicException.Parameter("feature", featureName),
-                    new BasicException.Parameter("value", value)
-                ), this
+                this,
+                BasicException.Code.DEFAULT_DOMAIN,
+                BasicException.Code.NOT_SUPPORTED,
+                "index must be 0 in case of a non-collection value",
+                new BasicException.Parameter("feature", featureName),
+                new BasicException.Parameter("value", value)
             );
         }
     }
@@ -938,13 +965,11 @@ class RefObject_1
                 } 
                 else {
                     throw new JmiServiceException(
-                        new ServiceException(
-                            BasicException.Code.DEFAULT_DOMAIN,
-                            BasicException.Code.NOT_SUPPORTED,
-                            "operation only supported for features instanceof [List|SparseArray]",
-                            new BasicException.Parameter("values", values)
-                        ),
-                        this
+                        this,
+                        BasicException.Code.DEFAULT_DOMAIN,
+                        BasicException.Code.NOT_SUPPORTED,
+                        "operation only supported for features instanceof [List|SparseArray]",
+                        new BasicException.Parameter("values", values)
                     );
                 }
             }
@@ -958,13 +983,11 @@ class RefObject_1
             // index > 0 not supported
             else {
                 throw new JmiServiceException(
-                    new ServiceException(
-                        BasicException.Code.DEFAULT_DOMAIN,
-                        BasicException.Code.NOT_SUPPORTED,
-                        "index must be 0 for non-collection values",
-                        new BasicException.Parameter("values", values)
-                    ), 
-                    this
+                    this,
+                    BasicException.Code.DEFAULT_DOMAIN,
+                    BasicException.Code.NOT_SUPPORTED,
+                    "index must be 0 for non-collection values",
+                    new BasicException.Parameter("values", values)
                 );
             }
         } 
@@ -1009,16 +1032,13 @@ class RefObject_1
         }
         if (values instanceof List) {
             ((List<Object>) values).add(index, value);
-        } 
-        else {
+        } else {
             throw new JmiServiceException(
-                new ServiceException(
-                    BasicException.Code.DEFAULT_DOMAIN,
-                    BasicException.Code.NOT_SUPPORTED,
-                    "operation only supported for features instanceof [List]",
-                    new BasicException.Parameter("values", values)
-                ),
-                this
+                this,
+                BasicException.Code.DEFAULT_DOMAIN,
+                BasicException.Code.NOT_SUPPORTED,
+                "operation only supported for features instanceof [List]",
+                new BasicException.Parameter("values", values)
             );
         }
     }
@@ -1051,14 +1071,12 @@ class RefObject_1
         } 
         else {
             throw new JmiServiceException(
-                new ServiceException(
-                    BasicException.Code.DEFAULT_DOMAIN,
-                    BasicException.Code.NOT_SUPPORTED,
-                    "operation only supported for features instanceof [Set|List|SparseArray|Container]",
-                    new BasicException.Parameter("value class", values.getClass().getName()),
-                    new BasicException.Parameter("values", values)
-                ),
-                this
+                this,
+                BasicException.Code.DEFAULT_DOMAIN,
+                BasicException.Code.NOT_SUPPORTED,
+                "operation only supported for features instanceof [Set|List|SparseArray|Container]",
+                new BasicException.Parameter("value class", values.getClass().getName()),
+                new BasicException.Parameter("values", values)
             );
         }
     }
@@ -1084,13 +1102,11 @@ class RefObject_1
         } 
         else {
             throw new JmiServiceException(
-                new ServiceException(
-                    BasicException.Code.DEFAULT_DOMAIN,
-                    BasicException.Code.NOT_SUPPORTED,
-                    "operation only supported for features instanceof [List|SparseArray]",
-                    new BasicException.Parameter("values", values)
-                ),
-                this
+                this,
+                BasicException.Code.DEFAULT_DOMAIN,
+                BasicException.Code.NOT_SUPPORTED,
+                "operation only supported for features instanceof [List|SparseArray]",
+                new BasicException.Parameter("values", values)
             );
         }
     }
@@ -1154,9 +1170,8 @@ class RefObject_1
     ) {
         try {
             ReducedJDOHelper.getPersistenceManager(this.object).deletePersistent(this.object);
-        } 
-        catch(Exception e) {
-            throw new JmiServiceException(e);
+        } catch(RuntimeException exception) {
+            throw new JmiServiceException(exception);
         } 
     }
 
@@ -1460,7 +1475,7 @@ class RefObject_1
                             if (setRequiredToNull) {
                                 this.setValue(featureDef, null);
                             } else {
-                                String qualifiedTypeName = (String) type.objGetValue("qualifiedName");
+                                String qualifiedTypeName = (String) type.getQualifiedName();
                                 if (PrimitiveTypes.STRING.equals(qualifiedTypeName)) {
                                     this.setValue(featureDef, "");
                                 } else if (PrimitiveTypes.BOOLEAN.equals(qualifiedTypeName)) {
@@ -1548,13 +1563,13 @@ class RefObject_1
             ) {
                 ModelElement_1_0 featureDef = i.next();
                 if (
-                    !RefObject_1.excludeFromInitialization.contains(featureDef.jdoGetObjectId().getBase()) &&
+                    !RefObject_1.excludeFromInitialization.contains(featureDef.jdoGetObjectId().getLastSegment().toClassicRepresentation()) &&
                     this.isAttributeOrReferenceStoredAsAttribute(featureDef) && 
-                    Boolean.TRUE.equals(featureDef.objGetValue("isChangeable")) 
+                    Boolean.TRUE.equals(featureDef.isChangeable()) 
                 ) {
                     this.setValue(
                         featureDef, 
-                        source.refGetValue((String)featureDef.objGetValue("name"))
+                        source.refGetValue((String)featureDef.getName())
                     );
                 }
             }
@@ -1601,23 +1616,19 @@ class RefObject_1
                             refContainer.refOutermostPackage()
                         );
                     }
-                } 
-                else {
+                } else {
                     throw new JmiServiceException(
-                        new ServiceException(
-                            BasicException.Code.DEFAULT_DOMAIN,
-                            BasicException.Code.NOT_SUPPORTED,
-                            "a) feature type = Reference and qualifier is RefObject_1_0; b) feature type = collection type attribute and qualifier is Number",
-                            new BasicException.Parameter(
-                                "values", container == null ? null : container.getClass().getName()
-                            )
-                        ),
-                        this
+                        this,
+                        BasicException.Code.DEFAULT_DOMAIN,
+                        BasicException.Code.NOT_SUPPORTED,
+                        "a) feature type = Reference and qualifier is RefObject_1_0; b) feature type = collection type attribute and qualifier is Number",
+                        new BasicException.Parameter(
+                            "values", container == null ? null : container.getClass().getName()
+                        )
                     );
                 }
             }
-        } 
-        catch (ServiceException e) {
+        } catch (ServiceException e) {
             throw new JmiServiceException(e, this);
         } 
         catch (RuntimeServiceException e) {
@@ -1676,7 +1687,7 @@ class RefObject_1
      * Reconstitute the <tt>Object_1_0</tt> instance from a stream (that is,
      * deserialize it).
      */
-    private synchronized void readObject(
+    private void readObject(
         java.io.ObjectInputStream stream
     ) throws java.io.IOException, ClassNotFoundException {
         stream.defaultReadObject();

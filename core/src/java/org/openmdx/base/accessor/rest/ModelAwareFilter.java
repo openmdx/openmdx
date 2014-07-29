@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2007-2013, OMEX AG, Switzerland
+ * Copyright (c) 2007-2014, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -252,7 +252,7 @@ abstract class ModelAwareFilter
         boolean aspectCapable = false;
         boolean aspect = false;
         for(Object superType : classifier.objGetList("allSupertype")) {
-           String superTypeName = ((Path) superType).getBase();
+           String superTypeName = ((Path) superType).getLastSegment().toClassicRepresentation();
            aspect |= "org:openmdx:base:Aspect".equals(superTypeName);
            aspectCapable |= "org:openmdx:base:AspectCapable".equals(superTypeName);
         }
@@ -273,7 +273,7 @@ abstract class ModelAwareFilter
         InstanceOfIterator(
             ModelElement_1_0 classifier
         ) throws ServiceException{
-            this.objectClass = (String) classifier.objGetValue("qualifiedName");
+            this.objectClass = (String) classifier.getQualifiedName();
             this.superTypes = classifier.objGetList("allSupertype");
         }
 
@@ -303,7 +303,7 @@ abstract class ModelAwareFilter
                 this.superTypeIterator = this.superTypes.iterator(); 
                 return this.objectClass;
             } else {
-                return ((Path)this.superTypeIterator.next()).getBase();
+                return ((Path)this.superTypeIterator.next()).getLastSegment().toClassicRepresentation();
             }
         }
 

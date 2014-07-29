@@ -48,8 +48,6 @@
 package org.openmdx.base.mof.cci;
 
 
-import java.util.Set;
-
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.kernel.exception.BasicException;
 
@@ -81,14 +79,14 @@ public class ModelHelper {
         ModelElement_1_0 featureDef
     ) throws ServiceException{
         Model_1_0 model = featureDef.getModel();
-        String multiplicity = (String) featureDef.objGetValue("multiplicity");
-        if(isReference(featureDef)) {
+        String multiplicity = (String) featureDef.getMultiplicity();
+        if(featureDef.isReference()) {
             ModelElement_1_0 referencedEnd = model.getElement(
-                featureDef.objGetValue("referencedEnd")
+                featureDef.getReferencedEnd()
             );
             if(!referencedEnd.objGetList("qualifierType").isEmpty()) {
                 ModelElement_1_0 qualifierType = model.getDereferencedType(
-                    referencedEnd.objGetValue("qualifierType")
+                    referencedEnd.getQualifierType()
                 );
                 return model.isNumericType(qualifierType) ? Multiplicity.LIST : Multiplicity.MAP;
             } else if (UNBOUND.equals(multiplicity)) {
@@ -107,7 +105,7 @@ public class ModelHelper {
         		BasicException.Code.DEFAULT_DOMAIN,
         		BasicException.Code.BAD_PARAMETER,
         		"Unable the convert the sterotype into a multiplicity",
-                new BasicException.Parameter("feature", featureDef.objGetValue("qualifiedName")),
+                new BasicException.Parameter("feature", featureDef.getQualifiedName()),
         		new BasicException.Parameter("stereotype", multiplicity)
         	);
         }
@@ -126,12 +124,12 @@ public class ModelHelper {
         ModelElement_1_0 featureDef
     ) throws ServiceException {
         if(featureDef.isAttributeType()) {
-            return Boolean.TRUE.equals(featureDef.objGetValue("isDerived"));
+            return Boolean.TRUE.equals(featureDef.isDerived());
         } else if(featureDef.isReferenceType()) {
             Model_1_0 model = featureDef.getModel();
-            ModelElement_1_0 referencedEnd = model.getElement(featureDef.objGetValue("referencedEnd"));
-            ModelElement_1_0 association = model.getElement(referencedEnd.objGetValue("container"));
-            return Boolean.TRUE.equals(association.objGetValue("isDerived"));
+            ModelElement_1_0 referencedEnd = model.getElement(featureDef.getReferencedEnd());
+            ModelElement_1_0 association = model.getElement(referencedEnd.getContainer());
+            return Boolean.TRUE.equals(association.isDerived());
         } else {
             return false;
         }
@@ -153,26 +151,9 @@ public class ModelHelper {
         return model.isReferenceType(feature) ? (
             !model.referenceIsDerived(feature) 
         ) : (
-            !((Boolean)feature.objGetValue("isDerived")).booleanValue() && 
-            ((Boolean)feature.objGetValue("isChangeable")).booleanValue()
+            !((Boolean)feature.isDerived()).booleanValue() && 
+            ((Boolean)feature.isChangeable()).booleanValue()
         );
-    }
-
-    /**
-     * Tells whether the given feature is a reference
-     * 
-     * @param feature the feature to be inspected
-     * 
-     * @return <code>true</code> if the given feature is a reference
-     * 
-     * @throws ServiceException
-     */
-    public static boolean isReference(
-        ModelElement_1_0 feature
-    ) throws ServiceException {
-    	return 
-    		feature.getModel().isReferenceType(feature) || // standard
-    		hasFeatures(feature, "exposedEnd", "referencedEnd"); // list of references stored as attribute
     }
 
     /**
@@ -194,28 +175,6 @@ public class ModelHelper {
         );
     }
     
-    /**
-     * Test whether certain features exists and have non-null values
-     * 
-     * @param object
-     * @param features
-     * 
-     * @return <code>true</code> if the given features exists and have non-null values
-     * @throws ServiceException 
-     */
-    private static boolean hasFeatures(
-		ModelElement_1_0 object,
-    	String... features
-    ) throws ServiceException {
-		Set<String> attributes = object.objDefaultFetchGroup();
-		for(String feature : features) {
-			if(!attributes.contains(feature) || object.objGetValue(feature) == null) {
-				return false;
-			}
-		}
-		return true;
-    }
-
 	/**
 	 * Parse the multiplicity 
 	 * 
@@ -255,9 +214,7 @@ public class ModelHelper {
         boolean exposedEnd
     ) throws ServiceException {
         return referenceDef.getModel().getElement(
-            referenceDef.objGetValue(
-                exposedEnd ? "exposedEnd" : "referencedEnd"
-            )
+        	exposedEnd ? referenceDef.getExposedEnd() : referenceDef.getReferencedEnd()
         );
     }
     
@@ -275,7 +232,7 @@ public class ModelHelper {
         ModelElement_1_0 referenceDef,
         boolean exposedEnd
     )throws ServiceException {
-        return getEnd(referenceDef, exposedEnd).objGetValue("aggregation");
+        return getEnd(referenceDef, exposedEnd).getAggregation();
     }
 
     /**

@@ -114,6 +114,11 @@ public abstract class AbstractPersistenceManager implements PersistenceManager {
     private boolean copyOnAttach;
 
     /**
+     * Tells, whether the persistence manager has been closed
+     */
+    private volatile boolean closed = false;
+    
+    /**
      * 
      */
     private ConcurrentMap<Object,Object> userObjects = new ConcurrentHashMap<Object,Object>();
@@ -139,28 +144,28 @@ public abstract class AbstractPersistenceManager implements PersistenceManager {
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#getPersistenceManagerFactory()
      */
-//  @Override
+   @Override
     public PersistenceManagerFactory getPersistenceManagerFactory() {
-        if(this.persistenceManagerFactory == null) {
+        if(this.closed) {
             throw BasicException.initHolder(
                 new JDOUserException(
                     "The persistence manager is closed",
                     BasicException.newEmbeddedExceptionStack(
                         BasicException.Code.DEFAULT_DOMAIN,
-                        BasicException.Code.ILLEGAL_STATE,
-                        new BasicException.Parameter("persistenceManagerFactory")
+                        BasicException.Code.ILLEGAL_STATE
                     )
                 )
             );
+        } else {
+	        return this.persistenceManagerFactory;
         }
-        return this.persistenceManagerFactory;
     }
 
     /**
-     * Tells whether the tarnsactions are container managed
+     * Tells whether the transactions are container managed
      * 
      * @return <code>true</code> if the transactions are container managed
-     */
+     */ 
     protected boolean isTransactionContainerManaged(){
     	return false;
     }
@@ -168,27 +173,30 @@ public abstract class AbstractPersistenceManager implements PersistenceManager {
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#close()
      */
-//  @Override
-    public void close() {
-        if(!this.isTransactionContainerManaged() && this.currentUnitOfWork().isActive()) throw new JDOUserException(
-            "Persistence manager with an active unit of work can't be closed unless they are container managed"
-        );
-        this.instanceLifecycleListener.close();
-        this.instanceLifecycleListener = null;
-        this.userObjects.clear();
-        this.userObjects = null;
-        if(this.persistenceManagerFactory instanceof CloseCallback) {
-            ((CloseCallback)this.persistenceManagerFactory).postClose(this);
-        }
-        this.persistenceManagerFactory = null;
+    @Override
+    public synchronized void close() {
+    	if(!closed) {
+	        if(!this.isTransactionContainerManaged() && this.currentUnitOfWork().isActive()) throw new JDOUserException(
+	            "Persistence manager with an active unit of work can't be closed unless they are container managed"
+	        );
+	        this.instanceLifecycleListener.close();
+	        this.instanceLifecycleListener = null;
+	        this.userObjects.clear();
+	        this.userObjects = null;
+	        if(this.persistenceManagerFactory instanceof CloseCallback) {
+	            ((CloseCallback)this.persistenceManagerFactory).postClose(this);
+	        }
+	        this.persistenceManagerFactory = null;
+	        this.closed = true;
+    	}
     }
 
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#isClosed()
      */
-//  @Override
+    @Override
     public boolean isClosed() {
-        return this.persistenceManagerFactory == null;
+        return this.closed;
     }
 
     /* (non-Javadoc)
@@ -203,7 +211,7 @@ public abstract class AbstractPersistenceManager implements PersistenceManager {
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#evictAll(java.util.Collection)
      */
-//  @Override
+    @Override
     public void evictAll(Collection pcs) {
         PersistenceManagers.evictAll(this, pcs);
     }
@@ -211,7 +219,7 @@ public abstract class AbstractPersistenceManager implements PersistenceManager {
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#refreshAll(java.util.Collection)
      */
-//  @Override
+    @Override
     public void refreshAll(Collection pcs) {
         PersistenceManagers.refreshAll(this, pcs);
     }
@@ -219,7 +227,7 @@ public abstract class AbstractPersistenceManager implements PersistenceManager {
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#refreshAll(javax.jdo.JDOException)
      */
-//  @Override
+    @Override
     public void refreshAll(JDOException jdoe) {
         PersistenceManagers.refreshAll(this, jdoe);
     }
@@ -227,7 +235,7 @@ public abstract class AbstractPersistenceManager implements PersistenceManager {
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#getObjectById(java.lang.Class, java.lang.Object)
      */
-//  @Override
+    @Override
     public <T> T getObjectById(Class<T> cls, Object key) {
         return (T) this.getObjectById(
             this.newObjectIdInstance(cls, key)
@@ -237,7 +245,7 @@ public abstract class AbstractPersistenceManager implements PersistenceManager {
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#getObjectsById(java.util.Collection, boolean)
      */
-//  @Override
+    @Override
     public Collection getObjectsById(Collection oids, boolean validate) {
         return PersistenceManagers.getObjectsById(this, validate, oids);
     }
@@ -245,7 +253,7 @@ public abstract class AbstractPersistenceManager implements PersistenceManager {
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#getObjectsById(java.util.Collection)
      */
-//  @Override
+    @Override
     public Collection getObjectsById(Collection oids) {
         return this.getObjectsById(oids, true);
     }
@@ -253,7 +261,7 @@ public abstract class AbstractPersistenceManager implements PersistenceManager {
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#getObjectsById(boolean, java.lang.Object[])
      */
-//  @Override
+    @Override
     public Object[] getObjectsById(boolean validate, Object... oids) {
         return PersistenceManagers.getObjectsById(this, validate, oids);
     }
@@ -261,7 +269,7 @@ public abstract class AbstractPersistenceManager implements PersistenceManager {
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#makePersistentAll(T[])
      */
-//  @Override
+    @Override
     public <T> T[] makePersistentAll(T... pcs) {
         return PersistenceManagers.makePersistentAll(this, pcs);
     }
@@ -269,7 +277,7 @@ public abstract class AbstractPersistenceManager implements PersistenceManager {
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#makePersistentAll(java.util.Collection)
      */
-//  @Override
+    @Override
     public <T> Collection<T> makePersistentAll(Collection<T> pcs) {
         return PersistenceManagers.makePersistentAll(this, pcs);
     }
@@ -277,7 +285,7 @@ public abstract class AbstractPersistenceManager implements PersistenceManager {
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#deletePersistentAll(java.util.Collection)
      */
-//  @Override
+    @Override
     public void deletePersistentAll(Collection pcs) {
         PersistenceManagers.deletePersistentAll(this, pcs);
     }
@@ -285,7 +293,7 @@ public abstract class AbstractPersistenceManager implements PersistenceManager {
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#makeTransient(java.lang.Object)
      */
-//  @Override
+    @Override
     public void makeTransient(Object pc) {
         this.makeTransient(pc, false);
     }
@@ -293,7 +301,7 @@ public abstract class AbstractPersistenceManager implements PersistenceManager {
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#makeTransientAll(java.util.Collection, boolean)
      */
-//  @Override
+    @Override
     public void makeTransientAll(Collection pcs, boolean useFetchPlan) {
         PersistenceManagers.makeTransientAll(this, pcs, useFetchPlan);
     }
@@ -301,7 +309,7 @@ public abstract class AbstractPersistenceManager implements PersistenceManager {
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#makeTransientAll(boolean, java.lang.Object[])
      */
-//  @Override
+    @Override
     public void makeTransientAll(boolean useFetchPlan, Object... pcs) {
         PersistenceManagers.makeTransientAll(this, useFetchPlan, pcs);
     }
@@ -309,7 +317,7 @@ public abstract class AbstractPersistenceManager implements PersistenceManager {
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#makeTransientAll(java.util.Collection)
      */
-//  @Override
+    @Override
     public void makeTransientAll(Collection pcs) {
         this.makeTransientAll(pcs, false);
     }
@@ -317,7 +325,7 @@ public abstract class AbstractPersistenceManager implements PersistenceManager {
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#makeTransactionalAll(java.util.Collection)
      */
-//  @Override
+    @Override
     public void makeTransactionalAll(Collection pcs) {
         PersistenceManagers.makeTransactionalAll(this, pcs);
     }
@@ -325,7 +333,7 @@ public abstract class AbstractPersistenceManager implements PersistenceManager {
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#makeNontransactionalAll(java.util.Collection)
      */
-//  @Override
+    @Override
     public void makeNontransactionalAll(Collection pcs) {
         PersistenceManagers.makeNontransactionalAll(this, pcs);
     }
@@ -333,7 +341,7 @@ public abstract class AbstractPersistenceManager implements PersistenceManager {
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#retrieve(java.lang.Object)
      */
-//  @Override
+    @Override
     public void retrieve(Object pc) {
         this.retrieve(pc, false);
     }
@@ -341,7 +349,7 @@ public abstract class AbstractPersistenceManager implements PersistenceManager {
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#retrieveAll(java.util.Collection)
      */
-//  @Override
+    @Override
     public void retrieveAll(Collection pcs) {
         this.retrieveAll(pcs, false);
     }
@@ -349,7 +357,7 @@ public abstract class AbstractPersistenceManager implements PersistenceManager {
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#retrieveAll(java.util.Collection, boolean)
      */
-//  @Override
+    @Override
     public void retrieveAll(Collection pcs, boolean useFetchPlan) {
         PersistenceManagers.retrieveAll(this, useFetchPlan, pcs);
     }
@@ -357,7 +365,7 @@ public abstract class AbstractPersistenceManager implements PersistenceManager {
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#retrieveAll(boolean, java.lang.Object[])
      */
-//  @Override
+    @Override
     public void retrieveAll(boolean useFetchPlan, Object... pcs) {
         PersistenceManagers.retrieveAll(this, useFetchPlan, pcs);
     }
@@ -365,7 +373,7 @@ public abstract class AbstractPersistenceManager implements PersistenceManager {
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#setUserObject(java.lang.Object)
      */
-//  @Override
+    @Override
     public void setUserObject(Object o) {
         if(o == null) {
             removeUserObject(USER_OBJECT_KEY);
@@ -377,7 +385,7 @@ public abstract class AbstractPersistenceManager implements PersistenceManager {
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#getUserObject()
      */
-//  @Override
+    @Override
     public Object getUserObject() {
         return getUserObject(USER_OBJECT_KEY);
     }
@@ -385,7 +393,7 @@ public abstract class AbstractPersistenceManager implements PersistenceManager {
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#setIgnoreCache(boolean)
      */
-//  @Override
+    @Override
     public void setIgnoreCache(boolean flag) {
         this.ignoreCache = flag;
     }
@@ -393,7 +401,7 @@ public abstract class AbstractPersistenceManager implements PersistenceManager {
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#getIgnoreCache()
      */
-//  @Override
+    @Override
     public boolean getIgnoreCache() {
         return this.ignoreCache;
     }
@@ -401,7 +409,7 @@ public abstract class AbstractPersistenceManager implements PersistenceManager {
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#getDetachAllOnCommit()
      */
-//  @Override
+    @Override
     public boolean getDetachAllOnCommit() {
         return this.detachAllOnCommit;
     }
@@ -409,7 +417,7 @@ public abstract class AbstractPersistenceManager implements PersistenceManager {
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#setDetachAllOnCommit(boolean)
      */
-//  @Override
+    @Override
     public void setDetachAllOnCommit(boolean detachAllOnCommit) {
         this.detachAllOnCommit = detachAllOnCommit;
     }
@@ -417,7 +425,7 @@ public abstract class AbstractPersistenceManager implements PersistenceManager {
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#getCopyOnAttach()
      */
-//  @Override
+    @Override
     public boolean getCopyOnAttach() {
         return this.copyOnAttach;
     }
@@ -425,7 +433,7 @@ public abstract class AbstractPersistenceManager implements PersistenceManager {
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#setCopyOnAttach(boolean)
      */
-//  @Override
+    @Override
     public void setCopyOnAttach(boolean flag) {
         this.copyOnAttach = flag;
     }
@@ -433,7 +441,7 @@ public abstract class AbstractPersistenceManager implements PersistenceManager {
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#detachCopyAll(java.util.Collection)
      */
-//  @Override
+    @Override
     public <T> Collection<T> detachCopyAll(Collection<T> pcs) {
         return PersistenceManagers.detachCopyAll(this, pcs);
     }
@@ -441,7 +449,7 @@ public abstract class AbstractPersistenceManager implements PersistenceManager {
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#detachCopyAll(java.lang.Object[])
      */
-//  @Override
+    @Override
     public <T> T[] detachCopyAll(T... pcs) {
         return PersistenceManagers.detachCopyAll(this, pcs);
     }
@@ -449,7 +457,7 @@ public abstract class AbstractPersistenceManager implements PersistenceManager {
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#putUserObject(java.lang.Object, java.lang.Object)
      */
-//  @Override
+    @Override
     public Object putUserObject(Object key, Object val) {
         return this.userObjects.put(key, val);
     }
@@ -457,7 +465,7 @@ public abstract class AbstractPersistenceManager implements PersistenceManager {
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#getUserObject(java.lang.Object)
      */
-//  @Override
+    @Override
     public Object getUserObject(Object key) {
         return this.userObjects.get(key);
     }
@@ -465,7 +473,7 @@ public abstract class AbstractPersistenceManager implements PersistenceManager {
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#removeUserObject(java.lang.Object)
      */
-//  @Override
+    @Override
     public Object removeUserObject(Object key) {
         return this.userObjects.remove(key);
     }
@@ -473,7 +481,7 @@ public abstract class AbstractPersistenceManager implements PersistenceManager {
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#addInstanceLifecycleListener(javax.jdo.listener.InstanceLifecycleListener, java.lang.Class[])
      */
-//  @Override
+    @Override
     public void addInstanceLifecycleListener(
         InstanceLifecycleListener listener,
         Class... classes
@@ -484,7 +492,7 @@ public abstract class AbstractPersistenceManager implements PersistenceManager {
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#removeInstanceLifecycleListener(javax.jdo.listener.InstanceLifecycleListener)
      */
-//  @Override
+    @Override
     public void removeInstanceLifecycleListener(
         InstanceLifecycleListener listener
     ) {
@@ -494,7 +502,7 @@ public abstract class AbstractPersistenceManager implements PersistenceManager {
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#getExtent(java.lang.Class)
      */
-//  @Override
+    @Override
     public <T> Extent<T> getExtent(Class<T> persistenceCapableClass) {
         return this.getExtent(persistenceCapableClass, true);
     }
@@ -502,7 +510,7 @@ public abstract class AbstractPersistenceManager implements PersistenceManager {
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#evictAll(boolean, java.lang.Class)
      */
-//  @Override
+    @Override
     public void evictAll(boolean subclasses, Class pcClass) {
         throw new UnsupportedOperationException("Operation not supported by AbstractPersistenceManager");
     }
@@ -510,7 +518,7 @@ public abstract class AbstractPersistenceManager implements PersistenceManager {
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#getFetchGroup(java.lang.Class, java.lang.String)
      */
-//  @Override
+    @Override
     public FetchGroup getFetchGroup(Class arg0, String arg1) {
         throw new UnsupportedOperationException("Operation not supported by AbstractPersistenceManager");
     }
@@ -518,7 +526,7 @@ public abstract class AbstractPersistenceManager implements PersistenceManager {
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#deletePersistentAll(java.lang.Object[])
      */
-//  @Override
+    @Override
     public void deletePersistentAll(Object... pcs) {
         throw new UnsupportedOperationException("Operation not supported by AbstractPersistenceManager");
     }
@@ -526,7 +534,7 @@ public abstract class AbstractPersistenceManager implements PersistenceManager {
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#evictAll(java.lang.Object[])
      */
-//  @Override
+    @Override
     public void evictAll(Object... pcs) {
         throw new UnsupportedOperationException("Operation not supported by AbstractPersistenceManager");
     }
@@ -534,7 +542,7 @@ public abstract class AbstractPersistenceManager implements PersistenceManager {
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#getObjectsById(java.lang.Object[])
      */
-//  @Override
+    @Override
     public Object[] getObjectsById(Object... oids) {
         throw new UnsupportedOperationException("Operation not supported by AbstractPersistenceManager");
     }
@@ -542,7 +550,7 @@ public abstract class AbstractPersistenceManager implements PersistenceManager {
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#getObjectsById(java.lang.Object[], boolean)
      */
-//  @Override
+    @Override
     public Object[] getObjectsById(Object[] oids, boolean validate) {
         throw new UnsupportedOperationException("Operation not supported by AbstractPersistenceManager");
     }
@@ -550,7 +558,7 @@ public abstract class AbstractPersistenceManager implements PersistenceManager {
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#makeNontransactionalAll(java.lang.Object[])
      */
-//  @Override
+    @Override
     public void makeNontransactionalAll(Object... pcs) {
         throw new UnsupportedOperationException("Operation not supported by AbstractPersistenceManager");
     }
@@ -558,7 +566,7 @@ public abstract class AbstractPersistenceManager implements PersistenceManager {
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#makeTransactionalAll(java.lang.Object[])
      */
-//  @Override
+    @Override
     public void makeTransactionalAll(Object... pcs) {
         throw new UnsupportedOperationException("Operation not supported by AbstractPersistenceManager");
     }
@@ -566,7 +574,7 @@ public abstract class AbstractPersistenceManager implements PersistenceManager {
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#makeTransientAll(java.lang.Object[])
      */
-//  @Override
+    @Override
     public void makeTransientAll(Object... pcs) {
         throw new UnsupportedOperationException("Operation not supported by AbstractPersistenceManager");
     }
@@ -574,7 +582,7 @@ public abstract class AbstractPersistenceManager implements PersistenceManager {
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#refreshAll(java.lang.Object[])
      */
-//  @Override
+    @Override
     public void refreshAll(Object... pcs) {
         PersistenceManagers.refreshAll(this, pcs);
     }
@@ -582,7 +590,7 @@ public abstract class AbstractPersistenceManager implements PersistenceManager {
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#retrieveAll(java.lang.Object[])
      */
-//  @Override
+    @Override
     public void retrieveAll(Object... pcs) {
         throw new UnsupportedOperationException("Operation not supported by AbstractPersistenceManager");
     }
@@ -590,7 +598,7 @@ public abstract class AbstractPersistenceManager implements PersistenceManager {
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#retrieveAll(java.lang.Object[], boolean)
      */
-//  @Override
+    @Override
     public void retrieveAll(Object[] pcs, boolean useFetchPlan) {
         throw new UnsupportedOperationException("Operation not supported by AbstractPersistenceManager");
     }

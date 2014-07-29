@@ -68,10 +68,10 @@ import org.openmdx.portal.servlet.Action;
 import org.openmdx.portal.servlet.ApplicationContext;
 import org.openmdx.portal.servlet.ViewPort;
 import org.openmdx.portal.servlet.ViewsCache;
-import org.openmdx.portal.servlet.view.EditObjectView;
-import org.openmdx.portal.servlet.view.ObjectView;
-import org.openmdx.portal.servlet.view.ShowObjectView;
-import org.openmdx.portal.servlet.view.ViewMode;
+import org.openmdx.portal.servlet.component.EditObjectView;
+import org.openmdx.portal.servlet.component.ObjectView;
+import org.openmdx.portal.servlet.component.ShowObjectView;
+import org.openmdx.portal.servlet.component.ViewMode;
 
 /**
  * EditAction
@@ -103,7 +103,7 @@ public class EditAction extends BoundAction {
         	Path objectIdentity = null;
         	Map<Path,Action> historyActions = null;
         	if(currentView instanceof ShowObjectView) {
-        		objectIdentity = currentView.getRefObject().refGetPath();
+        		objectIdentity = currentView.getObject().refGetPath();
         		historyActions = ((ShowObjectView)currentView).createHistoryAppendCurrent();
         	} else {
         		objectIdentity = new Path(Action.getParameter(parameter, Action.PARAMETER_OBJECTXRI));
@@ -126,6 +126,7 @@ public class EditAction extends BoundAction {
                 objectIdentity,
                 app,
                 historyActions,
+                currentView.getNextPrevActions(),
                 currentView.getLookupType(),
                 currentView.getResourcePathPrefix(),
                 currentView.getNavigationTarget(),
@@ -137,7 +138,7 @@ public class EditAction extends BoundAction {
             ServiceException e0 = new ServiceException(e);
             SysLog.warning(e0.getMessage(), e0.getCause());
             app.addErrorMessage(
-                app.getTexts().getErrorTextCannotEditObject(), new String[] {view.getRefObject().refMofId(), e.getMessage() }
+                app.getTexts().getErrorTextCannotEditObject(), new String[] {view.getObject().refMofId(), e.getMessage() }
             );
         }
         return new ActionPerformResult(

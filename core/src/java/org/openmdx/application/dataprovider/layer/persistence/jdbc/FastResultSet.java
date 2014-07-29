@@ -160,6 +160,11 @@ public class FastResultSet {
         return hasMore;
     }
 
+    public boolean isAbsolutePositioningEnabled(
+    ) throws SQLException{
+    	return this.rs.getType() != ResultSet.TYPE_FORWARD_ONLY;
+    }
+    
     //-----------------------------------------------------------------------
     public boolean absolute(
         int position

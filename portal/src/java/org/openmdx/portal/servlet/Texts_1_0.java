@@ -148,6 +148,7 @@ public interface Texts_1_0 {
 	public String getExpandTitle();
 	public String getCollapseTitle();
 	public String getSelectExistingText();
+	public String getWizardsMenuTitle();
     
 }
 

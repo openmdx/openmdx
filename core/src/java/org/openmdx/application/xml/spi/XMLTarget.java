@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2009, OMEX AG, Switzerland
+ * Copyright (c) 2009-2014, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -146,11 +146,11 @@ public class XMLTarget implements ExportTarget {
     ) throws ServiceException {
         ModelElement_1_0 objectClass = this.model.getElement(object.refClass().refMofId());
         if(!objectClass.objGetList("compositeReference").isEmpty()) {
-            ModelElement_1_0 compReference = this.model.getElement(((Path) objectClass.objGetValue("compositeReference")).getBase());
-            ModelElement_1_0 associationEnd = this.model.getElement(((Path) compReference.objGetValue("referencedEnd")).getBase());
+            ModelElement_1_0 compReference = this.model.getElement(((Path) objectClass.objGetValue("compositeReference")).getLastSegment().toClassicRepresentation());
+            ModelElement_1_0 associationEnd = this.model.getElement(((Path) compReference.getReferencedEnd()).getLastSegment().toClassicRepresentation());
             return (String) associationEnd.objGetValue("qualifierName");
         }
-        if("org:openmdx:base:Authority".equals(objectClass.objGetValue("qualifiedName"))) {
+        if("org:openmdx:base:Authority".equals(objectClass.getQualifiedName())) {
             return "name";
         }
         throw new ServiceException(
@@ -190,7 +190,7 @@ public class XMLTarget implements ExportTarget {
         String qualifiedTypeName = refObject.refClass().refMofId();
         Path objectId = (Path) ReducedJDOHelper.getObjectId(refObject);
         Map<String, String> atts = new LinkedHashMap<String,String>();
-        String qualifierValue = objectId.getBase();
+        String qualifierValue = objectId.getLastSegment().toClassicRepresentation();
         atts.put(qualifierName, qualifierValue);
         if(noOperation) {
             atts.put("_operation", "null");

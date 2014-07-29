@@ -101,7 +101,8 @@ public class QuickAccessor {
     			((RefObject_1_0)currentObject).refGetPath() :
     			null :
     		this.targetIdentity;
-        String actionName = this.actionName.replace("$XRI", targetIdentity.toXri());
+        @SuppressWarnings("deprecation")
+		String actionName = this.actionName.replace("$XRI", targetIdentity.toXri());
         try {
           Action action = new Action(
               MacroAction.EVENT_ID,

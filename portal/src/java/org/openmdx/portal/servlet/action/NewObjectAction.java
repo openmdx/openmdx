@@ -68,10 +68,10 @@ import org.openmdx.portal.servlet.Action;
 import org.openmdx.portal.servlet.ApplicationContext;
 import org.openmdx.portal.servlet.ViewPort;
 import org.openmdx.portal.servlet.ViewsCache;
-import org.openmdx.portal.servlet.view.EditObjectView;
-import org.openmdx.portal.servlet.view.ObjectView;
-import org.openmdx.portal.servlet.view.ShowObjectView;
-import org.openmdx.portal.servlet.view.ViewMode;
+import org.openmdx.portal.servlet.component.EditObjectView;
+import org.openmdx.portal.servlet.component.ObjectView;
+import org.openmdx.portal.servlet.component.ShowObjectView;
+import org.openmdx.portal.servlet.component.ViewMode;
 
 /**
  * NewObjectAction
@@ -104,7 +104,7 @@ public class NewObjectAction extends BoundAction {
             String forReference = Action.getParameter(parameter, Action.PARAMETER_FOR_REFERENCE);
             SysLog.detail("creating object", Action.PARAMETER_FOR_CLASS + "=" + forClass + "; " + Action.PARAMETER_FOR_REFERENCE + "=" + forReference);
             PersistenceManager pm = app.getNewPmData();
-            RefObject_1_0 parent = (RefObject_1_0)pm.getObjectById(currentView.getRefObject().refGetPath()); 
+            RefObject_1_0 parent = (RefObject_1_0)pm.getObjectById(currentView.getObject().refGetPath()); 
             RefObject_1_0 newObject = (RefObject_1_0)parent.refOutermostPackage().refClass(forClass).refCreateInstance(null);
             newObject.refInitialize(false, false);
             nextView = new EditObjectView(
@@ -114,6 +114,7 @@ public class NewObjectAction extends BoundAction {
                 null,
                 app,
                 currentView.createHistoryAppendCurrent(),
+                null, // nextPrevActions
                 currentView.getLookupType(),
                 parent,
                 forReference,
@@ -125,7 +126,7 @@ public class NewObjectAction extends BoundAction {
             ServiceException e0 = new ServiceException(e);
             SysLog.warning(e0.getMessage(), e0.getCause());
             app.addErrorMessage(
-                app.getTexts().getErrorTextCannotEditObject(), new String[] { currentView.getRefObject().refMofId(), e.getMessage() }
+                app.getTexts().getErrorTextCannotEditObject(), new String[] { currentView.getObject().refMofId(), e.getMessage() }
             );
         }
         return new ActionPerformResult(

@@ -1,18 +1,15 @@
 <%@ page contentType= "text/html;charset=UTF-8" language= "java" pageEncoding= "UTF-8" %><%
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: Error.jsp,v 1.11 2009/09/22 11:16:26 wfro Exp $
+ * Project:     openMDX/Portal, http://www.openmdx.org/
  * Description: Error.jsp
- * Revision:    $Revision: 1.11 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/09/22 11:16:26 $
  * ====================================================================
  *
  * This software is published under the BSD license
  * as listed below.
  *
- * Copyright (c) 2004-2008, OMEX AG, Switzerland
+ * Copyright (c) 2004-2014, OMEX AG, Switzerland
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or
@@ -68,43 +65,51 @@ javax.servlet.*
 <%
 	request.setCharacterEncoding("UTF-8");
 	// Get locale
-	String locale = request.getParameter("locale");
+	String locale = request.getParameter(org.openmdx.portal.servlet.WebKeys.LOCALE_KEY);
 	if(locale == null) {
 		try {
-			locale = (String)request.getSession().getAttribute("locale");
-		} 
-		catch(Exception e) {}
+			locale = (String)request.getSession().getAttribute(org.openmdx.portal.servlet.WebKeys.LOCALE_KEY);
+		} catch(Exception e) {}
 	}
-	String timezone = request.getParameter("timezone");
+	String timezone = request.getParameter(org.openmdx.portal.servlet.WebKeys.TIMEZONE_KEY);
 	if(timezone == null) {
 		try {
-			timezone = (String)request.getSession().getAttribute("timezone");
-		} 
-		catch(Exception e) {}
+			timezone = (String)request.getSession().getAttribute(org.openmdx.portal.servlet.WebKeys.TIMEZONE_KEY);
+		} catch(Exception e) {}
+	}
+	Object initialScale = request.getParameter(org.openmdx.portal.servlet.WebKeys.INITIAL_SCALE_KEY);
+	if(initialScale == null) {
+		try {
+			initialScale = request.getSession().getAttribute(org.openmdx.portal.servlet.WebKeys.INITIAL_SCALE_KEY);
+		} catch(Exception e) {}
 	}
 	String loginFailed = request.getParameter("loginFailed");	
 	System.out.println(new Date() + ": Error: login failed; locale=" + locale + "; timezone=" + timezone + "; requestURL=" + request.getRequestURL());
 	// Invalidate sesion
 	try {
 		request.getSession().invalidate();
-	} 
-	catch(Exception e) {}	
+	} catch(Exception e) {}	
 	// Forward to Login
 	String cookieMissingHint = request.isRequestedSessionIdFromCookie() ? 
 		"" : 
 		"&cookieError=true";
 	try {
 		request.getSession().setAttribute("loginFailed", loginFailed == null ? "true" : loginFailed);
-		request.getSession().setAttribute("locale", locale);
-		request.getSession().setAttribute("timezone", timezone);
+		request.getSession().setAttribute(org.openmdx.portal.servlet.WebKeys.LOCALE_KEY, locale);
+		request.getSession().setAttribute(org.openmdx.portal.servlet.WebKeys.TIMEZONE_KEY, timezone);
+		request.getSession().setAttribute(
+			org.openmdx.portal.servlet.WebKeys.INITIAL_SCALE_KEY, 
+			initialScale == null ? null : new java.math.BigDecimal(initialScale.toString())
+		);
 		request.getSession().setAttribute("processingLogin", "true");		
 	} 
 	catch(Exception e) {}
 	String event = request.getParameter("event");
 	String parameter = request.getParameter("parameter");
 	response.sendRedirect(
-		request.getContextPath() + "/ObjectInspectorServlet?locale=" + locale +
-		(timezone == null ? "" : "&timezone=" + URLEncoder.encode(timezone)) + 
+		request.getContextPath() + "/ObjectInspectorServlet?" + org.openmdx.portal.servlet.WebKeys.LOCALE_KEY + "=" + locale +
+		(timezone == null ? "" : "&" + org.openmdx.portal.servlet.WebKeys.TIMEZONE_KEY + "=" + URLEncoder.encode(timezone)) + 
+		(initialScale == null ? "" : "&" + org.openmdx.portal.servlet.WebKeys.INITIAL_SCALE_KEY + "=" + initialScale.toString()) + 
 		(event == null ? "" : "&event=" + URLEncoder.encode(event)) +
 		(parameter == null ? "" : "&parameter=" + URLEncoder.encode(parameter)) +
 		cookieMissingHint

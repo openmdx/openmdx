@@ -107,7 +107,7 @@ public class AddressImpl<S extends test.openmdx.app1.jmi1.Address,N extends test
      */
     public String getId() {
         Path objectId = (Path) JDOHelper.getObjectId(sameObject());
-        return objectId == null ? null : objectId.getBase();
+        return objectId == null ? null : objectId.getLastSegment().toClassicRepresentation();
     }
     
 }

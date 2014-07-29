@@ -76,11 +76,13 @@ import org.openmdx.kernel.id.UUIDs;
 import org.openmdx.kernel.log.SysLog;
 import org.openmdx.portal.servlet.Action;
 import org.openmdx.portal.servlet.ApplicationContext;
+import org.openmdx.portal.servlet.CssClass;
 import org.openmdx.portal.servlet.HtmlEncoder_1_0;
 import org.openmdx.portal.servlet.Texts_1_0;
 import org.openmdx.portal.servlet.ViewPort;
 import org.openmdx.portal.servlet.WebKeys;
 import org.w3c.cci2.BinaryLargeObject;
+import org.w3c.cci2.BinaryLargeObjects;
 
 /**
  * BinaryValue
@@ -246,16 +248,19 @@ public class BinaryValue extends AttributeValue implements Serializable {
             // For transient objects the binary value is stored in temporary
             // file which is returned on EVENT_DOWNLOAD
             String location = null;        
-            byte[] bytes = null;
+            Object content = null;
             Object value = super.getValue(false);
             if(value instanceof Collection) {
-                bytes = (byte[])((Collection)value).iterator().next();
-            } else {
-                bytes = (byte[])value;
+                content = (byte[])((Collection<?>)value).iterator().next();
+            } else if(value instanceof BinaryLargeObjects.StreamLargeObject) {
+            	try {
+            		content = ((BinaryLargeObjects.StreamLargeObject)value).getContent();
+            	} catch(Exception ignore) {}
+            } else if(value instanceof byte[]) {
+                content = (byte[])value;
             }
-            SysLog.trace("bytes", "" + (bytes == null ? -1 : bytes.length));
-            this.isNull = bytes == null;
-            this.downloadAction = null;        
+            this.isNull = content == null;
+            this.downloadAction = null;
             // Only create temporary file if the content is not null
             // and if it must be prepared for download. inPlace content
             // is never downloaded
@@ -266,7 +271,11 @@ public class BinaryValue extends AttributeValue implements Serializable {
                         application.getTempFileName(location, "")
                     );
                     OutputStream os = new FileOutputStream(f);
-                    os.write(bytes);
+                    if(content instanceof byte[]) {
+                    	os.write((byte[])content);
+                    } else if(content instanceof InputStream) {
+                    	BinaryLargeObjects.streamCopy((InputStream)content, 0L, os);
+                    }
                     os.flush();
                     os.close();
                 } catch(Exception e) {
@@ -468,24 +477,17 @@ public class BinaryValue extends AttributeValue implements Serializable {
             popupImages.put(imageId, imageSrc);
         }
         // Single-valued BinaryValue in place
-    	String cssClass = DEFAULT_CSS_CLASS;
+    	String cssClass = this.app.getPortalExtension().getDefaultCssClassFieldGroup(this, this.app);
     	if(this.getCssClassFieldGroup() != null) {
     		cssClass = this.getCssClassFieldGroup() + " " + cssClass;
     	}
-    	if(p.getViewPortType() == ViewPort.Type.MOBILE) {
-        	p.write("		<label>",  htmlEncoder.encode(label, false), "</label>");                	
-            p.write("       <div class=\"", cssClass, "\">");
-	        p.write(p.getImg("class=\"picture\" src=\"", imageSrc, "\" id=\"image", imageId, "\" ondblclick=\"return showImage('divImgPopUp", imageId, "', 'popUpImg", imageId, "', 'tdImage", imageId, "', this.id);\" alt=\"\""));
-	        p.write("</div>");	        
-    	} else {
-	        p.write(gapModifier); 
-	        p.write("<td class=\"label\"><span class=\"nw\">", htmlEncoder.encode(label, false), "</span></td>");
-	        p.write("<td ", rowSpanModifier, " class=\"", cssClass, "\" ", widthModifier, " id=\"tdImage", imageId, "\">");
-	        p.write("<div class=\"valuePicture\" ", styleModifier, ">");
-	        p.write(p.getImg("class=\"picture\" src=\"", imageSrc, "\" id=\"image", imageId, "\" ondblclick=\"return showImage('divImgPopUp", imageId, "', 'popUpImg", imageId, "', 'tdImage", imageId, "', this.id);\" alt=\"\""));
-	        p.write("</div>");
-	        p.write("</td>");
-    	}
+        p.write(gapModifier); 
+        p.write("<td class=\"", CssClass.fieldLabel.toString(), "\"><span class=\"", CssClass.nw.toString(), "\">", htmlEncoder.encode(label, false), "</span></td>");
+        p.write("<td ", rowSpanModifier, " class=\"", cssClass, "\" ", widthModifier, " id=\"tdImage", imageId, "\">");
+        p.write("<div class=\"", CssClass.valuePicture.toString(), "\" ", styleModifier, ">");
+        p.write(p.getImg("class=\"", CssClass.picture.toString(), "\" src=\"", imageSrc, "\" id=\"image", imageId, "\" ondblclick=\"return showImage('divImgPopUp", imageId, "', 'popUpImg", imageId, "', 'tdImage", imageId, "', this.id);\" alt=\"\""));
+        p.write("</div>");
+        p.write("</td>");
     }
 
     /* (non-Javadoc)
@@ -516,20 +518,20 @@ public class BinaryValue extends AttributeValue implements Serializable {
         if(forEditing) {
             String idTag = id == null ? "" : 
                 "id=\"" + id + "\"";                                                                        
-            p.write("<td class=\"label\" title=\"", (title == null ? "" : htmlEncoder.encode(title, false)), "\"><span class=\"nw\">", htmlEncoder.encode(label, false), "</span></td>");            
+            p.write("<td class=\"", CssClass.fieldLabel.toString(), "\" title=\"", (title == null ? "" : htmlEncoder.encode(title, false)), "\"><span class=\"", CssClass.nw.toString(), "\">", htmlEncoder.encode(label, false), "</span></td>");            
             String feature = this.getName();
             p.write("<td ", rowSpanModifier, ">");
             if(readonlyModifier.isEmpty()) {            
-            	p.write("  <input ", idTag, " type=\"file\" class=\"valueL", lockedModifier, "\" name=\"", feature, "[", Integer.toString(tabIndex), "]\" ", readonlyModifier, " ", (readonlyModifier.isEmpty() ? "" : "disabled"), " tabindex=\"", Integer.toString(tabIndex), "\" title=\"", texts.getEnterNullToDeleteText(), "\">");
+            	p.write("  <input ", idTag, " type=\"file\" class=\"", CssClass.valueL.toString(), lockedModifier, "\" name=\"", feature, "[", Integer.toString(tabIndex), "]\" ", readonlyModifier, " ", (readonlyModifier.isEmpty() ? "" : "disabled"), " tabindex=\"", Integer.toString(tabIndex), "\" title=\"", texts.getEnterNullToDeleteText(), "\">");
             }
             p.write("</td>");
-            p.write("<td class=\"addon\" ", rowSpanModifier, "></td>");            
+            p.write("<td class=\"", CssClass.addon.toString(), "\" ", rowSpanModifier, "></td>");            
         } else {
         	// Show
-        	String cssClass = DEFAULT_CSS_CLASS;
+        	String cssClass = this.app.getPortalExtension().getDefaultCssClassFieldGroup(this, this.app);
         	if(this.getCssClassFieldGroup() != null) {
         		cssClass = this.getCssClassFieldGroup() + " " + cssClass;
-        	}  	
+        	}
         	if(WebKeys.LOCKED_VALUE.equals(stringifiedValue)) {
         		super.paint(
         			attribute, 
@@ -577,23 +579,18 @@ public class BinaryValue extends AttributeValue implements Serializable {
 	                    styleModifier
 	                );
 		            if(forEditing) {
-		            	p.write("<td class=\"addon\" />");
+		            	p.write("<td class=\"", CssClass.addon.toString(), "\" />");
 		            }
 	            } else {
 		            // Single-valued BinaryValue as link -->
-	            	if(p.getViewPortType() == ViewPort.Type.MOBILE) {
-	                	p.write("		<label>",  htmlEncoder.encode(label, false), "</label>");                	
-		                p.write("       <div class=\"", cssClass, "\">", attribute.getStringifiedValue(p, false, false), "</div>");
-	            	} else {
-		                p.write(gapModifier);
-		                p.write("<td class=\"label\" title=\"", (title == null ? "" : htmlEncoder.encode(title, false)), "\"><span class=\"nw\">", label, "</span></td>");
-		                p.write("<td ", rowSpanModifier, " class=\"", cssClass, "\" ", (forEditing ? "" : widthModifier), ">");
-		                p.write("<div class=\"field\">", attribute.getStringifiedValue(p, false, false), "</div>");
-		                p.write("</td>");
-			            if(forEditing) {
-			            	p.write("<td class=\"addon\" />");
-			            }
-	            	}
+	                p.write(gapModifier);
+	                p.write("<td class=\"", CssClass.fieldLabel.toString(), "\" title=\"", (title == null ? "" : htmlEncoder.encode(title, false)), "\"><span class=\"", CssClass.nw.toString(), "\">", label, "</span></td>");
+	                p.write("<td ", rowSpanModifier, " class=\"", cssClass, "\" ", (forEditing ? "" : widthModifier), ">");
+	                p.write("<div class=\"", CssClass.field.toString(), "\">", attribute.getStringifiedValue(p, false, false), "</div>");
+	                p.write("</td>");
+		            if(forEditing) {
+		            	p.write("<td class=\"", CssClass.addon.toString(), "\" />");
+		            }
 	            }
 	        }
         }

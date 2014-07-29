@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2010, OMEX AG, Switzerland
+ * Copyright (c) 2014, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -66,21 +66,21 @@ public class ControlObjects_2 {
      */
     private static final Path TRANSACTION_OBJECT_PATTERN = new Path(
         "xri://@openmdx*org.openmdx.kernel/transaction/($..)"
-    ).lock();
+    );
 
     /**
      * Virtual Transaction Object Id Pattern
      */
     private static final Path TRANSACTION_COMMIT_PATTERN = new Path(
         "xri://@openmdx*org.openmdx.kernel/transaction/($..)/commit/($..)"
-    ).lock();
+    );
 
     /**
      * Virtual Connection Object Id Pattern
      */
     protected static final Path CONNECTION_OBJECT_PATTERN = new Path(
         "xri://@openmdx*org.openmdx.kernel/connection/($..)"
-    ).lock();
+    );
     
     /**
      * Tests whether the candidate is a control object 
@@ -107,7 +107,7 @@ public class ControlObjects_2 {
         Path candidate,
         Path pattern
     ){
-        return candidate.size() % 2 == 1 ? 
+        return candidate.isObjectPath() ? 
             candidate.isLike(pattern) :
             candidate.isLike(pattern.getParent());
     }

@@ -1,4 +1,4 @@
-﻿<%@  page contentType="text/html;charset=UTF-8" language="java" pageEncoding="UTF-8" %><%
+<%@  page contentType="text/html;charset=UTF-8" language="java" pageEncoding="UTF-8" %><%
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
@@ -9,7 +9,7 @@
  * This software is published under the BSD license
  * as listed below.
  *
- * Copyright (c) 2004-2013, OMEX AG, Switzerland
+ * Copyright (c) 2004-2014, OMEX AG, Switzerland
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or
@@ -63,7 +63,7 @@ org.openmdx.kernel.id.*,
 org.openmdx.base.accessor.jmi.cci.*,
 org.openmdx.portal.servlet.*,
 org.openmdx.portal.servlet.attribute.*,
-org.openmdx.portal.servlet.view.*,
+org.openmdx.portal.servlet.component.*,
 org.openmdx.portal.servlet.control.*,
 org.openmdx.portal.servlet.wizards.*,
 org.openmdx.base.naming.*
@@ -101,7 +101,7 @@ org.openmdx.base.naming.*
 		// Handle request
 		if(xri != null && requestId != null && dashletId != null && viewsCache.getView(requestId) != null) {
 
-		    String submitFormScriptlet = "var form = document.forms['" + dashletId + "Form'];var params = Form.serialize(form);new Ajax.Updater('" + dashletId + "Content', './wizards/Dashboard/WorkspacesDashlet.jsp', {asynchronous:true, evalScripts: true, parameters: params, onComplete: function(){}});return false;";			
+		    String submitFormScriptlet = "var form = document.forms['" + dashletId + "Form'];var params = Form.serialize(form);jQuery.ajax({type: 'get', url: './wizards/Dashboard/WorkspacesDashlet.jsp', dataType: 'html', data: params, success: function(data){$('" + dashletId + "Content').innerHTML=data;eval(jQuery(data).find('script').text());eval(jQuery(data).filter('script').text());}});return false;";			
 
 		    String command = request.getParameter(FIELD_NAME_COMMAND);
 			if(command == null) command = "";						
@@ -158,21 +158,21 @@ org.openmdx.base.naming.*
 				);
 			}
 %>
-			<div id="<%= dashletId %>Content" style="padding:5px;min-width:150px;">
+			<div id="<%= dashletId %>Content" style=>
 			<form id="<%= dashletId %>Form" name="<%= dashletId %>Form">
 				<input type="hidden" name="<%= Action.PARAMETER_REQUEST_ID %>" value="<%= requestId %>" />
-				<input id="<%= WebKeys.REQUEST_PARAMETER %>" name="<%= WebKeys.REQUEST_PARAMETER %>" type="hidden" value="<%= parameters %>" />				
+				<input id="<%= WebKeys.REQUEST_PARAMETER %>" name="<%= WebKeys.REQUEST_PARAMETER %>" type="hidden" value="<%= parameters %>" />
 				<input type="hidden" name="<%= Action.PARAMETER_OBJECTXRI %>" value="<%= xri %>" />
 				<input type="hidden" id="<%= FIELD_NAME_COMMAND %>" name="<%= FIELD_NAME_COMMAND %>" value="" />
 				<input type="hidden" id="<%= FIELD_NAME_PARAM %>" name="<%= FIELD_NAME_PARAM %>" value="" />
-				<table class="tableLayout">
+				<table class="<%= CssClass.tableLayout %>">
 					<tr>
-						<td class="cellObject">
-							<div class="panel" id="panel<%= dashletId %>" style="display:block">
+						<td class="<%= CssClass.cellObject %>">
+							<div id="panel<%= dashletId %>" style="display:block;background-color:inherit;">
 <%
 								if(isAdmin && actionEdit) {
 									for(int i = 0; i < MAX_WORKSPACES; i++) {
-										String workspaceId = "W" + i;										
+										String workspaceId = "W" + i;
 										String workspaceName = settings.getProperty(
 											PROPERTY_WORKSPACE + "." + workspaceId + "." + PROPERTY_WORKSPACE_LABEL
 										);
@@ -190,10 +190,10 @@ org.openmdx.base.naming.*
 									}
 %>									
 									<div>
-										<input type="submit" class="abutton" name="<%= COMMAND_APPLY %>" tabindex="9010" value="<%= texts.getSaveTitle() %>" onclick="javascript:$('<%= FIELD_NAME_COMMAND %>').value='<%= COMMAND_APPLY %>';<%= submitFormScriptlet %>;" />
-										<input type="submit" class="abutton" name="<%= COMMAND_CANCEL %>" tabindex="9020" value="<%= texts.getCancelTitle() %>" onclick="javascript:$('<%= FIELD_NAME_COMMAND %>').value='<%= COMMAND_CANCEL %>';<%= submitFormScriptlet %>;" />
+										<input type="submit" class="<%= CssClass.btn.toString() + " " + CssClass.btnDefault.toString() %>" name="<%= COMMAND_APPLY %>" tabindex="9010" value="<%= texts.getSaveTitle() %>" onclick="javascript:$('<%= FIELD_NAME_COMMAND %>').value='<%= COMMAND_APPLY %>';<%= submitFormScriptlet %>;" />
+										<input type="submit" class="<%= CssClass.btn.toString() + " " + CssClass.btnDefault.toString() %>" name="<%= COMMAND_CANCEL %>" tabindex="9020" value="<%= texts.getCancelTitle() %>" onclick="javascript:$('<%= FIELD_NAME_COMMAND %>').value='<%= COMMAND_CANCEL %>';<%= submitFormScriptlet %>;" />
 									</div>
-<%																		
+<%
 								}
 								else {
 									Properties adminSettings = isAdmin ? settings : app.getUserSettings(userHomeAdminIdentity);
@@ -220,7 +220,7 @@ org.openmdx.base.naming.*
 											workspaceName = "Default";
 										}
 %>
-							            <div><a <%= workspaceId.equals(app.getCurrentWorkspace()) ? "class=\"hilite\"" : "" %> onclick="javascript:$('<%= FIELD_NAME_COMMAND %>').value='<%= COMMAND_SELECT %>';$('<%= FIELD_NAME_PARAM %>').value='<%= workspaceId %>';<%= submitFormScriptlet %>"><%= workspaceName %></a></div>
+							            <div><a <%= workspaceId.equals(app.getCurrentWorkspace()) ? "class=\"" + CssClass.hilite + "\"" : "" %> onclick="javascript:$('<%= FIELD_NAME_COMMAND %>').value='<%= COMMAND_SELECT %>';$('<%= FIELD_NAME_PARAM %>').value='<%= workspaceId %>';<%= submitFormScriptlet %>"><%= workspaceName %></a></div>
 <%
 									}
 								}

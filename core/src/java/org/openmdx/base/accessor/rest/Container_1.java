@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2009-2011, OMEX AG, Switzerland
+ * Copyright (c) 2009-2014, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -176,8 +176,8 @@ class Container_1
             Model_1_0 model = this.openmdxjdoGetDataObjectManager().getModel();
             ModelElement_1_0 classDef = model.getElement(this.owner.objGetClass());
             ModelElement_1_0 reference = model.getFeatureDef(classDef, this.transientContainerId.getFeature(), true);
-            ModelElement_1_0 referencedEnd = model.getElement(reference.objGetValue("referencedEnd"));
-            return AggregationKind.COMPOSITE.equals(referencedEnd.objGetValue("aggregation"));
+            ModelElement_1_0 referencedEnd = model.getElement(reference.getReferencedEnd());
+            return AggregationKind.COMPOSITE.equals(referencedEnd.getAggregation());
         } catch(Exception e) {
             return false;
         }
@@ -485,7 +485,7 @@ class Container_1
     ){
         for(DataObject_1_0 object : this.getIncluded()) {
             cache.put(
-                object.jdoGetObjectId().getBase(),
+                object.jdoGetObjectId().getLastSegment().toClassicRepresentation(),
                 object
             );
         }
@@ -498,7 +498,7 @@ class Container_1
         for(DataObject_1_0 object : this.getStored()){
             if(!object.jdoIsDeleted()) {
                 cache.put(
-                    object.jdoGetObjectId().getBase(),
+                    object.jdoGetObjectId().getLastSegment().toClassicRepresentation(),
                     object
                 );
             }                    
@@ -575,7 +575,7 @@ class Container_1
         	ModelElement_1_0 referencedType = ownerClass == null ?
                 model.getTypes(this.jdoGetObjectId())[2] :
                 model.getElementType(model.getFeatureDef(model.getElement(ownerClass), this.transientContainerId.getFeature(), false));
-	        this.queryType = (String)referencedType.objGetValue("qualifiedName");
+	        this.queryType = (String)referencedType.getQualifiedName();
         } catch (ServiceException exception) {
             exception.log();
         }

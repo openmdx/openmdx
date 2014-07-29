@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2008-2012, OMEX AG, Switzerland
+ * Copyright (c) 2008-2014, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -47,10 +47,7 @@
  */
 package org.openmdx.state2.aop1;
 
-import javax.jdo.spi.PersistenceCapable;
-
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.base.naming.Path;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.jdo.ReducedJDOHelper;
 
@@ -77,25 +74,6 @@ final class UniqueValue<T> {
     private boolean empty = true;
     
     /**
-     * Prepare an exception parameter value
-     * 
-     * @param value
-     * 
-     * @return the prepared value
-     */
-    private static Object toValue(
-        Object value
-    ){
-        if(value instanceof PersistenceCapable) {
-            return ReducedJDOHelper.isPersistent(value) ? 
-        		((Path)ReducedJDOHelper.getObjectId(value)).toXRI() : 
-    		    ReducedJDOHelper.getTransactionalObjectId(value);
-        } else {
-            return value;
-        }
-    }
-    
-    /**
      * Process a single state's reply
      * 
      * @param value
@@ -113,7 +91,7 @@ final class UniqueValue<T> {
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.ILLEGAL_STATE,
                 "The underlying states have inconsistent values for the given request",
-                new BasicException.Parameter("values", toValue(this.value), toValue(value))
+                new BasicException.Parameter("values", ReducedJDOHelper.replaceObjectById(this.value), ReducedJDOHelper.replaceObjectById(value))
             );
         }
     }

@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2008, OMEX AG, Switzerland
+ * Copyright (c) 2004-2014, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -186,7 +186,7 @@ public class RefException_1
      * @return Throwable  The exception cause.
      */
     @Override
-    public final BasicException getCause(
+    public final synchronized BasicException getCause(
     ){
         return (BasicException) super.getCause();
     }
@@ -223,7 +223,7 @@ public class RefException_1
      */
     @Override
     public void printStackTrace(PrintStream s) {
-        getCause().printStackTrace(s);
+        getCause().printStackTrace(getClass().getName(), s);
     }
 
     /* (non-Javadoc)
@@ -231,7 +231,7 @@ public class RefException_1
      */
     @Override
     public void printStackTrace(PrintWriter s) {
-        getCause().printStackTrace(s);
+        getCause().printStackTrace(getClass().getName(), s);
     }
 
     /* (non-Javadoc)

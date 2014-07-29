@@ -1,18 +1,15 @@
 <%@ page contentType= "text/html;charset=UTF-8" language= "java" pageEncoding= "UTF-8" %><%
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: Logoff.jsp,v 1.9 2011/05/11 14:04:47 cmu Exp $
+ * Project:     openMDX/Portal, http://www.openmdx.org/
  * Description: LoginFailed.jsp
- * Revision:    $Revision: 1.9 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/05/11 14:04:47 $
  * ====================================================================
  *
  * This software is published under the BSD license
  * as listed below.
  * 
- * Copyright (c) 2004, OMEX AG, Switzerland
+ * Copyright (c) 2004-2014, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -63,13 +60,13 @@
 java.util.*,
 java.net.*,
 java.io.*,
-javax.servlet.*
+javax.servlet.*,
+org.openmdx.portal.servlet.*
 "%>
 <%
 request.setCharacterEncoding("UTF-8");
 %>
-
-<body class="yui-skin-sam" style="border:0px solid white;">
+<body style="border:0px solid white;">
 <%
 	String localeStr = null;
 	try {
@@ -82,35 +79,40 @@ request.setCharacterEncoding("UTF-8");
 	List activeLocales = new ArrayList();
 	boolean wasAuthenticated = false;
 
-  if(request.getSession().getAttribute("ObjectInspectorServlet.ApplicationContext") != null) {
-  		wasAuthenticated = true;
-      System.out.println(new Date() + ": Logoff: removing application context");
-      request.getSession().removeAttribute("ObjectInspectorServlet.ApplicationContext");
-  }
-  if(request.getSession().getAttribute("processingLogin") != null) {
-    request.getSession().setAttribute("processingLogin", "false");
-  }
-  System.out.println(new Date() + ": Logoff: requestURL=" + request.getRequestURL());
-  String locale = request.getParameter("locale");
-  if(locale == null) {
-      locale = (String)request.getSession().getAttribute("locale");  
-  }
-  String timezone = request.getParameter("timezone");
-  if(timezone == null) {
-      timezone = (String)request.getSession().getAttribute("timezone");  
-  }
-  System.out.println(new Date() + ": Logoff: invalidate session. locale=" + locale + "; timezone=" + timezone);  
-  session.invalidate();
-  
-  if (wasAuthenticated) {
-			// NO session management beyond this point.
-			// Otherwise WebSphere 5 fails
-			response.sendRedirect(
-			"Login.jsp?locale=" + locale + 
-			(timezone == null ? "" : "&timezone=" + URLEncoder.encode(timezone)) +
-				("&loginFailed=false")	
-			);  
-  }
+	if(request.getSession().getAttribute("ObjectInspectorServlet.ApplicationContext") != null) {
+		wasAuthenticated = true;
+		System.out.println(new Date() + ": Logoff: removing application context");
+		request.getSession().removeAttribute("ObjectInspectorServlet.ApplicationContext");
+	}
+	if(request.getSession().getAttribute("processingLogin") != null) {
+		request.getSession().setAttribute("processingLogin", "false");
+	}
+	System.out.println(new Date() + ": Logoff: requestURL=" + request.getRequestURL());
+	String locale = request.getParameter(org.openmdx.portal.servlet.WebKeys.LOCALE_KEY);
+	if(locale == null) {
+		locale = (String)request.getSession().getAttribute(org.openmdx.portal.servlet.WebKeys.LOCALE_KEY);  
+	}
+	String timezone = request.getParameter(org.openmdx.portal.servlet.WebKeys.TIMEZONE_KEY);
+	if(timezone == null) {
+		timezone = (String)request.getSession().getAttribute(org.openmdx.portal.servlet.WebKeys.TIMEZONE_KEY);  
+	}
+	Object initialScale = request.getParameter(org.openmdx.portal.servlet.WebKeys.INITIAL_SCALE_KEY);
+	if(initialScale == null) {
+		initialScale = request.getSession().getAttribute(org.openmdx.portal.servlet.WebKeys.INITIAL_SCALE_KEY);
+	}
+	System.out.println(new Date() + ": Logoff: invalidate session. locale=" + locale + "; timezone=" + timezone);  
+	session.invalidate();
+  	if(wasAuthenticated) {
+		// NO session management beyond this point.
+		// Otherwise WebSphere 5 fails
+		response.sendRedirect(
+			"Login.jsp?" +
+			org.openmdx.portal.servlet.WebKeys.LOCALE_KEY + "=" + locale + 
+			(timezone == null ? "" : "&" + org.openmdx.portal.servlet.WebKeys.TIMEZONE_KEY + "=" + URLEncoder.encode(timezone)) +
+			(initialScale == null ? "" : "&" + org.openmdx.portal.servlet.WebKeys.INITIAL_SCALE_KEY + "=" + initialScale.toString()) +
+			("&loginFailed=false")	
+		);
+	}
 %>
 <%@ include file="login-locales.jsp" %>
 	<div id="header" style="height:90px;">
@@ -134,7 +136,7 @@ request.setCharacterEncoding("UTF-8");
   <%@ include file="login-header.html" %>
 </div>
 
-	&nbsp;&nbsp;<input class="submit" type="submit" name="button" value="<%= textsLogin.get(localeStr) == null ? "Login" :  textsLogin.get(localeStr) %>" onclick="javascript:window.location.href='Login.jsp';" >
+	&nbsp;&nbsp;<input class="<%= CssClass.submit %>" type="submit" name="button" value="<%= textsLogin.get(localeStr) == null ? "Login" :  textsLogin.get(localeStr) %>" onclick="javascript:window.location.href='Login.jsp';" >
 
 </body>
 </html>

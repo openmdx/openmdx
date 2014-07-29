@@ -65,9 +65,10 @@ import javax.xml.datatype.XMLGregorianCalendar;
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.portal.servlet.ApplicationContext;
+import org.openmdx.portal.servlet.CssClass;
 import org.openmdx.portal.servlet.HtmlEncoder_1_0;
 import org.openmdx.portal.servlet.ViewPort;
-import org.openmdx.portal.servlet.control.EditObjectControl;
+import org.openmdx.portal.servlet.control.EditInspectorControl;
 import org.w3c.spi2.Datatypes;
 
 public class DateValue
@@ -387,22 +388,22 @@ public class DateValue
             id = (id == null) || (id.length() == 0) ? 
                 feature + "[" + Integer.toString(tabIndex) + "]" : 
                 id;            
-            p.write("<td class=\"label\" title=\"", (title == null ? "" : htmlEncoder.encode(title, false)), "\"><span class=\"nw\">", htmlEncoder.encode(label, false), "</span></td>");            
+            p.write("<td class=\"", CssClass.fieldLabel.toString(), "\" title=\"", (title == null ? "" : htmlEncoder.encode(title, false)), "\"><span class=\"", CssClass.nw.toString(), "\">", htmlEncoder.encode(label, false), "</span></td>");            
             if(this.isSingleValued()) {
-                String classModifier = this.isMandatory() ?
-                    "valueR mandatory" :
-                    "valueR";                
+                String classModifier = this.isMandatory() 
+                	? CssClass.valueR + " " + CssClass.mandatory
+                    : CssClass.valueR.toString();                
                 p.write("<td ", rowSpanModifier, ">");
                 p.write("  <input id=\"", id, "\" name=\"", id, "\" type=\"text\" class=\"", classModifier, lockedModifier, "\" ", readonlyModifier, " tabindex=\"" + tabIndex, "\" value=\"", stringifiedValue, "\"");
                 p.writeEventHandlers("    ", attribute.getEventHandler());
                 p.write("  >");
                 p.write("</td>");
-                p.write("<td class=\"addon\" ", rowSpanModifier, ">");
+                p.write("<td class=\"", CssClass.addon.toString(), "\" ", rowSpanModifier, ">");
                 if(readonlyModifier.isEmpty()) {
                     if(this.isDate()) {
                         SimpleDateFormat dateFormatter = this.getLocalizedDateFormatter(true);
                         String calendarFormat = DateValue.getCalendarFormat(dateFormatter);
-                        p.write("        <a>", p.getImg("class=\"popUpButton\" id=\"", id, ".Trigger\" border=\"0\" alt=\"Click to open Calendar\" src=\"", p.getResourcePath("images/cal"), p.getImgType(), "\""), "</a>");
+                        p.write("        <a>", p.getImg("class=\"", CssClass.popUpButton.toString(), "\" id=\"", id, ".Trigger\" border=\"0\" alt=\"Click to open Calendar\" src=\"", p.getResourcePath("images/cal"), p.getImgType(), "\""), "</a>");
                         p.write("        <script language=\"javascript\" type=\"text/javascript\">");
                         p.write("        Calendar.setup({");
                         p.write("          inputField   : \"", id, "\",");
@@ -415,11 +416,10 @@ public class DateValue
                         p.write("          showsTime    : false");
                         p.write("        });");
                         p.write("        </script>");
-                    }
-                    else {
+                    } else {
                         SimpleDateFormat dateTimeFormatter = this.getLocalizedDateTimeFormatter(true);
                         String calendarFormat = DateValue.getCalendarFormat(dateTimeFormatter);
-                        p.write("        <a>", p.getImg("class=\"popUpButton\" id=\"", id, ".Trigger\" border=\"0\" alt=\"Click to open Calendar\" src=\"", p.getResourcePath("images/cal"), p.getImgType(), "\""), "</a>");
+                        p.write("        <a>", p.getImg("class=\"", CssClass.popUpButton.toString(), "\" id=\"", id, ".Trigger\" border=\"0\" alt=\"Click to open Calendar\" src=\"", p.getResourcePath("images/cal"), p.getImgType(), "\""), "</a>");
                         p.write("        <script language=\"javascript\" type=\"text/javascript\">");
                         p.write("        Calendar.setup({");
                         p.write("          inputField   : \"", id, "\",");
@@ -435,24 +435,25 @@ public class DateValue
                     }
                 }
                 p.write("</td>");
-            }
-            else {
+            } else {
                 p.write("<td ", rowSpanModifier, ">");
-                p.write("  <textarea id=\"", id, "\" name=\"", id, "\" class=\"multiStringLocked\" rows=\"", Integer.toString(attribute.getSpanRow()), "\" cols=\"20\" readonly tabindex=\"" + tabIndex, "\">", stringifiedValue, "</textarea>");
+                p.write("  <textarea id=\"", id, "\" name=\"", id, "\" class=\"", CssClass.multiStringLocked.toString(), "\" rows=\"", Integer.toString(attribute.getSpanRow()), "\" cols=\"20\" readonly tabindex=\"" + tabIndex, "\">", stringifiedValue, "</textarea>");
                 p.write("</td>");
                 p. write("<td class=\"addon\" ", rowSpanModifier, ">");
                 if(readonlyModifier.isEmpty()) {
                     if(this.isDate()) {
-                        p.write("        ", p.getImg("class=\"popUpButton\" id=\"", id, ".popup\" border=\"0\" alt=\"Click to edit\" src=\"", p.getResourcePath("images/edit"), p.getImgType(), "\" onclick=\"javascript:multiValuedHigh=", this.getUpperBound("1..10"), "; popup_", EditObjectControl.EDIT_DATES, " = ", EditObjectControl.EDIT_DATES, "_showPopup(event, this.id, popup_", EditObjectControl.EDIT_DATES, ", 'popup_", EditObjectControl.EDIT_DATES, "', $('", id, "'), new Array());\""));
-                    }
-                    else {
-                        p.write("        ", p.getImg("class=\"popUpButton\" id=\"", id, ".popup\" border=\"0\" alt=\"Click to edit\" src=\"", p.getResourcePath("images/edit"), p.getImgType(), "\" onclick=\"javascript:multiValuedHigh=", this.getUpperBound("1..10"), "; popup_", EditObjectControl.EDIT_DATETIMES, " = ", EditObjectControl.EDIT_DATETIMES, "_showPopup(event, this.id, popup_", EditObjectControl.EDIT_DATETIMES, ", 'popup_", EditObjectControl.EDIT_DATETIMES, "', $('", id, "'), new Array());\""));
+        				p.write("<a role=\"button\" data-toggle=\"modal\" href=\"#popup_", EditInspectorControl.EDIT_DATES, "\" onclick=\"javascript:multiValuedHigh=", this.getUpperBound("1..10"), "; ", EditInspectorControl.EDIT_DATES, "_showPopup(event, this.id, popup_", EditInspectorControl.EDIT_DATES, ", 'popup_", EditInspectorControl.EDIT_DATES, "', $('", id, "'), new Array());\">");
+        				p.write("    ", p.getImg("class=\"", CssClass.popUpButton.toString(), "\" id=\"", id, ".popup\" border=\"0\" alt=\"Click to edit\" src=\"", p.getResourcePath("images/edit"), p.getImgType(), "\" "));
+        				p.write("</a>");
+                    } else {
+        				p.write("<a role=\"button\" data-toggle=\"modal\" href=\"#popup_", EditInspectorControl.EDIT_DATETIMES, "\" onclick=\"javascript:multiValuedHigh=", this.getUpperBound("1..10"), "; ", EditInspectorControl.EDIT_DATETIMES, "_showPopup(event, this.id, popup_", EditInspectorControl.EDIT_DATETIMES, ", 'popup_", EditInspectorControl.EDIT_DATETIMES, "', $('", id, "'), new Array());\">");
+        				p.write("    ", p.getImg("class=\"", CssClass.popUpButton.toString(), "\" id=\"", id, ".popup\" border=\"0\" alt=\"Click to edit\" src=\"", p.getResourcePath("images/edit"), p.getImgType(), "\" "));
+        				p.write("</a>");                    	
                     }
                 }
                 p.write("</td>");
             }
-        }
-        else {
+        } else {
             super.paint(
                 attribute,
                 p,

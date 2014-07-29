@@ -72,6 +72,7 @@ public class BaseTag extends TagSupport {
 		return this.scope;
 	}
 	
+	private static final long serialVersionUID = 4430804695627400246L;
 	public static final String PAGE = "page";
 	public static final String REQUEST = "request";
 	

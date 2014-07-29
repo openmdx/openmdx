@@ -2,4 +2,5 @@
 /source-archive/
 /*/build/
 /jre-*/
-/.metadata
+/.metadata/
+/opt/xstream/

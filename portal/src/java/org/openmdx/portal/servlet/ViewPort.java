@@ -63,14 +63,13 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.portal.servlet.view.View;
+import org.openmdx.portal.servlet.component.View;
 
 public class ViewPort {
     
     //-----------------------------------------------------------------------
 	public enum Type {
 	    STANDARD, // standard HTML devices 
-	    MOBILE,  // mobile HTML devices
 	    EMBEDDED // view is embedded
 	}
 	
@@ -253,18 +252,6 @@ public class ViewPort {
     }
     
     //-------------------------------------------------------------------------
-    public String getButtonEffectHighlight(
-    ) {
-        return "new Effect.Highlight(this,{duration:0.3});";
-    }
-    
-    //-------------------------------------------------------------------------
-    public String getButtonEffectPulsate(
-    ) {
-        return "new Effect.Pulsate(this,{pulses:1,duration:0.5});";        
-    }
-                  
-    //-------------------------------------------------------------------------
     public CharSequence getOnDblClick(
         CharSequence... strings
     ) {
@@ -338,17 +325,17 @@ public class ViewPort {
     //-----------------------------------------------------------------------
     public void writeEventHandlers(
         String indent,
-        List eventHandlers
+        List<String> eventHandlers
     ) throws ServiceException {
-        for(Iterator i = eventHandlers.iterator(); i.hasNext(); ) {
+        for(Iterator<String> i = eventHandlers.iterator(); i.hasNext(); ) {
             String eventHandler = (String)i.next();
             int pos = eventHandler.indexOf(":");
             if(pos > 0) {
                 this.write(indent, eventHandler.substring(0, pos), "=\"javascript:", eventHandler.substring(pos+1), "();\"");
             }
-        }        
+        }
     }
-    
+
     //-----------------------------------------------------------------------
     public void flush(
     ) throws ServiceException {

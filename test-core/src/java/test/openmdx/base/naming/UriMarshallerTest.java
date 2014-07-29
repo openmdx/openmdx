@@ -144,7 +144,7 @@ public class UriMarshallerTest extends TestCase {
             index < components.length;
             index++
         ) assertEquals(
-            Arrays.asList(components[index]).toString(),
+            index + ": " + Arrays.asList(components[index]).toString(),
             uris[index], 
             paths[index].toUri()
         );

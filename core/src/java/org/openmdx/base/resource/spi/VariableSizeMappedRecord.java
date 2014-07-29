@@ -50,7 +50,6 @@ package org.openmdx.base.resource.spi;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.util.AbstractMap;
-import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -58,14 +57,21 @@ import java.util.Set;
 
 import javax.resource.cci.MappedRecord;
 
-import org.openmdx.kernel.collection.InternalizedKeys;
+import org.openmdx.kernel.collection.InternalizedKeyMap;
 import org.openmdx.kernel.text.MultiLineStringRepresentation;
 import org.openmdx.kernel.text.format.IndentingFormatter;
 import org.w3c.cci2.ImmutableDatatype;
 
 /**
  * Java Connector Architecture:
- * A variable-size MappedRecord implementation. Only keys of type string and Integers in the range [-128..127] are supported.
+ * A variable-size MappedRecord implementation. 
+ * <p>
+ * The key values must be of instances of the following types:<ul> 
+ * <li><code>java.lang.String<code>
+ * <li><code>java.lang.Short<code>
+ * <li><code>java.lang.Integer<code>
+ * <li><code>java.lang.Long<code>
+ * </ul>
  */
 @SuppressWarnings({"rawtypes","unchecked"})
 class VariableSizeMappedRecord 
@@ -73,13 +79,6 @@ class VariableSizeMappedRecord
     implements MappedRecord, MultiLineStringRepresentation
 {
 
-    /**
-     * Constructor
-     */
-    protected VariableSizeMappedRecord(){
-        // for de-serialization
-    }
-        
     /**
      * Creates a <code>MappedRecord</code> with the specified name.
      *
@@ -93,7 +92,7 @@ class VariableSizeMappedRecord
     ){
         this.recordName = recordName;
         this.recordShortDescription = null;
-        this.values = new IdentityHashMap();
+        this.values = new InternalizedKeyMap();
     }
 
     /**
@@ -152,14 +151,14 @@ class VariableSizeMappedRecord
     ) throws IOException, ClassNotFoundException {
        in.defaultReadObject();
        int size = in.readInt();
-       this.values = new IdentityHashMap(size);
+       this.values = new InternalizedKeyMap(size);
        for(
            int i = 0;
            i < size;
            i++
        ){
            this.values.put(
-               InternalizedKeys.internalize(in.readObject()),
+               in.readObject(),
                in.readObject()
            );
        }
@@ -203,7 +202,7 @@ class VariableSizeMappedRecord
         Object value
     ){
         return this.values.put(
-            InternalizedKeys.internalize(key), 
+            key, 
             value
          );
     }
@@ -236,9 +235,7 @@ class VariableSizeMappedRecord
     public boolean containsKey(
         Object key
     ) {
-        return this.values.containsKey(
-            InternalizedKeys.internalize(key)
-        );
+        return this.values.containsKey(key);
     }
 
     /* (non-Javadoc)
@@ -248,7 +245,7 @@ class VariableSizeMappedRecord
     public boolean containsValue(
         Object value
     ) {
-        return this.containsValue(value);
+        return this.values.containsValue(value);
     }
 
     /* (non-Javadoc)
@@ -258,9 +255,7 @@ class VariableSizeMappedRecord
     public Object get(
         Object key
     ) {
-        return this.values.get(
-            InternalizedKeys.internalize(key)
-        );
+        return this.values.get(key);
     }
 
     /* (non-Javadoc)
@@ -279,9 +274,7 @@ class VariableSizeMappedRecord
     public Object remove(
         Object key
     ) {
-        return this.values.remove(
-            InternalizedKeys.internalize(key)
-        );
+        return this.values.remove(key);
     }
 
     /* (non-Javadoc)

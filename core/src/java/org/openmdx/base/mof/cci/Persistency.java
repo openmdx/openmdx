@@ -153,7 +153,7 @@ public class Persistency {
     public boolean isPersistentAttribute(
         ModelElement_1_0 featureDef
     ) throws ServiceException {
-        Boolean persistent = this.persistentFeatures.get(featureDef.objGetValue("qualifiedName"));
+        Boolean persistent = this.persistentFeatures.get(featureDef.getQualifiedName());
         return persistent == null ? isNonDerivedAttribute(featureDef) : persistent.booleanValue();
     }
     

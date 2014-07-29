@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2009, OMEX AG, Switzerland
+ * Copyright (c) 2009-2014, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -78,7 +78,7 @@ public class UnitOfWork_1 extends Interceptor_1 {
         String feature
     ) throws ServiceException {
         return "unitOfWorkId".equals(feature) ? ( 
-            self.jdoIsPersistent() ? self.jdoGetObjectId().getBase() : null
+            self.jdoIsPersistent() ? self.jdoGetObjectId().getLastSegment().toClassicRepresentation() : null
         ) : super.objGetValue(feature);
     }
 

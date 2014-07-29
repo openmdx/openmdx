@@ -92,18 +92,19 @@ public class Model_1Dumper {
     ){
         if(arguments == null || arguments.length < 1 || arguments.length > 2) {
             System.err.println("Usage: java " + Model_1Dumper.class.getName() + " <targetFileName> [<mimeType>]");
-        }
-        final String targetFileName = arguments[0];
-        final String mimeType = arguments.length > 1 ? arguments[1] : "application/vnd.openmdx-xmi.wbxml";
-        try {
-            System.out.println("Saving the model repository to " + targetFileName + "...");
-            final Model_1_0 model = Model_1Factory.getModel();
-            final FileOutputStream target = new FileOutputStream(targetFileName);
-            save(target, mimeType, model);
-            target.close();
-        } catch (Exception exception) {
-            exception.printStackTrace();
-            System.exit(-1);
+        } else {
+	        final String targetFileName = arguments[0];
+	        final String mimeType = arguments.length > 1 ? arguments[1] : "application/vnd.openmdx-xmi.wbxml";
+	        try {
+	            System.out.println("Saving the model repository to " + targetFileName + "...");
+	            final Model_1_0 model = Model_1Factory.getModel();
+	            final FileOutputStream target = new FileOutputStream(targetFileName);
+	            save(target, mimeType, model);
+	            target.close();
+	        } catch (Exception exception) {
+	            exception.printStackTrace();
+	            System.exit(-1);
+	        }
         }
     }
     

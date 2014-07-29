@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2010, OMEX AG, Switzerland
+ * Copyright (c) 2010-2014, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -49,7 +49,6 @@
 package org.openmdx.base.accessor.spi;
 
 
-import org.openmdx.base.naming.Path;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.jdo.ReducedJDOHelper;
 
@@ -85,7 +84,7 @@ public class ExceptionHelper {
             ) : ReducedJDOHelper.isPersistent(object) ? new BasicException.Parameter(
                 label,
                 ReducedJDOHelper.getTransactionalObjectId(object), 
-                ((Path)ReducedJDOHelper.getObjectId(object)).toXRI() 
+                ReducedJDOHelper.getObjectId(object) 
             ) : new BasicException.Parameter(
                 label,
                 ReducedJDOHelper.getTransactionalObjectId(object)

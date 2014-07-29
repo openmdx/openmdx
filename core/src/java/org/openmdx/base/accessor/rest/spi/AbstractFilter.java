@@ -51,19 +51,21 @@ import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
-import java.util.regex.Pattern;
 
 import javax.jdo.PersistenceManager;
+
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.query.Condition;
 import org.openmdx.base.query.ConditionType;
 import org.openmdx.base.query.LenientPathComparator;
 import org.openmdx.base.query.Quantifier;
 import org.openmdx.base.query.Selector;
+import org.openmdx.base.query.spi.AbstractPattern;
+import org.openmdx.base.query.spi.PathPattern;
+import org.openmdx.base.query.spi.Soundex;
 import org.openmdx.base.resource.Records;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.exception.Throwables;
-import org.openmdx.kernel.url.protocol.XRI_1Protocols;
 
 
 /**
@@ -104,14 +106,9 @@ public abstract class AbstractFilter implements Selector, Serializable {
                 operator == ConditionType.IS_UNLIKE
             ){
                 if(this.pattern == null) {
-                    this.pattern = new Pattern_1_0[filter.length];
+                    this.pattern = new AbstractPattern[filter.length];
                 }
-                Object value = filter[i].getValue(0);
-                this.pattern[i] = value instanceof Path ?
-                    new PathPattern((Path)value) :
-                    ((String)value).startsWith(XRI_1Protocols.OPENMDX_PREFIX) ?
-                        new PathPattern(new Path((String)value)) :
-                        new RegularExpressionPattern((String)value);                
+                this.pattern[i] = AbstractPattern.newInstance(filter[i].getValue(0));                
             }
         } 
         catch (IllegalArgumentException exception) {
@@ -130,6 +127,11 @@ public abstract class AbstractFilter implements Selector, Serializable {
     }
 
     /**
+     * Implements <code>Serializable</code>
+     */
+    private static final long serialVersionUID = 8279786822145802222L;
+    
+    /**
      * 
      */
     protected Condition[] filter;
@@ -137,9 +139,9 @@ public abstract class AbstractFilter implements Selector, Serializable {
     /**
      * 
      */
-    private Pattern_1_0[] pattern;
+    private AbstractPattern[] pattern;
 
-    /**
+	/**
      * 
      * @param candidate
      * @param condition
@@ -353,13 +355,14 @@ public abstract class AbstractFilter implements Selector, Serializable {
 
                 case SOUNDS_LIKE: {
                     boolean test = false;
-                    String encoded = Soundex.getInstance().encode((String)raw);
+                    final Soundex soundex = Soundex.getInstance();
+					String encoded = soundex.encode((String)raw);
                     SoundsLike: for(
                         int setIndex = 0, setSize = condition.getValue().length;
                         setIndex < setSize;
                         setIndex++
                     ){
-                        if(encoded.equals(Soundex.getInstance().encode((String)condition.getValue(setIndex)))) {
+                        if(encoded.equals(soundex.encode((String)condition.getValue(setIndex)))) {
                             test = true;
                             break SoundsLike;
                         }
@@ -374,13 +377,14 @@ public abstract class AbstractFilter implements Selector, Serializable {
 
                 case SOUNDS_UNLIKE: {
                     boolean test = true;
-                    String encoded = Soundex.getInstance().encode((String)raw);
+                    final Soundex soundex = Soundex.getInstance();
+                    String encoded = soundex.encode((String)raw);
                     SoundsUnlike: for(
                         int setIndex = 0, setSize = condition.getValue().length;
                         setIndex < setSize;
                         setIndex++
                     ) {
-                        if(encoded.equals(Soundex.getInstance().encode((String)condition.getValue(setIndex)))) {
+                        if(encoded.equals(soundex.encode((String)condition.getValue(setIndex)))) {
                             test = false;
                             break SoundsUnlike;
                         }
@@ -455,7 +459,7 @@ public abstract class AbstractFilter implements Selector, Serializable {
     ){        
         if(value instanceof Path){
             if(!(this.pattern[index] instanceof PathPattern)) try {
-                this.pattern[index] = new PathPattern(new Path(this.pattern[index].pattern()));
+                this.pattern[index] = PathPattern.newInstance(this.pattern[index].pattern());
             } catch (Exception exception) {
                 return false;
             }
@@ -465,370 +469,4 @@ public abstract class AbstractFilter implements Selector, Serializable {
         }
     }
 
-    //------------------------------------------------------------------------
-    // Class Soundex 
-    //------------------------------------------------------------------------
-
-    /**
-     * Encodes words using the soundex phonetic algorithm.
-     * The primary method to call is Soundex.encode(String).<p>
-     * The main method encodes arguments to System.out.
-     * @author Aaron Hansen
-     */
-    final static class Soundex {
-
-        /**
-         * 
-         */
-        public static Soundex getInstance(
-        ) {
-            if(Soundex.instance == null) {
-                Soundex.instance = new Soundex();
-            }
-            return instance;
-        }
-
-        /**
-         * @param _word
-         */    
-        public String encode(
-            String _word
-        ) {
-            String word = _word.trim();
-            if (DropFinalSBoolean) {
-                //we're not dropping double s as in guess
-                if ( (word.length() > 1) 
-                        && (word.endsWith("S") || word.endsWith("s")))
-                    word = word.substring(0, (word.length() - 1));
-            }
-            if(word.length() == 0) return "";
-            word = reduce(word);
-            int wordLength = word.length(); //original word size
-            int sofar = 0; //how many codes have been created
-            int max = LengthInt - 1; //max codes to create (less the first char)
-            if (LengthInt < 0) //if NO_MAX
-                max = wordLength; //wordLength was the max possible size.
-            int code = 0; 
-            StringBuilder buf = new StringBuilder(
-                max
-            ).append(
-                Character.toLowerCase(word.charAt(0))
-            );
-            for (int i = 1;(i < wordLength) && (sofar < max); i++) {
-                code = getCode(word.charAt(i));
-                if (code > 0) {
-                    buf.append(code);
-                    sofar++;
-                }
-            }
-            if (PadBoolean && (LengthInt > 0)) {
-                for (;sofar < max; sofar++)
-                    buf.append('0');
-            }
-            return buf.toString();
-        }
-
-        /**
-         * Returns the Soundex code for the specified character.
-         * @param ch Should be between A-Z or a-z
-         * @return -1 if the character has no phonetic code.
-         */
-        public int getCode(
-            char ch
-        ) {
-            int arrayidx = -1;
-            if (('a' <= ch) && (ch <= 'z'))
-                arrayidx = ch - 'a';
-            else if (('A' <= ch) && (ch <= 'Z'))
-                arrayidx = ch - 'A';
-            if ((arrayidx >= 0) && (arrayidx < SoundexInts.length))
-                return SoundexInts[arrayidx];
-            else
-                return -1;
-        }
-
-        /**
-         * If true, a final char of 's' or 'S' of the word being encoded will be 
-         * dropped. By dropping the last s, lady and ladies for example,
-         * will encode the same. False by default.
-         */
-        public boolean getDropFinalS(
-        ) {
-            return DropFinalSBoolean;
-        }
-
-        /**
-         * The length of code strings to build, 4 by default.
-         * If negative, length is unlimited.
-         * @see #NO_MAX
-         */
-        public int getLength(
-        ) {
-            return LengthInt;
-        }
-
-        /**
-         * If true, appends zeros to a soundex code if the code is less than
-         * Soundex.getLength().  True by default.
-         */
-        public boolean getPad(
-        ) {
-            return PadBoolean;
-        }
-
-        /**
-         * Allows you to modify the default code table
-         * @param ch The character to specify the code for.
-         * @param code The code to represent ch with, must be -1, or 1 thru 9
-         */
-        public void setCode(
-            char ch, 
-            int code
-        ) {
-            int arrayidx = -1;
-            if (('a' <= ch) || (ch <= 'z'))
-                arrayidx = ch - 'a';
-            else if (('A' <= ch) || (ch <= 'Z'))
-                arrayidx = ch - 'A';
-            if ((0 <= arrayidx) && (arrayidx < SoundexInts.length))
-                SoundexInts[arrayidx] = code;
-        }
-
-        /**
-         * If true, a final char of 's' or 'S' of the word being encoded will be 
-         * dropped.
-         */
-        public void setDropFinalS(
-            boolean bool
-        ) {
-            DropFinalSBoolean = bool;
-        }
-
-        /**
-         * Sets the length of code strings to build. 4 by default.
-         * @param Length of code to produce, must be &gt;= 1
-         */
-        public void setLength(
-            int length
-        ) {
-            LengthInt = length;
-        }
-
-        /**
-         * If true, appends zeros to a soundex code if the code is less than
-         * Soundex.getLength().  True by default.
-         */
-        public void setPad(
-            boolean bool
-        ) {
-            PadBoolean = bool;
-        }
-
-        /**
-         * Creates the Soundex code table.
-         */
-        protected static int[] createArray(
-        ) {
-            return new int[] {
-                -1, //a 
-                1, //b
-                2, //c 
-                3, //d
-                -1, //e 
-                1, //f
-                2, //g 
-                -1, //h
-                -1, //i 
-                2, //j
-                2, //k
-                4, //l
-                5, //m
-                5, //n
-                -1, //o
-                1, //p
-                2, //q
-                6, //r
-                2, //s
-                3, //t
-                -1, //u
-                1, //v
-                -1, //w
-                2, //x
-                -1, //y
-                2  //z
-            };
-        }
-
-        /**
-         * Removes adjacent sounds.
-         */
-        protected String reduce(
-            String word
-        ) {
-            int len = word.length();
-            StringBuilder buf = new StringBuilder(len);
-            char ch = word.charAt(0);
-            int currentCode = getCode(ch);
-            buf.append(ch);
-            int lastCode = currentCode;
-            for (int i = 1; i < len; i++) {
-                ch = word.charAt(i);
-                currentCode = getCode(ch);
-                if ((currentCode != lastCode) && (currentCode >= 0)) {
-                    buf.append(ch);
-                    lastCode = currentCode;
-                }
-            }
-            return buf.toString();
-        }
-
-        /**
-         * 
-         */
-        private static transient Soundex instance = null;
-
-        /**
-         * 
-         */
-        public static final int NO_MAX = -1;
-
-        /**
-         * If true, the final 's' of the word being encoded is dropped.
-         */
-        protected boolean DropFinalSBoolean = false;
-
-        /**
-         * Length of code to build.
-         */
-        protected int LengthInt = 4;
-
-        /**
-         * If true, codes are padded to the LengthInt with zeros.
-         */
-        protected boolean PadBoolean = true;
-
-        /**
-         * Soundex code table.
-         */
-        protected int[] SoundexInts = createArray();
-
-    }
-
-    /**
-     * Pattern interface
-     * <p>
-     * Instances of this class are immutable and are safe for use by 
-     * multiple concurrent threads. Instances of Matcher_1_0 class are 
-     * not safe for such use. 
-     */
-    interface Pattern_1_0 
-        extends Serializable
-    {
-
-        /**
-         * Attempts to match the given input against the pattern
-         * <p>
-         * An invocation of this convenience method of the form
-         * <pre>
-         *      matches(input)
-         * </pre>
-         * behaves in exactly the same way as the expression
-         * <pre>
-         *      matcher(input).matches()
-         * </pre>
-         *  
-         * @param input
-         */
-        boolean matches (
-            String input
-        );
-
-        /**
-         * Returns the expression from which this pattern was compiled. 
-         *  
-         * @return The source of this pattern
-         */
-        public String pattern();
-            
-    }
-
-    /**
-     * PathPattern_1
-     */
-    final static class PathPattern implements Pattern_1_0 {
-
-        private static final long serialVersionUID = 3256441391432086579L;
-        private final Path pathPattern;
-        
-        public PathPattern(
-             Path pathPattern
-        ) {
-            this.pathPattern = pathPattern;
-        }
-
-        public boolean matches(String input) {
-            try {
-                return this.matches(new Path(input));
-            } catch (Exception exception){
-                return false;
-            }
-        }
-
-        public boolean matches(Path input) {
-            return input.isLike(this.pathPattern);
-        }
-
-        @SuppressWarnings("deprecation")
-        public String pattern() {
-            return this.pathPattern.toUri();
-        }
-
-    }
-        
-    /**
-     * Pattern implementation 
-     */
-    final static class RegularExpressionPattern implements Pattern_1_0 {
-
-        private static final long serialVersionUID = 1340205266230718256L;
-        private final Pattern compiledExpression;
-        private final String rawExpression;
-
-        /**
-         * Compiles a regular expression
-         * 
-         * @param pattern
-         *
-         * @exception IllegalArgumentException
-         *            if the pattern can't be compiled
-         */    
-        RegularExpressionPattern(
-            String pattern,
-            String rawExpression
-        ) {
-            this.rawExpression = rawExpression;
-            this.compiledExpression = Pattern.compile(pattern);
-        }
-
-        RegularExpressionPattern(
-            String pattern
-        ) {
-            this(pattern, pattern);
-        }
-
-        public boolean matches(String source) {
-            return this.compiledExpression.matcher(source).matches();
-        }
-
-        public String pattern() {
-            return this.rawExpression;
-        }
-
-    }
-    
-    //-----------------------------------------------------------------------
-    //
-    //-----------------------------------------------------------------------
-    private static final long serialVersionUID = 8279786822145802222L;
-    
 }

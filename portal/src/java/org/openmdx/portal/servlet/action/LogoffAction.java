@@ -66,7 +66,7 @@ import javax.servlet.http.HttpSession;
 import org.openmdx.portal.servlet.ApplicationContext;
 import org.openmdx.portal.servlet.ViewsCache;
 import org.openmdx.portal.servlet.WebKeys;
-import org.openmdx.portal.servlet.view.ObjectView;
+import org.openmdx.portal.servlet.component.ObjectView;
 
 public class LogoffAction extends BoundAction {
 
@@ -94,9 +94,15 @@ public class LogoffAction extends BoundAction {
             WebKeys.TIMEZONE_KEY, 
             app.getCurrentTimeZone()
         );
+        request.getSession().setAttribute(
+        	WebKeys.INITIAL_SCALE_KEY,
+        	app.getInitialScale()
+        );
         ServletContext sc = request.getSession().getServletContext();
         RequestDispatcher rd = sc.getRequestDispatcher(
-            "/Logoff.jsp?locale=" + URLEncoder.encode(app.getCurrentLocaleAsString(), "UTF-8") + "&timezone=" + URLEncoder.encode(app.getCurrentTimeZone(), "UTF-8")
+            "/Logoff.jsp?locale=" + URLEncoder.encode(app.getCurrentLocaleAsString(), "UTF-8") + 
+            "&timezone=" + URLEncoder.encode(app.getCurrentTimeZone(), "UTF-8") +
+            "&initialScale=" + app.getInitialScale().toString()
         );
         rd.forward(
             request, 

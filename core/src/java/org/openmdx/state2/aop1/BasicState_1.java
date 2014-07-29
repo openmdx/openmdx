@@ -302,7 +302,7 @@ public abstract class BasicState_1<C extends StateContext<?>>
     /* (non-Javadoc)
      * @see org.openmdx.state2.aop1.Involved#getQueryAccessMode()
      */
-//  @Override
+    @Override
     public AccessMode getQueryAccessMode() {
         return Parameters.STRICT_QUERY && getContext().getViewKind() == ViewKind.TIME_RANGE_VIEW ? 
             AccessMode.UNDERLYING_STATE : 

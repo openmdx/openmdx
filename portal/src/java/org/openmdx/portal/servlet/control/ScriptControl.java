@@ -8,7 +8,7 @@
  * This software is published under the BSD license
  * as listed below.
  * 
- * Copyright (c) 2008, OMEX AG, Switzerland
+ * Copyright (c) 2008-2014, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -46,8 +46,10 @@
  * This product includes software developed by other organizations as
  * listed in the NOTICE file.
  */
-
 package org.openmdx.portal.servlet.control;
+
+import java.util.Collections;
+import java.util.List;
 
 /**
  * ScriptControl
@@ -55,7 +57,14 @@ package org.openmdx.portal.servlet.control;
  */
 public class ScriptControl extends Control {
     
-    public ScriptControl(
+	/**
+	 * Constructor.
+	 * 
+	 * @param id
+	 * @param locale
+	 * @param localeAsIndex
+	 */
+	public ScriptControl(
         String id,
         String locale,
         int localeAsIndex
@@ -66,5 +75,20 @@ public class ScriptControl extends Control {
             localeAsIndex
         );
     }
+
+	/* (non-Javadoc)
+	 * @see org.openmdx.portal.servlet.control.Control#getChildren(java.lang.Class)
+	 */
+	@Override
+	public <T extends Control> List<T> getChildren(
+		Class<T> type
+	) {
+		return Collections.emptyList();
+	}
+
+	//-----------------------------------------------------------------------
+	// Members
+	//-----------------------------------------------------------------------
+	private static final long serialVersionUID = 5689040272857358527L;
 
 }

@@ -66,7 +66,7 @@ import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.Model_1_0;
 import org.openmdx.kernel.log.SysLog;
 import org.openmdx.portal.servlet.PortalExtension_1_0;
-import org.openmdx.portal.servlet.view.LayoutFactory;
+import org.openmdx.portal.servlet.component.LayoutFactory;
 
 public class LayoutLoader
     extends Loader {

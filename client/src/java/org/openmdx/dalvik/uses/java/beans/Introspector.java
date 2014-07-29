@@ -1197,6 +1197,10 @@ public class Introspector {
         return result;
     }
 
+    @edu.umd.cs.findbugs.annotations.SuppressFBWarnings(
+    	value = "ES_COMPARING_STRINGS_WITH_EQ", 
+    	justification = "Use original implementation"
+    )
     private void addMethod(MethodDescriptor md) {
         // We have to be careful here to distinguish method by both name
         // and argument lists.

@@ -1,16 +1,13 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <!--
 =======================================================================
-= Name:        $Id: build.xml,v 1.37 2011/11/02 16:18:33 wfro Exp $
 = Description: openMDX/Ant Build File
-= Revision:    $Revision: 1.37 $
-= Date:        $Date: 2011/11/02 16:18:33 $
-= Copyright:   (c) 2003-2010 OMEX AG
+= Copyright:   (c) 2003-2014 OMEX AG
 =======================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2010, OMEX AG, Switzerland
+ * Copyright (c) 2004-2013, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without 

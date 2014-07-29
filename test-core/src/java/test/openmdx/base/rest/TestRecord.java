@@ -119,7 +119,8 @@ public class TestRecord {
         /* (non-Javadoc)
          * @see java.lang.Thread#run()
          */
-        @Override
+        @SuppressWarnings("unchecked")
+		@Override
         public void run() {
             for(int i = 0; i < entryCount; i++) {
                 UUID value = source.next();

@@ -68,8 +68,8 @@ public class AssociationDef extends ElementDef {
         Model_1_0 model
     ) throws ServiceException {
         super( 
-            (String)associationDef.objGetValue("name"),
-            (String)associationDef.objGetValue("qualifiedName"),
+            (String)associationDef.getName(),
+            (String)associationDef.getQualifiedName(),
             (String)associationDef.objGetValue("annotation"),
             new HashSet<Object>(associationDef.objGetList("stereotype"))
         );      

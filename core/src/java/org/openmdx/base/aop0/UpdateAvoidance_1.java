@@ -47,8 +47,7 @@
  */
 package org.openmdx.base.aop0;
 
-import java.util.EnumSet;
-
+import javax.jdo.JDOHelper;
 import javax.jdo.ObjectState;
 import javax.jdo.PersistenceManager;
 import javax.jdo.listener.InstanceLifecycleEvent;
@@ -65,13 +64,6 @@ import org.openmdx.base.persistence.cci.PersistenceHelper;
  */
 public class UpdateAvoidance_1 extends PlugIn_1 {
 
-    /**
-     * States of objects involved in a unit of work 
-     */
-    private static final EnumSet<ObjectState> CLEANUP_CANDIDATES = EnumSet.of(
-        ObjectState.PERSISTENT_DIRTY
-    );
-    
     /**
      * The configuration object
      */
@@ -92,16 +84,15 @@ public class UpdateAvoidance_1 extends PlugIn_1 {
     @Override
     public void preStore(InstanceLifecycleEvent event) {
         DataObject_1 dataObject = (DataObject_1) event.getPersistentInstance();
-        if(dataObject.getUnitOfWork().isUpdateAvoidanceEnabled()) try {
-            for (Object managedObject : dataObject.jdoGetPersistenceManager().getManagedObjects(CLEANUP_CANDIDATES)) {
-                DataObject_1 candidate = (DataObject_1) managedObject;
-                candidate.makePersistentCleanWhenUnmodified();
-            }
-        } catch (ServiceException exception) {
-            throw new javax.jdo.JDOUserCallbackException(
-                "Update avoidance failure",
-                exception
-            );
+        if(dataObject.getUnitOfWork().isUpdateAvoidanceEnabled() && JDOHelper.getObjectState(dataObject) == ObjectState.PERSISTENT_DIRTY) {
+        	try {
+	            dataObject.makePersistentCleanWhenUnmodified();
+	        } catch (ServiceException exception) {
+	            throw new javax.jdo.JDOUserCallbackException(
+	                "Update avoidance failure",
+	                exception
+	            );
+	        }
         }
         super.preStore(event);
     }

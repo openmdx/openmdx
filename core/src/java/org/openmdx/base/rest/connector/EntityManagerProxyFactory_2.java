@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2009-2013, OMEX AG, Switzerland
+ * Copyright (c) 2009-2014, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -130,8 +130,8 @@ public class EntityManagerProxyFactory_2 extends AbstractPersistenceManagerFacto
                     i < this.plugIns.length;
                     i++
                 ){
-                    this.plugIns[i] = new BeanFactory<PlugIn_1_0>(
-                        "class",
+                    this.plugIns[i] = BeanFactory.newInstance(
+                    	PlugIn_1_0.class,
                         PropertiesConfigurationProvider.getConfiguration(
                             properties,
                             toSection(p.next())
@@ -230,7 +230,7 @@ public class EntityManagerProxyFactory_2 extends AbstractPersistenceManagerFacto
     /**
      * Catch all proxied objects
      */
-    private static final Path PROXY_PATTERN = new Path("%").lock();
+    private static final Path PROXY_PATTERN = new Path("%");
     
     /**
      * The resource adapter's metadata

@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2009-2012, OMEX AG, Switzerland
+ * Copyright (c) 2009-2014, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -123,7 +123,7 @@ public class PlugIn_1
     /* (non-Javadoc)
      * @see org.openmdx.base.aop0.PlugIn_1_0#setCore(org.openmdx.base.accessor.rest.DataObject_1, org.openmdx.base.accessor.rest.DataObject_1)
      */
-//  @Override
+    @Override
     public void postSetCore(
         DataObject_1 target, 
         DataObject_1 core
@@ -134,7 +134,7 @@ public class PlugIn_1
     /* (non-Javadoc)
      * @see org.openmdx.base.aop0.PlugIn_1_0#flush(org.openmdx.base.accessor.rest.UnitOfWork_1)
      */
-//  @Override
+    @Override
     public void flush(
         UnitOfWork_1 unitOfWork, 
         boolean beforeCompletion
@@ -145,7 +145,7 @@ public class PlugIn_1
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.rest.PlugIn_1_0#newQualifier(org.openmdx.base.accessor.rest.DataObject_1, java.lang.String)
      */
-//  @Override
+    @Override
     public String getQualifier(
         DataObject_1 object, 
         String qualifier
@@ -187,7 +187,7 @@ public class PlugIn_1
 	/* (non-Javadoc)
      * @see javax.jdo.listener.StoreLifecycleListener#postStore(javax.jdo.listener.InstanceLifecycleEvent)
      */
-//  @Override
+    @Override
     public void postStore(InstanceLifecycleEvent event) {
         // nothing to do
     }
@@ -195,7 +195,7 @@ public class PlugIn_1
     /* (non-Javadoc)
      * @see javax.jdo.listener.StoreLifecycleListener#preStore(javax.jdo.listener.InstanceLifecycleEvent)
      */
-//  @Override
+    @Override
     public void preStore(InstanceLifecycleEvent event) {
         DataObject_1 persistentInstance = (DataObject_1) event.getPersistentInstance();
         DataObjectManager_1 dataObjectManager = persistentInstance.jdoGetPersistenceManager(); 
@@ -257,7 +257,7 @@ public class PlugIn_1
     /* (non-Javadoc)
      * @see javax.jdo.listener.DeleteLifecycleListener#postDelete(javax.jdo.listener.InstanceLifecycleEvent)
      */
-//  @Override
+    @Override
     public void postDelete(InstanceLifecycleEvent event) {
         // nothing to do
     }
@@ -265,7 +265,7 @@ public class PlugIn_1
     /* (non-Javadoc)
      * @see javax.jdo.listener.DeleteLifecycleListener#preDelete(javax.jdo.listener.InstanceLifecycleEvent)
      */
-//  @Override
+    @Override
     public void preDelete(InstanceLifecycleEvent event) {
         DataObject_1 persistentInstance = (DataObject_1) event.getPersistentInstance();
         try {
@@ -303,7 +303,7 @@ public class PlugIn_1
     /* (non-Javadoc)
      * @see org.openmdx.base.aop0.PlugIn_1_0#callbackOnCascadedDeletes()
      */
-//  @Override
+    @Override
     public boolean requiresCallbackOnCascadedDelete(DataObject_1 object) {
         return false;
     }
@@ -311,7 +311,7 @@ public class PlugIn_1
 	/* (non-Javadoc)
 	 * @see org.openmdx.base.aop0.PlugIn_1_0#isAspect(org.openmdx.base.accessor.rest.DataObject_1)
 	 */
-//  @Override
+    @Override
 	public Boolean isAspect(
 		DataObject_1 object
 	) throws ServiceException {

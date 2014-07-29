@@ -1,14 +1,13 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
+ * Project:     openMDX, http://www.openmdx.org/
  * Description: SlicedDbObjectParentRidOnly class
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
  * ====================================================================
  *
- * This software is published under the BSD license
- * as listed below.
+ * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2005, OMEX AG, Switzerland
+ * Copyright (c) 2004-2014, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -117,14 +116,14 @@ public class SlicedDbObjectParentRidOnly
                     false
                 )
             );
-            if(":*".equals(parentResourceIdentifier.getBase())) {
+            if(":*".equals(parentResourceIdentifier.getLastSegment().toClassicRepresentation())) {
                 this.referenceClause = 
                     "(v." + columnNameParentRid + " IN (?))";           
             } else {
                 // parent object oid
                 this.getReferenceValues().add(
                     this.database.getObjectId(
-                        parentResourceIdentifier.getBase()
+                        parentResourceIdentifier.getLastSegment().toClassicRepresentation()
                     )
                 );
                 this.referenceClause = 
@@ -146,7 +145,7 @@ public class SlicedDbObjectParentRidOnly
                 true // reference
             ).getDescendant(
                 frs.getObject(columnNameParentOid).toString(),
-                getReference().getBase()
+                getReference().getLastSegment().toClassicRepresentation()
             );
         } else {
             return super.getObjectReference(frs);

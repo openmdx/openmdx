@@ -54,8 +54,10 @@ import org.openmdx.base.accessor.jmi.cci.RefQuery_1_0;
 import org.openmdx.portal.servlet.Action;
 import org.openmdx.portal.servlet.Filter;
 import org.openmdx.portal.servlet.Filters;
-import org.openmdx.portal.servlet.view.ReferencePane;
-import org.openmdx.portal.servlet.view.ShowObjectView;
+import org.openmdx.portal.servlet.component.Grid;
+import org.openmdx.portal.servlet.component.ReferencePane;
+import org.openmdx.portal.servlet.component.ShowObjectView;
+import org.openmdx.portal.servlet.component.UiGrid;
 
 public class QueryTag extends BaseTag {
 
@@ -87,32 +89,38 @@ public class QueryTag extends BaseTag {
 		if(this.getParent() instanceof ShowObjectTag) {
 			ShowObjectView view = ((ShowObjectTag)this.getParent()).getView();
 			if(view != null) {
-				for(ReferencePane referencePane: view.getReferencePane()) {
+				for(ReferencePane referencePane: view.getChildren(ReferencePane.class)) {
 					for(Action selectReferenceAction: referencePane.getSelectReferenceActions()) {
 						if(this.name.equals(selectReferenceAction.getParameter(Action.PARAMETER_REFERENCE_NAME))) {
 							referencePane.selectReference(
 								Integer.valueOf(selectReferenceAction.getParameter(Action.PARAMETER_REFERENCE))
 							);
 							if(this.query instanceof RefQuery_1_0) {
-								Filter defaultFilter = referencePane.getGrid().getFilter(Filters.DEFAULT_FILTER_NAME);
-								org.openmdx.base.query.Filter query = ((RefQuery_1_0)this.query).refGetFilter();
-								referencePane.getGrid().setFilter(
-									Filters.DEFAULT_FILTER_NAME, 
-									new Filter(
-										defaultFilter.getName(),
-										defaultFilter.getLabel(),
-										defaultFilter.getGroupName(),
-										defaultFilter.getIconKey(),
-										defaultFilter.getOrder(),
-										query.getCondition(),
-										query.getOrderSpecifier(),
-										query.getExtension()
-									)
-								);
-								referencePane.getGrid().selectFilter(
-									Filters.DEFAULT_FILTER_NAME, 
-									"" // filterValues
-								);
+								Grid grid = referencePane.getGrid();
+								if(grid instanceof UiGrid) {
+			                    	UiGrid uiGrid = (UiGrid)grid;                    										
+									Filter defaultFilter = uiGrid.getFilter(Filters.DEFAULT_FILTER_NAME);
+									org.openmdx.base.query.Filter query = ((RefQuery_1_0)this.query).refGetFilter();
+									if(defaultFilter != null) {
+										uiGrid.setFilter(
+											Filters.DEFAULT_FILTER_NAME, 
+											new Filter(
+												defaultFilter.getName(),
+												defaultFilter.getLabel(),
+												defaultFilter.getGroupName(),
+												defaultFilter.getIconKey(),
+												defaultFilter.getOrder(),
+												query.getCondition(),
+												query.getOrderSpecifier(),
+												query.getExtension()
+											)
+										);
+									}
+									uiGrid.selectFilter(
+										Filters.DEFAULT_FILTER_NAME, 
+										"" // filterValues
+									);
+								}
 							}
 						}
 					}
@@ -125,6 +133,8 @@ public class QueryTag extends BaseTag {
 	//-----------------------------------------------------------------------
 	// Members
 	//-----------------------------------------------------------------------
+	private static final long serialVersionUID = -7944478980009666356L;
+
 	private Object query = null;
 	private String name = null;
 

@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2009-2010, OMEX AG, Switzerland
+ * Copyright (c) 2009-2014, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -104,7 +104,7 @@ public class BasicImportPlugIn implements ImportPlugIn {
                         BasicException.Code.DEFAULT_DOMAIN,
                         BasicException.Code.NOT_FOUND,
                         "Could find neither persistent nor transient object for the given id",
-                        new BasicException.Parameter("externalId", externalId.toXRI())
+                        new BasicException.Parameter("externalId", externalId)
                     ); 
                 } catch (JDOException exception) {
                     throw new ServiceException(exception);
@@ -134,7 +134,7 @@ public class BasicImportPlugIn implements ImportPlugIn {
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.NOT_FOUND,
                 "Class mismatch",
-                new BasicException.Parameter("xri", externalId.toXRI()),
+                new BasicException.Parameter("xri", externalId),
                 new BasicException.Parameter("existing", refObject.getClass().getName()),
                 new BasicException.Parameter("imported", objectClass.getName())
             );
@@ -171,7 +171,7 @@ public class BasicImportPlugIn implements ImportPlugIn {
         //
         if(!ReducedJDOHelper.isPersistent(refObject)) {
             Path containerId = objectId.getParent();
-            String qualifier = objectId.getBase();
+            String qualifier = objectId.getLastSegment().toClassicRepresentation();
             RefContainer<?> refContainer = (RefContainer<?>) persistenceManager.getObjectById(containerId);
             if(qualifier.startsWith("!")) {
                 refContainer.refAdd(

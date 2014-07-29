@@ -70,36 +70,36 @@ public class TestModel {
         assertEquals(
             "Composite reference of 'org:omg:model1:Classifier'", 
             "org:omg:model1:Segment:element",
-            compositeReferenceClassifier.objGetValue("qualifiedName")
+            compositeReferenceClassifier.getQualifiedName()
         );
-        ModelElement_1_0 compositeReferenceClassifierExposedEnd = model.getElement(compositeReferenceClassifier.objGetValue("exposedEnd"));
+        ModelElement_1_0 compositeReferenceClassifierExposedEnd = model.getElement(compositeReferenceClassifier.getExposedEnd());
         assertEquals(
             "Exposed end of 'org:omg:model1:Segment:element'", 
             "org:omg:model1:SegmentContainsElement:segment",
-            compositeReferenceClassifierExposedEnd.objGetValue("qualifiedName")
+            compositeReferenceClassifierExposedEnd.getQualifiedName()
         );
         assertEquals(
             "Referenced type of 'org:omg:model1:Segment:element'",
             "org:omg:model1:Segment",
-            model.getElement(compositeReferenceClassifierExposedEnd.objGetValue("type")).objGetValue("qualifiedName")
+            model.getElement(compositeReferenceClassifierExposedEnd.getType()).getQualifiedName()
         );
         // org:omg:model1:Segment
         ModelElement_1_0 compositeReferenceSegment = model.getCompositeReference(model.getElement("org:omg:model1:Segment"));
         assertEquals(
             "Composite reference of 'org:omg:model1:Segment'", 
             "org:openmdx:base:Provider:segment",
-            compositeReferenceSegment.objGetValue("qualifiedName")
+            compositeReferenceSegment.getQualifiedName()
         );        
-        ModelElement_1_0 compositeReferenceSegmentExposedEnd = model.getElement(compositeReferenceSegment.objGetValue("exposedEnd"));
+        ModelElement_1_0 compositeReferenceSegmentExposedEnd = model.getElement(compositeReferenceSegment.getExposedEnd());
         assertEquals(
             "Exposed end of 'org:openmdx:base:Provider:segment'", 
             "org:openmdx:base:ProviderProvidesSegment:provider",
-            compositeReferenceSegmentExposedEnd.objGetValue("qualifiedName")
+            compositeReferenceSegmentExposedEnd.getQualifiedName()
         );
         assertEquals(
             "Referenced type of 'org:openmdx:base:Provider:segment'",
             "org:openmdx:base:Provider",
-            model.getElement(compositeReferenceSegmentExposedEnd.objGetValue("type")).objGetValue("qualifiedName")
+            model.getElement(compositeReferenceSegmentExposedEnd.getType()).getQualifiedName()
         );
     }
 

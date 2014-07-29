@@ -311,7 +311,7 @@ public class DataproviderRequest {
         RestFunction function = this.interactionSpec.getFunction();
         switch(function) {
             case GET:
-            	return this.path().size() % 2 == 0 ?
+            	return this.path().isContainerPath() ?
                     DataproviderOperations.ITERATION_START :
                     DataproviderOperations.OBJECT_RETRIEVAL;
             case DELETE:

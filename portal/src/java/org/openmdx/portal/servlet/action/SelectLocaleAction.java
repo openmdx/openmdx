@@ -53,6 +53,7 @@
 package org.openmdx.portal.servlet.action;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 
 import javax.servlet.ServletException;
@@ -60,14 +61,16 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.kernel.log.SysLog;
 import org.openmdx.portal.servlet.Action;
 import org.openmdx.portal.servlet.ApplicationContext;
 import org.openmdx.portal.servlet.ViewPort;
 import org.openmdx.portal.servlet.ViewsCache;
-import org.openmdx.portal.servlet.view.ObjectView;
-import org.openmdx.portal.servlet.view.ShowObjectView;
+import org.openmdx.portal.servlet.component.ObjectView;
+import org.openmdx.portal.servlet.component.ReferencePane;
+import org.openmdx.portal.servlet.component.ShowObjectView;
 
 public class SelectLocaleAction extends BoundAction {
 
@@ -95,20 +98,22 @@ public class SelectLocaleAction extends BoundAction {
             nextView = new ShowObjectView(
                 currentView.getId(),
                 currentView.getContainerElementId(),
-                currentView.getRefObject().refGetPath(),
+                (RefObject_1_0)app.getNewPmData().getObjectById(currentView.getObject().refGetPath()),
                 app,
                 currentView.getHistoryActions(),
+                null, // no nextPrevActions
                 currentView.getLookupType(),
                 null, // do not propagate resourcePathPrefix
                 null, // do not propagate navigationTarget
                 null // do not propagate isReadOnly
             );
             ShowObjectView showNextView = (ShowObjectView) nextView;
-            for (int i = 0; i < currentView.getReferencePane().length; i++) {
-            	showNextView.getReferencePane()[i].selectReference(currentView.getReferencePane()[i].getSelectedReference());
+            List<ReferencePane> nextViewReferencePanes = showNextView.getChildren(ReferencePane.class);
+            List<ReferencePane> currentViewReferencePanes = currentView.getChildren(ReferencePane.class);
+            for (int i = 0; i < currentViewReferencePanes.size(); i++) {
+            	nextViewReferencePanes.get(i).selectReference(currentViewReferencePanes.get(i).getSelectedReference());
             }
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             ServiceException e0 = new ServiceException(e);
             SysLog.warning(e0.getMessage(), e0.getCause());
             app.addErrorMessage(

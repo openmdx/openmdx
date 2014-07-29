@@ -8,7 +8,7 @@
  * This software is published under the BSD license
  * as listed below.
  * 
- * Copyright (c) 2004-2007, OMEX AG, Switzerland
+ * Copyright (c) 2004-2014, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -54,23 +54,33 @@ package org.openmdx.portal.servlet.control;
 
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
+import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.portal.servlet.Action;
 import org.openmdx.portal.servlet.ApplicationContext;
+import org.openmdx.portal.servlet.CssClass;
 import org.openmdx.portal.servlet.HtmlEncoder_1_0;
 import org.openmdx.portal.servlet.ViewPort;
-import org.openmdx.portal.servlet.WebKeys;
 import org.openmdx.portal.servlet.attribute.DateValue;
-import org.openmdx.portal.servlet.view.ShowObjectView;
-import org.openmdx.portal.servlet.view.View;
+import org.openmdx.portal.servlet.component.ShowObjectView;
+import org.openmdx.portal.servlet.component.View;
 
-public class SessionInfoControl
-    extends Control
-    implements Serializable {
+/**
+ * SessionInfoControl
+ *
+ */
+public class SessionInfoControl extends Control implements Serializable {
 
-    //-------------------------------------------------------------------------
+    /**
+     * Constructor.
+     * 
+     * @param id
+     * @param locale
+     * @param localeAsIndex
+     */
     public SessionInfoControl(
         String id,
         String locale,
@@ -83,20 +93,28 @@ public class SessionInfoControl
         );
     }
     
-    //---------------------------------------------------------------------------------
+    /**
+     * Paint login principal.
+     * 
+     * @param p
+     */
     public static void paintLoginPrincipal(
         ViewPort p
     ) {
         try {
             ApplicationContext app = p.getApplicationContext();
             p.write("<span>", app.getLoginPrincipal(), "</span>");
-        }
-        catch(Exception e) {
+        } catch(Exception e) {
             new ServiceException(e).log();
         }
     }
     
-    //---------------------------------------------------------------------------------
+    /**
+     * Paint locales menu.
+     * 
+     * @param p
+     * @param forEditing
+     */
     public static void paintLocalesMenu(
         ViewPort p,
         boolean forEditing
@@ -106,11 +124,10 @@ public class SessionInfoControl
             View view = p.getView();        
             if(forEditing) {
                 p.write("<span>", app.getCurrentLocaleAsString(), "</span>");            
-            }
-            else {
-                p.write("<ul id=\"nav\" class=\"nav\" onmouseover=\"sfinit(this);\" >");
-                p.write("  <li><a href=\"#\" onclick=\"javascript:return false;\">", app.getCurrentLocaleAsString(), "&nbsp;<img src=\"", p.getResourcePath("images/"), WebKeys.ICON_PANEL_DOWN, "\" alt=\"\" /></a>");
-                p.write("    <ul onclick=\"this.style.left='-999em';\" onmouseout=\"this.style.left='';\">");
+            } else {
+                p.write("<ul class=\"", CssClass.nav.toString(), " ", CssClass.navPills.toString(), "\">");
+                p.write("  <li class=\"", CssClass.dropdown.toString(), "\"><a href=\"#\" class=\"", CssClass.dropdownToggle.toString(), "\" data-toggle=\"dropdown\" onclick=\"javascript:this.parentNode.hide=function(){};\">", app.getCurrentLocaleAsString(), "  <b class=\"caret\"></b></a>");
+                p.write("    <ul class=\"", CssClass.dropdownMenu.toString(), "\" style=\"z-index:1010;\">");
                 Action[] selectLocaleAction = ((ShowObjectView)view).getSelectLocaleAction();
                 for(int i = 0; i < selectLocaleAction.length; i++) {
                     Action action = selectLocaleAction[i];
@@ -120,32 +137,63 @@ public class SessionInfoControl
                 p.write("  </li>");
                 p.write("</ul>");
             }
-        }
-        catch(Exception e) {
+        } catch(Exception e) {
             new ServiceException(e).log();
         }
     }
     
-    //---------------------------------------------------------------------------------
+    /**
+     * Paint logoff button.
+     * 
+     * @param p
+     * @param forEditing
+     * @param buttonClass
+     * @param buttonStyle
+     */
     public static void paintLogoffButton(
         ViewPort p,
         boolean forEditing,
-        String buttonClass
+        String buttonClass,
+        String buttonStyle
     ) {
         try {
             View view = p.getView();
             ApplicationContext app = p.getApplicationContext();            
             Action logoffAction = view.getLogoffAction();        
             if(!forEditing) {
-                p.write("<a class=\"", buttonClass, "\" href=\"#\" onclick=\"javascript:", p.getButtonEffectPulsate(), "window.location.href=", p.getEvalHRef(logoffAction), ";\">", logoffAction.getTitle(), "&nbsp;", app.getLoginPrincipal(), "</a>");            
+                p.write("<a class=\"", buttonClass, "\" style=\"", buttonStyle, "\" href=\"#\" onclick=\"javascript:window.location.href=", p.getEvalHRef(logoffAction), ";\">", logoffAction.getTitle(), "&nbsp;", app.getLoginPrincipal(), "</a>");            
             }
-        }
-        catch(Exception e) {
+        } catch(Exception e) {
             new ServiceException(e).log();
         }
     }
     
-    //---------------------------------------------------------------------------------
+    /**
+     * Paint logoff button.
+     * 
+     * @param p
+     * @param forEditing
+     * @param buttonClass
+     */
+    public static void paintLogoffButton(
+        ViewPort p,
+        boolean forEditing,
+        String buttonClass
+    ) {
+    	paintLogoffButton(
+    		p,
+    		forEditing,
+    		buttonClass,
+    		"border:none;"
+    	);
+    }
+
+    /**
+     * Paint roles menu.
+     * 
+     * @param p
+     * @param forEditing
+     */
     public static void paintRolesMenu(
         ViewPort p,
         boolean forEditing
@@ -161,40 +209,34 @@ public class SessionInfoControl
             	app.getCurrentUserRole(),
             	app
             );
-            if(p.getViewPortType() == ViewPort.Type.MOBILE) {
-            	String groupId = "selectRole";
-                p.write("    <ul id=\"t", groupId, "\" selected=\"true\" style=\"position:relative;top:auto;min-height:0px;\" onclick=\"javascript:var e=document.getElementById('p", groupId, "');if(e.style.display=='block'){e.style.display='none';}else{e.style.display='block';};\">");
-                p.write("      <li class=\"group\" style=\"height:40px;\"><div style=\"padding-top:10px;\">", p.getImg("src=\"", p.getResourcePathPrefix(), "images/", WebKeys.ICON_ROLE, "\""), "&nbsp;&nbsp;&nbsp;", htmlEncoder.encode(currentRoleTitle, false), "</div></li>");
-                p.write("    </ul>");
-                p.write("    <ul id=\"p", groupId, "\" selected=\"true\" style=\"display:none;position:relative;top:auto;min-height:0px;\">");
-                for(int i = 0; i < setRoleAction.length; i++) {
-                    Action action = setRoleAction[i];
-                    p.write("      <li><a href=\"#\" onclick=\"javascript:window.location.href=", p.getEvalHRef(action), ";\">", p.getImg("src=\"", p.getResourcePathPrefix(), "images/", action.getIconKey(), "\""), "&nbsp;&nbsp;&nbsp;", action.getTitle(), "</a></li>");
-                }
-                p.write("    </ul>");
-            }
-            else if(forEditing || (setRoleAction.length < 2)) {            	
+            if(forEditing) {            	
                 p.write("<span>", app.getCurrentUserRole(), "</span>");            
-            }
-            else {
-                p.write("<ul id=\"nav\" class=\"nav\" onmouseover=\"sfinit(this);\" >");
-                p.write("  <li><a href=\"#\" onclick=\"javascript:return false;\">", htmlEncoder.encode(currentRoleTitle, false), "&nbsp;<img src=\"", p.getResourcePath("images/"), WebKeys.ICON_PANEL_DOWN, "\" alt=\"\" /></a>");
-                p.write("    <ul onclick=\"this.style.left='-999em';\" onmouseout=\"this.style.left='';\">");
-                for(int i = 0; i < setRoleAction.length; i++) {
-                    Action action = setRoleAction[i];
-                    p.write("      <li><a href=\"#\" onclick=\"javascript:window.location.href=", p.getEvalHRef(action), ";\">", action.getTitle(), "</a></li>");
+            } else {
+            	boolean hasRoles = setRoleAction.length > 2;
+                p.write("<ul class=\"", CssClass.nav.toString(), " ", CssClass.navPills.toString(), "\">");
+                p.write("  <li class=\"", CssClass.dropdown.toString(), (hasRoles ? "" : " " + CssClass.disabled), "\"><a href=\"#\" class=\"", CssClass.dropdownToggle.toString(), "\" data-toggle=\"dropdown\" onclick=\"javascript:this.parentNode.hide=function(){};\">", htmlEncoder.encode(currentRoleTitle, false), " <b class=\"caret\"></b></a>");
+                if(hasRoles) {
+                	p.write("    <ul class=\"", CssClass.dropdownMenu.toString(), "\" style=\"z-index:1010;\">");
+	                for(int i = 0; i < setRoleAction.length; i++) {
+	                    Action action = setRoleAction[i];
+	                    p.write("      <li><a href=\"#\" onclick=\"javascript:window.location.href=", p.getEvalHRef(action), ";\">", action.getTitle(), "</a></li>");
+	                }
+	                p.write("    </ul>");
                 }
-                p.write("    </ul>");
                 p.write("  </li>");
                 p.write("</ul>");
             }
-        }
-        catch(Exception e) {
+        } catch(Exception e) {
             new ServiceException(e).log();
         }        
     }
     
-    //---------------------------------------------------------------------------------
+    /**
+     * Paint current date-time.
+     * 
+     * @param p
+     * @param separator
+     */
     public static void paintCurrentDateTime(
         ViewPort p,
         String separator
@@ -212,30 +254,66 @@ public class SessionInfoControl
                 separator, 
                 dateTimeFormat.getTimeZone().getID()
             );
-        }
-        catch(Exception e) {
+        } catch(Exception e) {
             new ServiceException(e).log();
         }
     }
     
-    //---------------------------------------------------------------------------------
+    /**
+     * Paint save settings button.
+     * 
+     * @param p
+     * @param forEditing
+     * @param buttonClass
+     * @param buttonStyle
+     */
     public static void paintSaveSettingsButton(
         ViewPort p,
         boolean forEditing,
-        String buttonClass
+        String buttonClass,
+        String buttonStyle
     ) {
         try {
             View view = p.getView();        
             Action saveSettingsAction = view.getSaveSettingsAction();
             if(!forEditing) {
-                p.write("<a class=\"", buttonClass, "\" href=\"#\" onclick=\"javascript:", p.getButtonEffectPulsate(), ";new Ajax.Request(", p.getEvalHRef(saveSettingsAction), ", {asynchronous:true});\">", saveSettingsAction.getTitle(), "</a>");            
+                p.write("<a class=\"", buttonClass, "\" style=\"", buttonStyle, "\" href=\"#\" onclick=\"javascript:new Ajax.Request(", p.getEvalHRef(saveSettingsAction), ", {asynchronous:true});\">", saveSettingsAction.getTitle(), "</a>");            
             }
-        }
-        catch(Exception e) {
+        } catch(Exception e) {
             new ServiceException(e).log();
-        }        
+        }
     }
-    
+
+    /**
+     * Paint save settings button.
+     * 
+     * @param p
+     * @param forEditing
+     * @param buttonClass
+     */
+    public static void paintSaveSettingsButton(
+        ViewPort p,
+        boolean forEditing,
+        String buttonClass
+    ) {
+    	paintSaveSettingsButton(
+    		p,
+    		forEditing,
+    		buttonClass,
+    		"border:none;"
+    	);
+    }
+
+	/* (non-Javadoc)
+	 * @see org.openmdx.portal.servlet.control.Control#getChildren(java.lang.Class)
+	 */
+	@Override
+	public <T extends Control> List<T> getChildren(
+		Class<T> type
+	) {
+		return Collections.emptyList();
+	}
+
     //---------------------------------------------------------------------------------
     // Members
     //---------------------------------------------------------------------------------

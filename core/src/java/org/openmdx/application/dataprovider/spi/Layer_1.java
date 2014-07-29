@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2013, OMEX AG, Switzerland
+ * Copyright (c) 2004-2014, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -110,7 +110,7 @@ public abstract class Layer_1 implements Dataprovider_1_0, Port {
     public Path newReplyId(
         Path requestId
     ){
-        return requestId.getParent().getChild(requestId.getBase() + "*-");
+        return requestId.getParent().getChild(requestId.getLastSegment().toClassicRepresentation() + "*-");
     }
     
     /**

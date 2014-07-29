@@ -62,6 +62,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.Constructor;
 import java.math.BigDecimal;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -73,6 +74,7 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.ConcurrentModificationException;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
@@ -86,6 +88,7 @@ import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.TimeZone;
 import java.util.TreeMap;
+import java.util.TreeSet;
 
 import javax.jdo.JDOHelper;
 import javax.jdo.PersistenceManager;
@@ -96,9 +99,11 @@ import javax.xml.datatype.DatatypeConstants;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 
+import org.openmdx.base.accessor.cci.SystemAttributes;
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
 import org.openmdx.base.accessor.jmi.cci.RefPackage_1_0;
 import org.openmdx.base.accessor.jmi.spi.RefMetaObject_1;
+import org.openmdx.base.accessor.jmi.spi.RefPackage_1;
 import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.AggregationKind;
@@ -106,6 +111,7 @@ import org.openmdx.base.mof.cci.ModelElement_1_0;
 import org.openmdx.base.mof.cci.ModelHelper;
 import org.openmdx.base.mof.cci.Model_1_0;
 import org.openmdx.base.mof.cci.PrimitiveTypes;
+import org.openmdx.base.mof.spi.Model_1Factory;
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.query.Condition;
 import org.openmdx.base.query.ConditionType;
@@ -115,24 +121,79 @@ import org.openmdx.base.query.IsInCondition;
 import org.openmdx.base.query.IsLikeCondition;
 import org.openmdx.base.query.Quantifier;
 import org.openmdx.base.query.SoundsLikeCondition;
+import org.openmdx.base.text.conversion.UUIDConversion;
+import org.openmdx.kernel.id.UUIDs;
 import org.openmdx.kernel.log.SysLog;
+import org.openmdx.portal.servlet.action.AbstractAction;
+import org.openmdx.portal.servlet.action.CancelAction;
+import org.openmdx.portal.servlet.action.CreateAction;
+import org.openmdx.portal.servlet.action.DeleteAction;
+import org.openmdx.portal.servlet.action.EditAction;
+import org.openmdx.portal.servlet.action.EditAsNewAction;
+import org.openmdx.portal.servlet.action.FindObjectAction;
+import org.openmdx.portal.servlet.action.FindObjectsAction;
+import org.openmdx.portal.servlet.action.FindSearchFieldValuesAction;
+import org.openmdx.portal.servlet.action.InvokeOperationAction;
+import org.openmdx.portal.servlet.action.LogoffAction;
+import org.openmdx.portal.servlet.action.MacroAction;
+import org.openmdx.portal.servlet.action.MultiDeleteAction;
+import org.openmdx.portal.servlet.action.NewObjectAction;
+import org.openmdx.portal.servlet.action.ObjectGetAttributesAction;
+import org.openmdx.portal.servlet.action.ReloadAction;
+import org.openmdx.portal.servlet.action.SaveAction;
+import org.openmdx.portal.servlet.action.SaveSettingsAction;
+import org.openmdx.portal.servlet.action.SelectAndEditObjectAction;
+import org.openmdx.portal.servlet.action.SelectAndNewObjectAction;
+import org.openmdx.portal.servlet.action.SelectLocaleAction;
+import org.openmdx.portal.servlet.action.SelectObjectAction;
+import org.openmdx.portal.servlet.action.SelectPerspectiveAction;
+import org.openmdx.portal.servlet.action.SelectViewportAction;
+import org.openmdx.portal.servlet.action.SetPanelStateAction;
+import org.openmdx.portal.servlet.action.UiGetOperationDialogAction;
+import org.openmdx.portal.servlet.action.UiGridAddColumnFilterAction;
+import org.openmdx.portal.servlet.action.UiGridAddObjectAction;
+import org.openmdx.portal.servlet.action.UiGridAddOrderAnyAction;
+import org.openmdx.portal.servlet.action.UiGridAddOrderAscendingAction;
+import org.openmdx.portal.servlet.action.UiGridAddOrderDescendingAction;
+import org.openmdx.portal.servlet.action.UiGridGetRowMenuAction;
+import org.openmdx.portal.servlet.action.UiGridMoveDownObjectAction;
+import org.openmdx.portal.servlet.action.UiGridMoveUpObjectAction;
+import org.openmdx.portal.servlet.action.UiGridPageNextAction;
+import org.openmdx.portal.servlet.action.UiGridPagePreviousAction;
+import org.openmdx.portal.servlet.action.UiGridSelectFilterAction;
+import org.openmdx.portal.servlet.action.UiGridSelectReferenceAction;
+import org.openmdx.portal.servlet.action.UiGridSetColumnFilterAction;
+import org.openmdx.portal.servlet.action.UiGridSetCurrentFilterAsDefaultAction;
+import org.openmdx.portal.servlet.action.UiGridSetHideRowsOnInitAction;
+import org.openmdx.portal.servlet.action.UiGridSetOrderAnyAction;
+import org.openmdx.portal.servlet.action.UiGridSetOrderAscendingAction;
+import org.openmdx.portal.servlet.action.UiGridSetOrderDescendingAction;
+import org.openmdx.portal.servlet.action.UiGridSetPageAction;
+import org.openmdx.portal.servlet.action.UiGridSetShowRowsOnInitAction;
+import org.openmdx.portal.servlet.action.UiGridSwapColumnOrderAction;
 import org.openmdx.portal.servlet.attribute.Attribute;
 import org.openmdx.portal.servlet.attribute.AttributeValue;
 import org.openmdx.portal.servlet.attribute.BinaryValue;
 import org.openmdx.portal.servlet.attribute.BooleanValue;
 import org.openmdx.portal.servlet.attribute.CodeValue;
 import org.openmdx.portal.servlet.attribute.DateValue;
+import org.openmdx.portal.servlet.attribute.FieldDef;
+import org.openmdx.portal.servlet.attribute.NullValue;
 import org.openmdx.portal.servlet.attribute.NumberValue;
 import org.openmdx.portal.servlet.attribute.ObjectReferenceValue;
 import org.openmdx.portal.servlet.attribute.TextValue;
+import org.openmdx.portal.servlet.component.Grid;
+import org.openmdx.portal.servlet.component.ObjectView;
+import org.openmdx.portal.servlet.component.ShowObjectView;
 import org.openmdx.portal.servlet.control.Control;
-import org.openmdx.portal.servlet.control.GridControl;
+import org.openmdx.portal.servlet.control.EditInspectorControl;
+import org.openmdx.portal.servlet.control.InspectorControl;
+import org.openmdx.portal.servlet.control.ShowInspectorControl;
+import org.openmdx.portal.servlet.control.UiGridControl;
 import org.openmdx.portal.servlet.databinding.CompositeObjectDataBinding;
 import org.openmdx.portal.servlet.databinding.JoiningListDataBinding;
 import org.openmdx.portal.servlet.databinding.ReferencedObjectDataBinding;
-import org.openmdx.portal.servlet.view.Grid;
-import org.openmdx.portal.servlet.view.ObjectView;
-import org.openmdx.portal.servlet.view.ShowObjectView;
+import org.openmdx.portal.servlet.wizards.WizardDefinitionFactory;
 import org.openmdx.ui1.jmi1.FeatureDefinition;
 import org.openmdx.ui1.jmi1.StructuralFeatureDefinition;
 
@@ -142,6 +203,626 @@ import org.openmdx.ui1.jmi1.StructuralFeatureDefinition;
  */
 public class DefaultPortalExtension implements PortalExtension_1_0, Serializable {
   
+	/**
+	 * DefaultActionFactory
+	 *
+	 */
+	public static class DefaultActionFactory implements ActionFactory {
+
+		public AbstractAction getAction(
+			short event
+		) {
+			switch(event) {
+				case SaveAction.EVENT_ID:
+					return new SaveAction();
+				case CancelAction.EVENT_ID:
+					return new CancelAction();
+				case FindObjectsAction.EVENT_ID:
+					return new FindObjectsAction();
+				case UiGridSelectReferenceAction.EVENT_ID:
+					return new UiGridSelectReferenceAction();
+				case UiGridPageNextAction.EVENT_ID:
+					return new UiGridPageNextAction();
+				case UiGridSetPageAction.EVENT_ID:
+					return new UiGridSetPageAction();
+				case UiGridPagePreviousAction.EVENT_ID:
+					return new UiGridPagePreviousAction();
+				case UiGridSelectFilterAction.EVENT_ID:
+					return new UiGridSelectFilterAction();
+				case UiGridSetColumnFilterAction.EVENT_ID:
+					return new UiGridSetColumnFilterAction();
+				case UiGridAddColumnFilterAction.EVENT_ID:
+					return new UiGridAddColumnFilterAction();
+				case UiGridSetOrderAscendingAction.EVENT_ID:
+					return new UiGridSetOrderAscendingAction();
+				case UiGridAddOrderAscendingAction.EVENT_ID:
+					return new UiGridAddOrderAscendingAction();
+				case UiGridSetOrderDescendingAction.EVENT_ID:
+					return new UiGridSetOrderDescendingAction();
+				case UiGridAddOrderDescendingAction.EVENT_ID:
+					return new UiGridAddOrderAscendingAction();
+				case UiGridSetOrderAnyAction.EVENT_ID:
+					return new UiGridSetOrderAnyAction();
+				case UiGridAddOrderAnyAction.EVENT_ID:
+					return new UiGridAddOrderAnyAction();
+				case UiGridSetCurrentFilterAsDefaultAction.EVENT_ID:
+					return new UiGridSetCurrentFilterAsDefaultAction();
+				case UiGridAddObjectAction.EVENT_ID:
+					return new UiGridAddObjectAction();
+				case UiGridSetShowRowsOnInitAction.EVENT_ID:
+					return new UiGridSetShowRowsOnInitAction();
+				case UiGridGetRowMenuAction.EVENT_ID:
+					return new UiGridGetRowMenuAction();
+				case UiGridSetHideRowsOnInitAction.EVENT_ID:
+					return new UiGridSetHideRowsOnInitAction();
+				case FindObjectAction.EVENT_ID:
+					return new FindObjectAction();
+				case SetPanelStateAction.EVENT_ID:
+					return new SetPanelStateAction();
+				case SaveSettingsAction.EVENT_ID:
+					return new SaveSettingsAction();
+				case LogoffAction.EVENT_ID:
+					return new LogoffAction();		
+				case SelectObjectAction.EVENT_ID:
+					return new SelectObjectAction();
+				case ReloadAction.EVENT_ID:
+					return new ReloadAction();
+				case SelectAndEditObjectAction.EVENT_ID:
+					return new SelectAndEditObjectAction();
+				case SelectAndNewObjectAction.EVENT_ID:
+					return new SelectAndNewObjectAction();
+				case EditAction.EVENT_ID:
+					return new EditAction();
+				case NewObjectAction.EVENT_ID:
+					return new NewObjectAction();
+				case SelectLocaleAction.EVENT_ID:
+					return new SelectLocaleAction();
+				case DeleteAction.EVENT_ID:
+					return new DeleteAction();
+				case MultiDeleteAction.EVENT_ID:
+					return new MultiDeleteAction();
+				case InvokeOperationAction.EVENT_ID:
+					return new InvokeOperationAction();
+				case MacroAction.EVENT_ID:
+					return new MacroAction();
+				case ObjectGetAttributesAction.EVENT_ID:
+					return new ObjectGetAttributesAction();
+				case SelectPerspectiveAction.EVENT_ID:
+					return new SelectPerspectiveAction();
+				case SelectViewportAction.EVENT_ID:
+					return new SelectViewportAction();
+				case UiGridMoveDownObjectAction.EVENT_ID:
+					return new UiGridMoveDownObjectAction();				
+				case UiGridMoveUpObjectAction.EVENT_ID:
+					return new UiGridMoveUpObjectAction();
+				case UiGetOperationDialogAction.EVENT_ID:
+					return new UiGetOperationDialogAction();
+				case EditAsNewAction.EVENT_ID:
+					return new EditAsNewAction();
+				case CreateAction.EVENT_ID:
+					return new CreateAction();
+				case FindSearchFieldValuesAction.EVENT_ID:
+					return new FindSearchFieldValuesAction();
+				case UiGridSwapColumnOrderAction.EVENT_ID:
+					return new UiGridSwapColumnOrderAction();
+				default:
+					return null;
+			}
+		}
+
+	}
+	
+	/**
+	 * DefaultControlFactory
+	 *
+	 */
+	public static class DefaultControlFactory implements ControlFactory {
+		
+	    /**
+	     * Reset controls cache.
+	     */
+	    public synchronized void reset(
+	    ) {
+	        this.gridControls.clear();
+	        this.inspectorControls.clear();
+	        this.fieldDefs.clear();	        
+	    }
+	    
+	    /**
+	     * Return UUID.
+	     * 
+	     * @return
+	     */
+	    protected String uuidAsString(
+	    ) {
+	        return UUIDConversion.toUID(UUIDs.newUUID());
+	    }
+	    
+	    /**
+	     * Create new instance of a ShowInspectorControl. Override
+	     * for custom-specific implementation.
+	     * 
+	     * @param id
+	     * @param perspective
+	     * @param locale
+	     * @param localeAsIndex
+	     * @param controlFactory
+	     * @param wizardDefinitionFactory
+	     * @param inspectorDef
+	     * @param forClass
+	     * @return
+	     */
+	    protected ShowInspectorControl newShowInspectorControl(
+            String id, 
+            int perspective,
+            String locale,
+            int localeAsIndex,
+            PortalExtension_1_0.ControlFactory controlFactory,
+            WizardDefinitionFactory wizardDefinitionFactory,
+            org.openmdx.ui1.jmi1.Inspector inspectorDef,
+            String forClass	    			    		
+	    ) {
+	    	return new ShowInspectorControl(
+	    		id,
+	    		perspective,
+	    		locale,
+	    		localeAsIndex,
+	    		controlFactory,
+	    		wizardDefinitionFactory,
+	    		inspectorDef,
+	    		forClass
+	    	);
+	    }
+	    
+	    /**
+	     * Create a new instance of an EditInspectorControl. Override for
+	     * custom-specific implementation.
+	     * 
+	     * @param id
+	     * @param locale
+	     * @param localeAsIndex
+	     * @param controlFactory
+	     * @param inspectorDef
+	     * @return
+	     */
+	    protected EditInspectorControl newEditInspectorControl(
+            String id,
+            String locale,
+            int localeAsIndex,
+            PortalExtension_1_0.ControlFactory controlFactory,
+            org.openmdx.ui1.jmi1.Inspector inspectorDef	    		
+	    ) {
+	    	return new EditInspectorControl(
+	    		id,
+	    		locale,
+	    		localeAsIndex,
+	    		controlFactory,
+	    		inspectorDef
+	    	);	    	
+	    }
+	    
+	    /**
+	     * Create new instance of a GridControl. Override for
+	     * custom-specific implementation.
+	     * 
+	     * @param id
+	     * @param locale
+	     * @param localeAsIndex
+	     * @param controlFactory
+	     * @param gridDef
+	     * @param containerClass
+	     * @param paneIndex
+	     * @return
+	     */
+	    protected UiGridControl newGridControl(
+            String id,
+            String locale,
+            int localeAsIndex,
+            PortalExtension_1_0.ControlFactory controlFactory,
+            org.openmdx.ui1.jmi1.ObjectContainer gridDef,
+            String containerClass,
+            int paneIndex	    		
+	    ) {
+	    	return new UiGridControl(
+	    		id,
+	    		locale,
+	    		localeAsIndex,
+	    		controlFactory,
+	    		gridDef,
+	    		containerClass,
+	    		paneIndex
+	    	);
+	    }
+	    
+	    /* (non-Javadoc)
+	     * @see org.openmdx.portal.servlet.PortalExtension_1_0.ControlFactory#createGridControl(java.lang.String, int, java.lang.String, int, org.openmdx.ui1.jmi1.Tab, int, java.lang.String)
+	     */
+	    @Override
+	    public synchronized UiGridControl createGridControl(
+	        String id,
+	        int perspective,
+	        String locale,
+	        int localeAsIndex,
+	        org.openmdx.ui1.jmi1.Tab tabDef,
+	        int paneIndex,
+	        String containerClass
+	    ) {
+	        org.openmdx.ui1.jmi1.ObjectContainer objectContainer = (org.openmdx.ui1.jmi1.ObjectContainer)tabDef.getMember().get(0);
+	        String key = null;
+	        synchronized(objectContainer) {
+	            key = perspective + "*" + containerClass + "*" + objectContainer.refMofId() + "*" + paneIndex + "*" + locale;
+	        }
+	        UiGridControl gridControl = (UiGridControl)this.gridControls.get(key);
+	        if(gridControl == null) {
+	            this.gridControls.put(
+	                key,
+	                gridControl = this.newGridControl(
+	                    id,
+	                    locale,
+	                    localeAsIndex,
+	                    this,
+	                    objectContainer,
+	                    containerClass,
+	                    paneIndex
+	                )
+	            );
+	        }
+	        return gridControl;
+	    }
+
+	    /* (non-Javadoc)
+	     * @see org.openmdx.portal.servlet.PortalExtension_1_0.ControlFactory#createShowInspectorControl(java.lang.String, int, java.lang.String, int, org.openmdx.ui1.jmi1.Inspector, java.lang.String)
+	     */
+	    @Override
+	    public synchronized ShowInspectorControl createShowInspectorControl(
+	        String id,
+	        int perspective,
+	        String locale,
+	        int localeAsIndex,
+	        org.openmdx.ui1.jmi1.Inspector inspectorDef,
+	        String forClass,
+	        WizardDefinitionFactory wizardFactory
+	    ) {
+	        String key = perspective + "*" + forClass + "*Show*" + locale;
+	        ShowInspectorControl inspectorControl = (ShowInspectorControl)this.inspectorControls.get(key);
+	        if(inspectorControl == null) {
+	            inspectorControl = this.newShowInspectorControl(
+	                id == null ? this.uuidAsString() : id,
+	                perspective,
+	                locale,
+	                localeAsIndex,
+	                this,
+	                wizardFactory,
+	                inspectorDef,
+	                forClass
+	            );
+	            this.inspectorControls.put(
+	                key,
+	                inspectorControl
+	            );
+	        }
+	        return inspectorControl;
+	    }
+
+	    /* (non-Javadoc)
+	     * @see org.openmdx.portal.servlet.PortalExtension_1_0.ControlFactory#createEditInspectorControl(java.lang.String, int, java.lang.String, int, org.openmdx.ui1.jmi1.Inspector, java.lang.String)
+	     */
+	    @Override
+	    public synchronized EditInspectorControl createEditInspectorControl(
+	        String id,
+	        int perspective,
+	        String locale,
+	        int localeAsIndex,
+	        org.openmdx.ui1.jmi1.Inspector inspectorDef,
+	        String forClass
+	    ) {
+	        String key = perspective + "*" + forClass + "*Edit*" + locale;
+	        EditInspectorControl inspectorControl = (EditInspectorControl)this.inspectorControls.get(key);
+	        if(inspectorControl == null) {
+	            inspectorControl = this.newEditInspectorControl(
+	                id == null ? this.uuidAsString() : id,
+	                locale,
+	                localeAsIndex,
+	                this,
+	                inspectorDef
+	            );
+	            this.inspectorControls.put(
+	                key,
+	                inspectorControl
+	            );
+	        }
+	        return inspectorControl;
+	    }
+
+	    /* (non-Javadoc)
+	     * @see org.openmdx.portal.servlet.PortalExtension_1_0.ControlFactory#createControl(java.lang.String, java.lang.String, int, java.lang.Class, java.lang.Object[])
+	     */
+	    @Override
+	    public synchronized Control createControl(
+	        String id,
+	        String locale,
+	        int localeAsIndex,
+	        Class<?> controlClass,
+	        Object... parameter
+	    ) throws ServiceException {
+	        try {
+	        	// Signature w/o parameters
+	        	Constructor<?> cons = controlClass.getConstructor(
+	                new Class[]{
+	                    String.class,
+	                    String.class,
+	                    int.class
+	                }
+	            );
+	        	try {
+		            return (Control)cons.newInstance(
+		                new Object[]{
+		                    id == null 
+		                    	? this.uuidAsString() 
+		                    	: id,
+		                    locale,
+		                    new Integer(localeAsIndex)
+		                }
+		            );
+	        	} catch(Exception e) {
+	        		throw new ServiceException(e);
+	        	}
+	        } catch(NoSuchMethodException ignore) {
+		        try {
+		        	// Signature w/ parameters
+		            Constructor<?> cons = controlClass.getConstructor(
+		                new Class[]{
+		                    String.class,
+		                    String.class,
+		                    int.class,
+		                    Object[].class
+		                }
+		            );
+		            return (Control)cons.newInstance(
+		                new Object[]{
+		                    id == null ? this.uuidAsString() : id,
+		                    locale,
+		                    new Integer(localeAsIndex),
+		                    parameter
+		                }
+		            );
+		        } catch(Exception e) {
+		            throw new ServiceException(e);
+		        }
+	        }
+	    }
+
+	    /* (non-Javadoc)
+	     * @see org.openmdx.portal.servlet.PortalExtension_1_0.ControlFactory#getAttributeValue(org.openmdx.ui1.jmi1.ValuedField, java.lang.Object, org.openmdx.portal.servlet.ApplicationContext)
+	     */
+	    @Override
+	    public AttributeValue createAttributeValue(
+	        org.openmdx.ui1.jmi1.ValuedField field,
+	        Object object,
+	        ApplicationContext app
+	    ) throws ServiceException {
+	      Path fieldIdentity = null;
+	      try {
+	          fieldIdentity = field.refGetPath();
+	      } catch(ConcurrentModificationException e) {
+		      // Retry to get the refMofId if the first attempt fails
+		      // Getting the refMofId the first time modifies a JMI object
+		      // JMI objects are not thread-safe which may throw a 
+		      // ConcurrentModificationException. This and other methods of 
+		      // openMDX/Portal are not synchronized a) for performance reasons 
+		      // and b) because ui objects are updated very rarely (typically 
+		      // only the first time a control is initialized)
+	          try { 
+	          	Thread.sleep(10); 
+	          } catch(Exception e0) {}
+	          fieldIdentity = field.refGetPath();
+	      }
+	      SysLog.trace("mapping field", field);
+	      Model_1_0 model = null;
+	      ModelElement_1_0 classDef = null;
+	      // RefObject_1_0: derive class from object
+	      if(object instanceof RefObject_1_0) {
+	          model = ((RefPackage_1)((RefObject_1_0)object).refOutermostPackage()).refModel();
+	          classDef = ((RefMetaObject_1)((RefObject)object).refMetaObject()).getElementDef();
+	      } else if(object instanceof Map) {
+		      // Map: object must be class name
+	          model = Model_1Factory.getModel();
+	          try {
+	        	  @SuppressWarnings("unchecked")
+	        	  Map<String,Object> objectAsMap = (Map<String,Object>)object;
+	              classDef = model.getElement(objectAsMap.get(SystemAttributes.OBJECT_CLASS));
+	          }  catch(Exception e) {}
+	      }
+	      AttributeValue value = NullValue.createNullValue();
+	      FieldDef fieldDef = (FieldDef)this.fieldDefs.get(fieldIdentity);
+	      // Number / Code
+	      if(field instanceof org.openmdx.ui1.jmi1.NumberField) {
+	        org.openmdx.ui1.jmi1.NumberField f = (org.openmdx.ui1.jmi1.NumberField)field;
+	        String qualifiedTypeName = null;
+	        String qualifiedClassName = null;
+	        if(object instanceof RefObject_1_0) {
+	        	qualifiedClassName = ((RefObject_1_0)object).refClass().refMofId();
+	        } else if(object instanceof Map) {
+	        	  @SuppressWarnings("unchecked")
+	        	  Map<String,Object> objectAsMap = (Map<String,Object>)object;
+	        	  qualifiedClassName = (String)objectAsMap.get(SystemAttributes.OBJECT_CLASS);
+	        }
+	        if(qualifiedClassName != null) {
+	            try {
+	                ModelElement_1_0 compositeReference = model.getElement(classDef.objGetValue("compositeReference"));
+	                ModelElement_1_0 typeDef = model.getElement(compositeReference.getType());
+	                qualifiedTypeName = (String)typeDef.getQualifiedName();
+	            } catch(Exception e) {}
+	        }
+	        // return code value in case a code table is defined for feature for the instance-level class
+	        if(
+	            (qualifiedClassName != null) &&
+	            (app.getCodes() != null) &&
+	            app.getCodes().getLongText(qualifiedClassName + ":" + f.getFeatureName(), (short)0, true, true) != null
+	        ) {
+	            if(fieldDef == null) {
+	                this.fieldDefs.put(
+	                    fieldIdentity,
+	                    fieldDef = FieldDef.createFieldDef(app, field)
+	                );
+	            }
+	            value = CodeValue.createCodeValue(
+	                object,
+	                fieldDef,
+	                app,
+	                qualifiedClassName + ":" + f.getFeatureName()
+	            );
+	        } else if(
+	            (app.getCodes() != null) &&
+	            (qualifiedTypeName != null) &&
+	            (app.getCodes().getLongText(qualifiedTypeName + ":" + f.getFeatureName(), (short)0, true, true) != null)
+	        ) {
+		        // Each concrete class has a compositeReference, i.e. is referenced by a 
+		        // parent class with aggregation kind = composite. Determine the type, i.e. 
+		        // class of the composite reference. The referenced class with all its subclasses 
+		        // defines a class hierarchy. The ObjectInspectorServlet allows to define codes 
+		        // either for a) a fully qualified attribute name or b) for an attribute of a class 
+		        // hierarchy. Option b) allows to define individual code tables for each class 
+		        // hierarchy in case the attribute is member of an abstract root class.
+	            if(fieldDef == null) {
+	                this.fieldDefs.put(
+	                    fieldIdentity,
+	                    fieldDef = FieldDef.createFieldDef(app, field)
+	                );
+	            }
+	            value = CodeValue.createCodeValue(
+	                object,
+	                fieldDef,
+	                app,
+	                qualifiedTypeName + ":" + f.getFeatureName()
+	            );
+	        } else if(
+	            (app.getCodes() != null) &&
+	            app.getCodes().getLongText(f.getQualifiedFeatureName(), (short)0, true, true) != null) {
+	            if(fieldDef == null) {
+	                this.fieldDefs.put(
+	                    fieldIdentity,
+	                    fieldDef = FieldDef.createFieldDef(app, field)
+	                );
+	            }
+	            value = CodeValue.createCodeValue(
+	                object,
+	                fieldDef,
+	                app,
+	                f.getQualifiedFeatureName()
+	              );
+	        } else {
+	            org.openmdx.ui1.jmi1.NumberField numberField = (org.openmdx.ui1.jmi1.NumberField)field;
+	            if(fieldDef == null) {
+	                this.fieldDefs.put(
+	                    fieldIdentity,
+	                    fieldDef = FieldDef.createNumberFieldDef(app, numberField)
+	                );
+	            }
+	            value = NumberValue.createNumberValue(
+	                object,
+	                fieldDef,
+	                f.isHasThousandsSeparator(),
+	                f.getMinValue(),
+	                f.getMaxValue(),
+	                app
+	            );
+	        }
+	      } else if(field instanceof org.openmdx.ui1.jmi1.DateField) {
+	          org.openmdx.ui1.jmi1.DateField f = (org.openmdx.ui1.jmi1.DateField)field;
+	          if(fieldDef == null) {
+	              this.fieldDefs.put(
+	                  fieldIdentity,
+	                  fieldDef = FieldDef.createDateFieldDef(app, f)
+	              );
+	          }
+	          value = DateValue.createDateValue(
+	              object,
+	              fieldDef,
+	              app
+	          );
+	      } else if(field instanceof org.openmdx.ui1.jmi1.ObjectReferenceField) {
+	          org.openmdx.ui1.jmi1.ValuedField f = field;
+	          if(fieldDef == null) {
+	            this.fieldDefs.put(
+	                  fieldIdentity,
+	                  fieldDef = FieldDef.createFieldDef(app, f)
+	              );
+	          }
+	          value = ObjectReferenceValue.createObjectReferenceValue(
+	              object,
+	              fieldDef,
+	              app
+	          );
+	      } else if(field instanceof org.openmdx.ui1.jmi1.TextField) {
+	          org.openmdx.ui1.jmi1.TextField f = (org.openmdx.ui1.jmi1.TextField)field;
+	          if(fieldDef == null) {
+	            this.fieldDefs.put(
+	                  fieldIdentity,
+	                  fieldDef = FieldDef.createFieldDef(app, f)
+	              );
+	          }
+	          value = TextValue.createTextValue(
+	              object,
+	              fieldDef,
+	              false,
+	              Integer.MAX_VALUE,
+	              app
+	          );
+	      } else if(field instanceof org.openmdx.ui1.jmi1.TextBox) {
+	          org.openmdx.ui1.jmi1.TextBox f = (org.openmdx.ui1.jmi1.TextBox)field;
+	          if(fieldDef == null) {
+	            this.fieldDefs.put(
+	                  fieldIdentity,
+	                  fieldDef = FieldDef.createFieldDef(app, f)
+	              );
+	          }
+	          value = TextValue.createTextValue(
+	              object,
+	              fieldDef,
+	              f.isPassword(),
+	              f.getMaxLength(),
+	              app
+	          );
+	      } else if(field instanceof org.openmdx.ui1.jmi1.CheckBox) {
+	          org.openmdx.ui1.jmi1.ValuedField f = field;
+	          if(fieldDef == null) {
+	            this.fieldDefs.put(
+	                  fieldIdentity,
+	                  fieldDef = FieldDef.createFieldDef(app, f)
+	              );
+	          }
+	          value = BooleanValue.createBooleanValue(
+	              object,
+	              fieldDef,
+	              app
+	          );
+	      } else if(field instanceof org.openmdx.ui1.jmi1.DocumentBox) {
+	          org.openmdx.ui1.jmi1.DocumentBox f = (org.openmdx.ui1.jmi1.DocumentBox)field;
+	          if(fieldDef == null) {
+	            this.fieldDefs.put(
+	                  fieldIdentity,
+	                  fieldDef = FieldDef.createBinaryFieldDef(app, f)
+	              );
+	          }
+	          value = BinaryValue.createBinaryValue(
+	              object,
+	              fieldDef,
+	              app
+	          );
+	      }
+	      return value;
+	    }
+	    
+	    //-------------------------------------------------------------------------
+	    // Members
+	    //-------------------------------------------------------------------------	    
+	    private Map<String,UiGridControl> gridControls = new HashMap<String,UiGridControl>();
+	    private Map<String,InspectorControl> inspectorControls = new HashMap<String,InspectorControl>();
+	    private final Map<Path,FieldDef> fieldDefs = new HashMap<Path,FieldDef>();	    
+	    
+	}
+	
     /**
      * Return toString() of the given object. If object is a collection 
      * return toString() of first element.
@@ -218,7 +899,7 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
     	String objectClass = refObj.refClass().refMofId();
     	try {
     		ModelElement_1_0 classDef = model.getElement(objectClass);
-    		Map attributeDefs = model.getAttributeDefs(classDef, false, true);
+    		Map<String,ModelElement_1_0> attributeDefs = model.getAttributeDefs(classDef, false, true);
     		if(
     			attributeDefs.keySet().contains("fullName") &&
     			(refObj.refGetValue("fullName") != null)
@@ -240,7 +921,7 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
     		) {
     			return this.toPlain(refObj.refGetValue("description"));
     		} else {
-    			return p.getBase();
+    			return p.getLastSegment().toClassicRepresentation();
     		}
     	} catch(ServiceException e) {
     		e.log();
@@ -328,7 +1009,7 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
     public boolean isLookupType(
         ModelElement_1_0 classDef
     ) throws ServiceException {
-        String qualifiedName = (String)classDef.objGetValue("qualifiedName");
+        String qualifiedName = (String)classDef.getQualifiedName();
         return 
             !"org:openmdx:base:BasicObject".equals(qualifiedName) &&
             !"org:openmdx:base:ContextCapable".equals(qualifiedName);
@@ -350,7 +1031,7 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
             // Get lookup type from model
             try {
                 ModelElement_1_0 lookupFeature = model.getElement(qualifiedFeatureName);
-                lookupType = model.getElement(lookupFeature.objGetValue("type"));
+                lookupType = model.getElement(lookupFeature.getType());
             } catch(Exception e) {
                 try {
                     // Fallback to customized feature definitions
@@ -390,10 +1071,10 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
                 int ii = 0;
                 for(ModelElement_1_0 feature: lookupObjectFeatures.values()) {
                     if(model.isReferenceType(feature)) {
-                        ModelElement_1_0 referencedEnd = model.getElement(feature.objGetValue("referencedEnd"));
-                        ModelElement_1_0 referencedType = model.getElement(feature.objGetValue("type"));
+                        ModelElement_1_0 referencedEnd = model.getElement(feature.getReferencedEnd());
+                        ModelElement_1_0 referencedType = model.getElement(feature.getType());
                         List<Object> allReferencedTypes = new ArrayList<Object>();
-                        for(Iterator j = referencedType.objGetList("allSubtype").iterator(); j.hasNext(); ) {
+                        for(Iterator<Object> j = referencedType.objGetList("allSubtype").iterator(); j.hasNext(); ) {
                             allReferencedTypes.addAll(
                                 model.getElement(j.next()).objGetList("allSupertype")
                             );
@@ -402,19 +1083,19 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
                             !referencedType.equals(extentCapableClass) && 
                             !referencedType.equals(contextCapableClass) && 
                             !referencedType.equals(basicObjectClass) &&
-                            !AggregationKind.NONE.equals(referencedEnd.objGetValue("aggregation")) &&
+                            !AggregationKind.NONE.equals(referencedEnd.getAggregation()) &&
                             allReferencedTypes.contains(lookupType.jdoGetObjectId()) 
                         ) {
-                            String lookupReferenceName = (String)feature.objGetValue("name");
+                            String lookupReferenceName = (String)feature.getName();
                             // Get default order by features for context object. Get all attributes
                             // which include the strings name, description, title or number and
                             // the attribute type is PrimitiveTypes.STRING
                             // Find reference of lookup object which references objects of type contextClass
-                            Map lookupTypeAttributes = model.getAttributeDefs(lookupType, true, false);
-                            for(Iterator k = lookupTypeAttributes.values().iterator(); k.hasNext(); ) {
+                            Map<String,ModelElement_1_0> lookupTypeAttributes = model.getAttributeDefs(lookupType, true, false);
+                            for(Iterator<ModelElement_1_0> k = lookupTypeAttributes.values().iterator(); k.hasNext(); ) {
                                 ModelElement_1_0 attributeDef = (ModelElement_1_0)k.next();
-                                ModelElement_1_0 attributeType = model.getElement(attributeDef.objGetValue("type"));
-                                String attributeName = (String)attributeDef.objGetValue("name");
+                                ModelElement_1_0 attributeType = model.getElement(attributeDef.getType());
+                                String attributeName = (String)attributeDef.getName();
                                 if(
                                     (attributeName.indexOf("name") >= 0 ||
                                     attributeName.indexOf("Name") >= 0 ||
@@ -426,15 +1107,15 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
                                     attributeName.indexOf("Address") >= 0 ||
                                     attributeName.indexOf("number") >= 0 ||
                                     attributeName.indexOf("Number") >= 0) &&
-                                    PrimitiveTypes.STRING.equals(attributeType.objGetValue("qualifiedName"))                                    
+                                    PrimitiveTypes.STRING.equals(attributeType.getQualifiedName())                                    
                                 ) {
                                     int order = 10000 * (filterByFeatures.size() + 1);
                                     try {
                                         org.openmdx.ui1.jmi1.ElementDefinition field = app.getUiElementDefinition(
-                                            (String)attributeDef.objGetValue("qualifiedName")
+                                            (String)attributeDef.getQualifiedName()
                                         );
                                         org.openmdx.ui1.jmi1.AssertableInspector referencedTypeInspector =
-                                            app.getAssertableInspector((String)referencedType.objGetValue("qualifiedName"));                                        
+                                            app.getAssertableInspector((String)referencedType.getQualifiedName());                                        
                                         String referencedTypeLabel =  app.getLabel(
                                             referencedTypeInspector.getForClass()
                                         );
@@ -508,7 +1189,7 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
                     return new FindObjectsAutocompleter(
                         lookupObjectIdentity,
                         (String[])lookupReferenceNames.values().toArray(new String[lookupReferenceNames.size()]),
-                        (String)lookupType.objGetValue("qualifiedName"),
+                        (String)lookupType.getQualifiedName(),
                         (String[])filterByFeatures.values().toArray(new String[filterByFeatures.size()]),
                         (String[])filterByLabels.values().toArray(new String[filterByLabels.size()]),
                         filterOperators,
@@ -640,7 +1321,7 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
     		// map object
     		Set<String> modifiedFeatures = new HashSet<String>();
     		for(
-    			Iterator i = parameterMap.keySet().iterator(); 
+    			Iterator<String> i = parameterMap.keySet().iterator(); 
     			i.hasNext(); 
     		) {
     			Object key = i.next();        
@@ -659,7 +1340,7 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
     				// Lookup feature in model repository
     				try {
     					ModelElement_1_0 featureDef = model.getElement(featureName);
-    					featureTypeName = (String)model.getElement(featureDef.objGetValue("type")).objGetValue("qualifiedName");
+    					featureTypeName = (String)model.getElement(featureDef.getType()).getQualifiedName();
     				} catch(Exception e) {
     					try {
     						// Fallback: lookup feature in ui repository as feature definition
@@ -672,7 +1353,7 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
     				Attribute feature = (Attribute)fieldMap.get(featureName);
     				if(feature != null) {        
     					// parse parameter values
-    					List parameterValues = Arrays.asList((Object[])parameterMap.get(key));
+    					List<Object> parameterValues = Arrays.asList((Object[])parameterMap.get(key));
     					StringTokenizer tokenizer = parameterValues.isEmpty() ? 
     						new StringTokenizer("", "\n", true) : 
     							new StringTokenizer((String)parameterValues.get(0), "\n\r", true);
@@ -932,7 +1613,7 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
 										}
 									}
 									List<Object> mappedNewValues = new ArrayList<Object>();
-									for(Iterator j = newValues.iterator(); j.hasNext(); ) {
+									for(Iterator<String> j = newValues.iterator(); j.hasNext(); ) {
 										try {
 											String numberAsString = ((String)j.next()).trim();
 											BigDecimal number = app.parseNumber(numberAsString);
@@ -1134,7 +1815,7 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
 										}
 									}
 									List<Object> mappedNewValues = new ArrayList<Object>();
-									for(Iterator j = newValues.iterator(); j.hasNext(); ) {
+									for(Iterator<String> j = newValues.iterator(); j.hasNext(); ) {
 										try {
 											String newValue = (String)j.next();
 											Date dateTime = null;
@@ -1343,9 +2024,9 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
 											);
 										}
 									}
-									Map longTexts = ((CodeValue)valueHolder).getLongText(false, false);      
+									Map<?,?> longTexts = ((CodeValue)valueHolder).getLongText(false, false);      
 									List<Object> mappedNewValues = new ArrayList<Object>();                        
-									for(Iterator j = newValues.iterator(); j.hasNext(); ) {
+									for(Iterator<String> j = newValues.iterator(); j.hasNext(); ) {
 										try {
 											String longText = j.next().toString();
 											Short code = (Short)longTexts.get(longText);
@@ -1430,7 +2111,7 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
 										}
 									}
 									List<Object> mappedNewValues = new ArrayList<Object>();
-									for(Iterator j = newValues.iterator(); j.hasNext(); ) {
+									for(Iterator<String> j = newValues.iterator(); j.hasNext(); ) {
 										Object mappedNewValue = j.next();
 										mappedNewValues.add(
 											new Boolean(
@@ -1644,7 +2325,7 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
 					if(
 						(value == null) || 
 						(value instanceof String && ((String)value).length() == 0) || 
-						(value instanceof Collection && ((Collection)value).isEmpty())
+						(value instanceof Collection && ((Collection<?>)value).isEmpty())
 					) {
 						app.addErrorMessage(
 							app.getTexts().getErrorTextMandatoryField(),
@@ -1672,7 +2353,7 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
     ) throws ServiceException {
     	Model_1_0 model = ofType.getModel();        
     	// add ofType to hierarchy
-    	String ofTypeName = (String)ofType.objGetValue("qualifiedName");
+    	String ofTypeName = (String)ofType.getQualifiedName();
     	if(hierarchy.get(ofTypeName) != null) {
     		return;
     	}
@@ -1685,28 +2366,28 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
     	if(!ofType.objGetList("compositeReference").isEmpty()) {
     		typesToCheck.add(ofType);
     	} else {
-    		for(Iterator i = ofType.objGetList("allSubtype").iterator(); i.hasNext(); ) {
+    		for(Iterator<Object> i = ofType.objGetList("allSubtype").iterator(); i.hasNext(); ) {
     			ModelElement_1_0 subtype = model.getElement(i.next());
     			if(
-    				!ofType.objGetValue("qualifiedName").equals(subtype.objGetValue("qualifiedName")) &&
+    				!ofType.getQualifiedName().equals(subtype.getQualifiedName()) &&
     				!subtype.objGetList("compositeReference").isEmpty()
     			) {
     				typesToCheck.add(subtype);
     			}
     		}
     	}        
-    	for(Iterator i = typesToCheck.iterator(); i.hasNext(); ) {
-    		ModelElement_1_0 type = (ModelElement_1_0)i.next();
+    	for(Iterator<ModelElement_1_0> i = typesToCheck.iterator(); i.hasNext(); ) {
+    		ModelElement_1_0 type = i.next();
     		ModelElement_1_0 compositeReference = model.getElement(type.objGetValue("compositeReference"));
-    		ModelElement_1_0 exposingType = model.getElement(compositeReference.objGetValue("container"));
+    		ModelElement_1_0 exposingType = model.getElement(compositeReference.getContainer());
     		this.createCompositionHierarchy(
     			exposingType,
     			hierarchy
     		);
     		hierarchy.get(
-    			exposingType.objGetValue("qualifiedName")
+    			exposingType.getQualifiedName()
     		).add(
-    			(String)compositeReference.objGetValue("name")
+    			(String)compositeReference.getName()
     		);
     	}
     }
@@ -1727,10 +2408,10 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
     	ModelElement_1_0 lookupType
     ) throws ServiceException {
     	Model_1_0 model = referenceDef.getModel();
-		ModelElement_1_0 referencedType = model.getElement(referenceDef.objGetValue("type"));
+		ModelElement_1_0 referencedType = model.getElement(referenceDef.getType());
     	return
 			(ModelHelper.isCompositeEnd(referenceDef, false) || ModelHelper.isSharedEnd(referenceDef, false)) &&
-			!"org:openmdx:base:ExtentCapable".equals(referencedType.objGetValue("qualifiedName")) &&
+			!"org:openmdx:base:ExtentCapable".equals(referencedType.getQualifiedName()) &&
 			model.isSubtypeOf(lookupType, referencedType);    	
     }
 
@@ -1745,7 +2426,7 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
     ) throws ServiceException {
     	Model_1_0 model = app.getModel();
     	PersistenceManager pm = JDOHelper.getPersistenceManager(startFrom);
-    	String qualifiedNameLookupType = (String)lookupType.objGetValue("qualifiedName");
+    	String qualifiedNameLookupType = (String)lookupType.getQualifiedName();
     	ModelElement_1_0 startFromType = model.getElement(startFrom.refClass().refMofId());
     	// First check whether startFrom has a reference with type lookupType
     	{
@@ -1769,7 +2450,7 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
 	    	RefObject_1_0 current = startFrom;
 	    	while(true) {
 	    		for(
-	    			Iterator i = compositionHierarchy.keySet().iterator(); 
+	    			Iterator<String> i = compositionHierarchy.keySet().iterator(); 
 	    			i.hasNext(); 
 	    		) {
 	    			if(
@@ -1802,7 +2483,7 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
 	    	if(objectToShow == null) {
 	    		RefObject[] rootObject = app.getRootObject();
 	    		for(int i = 0; i < rootObject.length; i++) {
-	    			for(Iterator j = compositionHierarchy.keySet().iterator(); j.hasNext(); ) {
+	    			for(Iterator<String> j = compositionHierarchy.keySet().iterator(); j.hasNext(); ) {
 	    				if(model.isSubtypeOf(rootObject[i].refClass().refMofId(), j.next())) {
 	    					objectToShow = (RefObject_1_0)rootObject[i];
 	    					break;
@@ -1835,13 +2516,14 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
             startFrom, 
             app
         );
-        String qualifiedNameLookupType = (String)lookupType.objGetValue("qualifiedName");        
+        String qualifiedNameLookupType = (String)lookupType.getQualifiedName();        
         ObjectView view = new ShowObjectView(
             id,
             null,
-            lookupObject.refGetPath(),
+            (RefObject_1_0)app.getNewPmData().getObjectById(lookupObject.refGetPath()),
             app,
             new LinkedHashMap<Path,Action>(),
+            null, // no nextPrevActions
             qualifiedNameLookupType,
             null, // resourcePathPrefix
             null, // navigationTarget
@@ -1866,7 +2548,7 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
      */
     @Override
     public boolean showGridContentOnInit(
-        GridControl gridControl,
+        UiGridControl gridControl,
         ApplicationContext app
     ) {
         String propertyName = gridControl.getPropertyName(
@@ -1879,28 +2561,12 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
     }
     
     /* (non-Javadoc)
-     * @see org.openmdx.portal.servlet.PortalExtension_1_0#showSearchForm(org.openmdx.portal.servlet.control.GridControl, org.openmdx.portal.servlet.ApplicationContext)
-     */
-    @Override
-    public boolean showSearchForm(
-        GridControl gridControl,
-        ApplicationContext app
-    ) {
-        String propertyName = gridControl.getPropertyName(
-            gridControl.getQualifiedReferenceName(),
-            UserSettings.SHOW_SEARCH_FORM.getName()
-        );
-        return app.getSettings().getProperty(propertyName) != null ? 
-        	Boolean.valueOf(app.getSettings().getProperty(propertyName)).booleanValue() : 
-        		false;        
-    }
-    
-    /* (non-Javadoc)
      * @see org.openmdx.portal.servlet.PortalExtension_1_0#renderTextValue(org.openmdx.portal.servlet.ViewPort, java.lang.String, boolean)
      */
     @Override
     public void renderTextValue(
         ViewPort p,
+        AttributeValue attributeValue,
         String value,
         boolean asWiki
     ) throws ServiceException {
@@ -1969,7 +2635,7 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
         // Do not need to generate HTML tags if text is postprocessed with wiki renderer
         if(!asWiki) {
 	        for(
-	            Iterator i = WELL_KNOWN_PROTOCOLS.iterator();
+	            Iterator<String> i = WELL_KNOWN_PROTOCOLS.iterator();
 	            i.hasNext();
 	        ) {
 	            String protocol = (String)i.next();
@@ -2057,6 +2723,28 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
         }
     }
 
+	/* (non-Javadoc)
+	 * @see org.openmdx.portal.servlet.PortalExtension_1_0#getDefaultCssClassFieldGroup(org.openmdx.portal.servlet.attribute.AttributeValue, org.openmdx.portal.servlet.ApplicationContext)
+	 */
+	@Override
+	public String getDefaultCssClassFieldGroup(
+		AttributeValue attributeValue,
+		ApplicationContext app
+	) {
+		return AttributeValue.DEFAULT_CSS_CLASS.toString();
+	}
+
+	/* (non-Javadoc)
+	 * @see org.openmdx.portal.servlet.PortalExtension_1_0#getDefaultCssClassObjectContainer(org.openmdx.portal.servlet.attribute.AttributeValue, org.openmdx.portal.servlet.ApplicationContext)
+	 */
+	@Override
+	public String getDefaultCssClassObjectContainer(
+		AttributeValue attributeValue, 
+		ApplicationContext app
+	) {
+		return "";
+	}
+
     /* (non-Javadoc)
      * @see org.openmdx.portal.servlet.PortalExtension_1_0#handleOperationResult(org.openmdx.base.accessor.jmi.cci.RefObject_1_0, java.lang.String, javax.jmi.reflect.RefStruct, javax.jmi.reflect.RefStruct)
      */
@@ -2078,7 +2766,7 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
     	Path requestedObjectIdentity
     ) {
     	// Return new user role depending on the segment name of the requested object: principal@segment.
-	    return app.getCurrentUserRole().substring(0, app.getCurrentUserRole().indexOf("@") + 1) + requestedObjectIdentity.get(4);
+	    return app.getCurrentUserRole().substring(0, app.getCurrentUserRole().indexOf("@") + 1) + requestedObjectIdentity.getSegment(4).toClassicRepresentation();
     }
 
 	/* (non-Javadoc)
@@ -2092,13 +2780,50 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
     	return Collections.<Action>emptyList();
     }
     
+    /**
+     * Create new instance of action factory. Override for
+     * custom-specific implementation.
+     * 
+     * @return
+     */
+    protected ActionFactory newActionFactory(
+    ) {
+    	return new DefaultActionFactory();
+    }
+        
 	/* (non-Javadoc)
      * @see org.openmdx.portal.servlet.PortalExtension_1_0#getActionFactory()
      */
     @Override
-    public ActionFactory_1_0 getActionFactory(
+    public ActionFactory getActionFactory(
     ) {
+    	if(this.actionFactory == null) {
+    		this.actionFactory = newActionFactory();
+    	}
     	return this.actionFactory;
+    }
+
+    /**
+     * Create new instance of control factory. Override for
+     * custom-specific implemenation.
+     * 
+     * @return
+     */
+    protected ControlFactory newControlFactory(
+    ) {
+    	return new DefaultControlFactory();
+    }
+
+    /* (non-Javadoc)
+     * @see org.openmdx.portal.servlet.PortalExtension_1_0#getControlFactory()
+     */
+    @Override
+    public ControlFactory getControlFactory(
+    ) {
+    	if(this.controlFactory == null) {
+    		this.controlFactory = newControlFactory();
+    	}
+    	return this.controlFactory;
     }
 
     /* (non-Javadoc)
@@ -2201,8 +2926,7 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
     					true,
     					(Object[])null
     				);
-    		}
-    		else if(token.startsWith("<=")) {
+    		} else if(token.startsWith("<=")) {
     			this.offset = 2;
     			return new IsGreaterCondition(
     				Quantifier.THERE_EXISTS,
@@ -2210,8 +2934,7 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
     				false,
     				(Object[])null
     			);
-    		}
-    		else if(token.startsWith("<>")) {
+    		} else if(token.startsWith("<>")) {
     			this.offset = 2;
     			return new IsInCondition(
     				Quantifier.THERE_EXISTS,
@@ -2219,8 +2942,7 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
     				false,
     				(Object[])null
     			);
-    		}
-    		else if(token.startsWith("<")) {
+    		} else if(token.startsWith("<")) {
     			this.offset = 1;
     			return new IsGreaterOrEqualCondition(
     				Quantifier.THERE_EXISTS,
@@ -2228,8 +2950,7 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
     				false,
     				(Object[])null
     			);
-    		}
-    		else if(token.startsWith(">")) {
+    		} else if(token.startsWith(">")) {
     			this.offset = 1;
     			return new IsGreaterCondition(
     				Quantifier.THERE_EXISTS,
@@ -2237,8 +2958,7 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
     				true,
     				(Object[])null
     			);
-    		}
-    		else if(token.startsWith("*")) {
+    		} else if(token.startsWith("*")) {
     			this.offset = 1;
     			return new SoundsLikeCondition(
     				Quantifier.THERE_EXISTS,
@@ -2246,8 +2966,7 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
     				true,
     				(Object[])null
     			);
-    		}
-    		else if(token.startsWith("!*")) {
+    		} else if(token.startsWith("!*")) {
     			this.offset = 2;
     			return new SoundsLikeCondition(
     				Quantifier.THERE_EXISTS,
@@ -2255,8 +2974,7 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
     				false,
     				(Object[])null
     			);
-    		}
-    		else if(token.startsWith("%")) {
+    		} else if(token.startsWith("%")) {
     			this.offset = 1;
     			return new IsLikeCondition(
     				Quantifier.THERE_EXISTS,
@@ -2264,8 +2982,7 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
     				true,
     				(Object[])null
     			);
-    		}
-    		else if(token.startsWith("!%")) {
+    		} else if(token.startsWith("!%")) {
     			this.offset = 2;
     			return new IsLikeCondition(
     				Quantifier.THERE_EXISTS,
@@ -2273,8 +2990,7 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
     				false,
     				(Object[])null
     			);
-    		}
-    		else if(token.startsWith("=")) {
+    		} else if(token.startsWith("=")) {
     			this.offset = 1;
     			return new IsInCondition(
     				Quantifier.THERE_EXISTS,
@@ -2282,8 +2998,7 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
     				true,
     				(Object[])null
     			);
-    		}
-    		else if(token.startsWith("!=")) {
+    		} else if(token.startsWith("!=")) {
     			this.offset = 2;
     			return new IsInCondition(
     				Quantifier.THERE_EXISTS,
@@ -2291,8 +3006,7 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
     				false,
     				(Object[])null
     			);
-    		}
-    		else {
+    		} else {
     			this.offset = 0;
     			return this.defaultCondition;
     		}
@@ -2320,16 +3034,92 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
     	);
     }
 
-	/* (non-Javadoc)
-     * @see org.openmdx.portal.servlet.PortalExtension_1_0#getExtension(java.lang.String)
+    /**
+     * CodeSearchFieldDef
+     *
      */
-    @Override
-    public Object getExtension(
-    	String name
-    ) {
-	    return null;
+    static class CodeSearchFieldDef extends SearchFieldDef {
+
+    	public CodeSearchFieldDef(
+    		String qualifiedReferenceName,
+    		String featureName,
+    		String codeValueContainerName
+    	) {
+    		super(qualifiedReferenceName, featureName);
+    		this.codeValueContainerName = codeValueContainerName;
+    	}
+    	
+		@Override
+		public List<String> findValues(
+			Object object,
+			String pattern,
+			ApplicationContext app
+		) throws ServiceException {
+			Map<Short,String> codeTexts = app.getCodes().getLongTextByCode(this.codeValueContainerName, app.getCurrentLocaleAsIndex(), true);
+			Set<String> values = new TreeSet<String>();
+			int count = 0;
+			for(String codeText: codeTexts.values()) {
+				if(
+					pattern != null && 
+					!pattern.isEmpty() && 
+					(codeText.toLowerCase().indexOf(pattern.toLowerCase()) >= 0 || "*".equals(pattern))
+				) {
+					values.add(codeText);
+					count++;
+					if(count > 30) break;
+				}
+			}
+			return new ArrayList<String>(values);
+		}
+
+		private final String codeValueContainerName;
+
     }
-    
+
+	/* (non-Javadoc)
+	 * @see org.openmdx.portal.servlet.PortalExtension_1_0#getSearchFieldDef(java.lang.Object, java.lang.String, org.openmdx.portal.servlet.ApplicationContext)
+	 */
+	@Override
+	public SearchFieldDef getSearchFieldDef(
+		String qualifiedReferenceName,
+		String featureName,
+		ApplicationContext app
+	) throws ServiceException {		
+		if(
+			qualifiedReferenceName != null &&
+			featureName != null
+		) {
+			Model_1_0 model = app.getModel();
+			ModelElement_1_0 referenceDef = null;
+			try {
+				referenceDef = model.getElement(qualifiedReferenceName);
+			} catch(Exception ignore) {}
+			if(referenceDef != null && referenceDef.isReferenceType()) {
+				ModelElement_1_0 referencedType = model.getElement(referenceDef.getType());
+				if(referencedType != null && referencedType.isClassType()) {
+					List<ModelElement_1_0> types = new ArrayList<ModelElement_1_0>();
+					for(Object subtype: referencedType.objGetList("allSupertype")) {
+						types.add(model.getElement(subtype));
+					}					
+					for(Object subtype: referencedType.objGetList("allSubtype")) {
+						types.add(model.getElement(subtype));
+					}
+					for(ModelElement_1_0 type: types) {
+						String codeValueContainerName = type.getQualifiedName() + ":" + featureName;
+						if(app.getCodes().getLongText(codeValueContainerName,  (short)0, true, true) != null) {
+							return new CodeSearchFieldDef(
+								qualifiedReferenceName, 
+								featureName, 
+								codeValueContainerName
+							);
+						}
+					}
+				}
+			}
+		}
+		return null;
+	}
+
     //-------------------------------------------------------------------------
     // Members
     //-------------------------------------------------------------------------
@@ -2361,7 +3151,8 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
         return DefaultPortalExtension.datatypeFactory;
     }
     
-    private DefaultActionFactory actionFactory = new DefaultActionFactory();
+    private ActionFactory actionFactory;
+    private ControlFactory controlFactory;
 
 }
 

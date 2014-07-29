@@ -105,8 +105,8 @@ public class Jmi1PackageInvocationHandler implements InvocationHandler {
             ) {
                 ModelElement_1_0 e = i.next();
                 if(model.isClassType(e) || model.isStructureType(e)) {
-                    String elementName = Identifier.CLASS_PROXY_NAME.toIdentifier((String)e.objGetValue("name"));
-                    String qualifiedElementName = (String)e.objGetValue("qualifiedName");
+                    String elementName = Identifier.CLASS_PROXY_NAME.toIdentifier((String)e.getName());
+                    String qualifiedElementName = (String)e.getQualifiedName();
                     if(
                         elementName.equals(cciName) &&
                         qualifiedElementName.substring(0, qualifiedElementName.lastIndexOf(":")).equals(qualifiedPackageName)

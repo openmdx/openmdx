@@ -290,8 +290,6 @@ public class XMI1ReferenceResolver
         atts.getValue("xmi.id"),
         sb.toString()
       );
-
-//      System.out.println("xmi.id=" + atts.getValue("xmi.id") + " maps to name=" + sb.toString());
     }
   }
 

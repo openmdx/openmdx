@@ -61,6 +61,9 @@ import java.util.logging.Level;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
 import org.openmdx.kernel.collection.ArraysExtension;
 import org.openmdx.kernel.log.ForeignLogRecord;
 import org.openmdx.kernel.log.LoggerFactory;
@@ -588,7 +591,7 @@ public final class BasicException extends Exception {
      * @see java.lang.Throwable#getCause()
      */
     @Override
-    public final BasicException getCause() {
+    public final synchronized BasicException getCause() {
         BasicException cause = (BasicException) super.getCause();
         if(cause == null && this.source != null && this.timestamp == Long.MIN_VALUE) {
             Throwable source = this.source.getCause();
@@ -727,7 +730,7 @@ public final class BasicException extends Exception {
     }
 
     /**
-     * The name of the exception class represented by this basic excpetion
+     * The name of the exception class represented by this basic exception
      * 
      * @return the name of the exception class 
      */
@@ -888,12 +891,17 @@ public final class BasicException extends Exception {
 	/**
      * Print the whole stack trace
      * 
-     * @param out the target
+	 * @param holderClassName the name of the BasicException.Holder implementation class
+	 * @param out the target
      */
     private void printExceptionStack(
-        Streamable out
+        @Nullable String holderClassName, 
+        @Nonnull Streamable out
     ){
         try {
+            if(holderClassName != null) {
+                out.append(holderClassName).append(": ");
+            }
             out.append(getExceptionClass()).append(": ").append(getMessage());
             out.println();
             int exceptionStackElement = 0;
@@ -934,8 +942,22 @@ public final class BasicException extends Exception {
      */
     @Override
     public void printStackTrace(final PrintStream s) {
+        printStackTrace(null, s);
+    }
+
+    /**
+     * Allows to inject the BasicException holder class name
+     * 
+     * @param holderClassName the BasicException's holder calss
+     * @param s the target stream
+     */
+    public void printStackTrace(
+        final String holderClassName,
+        final PrintStream s
+    ) {
         synchronized (s) {
             printExceptionStack(
+                holderClassName, 
                 new Streamable(s) {
 
                     @Override
@@ -953,8 +975,22 @@ public final class BasicException extends Exception {
      */
     @Override
     public void printStackTrace(final PrintWriter s) {
+        printStackTrace(null, s);
+    }
+
+    /**
+     * Allows to inject the BasicException holder class name
+     * 
+     * @param holderClassName the BasicException's holder calss
+     * @param s the target stream
+     */
+    public void printStackTrace(
+        final String holderClassName,
+        final PrintWriter s
+    ) {
         synchronized (s) {
             printExceptionStack(
+                holderClassName, 
                 new Streamable(s) {
 
                     @Override

@@ -8,7 +8,7 @@
  * This software is published under the BSD license
  * as listed below.
  * 
- * Copyright (c) 2009-2011, OMEX AG, Switzerland
+ * Copyright (c) 2009-2014, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -49,16 +49,27 @@
 package org.openmdx.portal.servlet.control;
 
 import java.io.Serializable;
+import java.util.Collections;
+import java.util.List;
 
+import org.openmdx.portal.servlet.CssClass;
 import org.openmdx.portal.servlet.ViewPort;
-import org.openmdx.portal.servlet.view.ShowObjectView;
-import org.openmdx.portal.servlet.view.View;
+import org.openmdx.portal.servlet.component.ShowObjectView;
+import org.openmdx.portal.servlet.component.View;
 
-public class DashboardControl
-	extends AbstractDashboardControl 
-	implements Serializable {
+/**
+ * DashboardControl
+ *
+ */
+public class DashboardControl extends AbstractDashboardControl implements Serializable {
 	
-	//-----------------------------------------------------------------------
+	/**
+	 * Constructor.
+	 * 
+	 * @param id
+	 * @param locale
+	 * @param localeAsIndex
+	 */
 	public DashboardControl(
         String id,
         String locale,
@@ -71,17 +82,15 @@ public class DashboardControl
 		);
 	}
 	
-	//-----------------------------------------------------------------------
 	/* (non-Javadoc)
      * @see org.openmdx.portal.servlet.control.AbstractDashboardControl#getDashboardStyle()
      */
     @Override
     protected String getDashboardStyle(
     ) {
-	    return "class=\"dashboard\" width=\"100%\"";
+	    return "width=\"100%\"";
     }
 
-	//-----------------------------------------------------------------------
 	/* (non-Javadoc)
      * @see org.openmdx.portal.servlet.control.AbstractDashboardControl#getDashboardIdSuffix(org.openmdx.portal.servlet.view.View)
      */
@@ -91,8 +100,23 @@ public class DashboardControl
     ) {
     	View view = p.getView();
     	return view instanceof ShowObjectView ?
-    		((ShowObjectView)view).getRefObject().refClass().refMofId() : 
+    		((ShowObjectView)view).getObject().refClass().refMofId() : 
     			null;
     }
-		
+
+	/* (non-Javadoc)
+	 * @see org.openmdx.portal.servlet.control.Control#getChildren(java.lang.Class)
+	 */
+	@Override
+	public <T extends Control> List<T> getChildren(
+		Class<T> type
+	) {
+		return Collections.emptyList();
+	}
+
+	//-----------------------------------------------------------------------
+	// Members
+	//-----------------------------------------------------------------------
+	private static final long serialVersionUID = 6773430723279101053L;
+
 }

@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2008-2013, OMEX AG, Switzerland
+ * Copyright (c) 2008-2014, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -148,11 +148,8 @@ public class Jmi1ContainerInvocationHandler
                         ReducedJDOHelper.getTransactionalObjectId(proxy).equals(ReducedJDOHelper.getTransactionalObjectId(args[0]))
                     );
                 } else if ("toString".equals(methodName)) {
-                    return proxy.getClass().getInterfaces()[0].getName() + ": " + (
-                        ReducedJDOHelper.isPersistent(proxy) ? ((Path)ReducedJDOHelper.getObjectId(proxy)).toXRI() : ReducedJDOHelper.getTransactionalObjectId(proxy)
-                    );
+                    return proxy.getClass().getInterfaces()[0].getName() + ": " + ReducedJDOHelper.getAnyObjectId(proxy);
                 } else throw new JmiServiceException(
-                    null,
                     BasicException.Code.DEFAULT_DOMAIN,
                     BasicException.Code.ASSERTION_FAILURE,
                     "Unexpected method dispatching",

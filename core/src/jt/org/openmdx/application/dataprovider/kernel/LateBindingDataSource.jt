@@ -66,14 +66,14 @@ import java.sql.SQLFeatureNotSupportedException;
 /**
  * Late Binding <code>DataSource</code>
  */
-class LateBindingDataSource implements DataSource {
+public class LateBindingDataSource implements DataSource {
 
     /**
      * Constructor
      *
      * @param jndiName the <code>DataSource</code>'s JNDI name
      */
-    LateBindingDataSource(
+    public LateBindingDataSource(
         String jndiName
     ){
         this.jndiName = jndiName;

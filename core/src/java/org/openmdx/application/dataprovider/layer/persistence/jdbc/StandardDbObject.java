@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2011, OMEX AG, Switzerland
+ * Copyright (c) 2004-2014, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -474,7 +474,7 @@ public abstract class StandardDbObject extends DbObject {
     protected String toObjectIdQuery (
         Path path
     ) throws ServiceException {
-        String pathComponentQuery = path.getBase();
+        String pathComponentQuery = path.getLastSegment().toClassicRepresentation();
         return pathComponentQuery.startsWith(":") && pathComponentQuery.endsWith("*") 
         ? pathComponentQuery.substring(1, pathComponentQuery.length() - 1) + '%' 
             : pathComponentQuery;

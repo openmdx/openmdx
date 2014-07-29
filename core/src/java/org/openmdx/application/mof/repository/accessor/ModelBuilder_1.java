@@ -52,7 +52,6 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -155,10 +154,9 @@ public class ModelBuilder_1 implements ModelBuilder_1_0 {
      */
     private final ModelLoader modelLoader;
     
-    /**
-     * 
-     */
     private Map<String,ModelElement_1_0> modelElements;
+    private Map<String, List<AssociationDef>> associationDefs;
+    private Model_1 model;
     
     /* (non-Javadoc)
      * @see org.openmdx.base.mof.cci.ModelBuilder_1_0#build()
@@ -167,65 +165,77 @@ public class ModelBuilder_1 implements ModelBuilder_1_0 {
     public Model_1_0 build(
     ) throws ServiceException {
         this.modelElements = new HashMap<String, ModelElement_1_0>();
-        final Map<String, List<AssociationDef>> associationDefs = new HashMap<String, List<AssociationDef>>(); 
-        final Model_1 model = new Model_1(this.modelElements, associationDefs);
+        this.associationDefs = new HashMap<String, List<AssociationDef>>(); 
+        this.model = new Model_1(this.modelElements, this.associationDefs);
         this.modelLoader.populateModelElements(model);
-        populateAssociationDefs(associationDefs);
+        populateAssociationDefs();
+        completeTypedElements();
         return model;
     }
 
     /** 
-     * Prepare AssociationDefs which allow fast lookup of referenced and exposed
-     * ends given a path
+     * Prepare the dereferenced types
+     */
+    private void completeTypedElements(
+    ) throws ServiceException {
+        for(ModelElement_1_0 elementDef : this.modelElements.values()){
+            if(
+                elementDef.isInstanceOf("org:omg:model1:TypedElement") &&
+                !"org:omg:model1".equals(elementDef.jdoGetObjectId().get(4))
+            ){
+                //
+                // Handle typed elements except the org:omg:model1 members
+                //
+                this.model.getElementType(elementDef);
+            }
+        }
+    }
+    
+    /** 
+     * Prepare association definitions which allow fast lookup of referenced and exposed ends given a path.
      */
     private void populateAssociationDefs(
-        Map<String,List<AssociationDef>> associationDefMap
     ) throws ServiceException {
-        for(
-            Iterator<ModelElement_1_0> i = this.modelElements.values().iterator();
-            i.hasNext();
-        ) {
-            ModelElement_1_0 elementDef = i.next();
-            /**
-             * Add only associations used in references to the list of AssociationDefs
-             */
+        for(ModelElement_1_0 elementDef : this.modelElements.values()){
+            //
+            // Add only associations used in references to the list of AssociationDefs
+            //
             if(elementDef.objGetClass().equals(ModelAttributes.REFERENCE)) {
-                addAssociationDef(associationDefMap, elementDef);
+                addAssociationDef(elementDef);
             }
         }
     }
 
     /**
-     * @param associationDefMap
+     * Amend the builder's association definitions
+     * 
      * @param elementDef
+     * 
      * @throws ServiceException
      */
     private void addAssociationDef(
-        Map<String, List<AssociationDef>> associationDefMap,
         ModelElement_1_0 elementDef
     ) throws ServiceException {
-        Path referencedEndPath = (Path)elementDef.objGetValue("referencedEnd");
-        Path exposedEndPath = (Path)elementDef.objGetValue("exposedEnd");
-        String referenceName = (String)elementDef.objGetValue("name");
-        List<AssociationDef> associationDefs = associationDefMap.get(referenceName);
-        if(associationDefs == null) {
-            associationDefMap.put(
+        Path referencedEndPath = (Path)elementDef.getReferencedEnd();
+        Path exposedEndPath = (Path)elementDef.getExposedEnd();
+        String referenceName = (String)elementDef.getName();
+        List<AssociationDef> associationDef = associationDefs.get(referenceName);
+        if(associationDef == null) {
+            this.associationDefs.put(
                 referenceName,
-                associationDefs = new ArrayList<AssociationDef>()
+                associationDef = new ArrayList<AssociationDef>()
             );
         }
-        associationDefs.add(
+        associationDef.add(
             new AssociationDef(
-                ModelHelper.getDereferencedType(
-                    ModelHelper.getElement(exposedEndPath, this.modelElements).objGetValue("type"),
-                    this.modelElements
+                this.model.getElementType(
+                    ModelHelper.getElement(exposedEndPath, this.modelElements)
                 ),
-                ModelHelper.getDereferencedType(
-                    ModelHelper.getElement(referencedEndPath, this.modelElements).objGetValue("type"),
-                    this.modelElements
+                this.model.getElementType(
+                    ModelHelper.getElement(referencedEndPath, this.modelElements)
                 ),
                 elementDef,
-                modelElements
+                this.modelElements
             )
         );
     }

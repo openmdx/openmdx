@@ -129,8 +129,8 @@ public class ServletPort
                 public String getInitParameter(String name) {
                     return initParameters.get(name);
                 }
-                @SuppressWarnings("rawtypes")
-                public Enumeration getInitParameterNames() {
+				@Override
+				public Enumeration<String> getInitParameterNames() {
                     return Collections.enumeration(initParameters.keySet());
                 }
                 public ServletContext getServletContext() {
@@ -203,11 +203,10 @@ public class ServletPort
          * @see org.openmdx.base.resource.spi.AbstractInteraction#open()
          */
         @Override
-        @SuppressWarnings("rawtypes")
         protected void open(
         ) throws ResourceException {
             ServletMessage message = new ServletMessage(CONNECT_SPEC, CONNECT_XRI);
-            Map parameters = message.request.getParameterMap();
+            final Map<String, String[]> parameters = message.request.getParameterMap();
             parameters.put("UserName", new String[]{getConnectionUserName()});
             try {
                 message.execute();
@@ -248,11 +247,12 @@ public class ServletPort
                 validate();
                 return this.attributes.get(name);
             }
+            
             /* (non-Javadoc)
-             * @see javax.servlet.http.HttpSession#getAttributeNames()
-             */
-            @SuppressWarnings("rawtypes")
-            public Enumeration getAttributeNames() {
+			 * @see javax.servlet.http.HttpSession#getAttributeNames()
+			 */
+			@Override
+			public Enumeration<String> getAttributeNames() {
                 validate();
                 return Collections.enumeration(this.attributes.keySet());
             }
@@ -472,79 +472,77 @@ public class ServletPort
             class EmbeddedRequest implements HttpServletRequest {
                 private final Map<String,String> headers = new HashMap<String,String>();
                 private final Map<String,String[]> parameters = new HashMap<String,String[]>();
-            //  @Override
+                @Override
                 public String getAuthType() {
                     throw new UnsupportedOperationException();
                 }
-            //  @Override
+                @Override
                 public String getContextPath() {
                    return CONTEXT_PATH;
                 }
-            //  @Override
+                @Override
                 public Cookie[] getCookies() {
                     throw new UnsupportedOperationException();
                 }
-            //  @Override
+                @Override
                 public long getDateHeader(String name) {
                     return Long.parseLong(getHeader(name));
                 }
-            //  @Override
+                @Override
                 public String getHeader(String name) {
                     return this.headers.get(name.toLowerCase());
                 }
-            //  @Override
-                @SuppressWarnings("rawtypes")
-                public Enumeration getHeaderNames() {
+				@Override
+				public Enumeration<String> getHeaderNames() {
                     return Collections.enumeration(
                         this.headers.keySet()
                     );
                 }
-            //  @Override
-                @SuppressWarnings("rawtypes")
-                public Enumeration getHeaders(String name) {
+				@Override
+				public Enumeration<String> getHeaders(String name) {
                     String header = this.headers.get(name.toLowerCase());
                     final String[] values = header == null ? NO_VALUES : header.split(",");
-                    return new Enumeration(){
+                    return new Enumeration<String>(){
                         private int cursor = 0;
-                    //  @Override
+                        @Override
                         public boolean hasMoreElements() {
                             return this.cursor < values.length;
                         }
-                    //  @Override
-                        public Object nextElement() {
+                        @Override
+                        public String nextElement() {
                             return values[this.cursor++].trim();
                         }
                     };
                 }
-            //  @Override
+                @Override
                 public int getIntHeader(String name) {
                     return Integer.parseInt(getHeader(name));
                 }
-            //  @Override
+                @Override
                 public String getMethod() {
                     return ServletMessage.this.interactionSpec.getFunctionName();
                 }
-            //  @Override
+                @Override
                 public String getPathInfo() {
                     return null; // Assume default servlet mapping ("/")
                 }
-            //  @Override
+                @Override
                 public String getPathTranslated() {
                     throw new UnsupportedOperationException();
                 }
-            //  @Override
+                @Override
                 public String getQueryString() {
                     return null;
                 }
-            //  @Override
+                @Override
                 public String getRemoteUser() {
                     return remoteUser;
                 }
-            //  @Override
+                @Override
                 public String getRequestURI() {
                     return getContextPath() + URITransformation.encode(ServletMessage.this.servletPath);
                 }
-            //  @Override
+                @Override
                 public StringBuffer getRequestURL() {
                     return new StringBuffer(
                         ServletInteraction.this.contextURL
@@ -552,56 +550,55 @@ public class ServletPort
                         URITransformation.encode(ServletMessage.this.servletPath)
                     );
                 }
-            //  @Override
+                @Override
                 public String getRequestedSessionId() {
                     throw new UnsupportedOperationException();
                 }
-            //  @Override
+                @Override
                 public String getServletPath() {
                     return ServletMessage.this.servletPath;
                 }
-            //  @Override
+                @Override
                 public HttpSession getSession() {
                     return getSession(true);
                 }
-            //  @Override
+                @Override
                 public HttpSession getSession(boolean create) {
                     return ServletInteraction.this.session;
                 }
-            //  @Override
+                @Override
                 public Principal getUserPrincipal() {
                     throw new UnsupportedOperationException();
                 }
-            //  @Override
+                @Override
                 public boolean isRequestedSessionIdFromCookie() {
                     throw new UnsupportedOperationException();
                 }
-            //  @Override
+                @Override
                 public boolean isRequestedSessionIdFromURL() {
                     throw new UnsupportedOperationException();
                 }
-            //  @Override
+                @Override
                 public boolean isRequestedSessionIdFromUrl() {
                     throw new UnsupportedOperationException();
                 }
-            //  @Override
+                @Override
                 public boolean isRequestedSessionIdValid() {
                     throw new UnsupportedOperationException();
                 }
-            //  @Override
+                @Override
                 public boolean isUserInRole(String role) {
                     throw new UnsupportedOperationException();
                 }
-            //  @Override
+                @Override
                 public Object getAttribute(String name) {
                     throw new UnsupportedOperationException();
                 }
-            //  @Override
-                @SuppressWarnings("rawtypes")
-                public Enumeration getAttributeNames() {
+				@Override
+				public Enumeration<String> getAttributeNames() {
                     throw new UnsupportedOperationException();
                 }
-            //  @Override
+                @Override
                 public String getCharacterEncoding() {
                     HttpHeaderFieldContent contentType = new HttpHeaderFieldValue(
                         request.getHeaders("Content-Type")
@@ -624,7 +621,7 @@ public class ServletPort
                         }
                     }
                 }
-            //  @Override
+                @Override
                 public int getContentLength() {
                     String contentLength = headers.get("content-length");
                     try {
@@ -633,128 +630,125 @@ public class ServletPort
                         return -1;
                     }
                 }
-            //  @Override
+                @Override
                 public String getContentType() {
                     return request.getHeader("Content-Type");
                 }
-            //  @Override
+                @Override
                 public ServletInputStream getInputStream(
                 ) throws IOException {
                     return ServletMessage.this.outputTarget.body.getBinarySource();
                 }
-            //  @Override
+                @Override
                 public String getLocalAddr(
                 ) {
                     throw new UnsupportedOperationException();
                 }
-            //  @Override
+                @Override
                 public String getLocalName() {
                     throw new UnsupportedOperationException();
                 }
-            //  @Override
+                @Override
                 public int getLocalPort() {
                     throw new UnsupportedOperationException();
                 }
-            //  @Override
+                @Override
                 public Locale getLocale() {
                     throw new UnsupportedOperationException();
                 }
-            //  @Override
-                @SuppressWarnings("rawtypes")
-                public Enumeration getLocales() {
+				@Override
+				public Enumeration<Locale> getLocales() {
                     throw new UnsupportedOperationException();
                 }
-            //  @Override
+                @Override
                 public String getParameter(String name) {
                     String[] values = getParameterValues(name);
                     return values == null || values.length == 0 ? null : values[0];
                 }
-            //  @Override
-                @SuppressWarnings("rawtypes")
-                public Map getParameterMap() {
+				@Override
+				public Map<String, String[]> getParameterMap() {
                     return this.parameters;
                 }
-            //  @Override
-                @SuppressWarnings("rawtypes")
-                public Enumeration getParameterNames() {
+				@Override
+				public Enumeration<String> getParameterNames() {
                     return Collections.enumeration(this.parameters.keySet());
                 }
-            //  @Override
+                @Override
                 public String[] getParameterValues(String name) {
                     return this.parameters.get(name);
                 }
-            //  @Override
+                @Override
                 public String getProtocol() {
                     throw new UnsupportedOperationException();
                 }
-            //  @Override
+                @Override
                 public BufferedReader getReader(
                 ) throws IOException {
                     return new BufferedReader(
                         ServletMessage.this.outputTarget.body.getCharacterSource()
                     );
                 }
-            //  @Override
+                @Override
                 public String getRealPath(
                     String path
                 ) {
                     throw new UnsupportedOperationException();
                 }
-            //  @Override
+                @Override
                 public String getRemoteAddr(
                 ) {
                     throw new UnsupportedOperationException();
                 }
-            //  @Override
+                @Override
                 public String getRemoteHost(
                 ) {
                     throw new UnsupportedOperationException();
                 }
-            //  @Override
+                @Override
                 public int getRemotePort(
                 ) {
                     throw new UnsupportedOperationException();
                 }
-            //  @Override
+                @Override
                 public RequestDispatcher getRequestDispatcher(
                     String path
                 ) {
                     throw new UnsupportedOperationException();
                 }
-            //  @Override
+                @Override
                 public String getScheme(
                 ) {
                     throw new UnsupportedOperationException();
                 }
-            //  @Override
+                @Override
                 public String getServerName(
                 ) {
                     throw new UnsupportedOperationException();
                 }
-            //  @Override
+                @Override
                 public int getServerPort(
                 ) {
                     throw new UnsupportedOperationException();
                 }
-            //  @Override
+                @Override
                 public boolean isSecure(
                 ) {
                     throw new UnsupportedOperationException();
                 }
-            //  @Override
+                @Override
                 public void removeAttribute(
                     String name
                 ) {
                     throw new UnsupportedOperationException();
                 }
-            //  @Override
+                @Override
                 public void setAttribute(
                     String name,
                     Object o
                 ) {
                     throw new UnsupportedOperationException();
                 }
-            //  @Override
+                @Override
                 public void setCharacterEncoding(
                     String env
                 ) throws UnsupportedEncodingException {

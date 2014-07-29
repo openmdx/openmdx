@@ -1,13 +1,13 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Description: TestState 
+ * Description: Test Date State 
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2008-2011, OMEX AG, Switzerland
+ * Copyright (c) 2008-2014, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -45,7 +45,6 @@
  * This product includes software developed by other organizations as
  * listed in the NOTICE file.
  */
-
 package test.openmdx.state2;
 
 import static org.junit.Assert.assertNotNull;
@@ -177,12 +176,12 @@ public class TestDateState {
             assertNotNull("The segment's objectId must not be null", objectId);
             String description = segment.getDescription();
             assertNotNull("The segment's description must not be null", description);
-            String name = objectId.getBase();
+            String name = objectId.getLastSegment().toClassicRepresentation();
             assertTrue(
                 "The description '" + description + "' must start with '" + name + "'",
                 description.startsWith(name)
             );
-            System.out.println("Test " + objectId.toXRI() + ": " + description);
+            System.out.println("Test " + objectId + ": " + description);
         }
         //
         // Test Orders

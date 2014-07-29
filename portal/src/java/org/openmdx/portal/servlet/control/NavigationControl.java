@@ -8,7 +8,7 @@
  * This software is published under the BSD license
  * as listed below.
  * 
- * Copyright (c) 2008-2013, OMEX AG, Switzerland
+ * Copyright (c) 2008-2014, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -50,27 +50,27 @@
 package org.openmdx.portal.servlet.control;
 
 import java.io.Serializable;
+import java.util.Collections;
+import java.util.List;
 
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.portal.servlet.Action;
 import org.openmdx.portal.servlet.ApplicationContext;
+import org.openmdx.portal.servlet.CssClass;
 import org.openmdx.portal.servlet.HtmlEncoder_1_0;
 import org.openmdx.portal.servlet.Texts_1_0;
-import org.openmdx.portal.servlet.UserSettings;
 import org.openmdx.portal.servlet.ViewPort;
 import org.openmdx.portal.servlet.WebKeys;
-import org.openmdx.portal.servlet.view.ShowObjectView;
-import org.openmdx.portal.servlet.view.View;
+import org.openmdx.portal.servlet.component.ShowObjectView;
+import org.openmdx.portal.servlet.component.View;
 
 /**
  * NavigationControl
  *
  */
-public class NavigationControl 
-    extends Control
-    implements Serializable {
+public class NavigationControl extends Control implements Serializable {
 
-    /**
+	/**
      * Constructor 
      *
      * @param id
@@ -102,9 +102,55 @@ public class NavigationControl
         try {
             View view = p.getView();
             if(!forEditing) {
-                Action backAction = ((ShowObjectView)view).getBackAction();
-                if(backAction != null) {
-                    p.write("<div id=\"closeButton\" onclick=\"javascript:window.location.href=", p.getEvalHRef(backAction), ";\">&nbsp;</div>");
+                Action action = ((ShowObjectView)view).getBackAction();
+                if(action != null) {
+                    p.write("<div id=\"closeButton\" onclick=\"javascript:window.location.href=", p.getEvalHRef(action), ";\">&nbsp;</div>");
+                }
+            }
+        } catch(Exception e) {
+            new ServiceException(e).log();
+        }
+    }
+
+    /**
+     * Paint next button.
+     * 
+     * @param p
+     * @param forEditing
+     */
+    public static void paintNext(
+        ViewPort p,
+        boolean forEditing
+    ) {
+        try {
+            View view = p.getView();
+            if(!forEditing) {
+                Action action = ((ShowObjectView)view).getNextAction();
+                if(action != null) {
+                    p.write("<div id=\"nextButton\" onclick=\"javascript:window.location.href=", p.getEvalHRef(action), ";\">&nbsp;</div>");
+                }
+            }
+        } catch(Exception e) {
+            new ServiceException(e).log();
+        }
+    }
+
+    /**
+     * Paint prev button.
+     * 
+     * @param p
+     * @param forEditing
+     */
+    public static void paintPrev(
+        ViewPort p,
+        boolean forEditing
+    ) {
+        try {
+            View view = p.getView();
+            if(!forEditing) {
+                Action action = ((ShowObjectView)view).getPrevAction();
+                if(action != null) {
+                    p.write("<div id=\"prevButton\" onclick=\"javascript:window.location.href=", p.getEvalHRef(action), ";\">&nbsp;</div>");
                 }
             }
         } catch(Exception e) {
@@ -121,10 +167,7 @@ public class NavigationControl
     public static String getHeaderId(
     	ViewPort p
     ) {
-    	ApplicationContext app = p.getApplicationContext();
-    	return
-    		"header" + 
-    		(Boolean.valueOf(app.getSettings().getProperty(UserSettings.SCROLL_HEADER.getName())) ? "" : "NoScroll");
+    	return "header";
     }
     
     /**
@@ -133,33 +176,13 @@ public class NavigationControl
      * @param p
      * @return
      */
-    public static String getContentHeaderId(
+    public static String getContentClass(
     	ViewPort p
     ) {
     	ApplicationContext app = p.getApplicationContext();
-    	return getContentHeaderId(
-	    	app.getPanelState("Header") == 0,
-	    	Boolean.valueOf(app.getSettings().getProperty(UserSettings.HIDE_WORKSPACE_DASHBOARD.getName())),
-	    	Boolean.valueOf(app.getSettings().getProperty(UserSettings.SCROLL_HEADER.getName()))
+    	return getContentClass(
+	    	app.getPanelState("Header") == 0
 	    );
-    }
-
-    /**
-     * Get id of content header.
-     * 
-     * @param p
-     * @return
-     */
-    public static String getContentHeaderId(
-    	boolean headerStateYes,
-    	boolean hideWorkspaceDashboard,
-    	boolean scrollHeader
-    ) {
-    	return 
-    		"content" + 
-    		(headerStateYes ? "HeaderYes" : "HeaderNo") + 
-    		(hideWorkspaceDashboard ? "LeftNo" : "LeftYes") +
-    		(scrollHeader ? "" : "NoScroll");
     }
 
     /**
@@ -177,20 +200,30 @@ public class NavigationControl
             if(!forEditing) {
             	ApplicationContext app = p.getApplicationContext();
                 int panelState = app.getPanelState("Header");
-                String id = panelState == 0 ? "headerShown" : "headerHidden";
                 Action showHeaderAction = view.getSetPanelStateAction("Header", 0);
                 Action hideHeaderAction = view.getSetPanelStateAction("Header", 1);
-                String setContentHeaderIdScriptIfHeaderHidden = "";
-                String setContentHeaderIdScriptIfHeaderShown = "";
-                for(int i = 0; i < 4; i++) {
-	                setContentHeaderIdScriptIfHeaderHidden += "try{$('" + getContentHeaderId(false, i % 2 == 0, i / 2 == 0) + "').id='" + getContentHeaderId(true, i % 2 == 0, i / 2 == 0) + "';}catch(e){};";
-	                setContentHeaderIdScriptIfHeaderShown += "try{$('" + getContentHeaderId(true, i % 2 == 0, i / 2 == 0) + "').id='" + getContentHeaderId(false, i % 2 == 0, i / 2 == 0) + "';}catch(e){};";
-                }
-                p.write("<div id=\"", id, "\" onClick=\"javascript:if(this.id=='headerHidden'){new Ajax.Request(", p.getEvalHRef(showHeaderAction), ", {asynchronous:true});this.id='headerShown';$('logoTableNH').id='logoTable';", setContentHeaderIdScriptIfHeaderHidden, "}else{new Ajax.Request(", p.getEvalHRef(hideHeaderAction), ", {asynchronous:true});this.id='headerHidden';$('logoTable').id='logoTableNH';", setContentHeaderIdScriptIfHeaderShown, "};\">&nbsp;</div>");
+                String showHeaderScript = "try{$('content').className='" + getContentClass(true) + "';}catch(e){};";
+                String hideHeaderScript = "try{$('content').className='" + getContentClass(false) + "';}catch(e){};";
+                p.write("<div id=\"", (panelState == 0 ? "headerShown" : "headerHidden"), "\" onClick=\"javascript:if(this.id=='headerHidden'){new Ajax.Request(", p.getEvalHRef(showHeaderAction), ", {asynchronous:true});this.id='headerShown';$('panelLogo').className='logoTable';", showHeaderScript, "}else{new Ajax.Request(", p.getEvalHRef(hideHeaderAction), ", {asynchronous:true});this.id='headerHidden';$('panelLogo').className='logoTableNH';", hideHeaderScript, "};\">&nbsp;</div>");
             }
         } catch(Exception e) {
             new ServiceException(e).log();
         }
+    }
+
+    /**
+     * Get id of content header.
+     * 
+     * @param p
+     * @return
+     */
+    public static String getContentClass(
+    	boolean headerStateYes
+    ) {
+    	return
+    		"container-fluid " + 
+    		"content" + 
+    		(headerStateYes ? "HeaderYes" : "HeaderNo");
     }
 
     /**
@@ -204,12 +237,12 @@ public class NavigationControl
         boolean forEditing
     ) {
         try {
-            p.write("<div id=\"printButton\" onClick=\"javascript:yuiPrint();\">&nbsp;</div>");
+            p.write("<div id=\"printButton\" onClick=\"javascript:window.print();\">&nbsp;</div>");
         } catch(Exception e) {
             new ServiceException(e).log();
         }
     }
-    
+
     /**
      * Paint perspective selector.
      * 
@@ -228,7 +261,7 @@ public class NavigationControl
                 Action[] selectPerspectiveActions = showView.getSelectPerspectiveAction();
                 if(selectPerspectiveActions.length > 1) {
                     p.write("<div id=\"perspectiveSelector\">");
-                    p.write("  <ul id=\"nav\" class=\"nav\" onmouseover=\"sfinit(this);\"><li><a href=\"#\" onclick=\"javascript:return false;\"><img src=\"./images/perspective_", Integer.toString(app.getCurrentPerspective()), WebKeys.ICON_TYPE, "\" border=\"0\" align=\"top\" alt=\"", selectPerspectiveActions[app.getCurrentPerspective()].getTitle(), "\" title=\"\" /></a>");                    
+                    p.write("  <ul id=\"", CssClass.ssfNav.toString(), "\" class=\"", CssClass.ssfNav.toString(), "\" onmouseover=\"sfinit(this);\"><li><a href=\"#\" onclick=\"javascript:return false;\"><img src=\"./images/perspective_", Integer.toString(app.getCurrentPerspective()), WebKeys.ICON_TYPE, "\" border=\"0\" align=\"top\" alt=\"", selectPerspectiveActions[app.getCurrentPerspective()].getTitle(), "\" title=\"\" /></a>");                    
                     p.write("    <ul onclick=\"this.style.left='-999em';\" onmouseout=\"this.style.left='';\">");
                     for(int i = 0; i < selectPerspectiveActions.length; i++) {
                         Action action = selectPerspectiveActions[i];
@@ -239,37 +272,6 @@ public class NavigationControl
                     p.write("    </ul></li>");
                     p.write("  </ul>");
                     p.write("</div>");
-                }
-            }
-        } catch(Exception e) {
-            new ServiceException(e).log();
-        }
-    }
-
-    /**
-     * Paint view port toggler.
-     * 
-     * @param p
-     * @param forEditing
-     */
-    public static void paintToggleViewPort(
-        ViewPort p,
-        boolean forEditing
-    ) {
-        try {
-            View view = p.getView();
-            if(view instanceof ShowObjectView) {
-                ShowObjectView showView = (ShowObjectView)view;
-                ApplicationContext app = p.getApplicationContext();
-                HtmlEncoder_1_0 htmlEncoder = app.getHtmlEncoder();
-                Texts_1_0 texts = app.getTexts();
-                texts.getViewTitle();
-                Action action = showView.getToggleViewPortAction();
-                if(p.getViewPortType() == ViewPort.Type.MOBILE) {
-                	p.write("<div style=\"float:right;height:20px;width:150px;cursor:pointer;\" title=\"", htmlEncoder.encode(texts.getViewTitle() + " " + action.getTitle(), false), "\" onclick=\"javascript:window.location.href=", p.getEvalHRef(action), ";\">&nbsp;</div>");
-                	p.write("<a class=\"button\" href=\"#\" onclick=\"javascript:self.close();\">X</a>");                	
-                } else {
-                	p.write("<div id=\"toggleViewPort\" style=\"cursor:pointer;\" title=\"", htmlEncoder.encode(texts.getViewTitle() + " " + action.getTitle(), false), "\" onclick=\"javascript:window.location.href=", p.getEvalHRef(action), ";\">&nbsp;</div>");
                 }
             }
         } catch(Exception e) {
@@ -294,23 +296,17 @@ public class NavigationControl
                 HtmlEncoder_1_0 htmlEncoder = p.getApplicationContext().getHtmlEncoder();
                 ShowObjectView view = (ShowObjectView)p.getView();
                 if((view.getLookupType() != null) && view.getObjectReference().isInstanceof(view.getLookupType())) {
-                    p.write("<span class=\"lookupSelector\"><input type=\"checkbox\" name=\"objselect\" value=\"obj\" onclick=\"OF.selectAndClose('", view.getObjectReference().getXRI(), "', '", htmlEncoder.encode(view.getObjectReference().getTitleAsJavascriptArg(), false), "', '", view.getId(), "', window);\" /></span>");
+                    p.write("<span class=\"", CssClass.lookupSelector.toString(), "\"><input type=\"checkbox\" name=\"objselect\" value=\"obj\" onclick=\"OF.selectAndClose('", view.getObjectReference().getXRI(), "', '", htmlEncoder.encode(view.getObjectReference().getTitleAsJavascriptArg(), false), "', '", view.getId(), "', window);\" /></span>");
                 }
-                if(p.getViewPortType() == ViewPort.Type.MOBILE) {
-                    p.write("<a href=\"#\" onmouseover=\"javascript:window.location.href=", p.getEvalHRef(view.getObjectReference().getReloadAction()), ";\" title=\"", texts.getReloadText(), "\">", p.getImg("src=\"", p.getResourcePath("images/"), view.getObjectReference().getIconKey(), "\" border=\"0\" align=\"top\" alt=\"o\" title=\"\""), "&nbsp;&nbsp;</a>");
-                    p.write("<a href=\"./jsp/MobileMain.jsp?", Action.PARAMETER_REQUEST_ID, "=", view.getRequestId(), "\">", htmlEncoder.encode(app.getApplicationName(), false), "</a>&nbsp;&gt;");                	
-                } else {
-                    p.write("<div id=\"reloadIcon\" onclick=\"javascript:window.location.href=", p.getEvalHRef(view.getObjectReference().getReloadAction()), ";\" title=\"", texts.getReloadText(), "\">", p.getImg("src=\"", p.getResourcePath("images/"), view.getObjectReference().getIconKey(), "\" border=\"0\" align=\"absbottom\" alt=\"o\" title=\"\""), "</div>");                	
-                }
+                p.write("<div id=\"reloadIcon\" onclick=\"javascript:window.location.href=", p.getEvalHRef(view.getObjectReference().getReloadAction()), ";\" title=\"", texts.getReloadText(), "\">", p.getImg("src=\"", p.getResourcePath("images/"), view.getObjectReference().getIconKey(), "\" border=\"0\" align=\"absbottom\" alt=\"o\" title=\"\""), "</div>");                	
                 Action[] selectParentActions = view.getSelectParentAction();
+                p.write("<ol class=\"breadcrumb\" style=\"margin-bottom:0px;\">");
                 for(
                     int i = 0; 
                     i < selectParentActions.length; 
                     i++
                 ) {
                     Action selectParentAction = selectParentActions[i];
-                    String style = null;
-                    String separator = null;
                     String title = null;
                     if(selectParentAction != null) {
                         if(i == selectParentActions.length - 1) {
@@ -319,23 +315,38 @@ public class NavigationControl
                             if((i > 1) && (strippedTitle.length() > 45)) {
                                 strippedTitle = strippedTitle.substring(0, 45) + "...";
                             }
-                            title = view.getObjectReference().getObject() instanceof org.openmdx.base.jmi1.Segment ?
-                                strippedTitle :
-                                strippedTitle + " - " + view.getObjectReference().getLabel();
-                            style = "class=\"current\"";
-                            separator = "";
+                            title = view.getObjectReference().getObject() instanceof org.openmdx.base.jmi1.Segment 
+                            	? strippedTitle 
+                            	: strippedTitle + " - " + view.getObjectReference().getLabel();
+                            p.write("<li class=\"", CssClass.active.toString(), "\">");
                         } else {
-                            title = selectParentAction.getTitle();
-                            style = "";
-                            separator = " &gt;";
+                        	title = selectParentAction.getTitle();
+                            p.write("<li>");
                         }
-                        p.write("<a ", style, " href=\"#\" onmouseover=\"javascript:this.href='./' + ", p.getEvalHRef(selectParentAction), ";onmouseover=function(){};\">", htmlEncoder.encode(title, false), "</a>", separator);
+                        p.write("<a href=\"#\" onmouseover=\"javascript:this.href='./' + ", p.getEvalHRef(selectParentAction), ";onmouseover=function(){};\">", htmlEncoder.encode(title, false), "</a>");
+                        p.write("</li>");
                     }
                 }
+                p.write("</ol>");
             }
         } catch(Exception e) {
             new ServiceException(e).log();
         }       
     }
+    
+	/* (non-Javadoc)
+	 * @see org.openmdx.portal.servlet.control.Control#getChildren(java.lang.Class)
+	 */
+	@Override
+	public <T extends Control> List<T> getChildren(
+		Class<T> type
+	) {
+		return Collections.emptyList();
+	}
+
+    //-----------------------------------------------------------------------
+    // Members
+    //-----------------------------------------------------------------------
+	private static final long serialVersionUID = 5154342686199609946L;
 
 }

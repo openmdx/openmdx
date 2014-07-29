@@ -53,6 +53,10 @@
 package org.openmdx.portal.servlet;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import javax.jdo.JDOHelper;
 
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
@@ -68,7 +72,7 @@ import org.openmdx.portal.servlet.action.ObjectGetAttributesAction;
 import org.openmdx.portal.servlet.action.ReloadAction;
 import org.openmdx.portal.servlet.action.SelectAndEditObjectAction;
 import org.openmdx.portal.servlet.action.SelectObjectAction;
-import org.openmdx.portal.servlet.view.ViewMode;
+import org.openmdx.portal.servlet.component.ViewMode;
 import org.openmdx.ui1.layer.application.Ui_1;
 
 /**
@@ -259,12 +263,14 @@ public class ObjectReference
     }
     
     /**
-     * Get select action.
+     * Get select action. Custom request parameters are added to standard parameters.
      * 
+     * @param customParameters
      * @return
      */
     public Action getSelectObjectAction(
-    ) {  
+    	Action.Parameter... customParameters
+    ) {
         String title = this.getTitle();
         Path retrievalPath = (this.object == null) || (this.exception != null) ? 
             null : 
@@ -278,17 +284,20 @@ public class ObjectReference
                 true
             );
         }
+        List<Action.Parameter> parameters = new ArrayList<Action.Parameter>();
+        parameters.add(
+    		new Action.Parameter(
+                Action.PARAMETER_OBJECTXRI, 
+                retrievalPath.toXRI()
+            )        		
+        );
+        if(parameters != null) {
+        	parameters.addAll(Arrays.asList(customParameters));
+        }
         return new Action(
             SelectObjectAction.EVENT_ID,
-            new Action.Parameter[]{
-                new Action.Parameter(
-                    Action.PARAMETER_OBJECTXRI, 
-                    retrievalPath.toXri()
-                ),
-            },
-            !title.trim().isEmpty() ? 
-                title : 
-                this.getLabel(),
+            parameters.toArray(new Action.Parameter[parameters.size()]),
+            !title.trim().isEmpty() ? title : this.getLabel(),
             this.getIconKey(),
             true
         );
@@ -388,7 +397,13 @@ public class ObjectReference
                 this.getObject(),
                 this.app,
                 WebKeys.PERMISSION_REVOKE_SHOW
-            )          
+            ) && 
+            !this.app.getPortalExtension().hasPermission(
+                Ui_1.EDIT_OBJECT_OPERATION_NAME,
+                this.getObject(),
+                this.app,
+                WebKeys.PERMISSION_REVOKE_EDIT
+            )
         );
     }
   

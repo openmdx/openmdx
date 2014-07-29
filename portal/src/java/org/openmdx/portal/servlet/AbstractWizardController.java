@@ -63,7 +63,6 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -75,12 +74,13 @@ import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.naming.Path;
 import org.openmdx.kernel.log.SysLog;
+import org.openmdx.portal.servlet.component.ObjectView;
+import org.openmdx.portal.servlet.component.OperationPane;
+import org.openmdx.portal.servlet.component.UiOperationTab;
+import org.openmdx.portal.servlet.component.ShowObjectView;
 import org.openmdx.portal.servlet.control.FormControl;
-import org.openmdx.portal.servlet.control.WizardTabControl;
-import org.openmdx.portal.servlet.view.ObjectView;
-import org.openmdx.portal.servlet.view.OperationPane;
-import org.openmdx.portal.servlet.view.OperationTab;
-import org.openmdx.portal.servlet.view.ShowObjectView;
+import org.openmdx.portal.servlet.control.WizardControl;
+import org.openmdx.portal.servlet.control.UiWizardTabControl;
 import org.openmdx.uses.org.apache.commons.fileupload.DiskFileUpload;
 import org.openmdx.uses.org.apache.commons.fileupload.FileItem;
 import org.openmdx.uses.org.apache.commons.fileupload.FileUpload;
@@ -149,30 +149,28 @@ public abstract class AbstractWizardController {
 				DiskFileUpload upload = new DiskFileUpload();
 				upload.setHeaderEncoding("UTF-8");
 				try {
-					List items = upload.parseRequest(
+					@SuppressWarnings("unchecked")
+					List<FileItem> items = upload.parseRequest(
 						this.getRequest(),
 						200, // in-memory threshold. Content for fields larger than threshold is written to disk
 						50000000, // max request size [overall limit]
 						this.app.getTempDirectory().getPath()
 					);
-					for(Iterator i = items.iterator(); i.hasNext(); ) {
-						FileItem item = (FileItem)i.next();
+					for(FileItem item: items) {
 						if(item.isFormField()) {
 							this.parameterMap.put(
 								item.getFieldName(),
 								new String[]{item.getString("UTF-8")}
 							);
-						}
-						else {
+						} else {
 							// reset binary
 							if("#NULL".equals(item.getName())) {
 								this.parameterMap.put(
 									item.getFieldName(),
 									new String[]{item.getName()}
 								);
-							}
-							// add to parameter map if file received
-							else if(item.getSize() > 0) {
+							} else if(item.getSize() > 0) {
+								// add to parameter map if file received
 								this.parameterMap.put(
 									item.getFieldName(),
 									new String[]{item.getName()}
@@ -204,7 +202,6 @@ public abstract class AbstractWizardController {
 				this.parameterMap = this.request.getParameterMap();
 			}
 		}
-		ViewsCache viewsCache = (ViewsCache)this.session.getAttribute(WebKeys.VIEW_CACHE_KEY_SHOW);			
 		this.requestId = this.getFirstParameterValue(
 			this.parameterMap, 
 			Action.PARAMETER_REQUEST_ID
@@ -213,16 +210,19 @@ public abstract class AbstractWizardController {
 			this.parameterMap,
 			Action.PARAMETER_OBJECTXRI
 		);
+		ViewsCache showViewsCache = (ViewsCache)this.session.getAttribute(WebKeys.VIEW_CACHE_KEY_SHOW);			
+		ViewsCache editViewsCache = (ViewsCache)this.session.getAttribute(WebKeys.VIEW_CACHE_KEY_EDIT);			
+		ObjectView objectView = showViewsCache.getView(this.requestId) == null
+			? editViewsCache.getView(this.requestId)
+			: showViewsCache.getView(this.requestId);
 		if(
 			(this.app == null) ||
 			(assertObjectXri && objectXri == null) || 
-			(assertRequestId && viewsCache.getView(this.requestId) == null)
+			(assertRequestId && objectView == null)
 		) {
 			return false;
 		}
-		if(assertRequestId) {
-			this.currentView = viewsCache.getView(this.requestId);
-		}
+		this.currentView = objectView;
 		this.pm = this.app.getNewPmData();
 		if(assertObjectXri) {
 			this.objectIdentity = new Path(objectXri);
@@ -884,20 +884,22 @@ public abstract class AbstractWizardController {
 	public String getToolTip(
 	) {
 		if(this.getCurrentView() != null) {
-			String pattern = this.getWizardName().toLowerCase() + ".";
+			String pattern = this.getWizardName().toLowerCase().replace("_", "") + ".";
 			ShowObjectView currentView = (ShowObjectView)this.getCurrentView();
-			for(OperationPane operationPane: currentView.getOperationPane()) {
-				for(OperationTab operationTab: operationPane.getOperationTab()) {
-					String name = operationTab.getOperationTabControl().getName();
-					if(name.toLowerCase().indexOf(pattern) > 0) {
-						return operationTab.getOperationTabControl().getToolTip();
+			for(OperationPane operationPane: currentView.getChildren(OperationPane.class)) {
+				for(UiOperationTab operationTab: operationPane.getChildren(UiOperationTab.class)) {
+					String name = operationTab.getOperationName().toLowerCase().replace("_", "");
+					if(name.indexOf(pattern) > 0) {
+						return operationTab.getToolTip();
 					}
 				}
 			}
-			for(WizardTabControl wizardTabControl: currentView.getShowInspectorControl().getWizardControl().getWizardTabControls()) {
-				String qualifiedOperationName = wizardTabControl.getQualifiedOperationName();
-				if(qualifiedOperationName.toLowerCase().indexOf(pattern) > 0) {
-					return wizardTabControl.getToolTip();
+			for(WizardControl wizardControl: currentView.getControl().getChildren(WizardControl.class)) {
+				for(UiWizardTabControl wizardTabControl: wizardControl.getChildren(UiWizardTabControl.class)) {
+					String qualifiedOperationName = wizardTabControl.getQualifiedOperationName().toLowerCase().replace("_", "");
+					if(qualifiedOperationName.indexOf(pattern) > 0) {
+						return wizardTabControl.getToolTip();
+					}
 				}
 			}
 		}

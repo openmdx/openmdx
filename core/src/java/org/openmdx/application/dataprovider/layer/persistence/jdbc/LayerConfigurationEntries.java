@@ -755,7 +755,21 @@ static public final String REFERENCE_ID_SUFFIX_ATTRIBUTES_SUFFIX = "referenceIdS
    * @see java.util.TimeZone#getDefault()
    */
   static public final String DATETIME_TIMEZONE = "dateTimeZone";
-    
+
+  /**
+   * The daylight saving time zone used to store <code>org::w3c::dateTime</code> values in
+   * case of <code>TIMESTAMP WITH TIMEZONE</code> database fields, e.g.<ul>
+   * <li><code>Europe/Zurich CEST</code>
+   * <li><code>US/Eastern EDT</code>
+   * <li>&#133;</code>
+   * </ul>
+   * <i>Defaults to the same value as DATETIME_TIMEZONE in absence of an entry leading 
+   * to incorrect values when switching from daylight saving time back to standard time</i>
+   * <p>
+   * @see #DATETIME_TIMEZONE
+   */
+  static public final String DATETIME_DST_TIMEZONE = "dateTimeDaylightZone";
+  
   /**
      * SQL TIME value
      */

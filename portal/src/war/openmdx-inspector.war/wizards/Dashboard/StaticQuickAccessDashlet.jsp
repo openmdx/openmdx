@@ -2,14 +2,14 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Description: WorkspacesDashlet.jsp
+ * Description: StatickQuickAccessDashlet.jsp
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
  * ====================================================================
  *
  * This software is published under the BSD license
  * as listed below.
  *
- * Copyright (c) 2004-2013, OMEX AG, Switzerland
+ * Copyright (c) 2004-2014, OMEX AG, Switzerland
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or
@@ -61,9 +61,10 @@ java.math.*,
 java.net.*,
 org.openmdx.base.naming.*,
 org.openmdx.kernel.exception.*,
+org.openmdx.base.accessor.jmi.cci.*,
 org.openmdx.base.exception.*,
 org.openmdx.portal.servlet.*,
-org.openmdx.portal.servlet.view.*,
+org.openmdx.portal.servlet.component.*,
 org.openmdx.portal.servlet.control.*,
 org.openmdx.portal.servlet.action.*,
 org.openmdx.kernel.log.*
@@ -75,22 +76,22 @@ org.openmdx.kernel.log.*
 	Below is a sample properties file. The entries are displayed in the order of the property keys.
 
 	# SampleMenu.properties
-    e0000=<div style="font-size:120%;font-weight:bold;">Customers</div>
+    e0000=<li class="nav-header" style="padding:2px;font-weight:bold;"><b class="caret"></b>Customers</li>
 	e0001=xri://@openmdx*org.opencrx.kernel.activity1/provider/CRX/segment/Standard/activityCreator&queryType=org:opencrx:kernel:activity1:ActivityCreator&query=name().equalTo("Sample~Customers"); > Operation.org:opencrx:kernel:activity1:ActivityCreator:newActivity
 	e0002=xri://@openmdx*org.opencrx.kernel.activity1/provider/CRX/segment/Standard/activityTracker&queryType=org:opencrx:kernel:activity1:ActivityTracker&query=name().equalTo("Sample~Customers"); > Reference.filteredActivity
-	e0003=<div style="font-size:120%;font-weight:bold;">Compliance</div>
+	e0003=<li class="nav-header" style="padding:2px;font-weight:bold;"><b class="caret"></b>Compliance</li>
 	e0004=xri://@openmdx*org.opencrx.kernel.activity1/provider/CRX/segment/Standard/activityCreator&queryType=org:opencrx:kernel:activity1:ActivityCreator&query=name().equalTo("Sample~Compliance"); > Operation.org:opencrx:kernel:activity1:ActivityCreator:newActivity
 	e0005=xri://@openmdx*org.opencrx.kernel.activity1/provider/CRX/segment/Standard/activityTracker&queryType=org:opencrx:kernel:activity1:ActivityTracker&query=name().equalTo("Sample~Compliance"); > Reference.filteredActivity
-	e0006=<div style="font-size:120%;font-weight:bold;">Generic</div>
+	e0006=<li class="nav-header" style="padding:2px;font-weight:bold;"><b class="caret"></b>Generic</li>
 	e0007=xri://@openmdx*org.opencrx.kernel.activity1/provider/CRX/segment/Standard/activityCreator&queryType=org:opencrx:kernel:activity1:ActivityCreator&query=name().equalTo("Sample~Generic"); > Operation.org:opencrx:kernel:activity1:ActivityCreator:newActivity
 	e0008=xri://@openmdx*org.opencrx.kernel.activity1/provider/CRX/segment/Standard/activityTracker&queryType=org:opencrx:kernel:activity1:ActivityTracker&query=name().equalTo("Sample~Generic"); > Reference.filteredActivity
-	e0009=<div style="font-size:120%;font-weight:bold;">Communications</div>
+	e0009=<li class="nav-header" style="padding:2px;font-weight:bold;"><b class="caret"></b>Communications</li>
 	e0010=xri://@openmdx*org.opencrx.kernel.activity1/provider/CRX/segment/Standard/activityCreator&queryType=org:opencrx:kernel:activity1:ActivityCreator&query=name().equalTo("Sample~Communications"); > Operation.org:opencrx:kernel:activity1:ActivityCreator:newActivity
 	e0011=xri://@openmdx*org.opencrx.kernel.activity1/provider/CRX/segment/Standard/activityTracker&queryType=org:opencrx:kernel:activity1:ActivityTracker&query=name().equalTo("Sample~Communications"); > Reference.filteredActivity
-	e0012=<div style="font-size:120%;font-weight:bold;">Analysis</div>
+	e0012=<li class="nav-header" style="padding:2px;font-weight:bold;"><b class="caret"></b>Analysis</li>
 	e0013=xri://@openmdx*org.opencrx.kernel.activity1/provider/CRX/segment/Standard/activityCreator&queryType=org:opencrx:kernel:activity1:ActivityCreator&query=name().equalTo("Sample~Analysis"); > Operation.org:opencrx:kernel:activity1:ActivityCreator:newActivity
 	e0014=xri://@openmdx*org.opencrx.kernel.activity1/provider/CRX/segment/Standard/activityTracker&queryType=org:opencrx:kernel:activity1:ActivityTracker&query=name().equalTo("Sample~Analysis"); > Reference.filteredActivity
-	e0021=<div style="font-size:120%;font-weight:bold;">Underwriting</div>
+	e0021=<li class="nav-header" style="padding:2px;font-weight:bold;"><b class="caret"></b>Underwriting</li>
 	e0022=xri://@openmdx*org.opencrx.kernel.activity1/provider/CRX/segment/Standard/activityCreator&queryType=org:opencrx:kernel:activity1:ActivityCreator&query=name().equalTo("Sample~Underwriting"); > Operation.org:opencrx:kernel:activity1:ActivityCreator:newActivity
 	e0023=xri://@openmdx*org.opencrx.kernel.activity1/provider/CRX/segment/Standard/activityTracker&queryType=org:opencrx:kernel:activity1:ActivityTracker&query=name().equalTo("Sample~Underwriting"); > Reference.filteredActivity	
  */
@@ -143,15 +144,14 @@ org.openmdx.kernel.log.*
 		if(xri != null && requestId != null && dashletId != null && viewsCache.getView(requestId) != null) {
 			ShowObjectView view = (ShowObjectView)viewsCache.getView(requestId);
 %>
-			<div id="<%= dashletId %>Content" style="padding:5px;min-width:150px;">
+			<div id="<%= dashletId %>Content">
 				<form id="<%= dashletId %>Form" name="<%= dashletId %>Form" />
 					<input id="<%= WebKeys.REQUEST_ID %>" name="<%= Action.PARAMETER_REQUEST_ID %>" type="hidden" value="<%= requestId %>" />
 					<input id="<%= WebKeys.REQUEST_PARAMETER %>" name="<%= WebKeys.REQUEST_PARAMETER %>" type="hidden" value="<%= parameters %>" />
 					<div>
-						<table>
+						<div class="<%= CssClass.sidebarNav %>">
+						<ul class="<%= CssClass.nav + " " + CssClass.navList %>">
 <%							
-							final String SPACER = "</td></tr><tr><td><img src=\"images/spacer.gif\" height=\"1px;\" /></td></tr>";
-							String spacer = "";
 							for(Object entry: menuEntries.values()) {
 								String menuEntry = (String)entry;
 								try {
@@ -174,9 +174,10 @@ org.openmdx.kernel.log.*
 												targetView = new ShowObjectView(
 													view.getId(),
 													(String)null,
-													targetXri,
+													(RefObject_1_0)app.getNewPmData().getObjectById(targetXri),
 													app,
 													new HashMap(),
+													null, // nextPrevActions
 													(String)null, // lookupType
 													(String)null, // resourcePathPrefix
 													(String)null, // navigationTarget
@@ -188,16 +189,16 @@ org.openmdx.kernel.log.*
 													String operationName = function.substring(10);
 													List<OperationPaneControl> operationPaneControls = new ArrayList<OperationPaneControl>();
 													// Operations
-													for(OperationPaneControl paneControl: targetView.getShowInspectorControl().getOperationPaneControl()) {
-														for(OperationTabControl tabControl: paneControl.getOperationTabControl()) {
+													for(OperationPaneControl paneControl: targetView.getControl().getChildren(OperationPaneControl.class)) {
+														for(UiOperationTabControl tabControl: paneControl.getChildren(UiOperationTabControl.class)) {
 															if(tabControl.getQualifiedOperationName().equals(operationName)) {
 																String tabId = Integer.toString(tabControl.getTabId());
 																Action action = null;
 																String target = "";
-																if(tabControl instanceof WizardTabControl) {
-																	WizardTabControl wizardTabControl = (WizardTabControl)tabControl;
+																if(tabControl instanceof UiWizardTabControl) {
+																	UiWizardTabControl wizardTabControl = (UiWizardTabControl)tabControl;
 																	if(wizardTabControl.isInplace()) {
-																		String script = "$('UserDialogWait').className='loading udwait';new Ajax.Updater('UserDialog', '." + tabControl.getName() + "?requestId=REQUEST_ID&xri=" + targetXri + "', {evalScripts: true});";
+																		String script = "$('UserDialogWait').className='loading udwait';jQuery.ajax({type: 'get', url: '." + tabControl.getOperationName() + "?requestId=REQUEST_ID&xri=" + targetXri + "', dataType: 'html', success: function(data){$('UserDialog').innerHTML=data;eval(jQuery(data).find('script').text());eval(jQuery(data).filter('script').text());}});";
 																		action = new Action(
 																			MacroAction.EVENT_ID,
 																			new Action.Parameter[]{
@@ -241,20 +242,18 @@ org.openmdx.kernel.log.*
 																	);
 																}
 %>
-																<div>								                    		                    	
-												          			&nbsp;&nbsp;&raquo;&nbsp;<a <%= target %> href="#" onmouseover="javascript:this.href=<%= view.getEvalHRef(action) %>;onmouseover=function(){};" style="font-size:90%;"><%= action.getTitle().replace(" ", "&nbsp;") %></a>
-												          		</div>
+																<li><a <%= target %> href="#" style="padding:2px;font-size:90%;" onmouseover="javascript:this.href=<%= view.getEvalHRef(action) %>;onmouseover=function(){};"><%= action.getTitle() %></a></li>
 <%
 															}
 														}
 													}
 													// Wizards
-													for(WizardTabControl tabControl: targetView.getShowInspectorControl().getWizardControl().getWizardTabControls()) {
+													for(UiWizardTabControl tabControl: targetView.getControl().getChildren(WizardControl.class).get(0).getChildren(UiWizardTabControl.class)) {
 														String tabId = Integer.toString(tabControl.getTabId());
 														if(tabControl.getQualifiedOperationName().equals(operationName)) {
 															Action action = null;
 															if(tabControl.isInplace()) {
-																String script = "$('UserDialogWait').className='loading udwait';new Ajax.Updater('UserDialog', '." + tabControl.getName() + "?requestId=REQUEST_ID&xri=" + targetXri + "', {evalScripts: true});";
+																String script = "$('UserDialogWait').className='loading udwait';jQuery.ajax({type: 'get', url: '." + tabControl.getOperationName() + "?requestId=REQUEST_ID&xri=" + targetXri + "', dataType: 'html', success: function(data){$('UserDialog').innerHTML=data;eval(jQuery(data).find('script').text());eval(jQuery(data).filter('script').text());}});";
 																action = new Action(
 																	MacroAction.EVENT_ID,
 																	new Action.Parameter[]{
@@ -281,21 +280,17 @@ org.openmdx.kernel.log.*
 																	true
 																);
 															}
-%>								                    
-															<div>	                    	
-<%
-																String target = "_blank".equals(tabControl.getWizardDefinition().getTargetType()) ? "target=\"_blank\"" : "target=\"_self\"";
+															String target = "_blank".equals(tabControl.getWizardDefinition().getTargetType()) ? "target=\"_blank\"" : "target=\"_self\"";
 %>
-											          			&nbsp;&nbsp;&raquo;&nbsp;<a href="#" <%= target %> onmouseover="javascript:this.href=<%= view.getEvalHRef(action) %>;onmouseover=function(){};" style="font-size:90%;"><%= action.getTitle().replace(" ", "&nbsp;") %></a>
-											          		</div>
+										          			<li><a href="#" <%= target %> style="padding:2px;font-size:90%;" onmouseover="javascript:this.href=<%= view.getEvalHRef(action) %>;onmouseover=function(){};"><%= action.getTitle() %></a></li>
 <%
 														}
 													}
 												}
 												else if(function.startsWith("Reference.")) {
 													String referenceName = function.substring(10);
-													for(ReferencePane pane: targetView.getReferencePane()) {
-														for(Action action: pane.getReferencePaneControl().getSelectReferenceAction()) {
+													for(ReferencePane pane: targetView.getChildren(ReferencePane.class)) {
+														for(Action action: pane.getSelectReferenceAction()) {
 															if(referenceName.equals(action.getParameter(Action.PARAMETER_REFERENCE_NAME))) {
 																List<Action.Parameter> actionParams = new ArrayList<Action.Parameter>(Arrays.asList(action.getParameters()));
 																actionParams.add(
@@ -308,11 +303,9 @@ org.openmdx.kernel.log.*
 																	action.getIconKey(),
 																	action.isEnabled()
 																);
-	%>
-																<div>									                    	                    	
-												                		&nbsp;&nbsp;&raquo;&nbsp;<a href="#" onmouseover="javascript:this.href=<%= view.getEvalHRef(selectObjectAndReferenceAction) %>;onmouseover=function(){};" style="font-size:90%;"><%= (action.getTitle().startsWith(WebKeys.TAB_GROUPING_CHARACTER) ? action.getTitle().substring(1).replace(" ", "&nbsp;") : action.getTitle().replace(" ", "&nbsp;")) %></a>
-												                	</div>
-	<%
+%>
+																<li><a href="#" style="padding:2px;font-size:90%;" onmouseover="javascript:this.href=<%= view.getEvalHRef(selectObjectAndReferenceAction) %>;onmouseover=function(){};"><%= (action.getTitle().startsWith(WebKeys.TAB_GROUPING_CHARACTER) ? action.getTitle().substring(1) : action.getTitle()) %></a></li>
+<%
 															}						
 														}
 													}
@@ -323,12 +316,8 @@ org.openmdx.kernel.log.*
 									// Separator
 									else {
 %>
-					                  	<%= spacer %>
-										<tr>
-											<td>
-												<%= menuEntry %>
+										<%= menuEntry %>
 <%
-											spacer = SPACER;
 									}
 								} catch (Exception e) {
 									ServiceException e0 = new ServiceException(e);
@@ -338,8 +327,8 @@ org.openmdx.kernel.log.*
 								}
 							}
 %>
-							<%= spacer.isEmpty() ? "" : "</td></tr>" %>
-						</table>
+						</ul>
+						</div>
 					</div>
 				</form>
 			</div>

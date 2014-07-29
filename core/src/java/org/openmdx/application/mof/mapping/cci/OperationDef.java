@@ -69,8 +69,8 @@ extends FeatureDef {
         Model_1_0 model 
     ) throws ServiceException {
         this(
-            (String)operationDef.objGetValue("name"),
-            (String)operationDef.objGetValue("qualifiedName"),
+            (String)operationDef.getName(),
+            (String)operationDef.getQualifiedName(),
             (String)operationDef.objGetValue("annotation"),
             new HashSet(operationDef.objGetList("stereotype")),
             (String)operationDef.objGetValue("visibility"),
@@ -111,10 +111,10 @@ extends FeatureDef {
             i.hasNext();
         ) {
             ModelElement_1_0 paramDef = model.getElement(i.next());
-            if("result".equals(paramDef.objGetValue("name"))) {
+            if("result".equals(paramDef.getName())) {
                 return (String)model.getElementType(
                     paramDef
-                ).objGetValue("qualifiedName");
+                ).getQualifiedName();
             }
         }
         throw new ServiceException(

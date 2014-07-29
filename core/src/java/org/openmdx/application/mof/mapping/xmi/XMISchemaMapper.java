@@ -118,7 +118,7 @@ public class XMISchemaMapper {
   public void writePrimitiveType(
     ModelElement_1_0 primitiveTypeDef
   ) throws ServiceException {
-    String qualifiedName = (String)primitiveTypeDef.objGetValue("qualifiedName");
+    String qualifiedName = (String)primitiveTypeDef.getQualifiedName();
     this.pw.println(spaces(4) + "<xsd:simpleType name=\"" + toXsdName(qualifiedName) + "\">");
     this.pw.println(spaces(4) + "  <xsd:annotation>");
     this.pw.println(spaces(4) + "    <xsd:documentation>this is a " + qualifiedName + "</xsd:documentation>");
@@ -185,9 +185,9 @@ public class XMISchemaMapper {
     boolean isClass
   ) throws ServiceException {
     writeField(
-        (String)attributeDef.objGetValue("name"), // attributeName
+        (String)attributeDef.getName(), // attributeName
         ModelHelper.getMultiplicity(attributeDef), // multiplicity
-        isClass ? "org.openmdx.base.ObjectId" : toXsdName((String)this.model.getElementType(attributeDef).objGetValue("qualifiedName")) // typeName
+        isClass ? "org.openmdx.base.ObjectId" : toXsdName((String)this.model.getElementType(attributeDef).getQualifiedName()) // typeName
     );
     
     this.pw.flush();
@@ -199,9 +199,9 @@ public class XMISchemaMapper {
     boolean isClass
   ) throws ServiceException {
     writeField(
-		(String)structureFieldDef.objGetValue("name"), // fieldName,
+		(String)structureFieldDef.getName(), // fieldName,
 		ModelHelper.getMultiplicity(structureFieldDef), // multiplicity
-		isClass ? "org.openmdx.base.ObjectId" : toXsdName((String)this.model.getElementType(structureFieldDef).objGetValue("qualifiedName")) // typeName
+		isClass ? "org.openmdx.base.ObjectId" : toXsdName((String)this.model.getElementType(structureFieldDef).getQualifiedName()) // typeName
     );
     
     this.pw.flush();
@@ -276,7 +276,7 @@ public class XMISchemaMapper {
     ModelElement_1_0 referenceDef
   ) throws ServiceException {
     writeField(
-        (String)referenceDef.objGetValue("name"), // referenceName
+        (String)referenceDef.getName(), // referenceName
         ModelHelper.getMultiplicity(referenceDef), // multiplicity
         "org.openmdx.base.ObjectId"
     );
@@ -293,7 +293,7 @@ public class XMISchemaMapper {
     ModelElement_1_0 exposingType
   ) throws ServiceException {
     
-    String referenceName = (String)referenceDef.objGetValue("name");
+    String referenceName = (String)referenceDef.getName();
     ModelElement_1_0 referencedType = this.model.getElementType(referenceDef);
     
     // in case of a recursive reference, only the subclasses of exposingClass
@@ -311,7 +311,7 @@ public class XMISchemaMapper {
     ) {
       ModelElement_1_0 subtype = this.model.getDereferencedType(i.next());
       if(!isAbstract(subtype)) {
-        String qualifiedName = (String)subtype.objGetValue("qualifiedName");
+        String qualifiedName = (String)subtype.getQualifiedName();
         this.pw.println(spaces(24) + "<xsd:element name=\"" + toXsdName(qualifiedName) + "\" type=\"" + toXsdName(qualifiedName) + "\"/>");
       }
 
@@ -392,7 +392,7 @@ public class XMISchemaMapper {
   ) throws ServiceException {
     
 //    String className = (String) classDef.values("name").get(0);
-    String qualifiedClassName = (String) classDef.objGetValue("qualifiedName");
+    String qualifiedClassName = (String) classDef.getQualifiedName();
         
     this.pw.println(spaces(4) + "<xsd:complexType name=\"" + toXsdName(qualifiedClassName) + "\" abstract=\"" + isAbstract(classDef) + "\">");
 
@@ -409,7 +409,7 @@ public class XMISchemaMapper {
   ) throws ServiceException {
     // the implicit qualifier of org:openmdx:base:Authority is 'name: org::w3c::string'. This qualifier is not
     // modeled. Therefore force generation.
-    if("org:openmdx:base:Authority".equals(classDef.objGetValue("qualifiedName"))) {
+    if("org:openmdx:base:Authority".equals(classDef.getQualifiedName())) {
       this.pw.println(spaces(8) + "<xsd:attribute name=\"name\" type=\"org.w3c.string\" use=\"required\"/>");
       this.pw.println(spaces(8) + "<xsd:attribute name=\"_qualifier\" type=\"xsd:string\" fixed=\"name\"/>");
       this.pw.println(spaces(8) + "<xsd:attribute name=\"_operation\" type=\"xsd:string\" use=\"optional\"/>");
@@ -452,7 +452,7 @@ public class XMISchemaMapper {
   private boolean isAbstract(
     ModelElement_1_0 modelClass
   ) throws ServiceException {
-    Boolean isAbstract = (Boolean)modelClass.objGetValue("isAbstract");
+    Boolean isAbstract = (Boolean)modelClass.isAbstract();
     return isAbstract.booleanValue();
   }
 

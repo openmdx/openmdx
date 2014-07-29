@@ -1,6 +1,6 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
+ * Project:     openMDX/Portal, http://www.openmdx.org/
  * Description: FlashBinaryValue 
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
  * ====================================================================
@@ -8,7 +8,7 @@
  * This software is published under the BSD license
  * as listed below.
  * 
- * Copyright (c) 2008, OMEX AG, Switzerland
+ * Copyright (c) 2008-2014, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -52,6 +52,7 @@ package org.openmdx.portal.servlet.attribute;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.portal.servlet.Action;
 import org.openmdx.portal.servlet.ApplicationContext;
+import org.openmdx.portal.servlet.CssClass;
 import org.openmdx.portal.servlet.HtmlEncoder_1_0;
 import org.openmdx.portal.servlet.ViewPort;
 
@@ -59,11 +60,9 @@ import org.openmdx.portal.servlet.ViewPort;
  * FlashBinaryValue
  *
  */
-public class FlashBinaryValue
-    extends BinaryValue {
+public class FlashBinaryValue extends BinaryValue {
 
-    //-----------------------------------------------------------------------
-    /**
+	/**
      * Constructor 
      *
      * @param object
@@ -82,7 +81,9 @@ public class FlashBinaryValue
         );
     }
 
-    //-----------------------------------------------------------------------
+    /* (non-Javadoc)
+     * @see org.openmdx.portal.servlet.attribute.BinaryValue#paintInPlace(org.openmdx.portal.servlet.ViewPort, org.openmdx.portal.servlet.Action, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String)
+     */
     @Override
     protected void paintInPlace(
         ViewPort p,
@@ -97,13 +98,13 @@ public class FlashBinaryValue
         String imageId = org.openmdx.kernel.id.UUIDs.newUUID().toString();
         CharSequence imageSrc = p.getEncodedHRef(binaryValueAction);
         p.write(gapModifier); 
-    	String cssClass = DEFAULT_CSS_CLASS;
+    	String cssClass = this.app.getPortalExtension().getDefaultCssClassFieldGroup(this, this.app);
     	if(this.getCssClassFieldGroup() != null) {
     		cssClass = this.getCssClassFieldGroup() + " " + cssClass;
-    	}        
-        p.write("<td class=\"label\"><span class=\"nw\">", htmlEncoder.encode(label, false), "</span></td>");
+    	}
+        p.write("<td class=\"", CssClass.fieldLabel.toString(), "\"><span class=\"", CssClass.nw.toString(), "\">", htmlEncoder.encode(label, false), "</span></td>");
         p.write("<td ", rowSpanModifier, " class=\"", cssClass, "\" ", widthModifier, " id=\"tdImage", imageId, "\">");
-        p.write("<div class=\"valuePicture\" ", styleModifier, ">");
+        p.write("<div class=\"", CssClass.valuePicture.toString(), "\" ", styleModifier, ">");
         p.write("  <object classid=\"clsid:D27CDB6E-AE6D-11cf-96B8-444553540000\" codebase=\"http://download.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=6,0,29,0\">");
         p.write("    <param name=\"movie\" value=\"", imageSrc, "\">");
         p.write("    <param name=\"quality\" value=\"high\">");
@@ -112,5 +113,7 @@ public class FlashBinaryValue
         p.write("</div>");
         p.write("</td>");                                                            
     }
-    
+
+    private static final long serialVersionUID = -9190625128882528646L;
+
 }

@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2013, OMEX AG, Switzerland
+ * Copyright (c) 2004-2014, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -108,7 +108,7 @@ public class XMIMapper_1 extends AbstractMapper_1 {
         List<ModelElement_1_0> packagesToExport = this.getMatchingPackages(qualifiedPackageName);
         // Export all matching packages
         for(ModelElement_1_0 currentPackage: packagesToExport) {
-            String currentPackageName = (String)currentPackage.objGetValue("qualifiedName");
+            String currentPackageName = (String)currentPackage.getQualifiedName();
             // Model as text/xml
             try {
                 ByteArrayOutputStream bs = new ByteArrayOutputStream();
@@ -167,7 +167,7 @@ public class XMIMapper_1 extends AbstractMapper_1 {
         List<String> packagesToExport = new ArrayList<String>();
         for(ModelElement_1_0 packageToExport :  this.getMatchingPackages("%")) {
             packagesToExport.add(
-                (String)packageToExport.objGetValue("qualifiedName")
+                (String)packageToExport.getQualifiedName()
             );
         }
         this.createXMIModel(
@@ -202,9 +202,9 @@ public class XMIMapper_1 extends AbstractMapper_1 {
             // Collect AssociationEnds of with containment='composite' for performance reasons.
             // The collection is used to determine the qualifiers of classes.
             if(modelElement.objGetClass().equals(ModelAttributes.ASSOCIATION_END)) {
-                if(AggregationKind.COMPOSITE.equals(modelElement.objGetValue("aggregation"))) {
+                if(AggregationKind.COMPOSITE.equals(modelElement.getAggregation())) {
                     allCompositeAssociationEnds.put(
-                        modelElement.objGetValue("type"), 
+                        modelElement.getType(), 
                         modelElement
                     );        
                 }
@@ -261,7 +261,7 @@ public class XMIMapper_1 extends AbstractMapper_1 {
 
                         // Attribute
                         if(this.model.isAttributeType(featureDef)) {  
-                            boolean isChangeable = ((Boolean)featureDef.objGetValue("isChangeable")).booleanValue();
+                            boolean isChangeable = ((Boolean)featureDef.isChangeable()).booleanValue();
                             if(
                                     isPublic && 
                                     (isChangeable || allFeatures) 
@@ -279,14 +279,14 @@ public class XMIMapper_1 extends AbstractMapper_1 {
 
                         // Reference
                         else if(this.model.isReferenceType(featureDef)) {  
-                            ModelElement_1_0 referencedEnd = this.model.getElement(featureDef.objGetValue("referencedEnd"));
+                            ModelElement_1_0 referencedEnd = this.model.getElement(featureDef.getReferencedEnd());
                             boolean isNavigable = ((Boolean)referencedEnd.objGetValue("isNavigable")).booleanValue();
                             boolean isChangeable = 
-                                ((Boolean)featureDef.objGetValue("isChangeable")).booleanValue() ||
+                                ((Boolean)featureDef.isChangeable()).booleanValue() ||
                                 //
                                 // CR0004024
                                 //
-                                "org:openmdx:base:AuthorityHasProvider:provider".equals(referencedEnd.jdoGetObjectId().getBase());
+                                "org:openmdx:base:AuthorityHasProvider:provider".equals(referencedEnd.jdoGetObjectId().getLastSegment().toClassicRepresentation());
                             if(isPublic && isNavigable && (isChangeable || allFeatures)) {
                                 if(this.model.referenceIsStoredAsAttribute(featureDef)) {
                                     if(featureType == 0) {
@@ -295,7 +295,7 @@ public class XMIMapper_1 extends AbstractMapper_1 {
                                         );
                                     }
                                 }
-                                else if(!AggregationKind.NONE.equals(referencedEnd.objGetValue("aggregation"))) {
+                                else if(!AggregationKind.NONE.equals(referencedEnd.getAggregation())) {
                                     if(featureType == 1) {
                                         if(compositeReferenceCount++ == 0) {
                                             XMISchemaWriter.writeCompositeReferenceFeatureHeader(elementDef);
@@ -335,7 +335,7 @@ public class XMIMapper_1 extends AbstractMapper_1 {
                             ModelElement_1_0 qualifierType = this.model.getDereferencedType(modelAssociationEnd.objGetList("qualifierType").get(j));
                             XMISchemaWriter.writeQualifierAttributes(
                                 qualifierName, 
-                                (String)qualifierType.objGetValue("qualifiedName"),
+                                (String)qualifierType.getQualifiedName(),
                                 this.model.isPrimitiveType(qualifierType)
                             );    
                         }

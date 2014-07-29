@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2010, OMEX AG, Switzerland
+ * Copyright (c) 2004-2014, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -105,7 +105,6 @@ public class RefClass_1 implements Jmi1Class_1_0, Serializable {
     ) throws JmiException {
         if(this.immediatePackage.refPersistenceManager().isClosed()) {
             throw new JmiServiceException(
-                null,
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.ILLEGAL_STATE,
                 "The persistence manager is closed"
@@ -154,8 +153,8 @@ public class RefClass_1 implements Jmi1Class_1_0, Serializable {
                 if(argument instanceof Path) {
                     Path xri = (Path) argument;
                     delegateInstance = (PersistenceCapable)(
-                        !xri.isTransientObjectId() ? (PersistenceCapable)this.immediatePackage.refDelegate().getObjectById(xri) :
-                        isTerminal ? ((DataObjectManager_1_0)this.immediatePackage.refDelegate()).newInstance(refMofId(), xri.toUUID()) :
+                        !xri.isTransactionalObjectId() ? (PersistenceCapable)this.immediatePackage.refDelegate().getObjectById(xri) :
+                        isTerminal ? ((DataObjectManager_1_0)this.immediatePackage.refDelegate()).newInstance(refMofId(), xri.toTransactionalObjectId()) :
                         ((RefObject)this.immediatePackage.refDelegate().getObjectById(BASE)).refOutermostPackage().refClass(refMofId()).refCreateInstance(Collections.singletonList(xri))
                     );
                 } else if(isTerminal) {
@@ -236,8 +235,7 @@ public class RefClass_1 implements Jmi1Class_1_0, Serializable {
                 }
             }
             return instance;
-        } 
-        catch (ServiceException exception) {
+        } catch (ServiceException exception) {
             throw new JmiServiceException(exception);
         }
     }
@@ -413,8 +411,7 @@ public Object refInvokeOperation(
                     "org:omg:model1:Class"
                 )
             );
-        }
-        catch(ServiceException e) {
+        } catch(ServiceException e) {
             throw new JmiServiceException(e);
         }
     }
@@ -507,7 +504,7 @@ public Object refInvokeOperation(
     //-------------------------------------------------------------------------
     // Variables
     //-------------------------------------------------------------------------
-    private static final Path BASE = new Path("xri://@openmdx*org.openmdx.base").lock();
+    private static final Path BASE = new Path("xri://@openmdx*org.openmdx.base");
     
     /**
      * Imlements <code>Serializable</code>

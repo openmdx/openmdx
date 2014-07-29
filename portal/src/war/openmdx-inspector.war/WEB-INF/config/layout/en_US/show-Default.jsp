@@ -2,14 +2,14 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Description: Default.jsp
+ * Description: show-Default.jsp
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
  * ====================================================================
  *
  * This software is published under the BSD license
  * as listed below.
  *
- * Copyright (c) 2004-2013, OMEX AG, Switzerland
+ * Copyright (c) 2004-2014, OMEX AG, Switzerland
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or
@@ -55,14 +55,14 @@
 org.openmdx.base.naming.*,
 org.openmdx.portal.servlet.*,
 org.openmdx.portal.servlet.control.*,
-org.openmdx.portal.servlet.view.*
+org.openmdx.portal.servlet.component.*
 " %>
 <%
 	ApplicationContext app = (ApplicationContext)session.getValue(WebKeys.APPLICATION_KEY);
 	ViewsCache viewsCache = (ViewsCache)session.getValue(WebKeys.VIEW_CACHE_KEY_SHOW);
 	ShowObjectView view = (ShowObjectView)viewsCache.getView(request.getParameter(Action.PARAMETER_REQUEST_ID));
 	Texts_1_0 texts = app.getTexts();
-	ShowInspectorControl inspectorControl = view.getShowInspectorControl();
+	ShowInspectorControl inspectorControl = (ShowInspectorControl)view.getControl();
 	ViewPort p = ViewPortFactory.openPage(
 		view,
 		request,
@@ -100,17 +100,6 @@ org.openmdx.portal.servlet.view.*
 			SessionInfoControl.class
 		);
 
-		// Root menu
-		MenuControl rootPanel = (MenuControl)view.createControl(
-			"rootPanel",
-			MenuControl.class
-		);
-		rootPanel.addControl(
-			view.createControl("rootmenu", RootMenuControl.class)
-		);
-		rootPanel.setMenuClass("navv");
-		rootPanel.setLayout(MenuControl.LAYOUT_VERTICAL);
-
 		// West
 		PanelControl west = (PanelControl)view.createControl(
 			"layoutWest",
@@ -125,17 +114,6 @@ org.openmdx.portal.servlet.view.*
 			NavigationControl.class
 		);
 
-		// Operations Menu
-		MenuControl menuOps = (MenuControl)view.createControl(
-			"menuOps",
-			MenuControl.class
-		);
-		menuOps.setLayout(MenuControl.LAYOUT_HORIZONTAL);
-		menuOps.setMenuClass("nav");
-		menuOps.setHasPrintOption(true);
-		menuOps.addControl(inspectorControl.getOperationPaneControl());
-		menuOps.addControl(inspectorControl.getWizardControl());
-
 		// Search
 		Control search = view.createControl(
 			"search",
@@ -144,9 +122,6 @@ org.openmdx.portal.servlet.view.*
 
 		// Errors
 		Control errors = view.createControl(null, ShowErrorsControl.class);
-
-		// Attributes
-		Control attributes = inspectorControl.getAttributePaneControl();
 
 		// Dashboard
 		Control dashboard = view.createControl(
@@ -179,113 +154,144 @@ org.openmdx.portal.servlet.view.*
 	p.flush();
 %>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-	<link href="_style/colors.css" rel="stylesheet" type="text/css">
-	<link href="_style/calendar-small.css" rel="stylesheet" type="text/css">
-	<script type="text/javascript" src="javascript/portal-all.js"></script>
-	<!--[if lt IE 7]><script type="text/javascript" src="javascript/iehover-fix.js"></script><![endif]-->
-	<script type="text/javascript" src="javascript/calendar/lang/calendar-<%= app.getCurrentLocaleAsString() %>.js"></script>
-	<script language="javascript" type="text/javascript">
-	  var OF = null;
-	  try {
-		OF = self.opener.OF;
-	  }
-	  catch(e) {
-		OF = null;
-	  }
-	  if(!OF) {
-		OF = new ObjectFinder();
-	  }
+	<meta name="viewport" content="width=device-width, initial-scale=<%= app.getInitialScale() %>, maximum-scale=1.0">
+	
+	<!-- Styles -->
+	<link rel="stylesheet" href="javascript/bootstrap/css/bootstrap.min.css">
+	<link rel="stylesheet" href="_style/ssf.css" >
+	<link rel="stylesheet" href="_style/n2default.css" >
+	<link rel="stylesheet" href="_style/colors.css">
+	<link rel="stylesheet" href="_style/calendar-small.css">
+	<link rel="stylesheet" href="javascript/wiky/wiky.css" >
+	<link rel="stylesheet" href="javascript/wiky/wiky.lang.css" >
+	<link rel="stylesheet" href="javascript/wiky/wiky.math.css" >
+	<link rel="stylesheet" href="javascript/yui/build/assets/skins/sam/container.css" >
+	<link rel='shortcut icon' href='images/favicon.ico' >
+
+	<!-- Libraries -->
+    <script src="javascript/prototype.js"></script>
+    <script src="javascript/jquery/jquery.min.js"></script>
+	<script>
+	  $.noConflict();
 	</script>
-	<link rel="stylesheet" type="text/css" href="_style/ssf.css" >
-	<link rel="stylesheet" type="text/css" href="_style/n2default.css" >
-	<link rel="stylesheet" type="text/css" href="javascript/yui/build/assets/skins/sam/container.css" >
-	<link rel="stylesheet" type="text/css" href="javascript/wiky/wiky.css" >
-	<link rel="stylesheet" type="text/css" href="javascript/wiky/wiky.lang.css" >
-	<link rel="stylesheet" type="text/css" href="javascript/wiky/wiky.math.css" >
-	<link rel='shortcut icon' href='images/favicon.ico' />
+	<script src="javascript/bootstrap/js/bootstrap.min.js"></script>
+	<script src="javascript/portal-all.js"></script>
+	<script src="javascript/calendar/lang/calendar-<%= app.getCurrentLocaleAsString() %>.js"></script>
+	<!--[if lt IE 7]><script type="text/javascript" src="javascript/iehover-fix.js"></script><![endif]-->
+	<script language="javascript" type="text/javascript">
+		var OF = null;
+		try {
+			OF = self.opener.OF;
+		} catch(e) {
+			OF = null;
+		}
+		if(!OF) {
+			OF = new ObjectFinder();
+		}	  
+	</script>
 <%
 	prolog.paint(p, PagePrologControl.FRAME_POST_PROLOG, false);
 	p.flush();
 %>
-<script language="javascript" type="text/javascript">
-		var rootMenu = null;
-
-		function toggleRootMenu(e){
-			try{if(e.ctrlKey && e.altKey){rootMenu.moveTo(e.clientX+1, e.clientY);if(rootMenu.cfg.config.visible.value){rootMenu.hide();}else{rootMenu.show();}YAHOO.util.Event.preventDefault(e);}}catch(e){}
-		};
-
-		YAHOO.util.Event.onDOMReady(function(){
-			rootMenu = new YAHOO.widget.Panel("rootPanel",{context:['rootMenuAnchor','tl','tr'], close:true, visible:false,constraintoviewport:true});
-			rootMenu.cfg.queueProperty(
-				"keylisteners",
-				new YAHOO.util.KeyListener(document, { keys:27 }, {fn:rootMenu.hide, scope:rootMenu, correctScope:true })
-			);
-			rootMenu.cfg.queueProperty(
-				"keylisteners",
-				new YAHOO.util.KeyListener(document, { alt:true, keys:88 }, {fn:rootMenu.hide, scope:rootMenu, correctScope:true })
-			);
-			kl = new YAHOO.util.KeyListener(document, { alt:true, keys:88 }, {fn:rootMenu.show, scope:rootMenu, correctScope:true });
-			kl.enable();
-			YAHOO.util.Event.addListener(document, "click", toggleRootMenu);
-			rootMenu.render();
-		});
-</script>
 </head>
-<body class="yui-skin-sam" onload="initPage();">
-<iframe class="popUpFrame" id="DivShim" src="blank.html" scrolling="no" frameborder="0" style="position:absolute; top:0px; left:0px; display:none;"></iframe>
+<body style="padding-top:50px;" onload="initPage();">
+<iframe class="<%= CssClass.popUpFrame %>" id="DivShim" src="blank.html" scrolling="no" frameborder="0" style="position:absolute; top:0px; left:0px; display:none;"></iframe>
 <%
-		EditObjectControl.paintEditPopups(p);
+		EditInspectorControl.paintEditPopups(p);
 		p.flush();
 %>
-<div id="container">
-	<div id="wrap">
-		<div id="<%= NavigationControl.getHeaderId(p) %>">
-			<div id="hider">
+<div class="<%= CssClass.navbar + " " + CssClass.navbarInverse + " " + CssClass.navbarFixedTop %>" role="navigation">
+	<div class="<%= CssClass.containerFluid %>" style="padding-left:0px;">
+		<div class="<%= CssClass.navbarHeader %>">
+			<button type="button" class="<%= CssClass.navbarToggle %>" data-toggle="collapse" data-target="#bs-top-navigation">
+				<span class="sr-only">Toggle navigation</span>
+				<span class="icon-bar"></span>
+				<span class="icon-bar"></span>
+				<span class="icon-bar"></span>
+			</button>
+		</div>
+		<div class="<%= CssClass.collapse + " " + CssClass.navbarCollapse %>" id="bs-top-navigation">
+			<ul class="<%= CssClass.nav + " " + CssClass.navbarNav + " " + CssClass.visibleSm + " " + CssClass.visibleMd %>">
 <%
-				rootPanel.paint(p, false);
+				RootMenuControl.paintTopNavigation(p, 1);
 				p.flush();
 %>
+			</ul>
+			<ul class="<%= CssClass.nav + " " + CssClass.navbarNav + " " + CssClass.hiddenSm + " " + CssClass.hiddenMd %>">
+<%
+				RootMenuControl.paintTopNavigation(p, null);
+				p.flush();
+%>
+			</ul>
+			<ul class="<%= CssClass.nav + " " + CssClass.navbarNav + " " + CssClass.navbarRight %>">
+				<li class="<%= CssClass.dropdown %>">
+					<a href="#" class="<%= CssClass.dropdownToggle %>" data-toggle="dropdown" onclick="javascript:this.parentNode.hide=function(){};"><span><%= app.getLoginPrincipal() %> <b class="<%= CssClass.caret %>"></b></span></a>
+					<ul class="<%= CssClass.dropdownMenu %>" role="menu">
+						<li><% SessionInfoControl.paintLogoffButton(p, false, ""); p.flush(); %></li>
+						<li><% SessionInfoControl.paintSaveSettingsButton(p, false, ""); p.flush(); %></li>
+					</ul>
+				</li>
+			</ul>
+<%
+			search.paint(p, false);
+			p.flush();
+%>
+		</div>
+	</div>
+</div>
+<div id="container">
+	<div id="wrap">
+		<div id="<%= NavigationControl.getHeaderId(p) %>" class="<%= CssClass.hiddenPrint %>">
+			<div id="hider">
+			    <!-- root panel -->
+				<div id="rootPanel">"
+					<div class="<%= CssClass.hd %>"><%= app.getTexts().getExploreText() %></div>
+					<div class="bd">
+						<ul id="<%=CssClass.ssfNavv %>" class="<%=CssClass.ssfNavv %>" onmouseover="sfinit(this);">
+<%
+							RootMenuControl.paintQuickAccessors(p);
+							p.flush();
+%>
+							<li>&nbsp;</li>
+						</ul>
+					</div>
+				</div>
 			</div> <!-- hider -->
 <%
 			north.paint(p, false);
 			p.flush();
-%>
-			<div id="topnavi">
-<%
-				search.paint(p, false);
-				p.flush();
-%>
-				<ul id="navigation" class="navigation" onmouseover="sfinit(this);">
-<%
-					RootMenuControl.paintTopNavigation(p);
-					p.flush();
-%>
-				</ul>
-			</div> <!-- topnavi -->
-<%
-			RootMenuControl.paintMenuFlyIn(p);
 			navigation.paint(p, false);
-			menuOps.paint(p, false);
 			p.flush();
 %>
+			<ul id="nav" class="<%= CssClass.nav + " " + CssClass.navPills %>">
+<%
+				for(OperationPane operationPane: view.getChildren(OperationPane.class)) {
+					operationPane.paint(p, null, false);
+				}
+				for(WizardControl wizardControl: inspectorControl.getChildren(WizardControl.class)) {
+					wizardControl.paint(p, false);
+				}
+				p.flush();
+%>
+			</ul>
 			<div id="OperationDialogHolder">
-				<div id="OperationDialogEmbedder" onClick="javascript:try{var ud=$('UserDialog');var od=$('OperationDialog');ud.parentNode.insertBefore(od,ud);$('OperationDialogHolder').innerHTML='';od.className='dragged';window.scrollBy(0,-999999);}catch(e){};">
+				<div id="OperationDialogEmbedder" onClick="javascript:try{var ud=$('UserDialog');var od=$('OperationDialog');ud.parentNode.insertBefore(od,ud);$('OperationDialogHolder').innerHTML='';window.scrollBy(0,-999999);}catch(e){};">
 					<img src='images/show_content.gif' alt='' />
 				</div>
 				<div id="OperationDialog"></div>
 			</div>
 			<iframe name="OperationDialogResponse" id="OperationDialogResponse" onload="javascript:var t=this.contentDocument.body.innerHTML;if(t){$('OperationDialog').innerHTML=t;};"></iframe>
 		</div> <!-- header -->
-		<div id="content-wrap">
+		<div id="content" class="<%= NavigationControl.getContentClass(p) %>">
 <%
 			boolean hideWorkspaceDashboard = Boolean.valueOf(app.getSettings().getProperty(UserSettings.HIDE_WORKSPACE_DASHBOARD.getName()));
-%>		
-			<div id="<%= NavigationControl.getContentHeaderId(p) %>">
+%>
+			<div class="<%= CssClass.row %>">
 <%@ include file="../../../../show-header.html" %>
 <%
 				if(!hideWorkspaceDashboard) {
 %>
-					<div id="paneLeft">
+					<div class="<%= CssClass.hiddenXs %> <%= CssClass.colSm3 %> <%= CssClass.colLg2 %> <%= CssClass.hiddenPrint %>">
 <%
 						workspaceDashboard.paint(p, false);
 						p.flush();
@@ -293,38 +299,45 @@ org.openmdx.portal.servlet.view.*
 					</div> <!--  paneLeft -->
 <%
 				}
-				errors.paint(p, false);
-				// No dashboards in lookup mode
-				if(view.getLookupType() == null) {
-					dashboard.paint(p, false);
-				}
-				p.flush();
 %>
-				<iframe name="UserDialogResponse" id="UserDialogResponse" style="display:none;" onload="javascript:var t=this.contentDocument.body.innerHTML;if(t){$('UserDialog').innerHTML=t;};"></iframe>
-				<div id="UserDialog"><div id="UserDialogWait" class="hidden" /></div></div>
-				<script language="javascript" type="text/javascript">try {if($('header')){$('OperationDialogEmbedder').click();}}catch(e){};</script>
-				<div id="aPanel">
+				<div class="<%= hideWorkspaceDashboard ? CssClass.colXs12.toString() : CssClass.colXs12 + " " + CssClass.colSm9 + " " + CssClass.colLg10 %>">
 <%
-					attributes.paint(p, false);
+					errors.paint(p, false);
+					// No dashboards in lookup mode
+					if(view.getLookupType() == null) {
+						dashboard.paint(p, false);
+					}
+					p.flush();
+%>
+					<iframe name="UserDialogResponse" id="UserDialogResponse" style="display:none;" onload="javascript:var t=this.contentDocument.body.innerHTML;if(t){$('UserDialog').innerHTML=t;};"></iframe>
+					<div id="UserDialog"><div id="UserDialogWait" class="<%= CssClass.hidden %>" /></div></div>
+					<script language="javascript" type="text/javascript">try {if($('header')){$('OperationDialogEmbedder').click();}}catch(e){};</script>
+					<div id="aPanel">
+<%
+						for(AttributePane attributePane: view.getChildren(AttributePane.class)) {
+							attributePane.paint(p, null, false);
+						}
+						p.flush();
+%>
+					</div>
+<%
+					// Reference panes
+					for(ReferencePane referencePane: view.getChildren(ReferencePane.class)) {
+						%><%@ include file="../Set-MultiDelete-include.jsp" %><%
+						referencePane.paint(
+							p,
+							ReferencePaneControl.FRAME_VIEW,
+							false // forEditing
+						);
+					}
 					p.flush();
 %>
 				</div>
-<%
-				// Reference panes
-				ReferencePaneControl[] referencePaneControls = inspectorControl.getReferencePaneControl();
-				for(int i = 0; i < referencePaneControls.length; i++) {
-					%><%@ include file="../Set-MultiDelete-include.jsp" %><%
-					referencePaneControls[i].paint(
-						p,
-						ReferencePaneControl.FRAME_VIEW,
-						false // forEditing
-					);
-				}
-				p.flush();
-%>
+			</div>
+			<div class="row">
 <%@ include file="../../../../show-footer.html" %>
-			</div> <!-- content -->
-		</div> <!-- content-wrap -->
+			</div> <!-- row -->
+		</div> <!-- container -->
 <%@ include file="../../../../show-footer-noscroll.html" %>
 	</div> <!-- wrap -->
 </div> <!-- container -->
@@ -337,98 +350,16 @@ org.openmdx.portal.servlet.view.*
 </html>
 <%
 	}
-
-	// ViewPort.Type.MOBILE
-	else if(p.getViewPortType() == ViewPort.Type.MOBILE) {
-
-		// Set header
-		response.setHeader(
-			"Cache-Control",
-			"max-age=" + Integer.MAX_VALUE
-		);
-		response.setHeader(
-			"Pragma",
-			""
-		);
-		// Attributes
-		Control attributes = inspectorControl.getAttributePaneControl();
-
-%>
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
-<head>
-  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
-<%
-	String title = view.getObjectReference().getTitle();
-	if(title == null) {
-	    title = "#ERR";
-	}
-	else {
-	    while(title.startsWith("<") && title.indexOf("/>") > 0) {
-	        title = title.substring(title.indexOf("/>") + 2);
-	    }
-	}
-%>
-  <title><%= app.getApplicationName() + " - " + title + (title.length() == 0 ? "" : " - ") + view.getObjectReference().getLabel() %></title>
-  <meta name="viewport" content="width=320; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;">
-  <meta name="apple-touch-fullscreen" content="YES" /> 
-  <style type="text/css" media="screen">@import "./_style/ssf.css";</style>
-  <style type="text/css" media="screen">@import "./_style/mobile/iui.css";</style>
-  <style type="text/css" media="screen">@import "./_style/mobile/opencrx-iui.css";</style>
-  <script type="text/javascript" src="javascript/portal-all.js"></script>
-  <script type="application/x-javascript">      
-    addEventListener(
-      "load", 
-      function() {
-        setTimeout(updateLayout, 0);
-      }, 
-      false
-    );  
-    function updateLayout() {
-      window.scrollTo(0, 1);
-    } 
-  </script>
-</head>
-<body orient="landscape">
-    <div class="toolbar" style="font-size:17px;font-weight:bold;color:#dddddd;">
-      <div style="width:90%">
-<%
-        NavigationControl.paintBreadcrum(
-          p,
-          false
-        );
-        NavigationControl.paintToggleViewPort(
-          p,
-          false
-        );
-        p.flush();
-%>
-      </div>
-    </div>
-<%
-    attributes.paint(p, false);
-    p.flush();
-    ReferencePaneControl[] referencePaneControls = inspectorControl.getReferencePaneControl();
-    for(int i = 0; i < referencePaneControls.length; i++) {
-      referencePaneControls[i].paint(
-        p,
-        ReferencePaneControl.FRAME_VIEW,
-        false // forEditing
-      );
-    }
-    p.flush();
-%>
-</body>
-</html>
-<%
-	}
 	
 	// ViewPort.Type.EMBEDDED
 	else if(p.getViewPortType() == ViewPort.Type.EMBEDDED) {
-	  view.getAttributePane().getAttributePaneControl().paint(
-		  p,
-		  false
-	  );
+	  for(AttributePane attributePane: view.getChildren(AttributePane.class)) {
+		  attributePane.paint(
+			  p,
+			  null,
+			  false
+		  );
+	  }
 	  p.flush();
 	  p.close(false);
 %>

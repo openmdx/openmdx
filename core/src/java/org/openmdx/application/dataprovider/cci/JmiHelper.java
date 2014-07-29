@@ -278,7 +278,7 @@ public class JmiHelper {
                     new BasicException.Parameter("attribute name", featureName)
                 );
             }
-            if(Boolean.TRUE.equals(featureDef.objGetValue("isDerived"))) {
+            if(Boolean.TRUE.equals(featureDef.isDerived())) {
                 continue Features;
             }
             ModelElement_1_0 featureType = model.getElementType(
@@ -288,7 +288,7 @@ public class JmiHelper {
                 objectCache, 
                 pm, 
                 model,
-                (String)featureType.objGetValue("qualifiedName")
+                (String)featureType.getQualifiedName()
             );
             //
             // Store the attribute value to target according to the attribute's multiplicity

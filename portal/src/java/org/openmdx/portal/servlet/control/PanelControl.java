@@ -1,14 +1,14 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Description: ContainerControl
+ * Description: PanelControl
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
  * ====================================================================
  *
  * This software is published under the BSD license
  * as listed below.
  * 
- * Copyright (c) 2004-2007, OMEX AG, Switzerland
+ * Copyright (c) 2004-2014, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -53,17 +53,24 @@
 package org.openmdx.portal.servlet.control;
 
 import java.io.Serializable;
-import java.util.Iterator;
 
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.portal.servlet.ViewPort;
 
-public class PanelControl
-    extends ContainerControl
-    implements Serializable {
+/**
+ * PanelControl
+ *
+ */
+public class PanelControl extends ContainerControl implements Serializable {
 
-  //-------------------------------------------------------------------------
-  public PanelControl(
+	/**
+	 * Constructor.
+	 * 
+	 * @param id
+	 * @param locale
+	 * @param localeAsIndex
+	 */
+	public PanelControl(
         String id,
         String locale,
         int localeAsIndex
@@ -74,16 +81,17 @@ public class PanelControl
             localeAsIndex
         );
         this.layout = LAYOUT_NONE;
-  }
+	}
 
-    //-------------------------------------------------------------------------
+    /* (non-Javadoc)
+     * @see org.openmdx.portal.servlet.control.Control#paint(org.openmdx.portal.servlet.ViewPort, java.lang.String, boolean)
+     */
     @Override
     public void paint(
         ViewPort p,
         String frame,
         boolean forEditing        
     ) throws ServiceException {
-
         // Contained controls
         if(this.layout != LAYOUT_NONE) {
             p.write("<table id=\"", this.id, "\" ", this.tableStyle, ">");
@@ -92,12 +100,7 @@ public class PanelControl
             p.write("<tr>");
         }
         int ii = 0;
-        for(
-            Iterator i = this.controls.iterator();
-            i.hasNext();
-            ii++
-        ) {
-            Control control = (Control)i.next();
+        for(Control control: this.getChildren(null)) {
             if(this.layout == LAYOUT_VERTICAL) {
                 p.write("<tr>");
             }
@@ -124,14 +127,22 @@ public class PanelControl
         }
     }
 
-    //-------------------------------------------------------------------------
+    /**
+     * Set layout id.
+     * 
+     * @param layout
+     */
     public void setLayout(
         int layout
     ) {
         this.layout = layout;
     }
     
-    //-------------------------------------------------------------------------
+    /**
+     * Set tab style.
+     * 
+     * @param tableStyle
+     */
     public void setTableStyle(
         String tableStyle
     ) {

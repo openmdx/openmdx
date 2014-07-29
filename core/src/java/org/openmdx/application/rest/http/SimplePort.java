@@ -188,7 +188,7 @@ public class SimplePort extends HttpPort {
         if(this.authorization == null && this.userName != null && !"".equals(this.userName)) {
             this.authorization = new BasicAuthentication(getUserName(), this.password);
         }
-        return this.authorization.getAuthorization();
+        return this.authorization == null ? null : this.authorization.getAuthorization();
     }
 
     /**

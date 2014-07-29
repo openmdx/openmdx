@@ -157,9 +157,9 @@ public class Uml1Mapper_1
 
       if(elementDef.objGetClass().equals(ModelAttributes.PACKAGE))
       {
-        String qualifiedName = ((String)elementDef.objGetValue("qualifiedName")).substring(
+        String qualifiedName = ((String)elementDef.getQualifiedName()).substring(
           0,
-          ((String)elementDef.objGetValue("qualifiedName")).lastIndexOf(":")
+          ((String)elementDef.getQualifiedName()).lastIndexOf(":")
         );
         packages.put(
           qualifiedName,
@@ -276,7 +276,7 @@ public class Uml1Mapper_1
       writer.writePrimitiveType(elementDef);
     }
     else if(elementDef.objGetClass().equals(ModelAttributes.ALIAS_TYPE)) {
-      ModelElement_1_0 typeDef = this.model.getElement(elementDef.objGetValue("type"));
+      ModelElement_1_0 typeDef = this.model.getElement(elementDef.getType());
       boolean refTypeIsPrimitive = typeDef.objGetClass().equals(ModelAttributes.PRIMITIVE_TYPE);
       writer.writeAliasType(elementDef, typeDef, refTypeIsPrimitive);
     }
@@ -336,10 +336,10 @@ public class Uml1Mapper_1
       );
     }
     else if(elementDef.objGetClass().equals(ModelAttributes.ATTRIBUTE)) {
-      ModelElement_1_0 typeDef = this.model.getElement(elementDef.objGetValue("type"));
+      ModelElement_1_0 typeDef = this.model.getElement(elementDef.getType());
       boolean refTypeIsPrimitive = typeDef.objGetClass().equals(ModelAttributes.PRIMITIVE_TYPE);
-      boolean isDerived = ((Boolean)elementDef.objGetValue("isDerived")).booleanValue();
-      boolean isChangeable = ((Boolean)elementDef.objGetValue("isChangeable")).booleanValue();
+      boolean isDerived = ((Boolean)elementDef.isDerived()).booleanValue();
+      boolean isChangeable = ((Boolean)elementDef.isChangeable()).booleanValue();
       writer.writeAttribute(elementDef, isDerived, isChangeable, typeDef, refTypeIsPrimitive);
     }
     else if(elementDef.objGetClass().equals(ModelAttributes.ASSOCIATION)) {
@@ -352,10 +352,10 @@ public class Uml1Mapper_1
       );
       
       ModelElement_1_0 associationEnd0TypeDef = this.model.getElement(
-        associationEnd0Def.objGetValue("type")
+        associationEnd0Def.getType()
       );
       ModelElement_1_0 associationEnd1TypeDef = this.model.getElement(
-        associationEnd1Def.objGetValue("type")
+        associationEnd1Def.getType()
       );
       
       List associationEnd0QualifierTypes = new ArrayList();
@@ -426,7 +426,7 @@ public class Uml1Mapper_1
       writer.writeExceptionFooter(elementDef);
     }
     else if(elementDef.objGetClass().equals(ModelAttributes.PARAMETER)) {
-      ModelElement_1_0 typeDef = this.model.getElement(elementDef.objGetValue("type"));
+      ModelElement_1_0 typeDef = this.model.getElement(elementDef.getType());
       boolean paramTypeIsPrimitive = typeDef.objGetClass().equals(ModelAttributes.PRIMITIVE_TYPE);
       writer.writeParameter(elementDef, typeDef, paramTypeIsPrimitive);
     }
@@ -454,7 +454,7 @@ public class Uml1Mapper_1
       writer.writeStructureTypeFooter(elementDef, hasStructureFields);
     }
     else if(elementDef.objGetClass().equals(ModelAttributes.STRUCTURE_FIELD)) {
-      ModelElement_1_0 typeDef = this.model.getElement(elementDef.objGetValue("type"));
+      ModelElement_1_0 typeDef = this.model.getElement(elementDef.getType());
       boolean refTypeIsPrimitive = typeDef.objGetClass().equals(ModelAttributes.PRIMITIVE_TYPE);
       writer.writeStructureField(elementDef, typeDef, refTypeIsPrimitive);
     }

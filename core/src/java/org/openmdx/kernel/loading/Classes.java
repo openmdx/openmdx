@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2009, OMEX AG, Switzerland
+ * Copyright (c) 2004-2014, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -47,7 +47,6 @@
  */
 package org.openmdx.kernel.loading;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationHandler;
@@ -262,126 +261,6 @@ public class Classes {
             name,
             getClassLoader()
         );
-    }
-    
-    /**
-     * Load a system resource
-     *
-     * @param     name
-     *            fully qualified name of the desired resource
-     *
-     * @return    a URL for reading the resource,
-     *            or <code>null</code> if the resource could not be found or
-     *            the caller doesn't have adequate privileges to get the
-     *            resource.
-     *            
-     * @deprecated use {@link org.openmdx.kernel.loading.Resources#getResource(String)}           
-     */
-    @Deprecated
-    public static URL getSystemResource(
-        String name
-    ){
-        return ClassLoader.getSystemResource(name);
-    }
-    
-    /**
-     * Load a kernel resource
-     *
-     * @param     name
-     *            fully qualified name of the desired resource
-     *
-     * @return    a URL for reading the resource,
-     *            or <code>null</code> if the resource could not be found or
-     *            the caller doesn't have adequate privileges to get the
-     *            resource.
-     *            
-     * @deprecated use {@link org.openmdx.kernel.loading.Resources#getResource(String)}           
-     */
-    @Deprecated
-    public static URL getKernelResource(
-        String name
-    ){
-        URL resource = Classes.class.getResource(name);
-        return resource == null ? getSystemResource(name) : resource;
-    }
-    
-    /**
-     * Load an application resource
-     *
-     * @param     name
-     *            fully qualified name of the desired resource
-     *
-     * @return    a URL for reading the resource,
-     *            or <code>null</code> if the resource could not be found or
-     *            the caller doesn't have adequate privileges to get the
-     *            resource.
-     *            
-     * @deprecated use {@link org.openmdx.kernel.loading.Resources#getResource(String)}           
-     */
-    @Deprecated
-    public static URL getApplicationResource(
-        String name
-    ){
-        return Resources.getResource(name);
-    }
-    
-    /**
-     * Load an application resource
-     *
-     * @param     name
-     *            fully qualified name of the desired resource
-     *
-     * @return    a URL for reading the resource,
-     *            or <code>null</code> if the resource could not be found or
-     *            the caller doesn't have adequate privileges to get the
-     *            resource.
-     * @throws IOException 
-     *            
-     * @deprecated use {@link org.openmdx.kernel.loading.Resources#getResource(String)}
-     * and assert the existence by the caller
-     */
-    @Deprecated
-    public static URL getRequiredResource(
-        String name
-    ) throws IOException{
-        URL resource = Resources.getResource(name);
-        if(resource == null) {
-    	    throw Throwables.initCause(
-    	    	new FileNotFoundException("Could not locate resource " + name),
-    	    	null,
-        		BasicException.Code.DEFAULT_DOMAIN,
-        		BasicException.Code.INITIALIZATION_FAILURE,
-        		getInfo(
-        		    "resource",
-        		    name, 
-        		    getClassLoader()
-        		)
-    		);
-        }
-        return resource;
-    }
-
-    /**
-     * Load a package local resource
-     *
-     * @param     sibling
-     *            a class in the same package
-     * @param     simpleName
-     *            the unqualified resource name
-     *
-     * @return    a URL for reading the resource,
-     *            or <code>null</code> if the resource could not be found or
-     *            the caller doesn't have adequate privileges to get the
-     *            resource.
-     *            
-     * @deprecated use {@link java.lang.Class#getResource(String)}           
-     */
-    @Deprecated 
-    public static URL getPackageResource(
-    	Class<?> sibling,
-        String simpleName
-    ){
-        return sibling.getResource(simpleName);
     }
     
     /**
@@ -615,6 +494,83 @@ public class Classes {
                 )
             );
         }
+    }
+
+    /**
+     * Return a clone of the object
+     * 
+     * @param object the object to be cloned
+     * 
+     * @return a clone, or <code>null</code> if the object is <code>null</code>
+     * 
+     * @exception RuntimeException if cloning fails 
+     */
+    @SuppressWarnings("unchecked")
+    public static <T> T clone(
+        T object
+    ) {
+    	if(object == null) {
+    		return null;
+    	}
+    	final Class<?> objectClass = object.getClass();
+    	if(object instanceof Cloneable) {
+	    	try {
+	            return (T) objectClass.getMethod(
+	                "clone"
+	            ).invoke(
+	                object
+	            );
+	        } catch (InvocationTargetException exception) {
+	            final Throwable cause = exception.getCause();
+				throw BasicException.initHolder(
+	                new RuntimeException(
+	                    "Unable to clone object",
+	                    BasicException.newEmbeddedExceptionStack(
+	                        cause,
+	                        BasicException.Code.DEFAULT_DOMAIN,
+	                        cause instanceof CloneNotSupportedException ? BasicException.Code.NOT_SUPPORTED : BasicException.Code.GENERIC,
+	                        new BasicException.Parameter("objectClass", objectClass)
+	                    )
+	                )
+	            );
+	        } catch (IllegalAccessException exception) {
+	            throw BasicException.initHolder(
+	                new RuntimeException(
+	                    "Unable to clone object",
+	                    BasicException.newEmbeddedExceptionStack(
+	                        exception,
+	                        BasicException.Code.DEFAULT_DOMAIN,
+	                        BasicException.Code.SECURITY_FAILURE,
+	                        new BasicException.Parameter("objectClass", objectClass)
+	                    )
+	                )
+	            );
+			} catch (NoSuchMethodException exception) {
+	            throw BasicException.initHolder(
+	                new RuntimeException(
+	                    "Unable to clone object",
+	                    BasicException.newEmbeddedExceptionStack(
+	                        exception,
+	                        BasicException.Code.DEFAULT_DOMAIN,
+	                        BasicException.Code.NOT_IMPLEMENTED,
+	                        new BasicException.Parameter("objectClass", objectClass)
+	                    )
+	                )
+	            );
+	        }
+    	} else {
+            throw BasicException.initHolder(
+                new RuntimeException(
+                    "Object is not Cloneable",
+                    BasicException.newEmbeddedExceptionStack(
+                        BasicException.Code.DEFAULT_DOMAIN,
+                        BasicException.Code.BAD_PARAMETER,
+                        new BasicException.Parameter("required", Cloneable.class.getName()),
+                        new BasicException.Parameter("actual", objectClass)
+                    )
+                )
+            );
+    	}
     }
 
 }

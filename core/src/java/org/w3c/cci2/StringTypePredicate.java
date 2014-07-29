@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2006-2008, OMEX AG, Switzerland
+ * Copyright (c) 2006-201, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -76,6 +76,26 @@ public interface StringTypePredicate
     int SOUNDS = 010000000000;
 
     /**
+     * Enables POSIX regular expression matching.
+     *
+     * <p> POSIX regular expression matching can also be enabled via the 
+     * embedded flag expression&nbsp;<tt>(?P)</tt>.
+     *
+     * <p> Specifying this flag may impose a performance penalty.  </p>
+     */
+    int POSIX_EXPRESSION = 02000000000;
+    
+    /**
+     * Enables accent-insensitive matching.
+     *
+     * <p> Case-insensitive matching can also be enabled via the embedded flag
+     * expression&nbsp;<tt>(?I)</tt>.
+     *
+     * <p> Specifying this flag may impose a performance penalty.  </p>
+     */
+    int ACCENT_INSENSITIVE = 01000000000;
+    
+    /**
      * To define the SoundEx to be used.
      * <p>
      * <code>"org.openmdx.query.SoundEx"</code> is used as the first argument
@@ -101,6 +121,7 @@ public interface StringTypePredicate
      *     single character
      * </ul>
      * @see java.util.regex.Pattern#CASE_INSENSITIVE
+     * @see java.util.regex.Pattern#UNICODE_CASE
      * @see StringTypePredicate#SOUNDS
      */
     void like(
@@ -123,6 +144,7 @@ public interface StringTypePredicate
      *     single character
      * </ul>
      * @see java.util.regex.Pattern#CASE_INSENSITIVE
+     * @see java.util.regex.Pattern#UNICODE_CASE
      * @see StringTypePredicate#SOUNDS
      */
     void like(
@@ -145,6 +167,7 @@ public interface StringTypePredicate
      *     single character
      * </ul>
      * @see java.util.regex.Pattern#CASE_INSENSITIVE
+     * @see java.util.regex.Pattern#UNICODE_CASE
      * @see StringTypePredicate#SOUNDS
      */
     void like(
@@ -167,6 +190,7 @@ public interface StringTypePredicate
      *     single character
      * </ul>
      * @see java.util.regex.Pattern#CASE_INSENSITIVE
+     * @see java.util.regex.Pattern#UNICODE_CASE
      * @see StringTypePredicate#SOUNDS
      */
     void unlike(
@@ -189,6 +213,7 @@ public interface StringTypePredicate
      *     single character
      * </ul>
      * @see java.util.regex.Pattern#CASE_INSENSITIVE
+     * @see java.util.regex.Pattern#UNICODE_CASE
      * @see StringTypePredicate#SOUNDS
      */
     void unlike(
@@ -211,6 +236,7 @@ public interface StringTypePredicate
      *     single character
      * </ul>
      * @see java.util.regex.Pattern#CASE_INSENSITIVE
+     * @see java.util.regex.Pattern#UNICODE_CASE
      * @see StringTypePredicate#SOUNDS
      */
     void unlike(

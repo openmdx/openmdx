@@ -70,9 +70,9 @@ import org.openmdx.portal.servlet.Action;
 import org.openmdx.portal.servlet.ApplicationContext;
 import org.openmdx.portal.servlet.ViewsCache;
 import org.openmdx.portal.servlet.WebKeys;
-import org.openmdx.portal.servlet.view.EditObjectView;
-import org.openmdx.portal.servlet.view.ObjectView;
-import org.openmdx.portal.servlet.view.ShowObjectView;
+import org.openmdx.portal.servlet.component.EditObjectView;
+import org.openmdx.portal.servlet.component.ObjectView;
+import org.openmdx.portal.servlet.component.ShowObjectView;
 import org.openmdx.ui1.jmi1.FeatureDefinition;
 import org.openmdx.ui1.jmi1.StructuralFeatureDefinition;
 
@@ -106,7 +106,7 @@ public class FindObjectAction extends BoundAction {
 				try {
 					ModelElement_1_0 elementDef = model.getElement(qualifiedElementName);
 					lookupType = model.isReferenceType(elementDef) || model.isStructureFieldType(elementDef) ?
-						model.getElement(elementDef.objGetValue("type")) :
+						model.getElement(elementDef.getType()) :
 							elementDef;
 				}
 				catch(Exception e) {
@@ -124,7 +124,7 @@ public class FindObjectAction extends BoundAction {
 				nextView = app.getPortalExtension().getLookupView(
 					id, 
 					lookupType, 
-					currentView.getRefObject(),
+					currentView.getObject(),
 					filterValues,
 					app
 				);
@@ -149,7 +149,7 @@ public class FindObjectAction extends BoundAction {
 				// Try to get lookup type from model
 				try {
 					ModelElement_1_0 reference = model.getElement(referenceName);
-					lookupType = model.getElement(reference.objGetValue("type"));
+					lookupType = model.getElement(reference.getType());
 				}
 				catch(Exception e) {
 					try {
@@ -168,7 +168,7 @@ public class FindObjectAction extends BoundAction {
 					(RefObject_1_0)pm.getObjectById(currentView.getParentObject().refGetPath()) :
 						currentView.getEditObjectIdentity() != null ?
 							(RefObject_1_0)pm.getObjectById(currentView.getEditObjectIdentity()) :
-								(RefObject_1_0)pm.getObjectById(currentView.getRefObject().refGetPath()); 
+								(RefObject_1_0)pm.getObjectById(currentView.getObject().refGetPath()); 
 							Object[] parameterValues = (Object[])requestParameters.get(WebKeys.REQUEST_PARAMETER_FILTER_VALUES);
 							String filterValues = parameterValues == null ? null : (parameterValues.length > 0 ? (String) parameterValues[0] : null);                  
 							nextView = app.getPortalExtension().getLookupView(
@@ -185,7 +185,7 @@ public class FindObjectAction extends BoundAction {
 				try {
 					lookupTypeName = lookupType == null ? 
 						null : 
-							(String)lookupType.objGetValue("qualifiedName");
+							(String)lookupType.getQualifiedName();
 				} 
 				catch(Exception e0) {}
 				app.addErrorMessage(

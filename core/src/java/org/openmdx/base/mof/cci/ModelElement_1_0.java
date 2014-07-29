@@ -49,6 +49,7 @@ package org.openmdx.base.mof.cci;
 
 import org.openmdx.base.accessor.cci.DataObject_1_0;
 import org.openmdx.base.exception.ServiceException;
+import org.openmdx.base.naming.Path;
 
 public interface ModelElement_1_0 extends DataObject_1_0 {
 
@@ -110,4 +111,42 @@ public interface ModelElement_1_0 extends DataObject_1_0 {
     
     public boolean isSet(String feature);
     
+    public boolean isInstanceOf(String qualifiedName) throws ServiceException;
+
+    public String getName() throws ServiceException;
+    
+    public String getQualifiedName() throws ServiceException;
+    
+    public Path getReferencedEnd() throws ServiceException;
+    
+    public Path getExposedEnd() throws ServiceException;
+    
+    public String getAggregation() throws ServiceException;
+    
+    public Path getContainer() throws ServiceException;
+    
+    public Boolean isDerived() throws ServiceException;
+    
+    public Boolean isChangeable() throws ServiceException;
+    
+    public Boolean isAbstract() throws ServiceException;
+    
+    public Path getType() throws ServiceException;
+
+    public String getMultiplicity() throws ServiceException;
+    
+    public Path getQualifierType() throws ServiceException;
+    
+    /**
+     * Tells whether the given feature is a reference. The same as 
+     * isReferenceType() || (getReferencedEnd() != && exposedEnd != null)
+     * 
+     * @param feature the feature to be inspected
+     * 
+     * @return <code>true</code> if the given feature is a reference
+     * 
+     * @throws ServiceException
+     */
+    public boolean isReference() throws ServiceException;
+        
 }

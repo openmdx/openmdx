@@ -64,6 +64,7 @@ import org.openmdx.base.xml.spi.LargeObjectWriter;
 
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
+
 import org.openmdx.kernel.exception.BasicException;
 
 /**
@@ -152,7 +153,7 @@ public abstract class AbstractXMLStreamWriter implements XMLStreamWriter, LargeO
     /* (non-Javadoc)
      * @see javax.xml.stream.XMLStreamWriter#getNamespaceContext()
      */
-//  @Override
+    @Override
     public NamespaceContext getNamespaceContext(
     ) {
         return this.namespaceContext;
@@ -174,21 +175,21 @@ public abstract class AbstractXMLStreamWriter implements XMLStreamWriter, LargeO
         String prefix
     ) throws XMLStreamException {
         try {
-            Collection<Object> bound = null;
+            Collection<Object> namespaceIsBoundTo = null;
             for(
                 Iterator<?> i = this.namespaceContext.getPrefixes(namespaceURI);
                 i.hasNext();
             ) {
-                if(prefix.equals(i)){
+            	final Object candidate = i.next();
+                if(prefix.equals(candidate)){
                     return true;
-                } else {
-                    if(bound == null) {
-                        bound = new ArrayList<Object>();
-                    }
-                    bound.add(i);
                 }
+                if(namespaceIsBoundTo == null) {
+                    namespaceIsBoundTo = new ArrayList<Object>();
+                }
+                namespaceIsBoundTo.add(i);
             }
-            if(bound == null) {
+            if(namespaceIsBoundTo == null) {
                 return false;
             }
             throw new ServiceException(
@@ -196,7 +197,7 @@ public abstract class AbstractXMLStreamWriter implements XMLStreamWriter, LargeO
                 BasicException.Code.BAD_PARAMETER,
                 "Prefix mismatch",
                 new BasicException.Parameter("namespaceURI", namespaceURI),
-                new BasicException.Parameter("boundTo", bound),
+                new BasicException.Parameter("boundTo", namespaceIsBoundTo),
                 new BasicException.Parameter("prefix", prefix)
             );
         } catch (ServiceException exception) {
@@ -242,7 +243,7 @@ public abstract class AbstractXMLStreamWriter implements XMLStreamWriter, LargeO
     /* (non-Javadoc)
      * @see javax.xml.stream.XMLStreamWriter#getPrefix(java.lang.String)
      */
-//  @Override
+    @Override
     public String getPrefix(
         String namespaceURI
     ) throws XMLStreamException {
@@ -252,7 +253,7 @@ public abstract class AbstractXMLStreamWriter implements XMLStreamWriter, LargeO
     /* (non-Javadoc)
      * @see javax.xml.stream.XMLStreamWriter#getProperty(java.lang.String)
      */
-//  @Override
+    @Override
     public Object getProperty(
         String property
     ) throws IllegalArgumentException {
@@ -271,7 +272,7 @@ public abstract class AbstractXMLStreamWriter implements XMLStreamWriter, LargeO
     /* (non-Javadoc)
      * @see javax.xml.stream.XMLStreamWriter#setDefaultNamespace(java.lang.String)
      */
-//  @Override
+    @Override
     public void setDefaultNamespace(
         String namespaceURI
     ) throws XMLStreamException {
@@ -281,7 +282,7 @@ public abstract class AbstractXMLStreamWriter implements XMLStreamWriter, LargeO
     /* (non-Javadoc)
      * @see javax.xml.stream.XMLStreamWriter#setNamespaceContext(javax.xml.namespace.NamespaceContext)
      */
-//  @Override
+    @Override
     public void setNamespaceContext(
         NamespaceContext namespaceContext
     ) throws XMLStreamException {
@@ -299,7 +300,7 @@ public abstract class AbstractXMLStreamWriter implements XMLStreamWriter, LargeO
     /* (non-Javadoc)
      * @see javax.xml.stream.XMLStreamWriter#setPrefix(java.lang.String, java.lang.String)
      */
-//  @Override
+    @Override
     public void setPrefix(
         String prefix, 
         String namespaceURI
@@ -313,7 +314,7 @@ public abstract class AbstractXMLStreamWriter implements XMLStreamWriter, LargeO
     /* (non-Javadoc)
      * @see javax.xml.stream.XMLStreamWriter#writeDTD(java.lang.String)
      */
-//  @Override
+    @Override
     public void writeDTD(
         String dtd
     ) throws XMLStreamException {
@@ -326,7 +327,7 @@ public abstract class AbstractXMLStreamWriter implements XMLStreamWriter, LargeO
      * <li>XML version 1.0
      * </ul>
      */
-//  @Override
+    @Override
     public void writeStartDocument(
     ) throws XMLStreamException {
         writeStartDocument("UTF-8", "1.0");
@@ -337,7 +338,7 @@ public abstract class AbstractXMLStreamWriter implements XMLStreamWriter, LargeO
      * <li>Encoding UTF-8
      * </ul>
      */
-//  @Override
+    @Override
     public void writeStartDocument(
         String version
     ) throws XMLStreamException {

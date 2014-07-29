@@ -62,7 +62,7 @@ import javax.servlet.http.HttpSession;
 
 import org.openmdx.portal.servlet.ViewPort;
 import org.openmdx.portal.servlet.ViewsCache;
-import org.openmdx.portal.servlet.view.ObjectView;
+import org.openmdx.portal.servlet.component.ObjectView;
 
 public class ObjectGetAttributesAction extends BoundAction {
 

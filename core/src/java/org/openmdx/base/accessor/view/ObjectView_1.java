@@ -6,7 +6,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2012, OMEX AG, Switzerland
+ * Copyright (c) 2004-2014, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -145,14 +145,11 @@ class ObjectView_1
 	public Object getFeatureReplaceingObjectById(
 		ModelElement_1_0 featureDef
 	) throws ServiceException {
-        String feature = (String) featureDef.objGetValue("name");
+        String feature = (String) featureDef.getName();
         Multiplicity multiplicity = ModelHelper.getMultiplicity(featureDef);
         switch(multiplicity) {
 	        case SINGLE_VALUE: case OPTIONAL: {
-	            Object pc = getDelegate().objGetValue(feature); 
-	            return ReducedJDOHelper.isPersistent(pc) ?
-	                ReducedJDOHelper.getObjectId(pc) :
-	                ReducedJDOHelper.getTransactionalObjectId(pc);
+	            return ReducedJDOHelper.getAnyObjectId(getDelegate().objGetValue(feature));
 	        }
 	        case LIST:
 	            return new MarshallingList<Object>(
@@ -468,7 +465,7 @@ class ObjectView_1
      * Reconstitute the <tt>Object_1_0</tt> instance from a stream (that is,
      * deserialize it).
      */
-    private synchronized void readObject(
+    private void readObject(
         java.io.ObjectInputStream stream
     ) throws java.io.IOException, ClassNotFoundException {
         // stream.defaultReadObject(); has nothing to do

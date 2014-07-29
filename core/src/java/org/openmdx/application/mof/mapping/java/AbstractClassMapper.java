@@ -92,7 +92,7 @@ public abstract class AbstractClassMapper extends AbstractMapper {
         this.extendsClassDef = this.classDef.getSuperClassDef(format != Format.JPA3);
         this.classMetaData = (ClassMetaData) this.classDef.getClassMetaData();
         this.spiFeatures = this.classMetaData.getFieldMetaData(Visibility.SPI);
-        boolean requiresSlice = this.classMetaData == null || this.classMetaData.isRequiresSlices();
+        boolean requiresSlice = this.classMetaData.isRequiresSlices();
         this.qualifiedClassName = Arrays.asList(this.classDef.getQualifiedName().split(":"));
         if(this.isBaseClass()) {            
             this.baseClassDef = this.classDef;

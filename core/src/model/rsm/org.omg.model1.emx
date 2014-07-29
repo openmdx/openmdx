@@ -2392,7 +2392,7 @@ There are, and probably always will be, divergent views among industry leaders o
         <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_VJ2C458TEeKvlLQEyHS54Q" value="1"/>
         <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_VJ2C4p8TEeKvlLQEyHS54Q"/>
         <qualifier xmi:id="_ldI1wJ8UEeKvlLQEyHS54Q" name="key" visibility="private">
-          <type xmi:type="uml:PrimitiveType" href="org.w3c.emx#_sUC-4XTSEeGNposaCGm5NA?w3c/w3c/string?"/>
+          <type xmi:type="uml:PrimitiveType" href="org.w3c.emx#_3C7B8A60016D3C8B62E40010?w3c/w3c/string?"/>
         </qualifier>
       </ownedAttribute>
     </packagedElement>

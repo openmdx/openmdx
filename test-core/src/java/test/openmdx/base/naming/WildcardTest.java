@@ -245,11 +245,4 @@ public class WildcardTest extends TestCase {
         }
     }
     
-    public void testCR10009801(){
-        Path xri = new Path("org::opencrx::kernel::account1/provider/MASOFT/segment/Lifestock/account/9FB63C9LRID40YKEJXYZQKG92");
-        assertTrue(xri.isLike(new Path("org::opencrx::kernel::account1/provider/::*/segment/::*/account/::*/::*/%")));
-        assertFalse(xri.isLike(new Path("org::opencrx::kernel::account1/provider/::*/segment/::*/account/::*/::*")));
-        assertTrue(xri.isLike(new Path("org::opencrx::kernel::account1/provider/::*/segment/::*/account/::*")));
-    }
-
 }

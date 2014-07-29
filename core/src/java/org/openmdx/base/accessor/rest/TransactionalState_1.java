@@ -270,12 +270,16 @@ public final class TransactionalState_1 {
     /**
      * Convert the transient values to transactional ones
      * 
-     * @param values
+     * @param values the transient values
+     * @param dirty in case of new objects
      */
     final void setValues(
-        Map<String,Object> values
+        Map<String,Object> values, boolean dirty
     ){
         this.values = values;
+        if(dirty) {
+        	this.dirtyFeatures = new HashSet<String>(values.keySet());
+        }
     }
     
     /**

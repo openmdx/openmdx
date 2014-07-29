@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2007-2010, OMEX AG, Switzerland
+ * Copyright (c) 2007-2014, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -87,6 +87,7 @@ import javax.xml.datatype.Duration;
 import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.junit.AfterClass;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
@@ -95,6 +96,9 @@ import org.openmdx.application.xml.Exporter;
 import org.openmdx.application.xml.Importer;
 import org.openmdx.base.jmi1.Authority;
 import org.openmdx.base.jmi1.Provider;
+import org.openmdx.base.mof.cci.PrimitiveTypes;
+import org.openmdx.kernel.exception.BasicException;
+import org.openmdx.kernel.exception.Throwables;
 import org.openmdx.kernel.lightweight.naming.NonManagedInitialContextFactoryBuilder;
 import org.openmdx.kernel.log.SysLog;
 import org.openmdx.state2.spi.Order;
@@ -442,6 +446,32 @@ public class TestDatatypes  {
     }
 
     /**
+     * Enrich NullPointerException when accessing unset primitive values
+     */
+    @Test
+    public void testCR20022958(
+    ){
+        PersistenceManager persistenceManager = entityManagerFactory.getPersistenceManager();
+        Authority authority = (Authority) persistenceManager.getObjectById(
+            Authority.class,
+            Datatypes1Package.AUTHORITY_XRI
+        );
+        Datatypes1Package datatypes1Package = (Datatypes1Package) 
+        	authority.refOutermostPackage().refPackage("test:openmdx:datatypes1");
+        NonStated nonStated = datatypes1Package.getNonStated().createNonStated();
+        try {
+        	nonStated.isValue1();
+        	Assert.fail("NullPointerException expected");
+        } catch (NullPointerException exception) {
+        	final BasicException cause = Throwables.getCause(exception, null);
+        	Assert.assertEquals("exception-code", BasicException.Code.ILLEGAL_STATE, cause.getExceptionCode());
+        	Assert.assertEquals("feature-name", "value1", cause.getParameter("feature-name"));
+        	Assert.assertEquals("feature-type", PrimitiveTypes.BOOLEAN, cause.getParameter("feature-type"));
+        	Assert.assertEquals("object-class", "test:openmdx:datatypes1:NonStated", cause.getParameter("object-class"));
+        }
+    }
+
+    /**
      * Clear and Populate
      * 
      * @param providerName
@@ -781,7 +811,7 @@ public class TestDatatypes  {
             null,
             segment.refGetPath()
         );
-        System.out.println(segment.refGetPath().toXRI() + " exported to " + file);
+        System.out.println(segment.refGetPath() + " exported to " + file);
     }
 
     protected void importDatatypes(

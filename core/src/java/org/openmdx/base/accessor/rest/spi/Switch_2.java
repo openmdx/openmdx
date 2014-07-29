@@ -180,7 +180,7 @@ public class Switch_2 implements Port {
         protected Port getDestination(
             Path xri
         ) throws ResourceException {
-            if(!xri.isTransientObjectId()) try {
+            if(!xri.isTransactionalObjectId()) try {
                 if(this.cachingInteraction.getManagedConnectionCache().isAvailable(null, xri)) {
                     return Switch_2.this.cachingPlugIn;
                 }

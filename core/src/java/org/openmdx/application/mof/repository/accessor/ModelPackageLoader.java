@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2013, OMEX AG, Switzerland
+ * Copyright (c) 2013-2014, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -351,31 +351,31 @@ class ModelPackageLoader implements ModelLoader {
             j.hasNext();
         ) {
             Path contentElementPath = (Path)j.next();
-            if(!modelElements.containsKey(contentElementPath.getBase())) {
+            if(!modelElements.containsKey(contentElementPath.getLastSegment().toClassicRepresentation())) {
                 throw new ServiceException (
                     BasicException.Code.DEFAULT_DOMAIN, 
                     BasicException.Code.NOT_FOUND, 
                     "element is member of container but was not found in model. Probably the model is inconsistent.",
                     new BasicException.Parameter("container", element.jdoGetObjectId()),
-                    new BasicException.Parameter("element", contentElementPath.getBase())
+                    new BasicException.Parameter("element", contentElementPath.getLastSegment().toClassicRepresentation())
                 );
             }
             ModelElement_1_0 contentElement = modelElements.get(
-                contentElementPath.getBase()
+                contentElementPath.getLastSegment().toClassicRepresentation()
             );
             if(contentElement.objGetClass().equals(ModelAttributes.ATTRIBUTE)) {
                 attributes.put(
-                    (String)contentElement.objGetValue("name"),
+                    (String)contentElement.getName(),
                     contentElement
                 );
             } else if(contentElement.objGetClass().equals(ModelAttributes.OPERATION)) {
                 operations.put(
-                    (String)contentElement.objGetValue("name"),
+                    (String)contentElement.getName(),
                     contentElement
                 );
             } else if(contentElement.objGetClass().equals(ModelAttributes.REFERENCE)) {
                 references.put(
-                    (String)contentElement.objGetValue("name"),
+                    (String)contentElement.getName(),
                     contentElement
                 );
                 // add references stored as attribute to the list of attributes
@@ -397,18 +397,18 @@ class ModelPackageLoader implements ModelLoader {
                         new Integer(1024)
                     );
                     // If reference has a qualifier --> multiplicity 0..n
-                    if(!ModelHelper.findElement(contentElement.objGetValue("referencedEnd"), modelElements).objGetList("qualifierName").isEmpty()) {
+                    if(!ModelHelper.findElement(contentElement.getReferencedEnd(), modelElements).objGetList("qualifierName").isEmpty()) {
                         attribute.objSetValue("multiplicity", org.openmdx.base.mof.cci.ModelHelper.UNBOUND);
                     }
                     SysLog.trace("referenceIsStoredAsAttribute", attribute.jdoGetObjectId());
                     attributes.put(
-                        (String)attribute.objGetValue("name"),
+                        (String)attribute.getName(),
                         attribute
                     );
                 }
             } else if(contentElement.objGetClass().equals(ModelAttributes.STRUCTURE_FIELD)) {
                 fields.put(
-                    (String)contentElement.objGetValue("name"),
+                    (String)contentElement.getName(),
                     contentElement
                 );
             }
@@ -445,7 +445,7 @@ class ModelPackageLoader implements ModelLoader {
             );
             for(MappedRecord elementDef : elementDefs) {
                 modelElements.put(
-                    Object_2Facade.getPath(elementDef).getBase(),
+                    Object_2Facade.getPath(elementDef).getLastSegment().toClassicRepresentation(),
                     new ModelElement_1(elementDef, model)
                 ); 
             }

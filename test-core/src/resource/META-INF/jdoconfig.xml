@@ -57,11 +57,14 @@
         <property name="org.openmdx.jdo.EntityManager.plugIn[0]" value="test.openmdx.app1.jdo.EntityManagerPlugIn"/>
         <property name="test.openmdx.app1.jdo.EntityManagerPlugIn.modelPackage[0]" value="test:openmdx:app1"/>
         <property name="test.openmdx.app1.jdo.EntityManagerPlugIn.packageImpl[0]" value="test.openmdx.app1.aop2"/>
-        <property name="test.openmdx.app1.jdo.EntityManagerPlugIn.userObject[0]" value="PriceCalculator"/>
         <property name="test.openmdx.app1.jdo.EntityManagerPlugIn.modelPackage[1]" value="test:openmdx:model1"/>
         <property name="test.openmdx.app1.jdo.EntityManagerPlugIn.packageImpl[1]" value="test.openmdx.model1.aop2"/>
+        <property name="test.openmdx.app1.jdo.EntityManagerPlugIn.userObject[0]" value="PriceCalculator"/>
         <property name="PriceCalculator.class" value="test.openmdx.app1.aop2.PriceCalculator"/>
-        <property name="PriceCalculator.duration" value="(java.lang.Long)1000"/>
+        <property name="PriceCalculator.duration" value="(java.lang.Long)1000"/>duration
+        <property name="test.openmdx.app1.jdo.EntityManagerPlugIn.userObject[1]" value="PropagatedUserObject"/>
+        <property name="PropagatedUserObject.class" value="test.openmdx.app1.aop2.PropagatedUserObjectImpl"/>
+        <property name="PropagatedUserObject.interface" value="test.openmdx.app1.aop2.PropagatedUserObject"/>
         <property name="org.openmdx.jdo.ViewManager.plugIn[0]" value="org.openmdx.audit2.PlugIn"/>
         <property name="org.openmdx.jdo.ViewManager.plugIn[1]" value="org.openmdx.base.PlugIn"/>
         <property name="org.openmdx.audit2.PlugIn.class" value="org.openmdx.audit2.aop1.PlugIn_1"/>
@@ -70,7 +73,6 @@
     <persistence-manager-factory 
     	name="test-Main-DataManagerFactory"
     	class="org.openmdx.base.accessor.rest.DataManagerFactory_1"
-    	connection-factory-name="java:comp/env/jdbc/DataSource"
     >
         <property name="org.openmdx.jdo.DataManager.cachePlugIn" value="org.openmdx.cache.PlugIn"/>
         <property name="org.openmdx.jdo.DataManager.plugIn[0]" value="org.openmdx.audit2.PlugIn"/>

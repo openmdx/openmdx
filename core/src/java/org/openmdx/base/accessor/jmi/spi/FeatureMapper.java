@@ -149,7 +149,7 @@ public class FeatureMapper implements Serializable {
         } 
         else {
             featureDef = ((RefMetaObject_1) feature).getElementDef();
-            featureName = (String)featureDef.objGetValue("name");
+            featureName = (String)featureDef.getName();
         }
         Method accessor = this.accessors.get(featureName);
         if(accessor == null) { 
@@ -174,7 +174,7 @@ public class FeatureMapper implements Serializable {
                 String beanGetterName = AbstractNames.openmdx2AccessorName(
                     featureName,
                     true, // forQuery
-                    PrimitiveTypes.BOOLEAN.equals(featureDef.getModel().getElementType(featureDef).objGetValue("qualifiedName")), // isBoolean
+                    PrimitiveTypes.BOOLEAN.equals(featureDef.getModel().getElementType(featureDef).getQualifiedName()), // isBoolean
                     ModelHelper.getMultiplicity(featureDef).isSingleValued()
                 );
                 String accessorName = Identifier.OPERATION_NAME.toIdentifier(beanGetterName);
@@ -209,7 +209,7 @@ public class FeatureMapper implements Serializable {
             featureName = getSimpleName((String) feature);
         } else {
             featureDef = ((RefMetaObject_1) feature).getElementDef();
-            featureName = (String) featureDef.objGetValue("name");
+            featureName = (String) featureDef.getName();
         }
         Method mutator = this.mutators.get(featureName);
         if(mutator == null) {
@@ -225,7 +225,7 @@ public class FeatureMapper implements Serializable {
                 String beanSetterName = AbstractNames.openmdx2AccessorName(
                     featureName,
                     false, // forQuery
-                    PrimitiveTypes.BOOLEAN.equals(featureDef.getModel().getElementType(featureDef).objGetValue("qualifiedName")), // isBooleam
+                    PrimitiveTypes.BOOLEAN.equals(featureDef.getModel().getElementType(featureDef).getQualifiedName()), // isBooleam
                     ModelHelper.getMultiplicity(featureDef).isSingleValued()
                 );
                 String mutatorName = Identifier.OPERATION_NAME.toIdentifier(beanSetterName);
@@ -264,7 +264,7 @@ public class FeatureMapper implements Serializable {
             }                
         } else {
             ModelElement_1_0 featureDef = ((RefMetaObject_1) feature).getElementDef();
-            featureName = (String) featureDef.objGetValue("name");
+            featureName = (String) featureDef.getName();
         }
         Method operation = this.mutators.get(featureName);
         if(operation == null) {
@@ -333,7 +333,7 @@ public class FeatureMapper implements Serializable {
         MethodSignature mode
     ) throws ServiceException {
         String methodName = rawMethodName;
-        String className = (String)this.classDef.objGetValue("qualifiedName");
+        String className = (String)this.classDef.getQualifiedName();
         ConcurrentMap<String,ModelElement_1_0> features = allFeatures.get(className);
         if(features == null) {
             features = Maps.putUnlessPresent(
@@ -363,7 +363,7 @@ public class FeatureMapper implements Serializable {
                 }
                 // Structural feature
                 else {
-                    String featureName = (String)feature.objGetValue("name");
+                    String featureName = (String)feature.getName();
                     // non-boolean getter
                     features.putIfAbsent(
                         Identifier.OPERATION_NAME.toIdentifier(
@@ -442,7 +442,7 @@ public class FeatureMapper implements Serializable {
             }
             // Postprocess operations
             for(ModelElement_1_0 operation: operations) {
-                String operationName = (String)operation.objGetValue("name");                
+                String operationName = (String)operation.getName();                
                 // In case a feature accessor with the same name as an operation exists
                 // it is overriden, i.e. operations have precedence
                 features.put(

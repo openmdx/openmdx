@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2009, OMEX AG, Switzerland
+ * Copyright (c) 2004-2014, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -74,7 +74,10 @@ import org.openmdx.kernel.id.UUIDs;
  * An instance of a PathComponent is not synchronized against
  * concurrent multithreaded access if that access is not
  * read-only.
+ * 
+ * @deprecated use org.openmdx.base.naming.PathComponent
  */
+@Deprecated
 public final class PathComponent
 	implements Comparable<PathComponent>, Cloneable, Serializable
 {

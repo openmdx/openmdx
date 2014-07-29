@@ -263,7 +263,6 @@ CREATE VIEW BeforeImage_PersonGroup AS SELECT
     p$$object_oid$0 || '!' || p$$object_oid$1 object_oid,
     p$$object_oid$0,
     p$$object_oid$1,
-    object_idx,
     p$$object_parent__rid,
     p$$object_parent__oid,
     object__class,
@@ -299,7 +298,7 @@ CREATE VIEW Involvement_PersonGroup AS SELECT
   p$$object_rsx as p$$object__rid$1,  
   p$$object_oid$0 as p$$object__oid  
 FROM app1_PersonGroup
-WHERE object_idx = 0 AND p$$object_oid$1 IS NOT NULL;
+WHERE p$$object_oid$1 IS NOT NULL;
   
 DROP VIEW BeforeImage_SLICED;
 CREATE VIEW BeforeImage_SLICED AS SELECT 

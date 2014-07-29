@@ -899,16 +899,7 @@ public class Structures {
         ){
             Object[] target = new Object[source.size()];
             for(int i = 0; i < target.length; i++) {
-                Object value = source.get(i);
-                if(value instanceof PersistenceCapable) {
-                    if(ReducedJDOHelper.isPersistent(value)) {
-                        target[i] = ReducedJDOHelper.getObjectId(value);
-                    } else {
-                        target[i] = ReducedJDOHelper.getTransactionalObjectId(value);
-                    }
-                } else {
-                    target[i] = value;
-                }
+                target[i] = ReducedJDOHelper.replaceObjectById(source.get(i));
             }
             return target;
         }

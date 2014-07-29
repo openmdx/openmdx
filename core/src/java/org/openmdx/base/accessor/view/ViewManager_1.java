@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2013, OMEX AG, Switzerland
+ * Copyright (c) 2004-2014, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -140,9 +140,17 @@ public class ViewManager_1
         this.interactionSpec = interactionSpec;
         this.unitOfWork =  unitOfWork == null ? new AbstractUnitOfWork_1(){
 
-            @Override
+            /* (non-Javadoc)
+			 * @see org.openmdx.base.accessor.spi.AbstractUnitOfWork_1#isActive()
+			 */
+			@Override
+			public boolean isActive() {
+				return !getPersistenceManager().isClosed() && super.isActive();
+			}
+
+			@Override
             protected UnitOfWork getDelegate() {
-                return ViewManager_1.this.connection.currentUnitOfWork();
+                return getConnection().currentUnitOfWork();
             }
 
             @Override
@@ -265,7 +273,7 @@ public class ViewManager_1
     /**
      * Return connection assigned to this manager.
      */
-    private DataObjectManager_1_0 getConnection(
+    DataObjectManager_1_0 getConnection(
     ) {
         try {
             validateState();
@@ -381,7 +389,7 @@ public class ViewManager_1
                     new BasicException.Parameter("feature", featureName)
                 ); 
             }
-            String cciFeatureName = (String) featureDef.objGetValue("name"); 
+            String cciFeatureName = (String) featureDef.getName(); 
             if (!model.isReferenceType(featureDef)) throw new ServiceException(
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.BAD_MEMBER_NAME,
@@ -398,13 +406,13 @@ public class ViewManager_1
                 // Aggregation
                 //
                 ModelElement_1_0 exposedEnd = model.getElement(
-                    featureDef.objGetValue("exposedEnd")
+                    featureDef.getExposedEnd()
                 );
                 // navigation to parent object is performed locally by removing
                 // the last to object path components
                 if(
-                    AggregationKind.SHARED.equals(exposedEnd.objGetValue("aggregation")) || 
-                    AggregationKind.COMPOSITE.equals(exposedEnd.objGetValue("aggregation"))
+                    AggregationKind.SHARED.equals(exposedEnd.getAggregation()) || 
+                    AggregationKind.COMPOSITE.equals(exposedEnd.getAggregation())
                 ) {
                     Path childId = source.jdoGetObjectId();
                     return childId.getPrefix(childId.size() - 2);
@@ -531,12 +539,12 @@ public class ViewManager_1
                 );
             } else if(oid instanceof Path) {
                 Path path = (Path)oid; 
-                boolean odd = path.size() % 2 == 1;
+                boolean odd = path.isObjectPath();
                 Path objectId = odd ? path : path.getParent();
                 DataObject_1_0 object =  (DataObject_1_0) marshal(
                     this.connection.getObjectById(objectId, validate)
                 );
-                return odd ? object : object.objGetContainer(path.getBase());
+                return odd ? object : object.objGetContainer(path.getLastSegment().toClassicRepresentation());
             }
         } catch(ServiceException exception) {
             throw exception.getExceptionCode() == BasicException.Code.NOT_FOUND ? new JDOObjectNotFoundException(
@@ -1496,15 +1504,8 @@ public class ViewManager_1
     private static Object toDataObject(
         Object pc
     ){
-        if(pc instanceof ObjectView_1_0) try {
-            return ((ObjectView_1_0)pc).objGetDelegate();
-        } catch (ServiceException exception) {
-            throw BasicException.initHolder(
-                new JDOFatalUserException(
-                    "Unable to retrieve the persistence capable's DataObject_1_0 delegate",
-                    BasicException.newEmbeddedExceptionStack(exception)
-                )
-            );          
+        if(pc instanceof ObjectView_1_0) {
+			return ((ObjectView_1_0)pc).objGetDelegate();
         } else {
             throw BasicException.initHolder(
                 new JDOFatalUserException(

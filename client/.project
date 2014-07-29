@@ -18,13 +18,7 @@
 		<link>
 			<name>deliverables</name>
 			<type>2</type>
-			<locationURI>OPENMDX_HOME/jre-1.6/client</locationURI>
+			<locationURI>PARENT-1-PROJECT_LOC/jre-1.6/client</locationURI>
 		</link>
 	</linkedResources>
-	<variableList>
-		<variable>
-			<name>OPENMDX_HOME</name>
-			<value>$%7BPARENT-1-PROJECT_LOC%7D</value>
-		</variable>
-	</variableList>
 </projectDescription>

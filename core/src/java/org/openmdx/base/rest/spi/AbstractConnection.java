@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2009-2012, OMEX AG, Switzerland
+ * Copyright (c) 2009-2013, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -90,10 +90,13 @@ public abstract class AbstractConnection implements Connection {
      * Retrieve connectionSpec.
      *
      * @return Returns the connectionSpec.
+     * 
+     * @deprecated use {@link #getMetaData()}.getConnectionSpec();
      */
+    @Deprecated
     protected RestConnectionSpec getConnectionSpec(
     ) {
-        return this.metaData.connectionSpec;
+        return getMetaData().getConnectionSpec();
     }
 
     
@@ -104,16 +107,16 @@ public abstract class AbstractConnection implements Connection {
     /* (non-Javadoc)
      * @see javax.resource.cci.Connection#getMetaData()
      */
-//  @Override
+    @Override
     public final RestConnectionMetaData getMetaData(
-    ) throws ResourceException {
+    ){
         return this.metaData;
     }
 
     /* (non-Javadoc)
      * @see javax.resource.cci.Connection#getResultSetInfo()
      */
-//  @Override
+    @Override
     public final ResultSetInfo getResultSetInfo(
     ) throws ResourceException {
         throw ResourceExceptions.initHolder( 
@@ -150,7 +153,7 @@ public abstract class AbstractConnection implements Connection {
     /* (non-Javadoc)
      * @see javax.resource.cci.Connection#close()
      */
-//  @Override
+    @Override
     public void close(
     ) throws ResourceException {
         this.assertOpen();
@@ -184,7 +187,7 @@ public abstract class AbstractConnection implements Connection {
         /**
          * It's an openMDX connection
          */
-    //  @Override
+        @Override
         public String getEISProductName(
         ) throws ResourceException {
             return "openMDX/REST";
@@ -193,7 +196,7 @@ public abstract class AbstractConnection implements Connection {
         /**
          * with the given openMDX version
          */
-    //  @Override
+        @Override
         public String getEISProductVersion(
         ) throws ResourceException {
             return Version.getSpecificationVersion();
@@ -202,7 +205,7 @@ public abstract class AbstractConnection implements Connection {
         /**
          * Use the stringified principal chain
          */
-    //  @Override
+        @Override
         public String getUserName(
         ) throws ResourceException {
             return this.connectionSpec == null ? null : this.connectionSpec.getUserName();
@@ -211,10 +214,15 @@ public abstract class AbstractConnection implements Connection {
         /* (non-Javadoc)
          * @see org.openmdx.base.rest.cci.RestConnectionMetaData#isBulkLoad()
          */
-        //  @Override
+        @Override
         public boolean isBulkLoad() {
             return this.connectionSpec != null && this.connectionSpec.isBulkLoad();
         }
+
+		@Override
+		public RestConnectionSpec getConnectionSpec() {
+			return this.connectionSpec;
+		}
         
     }
 

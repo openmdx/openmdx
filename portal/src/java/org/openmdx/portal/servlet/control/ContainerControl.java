@@ -8,7 +8,7 @@
  * This software is published under the BSD license
  * as listed below.
  * 
- * Copyright (c) 2004-2007, OMEX AG, Switzerland
+ * Copyright (c) 2004-2014, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -54,18 +54,22 @@ package org.openmdx.portal.servlet.control;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
-import org.openmdx.base.exception.ServiceException;
-import org.openmdx.portal.servlet.ViewPort;
+/**
+ * ContainerControl
+ *
+ */
+public abstract class ContainerControl extends Control implements Serializable {
 
-public abstract class ContainerControl
-    extends Control
-    implements Serializable {
-
-  //-------------------------------------------------------------------------
-  public ContainerControl(
+	/**
+	 * Constructor.
+	 * 
+	 * @param id
+	 * @param locale
+	 * @param localeAsIndex
+	 */
+	public ContainerControl(
         String id,
         String locale,
         int localeAsIndex
@@ -77,7 +81,11 @@ public abstract class ContainerControl
         );
     }
 
-    //-------------------------------------------------------------------------
+    /**
+     * Add child control.
+     * 
+     * @param control
+     */
     public void addControl(
         Control control
     ) {
@@ -87,16 +95,25 @@ public abstract class ContainerControl
         );
     }
     
-    //-------------------------------------------------------------------------
+    /**
+     * Add child control and frame.
+     * 
+     * @param control
+     * @param frame
+     */
     public void addControl(
         Control control,
         String frame
     ) {
-        this.controls.add(control);
+        this.children.add(control);
         this.frames.add(frame);
     }
     
-    //-------------------------------------------------------------------------
+    /**
+     * Add multiple controls.
+     * 
+     * @param controls
+     */
     public void addControl(
         Control[] controls
     ) {
@@ -106,7 +123,28 @@ public abstract class ContainerControl
         );
     }
     
-    //-------------------------------------------------------------------------
+    /**
+     * Add controls.
+     * 
+     * @param controls
+     */
+    public void addControls(
+    	List<? extends Control> controls
+    ) {
+    	for(Control control: controls) {
+            this.addControl(
+                control,
+                null
+            );    		
+    	}
+    }
+
+    /**
+     * Add multiple controls and frame.
+     * 
+     * @param controls
+     * @param frame
+     */
     public void addControl(
         Control[] controls,
         String frame
@@ -119,39 +157,24 @@ public abstract class ContainerControl
         }
     }
     
-    //-------------------------------------------------------------------------
-    public void paintContent(
-        ViewPort p, 
-        String frame,
-        boolean forEditing        
-    ) {
-        try {
-            int ii = 0;
-            for(
-                Iterator i = this.controls.iterator();
-                i.hasNext();
-                ii++
-            ) {
-                Control control = (Control)i.next();
-                // Menu entry
-                control.paint(
-                    p, 
-                    (String)this.frames.get(ii),
-                    forEditing
-                );
-            }
-        }
-        catch(Exception e) {
-            new ServiceException(e).log();
-        }
-    }
-    
-    //-------------------------------------------------------------------------
+	/* (non-Javadoc)
+	 * @see org.openmdx.portal.servlet.control.Control#getChildren(java.lang.Class)
+	 */
+	@Override
+	public <T extends Control> List<T> getChildren(
+		Class<T> type
+	) {
+		@SuppressWarnings("unchecked")
+		List<T> children = (List<T>)this.children;
+		return children;	
+	}
+
+	//-------------------------------------------------------------------------
     // Members
     //-------------------------------------------------------------------------
     private static final long serialVersionUID = -1231427781842708999L;
 
-    protected final List<Control> controls = new ArrayList<Control>();
+    protected final List<Control> children = new ArrayList<Control>();
     protected final List<String> frames = new ArrayList<String>();
     
 }

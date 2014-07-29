@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2013, OMEX AG, Switzerland
+ * Copyright (c) 2004-2014, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -55,7 +55,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -70,8 +69,6 @@ import javax.resource.cci.MappedRecord;
 import javax.xml.datatype.Duration;
 import javax.xml.datatype.XMLGregorianCalendar;
 
-import org.openmdx.application.mof.cci.ModelConstraints;
-import org.openmdx.application.mof.cci.ModelExceptions;
 import org.openmdx.base.accessor.cci.DataObject_1_0;
 import org.openmdx.base.accessor.cci.Structure_1_0;
 import org.openmdx.base.accessor.cci.SystemAttributes;
@@ -88,6 +85,7 @@ import org.openmdx.base.naming.Path;
 import org.openmdx.base.rest.spi.Facades;
 import org.openmdx.base.rest.spi.Object_2Facade;
 import org.openmdx.kernel.exception.BasicException;
+import org.openmdx.kernel.log.SysLog;
 import org.w3c.cci2.LargeObject;
 import org.w3c.spi2.Datatypes;
 
@@ -112,25 +110,28 @@ public class Model_1 implements Marshaller, Model_1_0 {
     }
 
     /**
-     * The repository's content
+     * The repository's eagerly populated content
      */
     private final Map<String,ModelElement_1_0> modelElements;
     
     /**
-     * The eagerly populated associationDefMap
+     * The eagerly populated association definitions
      */
     private final Map<String,List<AssociationDef>> associationDefMap;
     
     /**
-     * The lazily populated structuralFeatureDefMap
+     * The lazily populated structural feature definitions
      */
     private final ConcurrentMap<Path,Map<Boolean,Map<Boolean,Map<Boolean,Map<String,ModelElement_1_0>>>>> structuralFeatureDefMap = new ConcurrentHashMap<Path,Map<Boolean,Map<Boolean,Map<Boolean,Map<String,ModelElement_1_0>>>>>();
     
     /**
-     * The lazily populated sharedAssociations
+     * The lazily populated shared associations
      */
     private final ConcurrentMap<Path,Boolean> sharedAssociations = new ConcurrentHashMap<Path,Boolean>();
     
+    /**
+     * To populate the root association definition
+     */
     private static final String AUTHORITY_TYPE_NAME = "org:openmdx:base:Authority";
     
     /* (non-Javadoc)
@@ -140,7 +141,7 @@ public class Model_1 implements Marshaller, Model_1_0 {
     public Object marshal(
         Object source
     ) throws ServiceException {
-        return source instanceof Path ? this.modelElements.get(((Path)source).getBase()) : source;
+        return source instanceof Path ? this.modelElements.get(((Path)source).getLastSegment().toClassicRepresentation()) : source;
     }
 
     /* (non-Javadoc)
@@ -165,9 +166,9 @@ public class Model_1 implements Marshaller, Model_1_0 {
     private AssociationDef[] getAssociationDefs(
         Path objectPath
     ) throws ServiceException {
-        /**        
-         * Iterate all reference names and follow the ReferenceLinks
-         */     
+        //
+        // Iterate all reference names and follow the ReferenceLinks
+        //     
         AssociationDef prev = null;
         // start from root association The association to the authority
         // is not modeled and is created is virtual association.
@@ -196,21 +197,17 @@ public class Model_1 implements Marshaller, Model_1_0 {
             }    
             // get next associations
             List<AssociationDef> next = new ArrayList<AssociationDef>();
-            for(
-                Iterator<AssociationDef> j = candidates.iterator();
-                j.hasNext();
-            ) {
-                AssociationDef associationDef = j.next();        
-                String exposedEndQualifiedName = (String)associationDef.getExposedType().objGetValue("qualifiedName");
+            for(AssociationDef associationDef : candidates){
+                String exposedEndQualifiedName = (String)associationDef.getExposedType().getQualifiedName();
                 // Test whether one of the current referenced types matches the exposed type of 
                 // the next candidate association
                 if(current.getAllReferencedTypes().contains(exposedEndQualifiedName)) {
                     // Move prev forward only if not a root class is referenced. Referenced
                     // to root classes are interpreted as references to the concrete subclass, 
-                    // e.g. ch:omex:generic:Role, ch:omex:generic:State
+                    // e.g. org::openmdx::state2
                     if(
                         !current.getReferencedType().objGetList("stereotype").contains(Stereotypes.ROOT) || 
-                        !((Boolean)current.getReferencedType().objGetValue("isAbstract")).booleanValue()
+                        !((Boolean)current.getReferencedType().isAbstract()).booleanValue()
                     ) {
                         prev = current;
                     }
@@ -230,7 +227,7 @@ public class Model_1 implements Marshaller, Model_1_0 {
                     "invalid reference. no matching association found",
                     new BasicException.Parameter("path", objectPath),
                     new BasicException.Parameter("reference/operation", referenceName),
-                    new BasicException.Parameter("exposing class", current.getExposedType() == null ? null : current.getExposedType().objGetValue("qualifiedName"))
+                    new BasicException.Parameter("exposing class", current.getExposedType() == null ? null : current.getExposedType().getQualifiedName())
                 );
             }
 
@@ -240,25 +237,18 @@ public class Model_1 implements Marshaller, Model_1_0 {
                 int matching = 0;
                 int index = 0;
                 int jj = 0;
-                for(
-                    Iterator<AssociationDef> j = next.iterator();
-                    j.hasNext();
-                    jj++
-                ) {
-                    AssociationDef assocationDef = j.next();
+                for(AssociationDef assocationDef : next){
                     // model name (segment name) must match the path authority
                     if(assocationDef.getReference().jdoGetObjectId().get(4).equals(objectPath.get(0))) {
                         matching++;
                         index = jj; 
                     }
+                    jj++;
                 }
                 if(matching != 1) {        
                     List<String> matches = new ArrayList<String>();
-                    for(
-                        Iterator<AssociationDef> j = next.iterator();
-                        j.hasNext();
-                    ) {
-                        Path referencePath = j.next().getReference().jdoGetObjectId(); 
+                    for(AssociationDef associationDef : next){
+                        Path referencePath = associationDef.getReference().jdoGetObjectId(); 
                         if(referencePath.get(4).equals(objectPath.get(0))) {
                             matches.add(referencePath.get(6));
                         }
@@ -269,7 +259,7 @@ public class Model_1 implements Marshaller, Model_1_0 {
                         "invalid reference. #matching referenced classifiers must be 1",
                         new BasicException.Parameter("path", objectPath),
                         new BasicException.Parameter("reference/operation", referenceName),
-                        new BasicException.Parameter("exposing class", current.getExposedType() == null ? null : current.getExposedType().objGetValue("qualifiedName")),
+                        new BasicException.Parameter("exposing class", current.getExposedType() == null ? null : current.getExposedType().getQualifiedName()),
                         new BasicException.Parameter("#matching referenced classifiers", matching),
                         new BasicException.Parameter("matching references", matches)
                     );
@@ -309,7 +299,7 @@ public class Model_1 implements Marshaller, Model_1_0 {
             "values expected to be in [Collectin|Map]",
             new BasicException.Parameter("multiplicity", multiplicity),
             new BasicException.Parameter("values", values),
-            new BasicException.Parameter("values class", (values == null) ? "null" : values.getClass().getName()),
+            new BasicException.Parameter("values class", values == null ? "null" : values.getClass().getName()),
             new BasicException.Parameter("context", validationContext)
         );      
         // Verify multiplicity
@@ -320,7 +310,7 @@ public class Model_1 implements Marshaller, Model_1_0 {
                 "number of values exceeds multiplicity",
                 new BasicException.Parameter("multiplicity", multiplicity),
                 new BasicException.Parameter("values", values),
-                new BasicException.Parameter("values class", (values == null) ? "null" : values.getClass().getName()),
+                new BasicException.Parameter("values class", values == null ? "null" : values.getClass().getName()),
                 new BasicException.Parameter("context", validationContext)
             );      
         }
@@ -349,7 +339,7 @@ public class Model_1 implements Marshaller, Model_1_0 {
                 "multiplicity does not match value type",
                 new BasicException.Parameter("multiplicity", multiplicity),
                 new BasicException.Parameter("values", values),
-                new BasicException.Parameter("values class", (values == null) ? "null" : values.getClass().getName()),
+                new BasicException.Parameter("values class", values == null ? "null" : values.getClass().getName()),
                 new BasicException.Parameter("context", validationContext)
             );
         }
@@ -358,14 +348,9 @@ public class Model_1 implements Marshaller, Model_1_0 {
             Arrays.asList("validated values", values)
         );
         int index = 0;
-        for(
-            Iterator<?> i = (values instanceof Collection<?> ? (Collection<?>)values : ((Map<?,?>)values).values()).iterator();
-            i.hasNext();
-            index++
-        ) {
-            Object value = i.next();
+        for(Object value : values instanceof Collection<?> ? (Collection<?>)values : ((Map<?,?>)values).values()){
             validationContext.push(
-                Arrays.asList("index", new Integer(index), "value", value)
+                Arrays.asList("index", Integer.valueOf(index++), "value", value)
             );
             this.verifyObject(
                 value,
@@ -397,7 +382,7 @@ public class Model_1 implements Marshaller, Model_1_0 {
             return;
         }
         ModelElement_1_0 typeDef = this.getDereferencedType(type);
-        String typeName = (String)typeDef.objGetValue("qualifiedName"); 
+        String typeName = (String)typeDef.getQualifiedName(); 
         // Collection
         if(value instanceof Collection || value instanceof SortedMap) {
             this.verifyObjectCollection(
@@ -490,14 +475,14 @@ public class Model_1 implements Marshaller, Model_1_0 {
             else if(
                 (value instanceof Reader || value instanceof Long) && 
                 PrimitiveTypes.STRING.equals(typeName) &&
-                Multiplicity.STREAM.toString().equals(multiplicity)
+                Multiplicity.STREAM == multiplicity
             ) {
                 return;
             }
             else if(
                 (value instanceof InputStream || value instanceof LargeObject || value instanceof Long) && 
                 PrimitiveTypes.BINARY.equals(typeName) &&
-                Multiplicity.STREAM.toString().equals(multiplicity)
+                Multiplicity.STREAM == multiplicity
             ) {
                 return;
             }
@@ -505,7 +490,7 @@ public class Model_1 implements Marshaller, Model_1_0 {
                 (value instanceof Path) && 
                 (PrimitiveTypes.OBJECT_ID.equals(typeName) || this.isClassType(type))
             ) {
-                if(((Path)value).size() % 2 != 1) {
+                if(!((Path)value).isObjectPath()) {
                     throw new ServiceException(
                         BasicException.Code.DEFAULT_DOMAIN,
                         BasicException.Code.ASSERTION_FAILURE, 
@@ -521,7 +506,7 @@ public class Model_1 implements Marshaller, Model_1_0 {
                 (PrimitiveTypes.OBJECT_ID.equals(typeName) || this.isClassType(type))
             ) {
                 Path p = new Path((String)value);
-                if(p.size() % 2 != 1) {
+                if(!p.isObjectPath()) {
                     throw new ServiceException(
                         BasicException.Code.DEFAULT_DOMAIN,
                         BasicException.Code.ASSERTION_FAILURE, 
@@ -575,24 +560,16 @@ public class Model_1 implements Marshaller, Model_1_0 {
             Map<String,ModelElement_1_0> fieldDefs = (Map<String,ModelElement_1_0>)typeDef.objGetMap("field");
             // complete fieldNames with all required fields in case of includeRequired
             if((fieldDefs != null) && enforceRequired) {
-                for(
-                    Iterator<ModelElement_1_0> i = fieldDefs.values().iterator();
-                    i.hasNext();
-                ) {
-                    ModelElement_1_0 fieldDef = i.next();
-                    if(Multiplicity.SINGLE_VALUE.toString().equals(fieldDef.objGetValue("multiplicity"))) {
+                for(ModelElement_1_0 fieldDef : fieldDefs.values()){
+                    if(Multiplicity.SINGLE_VALUE.toString().equals(fieldDef.getMultiplicity())) {
                         fieldNames.add(
-                            (String)fieldDef.objGetValue("name")
+                            (String)fieldDef.getName()
                         );
                     }
                 }
             }
             // validate all fields contained in value
-            for(
-                Iterator<String> i = fieldNames.iterator(); 
-                i.hasNext(); 
-            ) {
-                String fieldName = i.next();
+            for(String fieldName: fieldNames){
                 // object_class for openMDX/2 compatibility
                 if(
                     !fieldName.equals(SystemAttributes.OBJECT_CLASS) &&
@@ -606,7 +583,7 @@ public class Model_1 implements Marshaller, Model_1_0 {
                             "attribute not member of class",
                             new BasicException.Parameter("value", value),
                             new BasicException.Parameter("field", fieldName),
-                            new BasicException.Parameter("structure type", typeDef.objGetValue("qualifiedName")),
+                            new BasicException.Parameter("structure type", typeDef.getQualifiedName()),
                             new BasicException.Parameter("context", validationContext)
                         );
                     }
@@ -629,8 +606,8 @@ public class Model_1 implements Marshaller, Model_1_0 {
                         );
                         this.verifyObject(
                             fieldValue,
-                            featureDef.objGetValue("type"),
-                            org.openmdx.base.mof.cci.ModelHelper.toMultiplicity((String)featureDef.objGetValue("multiplicity")),
+                            featureDef.getType(),
+                            org.openmdx.base.mof.cci.ModelHelper.toMultiplicity((String)featureDef.getMultiplicity()),
                             enforceRequired,
                             validationContext, 
                             attributesOnly, 
@@ -675,28 +652,19 @@ public class Model_1 implements Marshaller, Model_1_0 {
             );
             // Complete attributeNames with all required fields in case of enforceRequired
             if(enforceRequired) {
-                for(
-                    Iterator<ModelElement_1_0> i = structuralFeatureDefs.values().iterator();
-                    i.hasNext();
-                ) {
-                    ModelElement_1_0 fieldDef = i.next();
+                for(ModelElement_1_0 fieldDef : structuralFeatureDefs.values()){
                     if(
-                        Multiplicity.SINGLE_VALUE.toString().equals(fieldDef.objGetValue("multiplicity")) && 
-                        (verifyDerived || !Boolean.TRUE.equals(fieldDef.objGetValue("isDerived")))
+                        Multiplicity.SINGLE_VALUE.toString().equals(fieldDef.getMultiplicity()) && 
+                        (verifyDerived || !Boolean.TRUE.equals(fieldDef.isDerived()))
                     ) {
                         attributeNames.add(
-                            (String)fieldDef.objGetValue("name")
+                            (String)fieldDef.getName()
                         );
                     }
                 }
             }
             // Validate all attributes contained in value
-            for(
-                Iterator<String> i = attributeNames.iterator(); 
-                i.hasNext(); 
-            ) {
-                String attributeName = i.next();
-
+            for(String attributeName : attributeNames){ 
                 // object_class and object_instanceof for openMDX/2 compatibility
                 // at the current time ignore namespaces
                 if(
@@ -712,11 +680,11 @@ public class Model_1 implements Marshaller, Model_1_0 {
                             "attribute not member of class",
                             new BasicException.Parameter("value", value),
                             new BasicException.Parameter("attribute", attributeName),
-                            new BasicException.Parameter("object class", typeDef.objGetValue("qualifiedName")),
+                            new BasicException.Parameter("object class", typeDef.getQualifiedName()),
                             new BasicException.Parameter("context", validationContext)
                         );
                     }
-                    Object featureMultiplicity = featureDef.objGetValue("multiplicity");
+                    Object featureMultiplicity = featureDef.getMultiplicity();
                     Object attributeValue;
                     if (value instanceof DataObject_1_0) {
                         DataObject_1_0 object = (DataObject_1_0)value;
@@ -781,10 +749,10 @@ public class Model_1 implements Marshaller, Model_1_0 {
                         Arrays.asList("validated attribute", attributeName)
                     ); 
                     // in case the feature is a reference stored as attribute check for qualifiers
-                    String attributeMultiplicity = (String)featureDef.objGetValue("multiplicity");
+                    String attributeMultiplicity = (String)featureDef.getMultiplicity();
                     if(this.isReferenceType(featureDef)) {
                         ModelElement_1_0 referencedEnd = getElement(
-                            featureDef.objGetValue("referencedEnd")
+                            featureDef.getReferencedEnd()
                         );
                         if(!referencedEnd.objGetList("qualifierType").isEmpty()) {
                             attributeMultiplicity = org.openmdx.base.mof.cci.ModelHelper.UNBOUND;
@@ -792,7 +760,7 @@ public class Model_1 implements Marshaller, Model_1_0 {
                     }
                     this.verifyObject(
                         attributeValue,
-                        featureDef.objGetValue("type"),
+                        featureDef.getType(),
                         org.openmdx.base.mof.cci.ModelHelper.toMultiplicity(attributeMultiplicity),
                         enforceRequired,
                         validationContext, 
@@ -896,8 +864,8 @@ public class Model_1 implements Marshaller, Model_1_0 {
                 } else {
                     Path reference = size % 2 == 0 ? xri : xri.getParent();
                     ModelElement_1_0 referenceType = this.getReferenceType(reference);
-                    ModelElement_1_0 referencedEnd = this.getElement(referenceType.objGetValue("referencedEnd"));
-                    sharedAssociation = Boolean.valueOf("shared".equals(referencedEnd.objGetValue("aggregation")));
+                    ModelElement_1_0 referencedEnd = this.getElement(referenceType.getReferencedEnd());
+                    sharedAssociation = Boolean.valueOf("shared".equals(referencedEnd.getAggregation()));
                 }
                 this.sharedAssociations.put(key, sharedAssociation);
             }
@@ -989,7 +957,7 @@ public class Model_1 implements Marshaller, Model_1_0 {
         boolean includeDerived,
         boolean attributesOnly
     ) throws ServiceException {
-        Map<Boolean,Map<Boolean,Map<Boolean,Map<String,ModelElement_1_0>>>> allStructuralFeatureDefs = (Map)this.structuralFeatureDefMap.get(classDef.jdoGetObjectId());
+        Map<Boolean,Map<Boolean,Map<Boolean,Map<String,ModelElement_1_0>>>> allStructuralFeatureDefs = this.structuralFeatureDefMap.get(classDef.jdoGetObjectId());
         if(allStructuralFeatureDefs == null) {
             allStructuralFeatureDefs = new HashMap<Boolean,Map<Boolean,Map<Boolean,Map<String,ModelElement_1_0>>>>();
             for(int ii = 0; ii < 2; ii++) {
@@ -1012,19 +980,15 @@ public class Model_1 implements Marshaller, Model_1_0 {
                             bIncludeSubtypes ? "allFeatureWithSubtype" : "allFeature"
                         );
                         Map<String,ModelElement_1_0> structuralFeatureDefs = new HashMap<String,ModelElement_1_0>();
-                        for(
-                            Iterator<ModelElement_1_0> i = featureDefs.values().iterator();
-                            i.hasNext();
-                        ) {
-                            ModelElement_1_0 featureDef = i.next();
+                        for(ModelElement_1_0 featureDef : featureDefs.values()){
                             if(
                                 this.isAttributeType(featureDef) || 
                                 (this.isReferenceType(featureDef) && (!bAttributesOnly || this.referenceIsStoredAsAttribute(featureDef)))          
                             ) {
-                                Boolean isDerived = (Boolean)featureDef.objGetValue("isDerived");
+                                Boolean isDerived = (Boolean)featureDef.isDerived();
                                 if(bIncludeDerived || (isDerived == null) || !isDerived.booleanValue()) {
                                     structuralFeatureDefs.put(
-                                        (String)featureDef.objGetValue("name"),
+                                        (String)featureDef.getName(),
                                         featureDef
                                     );
                                 }
@@ -1076,36 +1040,10 @@ public class Model_1 implements Marshaller, Model_1_0 {
     public ModelElement_1_0 getDereferencedType(
         java.lang.Object element
     ) throws ServiceException {
-        java.lang.Object current = element;
-        Set<ModelElement_1_0> visitedElements = null;
-        while(true) {
-            ModelElement_1_0 modelElement = ModelHelper.findElement(current, this.modelElements);
-            if(modelElement == null) {
-                throw new ServiceException (
-                    BasicException.Code.DEFAULT_DOMAIN, 
-                    BasicException.Code.NOT_FOUND, 
-                    "element not found in repository. Can not dereference type",
-                    new BasicException.Parameter("element", current)
-                );
-            }
-            if(modelElement.isAliasType()) {
-                if(visitedElements == null) {
-                    visitedElements = new HashSet<ModelElement_1_0>();
-                }
-                if(visitedElements.contains(modelElement)) {
-                    throw new ServiceException (
-                        ModelExceptions.MODEL_DOMAIN,
-                        ModelExceptions.CIRCULAR_ALIAS_TYPE_DEFINITION, 
-                        ModelConstraints.CIRCULAR_TYPE_DEPENCENCY_NOT_ALLOWED,
-                        new BasicException.Parameter("element", current)
-                    );
-                }
-                visitedElements.add(modelElement);
-                current = modelElement.objGetValue("type");
-            } else {
-                return modelElement;
-            }
-        }
+        return ModelHelper.getDereferencedType(
+            element,
+            this.modelElements
+        );
     }
 
     //-------------------------------------------------------------------------
@@ -1113,24 +1051,22 @@ public class Model_1 implements Marshaller, Model_1_0 {
     public ModelElement_1_0 getElementType(
         ModelElement_1_0 elementDef
     ) throws ServiceException {
-        ModelElement_1_0 type = (ModelElement_1_0)elementDef.objGetValue("dereferencedType");
-        if(type == null) {
-            if(elementDef.objGetValue("type") == null) {
-                throw new ServiceException(
-                    ModelExceptions.MODEL_DOMAIN,
-                    ModelExceptions.REFERENCED_ELEMENT_TYPE_NOT_FOUND_IN_REPOSITORY,
-                    "Element has undefined type",
-                    new BasicException.Parameter("element", elementDef)
-                );
-            }
-            type = this.getDereferencedType(
-                elementDef.objGetValue("type")
+    	ModelElement_1_0 elementType = null;
+    	try {
+	        elementType = (ModelElement_1_0)elementDef.objGetValue("dereferencedType");
+    	} catch (IndexOutOfBoundsException exception) {
+    		SysLog.info("CR20020817", exception.getMessage());
+    	}
+        if(elementType == null) {
+            elementType = ModelHelper.getElementType(
+                elementDef,
+                this.modelElements
             );
-            elementDef.objGetList("dereferencedType").add(type);
+            elementDef.objSetValue("dereferencedType",elementType);
         }
-        return type; 
+        return elementType; 
     }
-    
+
     //-------------------------------------------------------------------------
     @Override
     public ModelElement_1_0 getReferenceType(
@@ -1155,7 +1091,7 @@ public class Model_1 implements Marshaller, Model_1_0 {
     ) throws ServiceException {
         ModelElement_1_0 typeDef = this.getDereferencedType(type);
         if(typeDef.isPrimitiveType()) {
-            String typeName = (String)typeDef.objGetValue("qualifiedName");
+            String typeName = (String)typeDef.getQualifiedName();
             return 
             PrimitiveTypes.DECIMAL.equals(typeName) ||
             PrimitiveTypes.INTEGER.equals(typeName) ||
@@ -1422,16 +1358,13 @@ public class Model_1 implements Marshaller, Model_1_0 {
         Object object,
         Object type
     ) throws ServiceException {
-        String typeName = (String)this.getElement(type).objGetValue("qualifiedName");
+        String typeName = (String)this.getElement(type).getQualifiedName();
         String objectClass = 
             object instanceof MappedRecord ? Object_2Facade.getObjectClass((MappedRecord)object) :
             object instanceof DataObject_1_0 ? ((DataObject_1_0)object).objGetClass() :
             null;
-        for(
-            Iterator<?> i = this.getElement(objectClass).objGetList("allSupertype").iterator();
-            i.hasNext();
-        ) {
-            if(typeName.equals(((Path)i.next()).getBase())) {
+        for(Object supertype : this.getElement(objectClass).objGetList("allSupertype")){ 
+            if(typeName.equals(((Path)supertype).getLastSegment().toClassicRepresentation())) {
                 return true;
             }
         }
@@ -1444,12 +1377,9 @@ public class Model_1 implements Marshaller, Model_1_0 {
         Object objectType,
         Object type
     ) throws ServiceException {
-        String typeName = (String)this.getElement(type).objGetValue("qualifiedName");
-        for(
-            Iterator<?> i = this.getElement(objectType).objGetList("allSupertype").iterator();
-            i.hasNext();
-        ) {
-            if(typeName.equals(((Path)i.next()).getBase())) {
+        String typeName = (String)this.getElement(type).getQualifiedName();
+        for(Object supertype : this.getElement(objectType).objGetList("allSupertype")){
+            if(typeName.equals(((Path)supertype).getLastSegment().toClassicRepresentation())) {
                 return true;
             }
         }
@@ -1507,10 +1437,10 @@ public class Model_1 implements Marshaller, Model_1_0 {
     ) throws ServiceException {
         for(ModelElement_1_0 elementDef : this.getContent()) {
             if(this.isReferenceType(elementDef)) {
-                ModelElement_1_0 exposedEnd = this.getElement(elementDef.objGetValue("referencedEnd"));
-                Path type = (Path)exposedEnd.objGetValue("type");
+                ModelElement_1_0 exposedEnd = this.getElement(elementDef.getReferencedEnd());
+                Path type = (Path)exposedEnd.getType();
                 if(
-                    AggregationKind.COMPOSITE.equals(exposedEnd.objGetValue("aggregation")) &&
+                    AggregationKind.COMPOSITE.equals(exposedEnd.getAggregation()) &&
                     this.isSubtypeOf(classDef, type)
                 ) {
                     return elementDef;
@@ -1567,7 +1497,7 @@ public class Model_1 implements Marshaller, Model_1_0 {
                     continue Types;
                 }
             }
-            return (String) type.objGetValue("qualifiedName");
+            return (String) type.getQualifiedName();
         }
     }
     
@@ -1590,12 +1520,12 @@ public class Model_1 implements Marshaller, Model_1_0 {
             components.add(0, ":*");
             components.add(
                 0,
-                (String)compositeReference.objGetValue("name")
+                (String)compositeReference.getName()
             );
-            ModelElement_1_0 exposedEnd = this.getElement(compositeReference.objGetValue("exposedEnd"));     
-            currentClassDef = this.getElement(exposedEnd.objGetValue("type"));
+            ModelElement_1_0 exposedEnd = this.getElement(compositeReference.getExposedEnd());     
+            currentClassDef = this.getElement(exposedEnd.getType());
         }
-        String className = (String)classDef.objGetValue("qualifiedName");        
+        String className = (String)classDef.getQualifiedName();        
         components.add(
             0,
             className.substring(0, className.lastIndexOf(":"))

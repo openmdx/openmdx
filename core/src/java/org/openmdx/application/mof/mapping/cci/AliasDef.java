@@ -26,8 +26,8 @@ public class AliasDef extends ClassDef {
       model
     );
     this.qualifiedTypeName = (String)model.getElement(
-        aliasDef.objGetValue("type")
-    ).objGetValue("qualifiedName");
+        aliasDef.getType()
+    ).getQualifiedName();
   }
   
   public String getQualifiedTypeName(

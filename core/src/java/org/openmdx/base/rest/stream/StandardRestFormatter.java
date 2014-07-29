@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2010-2013, OMEX AG, Switzerland
+ * Copyright (c) 2010-2014, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -335,7 +335,6 @@ public class StandardRestFormatter implements RestFormatter {
      * 
      * @throws ServiceException
      */
-    @SuppressWarnings("resource")
     private static void printValue(
         RestTarget target,
         int indent,
@@ -629,15 +628,9 @@ public class StandardRestFormatter implements RestFormatter {
                             BasicException.Code.DEFAULT_DOMAIN,
                             BasicException.Code.PROCESSING_FAILURE,
                             "Unable to retrieve feature value",
-                            new BasicException.Parameter(
-                                "hrefContext",
-                                target.getBase()),
-                            new BasicException.Parameter("xri", xri
-                                .toXRI()),
-                            new BasicException.Parameter(
-                                "feature",
-                                feature
-                            )
+                            new BasicException.Parameter("hrefContext", target.getBase()),
+                            new BasicException.Parameter("xri", xri),
+                            new BasicException.Parameter("feature", feature)
                         )
                     );
                 }
@@ -696,14 +689,8 @@ public class StandardRestFormatter implements RestFormatter {
                                     "hrefContext",
                                     target.getBase()
                                 ),
-                                new BasicException.Parameter(
-                                    "xri",
-                                    xri == null ? null : xri.toXRI()
-                                ),
-                                new BasicException.Parameter(
-                                    "feature",
-                                    feature
-                                )
+                                new BasicException.Parameter("xri", xri),
+                                new BasicException.Parameter("feature", feature)
                             )
                         );
                     }
@@ -755,14 +742,9 @@ public class StandardRestFormatter implements RestFormatter {
                                         "hrefContext",
                                         target.getBase()
                                     ),
-                                    new BasicException.Parameter(
-                                        "xri",
-                                        xri == null ? null : xri.toXRI()
-                                    ),
-                                    new BasicException.Parameter(
-                                        "feature",
-                                        feature)
-                                    )
+                                    new BasicException.Parameter("xri", xri),
+                                    new BasicException.Parameter("feature", feature)
+                                 )
                              );
                         }
                     }

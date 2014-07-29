@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2009-2013, OMEX AG, Switzerland
+ * Copyright (c) 2009-2014, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -187,7 +187,7 @@ public class Exporter {
     private void exportAggregation(
         Path referenceId
     ) throws ServiceException{
-        String simpleName = referenceId.getBase();
+        String simpleName = referenceId.getLastSegment().toClassicRepresentation();
         Iterator<Map.Entry<Path, RefObject>> objects = this.source.children(referenceId);
         boolean empty = !objects.hasNext();
         this.target.startReference(simpleName, empty);
@@ -225,9 +225,9 @@ public class Exporter {
         String attributeName,
         ModelElement_1_0 attributeDef
     ) throws ServiceException{
-        String qualifiedName = (String) attributeDef.objGetValue("qualifiedName");
-        ModelElement_1_0 attributeType = this.model.getDereferencedType(attributeDef.objGetValue("type"));
-        String typeName = (String) attributeType.objGetValue("qualifiedName");
+        String qualifiedName = (String) attributeDef.getQualifiedName();
+        ModelElement_1_0 attributeType = this.model.getDereferencedType(attributeDef.getType());
+        String typeName = (String) attributeType.getQualifiedName();
         Object attributeValue = this.model.isReferenceType(attributeDef) ? 
            PersistenceHelper.getFeatureReplacingObjectById(object, attributeName) : 
            object.refGetValue(attributeName);
@@ -866,10 +866,10 @@ public class Exporter {
             String objectType = current.refClass().refMofId();
             Map<String, ModelElement_1_0> references = (Map<String, ModelElement_1_0>) model.getElement(objectType).objGetMap("reference");
             for (ModelElement_1_0 featureDef : references.values()) {
-                ModelElement_1_0 referencedEnd = model.getElement(featureDef.objGetValue("referencedEnd"));
-                AggregationKind aggregationKind = AggregationKindEnum.forName((String) referencedEnd.objGetValue("aggregation"));
-                String referenceName = (String) featureDef.objGetValue("name");
-                String qualifiedReferenceName = (String) featureDef.objGetValue("qualifiedName");
+                ModelElement_1_0 referencedEnd = model.getElement(featureDef.getReferencedEnd());
+                AggregationKind aggregationKind = AggregationKindEnum.forName((String) referencedEnd.getAggregation());
+                String referenceName = (String) featureDef.getName();
+                String qualifiedReferenceName = (String) featureDef.getQualifiedName();
                 if(AggregationKindEnum.NONE == aggregationKind) {
                     if(this.exportFilter.include(aggregationKind, qualifiedReferenceName, distance)) {
                         Object value = PersistenceHelper.getFeatureReplacingObjectById(current, referenceName);

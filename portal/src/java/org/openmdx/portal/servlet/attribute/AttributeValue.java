@@ -73,6 +73,7 @@ import org.openmdx.kernel.loading.Classes;
 import org.openmdx.kernel.log.SysLog;
 import org.openmdx.portal.servlet.ApplicationContext;
 import org.openmdx.portal.servlet.Autocompleter_1_0;
+import org.openmdx.portal.servlet.CssClass;
 import org.openmdx.portal.servlet.DataBinding;
 import org.openmdx.portal.servlet.HtmlEncoder_1_0;
 import org.openmdx.portal.servlet.ViewPort;
@@ -80,7 +81,7 @@ import org.openmdx.portal.servlet.WebKeys;
 
 public abstract class AttributeValue implements Serializable {
 
-    /**
+	/**
      * Create attribute value.
      * 
      * @param valueClassName
@@ -89,14 +90,13 @@ public abstract class AttributeValue implements Serializable {
      * @param app
      * @return
      */
-    @SuppressWarnings("unchecked")
     public static AttributeValue createAttributeValue(
         String valueClassName,
         Object object,
         FieldDef fieldDef,
         ApplicationContext app
     ) {
-        Class valueClass = (Class)AttributeValue.cachedValueClasses.get(valueClassName);
+        Class<?> valueClass = (Class<?>)AttributeValue.cachedValueClasses.get(valueClassName);
         if(valueClass == null) {
             try {
                 valueClass = Classes.getApplicationClass(valueClassName);
@@ -125,17 +125,13 @@ public abstract class AttributeValue implements Serializable {
                         app
                     }
                 );
-            }
-            catch(NoSuchMethodException e) {
+            } catch(NoSuchMethodException e) {
             	SysLog.error("constructor for value class not found", valueClassName + "(Object object, FieldDef fieldDef, ApplicationContext application)");
-            }
-            catch(InvocationTargetException e) {
+            } catch(InvocationTargetException e) {
             	SysLog.error("InvocationTargetException: can not create attribute value", e.getTargetException());
-            }
-            catch(InstantiationException e) {
+            } catch(InstantiationException e) {
             	SysLog.error("InstantiationException: can not create attribute value", e);
-            }
-            catch(IllegalAccessException e) {
+            } catch(IllegalAccessException e) {
             	SysLog.error("IllegalAccessException: can not create attribute value", e);
             }
         }        
@@ -656,9 +652,7 @@ public abstract class AttributeValue implements Serializable {
             if(label == null) {
             	label = attribute.getName();
             }
-            if(p.getViewPortType() != ViewPort.Type.MOBILE) {
-            	label += label.trim().length() == 0 ? "" : ":";
-            }
+           	label += label.trim().length() == 0 ? "" : ":";
         }
         return label;
     }
@@ -716,7 +710,7 @@ public abstract class AttributeValue implements Serializable {
         String lockedModifier,
         String stringifiedValue,
         boolean forEditing
-    ) throws ServiceException { 
+    ) throws ServiceException {
         HtmlEncoder_1_0 htmlEncoder = p.getApplicationContext().getHtmlEncoder();   
         label = this.getLabel(attribute, p, label);
         String title = this.getTitle(attribute, label);
@@ -726,7 +720,7 @@ public abstract class AttributeValue implements Serializable {
             id = (id == null) || (id.length() == 0) ? 
             	feature + "[" + Integer.toString(tabIndex) + "]" : 
             	id;            
-            p.write("<td class=\"label\" title=\"", (title == null ? "" : htmlEncoder.encode(title, false)), "\"><span class=\"nw\">", htmlEncoder.encode(label, false), "</span></td>");
+            p.write("<td class=\"", CssClass.fieldLabel.toString(), "\" title=\"", (title == null ? "" : htmlEncoder.encode(title, false)), "\"><span class=\"", CssClass.nw.toString(), "\">", htmlEncoder.encode(label, false), "</span></td>");
             // Edit single-value
             if(this.isSingleValued()) {
                 p.write("<td ", rowSpanModifier, ">");
@@ -739,13 +733,13 @@ public abstract class AttributeValue implements Serializable {
                             p.write("    <td><div onclick=\"javascript:$('", id, "').value=Wiky.toWiki($('", id, "').value);\"", p.getOnMouseOver("javascript: this.style.backgroundColor='#FF9900';this.style.cursor='pointer';"), p.getOnMouseOut("javascript: this.style.backgroundColor='';"), " >", p.getImg("src=\"", p.getResourcePath("images/htmltowiki"), p.getImgType(), "\" border=\"0\" alt=\"html &gt; wiki\" title=\"\""), "</div></td>");
                             p.write("  </tr></table>");
                         }
-                        String classModifier = this.isMandatory() ?
-                            "mandatory" :
-                            "";                        
+                        String classModifier = this.isMandatory() 
+                        	? CssClass.mandatory.toString() 
+                        	: "";
                         p.write("  <textarea id=\"", id, "\" name=\"", id, "\" class=\"", classModifier, "\" rows=\"", Integer.toString(attribute.getSpanRow()), "\" cols=\"30\" style=\"width:100%;\" class=\"string\" ", readonlyModifier, " tabindex=\"", Integer.toString(tabIndex), "\">", stringifiedValue, "</textarea>");
                     } else {
                      	// In case of read-only render as input field. However, without id and name attributes
-                        p.write("  <textarea rows=\"", Integer.toString(attribute.getSpanRow()), "\" cols=\"30\" class=\"multiStringLocked\" ", readonlyModifier, " tabindex=\"", Integer.toString(tabIndex), "\">", stringifiedValue, "</textarea>");
+                        p.write("  <textarea rows=\"", Integer.toString(attribute.getSpanRow()), "\" cols=\"30\" class=\"", CssClass.multiStringLocked.toString(), "\" ", readonlyModifier, " tabindex=\"", Integer.toString(tabIndex), "\">", stringifiedValue, "</textarea>");
                     }
                 } else {
                     Autocompleter_1_0 autocompleter = readonlyModifier.isEmpty() ? 
@@ -763,7 +757,7 @@ public abstract class AttributeValue implements Serializable {
                             false,
                             null,
                             null,
-                            "class=\"valueL valueAC\"",
+                            "class=\"" + CssClass.valueL + " " + CssClass.valueAC + "\"",
                             null, // imgTag
                             null // onChangeValueScript
                         );
@@ -777,9 +771,9 @@ public abstract class AttributeValue implements Serializable {
                         String maxLengthModifier = (maxLength == Integer.MAX_VALUE) ? 
                             "" : 
                             "maxlength=\"" + maxLength + "\"";
-                        String classModifier = this.isMandatory() ?
-                            "mandatory valueL" :
-                            "valueL";
+                        String classModifier = this.isMandatory() 
+                        	? CssClass.mandatory + " " + CssClass.valueL
+                        	: CssClass.valueL.toString();
                         if(readonlyModifier.isEmpty()) {
                         	p.write("  <input id=\"", id, "\" name=\"", id, "\" type=\"", inputType, "\" class=\"", classModifier, lockedModifier, "\" ", readonlyModifier, " tabindex=\"" + tabIndex, "\" ", maxLengthModifier, " value=\"", stringifiedValue, "\"");
                             p.writeEventHandlers("    ", attribute.getEventHandler());
@@ -792,7 +786,7 @@ public abstract class AttributeValue implements Serializable {
                     }
                 }
                 p.write("</td>");
-                p.write("<td class=\"addon\" ", rowSpanModifier, "></td>");
+                p.write("<td class=\"", CssClass.addon.toString(), "\" ", rowSpanModifier, "></td>");
             } else {
                 // Edit multi-value
                 int maxLength = this instanceof TextValue ? 
@@ -805,33 +799,24 @@ public abstract class AttributeValue implements Serializable {
                 	p.write("  <textarea rows=\"", Integer.toString(attribute.getSpanRow()), "\" cols=\"20\"", readonlyModifier, " tabindex=\"", Integer.toString(tabIndex), "\" onfocus=\"javascript:checkTextareaLimits(this,", this.getUpperBound("1..10"), ", ", Integer.toString(maxLength), ");\">", stringifiedValue, "</textarea>");                	
                 }
                 p.write("</td>");
-                p.write("<td class=\"addon\" ", rowSpanModifier, ">");
+                p.write("<td class=\"", CssClass.addon.toString(), "\" ", rowSpanModifier, ">");
                 p.write("</td>");
             }
         } else {
             // Show
-        	String cssClass = DEFAULT_CSS_CLASS;
+        	String cssClass = this.app.getPortalExtension().getDefaultCssClassFieldGroup(this, this.app);
         	if(this.getCssClassFieldGroup() != null) {
         		cssClass = this.getCssClassFieldGroup() + " " + cssClass;
         	}
             if(stringifiedValue.isEmpty()) {
                 styleModifier += "\"";
                 p.write(gapModifier);
-                if(p.getViewPortType() == ViewPort.Type.MOBILE) {
-                	p.write("		<label>",  htmlEncoder.encode(label, false), "</label>");                	
-                    p.write("       <div class=\"", cssClass, "\"></div>");
-                } else {
-                	p.write("<td class=\"label\" title=\"", (title == null ? "" : htmlEncoder.encode(title, false)), "\"><span class=\"nw\">",  htmlEncoder.encode(label, false), "</span></td>");
-                    p.write("<td ", rowSpanModifier, " class=\"", cssClass, "\" ",  widthModifier, " ", styleModifier, ">&nbsp;</td>");
-                }
+            	p.write("<td class=\"", CssClass.fieldLabel.toString(), "\" title=\"", (title == null ? "" : htmlEncoder.encode(title, false)), "\"><span class=\"", CssClass.nw.toString(), "\">",  htmlEncoder.encode(label, false), "</span></td>");
+                p.write("<td ", rowSpanModifier, " class=\"", cssClass, "\" ",  widthModifier, " ", styleModifier, ">&nbsp;</td>");
             } else {
                 if(this.isSingleValued()) {
                     p.write(gapModifier);
-                    if(p.getViewPortType() == ViewPort.Type.MOBILE) {
-                    	p.write("		<label>",  htmlEncoder.encode(label, false), "</label>");                	                    	
-                    } else {
-                    	p.write("<td class=\"label\" title=\"", (title == null ? "" : htmlEncoder.encode(title, false)), "\"><span class=\"nw\">", htmlEncoder.encode(label, false), "</span></td>");
-                    }
+                   	p.write("<td class=\"", CssClass.fieldLabel.toString(), "\" title=\"", (title == null ? "" : htmlEncoder.encode(title, false)), "\"><span class=\"", CssClass.nw.toString(), "\">", htmlEncoder.encode(label, false), "</span></td>");
                     String feature = this.getName();                    	
                     id = (id == null) || id.isEmpty() ? 
                         feature + "[" + Integer.toString(tabIndex) + "]" : 
@@ -841,28 +826,24 @@ public abstract class AttributeValue implements Serializable {
                     if(attribute.getSpanRow() > 1) {
                         if(nCols == 1) {
                             styleModifier += "\"";
-                        	if(p.getViewPortType() != ViewPort.Type.MOBILE) {
-                        		p.write("<td ", rowSpanModifier, " class=\"", cssClass, "\" ", widthModifier, " ", (styleModifier.length() == 0 ? "" : styleModifier), ">");
-                        	}
+                       		p.write("<td ", rowSpanModifier, " class=\"", cssClass, "\" ", widthModifier, " ", (styleModifier.length() == 0 ? "" : styleModifier), ">");
                             if(containsWiki) {
 	                            p.write("<div id=\"", id, "Value\" style='display:none'>");
 	                            this.app.getPortalExtension().renderTextValue(
-	                            	p, 
+	                            	p,
+	                            	this,
 	                            	stringifiedValue, 
 	                            	true
 	                            );
 	                            p.write("</div>");
                             }
-                        	if(p.getViewPortType() == ViewPort.Type.MOBILE) {
-                                p.write("       <div class=\"", cssClass, "\" id=\"", id, "\">");                        		
-                        	} else {                            
-                        		p.write("<div class=\"fieldSpannedFull\" id=\"", id, "\" ", (styleModifier.length() == 0 ? "" : styleModifier), ">");
-                        	}
+                       		p.write("<div class=\"", CssClass.fieldSpannedFull.toString(), "\" id=\"", id, "\" ", (styleModifier.length() == 0 ? "" : styleModifier), ">");
                             if(containsWiki) {
                             	p.write("<script language=\"javascript\" type=\"text/javascript\">try{var w=Wiky.toHtml($('", id, "Value').innerHTML);if(w.startsWith('<p>')){w=w.substring(3);};if(w.endsWith('</p>')){w=w.substring(0,w.length-4);};w=w.strip();$('", id, "').update(w);}catch(e){$('", id, "').update($('", id, "Value').innerHTML);};</script>");                            	
                             } else {
 	                            this.app.getPortalExtension().renderTextValue(
-	                            	p, 
+	                            	p,
+	                            	this,
 	                            	containsHtml ? stringifiedValue : stringifiedValue.replaceAll("\n", "<br />"), 
 	                            	false
 	                            );
@@ -870,31 +851,27 @@ public abstract class AttributeValue implements Serializable {
                             p.write("</div>");
                         } else {
                             styleModifier += "height:" + (1.2+(attribute.getSpanRow()-1)*1.5) + "em;\"";
-                        	if(p.getViewPortType() != ViewPort.Type.MOBILE) {
-                        		p.write("<td ", rowSpanModifier, " class=\"", cssClass, "\" ", widthModifier, " ",  styleModifier, ">");
-                        	}
+                       		p.write("<td ", rowSpanModifier, " class=\"", cssClass, "\" ", widthModifier, " ",  styleModifier, ">");
                             if(containsWiki) {
 	                            p.write("<div id=\"", id, "Value\" style='display:none'>");
 	                            this.app.getPortalExtension().renderTextValue(
-	                            	p, 
+	                            	p,
+	                            	this,
 	                            	stringifiedValue, 
 	                            	true
 	                            );
 	                            p.write("</div>");
                             }
-                        	if(p.getViewPortType() == ViewPort.Type.MOBILE) {
-                                p.write("       <div class=\"", cssClass, "\" id=\"", id, "\">");                        		
-                        	} else {
-                        		p.write("<div class=\"fieldSpanned\" id=\"", id, "\" ", styleModifier, ">");
-                        	}
+                       		p.write("<div class=\"", CssClass.fieldSpanned.toString(), "\" id=\"", id, "\" ", styleModifier, ">");
                             if(containsWiki) {
                             	p.write("<script language=\"javascript\" type=\"text/javascript\">try{var w=Wiky.toHtml($('", id, "Value').innerHTML);if(w.startsWith('<p>')){w=w.substring(3);};if(w.endsWith('</p>')){w=w.substring(0,w.length-4);};w=w.strip();$('", id, "').update(w);}catch(e){$('", id, "').update($('", id, "Value').innerHTML);};</script>");
                             } else {
 	                            this.app.getPortalExtension().renderTextValue(
-	                            	p, 
+	                            	p,
+	                            	this,
 	                            	containsHtml ? stringifiedValue : stringifiedValue.replaceAll("\n", "<br />"), 
 	                            	false
-	                            );                            	
+	                            );                	
                             }
                             p.write("</div>");
                         }
@@ -904,74 +881,57 @@ public abstract class AttributeValue implements Serializable {
                         CharSequence iconTag = this.getIconKey() == null 
                         	? "" 
                         	: "" + p.getImg("src=\"", p.getResourcePath("images/"), this.getIconKey(), "\" align=\"middle\" border=\"0\" alt=\"\"") + p.getImg("src=\"", p.getResourcePath("images/spacer"), p.getImgType(), "\" width=\"5\" height=\"0\" align=\"middle\" border=\"0\" alt=\"\"");
-                        if(p.getViewPortType() != ViewPort.Type.MOBILE) {
-                        	p.write("<td ",  rowSpanModifier, " class=\"", cssClass, "\" ", widthModifier, " ", styleModifier, ">");
-                        }
+                       	p.write("<td ",  rowSpanModifier, " class=\"", cssClass, "\" ", widthModifier, " ", styleModifier, ">");
                         if(attribute.getValue() instanceof TextValue) {
                         	if(containsWiki) {
 		                        p.write("<div id=\"", id, "Value\" style='display:none'>");
 		                        this.app.getPortalExtension().renderTextValue(
-		                        	p, 
+		                        	p,
+		                        	this,
 		                        	stringifiedValue, 
 		                        	true
 		                        );
 		                        p.write("</div>");
                         	}
-                        	if(p.getViewPortType() == ViewPort.Type.MOBILE) {
-                                p.write("       <div class=\"", cssClass, "\" id=\"", id, "\">");                        		
-                        	} else {
-                        		p.write("<div class=\"field\" id=\"", id, "\">", iconTag);
-                        	}
+                       		p.write("<div class=\"", CssClass.field.toString(), "\" id=\"", id, "\">", iconTag);
 	                        if(containsWiki) {
 	                        	p.write("<script language=\"javascript\" type=\"text/javascript\">try{var w=Wiky.toHtml($('", id, "Value').innerHTML);if(w.startsWith('<p>')){w=w.substring(3);};if(w.endsWith('</p>')){w=w.substring(0,w.length-4);};w=w.strip();$('", id, "').update(w);}catch(e){$('", id, "').update($('", id, "Value').innerHTML);};</script>");
 	                        } else {
 	                            this.app.getPortalExtension().renderTextValue(
-	                            	p, 
+	                            	p,
+	                            	this,
 	                            	stringifiedValue, 
 	                            	false
 	                            );                            		                        	
 	                        }
 	                        p.write("</div>");
                         } else {
-                        	if(p.getViewPortType() == ViewPort.Type.MOBILE) {
-                                p.write("       <div class=\"", cssClass, "\" id=\"", id, "\">");                        		
-                        	} else {
-                        		p.write("<div class=\"field\" id=\"", id, "\">", iconTag);
-                        	}
+                       		p.write("<div class=\"", CssClass.field.toString(), "\" id=\"", id, "\">", iconTag);
 	                        this.app.getPortalExtension().renderTextValue(
-	                        	p, 
+	                        	p,
+	                        	this,
 	                        	containsHtml ? stringifiedValue : stringifiedValue.replaceAll("\n", "<br />"), 
 	                        	false
 	                        );
 	                        p.write("</div>");                        	
                         }
                     }
-                    if(p.getViewPortType() != ViewPort.Type.MOBILE) {
-                    	p.write("</td>");
-                    }
+                   	p.write("</td>");
                 } else {
                     styleModifier += "height:" + (1.2+(attribute.getSpanRow()-1)*1.5) + "em;\"";
-                    if(p.getViewPortType() == ViewPort.Type.MOBILE) {
-                    	p.write("		<label>", label, "</label>");                	                    	
-                        p.write("       <div class=\"", cssClass, "\">");                        		
-                    } else {
-	                    p.debug("<!-- multi-valued AttributeValue -->");
-	                    p.write(gapModifier);
-	                    p.write("<td class=\"label\" title=\"", (title == null ? "" : htmlEncoder.encode(title, false)), "\"><span class=\"nw\">", label, "</span></td>");
-	                    p.write("<td class=\"", cssClass, "\" ",  rowSpanModifier, " ",  widthModifier, " ",  styleModifier, ">");
-	                    p.write("  <div class=\"valueMulti\" ",  styleModifier, "> ");
-                    }
+                    p.debug("<!-- multi-valued AttributeValue -->");
+                    p.write(gapModifier);
+                    p.write("<td class=\"", CssClass.fieldLabel.toString(), "\" title=\"", (title == null ? "" : htmlEncoder.encode(title, false)), "\"><span class=\"", CssClass.nw.toString(), "\">", label, "</span></td>");
+                    p.write("<td class=\"", cssClass, "\" ",  rowSpanModifier, " ",  widthModifier, " ",  styleModifier, ">");
+                    p.write("  <div class=\"", CssClass.valueMulti.toString(), "\" ",  styleModifier, "> ");
                     this.app.getPortalExtension().renderTextValue(
-                    	p, 
+                    	p,
+                    	this,
                     	stringifiedValue, 
                     	false
                     );
-                    if(p.getViewPortType() == ViewPort.Type.MOBILE) {
-                    	p.write("       </div>");                    	
-                    } else {
-                    	p.write("  </div>");
-                    	p.write("</td>");
-                    }
+                	p.write("  </div>");
+                	p.write("</td>");
                 }
             }
         }
@@ -980,9 +940,10 @@ public abstract class AttributeValue implements Serializable {
     //-------------------------------------------------------------------------
     // Variables
     //-------------------------------------------------------------------------
-    public static final String DEFAULT_CSS_CLASS = "valueL";
-    
-    private static Map cachedValueClasses = new HashMap();
+	private static final long serialVersionUID = -8515784264965959005L;
+
+	public static final CssClass DEFAULT_CSS_CLASS = CssClass.valueL;
+    private static Map<String,Class<?>> cachedValueClasses = new HashMap<String,Class<?>>();
 
     protected final FieldDef fieldDef;
     protected Object object = null;

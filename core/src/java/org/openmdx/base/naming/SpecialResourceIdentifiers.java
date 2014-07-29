@@ -66,12 +66,12 @@ public class SpecialResourceIdentifiers {
     /**
      * The extent reference pattern
      */
-    public static final Path EXTENT_REFERENCES = new Path("xri://@openmdx*($..)/provider/($..)/segment/($..)/extent").lock();    
+    public static final Path EXTENT_REFERENCES = new Path("xri://@openmdx*($..)/provider/($..)/segment/($..)/extent");    
 
     /**
      * The extent object pattern
      */
-    public static final Path EXTENT_OBJECTS = new Path("xri://@openmdx*($..)/provider/($..)/segment/($..)/extent/($..)").lock();    
+    public static final Path EXTENT_OBJECTS = new Path("xri://@openmdx*($..)/provider/($..)/segment/($..)/extent/($..)");    
 
     /**
      * An escaped dot

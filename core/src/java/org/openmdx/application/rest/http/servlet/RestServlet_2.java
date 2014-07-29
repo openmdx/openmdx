@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2008-2013, OMEX AG, Switzerland
+ * Copyright (c) 2008-2014, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -753,8 +753,8 @@ public class RestServlet_2 extends HttpServlet {
                 !this.isAutoCommitting(request) && this.isRetainValues(request)
             ).GET;
             // Object
-            if(xri.size() % 2 == 1) {
-                if(xri.containsWildcard()) {
+            if(xri.isObjectPath()) {
+                if(xri.isPattern()) {
                     throw new UnsupportedOperationException("WILDCARD");//  TODO
                 } else {
                     IndexedRecord input;
@@ -796,7 +796,7 @@ public class RestServlet_2 extends HttpServlet {
                     String queryType = request.getParameter("queryType");
                     String query = request.getParameter("query"); 
                     inputFacade.setQueryType(
-                        queryType == null ? (String)Model_1Factory.getModel().getTypes(xri.getChild(":*"))[2].objGetValue("qualifiedName") : queryType
+                        queryType == null ? (String)Model_1Factory.getModel().getTypes(xri.getChild(":*"))[2].getQualifiedName() : queryType
                     );
                     inputFacade.setQuery(query);
                     String position = request.getParameter("position");
@@ -974,7 +974,7 @@ public class RestServlet_2 extends HttpServlet {
                     boolean multivalued;
                     if(xri.size() % 2 == 0) {
                        multivalued = true;
-                    } else if(xri.containsWildcard()) {
+                    } else if(xri.isPattern()) {
                        throw new UnsupportedOperationException("WILDCARD");// TODO
                     } else{
                        multivalued = false;
@@ -1089,7 +1089,7 @@ public class RestServlet_2 extends HttpServlet {
                             exception,
                             BasicException.Code.DEFAULT_DOMAIN,
                             BasicException.Code.TRANSFORMATION_FAILURE,
-                            new BasicException.Parameter("xri", xri.toXRI())
+                            new BasicException.Parameter("xri", xri)
                         )
                     )
                 );

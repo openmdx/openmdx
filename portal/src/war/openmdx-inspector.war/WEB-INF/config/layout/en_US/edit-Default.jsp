@@ -1,4 +1,4 @@
-﻿<%@ page contentType= "text/html;charset=UTF-8" language="java" pageEncoding= "UTF-8" %><%
+<%@ page contentType= "text/html;charset=UTF-8" language="java" pageEncoding= "UTF-8" %><%
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
@@ -9,7 +9,7 @@
  * This software is published under the BSD license
  * as listed below.
  *
- * Copyright (c) 2004-2013, OMEX AG, Switzerland
+ * Copyright (c) 2004-2014, OMEX AG, Switzerland
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or
@@ -56,7 +56,7 @@ java.util.*,
 java.text.*,
 java.math.*,
 org.openmdx.portal.servlet.*,
-org.openmdx.portal.servlet.view.*,
+org.openmdx.portal.servlet.component.*,
 org.openmdx.portal.servlet.control.*,
 org.openmdx.base.naming.*
 " %><%
@@ -64,7 +64,7 @@ org.openmdx.base.naming.*
 	ViewsCache viewsCache = (ViewsCache)session.getValue(WebKeys.VIEW_CACHE_KEY_EDIT);
 	EditObjectView view = (EditObjectView)viewsCache.getView(request.getParameter(Action.PARAMETER_REQUEST_ID));
 	Texts_1_0 texts = app.getTexts();
-	EditInspectorControl inspectorControl = view.getEditInspectorControl();
+	EditInspectorControl inspectorControl = (EditInspectorControl)view.getControl();
 	ViewPort p = ViewPortFactory.openPage(
 		view,
 		request,
@@ -89,30 +89,8 @@ org.openmdx.base.naming.*
 		SessionInfoControl.class
 	);
 
-	// Errors
-	Control errors = view.createControl(
-  		"errors",
-  		ShowErrorsControl.class
-  	);
-
-	// Title
-	Control title = view.createControl(
-  		"title",
-  		EditObjectTitleControl.class
-  	);
-
-	// Attributes
-	Control attributes = inspectorControl.getAttributePaneControl();
-
 	// STANDARD
 	if(view.getMode() == ViewMode.STANDARD) {
-		EditObjectControl edit = (EditObjectControl)view.createControl(
-			"editObject",
-			EditObjectControl.class
-		);
-		edit.addControl(errors);
-		edit.addControl(title);
-		edit.addControl(attributes);
 %>
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html dir="<%= texts.getDir() %>">
@@ -127,41 +105,51 @@ org.openmdx.base.naming.*
 	p.flush();
 %>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-	<link href="_style/colors.css" rel="stylesheet" type="text/css">
-	<link href="_style/calendar-small.css" rel="stylesheet" type="text/css">
-	<script type="text/javascript" src="javascript/portal-all.js"></script>
-	<!--[if lt IE 7]><script type="text/javascript" src="javascript/iehover-fix.js"></script><![endif]-->
-	<script type="text/javascript" src="javascript/calendar/lang/calendar-<%= app.getCurrentLocaleAsString() %>.js"></script>
-	<script language="javascript" type="text/javascript">
-    history.forward(); // prevent going back to this page by breaking history
-	  var OF = null;
-	  try {
-		OF = self.opener.OF;
-	  }
-	  catch(e) {
-		OF = null;
-	  }
-	  if(!OF) {
-		OF = new ObjectFinder();
-	  }
-	</script>
-	<link rel="stylesheet" type="text/css" href="_style/ssf.css" >
-	<link rel="stylesheet" type="text/css" href="_style/n2default.css" >
-	<link rel="stylesheet" type="text/css" href="javascript/yui/build/assets/skins/sam/container.css" >
-	<link rel="stylesheet" type="text/css" href="javascript/wiky/wiky.css" >
-	<link rel="stylesheet" type="text/css" href="javascript/wiky/wiky.lang.css" >
-	<link rel="stylesheet" type="text/css" href="javascript/wiky/wiky.math.css" >
+	<meta name="viewport" content="width=device-width, initial-scale=<%= app.getInitialScale() %>">
+	
+	<!-- Styles -->
+	<link rel="stylesheet" href="javascript/bootstrap/css/bootstrap.min.css">
+	<link rel="stylesheet" href="_style/ssf.css" >
+	<link rel="stylesheet" href="_style/n2default.css" >
+	<link rel="stylesheet" href="_style/colors.css">
+	<link rel="stylesheet" href="_style/calendar-small.css">
+	<link rel="stylesheet" href="javascript/wiky/wiky.css" >
+	<link rel="stylesheet" href="javascript/wiky/wiky.lang.css" >
+	<link rel="stylesheet" href="javascript/wiky/wiky.math.css" >
+	<link rel="stylesheet" href="javascript/yui/build/assets/skins/sam/container.css" >
 	<link rel='shortcut icon' href='images/favicon.ico' />
+
+	<!-- Libraries -->
+    <script src="javascript/prototype.js"></script>
+    <script src="javascript/jquery/jquery.min.js"></script>
+	<script>
+	  $.noConflict();
+	</script>
+    <script src="javascript/bootstrap/js/bootstrap.min.js"></script>
+	<script src="javascript/portal-all.js"></script>
+	<script src="javascript/calendar/lang/calendar-<%= app.getCurrentLocaleAsString() %>.js"></script>
+	<!--[if lt IE 7]><script type="text/javascript" src="javascript/iehover-fix.js"></script><![endif]-->
+	<script language="javascript" type="text/javascript">
+		var OF = null;
+		try {
+			OF = self.opener.OF;
+		} catch(e) {
+			OF = null;
+		}
+		if(!OF) {
+			OF = new ObjectFinder();
+		}	  
+	</script>
 <%
 	prolog.paint(p, PagePrologControl.FRAME_POST_PROLOG, false);
 	p.flush();
 %>
 </head>
-<body class="yui-skin-sam" onload="initPage();">
-<iframe class="popUpFrame" id="DivShim" src="blank.html" scrolling="no" frameborder="0" style="position:absolute; top:0px; left:0px; display:none;"></iframe>
+<body onload="initPage();">
+<iframe class="<%= CssClass.popUpFrame %>" id="DivShim" src="blank.html" scrolling="no" frameborder="0" style="position:absolute; top:0px; left:0px; display:none;"></iframe>
 <%
 	if(view.getMode() == ViewMode.STANDARD) {
-		EditObjectControl.paintEditPopups(p);
+		EditInspectorControl.paintEditPopups(p);
 		p.flush();
 	}
 %>
@@ -177,11 +165,11 @@ org.openmdx.base.naming.*
 		<div id="content-wrap">
 			<div id="econtent">
 <%
-	edit.paint(p, true);
-	epilog.paint(p, true);
-	p.close(false);
+				view.paint(p, null, true);
+				epilog.paint(p, true);
+				p.close(false);
 %>
-			  <br>
+				<br />
 <%@ include file="../../../../edit-footer.html" %>
 			</div> <!-- content -->
 		</div> <!-- content-wrap -->
@@ -193,18 +181,7 @@ org.openmdx.base.naming.*
 	}
 	// EMBEDDED
 	else if(view.getMode() == ViewMode.EMBEDDED) {
-		EditObjectControl edit = (EditObjectControl)view.createControl(
-			"editObject",
-			EditObjectControl.class
-		);
-		if(!app.getErrorMessages().isEmpty()) {
-			edit.addControl(errors);
-		}
-		if(!view.isEditMode()) {
-			edit.addControl(title);
-		}
-		edit.addControl(attributes);
-		edit.paint(p, true);
+		view.paint(p, null, true);
 		p.flush();
 		p.close(false);
 %>

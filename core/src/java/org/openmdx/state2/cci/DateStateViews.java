@@ -55,8 +55,12 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Map;
+import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.UUID;
@@ -73,14 +77,22 @@ import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.oasisopen.cci2.QualifierType;
 import org.oasisopen.jmi1.RefContainer;
+import org.openmdx.base.accessor.cci.Container_1_0;
+import org.openmdx.base.accessor.cci.DataObject_1_0;
 import org.openmdx.base.accessor.cci.SystemAttributes;
 import org.openmdx.base.accessor.jmi.cci.RefPackage_1_0;
 import org.openmdx.base.accessor.jmi.cci.RefQuery_1_0;
 import org.openmdx.base.accessor.jmi.spi.DelegatingRefObject_1_0;
+import org.openmdx.base.accessor.rest.DataObjects;
 import org.openmdx.base.accessor.spi.ExceptionHelper;
+import org.openmdx.base.exception.RuntimeServiceException;
+import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.jmi1.AspectCapable;
+import org.openmdx.base.mof.cci.Model_1_0;
+import org.openmdx.base.mof.spi.Model_1Factory;
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.persistence.cci.PersistenceHelper;
+import org.openmdx.base.persistence.spi.TransientContainerId;
 import org.openmdx.base.query.Condition;
 import org.openmdx.base.query.Filter;
 import org.openmdx.base.query.IsGreaterCondition;
@@ -340,7 +352,7 @@ public class DateStateViews {
         T core
     ){
     	if(core == null) {
-            new IllegalArgumentException("The core object must not be null");
+            throw new IllegalArgumentException("The core object must not be null");
     	}
         DateStateContext context = DateStateViews.getContext(core); 
         if(context != null) {
@@ -1680,27 +1692,20 @@ public class DateStateViews {
         AccessMode mode
     ){
         Order.assertTimeRange(validFrom, validTo);
-        Path resourceIdentifier = (Path) JDOHelper.getObjectId(stateCapable);
-        return new FilteredStates<T>(
-            DateStateViews.<T>getRawStates(
-                (RefContainer<T>) DateStateViews.getPackageForContext(
-                    stateCapable,
-                    null
-                ).refContainer(
-                    resourceIdentifier.getParent(),
-                    null // containerClass
-                ),
-                resourceIdentifier
-            ),
-            validFrom,
-            validTo,
-            invalidated,
-            existsAt, 
-            mode
-        );
-    }
+		DataObject_1_0 dataObject = DataObjects.getDataObject(stateCapable); 
+		UUID objectId = (UUID) JDOHelper.getTransactionalObjectId(dataObject); 
+		TransientContainerId containerId = (TransientContainerId) JDOHelper.getTransactionalObjectId(dataObject.getContainer(false)); 
+		RefContainer<T> refContainer = (RefContainer<T>) DateStateViews.getPersistenceManager(stateCapable, null).getObjectById(containerId); 
+		return new FilteredStates<T>( 
+			DateStateViews.<T>getRawStates(refContainer, objectId), 
+			validFrom, 
+			validTo, 
+			invalidated, 
+			existsAt, 
+			mode 
+		); 
+    } 
 
-    
     /**
      * Retrieve states 
      * 
@@ -1956,8 +1961,9 @@ public class DateStateViews {
         if(context == null) {
             state = refObject;
         } else {
-            List<DateState> involved = null;
-            switch(context.getViewKind()) {
+        	final List<DateState> involved;
+            final ViewKind viewKind = context.getViewKind();
+			switch(viewKind) {
                 case TIME_POINT_VIEW:
                     involved = DateStateViews.getStates(
                         (StateCapable) refObject, 
@@ -1978,6 +1984,13 @@ public class DateStateViews {
                         AccessMode.RAW
                     );
                     break;
+                default:
+                	throw new RuntimeServiceException(
+                		BasicException.Code.DEFAULT_DOMAIN,
+                		BasicException.Code.ASSERTION_FAILURE,
+                		"Unexpected view kind",
+                		new BasicException.Parameter("viewKind", viewKind)
+                    );
             }
             int cardinality = involved.size(); 
             if(cardinality != 1) throw BasicException.initHolder(
@@ -2109,8 +2122,78 @@ public class DateStateViews {
             return amendement;
         }
     }
-        
     
+    /**
+     * Provides a container's core objects and the validities of their states.
+     * 
+     * @param refContainer the container
+     * @param periodFactory the factory for the application specific periods
+     * 
+     * @return a map with the core objects and their validities
+     */
+    public static <T extends StateCapable, P> Map<T, Set<P>> getPeriods(
+        Container<? super T> jmiContainer,
+    	PeriodFactory<P> periodFactory
+    ){
+    	Map<T, Set<P>> result = new IdentityHashMap<T, Set<P>>();
+    	try {
+	        final Model_1_0 model = Model_1Factory.getModel();
+	        final RefContainer<?> refContainer = (RefContainer<?>) jmiContainer;
+	        final TransientContainerId containerId = (TransientContainerId) JDOHelper.getTransactionalObjectId(refContainer);
+	        final PersistenceManager jmiManager = DateStateViews.getPersistenceManager(refContainer, null); 
+			final DataObject_1_0 parent = DataObjects.getDataObject((RefObject)jmiManager.getObjectById(containerId.getParent()));
+	        final Container_1_0 container = parent.objGetContainer(containerId.getFeature());
+	        container.openmdxjdoRetrieve(null);
+			for (DataObject_1_0 dataObject : container.values()) {
+	           if (model.isInstanceof(dataObject, "org:openmdx:state2:DateState")) {
+	              final DataObject_1_0 core = (DataObject_1_0) dataObject.objGetValue("core");
+	              Set<P> periods = getPeriods(jmiManager, result, core);
+	              if (dataObject.objGetValue(SystemAttributes.REMOVED_AT) == null) {
+	                 final XMLGregorianCalendar stateValidFrom = (XMLGregorianCalendar) dataObject.objGetValue("stateValidFrom");
+	                 final XMLGregorianCalendar stateValidTo = (XMLGregorianCalendar) dataObject.objGetValue("stateValidTo");
+	                 periods.add(periodFactory.newPeriod(stateValidFrom, stateValidTo));
+	              }
+	           } else {
+	              getPeriods(jmiManager, result, dataObject);
+	           }
+	        }
+    	} catch (ServiceException exception) {
+    		throw new RuntimeServiceException(exception);
+    	}
+    	return result;
+     }
+
+    /**
+     * Populates the cache
+     * 
+     * @param container the container
+     */
+    public static <T extends StateCapable> void retrieveAll(
+        Container<? super T> jmiContainer
+    ){
+    	try {
+	        final RefContainer<?> refContainer = (RefContainer<?>) jmiContainer;
+	        final TransientContainerId containerId = (TransientContainerId) JDOHelper.getTransactionalObjectId(refContainer);
+	        final PersistenceManager jmiManager = DateStateViews.getPersistenceManager(refContainer, null); 
+			final DataObject_1_0 parent = DataObjects.getDataObject((RefObject)jmiManager.getObjectById(containerId.getParent()));
+	        final Container_1_0 container = parent.objGetContainer(containerId.getFeature());
+	        container.openmdxjdoRetrieve(null);
+    	} catch (ServiceException exception) {
+    		throw new RuntimeServiceException(exception);
+    	}
+    }
+    
+     @SuppressWarnings("unchecked")
+     private static <T extends StateCapable, P> Set<P> getPeriods(PersistenceManager manager, Map<T, Set<P>> result, final DataObject_1_0 dataObject) {
+        final T key = (T) manager.getObjectById(dataObject.jdoGetTransactionalObjectId());
+        Set<P> periods = result.get(key);
+        if (periods == null) {
+           result.put(key, periods = new HashSet<P>());
+        }
+        return periods;
+     }
+
+     
     //------------------------------------------------------------------------
     // Class StateList
     //------------------------------------------------------------------------

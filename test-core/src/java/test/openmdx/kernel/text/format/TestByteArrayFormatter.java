@@ -61,7 +61,7 @@ public class TestByteArrayFormatter {
     /**
      * Add an instance variable for each part of the fixture 
      */
-    protected byte[] bufNull;
+    protected final static byte[] BUF_NULL = null;
     protected byte[] bufEmpty;
     protected byte[] buf1Byte;
     protected byte[] buf7Byte;
@@ -76,8 +76,6 @@ public class TestByteArrayFormatter {
     @Before
     public void setUp() 
     {
-        bufNull  = null;
-        
         bufEmpty = new byte[0];
 
         buf1Byte = new byte[] { 
@@ -138,18 +136,18 @@ public class TestByteArrayFormatter {
         assertEquals(
             "ByteArrayFormatter(bufNull)",
             "",
-            new ByteArrayFormatter(this.bufNull).toString());
+            new ByteArrayFormatter(BUF_NULL).toString());
             
         assertEquals(
             "ByteArrayFormatter(bufNull, 0, 0)",
             "", 
-            new ByteArrayFormatter(this.bufNull, 0, 0).toString());       
+            new ByteArrayFormatter(BUF_NULL, 0, 0).toString());       
 
             
         assertEquals(
             "ByteArrayFormatter(bufNull, 2, 6)",
             "", 
-            new ByteArrayFormatter(this.bufNull, 2, 6).toString());       
+            new ByteArrayFormatter(BUF_NULL, 2, 6).toString());       
     }
     
     @Test

@@ -49,7 +49,6 @@
 package org.openmdx.application.mof.mapping.xmi;
 
 import java.io.OutputStream;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -294,7 +293,7 @@ public class XMIModelMapper implements StringTable {
     ) throws ServiceException {
         try {
             this.pw.writeStartElement("org.omg.model1.Package");
-            this.pw.writeAttribute("qualifiedName", (String)packageDef.objGetValue("qualifiedName"));
+            this.pw.writeAttribute("qualifiedName", (String)packageDef.getQualifiedName());
             this.pw.writeStartElement("_object");
             if(this.derivedFeatures) {
                 this.writeElement(SystemAttributes.OBJECT_IDENTITY, packageDef.jdoGetObjectId().toXRI());
@@ -303,13 +302,13 @@ public class XMIModelMapper implements StringTable {
                 this.writeElementAsDateTime(SystemAttributes.MODIFIED_AT, (Date)packageDef.objGetValue(SystemAttributes.MODIFIED_AT));
                 this.writeElement(SystemAttributes.MODIFIED_BY, packageDef.objGetSet(SystemAttributes.MODIFIED_BY));
             }
-            this.writeElement("container", packageDef.objGetValue("container"));
+            this.writeElement("container", packageDef.getContainer());
             if(this.derivedFeatures) {
-                this.writeElement("name", packageDef.objGetValue("name"));
-                this.writeElement("qualifiedName", packageDef.objGetValue("qualifiedName"));
+                this.writeElement("name", packageDef.getName());
+                this.writeElement("qualifiedName", packageDef.getQualifiedName());
             }
             this.writeElement("stereotype", packageDef.objGetList("stereotype"));
-            this.writeElement("isAbstract", packageDef.objGetValue("isAbstract"));
+            this.writeElement("isAbstract", packageDef.isAbstract());
             if(this.derivedFeatures) {
                 this.writeElement("feature", packageDef.objGetList("feature"));
                 this.writeElement("content", packageDef.objGetList("content"));
@@ -338,7 +337,7 @@ public class XMIModelMapper implements StringTable {
     ) throws ServiceException {
         try {
             this.pw.writeStartElement("org.omg.model1.PrimitiveType");
-            this.pw.writeAttribute("qualifiedName", (String)primitiveTypeDef.objGetValue("qualifiedName"));
+            this.pw.writeAttribute("qualifiedName", (String)primitiveTypeDef.getQualifiedName());
             this.pw.writeStartElement("_object");
             if(this.derivedFeatures) {
                 this.writeElement(SystemAttributes.OBJECT_IDENTITY, primitiveTypeDef.jdoGetObjectId().toXRI());
@@ -347,13 +346,13 @@ public class XMIModelMapper implements StringTable {
                 this.writeElementAsDateTime(SystemAttributes.MODIFIED_AT, (Date)primitiveTypeDef.objGetValue(SystemAttributes.MODIFIED_AT));
                 this.writeElement(SystemAttributes.MODIFIED_BY, primitiveTypeDef.objGetSet(SystemAttributes.MODIFIED_BY));
             }
-            this.writeElement("container", primitiveTypeDef.objGetValue("container"));
+            this.writeElement("container", primitiveTypeDef.getContainer());
             if(this.derivedFeatures) {
-                this.writeElement("name", primitiveTypeDef.objGetValue("name"));
-                this.writeElement("qualifiedName", primitiveTypeDef.objGetValue("qualifiedName"));
+                this.writeElement("name", primitiveTypeDef.getName());
+                this.writeElement("qualifiedName", primitiveTypeDef.getQualifiedName());
             }
             this.writeElement("stereotype", primitiveTypeDef.objGetList("stereotype"));
-            this.writeElement("isAbstract", primitiveTypeDef.objGetValue("isAbstract"));
+            this.writeElement("isAbstract", primitiveTypeDef.isAbstract());
             if(this.derivedFeatures) {
                 this.writeElement("feature", primitiveTypeDef.objGetList("feature"));
                 this.writeElement("content", primitiveTypeDef.objGetList("content"));
@@ -382,7 +381,7 @@ public class XMIModelMapper implements StringTable {
     ) throws ServiceException {
         try {
             this.pw.writeStartElement("org.omg.model1.Attribute");
-            this.pw.writeAttribute("qualifiedName", (String)attributeDef.objGetValue("qualifiedName"));
+            this.pw.writeAttribute("qualifiedName", (String)attributeDef.getQualifiedName());
             this.pw.writeStartElement("_object");
             if(this.derivedFeatures) {
                 this.writeElement(SystemAttributes.OBJECT_IDENTITY, attributeDef.jdoGetObjectId().toXRI());
@@ -391,20 +390,20 @@ public class XMIModelMapper implements StringTable {
                 this.writeElementAsDateTime(SystemAttributes.MODIFIED_AT, (Date)attributeDef.objGetValue(SystemAttributes.MODIFIED_AT));
                 this.writeElement(SystemAttributes.MODIFIED_BY, attributeDef.objGetSet(SystemAttributes.MODIFIED_BY));
             }
-            this.writeElement("isDerived", attributeDef.objGetValue("isDerived"));
+            this.writeElement("isDerived", attributeDef.isDerived());
             this.writeElement("maxLength", attributeDef.objGetValue("maxLength"));
-            this.writeElement("container", attributeDef.objGetValue("container"));
+            this.writeElement("container", attributeDef.getContainer());
             if(this.derivedFeatures) {
                 this.writeElement("content", attributeDef.objGetList("content"));
-                this.writeElement("name", attributeDef.objGetValue("name"));
-                this.writeElement("qualifiedName", attributeDef.objGetValue("qualifiedName"));
+                this.writeElement("name", attributeDef.getName());
+                this.writeElement("qualifiedName", attributeDef.getQualifiedName());
             }
             this.writeElement("stereotype", attributeDef.objGetList("stereotype"));
             this.writeElement("scope", attributeDef.objGetValue("scope"));
             this.writeElement("visibility", attributeDef.objGetValue("visibility"));
-            this.writeElement("isChangeable", attributeDef.objGetValue("isChangeable"));
-            this.writeElement("multiplicity", attributeDef.objGetValue("multiplicity"));
-            this.writeElement("type", attributeDef.objGetValue("type"));
+            this.writeElement("isChangeable", attributeDef.isChangeable());
+            this.writeElement("multiplicity", attributeDef.getMultiplicity());
+            this.writeElement("type", attributeDef.getType());
             this.pw.writeEndElement();
             this.pw.writeEmptyElement("_content");
             this.pw.writeEndElement();
@@ -424,7 +423,7 @@ public class XMIModelMapper implements StringTable {
     ) throws ServiceException {
         try {
             this.pw.writeStartElement("org.omg.model1.StructureField");
-            this.pw.writeAttribute("qualifiedName", (String)structureFieldDef.objGetValue("qualifiedName"));
+            this.pw.writeAttribute("qualifiedName", (String)structureFieldDef.getQualifiedName());
             this.pw.writeStartElement("_object");
             if(this.derivedFeatures) {
                 this.writeElement(SystemAttributes.OBJECT_IDENTITY, structureFieldDef.jdoGetObjectId().toXRI());
@@ -434,15 +433,15 @@ public class XMIModelMapper implements StringTable {
                 this.writeElement(SystemAttributes.MODIFIED_BY, structureFieldDef.objGetSet(SystemAttributes.MODIFIED_BY));
             }
             this.writeElement("maxLength", structureFieldDef.objGetValue("maxLength"));
-            this.writeElement("multiplicity", structureFieldDef.objGetValue("multiplicity"));
-            this.writeElement("container", structureFieldDef.objGetValue("container"));
+            this.writeElement("multiplicity", structureFieldDef.getMultiplicity());
+            this.writeElement("container", structureFieldDef.getContainer());
             if(this.derivedFeatures) {
                 this.writeElement("content", structureFieldDef.objGetList("content"));
-                this.writeElement("name", structureFieldDef.objGetValue("name"));
-                this.writeElement("qualifiedName", structureFieldDef.objGetValue("qualifiedName"));
+                this.writeElement("name", structureFieldDef.getName());
+                this.writeElement("qualifiedName", structureFieldDef.getQualifiedName());
             }
             this.writeElement("stereotype", structureFieldDef.objGetList("stereotype"));
-            this.writeElement("type", structureFieldDef.objGetValue("type"));
+            this.writeElement("type", structureFieldDef.getType());
             this.pw.writeEndElement();
             this.pw.writeEmptyElement("_content");
             this.pw.writeEndElement();
@@ -462,7 +461,7 @@ public class XMIModelMapper implements StringTable {
     ) throws ServiceException {
         try {
             this.pw.writeStartElement("org.omg.model1.Operation");
-            this.pw.writeAttribute("qualifiedName", (String)operationDef.objGetValue("qualifiedName"));
+            this.pw.writeAttribute("qualifiedName", (String)operationDef.getQualifiedName());
             this.pw.writeStartElement("_object");
             if(this.derivedFeatures) {
                 this.writeElement(SystemAttributes.OBJECT_IDENTITY, operationDef.jdoGetObjectId().toXRI());
@@ -474,10 +473,10 @@ public class XMIModelMapper implements StringTable {
             if(this.derivedFeatures) {
                 this.writeElement("parameter", operationDef.objGetList("parameter"));
             }
-            this.writeElement("container", operationDef.objGetValue("container"));
+            this.writeElement("container", operationDef.getContainer());
             if(this.derivedFeatures) {
-                this.writeElement("name", operationDef.objGetValue("name"));
-                this.writeElement("qualifiedName", operationDef.objGetValue("qualifiedName"));
+                this.writeElement("name", operationDef.getName());
+                this.writeElement("qualifiedName", operationDef.getQualifiedName());
             }
             this.writeElement("stereotype", operationDef.objGetList("stereotype"));
             this.writeElement("scope", operationDef.objGetValue("scope"));
@@ -508,7 +507,7 @@ public class XMIModelMapper implements StringTable {
     ) throws ServiceException {
         try {
             this.pw.writeStartElement("org.omg.model1.Exception");
-            this.pw.writeAttribute("qualifiedName", (String)exceptionDef.objGetValue("qualifiedName"));
+            this.pw.writeAttribute("qualifiedName", (String)exceptionDef.getQualifiedName());
             this.pw.writeStartElement("_object");
             if(this.derivedFeatures) {
                 this.writeElement(SystemAttributes.OBJECT_IDENTITY, exceptionDef.jdoGetObjectId().toXRI());
@@ -520,10 +519,10 @@ public class XMIModelMapper implements StringTable {
             if(this.derivedFeatures) {
                 this.writeElement("parameter", exceptionDef.objGetList("parameter"));
             }
-            this.writeElement("container", exceptionDef.objGetValue("container"));
+            this.writeElement("container", exceptionDef.getContainer());
             if(this.derivedFeatures) {
-                this.writeElement("name", exceptionDef.objGetValue("name"));
-                this.writeElement("qualifiedName", exceptionDef.objGetValue("qualifiedName"));
+                this.writeElement("name", exceptionDef.getName());
+                this.writeElement("qualifiedName", exceptionDef.getQualifiedName());
             }
             this.writeElement("stereotype", exceptionDef.objGetList("stereotype"));
             this.writeElement("scope", exceptionDef.objGetValue("scope"));
@@ -551,7 +550,7 @@ public class XMIModelMapper implements StringTable {
     ) throws ServiceException {
         try {
             this.pw.writeStartElement("org.omg.model1.Parameter");
-            this.pw.writeAttribute("qualifiedName", (String)parameterDef.objGetValue("qualifiedName"));
+            this.pw.writeAttribute("qualifiedName", (String)parameterDef.getQualifiedName());
             this.pw.writeStartElement("_object");
             if(this.derivedFeatures) {
                 this.writeElement(SystemAttributes.OBJECT_IDENTITY, parameterDef.jdoGetObjectId().toXRI());
@@ -560,16 +559,16 @@ public class XMIModelMapper implements StringTable {
                 this.writeElementAsDateTime(SystemAttributes.MODIFIED_AT, (Date)parameterDef.objGetValue(SystemAttributes.MODIFIED_AT));
                 this.writeElement(SystemAttributes.MODIFIED_BY, parameterDef.objGetSet(SystemAttributes.MODIFIED_BY));
             }
-            this.writeElement("container", parameterDef.objGetValue("container"));
+            this.writeElement("container", parameterDef.getContainer());
             if(this.derivedFeatures) {
                 this.writeElement("content", parameterDef.objGetList("content"));
-                this.writeElement("name", parameterDef.objGetValue("name"));
-                this.writeElement("qualifiedName", parameterDef.objGetValue("qualifiedName"));
+                this.writeElement("name", parameterDef.getName());
+                this.writeElement("qualifiedName", parameterDef.getQualifiedName());
             }
             this.writeElement("stereotype", parameterDef.objGetList("stereotype"));
             this.writeElement("direction", parameterDef.objGetValue("direction"));
-            this.writeElement("multiplicity", parameterDef.objGetValue("multiplicity"));
-            this.writeElement("type", parameterDef.objGetValue("type"));
+            this.writeElement("multiplicity", parameterDef.getMultiplicity());
+            this.writeElement("type", parameterDef.getType());
             this.pw.writeEndElement();
             this.pw.writeEmptyElement("_content");
             this.pw.writeEndElement();
@@ -589,7 +588,7 @@ public class XMIModelMapper implements StringTable {
     ) throws ServiceException {
         try {
             this.pw.writeStartElement("org.omg.model1.Association");
-            this.pw.writeAttribute("qualifiedName", (String)associationDef.objGetValue("qualifiedName"));
+            this.pw.writeAttribute("qualifiedName", (String)associationDef.getQualifiedName());
             this.pw.writeStartElement("_object");
             if(this.derivedFeatures) {
                 this.writeElement(SystemAttributes.OBJECT_IDENTITY, associationDef.jdoGetObjectId().toXRI());
@@ -598,13 +597,13 @@ public class XMIModelMapper implements StringTable {
                 this.writeElementAsDateTime(SystemAttributes.MODIFIED_AT, (Date)associationDef.objGetValue(SystemAttributes.MODIFIED_AT));
                 this.writeElement(SystemAttributes.MODIFIED_BY, associationDef.objGetSet(SystemAttributes.MODIFIED_BY));
             }
-            this.writeElement("container", associationDef.objGetValue("container"));
+            this.writeElement("container", associationDef.getContainer());
             if(this.derivedFeatures) {
-                this.writeElement("name", associationDef.objGetValue("name"));
-                this.writeElement("qualifiedName", associationDef.objGetValue("qualifiedName"));
+                this.writeElement("name", associationDef.getName());
+                this.writeElement("qualifiedName", associationDef.getQualifiedName());
             }
             this.writeElement("stereotype", associationDef.objGetList("stereotype"));
-            this.writeElement("isAbstract", associationDef.objGetValue("isAbstract"));
+            this.writeElement("isAbstract", associationDef.isAbstract());
             if(this.derivedFeatures) {
                 this.writeElement("feature", associationDef.objGetList("feature"));
                 this.writeElement("content", associationDef.objGetList("content"));
@@ -614,7 +613,7 @@ public class XMIModelMapper implements StringTable {
             }
             this.writeElement("supertype", associationDef.objGetList("supertype"));
             this.writeElement("visibility", associationDef.objGetValue("visibility"));  
-            this.writeElement("isDerived", associationDef.objGetValue("isDerived"));
+            this.writeElement("isDerived", associationDef.isDerived());
             this.pw.writeEndElement();
             this.pw.writeEmptyElement("_content");
             this.pw.writeEndElement();
@@ -634,7 +633,7 @@ public class XMIModelMapper implements StringTable {
         ) throws ServiceException {
         try {
             this.pw.writeStartElement("org.omg.model1.AssociationEnd");
-            this.pw.writeAttribute("qualifiedName", (String)associationEndDef.objGetValue("qualifiedName"));
+            this.pw.writeAttribute("qualifiedName", (String)associationEndDef.getQualifiedName());
             this.pw.writeStartElement("_object");
             if(this.derivedFeatures) {
                 this.writeElement(SystemAttributes.OBJECT_IDENTITY, associationEndDef.jdoGetObjectId().toXRI());
@@ -643,20 +642,20 @@ public class XMIModelMapper implements StringTable {
                 this.writeElementAsDateTime(SystemAttributes.MODIFIED_AT, (Date)associationEndDef.objGetValue(SystemAttributes.MODIFIED_AT));
                 this.writeElement(SystemAttributes.MODIFIED_BY, associationEndDef.objGetSet(SystemAttributes.MODIFIED_BY));
             }
-            this.writeElement("aggregation", associationEndDef.objGetValue("aggregation"));
-            this.writeElement("isChangeable", associationEndDef.objGetValue("isChangeable"));
+            this.writeElement("aggregation", associationEndDef.getAggregation());
+            this.writeElement("isChangeable", associationEndDef.isChangeable());
             this.writeElement("isNavigable", associationEndDef.objGetValue("isNavigable"));
-            this.writeElement("multiplicity", associationEndDef.objGetValue("multiplicity"));
+            this.writeElement("multiplicity", associationEndDef.getMultiplicity());
             this.writeElement("qualifierName", associationEndDef.objGetList("qualifierName"));
             this.writeElement("qualifierType", associationEndDef.objGetList("qualifierType"));
-            this.writeElement("container", associationEndDef.objGetValue("container"));
+            this.writeElement("container", associationEndDef.getContainer());
             if(this.derivedFeatures) {
                 this.writeElement("content", associationEndDef.objGetList("content"));
-                this.writeElement("name", associationEndDef.objGetValue("name"));
-                this.writeElement("qualifiedName", associationEndDef.objGetValue("qualifiedName"));
+                this.writeElement("name", associationEndDef.getName());
+                this.writeElement("qualifiedName", associationEndDef.getQualifiedName());
             }
             this.writeElement("stereotype", associationEndDef.objGetList("stereotype"));
-            this.writeElement("type", associationEndDef.objGetValue("type"));
+            this.writeElement("type", associationEndDef.getType());
             this.pw.writeEndElement();
             this.pw.writeEmptyElement("_content");
             this.pw.writeEndElement();
@@ -676,7 +675,7 @@ public class XMIModelMapper implements StringTable {
     ) throws ServiceException {
         try {
             this.pw.writeStartElement("org.omg.model1.Reference");
-            this.pw.writeAttribute("qualifiedName", (String)referenceDef.objGetValue("qualifiedName"));
+            this.pw.writeAttribute("qualifiedName", (String)referenceDef.getQualifiedName());
             this.pw.writeStartElement("_object");
             if(this.derivedFeatures) {
                 this.writeElement(SystemAttributes.OBJECT_IDENTITY, referenceDef.jdoGetObjectId().toXRI());
@@ -685,23 +684,23 @@ public class XMIModelMapper implements StringTable {
                 this.writeElementAsDateTime(SystemAttributes.MODIFIED_AT, (Date)referenceDef.objGetValue(SystemAttributes.MODIFIED_AT));
                 this.writeElement(SystemAttributes.MODIFIED_BY, referenceDef.objGetSet(SystemAttributes.MODIFIED_BY));
             }
-            this.writeElement("container", referenceDef.objGetValue("container"));
+            this.writeElement("container", referenceDef.getContainer());
             if(this.derivedFeatures) {
                 this.writeElement("content", referenceDef.objGetList("content"));
-                this.writeElement("name", referenceDef.objGetValue("name"));
-                this.writeElement("qualifiedName", referenceDef.objGetValue("qualifiedName"));
+                this.writeElement("name", referenceDef.getName());
+                this.writeElement("qualifiedName", referenceDef.getQualifiedName());
             }
             this.writeElement("stereotype", referenceDef.objGetList("stereotype"));
             this.writeElement("scope", referenceDef.objGetValue("scope"));
             this.writeElement("visibility", referenceDef.objGetValue("visibility"));
-            this.writeElement("exposedEnd", referenceDef.objGetValue("exposedEnd"));
-            this.writeElement("referencedEnd", referenceDef.objGetValue("referencedEnd"));
+            this.writeElement("exposedEnd", referenceDef.getExposedEnd());
+            this.writeElement("referencedEnd", referenceDef.getReferencedEnd());
             if(this.derivedFeatures) {
                 this.writeElement("referencedEndIsNavigable", referenceDef.objGetValue("referencedEndIsNavigable"));
             }
-            this.writeElement("isChangeable", referenceDef.objGetValue("isChangeable"));
-            this.writeElement("multiplicity", referenceDef.objGetValue("multiplicity"));
-            this.writeElement("type", referenceDef.objGetValue("type"));
+            this.writeElement("isChangeable", referenceDef.isChangeable());
+            this.writeElement("multiplicity", referenceDef.getMultiplicity());
+            this.writeElement("type", referenceDef.getType());
             this.pw.writeEndElement();
             this.pw.writeEmptyElement("_content");
             this.pw.writeEndElement();
@@ -710,16 +709,6 @@ public class XMIModelMapper implements StringTable {
         }
     }
 
-    List<Path> toPaths(
-        List<?> source
-    ){
-        List<Path> target = new ArrayList<Path>();
-        for(Object e : target){
-            ((ModelElement_1_0)e).jdoGetObjectId();
-        }
-        return target;
-    }
-    
     /**
      * Write class definition.
      * 
@@ -731,7 +720,7 @@ public class XMIModelMapper implements StringTable {
     ) throws ServiceException {
         try {
             this.pw.writeStartElement("org.omg.model1.Class");
-            this.pw.writeAttribute("qualifiedName", (String)classDef.objGetValue("qualifiedName"));
+            this.pw.writeAttribute("qualifiedName", (String)classDef.getQualifiedName());
             this.pw.writeStartElement("_object");
             if(this.derivedFeatures) {
                 this.writeElement(SystemAttributes.OBJECT_IDENTITY, classDef.jdoGetObjectId().toXRI());
@@ -745,13 +734,13 @@ public class XMIModelMapper implements StringTable {
                 this.writeElement("feature", classDef.objGetList("feature"));
                 this.writeElement("content", classDef.objGetList("content"));
             }
-            this.writeElement("container", classDef.objGetValue("container"));
+            this.writeElement("container", classDef.getContainer());
             if(this.derivedFeatures) {
-                this.writeElement("name", classDef.objGetValue("name"));
-                this.writeElement("qualifiedName", classDef.objGetValue("qualifiedName"));
+                this.writeElement("name", classDef.getName());
+                this.writeElement("qualifiedName", classDef.getQualifiedName());
             }
             this.writeElement("stereotype", classDef.objGetList("stereotype"));
-            this.writeElement("isAbstract", classDef.objGetValue("isAbstract"));
+            this.writeElement("isAbstract", classDef.isAbstract());
             if(this.derivedFeatures) {
                 this.writeElement("allSupertype", classDef.objGetList("allSupertype"));
                 this.writeElement("subtype", classDef.objGetList("subtype"));
@@ -787,7 +776,7 @@ public class XMIModelMapper implements StringTable {
     ) throws ServiceException {
         try {
             this.pw.writeStartElement("org.omg.model1.StructureType");
-            this.pw.writeAttribute("qualifiedName", (String)structDef.objGetValue("qualifiedName"));
+            this.pw.writeAttribute("qualifiedName", (String)structDef.getQualifiedName());
             this.pw.writeStartElement("_object");
             if(this.derivedFeatures) {
                 this.writeElement(SystemAttributes.OBJECT_IDENTITY, structDef.jdoGetObjectId().toXRI());
@@ -800,13 +789,13 @@ public class XMIModelMapper implements StringTable {
                 this.writeElement("feature", structDef.objGetList("feature"));
                 this.writeElement("content", structDef.objGetList("content"));
             }
-            this.writeElement("container", structDef.objGetValue("container"));
+            this.writeElement("container", structDef.getContainer());
             if(this.derivedFeatures) {
-                this.writeElement("name", structDef.objGetValue("name"));
-                this.writeElement("qualifiedName", structDef.objGetValue("qualifiedName"));
+                this.writeElement("name", structDef.getName());
+                this.writeElement("qualifiedName", structDef.getQualifiedName());
             }
             this.writeElement("stereotype", structDef.objGetList("stereotype"));
-            this.writeElement("isAbstract", structDef.objGetValue("isAbstract"));
+            this.writeElement("isAbstract", structDef.isAbstract());
             if(this.derivedFeatures) {
                 this.writeElement("allSupertype", structDef.objGetList("allSupertype"));
                 this.writeElement("subtype", structDef.objGetList("subtype"));
@@ -842,7 +831,7 @@ public class XMIModelMapper implements StringTable {
     ) throws ServiceException {
         try {
             this.pw.writeStartElement("org.omg.model1.AliasType");
-            this.pw.writeAttribute("qualifiedName", (String)aliasTypeDef.objGetValue("qualifiedName"));
+            this.pw.writeAttribute("qualifiedName", (String)aliasTypeDef.getQualifiedName());
             this.pw.writeStartElement("_object");
             if(this.derivedFeatures) {
                 this.writeElement(SystemAttributes.OBJECT_IDENTITY, aliasTypeDef.jdoGetObjectId().toXRI());
@@ -855,13 +844,13 @@ public class XMIModelMapper implements StringTable {
                 this.writeElement("feature", aliasTypeDef.objGetList("feature"));
                 this.writeElement("content", aliasTypeDef.objGetList("content"));
             }
-            writeElement("container", aliasTypeDef.objGetValue("container"));
+            writeElement("container", aliasTypeDef.getContainer());
             if(this.derivedFeatures) {
-                this.writeElement("name", aliasTypeDef.objGetValue("name"));
-                this.writeElement("qualifiedName", aliasTypeDef.objGetValue("qualifiedName"));
+                this.writeElement("name", aliasTypeDef.getName());
+                this.writeElement("qualifiedName", aliasTypeDef.getQualifiedName());
             }
             this.writeElement("stereotype", aliasTypeDef.objGetList("stereotype"));
-            this.writeElement("isAbstract", aliasTypeDef.objGetValue("isAbstract"));
+            this.writeElement("isAbstract", aliasTypeDef.isAbstract());
             if(this.derivedFeatures) {
                 this.writeElement("allSupertype", aliasTypeDef.objGetList("allSupertype"));
                 this.writeElement("subtype", aliasTypeDef.objGetList("subtype"));
@@ -869,7 +858,7 @@ public class XMIModelMapper implements StringTable {
             }
             this.writeElement("supertype", aliasTypeDef.objGetList("supertype"));
             this.writeElement("visibility", aliasTypeDef.objGetValue("visibility"));  
-            this.writeElement("type", aliasTypeDef.objGetValue("type"));
+            this.writeElement("type", aliasTypeDef.getType());
             this.writeElement("compositeReference", aliasTypeDef.objGetValue("compositeReference"));
             this.pw.writeEndElement();
             this.pw.writeEmptyElement("_content");

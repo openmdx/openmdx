@@ -130,9 +130,9 @@ public class Ui_1 extends Standard_1 {
         public FeatureDefinition(
             ModelElement_1_0 element
         ) throws ServiceException {
-            this.name = (String)element.objGetValue("name");
-            this.qualifiedName = (String)element.objGetValue("qualifiedName");
-            this.container = element.objGetValue("container");
+            this.name = (String)element.getName();
+            this.qualifiedName = (String)element.getQualifiedName();
+            this.container = element.getContainer();
             this.modelElement = element;
         }
 
@@ -193,19 +193,19 @@ public class Ui_1 extends Standard_1 {
             ModelElement_1_0 element
         ) throws ServiceException {
             super(element);
-            this.type = element.objGetValue("type");
-            this.multiplicity = (String)element.objGetValue("multiplicity");
-            this.isChangeable = (element.objGetValue("isChangeable") == null) || (element.objGetList("isChangeable").isEmpty()) ? 
+            this.type = element.getType();
+            this.multiplicity = (String)element.getMultiplicity();
+            this.isChangeable = (element.isChangeable() == null) || (element.objGetList("isChangeable").isEmpty()) ? 
                 new Boolean(Ui_1.this.changableDefaultValue) : 
-                (Boolean)element.objGetValue("isChangeable");
+                (Boolean)element.isChangeable();
             Model_1_0 model = Ui_1.this.getModel();
             if(model.isAttributeType(element) || model.isStructureFieldType(element)) {
                 this.isReference = false;
                 this.isReferenceStoredAsAttribute = false;
             }
             else if(model.isReferenceType(element)) {
-                ModelElement_1_0 referencedEnd = model.getElement(element.objGetValue("referencedEnd"));
-                ModelElement_1_0 exposedEnd = model.getElement(element.objGetValue("exposedEnd"));
+                ModelElement_1_0 referencedEnd = model.getElement(element.getReferencedEnd());
+                ModelElement_1_0 exposedEnd = model.getElement(element.getExposedEnd());
                 // A reference is handled as attribute in case of a single-valued reference with aggregation=none
                 this.isReference = 
                     !referencedEnd.objGetList("qualifierName").isEmpty() || 
@@ -554,7 +554,7 @@ public class Ui_1 extends Standard_1 {
             feature.getType()
         );
         objectReferenceFacace.attributeValuesAsList("referenceName").add(feature.getName());
-        objectReferenceFacace.attributeValuesAsList("referencedTypeName").add(featureType.objGetValue("qualifiedName"));
+        objectReferenceFacace.attributeValuesAsList("referencedTypeName").add(featureType.getQualifiedName());
         // Reference
         if(feature.isReference()) {
         	objectReferenceFacace.attributeValuesAsList("referenceIsStoredAsAttribute").add(
@@ -563,7 +563,7 @@ public class Ui_1 extends Standard_1 {
             ModelElement_1_0 element = feature.getModelElement();
             if(element != null) {
                 ModelElement_1_0 referencedEnd = model.getElement(
-                    element.objGetValue("referencedEnd")
+                    element.getReferencedEnd()
                 );
                 if(!referencedEnd.objGetList("qualifierName").isEmpty()) {
                     String qualifierName = (String)referencedEnd.objGetValue("qualifierName");           
@@ -718,7 +718,7 @@ public class Ui_1 extends Standard_1 {
     ) throws ServiceException {
         // Lookup element definition based on inspector class
         String containerName = 
-            "" + inspectorClass.objGetValue("qualifiedName") + ":Pane:" + paneName +
+            "" + inspectorClass.getQualifiedName() + ":Pane:" + paneName +
             ":Tab:" + tabName +
             (level > 0 ? ":Group:" + groupName : "");
         MappedRecord elementDefinition = this.existingElementDefinitions.get(segmentIdentity).get(containerName);
@@ -731,7 +731,7 @@ public class Ui_1 extends Standard_1 {
             containedFeature.getContainer()
         );        
         containerName =
-        	"" + definingClass.objGetValue("qualifiedName") + ":Pane:" + paneName +
+        	"" + definingClass.getQualifiedName() + ":Pane:" + paneName +
 	        ":Tab:" + tabName +
 	        (level > 0 ? ":Group:" + groupName : "");
         elementDefinition = this.existingElementDefinitions.get(segmentIdentity).get(containerName);
@@ -924,7 +924,7 @@ public class Ui_1 extends Standard_1 {
         );
         // Overload definition if a definition for inspectorClass exists
         if(inspectorClass != null) {
-            String qualifiedNameBase = (String)inspectorClass.objGetValue("qualifiedName") + ":" + feature.getName();
+            String qualifiedNameBase = (String)inspectorClass.getQualifiedName() + ":" + feature.getName();
             if(
                 (this.existingElementDefinitions.get(segmentIdentity).get(qualifiedNameBase) != null) ||
                 (this.existingElementDefinitions.get(segmentIdentity.getParent().getChild("Root")).get(qualifiedNameBase) != null)
@@ -1038,7 +1038,7 @@ public class Ui_1 extends Standard_1 {
         ModelElement_1_0 featureType = model.getDereferencedType(
             feature.getType()
         );
-        String typeName = (String)featureType.objGetValue("qualifiedName");
+        String typeName = (String)featureType.getQualifiedName();
         boolean isAdditionalElementDefinition = 
             "org:openmdx:ui1:AdditionalElementDefinition".equals(definitionFacade.getObjectClass());
         // Default value
@@ -1348,7 +1348,7 @@ public class Ui_1 extends Standard_1 {
         Map<Path,MappedRecord> cachedDefinitions = new HashMap<Path,MappedRecord>();
         Set<String> modifiedGroups = new HashSet<String>();
         Set<String> modifiedTabs = new HashSet<String>();
-        String paneName = inspectorClass.objGetValue("qualifiedName") + ":Pane:Attr";
+        String paneName = inspectorClass.getQualifiedName() + ":Pane:Attr";
         // Process all features
         for(StructuralFeatureDefinition feature: featureDefinitions) {
             if(!feature.isReference()) {
@@ -1828,7 +1828,7 @@ public class Ui_1 extends Standard_1 {
             }
             // filter additional definition: add definition only if base class matches for class
             // or if forClass is unspecified
-            String inspectorClassName = (String)inspectorClass.objGetValue("qualifiedName");
+            String inspectorClassName = (String)inspectorClass.getQualifiedName();
             if((targetFacade.getAttributeValues("forClass") == null) || targetFacade.attributeValuesAsList("forClass").contains(inspectorClassName)) {
                 definitions.add(
                     target
@@ -1981,10 +1981,10 @@ public class Ui_1 extends Standard_1 {
             StructuralFeatureDefinition feature = new StructuralFeatureDefinition(featureDef);            
             if(feature.isReference()) {
                 // Only add reference features if not explicitly excluded and exposed end is not composite
-                ModelElement_1_0 exposedEnd = model.getElement(featureDef.objGetValue("exposedEnd"));
+                ModelElement_1_0 exposedEnd = model.getElement(featureDef.getExposedEnd());
                 if(
                     !(REFERENCES_TO_EXCLUDE.contains(feature.getQualifiedName()) || REFERENCES_TO_EXCLUDE.contains(feature.getName())) &&
-                    !AggregationKind.COMPOSITE.equals(exposedEnd.objGetValue("aggregation"))
+                    !AggregationKind.COMPOSITE.equals(exposedEnd.getAggregation())
                 ) {
                     featureDefinitions.put(
                         feature.getQualifiedName(),
@@ -2133,11 +2133,11 @@ public class Ui_1 extends Standard_1 {
                     "";
                 // Create new ObjectContainer if it is a reference of classDef
                 MappedRecord container = this.existingElements.get(segmentIdentity).get(
-                    model.getElement(feature.getContainer()).objGetValue("qualifiedName") + ":Ref:" + feature.getName() + alternateDefinitionNameSuffix
+                    model.getElement(feature.getContainer()).getQualifiedName() + ":Ref:" + feature.getName() + alternateDefinitionNameSuffix
                 );
                 if(
                     (container == null) ||
-                    (feature.getQualifiedName()).startsWith(inspectorClassDef.objGetValue("qualifiedName") + ":")
+                    (feature.getQualifiedName()).startsWith(inspectorClassDef.getQualifiedName() + ":")
                 ) { 
                     String containerName = forClass + ":Ref:" + feature.getName() + alternateDefinitionNameSuffix;
                     try {
@@ -2198,7 +2198,7 @@ public class Ui_1 extends Standard_1 {
                     );
                     // In case the referenced type is org:openmdx:base:ExtentCapable 
                     // move the SystemAttributes at first order
-                    if("org:openmdx:base:ExtentCapable".equals(featureType.objGetValue("qualifiedName"))) {
+                    if("org:openmdx:base:ExtentCapable".equals(featureType.getQualifiedName())) {
                     	List<Object> members = containerFacade.attributeValuesAsList("member");
                     	List<Path> firstOrderMembers = new ArrayList<Path>();
                     	for(Iterator<Object> i = members.iterator(); i.hasNext(); ) {
@@ -2331,7 +2331,7 @@ public class Ui_1 extends Standard_1 {
         }
         return inspectorClass == null ? 
             "Pane:" + paneType : 
-            inspectorClass.objGetValue("qualifiedName") + ":Pane:" + id;
+            inspectorClass.getQualifiedName() + ":Pane:" + id;
     }
 
     //-------------------------------------------------------------------------
@@ -2540,12 +2540,12 @@ public class Ui_1 extends Standard_1 {
 	                        MappedRecord groupElementDefinition = this.getOperationDefinition(
 	                            segmentIdentity,
 	                            operationDef,
-	                            (String)paramDef.objGetValue("name"),
+	                            (String)paramDef.getName(),
 	                            1,
 	                            inspectorClass
 	                        );
 	                        Object_2Facade groupElementDefinitionFacade = Object_2Facade.newInstance(groupElementDefinition);
-	                        String groupName = tabName + ":Group:" + paramDef.objGetValue("name");
+	                        String groupName = tabName + ":Group:" + paramDef.getName();
 	                        MappedRecord group = Object_2Facade.newInstance(
 	                            segmentIdentity.getDescendant(new String[]{"element", groupName}),
 	                            "org:openmdx:ui1:FieldGroup"
@@ -2692,7 +2692,7 @@ public class Ui_1 extends Standard_1 {
 	            if(supertype != classDef) {
 	                this.createInspector(
 	                    segmentIdentity,
-	                    (String)supertype.objGetValue("qualifiedName")
+	                    (String)supertype.getQualifiedName()
 	                );
 	            }
 	        }
@@ -2755,8 +2755,8 @@ public class Ui_1 extends Standard_1 {
 	                false,
 	                false,
 	                false,
-	                (String)classDef.objGetValue("name"),
-	                (String)classDef.objGetValue("qualifiedName"),
+	                (String)classDef.getName(),
+	                (String)classDef.getQualifiedName(),
 	                null
 	            );
 	            this.storeElement(
@@ -3144,7 +3144,7 @@ public class Ui_1 extends Standard_1 {
 	                if(model.isClassType(elementDef)) {
 	                	try {
 		                	MappedRecord assertableInspector = Object_2Facade.newInstance(
-		                        request.path().getChild((String)elementDef.objGetValue("qualifiedName")),
+		                        request.path().getChild((String)elementDef.getQualifiedName()),
 		                        "org:openmdx:ui1:AssertableInspector"
 		                    ).getDelegate();
 		                    MappedRecord inspectorDefinition = Ui_1.this.getInspectorElementDefinition(
@@ -3157,7 +3157,7 @@ public class Ui_1 extends Standard_1 {
 		                        inspectorDefinition
 		                    );
 		                    assertableInspectorFacade.attributeValuesAsList("forClass").add(
-		                        elementDef.objGetValue("qualifiedName")
+		                        elementDef.getQualifiedName()
 		                    );
 		                    // label
 		                    assertableInspectorFacade.attributeValuesAsList("label").addAll(

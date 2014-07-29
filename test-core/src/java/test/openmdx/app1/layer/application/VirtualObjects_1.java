@@ -184,7 +184,7 @@ public class VirtualObjects_1 extends HardWiredObjects_1 {
                     BasicException.Code.DEFAULT_DOMAIN,
                     BasicException.Code.ASSERTION_FAILURE, 
                     "Virtual objects can't be created",
-                    new BasicException.Parameter("objectId", objectId.toXRI())
+                    new BasicException.Parameter("xri", objectId)
                 );
             } else {
                 //
@@ -222,7 +222,7 @@ public class VirtualObjects_1 extends HardWiredObjects_1 {
                     BasicException.Code.DEFAULT_DOMAIN,
                     BasicException.Code.ASSERTION_FAILURE, 
                     "Virtual objects can't be removed",
-                    new BasicException.Parameter("objectId", objectId.toXRI())
+                    new BasicException.Parameter("xri", objectId)
                 );
             } else {
                 //
@@ -259,7 +259,7 @@ public class VirtualObjects_1 extends HardWiredObjects_1 {
                     BasicException.Code.DEFAULT_DOMAIN,
                     BasicException.Code.ASSERTION_FAILURE, 
                     "Virtual objects can't be replaced",
-                    new BasicException.Parameter("objectId", objectId.toXRI())
+                    new BasicException.Parameter("xri", objectId)
                 );
             } else {
                 //
@@ -322,13 +322,13 @@ public class VirtualObjects_1 extends HardWiredObjects_1 {
             "productGroup",
             ":*"
         }
-    ).lock();
+    );
     private static final Path PRODUCT_PATTERN = PRODUCT_GROUP_PATTERN.getDescendant(
         new String[]{
             "product",
             ":*"
         }
-    ).lock();
+    );
 
     private final Logger logger = Logger.getLogger(VirtualObjects_1.class.getName());
 

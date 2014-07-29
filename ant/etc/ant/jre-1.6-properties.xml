@@ -107,6 +107,7 @@
 		<pathelement location="${openmdx.home}/osgi/${build.java.platform}/extension/lib/ejb.jar"/>
 		<pathelement location="${openmdx.home}/osgi/${build.java.platform}/extension/lib/javax.enterprise.deploy.jar"/>
 		<pathelement location="${openmdx.home}/osgi/${build.java.platform}/extension/lib/javax.el.jar"/>
+		<pathelement location="${openmdx.home}/osgi/${build.java.platform}/extension/lib/annotations.jar"/>
 	</path>
 	<path id="osgi.enterprise.lib">
 		<path refid="osgi.enterprise.api"/>

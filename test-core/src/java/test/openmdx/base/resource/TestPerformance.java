@@ -92,7 +92,7 @@ public class TestPerformance {
     static IndexedRecord testData;
     private static final int SIZE = 100;
     private static final int LOOP = 100;
-    protected static final Path BASE = new Path("xri://@openmdx*test.app1/segment/JUnit").lock();
+    protected static final Path BASE = new Path("xri://@openmdx*test.app1/segment/JUnit");
     protected static final String URI = "xri://+test/REST";
     protected static final boolean WBXML = false;
 

@@ -1,7 +1,7 @@
 /*
  * ==================================================================== 
  * Project: openMDX/Core, http://www.openmdx.org/
- * Name: PrimitiveTypeMapper
+ * Name: Primitive Type Mapper
  * Owner: OMEX AG, Switzerland, http://www.omex.ch
  * ====================================================================
  * 
@@ -13,15 +13,15 @@
  * modification, are permitted provided that the following conditions are met:
  * 
  * * Redistributions of source code must retain the above copyright notice, this
- * list of conditions and the following disclaimer.
+ *   list of conditions and the following disclaimer.
  * 
  * * Redistributions in binary form must reproduce the above copyright notice,
- * this list of conditions and the following disclaimer in the documentation
- * and/or other materials provided with the distribution.
+ *   this list of conditions and the following disclaimer in the documentation
+ *   and/or other materials provided with the distribution.
  * 
  * * Neither the name of the openMDX team nor the names of its contributors may
- * be used to endorse or promote products derived from this software without
- * specific prior written permission.
+ *   be used to endorse or promote products derived from this software without
+ *   specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
@@ -40,14 +40,12 @@
  * This product includes software developed by other organizations as listed in
  * the NOTICE file.
  */
-
 package org.openmdx.application.mof.mapping.java;
 
 import org.openmdx.base.exception.ServiceException;
 
 /**
- * PrimitiveTypeMapper
- *
+ * Primitive Type Mapper
  */
 public interface PrimitiveTypeMapper {
 
@@ -55,7 +53,7 @@ public interface PrimitiveTypeMapper {
      * Determines the Java equivalent for a given primitive type
      * 
      * @param qualifiedTypeName the qualified model class name
-     * @param format TODO
+     * @param format, e.g. CCI2, JMI1 etc.
      * @param asObject tells whether the object or scalar variant of a Java built-in types is required
      * @return the Java equivalent for the given primitive type
      * 
@@ -84,7 +82,7 @@ public interface PrimitiveTypeMapper {
      * Provide the Java pattern to parse a given expression represented by the EXPRESSION_PLACE_HOLDER.
      *  
      * @param qualifiedTypeName the qualified model class name
-     * @param format TODO
+     * @param format, e.g. CCI2, JMI1 etc.
      * @param asObject tells whether the object or scalar variant of a Java built-in types is required
      * @return the Java pattern to parse a given expression, e.g. "Boolean.valueOf({})"
      * 
@@ -98,6 +96,18 @@ public interface PrimitiveTypeMapper {
         boolean asObject
     ) throws ServiceException;
 
+    /**
+     * Maps between the type of the JPA3 property value and the type of the CCI2 property value
+     * 
+     * @param qualifiedTypeName
+     * @param from, either CCI2 or JPA3
+     * @param to, either CCI2 or JPA3
+     * @return the pattern to map the value from the <code>from</code> format to the <code>to</code> format
+     * 
+     * @throws ServiceException in case of an unsupported combination of arguments
+     * 
+     * @see {@link #EXPRESSION_PLACEHOLDER}
+     */
     String getMappingPattern(
         String qualifiedTypeName, 
         Format from, 

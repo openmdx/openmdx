@@ -8,7 +8,7 @@
  * This software is published under the BSD license
  * as listed below.
  * 
- * Copyright (c) 2004-2007, OMEX AG, Switzerland
+ * Copyright (c) 2004-2014, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -54,6 +54,7 @@ package org.openmdx.portal.servlet.control;
 
 import java.io.Serializable;
 import java.text.DateFormat;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
@@ -61,11 +62,19 @@ import org.openmdx.base.exception.ServiceException;
 import org.openmdx.portal.servlet.ApplicationContext;
 import org.openmdx.portal.servlet.ViewPort;
 
-public class CalendarControl
-    extends Control
-    implements Serializable {
+/**
+ * CalendarControl
+ *
+ */
+public class CalendarControl extends Control implements Serializable {
 
-    //-------------------------------------------------------------------------
+    /**
+     * Constructor.
+     * 
+     * @param id
+     * @param locale
+     * @param localeAsIndex
+     */
     public CalendarControl(
         String id,
         String locale,
@@ -78,9 +87,10 @@ public class CalendarControl
         );
     }
     
-    //-----------------------------------------------------------------------
+    /* (non-Javadoc)
+     * @see org.openmdx.portal.servlet.control.Control#paint(org.openmdx.portal.servlet.ViewPort, java.lang.String, boolean)
+     */
     @Override
-    @SuppressWarnings("unchecked")
     public void paint(
         ViewPort p, 
         String frame,
@@ -89,12 +99,23 @@ public class CalendarControl
         ApplicationContext app = p.getApplicationContext();
         String language = app.getCurrentLocaleAsString().substring(0, 2);
         DateFormat timeFormat = DateFormat.getTimeInstance(DateFormat.LONG, new Locale(language));        
-        List calendarIds = (List)p.getProperty(ViewPort.PROPERTY_CALENDAR_IDS);
+        @SuppressWarnings("unchecked")
+		List<String> calendarIds = (List<String>)p.getProperty(ViewPort.PROPERTY_CALENDAR_IDS);
         calendarIds.add(this.id);
         p.write("<div id=\"", this.id, "\" style=\"overflow:hidden;padding:0px;\"></div>");
         p.write("<div id=\"timestamp\">", timeFormat.format(app.getPmDataReloadedAt()), "</div>");        
     }
 
+	/* (non-Javadoc)
+	 * @see org.openmdx.portal.servlet.control.Control#getChildren(java.lang.Class)
+	 */
+	@Override
+	public <T extends Control> List<T> getChildren(
+		Class<T> type
+	) {
+		return Collections.emptyList();
+	}
+	
     //-----------------------------------------------------------------------
     // Members
     //-----------------------------------------------------------------------

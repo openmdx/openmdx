@@ -1,16 +1,13 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <!--
 =======================================================================
-= Name:        $Id: build.xml,v 1.69 2012/05/01 12:30:43 hburger Exp $
 = Description: openMDX/Test Core
-= Revision:    $Revision: 1.69 $
-= Date:        $Date: 2012/05/01 12:30:43 $
-= Copyright:   (c) 2003-2010 OMEX AG
+= Copyright:   (c) 2003-2013 OMEX AG
 =======================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2012, OMEX AG, Switzerland
+ * Copyright (c) 2004-2014, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without 
@@ -81,9 +78,16 @@
 		<pathelement location="${build.dir}/bin"/>
 		<pathelement location="${build.dir}/src/resource"/>
 		<pathelement location="${build.dir}/model/${ant.project.name}.openmdx-xmi.zip"/>
+		<path>
+			<fileset dir="../opt/xstream/${build.java.platform}/lib" erroronmissingdir="false">
+				<include name="*.jar"/>
+			</fileset>
+		</path>
 	</path>
 	<patternset id="project.junit.test.case">
 		<include name="test/**/Test*.java"/>
+		<include name="org/openmdx/kernel/**/Test*.java"/>
+		<include name="org/openmdx/base/**/*Test.java"/>
 		<exclude name="test/openmdx/base/*"/>
 		<exclude name="test/openmdx/state2/**"/>
 		<patternset refid="build.exclude"/>

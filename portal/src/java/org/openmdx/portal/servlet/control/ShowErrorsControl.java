@@ -1,15 +1,14 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Description: ReferencePaneRenderer
- * Revision:    $AttributePaneRenderer: 1.2 $
+ * Description: ShowErrorsControl
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
  * ====================================================================
  *
  * This software is published under the BSD license
  * as listed below.
  * 
- * Copyright (c) 2004-2007, OMEX AG, Switzerland
+ * Copyright (c) 2004-2014, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -55,19 +54,30 @@ package org.openmdx.portal.servlet.control;
 
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
+import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.kernel.log.SysLog;
 import org.openmdx.portal.servlet.ApplicationContext;
+import org.openmdx.portal.servlet.CssClass;
 import org.openmdx.portal.servlet.ViewPort;
 import org.openmdx.portal.servlet.attribute.DateValue;
 
-public class ShowErrorsControl
-    extends Control
-    implements Serializable {
+/**
+ * ShowErrorsControl
+ *
+ */
+public class ShowErrorsControl extends Control implements Serializable {
 
-    //-------------------------------------------------------------------------
+    /**
+     * Constructor.
+     * 
+     * @param id
+     * @param locale
+     * @param localeAsIndex
+     */
     public ShowErrorsControl(
         String id,
         String locale,
@@ -80,7 +90,9 @@ public class ShowErrorsControl
         );
     }
     
-    //---------------------------------------------------------------------------------
+    /* (non-Javadoc)
+     * @see org.openmdx.portal.servlet.control.Control#paint(org.openmdx.portal.servlet.ViewPort, java.lang.String, boolean)
+     */
     @Override
     public void paint(
         ViewPort p,
@@ -90,7 +102,7 @@ public class ShowErrorsControl
     	SysLog.detail("> paint");        
         ApplicationContext app = p.getApplicationContext();
         if(!app.getErrorMessages().isEmpty()) {
-           p.write("<table class=\"tableError\">");
+           p.write("<table class=\"", CssClass.tableError.toString(), "\">");
            SimpleDateFormat dateTimeFormat = DateValue.getLocalizedDateTimeFormatter(
                null, 
                true, 
@@ -99,14 +111,14 @@ public class ShowErrorsControl
            String formattedDateTime = dateTimeFormat.format(new Date());
            String separator = " | ";
            p.write("  <tr>");
-           p.write("    <td class=\"cellErrorLeft\">Error</td>");
-           p.write("    <td class=\"cellErrorRight\">");
+           p.write("    <td class=\"", CssClass.cellErrorLeft.toString(), "\">Error</td>");
+           p.write("    <td class=\"", CssClass.cellErrorRight.toString(), "\">");
            p.write(formattedDateTime.replace(" ", separator), separator, dateTimeFormat.getTimeZone().getID());
            p.write("    </td>");
            p.write("  </tr>");
            p.write("  <tr>");
-           p.write("    <td class=\"cellErrorLeft\"></td>");
-           p.write("    <td class=\"cellErrorRight\">");
+           p.write("    <td class=\"", CssClass.cellErrorLeft.toString(), "\"></td>");
+           p.write("    <td class=\"", CssClass.cellErrorRight.toString(), "\">");
            for(int i = 0; i < app.getErrorMessages().size(); i++) {
              p.write("      " + app.getErrorMessages().get(i), "<br />");
            }
@@ -117,9 +129,19 @@ public class ShowErrorsControl
         SysLog.detail("< paint");
     }
 
+	/* (non-Javadoc)
+	 * @see org.openmdx.portal.servlet.control.Control#getChildren(java.lang.Class)
+	 */
+	@Override
+	public <T extends Control> List<T> getChildren(
+		Class<T> type
+	) {
+		return Collections.emptyList();
+	}
+	
     //---------------------------------------------------------------------------------
     // Members
     //---------------------------------------------------------------------------------
     private static final long serialVersionUID = -5088760857844228009L;
-    
+
 }

@@ -62,15 +62,13 @@ public enum UserSettings {
 	SHOW_SEARCH_FORM("Page.ShowSearchForm"),
 	PAGE_ALIGNMENT("Page.Alignment"),
     TOP_NAVIGATION_SHOW_MAX("TopNavigation.ShowMax"),
-	TOP_NAVIGATION_SHOW_SUBLEVEL("TopNavigation.ShowSublevel"),
 	DEFAULT_FILTER("Filter.Default"),
 	PAGE_SIZE("Page.Size"),
+	PAGE_COLUMN_ORDERING("Page.ColumnOrdering"),
 	ROOT_OBJECT_STATE("RootObject"),
 	WORKSPACE_ID("Workspace.ID"),	
 	HIDE_WORKSPACE_DASHBOARD("WorkspaceDashboard.Hide"),
-	GRID_DEFAULT_ALIGNMENT_IS_WIDE("Grid.DefaultAlignmentIsWide"),
-	AUTOSTART_URL("Autostart.URL"),
-	SCROLL_HEADER("Header.Scroll");
+	AUTOSTART_URL("Autostart.URL");
 
 	private final String name;
 	

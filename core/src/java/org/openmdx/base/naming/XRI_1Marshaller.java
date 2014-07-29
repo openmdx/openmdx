@@ -375,7 +375,7 @@ implements Marshaller
                         target.append(character);
                 }
             }
-            return new Path(target.toString()).toComponent();
+            return new Path(target.toString()).toClassicRepresentation();
         } else if (authority && "*".equals(source)) {
             return ":*";
         } else if (terminal && ":***".equals(source)) {

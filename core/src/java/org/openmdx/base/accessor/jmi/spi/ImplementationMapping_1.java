@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2010-2011, OMEX AG, Switzerland
+ * Copyright (c) 2010-2014, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -205,7 +205,7 @@ class ImplementationMapping_1 implements Mapping_1_0 {
             BasicException.Code.BAD_PARAMETER,
             "Invalid struct record",
             new BasicException.Parameter("supported", MappedRecord.class.getName(), IndexedRecord.class.getName()),
-            new BasicException.Parameter("actual", delegate == null ? null : delegate.getClass().getName())
+            new BasicException.Parameter("actual", delegate.getClass().getName())
         );
     }
 
@@ -264,7 +264,7 @@ class ImplementationMapping_1 implements Mapping_1_0 {
                 //
                 aspectImplementationClasses = new ArrayList<AspectImplementationDescriptor>();
                 for(Object supertypePath : Model_1Factory.getModel().getElement(qualifiedClassName).objGetList("allSupertype")){                    
-                    AspectImplementationDescriptor descriptor = this.getAspectDescriptor(((Path)supertypePath).getBase());
+                    AspectImplementationDescriptor descriptor = this.getAspectDescriptor(((Path)supertypePath).getLastSegment().toClassicRepresentation());
                     if(descriptor != null) {
                         ImplementationDescriptor.add(descriptor, aspectImplementationClasses);
                     }

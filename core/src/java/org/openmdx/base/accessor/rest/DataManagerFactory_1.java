@@ -47,8 +47,7 @@
  */
 package org.openmdx.base.accessor.rest;
 
-import static org.openmdx.application.dataprovider.cci.SharedConfigurationEntries.DATABASE_CONNECTION_FACTORY;
-import static org.openmdx.application.dataprovider.cci.SharedConfigurationEntries.DATAPROVIDER_CONNECTION_FACTORY;
+import static org.openmdx.application.dataprovider.cci.SharedConfigurationEntries.*;
 
 import java.net.URL;
 import java.util.Collections;
@@ -66,6 +65,7 @@ import javax.resource.ResourceException;
 import javax.resource.cci.Connection;
 
 import org.openmdx.application.configuration.Configuration;
+import org.openmdx.application.dataprovider.cci.SharedConfigurationEntries;
 import org.openmdx.application.spi.PropertiesConfigurationProvider;
 import org.openmdx.base.accessor.cci.DataObjectManager_1_0;
 import org.openmdx.base.accessor.rest.spi.BasicCache_2;
@@ -139,8 +139,8 @@ public class DataManagerFactory_1
                         i < this.plugIns.length;
                         i++
                     ){
-                        this.plugIns[i] = new BeanFactory<PlugIn_1_0>(
-                            "class",
+                        this.plugIns[i] = BeanFactory.newInstance(
+                    		PlugIn_1_0.class,
                             PropertiesConfigurationProvider.getConfiguration(
                                 properties,
                                 toSection(plugIns.get(Integer.valueOf(i)))
@@ -150,8 +150,8 @@ public class DataManagerFactory_1
                 }
                 String cachePlugIn = persistenceManagerConfiguration.getFirstValue("cachePlugIn");
                 this.cachePlugIn = cachePlugIn == null ? new PinningCache_2(
-                ) : new BeanFactory<BasicCache_2>(
-                    "class",
+                ) : BeanFactory.newInstance(
+                	BasicCache_2.class,
                     PropertiesConfigurationProvider.getConfiguration(
                         properties,
                         cachePlugIn.split("\\.")
@@ -200,15 +200,18 @@ public class DataManagerFactory_1
                             this.connectionFactory
                         );
                         if(connectionFactoryName != null) {
-                            SparseArray<Object> datasources = plugInConfiguration.values(
-                            	DATABASE_CONNECTION_FACTORY
+                            plugInConfiguration.values(
+                    		    SharedConfigurationEntries.DATABASE_CONNECTION_FACTORY
+                    		);
+                            SparseArray<Object> datasourceNames = plugInConfiguration.values(
+                            	DATABASE_CONNECTION_FACTORY_NAME
                             );
-                            if(datasources.isEmpty()) {
-                                datasources.put(Integer.valueOf(0),connectionFactoryName);
+                            if(datasourceNames.isEmpty()) {
+                                datasourceNames.put(Integer.valueOf(0),connectionFactoryName);
                             }
                         }
-                        destination = new BeanFactory<Port>(
-                            "class",
+                        destination = BeanFactory.newInstance(
+                        	Port.class,
                             plugInConfiguration.entries()
                         ).instantiate();
                         raw.put(

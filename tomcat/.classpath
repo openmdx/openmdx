@@ -3,5 +3,5 @@
 	<classpathentry kind="src" path="src/java"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/openMDX Thirdparty ~ Apache Tomcat 7 (jre-1.6)"/>
-	<classpathentry kind="output" path="build/tomcat-7/eclipse"/>
+	<classpathentry kind="output" path="build/tomcat-6/eclipse"/>
 </classpath>

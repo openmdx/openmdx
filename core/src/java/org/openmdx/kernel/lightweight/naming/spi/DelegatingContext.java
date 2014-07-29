@@ -427,7 +427,7 @@ public class DelegatingContext implements Context {
      */
     @Override
     public boolean equals(Object obj) {
-        if(this.getClass() != obj.getClass()) return false;
+        if(obj == null || this.getClass() != obj.getClass()) return false;
         DelegatingContext that = (DelegatingContext) obj;
         try {
             return this.getDelegate().equals(that.getDelegate()) &&

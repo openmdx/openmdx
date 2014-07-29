@@ -320,6 +320,9 @@ class ReflectionUtils {
         }
 
         public boolean equals(Object o2) {
+        	if (null == o2) {
+        		return false;
+        	}
             if (this == o2) {
                 return true;
             }

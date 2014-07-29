@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2008-2012, OMEX AG, Switzerland
+ * Copyright (c) 2008-2014, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -120,7 +120,7 @@ public class StateCapableContainer_1
 		this.selection = container.subMap(
 			getFilter(
 				parent, 
-		        container == null ? null : (Path) ReducedJDOHelper.getObjectId(container), 
+		        (Path) ReducedJDOHelper.getObjectId(container), 
 		        type
 		    )
 		);
@@ -177,18 +177,18 @@ public class StateCapableContainer_1
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.generic.cci.Container_1_0#superSet()
      */
-//  @Override
+    @Override
     public Container_1_0 container(
     ) {
         return this.container.container();
     }     
 
-//  @Override
+    @Override
     public Object jdoGetObjectId() {
         return this.container.jdoGetObjectId();
     }
 
-//  @Override
+    @Override
     public Object jdoGetTransactionalObjectId() {
         return this.container.jdoGetTransactionalObjectId();
     }
@@ -196,7 +196,7 @@ public class StateCapableContainer_1
     /* (non-Javadoc)
      * @see org.openmdx.base.persistence.spi.PersistenceCapableContainer#openmdxjdoGetPersistenceManager()
      */
-//  @Override
+    @Override
     public PersistenceManager jdoGetPersistenceManager(){
     	return this.parent.jdoGetPersistenceManager();
     }
@@ -204,17 +204,17 @@ public class StateCapableContainer_1
     /* (non-Javadoc)
      * @see org.openmdx.base.persistence.spi.PersistenceCapableContainer#openmdxjdoGetPersistenceManager()
      */
-//  @Override
+    @Override
     public PersistenceManager openmdxjdoGetDataObjectManager() {
         return this.container.openmdxjdoGetDataObjectManager();
     }
 
-//  @Override
+    @Override
     public boolean jdoIsPersistent() {
         return this.container.jdoIsPersistent();
     }
 
-//  @Override
+    @Override
     public final Container_1_0 objGetDelegate(){
         return this.selection;
     }
@@ -337,9 +337,9 @@ public class StateCapableContainer_1
     		Model_1_0 model = parent.getModel();
     		Set<String> values = new HashSet<String>();
             ModelElement_1_0 classDef = model.getDereferencedType(type);
-            values.add((String) classDef.objGetValue("qualifiedName"));
+            values.add((String) classDef.getQualifiedName());
             for(Object path : classDef.objGetList("allSubtype")) {
-            	values.add(((Path)path).getBase());
+            	values.add(((Path)path).getLastSegment().toClassicRepresentation());
             }
     		for(Iterator<String> i = values.iterator(); i.hasNext();){
     			String v = i.next();
@@ -380,9 +380,9 @@ public class StateCapableContainer_1
     		Set<String> values = new HashSet<String>();
     		for(Object qualifiedTypeName : condition.getValue()) {
     	        ModelElement_1_0 classDef = model.getDereferencedType(qualifiedTypeName);
-    	        values.add((String) classDef.objGetValue("qualifiedName"));
+    	        values.add((String) classDef.getQualifiedName());
     	        for(Object path : classDef.objGetList("allSubtype")) {
-    	        	values.add(((Path)path).getBase());
+    	        	values.add(((Path)path).getLastSegment().toClassicRepresentation());
     	        }
     		}
     		for(Iterator<String> i = values.iterator(); i.hasNext();){
@@ -422,7 +422,7 @@ public class StateCapableContainer_1
     /* (non-Javadoc)
      * @see org.openmdx.base.collection.FilterableMap#subMap(java.lang.Object)
      */
-//  @Override
+    @Override
     public Container_1_0 subMap(Filter filter) {
     	if(filter == null) {
     		return this;
@@ -499,7 +499,7 @@ public class StateCapableContainer_1
     /* (non-Javadoc)
      * @see org.openmdx.base.collection.FilterableMap#values(java.lang.Object)
      */
-//  @Override
+    @Override
     public List<DataObject_1_0> values(
         FetchPlan fetchPlan, OrderSpecifier... criteria
     ) {
@@ -509,7 +509,7 @@ public class StateCapableContainer_1
     /* (non-Javadoc)
      * @see java.util.Map#clear()
      */
-//  @Override
+    @Override
     public void clear() {
         this.keySet().clear();
     }
@@ -517,7 +517,7 @@ public class StateCapableContainer_1
     /* (non-Javadoc)
      * @see java.util.Map#containsKey(java.lang.Object)
      */
-//  @Override
+    @Override
     public boolean containsKey(Object key) {
         return hasStates(this.container.get(key));
     }
@@ -525,7 +525,7 @@ public class StateCapableContainer_1
     /* (non-Javadoc)
      * @see java.util.Map#containsValue(java.lang.Object)
      */
-//  @Override
+    @Override
     public boolean containsValue(
         Object value
     ) {
@@ -535,7 +535,7 @@ public class StateCapableContainer_1
     /* (non-Javadoc)
      * @see java.util.Map#entrySet()
      */
-//  @Override
+    @Override
     public Set<java.util.Map.Entry<String, DataObject_1_0>> entrySet() {
         if(this.entries == null) {
             this.entries = new AbstractSet<java.util.Map.Entry<String, DataObject_1_0>>() {
@@ -564,7 +564,7 @@ public class StateCapableContainer_1
     /* (non-Javadoc)
      * @see java.util.Map#get(java.lang.Object)
      */
-//  @Override
+    @Override
     public DataObject_1_0 get(Object key) {
     	//
     	// TODO For some reason we may not return null if there are no states...
@@ -575,7 +575,7 @@ public class StateCapableContainer_1
     /* (non-Javadoc)
      * @see java.util.Map#isEmpty()
      */
-//  @Override
+    @Override
     public boolean isEmpty() {
         return this.selection.isEmpty();
     }
@@ -583,7 +583,7 @@ public class StateCapableContainer_1
     /* (non-Javadoc)
      * @see java.util.Map#keySet()
      */
-//  @Override
+    @Override
     public Set<String> keySet() {
     	if(this.keys == null) {
     		this.keys = new AbstractSet<String>() {
@@ -619,7 +619,7 @@ public class StateCapableContainer_1
     /* (non-Javadoc)
      * @see java.util.Map#put(java.lang.Object, java.lang.Object)
      */
-//  @Override
+    @Override
     public DataObject_1_0 put(String key, DataObject_1_0 value) {
         return this.selection.put(key, value);            
     }
@@ -627,7 +627,7 @@ public class StateCapableContainer_1
     /* (non-Javadoc)
      * @see java.util.Map#putAll(java.util.Map)
      */
-//  @Override
+    @Override
     public void putAll(Map<? extends String, ? extends DataObject_1_0> t) {
         throw new UnsupportedOperationException();
     }
@@ -675,7 +675,7 @@ public class StateCapableContainer_1
     /* (non-Javadoc)
      * @see java.util.Map#remove(java.lang.Object)
      */
-//  @Override
+    @Override
     public DataObject_1_0 remove(
         Object key
     ) {
@@ -690,7 +690,7 @@ public class StateCapableContainer_1
     /* (non-Javadoc)
      * @see java.util.Map#size()
      */
-//  @Override
+    @Override
     public int size() {
         return getSnapShot().size();
     }
@@ -698,7 +698,7 @@ public class StateCapableContainer_1
     /* (non-Javadoc)
      * @see java.util.Map#values()
      */
-//  @Override
+    @Override
     public Collection<DataObject_1_0> values() {
         if(this.values == null) {
             this.values = new AbstractCollection<DataObject_1_0>(){
@@ -735,12 +735,12 @@ public class StateCapableContainer_1
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.cci.Container_1_0#retrieve()
      */
-//  @Override
+    @Override
     public void openmdxjdoRetrieve(FetchPlan fetchPlan) {
         this.selection.openmdxjdoRetrieve(fetchPlan);
     }
 
-//  @Override
+    @Override
     public boolean isRetrieved() {
         return this.selection.isRetrieved();
     }
@@ -748,7 +748,7 @@ public class StateCapableContainer_1
     /* (non-Javadoc)
      * @see org.openmdx.base.persistence.spi.PersistenceCapableContainer#openmdxjdoEvict()
      */
-//  @Override
+    @Override
     public void openmdxjdoEvict(boolean allMembers, boolean allSubSets) {
         this.selection.openmdxjdoEvict(allMembers, allSubSets);
     }
@@ -756,7 +756,7 @@ public class StateCapableContainer_1
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.cci.Container_1_0#refreshAll()
      */
-//  @Override
+    @Override
     public void openmdxjdoRefresh() {
         this.selection.openmdxjdoRefresh();
     }
@@ -819,7 +819,7 @@ public class StateCapableContainer_1
     /* (non-Javadoc)
      * @see javax.jdo.spi.PersistenceCapable#jdoReplaceStateManager(javax.jdo.spi.StateManager)
      */
-//  @Override
+    @Override
     public void jdoReplaceStateManager(
         StateManager sm
     ) throws SecurityException {
@@ -829,7 +829,7 @@ public class StateCapableContainer_1
     /* (non-Javadoc)
      * @see javax.jdo.spi.PersistenceCapable#jdoProvideField(int)
      */
-//  @Override
+    @Override
     public void jdoProvideField(int fieldNumber) {
         throw new UnsupportedOperationException("Not supported by persistence capable collections");
     }
@@ -837,7 +837,7 @@ public class StateCapableContainer_1
     /* (non-Javadoc)
      * @see javax.jdo.spi.PersistenceCapable#jdoProvideFields(int[])
      */
-//  @Override
+    @Override
     public void jdoProvideFields(int[] fieldNumbers) {
         throw new UnsupportedOperationException("Not supported by persistence capable collections");
     }
@@ -845,7 +845,7 @@ public class StateCapableContainer_1
     /* (non-Javadoc)
      * @see javax.jdo.spi.PersistenceCapable#jdoReplaceField(int)
      */
-//  @Override
+    @Override
     public void jdoReplaceField(int fieldNumber) {
         throw new UnsupportedOperationException("Not supported by persistence capable collections");
     }
@@ -853,7 +853,7 @@ public class StateCapableContainer_1
     /* (non-Javadoc)
      * @see javax.jdo.spi.PersistenceCapable#jdoReplaceFields(int[])
      */
-//  @Override
+    @Override
     public void jdoReplaceFields(int[] fieldNumbers) {
         throw new UnsupportedOperationException("Not supported by persistence capable collections");
     }
@@ -861,7 +861,7 @@ public class StateCapableContainer_1
     /* (non-Javadoc)
      * @see javax.jdo.spi.PersistenceCapable#jdoReplaceFlags()
      */
-//  @Override
+    @Override
     public void jdoReplaceFlags() {
         throw new UnsupportedOperationException("Not supported by persistence capable collections");
     }
@@ -869,7 +869,7 @@ public class StateCapableContainer_1
     /* (non-Javadoc)
      * @see javax.jdo.spi.PersistenceCapable#jdoCopyFields(java.lang.Object, int[])
      */
-//  @Override
+    @Override
     public void jdoCopyFields(Object other, int[] fieldNumbers) {
         throw new UnsupportedOperationException("Not supported by persistence capable collections");
     }
@@ -877,7 +877,7 @@ public class StateCapableContainer_1
     /* (non-Javadoc)
      * @see javax.jdo.spi.PersistenceCapable#jdoMakeDirty(java.lang.String)
      */
-//  @Override
+    @Override
     public void jdoMakeDirty(String fieldName) {
         throw new UnsupportedOperationException("Not supported by persistence capable collections");
     }
@@ -885,7 +885,7 @@ public class StateCapableContainer_1
     /* (non-Javadoc)
      * @see javax.jdo.spi.PersistenceCapable#jdoGetVersion()
      */
-//  @Override
+    @Override
     public Object jdoGetVersion() {
         throw new UnsupportedOperationException("Not supported by persistence capable collections");
     }
@@ -893,7 +893,7 @@ public class StateCapableContainer_1
     /* (non-Javadoc)
      * @see javax.jdo.spi.PersistenceCapable#jdoIsDirty()
      */
-//  @Override
+    @Override
     public boolean jdoIsDirty() {
         throw new UnsupportedOperationException("Not supported by persistence capable collections");
     }
@@ -901,7 +901,7 @@ public class StateCapableContainer_1
     /* (non-Javadoc)
      * @see javax.jdo.spi.PersistenceCapable#jdoIsTransactional()
      */
-//  @Override
+    @Override
     public boolean jdoIsTransactional() {
         throw new UnsupportedOperationException("Not supported by persistence capable collections");
     }
@@ -909,7 +909,7 @@ public class StateCapableContainer_1
     /* (non-Javadoc)
      * @see javax.jdo.spi.PersistenceCapable#jdoIsNew()
      */
-//  @Override
+    @Override
     public boolean jdoIsNew() {
         throw new UnsupportedOperationException("Not supported by persistence capable collections");
     }
@@ -917,7 +917,7 @@ public class StateCapableContainer_1
     /* (non-Javadoc)
      * @see javax.jdo.spi.PersistenceCapable#jdoIsDeleted()
      */
-//  @Override
+    @Override
     public boolean jdoIsDeleted() {
         throw new UnsupportedOperationException("Not supported by persistence capable collections");
     }
@@ -925,7 +925,7 @@ public class StateCapableContainer_1
     /* (non-Javadoc)
      * @see javax.jdo.spi.PersistenceCapable#jdoIsDetached()
      */
-//  @Override
+    @Override
     public boolean jdoIsDetached() {
         throw new UnsupportedOperationException("Not supported by persistence capable collections");
     }
@@ -933,7 +933,7 @@ public class StateCapableContainer_1
     /* (non-Javadoc)
      * @see javax.jdo.spi.PersistenceCapable#jdoNewInstance(javax.jdo.spi.StateManager)
      */
-//  @Override
+    @Override
     public PersistenceCapable jdoNewInstance(StateManager sm) {
         throw new UnsupportedOperationException("Not supported by persistence capable collections");
     }
@@ -941,7 +941,7 @@ public class StateCapableContainer_1
     /* (non-Javadoc)
      * @see javax.jdo.spi.PersistenceCapable#jdoNewInstance(javax.jdo.spi.StateManager, java.lang.Object)
      */
-//  @Override
+    @Override
     public PersistenceCapable jdoNewInstance(StateManager sm, Object oid) {
         throw new UnsupportedOperationException("Not supported by persistence capable collections");
     }
@@ -949,7 +949,7 @@ public class StateCapableContainer_1
     /* (non-Javadoc)
      * @see javax.jdo.spi.PersistenceCapable#jdoNewObjectIdInstance()
      */
-//  @Override
+    @Override
     public Object jdoNewObjectIdInstance() {
         throw new UnsupportedOperationException("Not supported by persistence capable collections");
     }
@@ -957,7 +957,7 @@ public class StateCapableContainer_1
     /* (non-Javadoc)
      * @see javax.jdo.spi.PersistenceCapable#jdoNewObjectIdInstance(java.lang.Object)
      */
-//  @Override
+    @Override
     public Object jdoNewObjectIdInstance(Object o) {
         throw new UnsupportedOperationException("Not supported by persistence capable collections");
     }
@@ -965,7 +965,7 @@ public class StateCapableContainer_1
     /* (non-Javadoc)
      * @see javax.jdo.spi.PersistenceCapable#jdoCopyKeyFieldsToObjectId(java.lang.Object)
      */
-//  @Override
+    @Override
     public void jdoCopyKeyFieldsToObjectId(Object oid) {
         throw new UnsupportedOperationException("Not supported by persistence capable collections");
     }
@@ -973,7 +973,7 @@ public class StateCapableContainer_1
     /* (non-Javadoc)
      * @see javax.jdo.spi.PersistenceCapable#jdoCopyKeyFieldsToObjectId(javax.jdo.spi.PersistenceCapable.ObjectIdFieldSupplier, java.lang.Object)
      */
-//  @Override
+    @Override
     public void jdoCopyKeyFieldsToObjectId(ObjectIdFieldSupplier fm, Object oid) {
         throw new UnsupportedOperationException("Not supported by persistence capable collections");
     }
@@ -981,7 +981,7 @@ public class StateCapableContainer_1
     /* (non-Javadoc)
      * @see javax.jdo.spi.PersistenceCapable#jdoCopyKeyFieldsFromObjectId(javax.jdo.spi.PersistenceCapable.ObjectIdFieldConsumer, java.lang.Object)
      */
-//  @Override
+    @Override
     public void jdoCopyKeyFieldsFromObjectId(
         ObjectIdFieldConsumer fm,
         Object oid
@@ -1004,17 +1004,17 @@ public class StateCapableContainer_1
          */
         private final Iterator<Map.Entry<String,DataObject_1_0>> delegate = new EntryIterator();
 
-    //  @Override
+        @Override
         public boolean hasNext() {
             return this.delegate.hasNext();
         }
 
-    //  @Override
+        @Override
         public String next() {
         	return this.delegate.next().getKey();
         }
 
-    //  @Override
+        @Override
         public void remove() {
             this.delegate.remove();
         }
@@ -1036,17 +1036,17 @@ public class StateCapableContainer_1
          */
         private final Iterator<Map.Entry<String,DataObject_1_0>> delegate = new EntryIterator();
 
-    //  @Override
+        @Override
         public boolean hasNext() {
             return this.delegate.hasNext();
         }
 
-    //  @Override
+        @Override
         public DataObject_1_0 next() {
         	return this.delegate.next().getValue();
         }
 
-    //  @Override
+        @Override
         public void remove() {
             this.delegate.remove();
         }
@@ -1073,17 +1073,12 @@ public class StateCapableContainer_1
          */
         Map.Entry<String,DataObject_1_0> current;
         
-    //  @Override
+        @Override
         public boolean hasNext() {
             return this.delegate.hasNext();
         }
 
-    //  @Override
-        public boolean isEmpty() {
-            return StateCapableContainer_1.this.getSnapShot().isEmpty();
-        }
-    	
-
+        @Override
         public Map.Entry<String,DataObject_1_0> next() {
         	this.current = this.delegate.next();
         	return new Map.Entry<String,DataObject_1_0> (){
@@ -1103,7 +1098,7 @@ public class StateCapableContainer_1
         	};
         }
 
-    //  @Override
+        @Override
         public void remove() {
             this.delegate.remove();
             StateCapableContainer_1.this.remove(

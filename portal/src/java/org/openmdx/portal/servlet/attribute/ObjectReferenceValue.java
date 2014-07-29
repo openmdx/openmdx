@@ -68,10 +68,11 @@ import org.openmdx.kernel.log.SysLog;
 import org.openmdx.portal.servlet.Action;
 import org.openmdx.portal.servlet.ApplicationContext;
 import org.openmdx.portal.servlet.Autocompleter_1_0;
+import org.openmdx.portal.servlet.CssClass;
 import org.openmdx.portal.servlet.HtmlEncoder_1_0;
 import org.openmdx.portal.servlet.ObjectReference;
 import org.openmdx.portal.servlet.ViewPort;
-import org.openmdx.portal.servlet.view.View;
+import org.openmdx.portal.servlet.component.View;
 
 /**
  * ObjectReferenceValue
@@ -346,7 +347,7 @@ implements Serializable {
             id = (id == null) || (id.length() == 0) ? 
                 feature + "[" + tabIndex + "]" : 
                 id;
-            p.write("<td class=\"label\" title=\"", (title == null ? "" : htmlEncoder.encode(title, false)), "\"><span class=\"nw\">", htmlEncoder.encode(label, false), "</span></td>");            
+            p.write("<td class=\"", CssClass.fieldLabel.toString(), "\" title=\"", (title == null ? "" : htmlEncoder.encode(title, false)), "\"><span class=\"", CssClass.nw.toString(), "\">", htmlEncoder.encode(label, false), "</span></td>");            
             p.write("<td ", rowSpanModifier, ">");
             // Predefined, selectable values only allowed for single-valued attributes with spanRow == 1
             // Show drop-down instead of input field
@@ -354,13 +355,13 @@ implements Serializable {
                 this.getAutocompleter(lookupObject) : 
                 	null;
             if(autocompleter == null) {
-                String classModifier = this.isMandatory() ?
-                    "valueL mandatory" :
-                    "valueL";
+                String classModifier = this.isMandatory() 
+                	? CssClass.valueL + " " + CssClass.mandatory
+                    : CssClass.valueL.toString();
                 p.write("  <input id=\"", id, ".Title\" name=\"", id, ".Title\" type=\"text\" class=\"", classModifier, lockedModifier, "\" ", readonlyModifier, " tabindex=\"" + tabIndex, "\" value=\"", (objectReference == null ? "" : objectReference.getTitle()), "\"");
                 p.writeEventHandlers("    ", attribute.getEventHandler());
                 p.write("  >");
-                p.write("  <input id=\"", id, "\" name=\"", id, "\" type=\"hidden\" class=\"valueLLocked\" readonly value=\"", (objectReference == null ? "" : objectReference.getXRI()), "\">");
+                p.write("  <input id=\"", id, "\" name=\"", id, "\" type=\"hidden\" class=\"", CssClass.valueLLocked.toString(), "\" readonly value=\"", (objectReference == null ? "" : objectReference.getXRI()), "\">");
             } else {
                 autocompleter.paint(                    
                     p,
@@ -370,16 +371,16 @@ implements Serializable {
                     this,
                     false,
                     null,
-                    "class=\"autocompleterInput\"",
-                    this.isMandatory() ? 
-                        "class=\"valueL valueAC mandatory\"" : 
-                        "class=\"valueL valueAC\"",
+                    "class=\"" + CssClass.autocompleterInput + "\"",
+                    this.isMandatory() 
+                    	? "class=\"" + CssClass.valueL + " " + CssClass.valueAC + " " + CssClass.mandatory + "\""
+                        : "class=\"" + CssClass.valueL + " " + CssClass.valueAC + "\"",
                     null, // imgTag
                     null // onChangeValueScript
                 );                    
             }
             p.write("</td>");
-            p.write("<td class=\"addon\" ", rowSpanModifier, ">");
+            p.write("<td class=\"", CssClass.addon.toString(), "\" ", rowSpanModifier, ">");
             if(readonlyModifier.isEmpty()) {
                 if(
                     (autocompleter == null) || 
@@ -390,7 +391,7 @@ implements Serializable {
                         feature, 
                         lookupId
                     );
-                    p.write("  ", p.getImg("class=\"popUpButton\" border=\"0\" alt=\"Click to open ObjectFinder\" src=\"", p.getResourcePath("images/"), findObjectAction.getIconKey(), "\" onclick=\"javascript:OF.findObject(", p.getEvalHRef(findObjectAction), ", $('", id, ".Title'), $('", id, "'), '", lookupId, "');\""));                    
+                    p.write("  ", p.getImg("class=\"", CssClass.popUpButton.toString(), "\" border=\"0\" alt=\"Click to open ObjectFinder\" src=\"", p.getResourcePath("images/"), findObjectAction.getIconKey(), "\" onclick=\"javascript:OF.findObject(", p.getEvalHRef(findObjectAction), ", $('", id, ".Title'), $('", id, "'), '", lookupId, "');\""));                    
                 }
             }
             p.write("</td>");

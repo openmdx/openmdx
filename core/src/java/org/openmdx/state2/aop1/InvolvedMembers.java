@@ -97,7 +97,7 @@ abstract class InvolvedMembers<O,M> implements Involved<M> {
     /* (non-Javadoc)
      * @see org.openmdx.state2.aop1.Involved#getIdParameter()
      */
-//  @Override
+    @Override
     public Parameter getIdParameter() {
         return this.involvedStates.getIdParameter();
     }
@@ -105,7 +105,7 @@ abstract class InvolvedMembers<O,M> implements Involved<M> {
     /* (non-Javadoc)
      * @see org.openmdx.state2.aop1.Involved#getQueryAccess()
      */
-//  @Override
+    @Override
     public AccessMode getQueryAccessMode() {
         return this.involvedStates.getQueryAccessMode();
     }

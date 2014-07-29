@@ -94,12 +94,11 @@ public class HtmlEncoder {
             boolean isKnownTag = false;
             if(c == '<' || c == '&') {
                 for(int j = 0; j < KNOWN_TAGS.length; j++) {
-                    if(s.toLowerCase().startsWith(KNOWN_TAGS[j], i)) {
+                    if(s.regionMatches(true, i, KNOWN_TAGS[j], 0, KNOWN_TAGS[j].length())) {
                         int pos = 0;
                         if(KNOWN_TAGS[j].startsWith("&")) {
                             pos = s.indexOf(';', i);
-                        }
-                        else {
+                        } else {
                             pos = s.indexOf('>', i);
                         }
                         if(pos > i) {

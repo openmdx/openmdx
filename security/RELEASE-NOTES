@@ -1,13 +1,13 @@
 Distribution Name: openMDX/Security
-Release Date: 2013-11-04
-Implementation Version: 2.12.7
+Release Date: 2014-08-01
+Implementation Version: 2.13.0
 
 ---------------------------------------------------------------------
 Notes:
 
   This software is published under the BSD license as listed below.
   
-  Copyright (c) 2004-2013, OMEX AG, Switzerland
+  Copyright (c) 2004-2014, OMEX AG, Switzerland
   All rights reserved.
   
   Redistribution and use in source and binary forms, with or without 
@@ -47,13 +47,8 @@ Notes:
 
 ---------------------------------------------------------------------
 
-0.    SUMMARY
-      * clean-up
-      * bug fixes
-
-
 ==============================================================================
-Version 2.12.0                                                      2013-01-18
+Version 2.13.0                                                      2014-08-01
 ==============================================================================
 
 1.    NEW FEATURES
@@ -71,70 +66,7 @@ Version 2.12.0                                                      2013-01-18
       none
             
 2.3   REMOVED FEATURES
-
-      CR20020217
-      openmdx-client.jar
-
-      openMDX/Security's java client archive has been replaced by
-      openMDX/Client's java client archives.
-
-
-==============================================================================
-Version 2.8.0                                                       2010-12-27
-==============================================================================
-
-1.    NEW FEATURES
       none
 
-2.    CHANGES  
-     
-2.0.  CHANGED FEATURES      
-      none
-             
-2.1.  FIXED BUGS
-      none
+~ ~ ~
 
-2.2.  DEPRECATED FEATURES
-      none
-            
-2.3   REMOVED FEATURES
-      none
-
-
-==============================================================================
-Version 2.7.0                                                       2010-08-27
-==============================================================================
-
-1.    NEW FEATURES
-
-      CR20019273
-      Key Store Resource Adapter
-      
-      Setting the ManagedConnectionFactory's 'ConnectionType' property to 
-      'VALIDATOR_CONNECTION' has the following effect:
-      * The 'UserName' attribute is not treated as key store entry alias but 
-        as certificate path validation algorithm (usually "PKIX").
-      * The connections are instances of ValidatorConnection and implement
-        CertificateValidator
-
-2.    CHANGES  
-     
-2.0.  CHANGED FEATURES      
-
-      CR20019273
-      Key Store Resource Adapter
-      
-      Setting the ManagedConnectionFactory's 'ConnectionType' property to 
-      'KEY_CONNECTION' is now mandatory in order to retrieve instances of
-      KeyConnection.
-             
-2.1.  FIXED BUGS
-      none
-
-2.2.  DEPRECATED FEATURES
-      none
-            
-2.3   REMOVED FEATURES
-      none
-
----

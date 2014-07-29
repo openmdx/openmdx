@@ -230,15 +230,16 @@ public final class Codes implements Serializable {
 	    				model.getReferenceType(codeEntryContainer.refGetPath().getChild("entry"))
 	    			);
 	    			String entryClassName = Names.toClassName(
-	    				(String)entryDef.objGetValue("qualifiedName"),
+	    				(String)entryDef.getQualifiedName(),
 	    				Names.JMI1_PACKAGE_SUFFIX
 	    			);
 	    			Class<?> entryClass = Classes.getApplicationClass(entryClassName);
 	    			entryQuery = pm.newQuery(entryClass);
-	    			entryQuery.getFetchPlan().setGroup(FetchPlan.ALL);    			
+	    			entryQuery.getFetchPlan().setGroup(FetchPlan.ALL);	
+	    			entryQuery.getFetchPlan().setFetchSize(Integer.MAX_VALUE);    			
 	    		} catch(Exception ignore) {}
 	    		@SuppressWarnings("unchecked")
-	            RefContainer<RefObject_1_0> entries = (RefContainer)codeEntryContainer.refGetValue("entry");
+	            RefContainer<RefObject_1_0> entries = (RefContainer<RefObject_1_0>)codeEntryContainer.refGetValue("entry");
 	    		for(RefObject_1_0 entry: entryQuery == null ? entries : entries.refGetAll(entryQuery)) {
 	                Short code = 0;
 	                try {
@@ -328,15 +329,16 @@ public final class Codes implements Serializable {
 						model.getReferenceType(codeSegment.refGetPath().getChild("valueContainer"))
 					);
 					String codeEntryContainerClassName = Names.toClassName(
-						(String)codeEntryContainerDef.objGetValue("qualifiedName"),
+						(String)codeEntryContainerDef.getQualifiedName(),
 						Names.JMI1_PACKAGE_SUFFIX
 					);
 					Class<?> codeEntryContainerClass = Classes.getApplicationClass(codeEntryContainerClassName);
 			        codeEntryContainerQuery = pm.newQuery(codeEntryContainerClass);
 			        codeEntryContainerQuery.getFetchPlan().setGroup(FetchPlan.ALL);
+			        codeEntryContainerQuery.getFetchPlan().setFetchSize(Integer.MAX_VALUE);
 				} catch(Exception ignore) {}
 		        @SuppressWarnings("unchecked")
-		        RefContainer<RefObject_1_0> codeEntryContainers = (RefContainer)codeSegment.refGetValue("valueContainer");
+		        RefContainer<RefObject_1_0> codeEntryContainers = (RefContainer<RefObject_1_0>)codeSegment.refGetValue("valueContainer");
 		        Map<String,CodeContainer> codeContainers = new TreeMap<String,CodeContainer>();
 		        for(RefObject_1_0 codeEntryContainer: codeEntryContainerQuery == null ? codeEntryContainers : codeEntryContainers.refGetAll(codeEntryContainerQuery)) {
 		        	@SuppressWarnings("unchecked")
@@ -476,7 +478,8 @@ public final class Codes implements Serializable {
     							: (RefObject_1_0)pm.getObjectById(parentIdentity);
     					} catch(Exception ignore) {}
     					if(parent != null) {
-							RefContainer container = (RefContainer)parent.refGetValue(
+							@SuppressWarnings("unchecked")
+							RefContainer<RefObject_1_0> container = (RefContainer<RefObject_1_0>)parent.refGetValue(
 								entryPath.get(entryPath.size() - 2)
 							);
 							container.refAdd(
@@ -523,12 +526,12 @@ public final class Codes implements Serializable {
 		String classNameContainer = null;
 		String classNameEntry = null;
         @SuppressWarnings("unchecked")
-        Collection<RefObject_1_0> valueContainers = (Collection)codeSegment.refGetValue("valueContainer");
+        Collection<RefObject_1_0> valueContainers = (Collection<RefObject_1_0>)codeSegment.refGetValue("valueContainer");
         if(!valueContainers.isEmpty()) {
         	RefObject_1_0 valueContainer = valueContainers.iterator().next();
         	classNameContainer = valueContainer.refClass().refMofId();
         	@SuppressWarnings("unchecked")
-            Collection<RefObject_1_0> entries = (Collection)valueContainer.refGetValue("entry");
+            Collection<RefObject_1_0> entries = (Collection<RefObject_1_0>)valueContainer.refGetValue("entry");
         	if(!entries.isEmpty()) {
         		classNameEntry = entries.iterator().next().refClass().refMofId();
         	}
@@ -629,7 +632,7 @@ public final class Codes implements Serializable {
         SortedMap<Object,Object> shortTexts = new TreeMap<Object,Object>();
         for(Map.Entry<Short,CodeEntry> entry: codeEntries.entrySet()) {
             if(includeAll || entryIsValid(entry.getValue())) {
-                List texts = entry.getValue().getShortText();
+                List<String> texts = entry.getValue().getShortText();
                 Object text;
                 if(texts.size() > locale) {
                 	text = texts.get(locale);
@@ -677,7 +680,7 @@ public final class Codes implements Serializable {
         SortedMap<Object,Object> longTexts = new TreeMap<Object,Object>();
         for(Map.Entry<Short,CodeEntry> entry: codeEntries.entrySet()) {
             if(includeAll || entryIsValid(entry.getValue())) {
-                List texts = entry.getValue().getLongText();
+                List<String> texts = entry.getValue().getLongText();
                 Object text;
                 if(texts.size() > locale) {
                 	text = texts.get(locale);
@@ -736,7 +739,7 @@ public final class Codes implements Serializable {
      * @param includeAll
      * @return
      */
-    public Map getLongText(
+    public Map<?,?> getLongText(
         String name,
         short locale,
         boolean codeAsKey,
@@ -771,7 +774,7 @@ public final class Codes implements Serializable {
         short locale,
         boolean includeAll
     ) {
-    	return this.getLongText(name, locale, true, includeAll);
+    	return (Map<Short,String>)this.getLongText(name, locale, true, includeAll);
     }
 
     /**
@@ -788,7 +791,7 @@ public final class Codes implements Serializable {
         short locale,
         boolean includeAll
     ) {
-    	return this.getLongText(name, locale, false, includeAll);
+    	return (Map<String,Short>)this.getLongText(name, locale, false, includeAll);
     }
 
     /**
@@ -800,7 +803,7 @@ public final class Codes implements Serializable {
      * @param includeAll
      * @return
      */
-    public Map getShortText(
+    public Map<?,?> getShortText(
         String name,
         short locale,
         boolean codeAsKey,
@@ -835,7 +838,7 @@ public final class Codes implements Serializable {
         short locale,
         boolean includeAll
     ) {
-    	return this.getShortText(name, locale, true, includeAll);
+    	return (Map<Short,String>)this.getShortText(name, locale, true, includeAll);
     }
 
     /**
@@ -852,7 +855,7 @@ public final class Codes implements Serializable {
         short locale,
         boolean includeAll
     ) {
-    	return this.getShortText(name, locale, false, includeAll);
+    	return (Map<String,Short>)this.getShortText(name, locale, false, includeAll);
     }
 
     /**
@@ -862,7 +865,7 @@ public final class Codes implements Serializable {
      * @param includeAll
      * @return
      */
-    public SortedMap getIconKeys(
+    public SortedMap<Short,String> getIconKeys(
         String name,
         boolean includeAll
     ) {
@@ -897,7 +900,7 @@ public final class Codes implements Serializable {
      * @param includeAll
      * @return
      */
-    public SortedMap getColors(
+    public SortedMap<Short,String> getColors(
         String name,
         boolean includeAll
     ) {
@@ -932,7 +935,7 @@ public final class Codes implements Serializable {
      * @param includeAll
      * @return
      */
-    public SortedMap getBackColors(
+    public SortedMap<Short,String> getBackColors(
         String name,
         boolean includeAll
     ) {
@@ -969,54 +972,45 @@ public final class Codes implements Serializable {
         String value,
         String feature
     ) {
-        short code = 0;
         if((value != null) && !value.isEmpty()) {
             value = value.toUpperCase();
-            for(short locale = 0; locale < 255; locale++) {
-            	String key = this.getKey(feature, locale, true, false);
-            	// Prio 1: exact match for short texts
-            	{
-	            	if(this.cachedShortTexts.get(key) == null) {            		
-	                    if(!prepareShortText(feature, locale, true, key, false)) {
-	                    	return code;
+            SortedMap<Short,CodeEntry> codeEntries = this.codeContainerManager.getCodeEntries(feature);
+            if(codeEntries != null) {
+	            // Prio 1: Exact match short texts
+	            for(Map.Entry<Short,CodeEntry> entry: codeEntries.entrySet()) {
+	            	for(String text: entry.getValue().getShortText()) {
+	                    if((text != null) && text.trim().equalsIgnoreCase(value)) {
+	                    	return entry.getKey();
 	                    }
 	            	}
-	                @SuppressWarnings("unchecked")
-                    Map<Object,Object> shortTexts = this.getShortText(feature, locale, true, false);
-	                for(Map.Entry<Object,Object> entry: shortTexts.entrySet()) {
-	                    String text = ((String)entry.getValue()).trim();
-	                    if((text != null) && text.toUpperCase().equals(value)) {
-	                    	return (Short)entry.getKey();
-	                    }
-	                }
-            	}
-            	// Prio 2: try with long texts
-            	{
-	            	if(this.cachedLongTexts.get(key) == null) {            		
-	                    if(!prepareLongText(feature, locale, true, key, false)) {
-	                    	return code;
+	            }
+	        	// Prio 2: Exact match long text
+	            for(Map.Entry<Short,CodeEntry> entry: codeEntries.entrySet()) {
+	            	for(String text: entry.getValue().getLongText()) {
+	                    if((text != null) && text.trim().equalsIgnoreCase(value)) {
+	                    	return entry.getKey();
 	                    }
 	            	}
-	                @SuppressWarnings("unchecked")
-	                Map<Object,Object> longTexts = this.getLongText(feature, locale, true, false);
-	                Integer lastMatchLength = null;
-	                Short lastMatchCode = null;
-	                for(Map.Entry<Object,Object> entry: longTexts.entrySet()) {
-	                    String text = ((String)entry.getValue()).trim();
-	                    if((text != null) && text.toUpperCase().indexOf(value) >= 0) {
-	    	    			if(lastMatchLength == null || text.length() < lastMatchLength) {
-	    	    				lastMatchCode = (Short)entry.getKey();
-	    	    				lastMatchLength = text.length();
+	            }
+	            // Prio 3: Best match long text
+	            Integer bestMatchingLength = null;
+	            Short bestMatchingCode = null;
+	            for(Map.Entry<Short,CodeEntry> entry: codeEntries.entrySet()) {
+	            	for(String text: entry.getValue().getLongText()) {
+	                    if((text != null) && text.trim().toUpperCase().indexOf(value) >= 0) {
+	    	    			if(bestMatchingLength == null || text.length() < bestMatchingLength) {
+	    	    				bestMatchingCode = entry.getKey();
+	    	    				bestMatchingLength = text.length();
 	    	    			}
 	                    }
-	                }
-	                if(lastMatchCode != null) {
-	                	return lastMatchCode;
-	                }
-            	}
+	            	}
+	            }
+	            if(bestMatchingCode != null) {
+	            	return bestMatchingCode;
+	            }
             }
         }
-        return code;
+        return 0;
     }
 
     //-------------------------------------------------------------------------

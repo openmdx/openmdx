@@ -73,7 +73,7 @@ public class ValueListAutocompleter implements Autocompleter_1_0, Serializable {
      * @param options
      */
     public ValueListAutocompleter(
-        List options
+        List<? extends Object> options
     ) {
         this.options = options;
     }
@@ -146,6 +146,6 @@ public class ValueListAutocompleter implements Autocompleter_1_0, Serializable {
     //-----------------------------------------------------------------------
     private static final long serialVersionUID = -1138020420475572050L;
     
-    private final List options;
+    private final List<? extends Object> options;
     
 }

@@ -1,14 +1,13 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
+ * Project:     openMDX, http://www.openmdx.org/
  * Description: check MOF Model Constraints
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
  * ====================================================================
  *
- * This software is published under the BSD license
- * as listed below.
+ * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004, OMEX AG, Switzerland
+ * Copyright (c) 2004-2014, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -165,43 +164,43 @@ public class ModelConstraintsChecker_1 {
         List violations
     ) throws ServiceException {
 
-        SysLog.trace("checking all applicable constraints for element " + elementDef.objGetValue("qualifiedName"));
+        SysLog.trace("checking all applicable constraints for element " + elementDef.getQualifiedName());
 
         if(elementDef.isAttributeType()) {
-            SysLog.trace("checking all ATTRIBUTE constraints for element " + elementDef.objGetValue("qualifiedName"));
+            SysLog.trace("checking all ATTRIBUTE constraints for element " + elementDef.getQualifiedName());
             this.verifyCannotBeDerivedAndChangeable(elementDef, violations);
         }
         if(elementDef.isElementType()) {
-            SysLog.trace("checking all ELEMENT constraints for element " + elementDef.objGetValue("qualifiedName"));
+            SysLog.trace("checking all ELEMENT constraints for element " + elementDef.getQualifiedName());
             this.verifyMustBeContainedUnlessPackage(elementDef, violations);
         }
         if(elementDef.isNamespaceType()) {
-            SysLog.trace("checking all NAMESPACE constraints for element " + elementDef.objGetValue("qualifiedName"));
+            SysLog.trace("checking all NAMESPACE constraints for element " + elementDef.getQualifiedName());
             this.verifyContentNamesMustNotCollide(elementDef, violations);
         }
         if(elementDef.isGeneralizableElementType()) {
-            SysLog.trace("checking all GENERALIZABLE_ELEMENT constraints for element " + elementDef.objGetValue("qualifiedName"));
+            SysLog.trace("checking all GENERALIZABLE_ELEMENT constraints for element " + elementDef.getQualifiedName());
             this.verifySupertypeKindMustBeSame(elementDef, violations);
             this.verifyContentsMustNotCollideWithSupertypes(elementDef, violations);
             this.verifyDiamondRuleMustBeObeyed(elementDef, violations);
         }
         if(elementDef.isTypedElementType() && !elementDef.isPrimitiveType()) {
-            SysLog.trace("checking all TYPED_ELEMENT constraints for element " + elementDef.objGetValue("qualifiedName"));
+            SysLog.trace("checking all TYPED_ELEMENT constraints for element " + elementDef.getQualifiedName());
             this.verifyAssociationsCannotBeTypes(elementDef, violations);
         }
         if(elementDef.isClassType()) {
-            SysLog.trace("checking all CLASS constraints for element " + elementDef.objGetValue("qualifiedName"));
+            SysLog.trace("checking all CLASS constraints for element " + elementDef.getQualifiedName());
             this.verifyAbstractClassesCannotBeSingleton(elementDef, violations);
             this.verifyClassContainmentRules(elementDef, violations);
         }
         if(elementDef.isDataType()) {
-            SysLog.trace("checking all DATATYPE constraints for element " + elementDef.objGetValue("qualifiedName"));
+            SysLog.trace("checking all DATATYPE constraints for element " + elementDef.getQualifiedName());
             this.verifyDataTypeContainmentRules(elementDef, violations);
             this.verifyDataTypesHaveNoSupertypes(elementDef, violations);
             this.verifyDataTypesCannotBeAbstract(elementDef, violations);
         }
         if(elementDef.isReferenceType()) {
-            SysLog.trace("checking all REFERENCE constraints for element " + elementDef.objGetValue("qualifiedName"));
+            SysLog.trace("checking all REFERENCE constraints for element " + elementDef.getQualifiedName());
             this.verifyReferenceMultiplicityMustMatchEnd(elementDef, violations);
             this.verifyReferenceMustBeInstanceScoped(elementDef, violations);
             this.verifyChangeableReferenceMustHaveChangeableEnd(elementDef, violations);
@@ -210,19 +209,19 @@ public class ModelConstraintsChecker_1 {
             this.verifyContainerMustMatchExposedType(elementDef, violations);
         }
         if(elementDef.isOperationType()) {
-            SysLog.trace("checking all OPERATION constraints for element " + elementDef.objGetValue("qualifiedName"));
+            SysLog.trace("checking all OPERATION constraints for element " + elementDef.getQualifiedName());
             this.verifyOperationContainmentRules(elementDef, violations);
             this.verifyOperationsHaveAtMostOneReturn(elementDef, violations);
             this.verifyOperationParametersMustBeParameterClasses(elementDef, violations);
             this.verifyOperationExceptionsMustBeExceptionClasses(elementDef, violations);
         }    
         if(elementDef.isExceptionType()) {
-            SysLog.trace("checking all EXCEPTION constraints for element " + elementDef.objGetValue("qualifiedName"));
+            SysLog.trace("checking all EXCEPTION constraints for element " + elementDef.getQualifiedName());
             this.verifyExceptionContainmentRules(elementDef, violations);
             this.verifyExceptionsHaveOnlyOutParameters(elementDef, violations);
         }    
         if(elementDef.isAssociationType()) {
-            SysLog.trace("checking all ASSOCIATION constraints for element " + elementDef.objGetValue("qualifiedName"));
+            SysLog.trace("checking all ASSOCIATION constraints for element " + elementDef.getQualifiedName());
             this.verifyAssociationContainmentRules(elementDef, violations);
             this.verifyAssociationsHaveNoSupertypes(elementDef, violations);
             this.verifyAssociationsCannotBeAbstract(elementDef, violations);
@@ -231,7 +230,7 @@ public class ModelConstraintsChecker_1 {
             this.verifyAssociationEnds(elementDef, violations);
         }
         if(elementDef.isAssociationEndType()) {
-            SysLog.trace("checking all ASSOCIATION_END constraints for element " + elementDef.objGetValue("qualifiedName"));
+            SysLog.trace("checking all ASSOCIATION_END constraints for element " + elementDef.getQualifiedName());
             this.verifyEndTypeMustBeClass(elementDef, violations);
             this.verifyCannotHaveTwoAggregateEnds(elementDef, violations);
             this.verifyCannotHaveMoreThanOneQualifier(elementDef, violations);
@@ -240,32 +239,32 @@ public class ModelConstraintsChecker_1 {
             this.verifyChangeabilityForNonPrimitiveQualifier(elementDef, violations);
         }
         if(elementDef.isPackageType()) {
-            SysLog.trace("checking all PACKAGE constraints for element " + elementDef.objGetValue("qualifiedName"));
+            SysLog.trace("checking all PACKAGE constraints for element " + elementDef.getQualifiedName());
             this.verifyPackageContainmentRules(elementDef, violations);
             this.verifyPackagesCannotBeAbstract(elementDef, violations);
         }
         if(elementDef.isImportType()) {
-            SysLog.trace("checking all IMPORT constraints for element " + elementDef.objGetValue("qualifiedName"));
+            SysLog.trace("checking all IMPORT constraints for element " + elementDef.getQualifiedName());
             this.verifyCanOnlyImportPackagesAndClasses(elementDef, violations);
             this.verifyCannotImportSelf(elementDef, violations);
             this.verifyCannotImportNestedComponents(elementDef, violations);
             this.verifyNestedPackagesCannotImport(elementDef, violations);
         }
         if(elementDef.isConstraintType()) {
-            SysLog.trace("checking all CONSTRAINT constraints for element " + elementDef.objGetValue("qualifiedName"));
+            SysLog.trace("checking all CONSTRAINT constraints for element " + elementDef.getQualifiedName());
             this.verifyCannotConstrainThisElement(elementDef, violations);
             this.verifyConstraintsLimitedToContainer(elementDef, violations);
         }
         if(elementDef.isConstantType()) {
-            SysLog.trace("checking all CONSTANT constraints for element " + elementDef.objGetValue("qualifiedName"));
+            SysLog.trace("checking all CONSTANT constraints for element " + elementDef.getQualifiedName());
             this.verifyConstantsTypeMustBePrimitive(elementDef, violations);
         }
         if(elementDef.isStructureFieldType()) {
-            SysLog.trace("checking all STRUCTURE_FIELD constraints for element " + elementDef.objGetValue("qualifiedName"));
+            SysLog.trace("checking all STRUCTURE_FIELD constraints for element " + elementDef.getQualifiedName());
             this.verifyStructureFieldContainmentRules(elementDef, violations);
         }
         if(elementDef.isStructureType()) {
-            SysLog.trace("checking all STRUCTURE_TYPE constraints for element " + elementDef.objGetValue("qualifiedName"));
+            SysLog.trace("checking all STRUCTURE_TYPE constraints for element " + elementDef.getQualifiedName());
             this.verifyMustHaveFields(elementDef, violations);
         }
         if(
@@ -275,7 +274,7 @@ public class ModelConstraintsChecker_1 {
             elementDef.isStructureFieldType() ||
             elementDef.isCollectionType()
         ) {
-            SysLog.trace("checking all STRUCTURAL_FEATURE/ASSOCIATION_END/PARAMETER/STRUCTURE_FIELD/COLLECTION_TYPE constraints for element " + elementDef.objGetValue("qualifiedName"));
+            SysLog.trace("checking all STRUCTURAL_FEATURE/ASSOCIATION_END/PARAMETER/STRUCTURE_FIELD/COLLECTION_TYPE constraints for element " + elementDef.getQualifiedName());
             this.verifyMultiplicity(elementDef, violations);
         }
 
@@ -291,13 +290,13 @@ public class ModelConstraintsChecker_1 {
         List violations
     ) throws ServiceException {
         if (
-                ((Boolean)attributeDef.objGetValue("isDerived")).booleanValue() &&
-                ((Boolean)attributeDef.objGetValue("isChangeable")).booleanValue()
+                ((Boolean)attributeDef.isDerived()).booleanValue() &&
+                ((Boolean)attributeDef.isChangeable()).booleanValue()
         ) {
             violations.add(
                 new BasicException.Parameter(
                     ModelConstraints.CANNOT_BE_DERIVED_AND_CHANGEABLE,
-                    attributeDef.objGetValue("qualifiedName")
+                    attributeDef.getQualifiedName()
                 )
             );
         }
@@ -316,7 +315,7 @@ public class ModelConstraintsChecker_1 {
             violations.add(
                 new BasicException.Parameter(
                     ModelConstraints.CANNOT_HAVE_MORE_THAN_ONE_QUALIFIER,
-                    associationEndDef.objGetValue("qualifiedName")
+                    associationEndDef.getQualifiedName()
                 )
             );
         }
@@ -333,15 +332,15 @@ public class ModelConstraintsChecker_1 {
         List violations
     ) throws ServiceException {    
         if(associationEndDef.objGetList("qualifierType").size() > 0) {
-            ModelElement_1_0 qualifierType = this.model.getDereferencedType(associationEndDef.objGetValue("qualifierType"));      
+            ModelElement_1_0 qualifierType = this.model.getDereferencedType(associationEndDef.getQualifierType());      
             if(
                 !qualifierType.isPrimitiveType() &&
-                !ModelHelper.UNBOUND.equals(associationEndDef.objGetValue("multiplicity"))
+                !ModelHelper.UNBOUND.equals(associationEndDef.getMultiplicity())
             ) {
                 violations.add(
                     new BasicException.Parameter(
                         ModelConstraints.NON_PRIMITIVE_QUALIFIER_MUST_HAVE_MULTIPLICITY_0_TO_N,
-                        associationEndDef.objGetValue("qualifiedName")
+                        associationEndDef.getQualifiedName()
                     )
                 );
             }
@@ -360,15 +359,15 @@ public class ModelConstraintsChecker_1 {
     ) throws ServiceException {
 
         if(associationEndDef.objGetList("qualifierType").size() > 0) {
-            ModelElement_1_0 qualifierType = this.model.getDereferencedType(associationEndDef.objGetValue("qualifierType"));      
+            ModelElement_1_0 qualifierType = this.model.getDereferencedType(associationEndDef.getQualifierType());      
             if(
                 qualifierType.isPrimitiveType() &&
-                !((String)associationEndDef.objGetValue("multiplicity")).endsWith("..1")
+                !((String)associationEndDef.getMultiplicity()).endsWith("..1")
             ) {
                 violations.add(
                     new BasicException.Parameter(
                         ModelConstraints.PRIMITIVE_QUALIFIER_MUST_HAVE_MULTIPLICITY_0_OR_1_TO_1,
-                        associationEndDef.objGetValue("qualifiedName")
+                        associationEndDef.getQualifiedName()
                     )
                 );
             }
@@ -396,8 +395,8 @@ public class ModelConstraintsChecker_1 {
                     violations.add(
                         new BasicException.Parameter(
                             ModelConstraints.OPERATION_ARGUMENTS_MUST_BE_PARAMETER,
-                            operationDef.objGetValue("qualifiedName"), 
-                            parameterDef.objGetValue("name")
+                            operationDef.getQualifiedName(), 
+                            parameterDef.getName()
                         )
                     );
                     return;
@@ -408,8 +407,8 @@ public class ModelConstraintsChecker_1 {
                     violations.add(
                         new BasicException.Parameter(
                             ModelConstraints.PARAMETER_TYPE_MUST_BE_STRUCTURE_TYPE,
-                            operationDef.objGetValue("qualifiedName"), 
-                            parameterDef.objGetValue("name")
+                            operationDef.getQualifiedName(), 
+                            parameterDef.getName()
                         )
                     );
                     return;
@@ -433,7 +432,7 @@ public class ModelConstraintsChecker_1 {
                 it.hasNext();
             ) {        
                 Path exceptionPath = (Path)it.next();
-                String qualifiedExceptionName = exceptionPath.getBase();
+                String qualifiedExceptionName = exceptionPath.getLastSegment().toClassicRepresentation();
                 try {
                     ModelElement_1_0 exceptionDef = this.model.getElement(qualifiedExceptionName);
                     // check argument to be PARAMETER
@@ -441,8 +440,8 @@ public class ModelConstraintsChecker_1 {
                         violations.add(
                             new BasicException.Parameter(
                                 ModelConstraints.OPERATION_EXCEPTION_MUST_BE_EXCEPTION,
-                                operationDef.objGetValue("qualifiedName"), 
-                                exceptionDef.objGetValue("name")
+                                operationDef.getQualifiedName(), 
+                                exceptionDef.getName()
                             )
                         );
                         return;
@@ -481,7 +480,7 @@ public class ModelConstraintsChecker_1 {
                 violations.add(
                     new BasicException.Parameter(
                         ModelConstraints.MUST_BE_CONTAINED_UNLESS_PACKAGE,
-                        elementDef.objGetValue("qualifiedName")
+                        elementDef.getQualifiedName()
                     )
                 );
             }
@@ -505,16 +504,16 @@ public class ModelConstraintsChecker_1 {
                 it.hasNext();
             ) {        
                 ModelElement_1_0 elementDef = this.model.getElement(it.next());
-                if (contentNames.contains(elementDef.objGetValue("name"))) {
+                if (contentNames.contains(elementDef.getName())) {
                     violations.add(
                         new BasicException.Parameter(
                             ModelConstraints.CONTENT_NAMES_MUST_NOT_COLLIDE,
-                            modelNamespace.objGetValue("qualifiedName"),
-                            elementDef.objGetValue("name")
+                            modelNamespace.getQualifiedName(),
+                            elementDef.getName()
                         )
                     );
                 } else {
-                    contentNames.add(elementDef.objGetValue("name"));
+                    contentNames.add(elementDef.getName());
                 }
             }
         }
@@ -539,8 +538,8 @@ public class ModelConstraintsChecker_1 {
                 violations.add(
                     new BasicException.Parameter(
                         ModelConstraints.SUPERTYPE_KIND_MUST_BE_SAME,
-                        modelGeneralizableElement.objGetValue("qualifiedName"),
-                        elementDef.objGetValue("qualifiedName")
+                        modelGeneralizableElement.getQualifiedName(),
+                        elementDef.getQualifiedName()
                     )
                 );
             }
@@ -570,16 +569,16 @@ public class ModelConstraintsChecker_1 {
                 it.hasNext();
             ) {        
                 ModelElement_1_0 elementDef = this.model.getElement(it.next());
-                if (featureNames.contains(elementDef.objGetValue("name"))) {
+                if (featureNames.contains(elementDef.getName())) {
                     violations.add(
                         new BasicException.Parameter(
                             ModelConstraints.CONTENTS_MUST_NOT_COLLIDE_WITH_SUPERTYPES,
-                            modelGeneralizableElement.objGetValue("qualifiedName"),
-                            elementDef.objGetValue("name")
+                            modelGeneralizableElement.getQualifiedName(),
+                            elementDef.getName()
                         )
                     );
                 } else {
-                    featureNames.add(elementDef.objGetValue("name"));
+                    featureNames.add(elementDef.getName());
                 }
             }
         }
@@ -606,22 +605,22 @@ public class ModelConstraintsChecker_1 {
                     j.hasNext();
                 ) {
                     ModelElement_1_0 feature = this.model.getElement(j.next());
-                    ModelElement_1_0 inspected = (ModelElement_1_0)allFeatures.get(feature.objGetValue("name"));
+                    ModelElement_1_0 inspected = (ModelElement_1_0)allFeatures.get(feature.getName());
                     if(
                         (inspected != null) && 
-                        !(inspected.objGetValue("qualifiedName").equals(feature.objGetValue("qualifiedName")))
+                        !(inspected.getQualifiedName().equals(feature.getQualifiedName()))
                     ) {
                         violations.add(
                             new BasicException.Parameter(
                                 ModelConstraints.DIAMOND_RULE_MUST_BE_OBEYED,
-                                generalizableElementDef.objGetValue("qualifiedName"),
-                                feature.objGetValue("name")
+                                generalizableElementDef.getQualifiedName(),
+                                feature.getName()
                             )
                         );
                     }
                     else {
                         allFeatures.put(
-                            feature.objGetValue("name"),
+                            feature.getName(),
                             feature
                         );
                     }
@@ -645,7 +644,7 @@ public class ModelConstraintsChecker_1 {
             violations.add(
                 new BasicException.Parameter(
                     ModelConstraints.ASSOCIATIONS_CANNOT_BE_TYPES,
-                    typedElementDef.objGetValue("qualifiedName")
+                    typedElementDef.getQualifiedName()
                 )
             );
         }    
@@ -657,15 +656,15 @@ public class ModelConstraintsChecker_1 {
         List violations
     ) throws ServiceException {
         if(associationEndDef.objGetList("qualifierType").size() > 0) {
-            ModelElement_1_0 qualifierType = this.model.getDereferencedType(associationEndDef.objGetValue("qualifierType"));      
+            ModelElement_1_0 qualifierType = this.model.getDereferencedType(associationEndDef.getQualifierType());      
             if(
                 !qualifierType.isPrimitiveType() &&
-                ((Boolean)associationEndDef.objGetValue("isChangeable")).booleanValue()
+                ((Boolean)associationEndDef.isChangeable()).booleanValue()
             ) {
                 violations.add(
                     new BasicException.Parameter(
                         ModelConstraints.ASSOCIATION_END_WITH_COMPLEX_QUALIFIER_MUST_BE_FROZEN,
-                        associationEndDef.objGetValue("qualifiedName")
+                        associationEndDef.getQualifiedName()
                     )
                 );
             }
@@ -701,13 +700,13 @@ public class ModelConstraintsChecker_1 {
         List violations
     ) throws ServiceException {
         if (
-            ((Boolean) classDef.objGetValue("isAbstract")).booleanValue() &&
+            ((Boolean) classDef.isAbstract()).booleanValue() &&
             ((Boolean) classDef.objGetValue("isSingleton")).booleanValue()
         ) {
             violations.add(
                 new BasicException.Parameter(
                     ModelConstraints.ABSTRACT_CLASSES_CANNOT_BE_SINGLETON,
-                    classDef.objGetValue("qualifiedName")
+                    classDef.getQualifiedName()
                 )
             );
         }
@@ -742,8 +741,8 @@ public class ModelConstraintsChecker_1 {
                     violations.add(
                         new BasicException.Parameter(
                             ModelConstraints.DATA_TYPE_CONTAINMENT_RULES,
-                            dataTypeDef.objGetValue("qualifiedName"), 
-                            elementDef.objGetValue("name")
+                            dataTypeDef.getQualifiedName(), 
+                            elementDef.getName()
                         )
                     );
                 }
@@ -764,7 +763,7 @@ public class ModelConstraintsChecker_1 {
             violations.add(
                 new BasicException.Parameter(
                     ModelConstraints.DATA_TYPES_HAVE_NO_SUPERTYPES,
-                    modelDataType.objGetValue("qualifiedName")
+                    modelDataType.getQualifiedName()
                 )
             );
         }
@@ -779,11 +778,11 @@ public class ModelConstraintsChecker_1 {
         ModelElement_1_0 dataTypeDef,
         List violations
     ) throws ServiceException {
-        if (((Boolean)dataTypeDef.objGetValue("isAbstract")).booleanValue()) {
+        if (((Boolean)dataTypeDef.isAbstract()).booleanValue()) {
             violations.add(
                 new BasicException.Parameter(
                     ModelConstraints.DATA_TYPES_CANNOT_BE_ABSTRACT,
-                    dataTypeDef.objGetValue("qualifiedName")
+                    dataTypeDef.getQualifiedName()
                 )
             );
         }
@@ -801,17 +800,17 @@ public class ModelConstraintsChecker_1 {
     ) throws ServiceException {
 
         ModelElement_1_0 referencedEnd = this.model.getElement(
-            referenceDef.objGetValue("referencedEnd")
+            referenceDef.getReferencedEnd()
         );
         if (
-            !referenceDef.objGetValue("multiplicity").equals(
-                referencedEnd.objGetValue("multiplicity")
+            !referenceDef.getMultiplicity().equals(
+                referencedEnd.getMultiplicity()
             )
         ) {
             violations.add(
                 new BasicException.Parameter(
                     ModelConstraints.REFERENCE_MULTIPLICITY_MUST_MATCH_END,
-                    referenceDef.objGetValue("qualifiedName")
+                    referenceDef.getQualifiedName()
                 )
             );
         }
@@ -831,7 +830,7 @@ public class ModelConstraintsChecker_1 {
             violations.add(
                 new BasicException.Parameter(
                     ModelConstraints.REFERENCE_MUST_BE_INSTANCE_SCOPED,
-                    referenceDef.objGetValue("qualifiedName")
+                    referenceDef.getQualifiedName()
                 )
             );
         }
@@ -849,16 +848,16 @@ public class ModelConstraintsChecker_1 {
     ) throws ServiceException {
 
         ModelElement_1_0 referencedEnd = this.model.getElement(
-            referenceDef.objGetValue("referencedEnd")
+            referenceDef.getReferencedEnd()
         );
         if (
-                !((Boolean)referenceDef.objGetValue("isChangeable")).booleanValue() ==
-                    ((Boolean)referencedEnd.objGetValue("isChangeable")).booleanValue()
+                !((Boolean)referenceDef.isChangeable()).booleanValue() ==
+                    ((Boolean)referencedEnd.isChangeable()).booleanValue()
         ) {
             violations.add(
                 new BasicException.Parameter(
                     ModelConstraints.CHANGEABLE_REFERENCE_MUST_HAVE_CHANGEABLE_END,
-                    referenceDef.objGetValue("qualifiedName")
+                    referenceDef.getQualifiedName()
                 )
             );
         }
@@ -876,17 +875,17 @@ public class ModelConstraintsChecker_1 {
     ) throws ServiceException {
 
         ModelElement_1_0 referencedEnd = this.model.getElement(
-            referenceDef.objGetValue("referencedEnd")
+            referenceDef.getReferencedEnd()
         );
         if (
-                !referenceDef.objGetValue("type").equals(
-                    referencedEnd.objGetValue("type")
+                !referenceDef.getType().equals(
+                    referencedEnd.getType()
                 )
         ) {
             violations.add(
                 new BasicException.Parameter(
                     ModelConstraints.REFERENCE_TYPE_MUST_MATCH_END_TYPE,
-                    referenceDef.objGetValue("qualifiedName")
+                    referenceDef.getQualifiedName()
                 )
             );
         }
@@ -903,13 +902,13 @@ public class ModelConstraintsChecker_1 {
     ) throws ServiceException {
 
         ModelElement_1_0 referencedEnd = this.model.getElement(
-            referenceDef.objGetValue("referencedEnd")
+            referenceDef.getReferencedEnd()
         );
         if (!((Boolean)referencedEnd.objGetValue("isNavigable")).booleanValue()) {
             violations.add(
                 new BasicException.Parameter(
                     ModelConstraints.REFERENCED_END_MUST_BE_NAVIGABLE,
-                    referenceDef.objGetValue("qualifiedName")
+                    referenceDef.getQualifiedName()
                 )
             );
         }
@@ -926,7 +925,7 @@ public class ModelConstraintsChecker_1 {
             violations.add(
                 new BasicException.Parameter(
                     ModelConstraints.ASSOCIATIONS_CONTAINMENT_RULES,
-                    associationDef.objGetValue("qualifiedName")
+                    associationDef.getQualifiedName()
                 )
             );
             return;
@@ -935,46 +934,46 @@ public class ModelConstraintsChecker_1 {
         ModelElement_1_0 end2 = (ModelElement_1_0)ends.get(1);
 
         if(
-            !AggregationKind.NONE.equals(end1.objGetValue("aggregation")) &&
-            !AggregationKind.NONE.equals(end2.objGetValue("aggregation"))
+            !AggregationKind.NONE.equals(end1.getAggregation()) &&
+            !AggregationKind.NONE.equals(end2.getAggregation())
         ) {
             violations.add(
                 new BasicException.Parameter(
                     ModelConstraints.ONE_ASSOCIATION_END_MUST_HAVE_AGGREGATION_NONE,
-                    associationDef.objGetValue("qualifiedName")
+                    associationDef.getQualifiedName()
                 )
             );
         }
 
         // !NONE --> primitive qualifier and multiplicity 0..1|1..1
         if(
-            !AggregationKind.NONE.equals(end1.objGetValue("aggregation")) && (
+            !AggregationKind.NONE.equals(end1.getAggregation()) && (
                 end1.objGetList("qualifierType").size() < 1 || 
-                !this.model.isPrimitiveType(end1.objGetValue("qualifierType")) || (
-                    !Multiplicity.OPTIONAL.toString().equals(end1.objGetValue("multiplicity")) &&
-                    !Multiplicity.SINGLE_VALUE.toString().equals(end1.objGetValue("multiplicity"))
+                !this.model.isPrimitiveType(end1.getQualifierType()) || (
+                    !Multiplicity.OPTIONAL.toString().equals(end1.getMultiplicity()) &&
+                    !Multiplicity.SINGLE_VALUE.toString().equals(end1.getMultiplicity())
                 )
             )
         ) {
             violations.add(
                 new BasicException.Parameter(
                     ModelConstraints.AGGREGATION_NOT_EQUAL_NONE_REQUIRES_PRIMITIVE_TYPE_QUALIFIER_AND_SINGLE_MULTIPLICITY,
-                    end1.objGetValue("qualifiedName")
+                    end1.getQualifiedName()
                 )
             );
         }
 
         // !NONE --> primitive qualifier and multiplicity 0..1|1..1
         if(
-                !AggregationKind.NONE.equals(end2.objGetValue("aggregation")) &&
+                !AggregationKind.NONE.equals(end2.getAggregation()) &&
                 ((end2.objGetList("qualifierType").size() < 1) || 
-                        !this.model.isPrimitiveType(end2.objGetValue("qualifierType")) ||
-                        (!Multiplicity.OPTIONAL.toString().equals(end2.objGetValue("multiplicity"))) && !Multiplicity.SINGLE_VALUE.toString().equals(end2.objGetValue("multiplicity")))
+                        !this.model.isPrimitiveType(end2.getQualifierType()) ||
+                        (!Multiplicity.OPTIONAL.toString().equals(end2.getMultiplicity())) && !Multiplicity.SINGLE_VALUE.toString().equals(end2.getMultiplicity()))
         ) {
             violations.add(
                 new BasicException.Parameter(
                     ModelConstraints.AGGREGATION_NOT_EQUAL_NONE_REQUIRES_PRIMITIVE_TYPE_QUALIFIER_AND_SINGLE_MULTIPLICITY,
-                    end2.objGetValue("qualifiedName")
+                    end2.getQualifiedName()
                 )
             );
         }
@@ -987,7 +986,7 @@ public class ModelConstraintsChecker_1 {
             violations.add(
                 new BasicException.Parameter(
                     ModelConstraints.QUALIFIER_REQUIRES_NAVIGABILITY,
-                    end1.objGetValue("qualifiedName")
+                    end1.getQualifiedName()
                 )
             );
         }
@@ -1000,7 +999,7 @@ public class ModelConstraintsChecker_1 {
             violations.add(
                 new BasicException.Parameter(
                     ModelConstraints.QUALIFIER_REQUIRES_NAVIGABILITY,
-                    end2.objGetValue("qualifiedName")
+                    end2.getQualifiedName()
                 )
             );
         }
@@ -1009,15 +1008,15 @@ public class ModelConstraintsChecker_1 {
         //          || primitive qualifier & multiplicity 0..1 ||
         //          || class qualifier & multiplicity 0..n    
         if(
-                AggregationKind.NONE.equals(end1.objGetValue("aggregation")) &&
+                AggregationKind.NONE.equals(end1.getAggregation()) &&
                 (end1.objGetList("qualifierType").size() >= 1) &&
-                (!this.model.isPrimitiveType(end1.objGetValue("qualifierType")) || !Multiplicity.OPTIONAL.toString().equals(end1.objGetValue("multiplicity"))) &&
-                (!this.model.isClassType(end1.objGetValue("qualifierType")) || !ModelHelper.UNBOUND.equals(end1.objGetValue("multiplicity")))      
+                (!this.model.isPrimitiveType(end1.getQualifierType()) || !Multiplicity.OPTIONAL.toString().equals(end1.getMultiplicity())) &&
+                (!this.model.isClassType(end1.getQualifierType()) || !ModelHelper.UNBOUND.equals(end1.getMultiplicity()))      
         ) {
             violations.add(
                 new BasicException.Parameter(
                     ModelConstraints.AGGREGATION_NONE_REQUIRES_NO_OR_UNIQUE_PRIMITIVE_OR_NON_UNIQUE_CLASS_QUALIFIER,
-                    end1.objGetValue("qualifiedName")
+                    end1.getQualifiedName()
                 )
             );
         }
@@ -1026,19 +1025,19 @@ public class ModelConstraintsChecker_1 {
         //          || primitive qualifier & multiplicity 0..1
         //          || class qualifier & multiplicity 0..n    
         if(
-            AggregationKind.NONE.equals(end2.objGetValue("aggregation")) &&
+            AggregationKind.NONE.equals(end2.getAggregation()) &&
             end2.objGetList("qualifierType").size() >= 1 && (
-                !this.model.isPrimitiveType(end2.objGetValue("qualifierType")) || 
-                !Multiplicity.OPTIONAL.toString().equals(end2.objGetValue("multiplicity"))
+                !this.model.isPrimitiveType(end2.getQualifierType()) || 
+                !Multiplicity.OPTIONAL.toString().equals(end2.getMultiplicity())
             ) && (
-                !this.model.isClassType(end2.objGetValue("qualifierType")) || 
-                !ModelHelper.UNBOUND.equals(end2.objGetValue("multiplicity"))
+                !this.model.isClassType(end2.getQualifierType()) || 
+                !ModelHelper.UNBOUND.equals(end2.getMultiplicity())
             )      
         ) {
             violations.add(
                 new BasicException.Parameter(
                     ModelConstraints.AGGREGATION_NONE_REQUIRES_NO_OR_UNIQUE_PRIMITIVE_OR_NON_UNIQUE_CLASS_QUALIFIER,
-                    end1.objGetValue("qualifiedName")
+                    end1.getQualifiedName()
                 )
             );
         }
@@ -1046,15 +1045,15 @@ public class ModelConstraintsChecker_1 {
         // end1:class qualifier --> end2:no or primitive qualifier
         if(
             end1.objGetList("qualifierType").size() >= 1 &&
-            this.model.isClassType(end1.objGetValue("qualifierType")) &&
+            this.model.isClassType(end1.getQualifierType()) &&
             end2.objGetList("qualifierType").size() >= 1 && 
-            !this.model.isPrimitiveType(end2.objGetValue("qualifierType"))
+            !this.model.isPrimitiveType(end2.getQualifierType())
         ) {
             violations.add(
                 new BasicException.Parameter(
                     ModelConstraints.END1_CLASS_QUALIFIER_REQUIRES_END2_NONE_OR_PRIMITIVE_QUALIFIER,
-                    end1.objGetValue("qualifiedName"),
-                    end2.objGetValue("qualifiedName")
+                    end1.getQualifiedName(),
+                    end2.getQualifiedName()
                 )
             );
         }
@@ -1062,15 +1061,15 @@ public class ModelConstraintsChecker_1 {
         // end2:class qualifier --> end1:no or numeric qualifier
         if(
             end2.objGetList("qualifierType").size() >= 1 &&
-            this.model.isClassType(end2.objGetValue("qualifierType")) &&
+            this.model.isClassType(end2.getQualifierType()) &&
             end1.objGetList("qualifierType").size() >= 1 && 
-            !this.model.isPrimitiveType(end1.objGetValue("qualifierType"))
+            !this.model.isPrimitiveType(end1.getQualifierType())
         ) {
             violations.add(
                 new BasicException.Parameter(
                     ModelConstraints.END1_CLASS_QUALIFIER_REQUIRES_END2_NONE_OR_PRIMITIVE_QUALIFIER,
-                    end1.objGetValue("qualifiedName"),
-                    end2.objGetValue("qualifiedName")
+                    end1.getQualifiedName(),
+                    end2.getQualifiedName()
                 )
             );
         }
@@ -1089,21 +1088,21 @@ public class ModelConstraintsChecker_1 {
     ) throws ServiceException {
 
         ModelElement_1_0 container = this.model.getElement(
-            referenceDef.objGetValue("container")
+            referenceDef.getContainer()
         );
         ModelElement_1_0 exposedEnd = this.model.getElement(
-            referenceDef.objGetValue("exposedEnd")
+            referenceDef.getExposedEnd()
         );
 
         // precondition: container->allSupertype includes container itself
         if (!container.objGetList("allSupertype").contains(
-            exposedEnd.objGetValue("type")
+            exposedEnd.getType()
         )
         ) {
             violations.add(
                 new BasicException.Parameter(
                     ModelConstraints.CONTAINER_MUST_MATCH_EXPOSED_TYPE,
-                    referenceDef.objGetValue("qualifiedName")
+                    referenceDef.getQualifiedName()
                 )
             );
         }
@@ -1153,8 +1152,8 @@ public class ModelConstraintsChecker_1 {
                         violations.add(
                             new BasicException.Parameter(
                                 ModelConstraints.OPERATIONS_HAVE_AT_MOST_ONE_RETURN,
-                                operationDef.objGetValue("qualifiedName"), 
-                                modelParameter.objGetValue("name")
+                                operationDef.getQualifiedName(), 
+                                modelParameter.getName()
                             )
                         );
                         return;
@@ -1203,8 +1202,8 @@ public class ModelConstraintsChecker_1 {
                 violations.add(
                     new BasicException.Parameter(
                         ModelConstraints.EXCEPTIONS_HAVE_ONLY_OUT_PARAMETERS,
-                        exceptionDef.objGetValue("qualifiedName"), 
-                        modelParameter.objGetValue("name")
+                        exceptionDef.getQualifiedName(), 
+                        modelParameter.getName()
                     )
                 );
             }
@@ -1244,7 +1243,7 @@ public class ModelConstraintsChecker_1 {
             violations.add(
                 new BasicException.Parameter(
                     ModelConstraints.ASSOCIATIONS_HAVE_NO_SUPERTYPES,
-                    associationDef.objGetValue("qualifiedName")
+                    associationDef.getQualifiedName()
                 )
             );
         }
@@ -1259,11 +1258,11 @@ public class ModelConstraintsChecker_1 {
         ModelElement_1_0 associationDef,
         List violations
     ) throws ServiceException {
-        if (((Boolean) associationDef.objGetValue("isAbstract")).booleanValue()) {
+        if (((Boolean) associationDef.isAbstract()).booleanValue()) {
             violations.add(
                 new BasicException.Parameter(
                     ModelConstraints.ASSOCIATIONS_CANNOT_BE_ABSTRACT,
-                    associationDef.objGetValue("qualifiedName")
+                    associationDef.getQualifiedName()
                 )
             );
         }
@@ -1282,7 +1281,7 @@ public class ModelConstraintsChecker_1 {
             violations.add(
                 new BasicException.Parameter(
                     ModelConstraints.ASSOCIATIONS_MUST_BE_PUBLIC,
-                    associationDef.objGetValue("qualifiedName")
+                    associationDef.getQualifiedName()
                 )
             );
         }
@@ -1302,7 +1301,7 @@ public class ModelConstraintsChecker_1 {
             violations.add(
                 new BasicException.Parameter(
                     ModelConstraints.ASSOCIATIONS_MUST_BE_BINARY,
-                    associationDef.objGetValue("qualifiedName")
+                    associationDef.getQualifiedName()
                 )
             );
         }     
@@ -1322,7 +1321,7 @@ public class ModelConstraintsChecker_1 {
             violations.add(
                 new BasicException.Parameter(
                     ModelConstraints.END_TYPE_MUST_BE_CLASS,
-                    associationEndDef.objGetValue("qualifiedName")
+                    associationEndDef.getQualifiedName()
                 )
             );
         }
@@ -1341,10 +1340,10 @@ public class ModelConstraintsChecker_1 {
         // Note: the introduction of a derived BasicException.Parameter 'otherEnd' on an 
         //       AssociationEnd would simplify this operation
 
-        if (!associationEndDef.objGetValue("aggregation").equals(AggregationKind.NONE)) {
+        if (!associationEndDef.getAggregation().equals(AggregationKind.NONE)) {
             // get association this association end belongs to
             ModelElement_1_0 associationDef = this.model.getElement(
-                associationEndDef.objGetValue("container")
+                associationEndDef.getContainer()
             );
             for (
                 Iterator it = getAssociationEnds(associationDef).iterator();
@@ -1352,7 +1351,7 @@ public class ModelConstraintsChecker_1 {
             ) {
                 ModelElement_1_0 assEnd = (ModelElement_1_0) it.next();
                 if (!associationEndDef.equals(assEnd)) {
-                    if (assEnd.objGetValue("aggregation").equals(AggregationKind.NONE)) {
+                    if (assEnd.getAggregation().equals(AggregationKind.NONE)) {
                         return;
                     }
                 }
@@ -1360,7 +1359,7 @@ public class ModelConstraintsChecker_1 {
             violations.add(
                 new BasicException.Parameter(
                     ModelConstraints.CANNOT_HAVE_TWO_AGGREGATE_ENDS,
-                    associationDef.objGetValue("qualifiedName")
+                    associationDef.getQualifiedName()
                 )
             );
         }
@@ -1399,11 +1398,11 @@ public class ModelConstraintsChecker_1 {
         ModelElement_1_0 packageDef,
         List violations
     ) throws ServiceException {
-        if (((Boolean)packageDef.objGetValue("isAbstract")).booleanValue()) {
+        if (((Boolean)packageDef.isAbstract()).booleanValue()) {
             violations.add(
                 new BasicException.Parameter(
                     ModelConstraints.DATA_TYPES_CANNOT_BE_ABSTRACT,
-                    packageDef.objGetValue("qualifiedName")
+                    packageDef.getQualifiedName()
                 )
             );
         }
@@ -1432,7 +1431,7 @@ public class ModelConstraintsChecker_1 {
                 violations.add(
                     new BasicException.Parameter(
                         ModelConstraints.CAN_ONLY_IMPORT_PACKAGES_AND_CLASSES,
-                        importDef.objGetValue("qualifiedName")
+                        importDef.getQualifiedName()
                     )
                 );
             }
@@ -1452,11 +1451,11 @@ public class ModelConstraintsChecker_1 {
             Iterator it = importDef.objGetList("importedNamespace").iterator();
             it.hasNext();
         ) {
-            if (importDef.objGetValue("container").equals(it.next())) {
+            if (importDef.getContainer().equals(it.next())) {
                 violations.add(
                     new BasicException.Parameter(
                         ModelConstraints.CANNOT_IMPORT_SELF,
-                        importDef.objGetValue("qualifiedName")
+                        importDef.getQualifiedName()
                     )
                 );
             }
@@ -1474,7 +1473,7 @@ public class ModelConstraintsChecker_1 {
     ) throws ServiceException {
         Set allContainerContents = getAllContents(
             this.model.getElement(
-                importDef.objGetValue("container")
+                importDef.getContainer()
             )
         );
 
@@ -1487,8 +1486,8 @@ public class ModelConstraintsChecker_1 {
                 violations.add(
                     new BasicException.Parameter(
                         ModelConstraints.CANNOT_IMPORT_NESTED_COMPONENTS,
-                        importDef.objGetValue("qualifiedName"),
-                        (this.model.getElement(path)).objGetValue("qualifiedName")
+                        importDef.getQualifiedName(),
+                        (this.model.getElement(path)).getQualifiedName()
                     )
                 );
             }
@@ -1506,13 +1505,13 @@ public class ModelConstraintsChecker_1 {
     ) throws ServiceException {
         if (!importDef.objGetList("container").isEmpty()) {
             ModelElement_1_0 firstContainerElement = this.model.getElement(
-                importDef.objGetValue("container")
+                importDef.getContainer()
             );
             if (!firstContainerElement.objGetList("container").isEmpty()) {
                 violations.add(
                     new BasicException.Parameter(
                         ModelConstraints.NESTED_PACKAGES_CANNOT_IMPORT,
-                        importDef.objGetValue("qualifiedName")
+                        importDef.getQualifiedName()
                     )
                 );
             }
@@ -1560,7 +1559,7 @@ public class ModelConstraintsChecker_1 {
             violations.add(
                 new BasicException.Parameter(
                     ModelConstraints.CONSTANTS_TYPE_MUST_BE_PRIMITIVE,
-                    constantDef.objGetValue("qualifiedName")
+                    constantDef.getQualifiedName()
                 )
             );
         }
@@ -1584,12 +1583,12 @@ public class ModelConstraintsChecker_1 {
         //
         // Validate the multiplicity
         //
-        Multiplicity multiplicity = ModelHelper.toMultiplicity((String) elementDef.objGetValue("multiplicity"));
+        Multiplicity multiplicity = ModelHelper.toMultiplicity((String) elementDef.getMultiplicity());
         if(multiplicity == null) {
 	        violations.add(
 	            new BasicException.Parameter(
 	                ModelConstraints.INVALID_MULTIPLICITY,
-	                elementDef.objGetValue("qualifiedName")
+	                elementDef.getQualifiedName()
 	            )
 	        );
         } else {
@@ -1604,7 +1603,7 @@ public class ModelConstraintsChecker_1 {
                 violations.add(
                     new BasicException.Parameter(
                         ModelConstraints.STEREOTYPE_STREAM_IMPLIES_PRIMITIVE_TYPE,
-                        elementDef.objGetValue("qualifiedName") + "; type=" + type
+                        elementDef.getQualifiedName() + "; type=" + type
                     )
                 );
             }     
@@ -1680,8 +1679,8 @@ public class ModelConstraintsChecker_1 {
                 violations.add(
                     new BasicException.Parameter(
                         violatedConstraint,
-                        elementDef.objGetValue("qualifiedName"), 
-                        contentElement.objGetValue("name")
+                        elementDef.getQualifiedName(), 
+                        contentElement.getName()
                     )
                 );
             }

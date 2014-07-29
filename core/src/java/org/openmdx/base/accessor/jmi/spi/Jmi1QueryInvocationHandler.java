@@ -154,7 +154,7 @@ public class Jmi1QueryInvocationHandler implements Serializable, InvocationHandl
                 methodName.substring(7),
                 FeatureMapper.MethodSignature.PREDICATE                                
             );
-            String featureName = (String)feature.objGetValue("name");
+            String featureName = (String)feature.getName();
             return this.query.refGetOrder(
                 featureName
             );
@@ -164,7 +164,7 @@ public class Jmi1QueryInvocationHandler implements Serializable, InvocationHandl
                 methodName.substring(11),
                 FeatureMapper.MethodSignature.PREDICATE                                
             );
-            String featureName = (String)feature.objGetValue("name");
+            String featureName = (String)feature.getName();
             return this.query.refGetPredicate(
                 Quantifier.THERE_EXISTS,
                 featureName
@@ -175,7 +175,7 @@ public class Jmi1QueryInvocationHandler implements Serializable, InvocationHandl
                 methodName.substring(6),
                 FeatureMapper.MethodSignature.PREDICATE                
             );
-            String featureName = (String)feature.objGetValue("name");
+            String featureName = (String)feature.getName();
             return this.query.refGetPredicate(
                 Quantifier.FOR_ALL,
                 featureName
@@ -189,7 +189,7 @@ public class Jmi1QueryInvocationHandler implements Serializable, InvocationHandl
                 methodName,
                 FeatureMapper.MethodSignature.PREDICATE                
             );
-            String featureName = (String)feature.objGetValue("name");            
+            String featureName = (String)feature.getName();            
             return this.query.refGetPredicate(
                 featureName
             );

@@ -1,13 +1,13 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Description: Standard Mapper
+ * Description: Mapper
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
  * ====================================================================
  * 
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2013, OMEX AG, Switzerland
+ * Copyright (c) 2004-2014, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -147,9 +147,9 @@ public class Mapper_1 extends AbstractMapper_1 implements Mapper_1_1 {
         throws ServiceException {
 
         SysLog.trace("attribute", attributeDef.jdoGetObjectId());
-        Multiplicity multiplicity = ModelHelper.toMultiplicity((String) attributeDef.objGetValue("multiplicity"));
+        Multiplicity multiplicity = ModelHelper.toMultiplicity((String) attributeDef.getMultiplicity());
         boolean isDerived =
-            ((Boolean) attributeDef.objGetValue("isDerived")).booleanValue();
+            ((Boolean) attributeDef.isDerived()).booleanValue();
         // required for ...Class.create...() operations
         this.processedAttributes.add(attributeDef);
         try {
@@ -165,7 +165,7 @@ public class Mapper_1 extends AbstractMapper_1 implements Mapper_1_1 {
                 // Otherwise inherit from super interfaces.
                 if (((this.format == Format.JPA3) && (((ClassMetaData) mClassDef
                     .getClassMetaData()).getBaseClass() == null))
-                    || attributeDef.objGetValue("container").equals(
+                    || attributeDef.getContainer().equals(
                         classDef.jdoGetObjectId())) {
                     // query interface
                     if (queryMapper != null) {
@@ -353,9 +353,9 @@ public class Mapper_1 extends AbstractMapper_1 implements Mapper_1_1 {
         throws ServiceException {
         SysLog.trace("reference", referenceDef.jdoGetObjectId());
         ModelElement_1_0 referencedEnd =
-            this.model.getElement(referenceDef.objGetValue("referencedEnd"));
+            this.model.getElement(referenceDef.getReferencedEnd());
         ModelElement_1_0 association =
-            this.model.getElement(referencedEnd.objGetValue("container"));
+            this.model.getElement(referencedEnd.getContainer());
         ClassDef mClassDef = new ClassDef(classDef, this.model, this.metaData);
         SysLog.trace("referencedEnd", referencedEnd);
         SysLog.trace("association", association);
@@ -364,21 +364,21 @@ public class Mapper_1 extends AbstractMapper_1 implements Mapper_1_1 {
         boolean includeInClass =
             ((this.format == Format.JPA3) && (((ClassMetaData) mClassDef
                 .getClassMetaData()).getBaseClass() == null))
-                || referenceDef.objGetValue("container").equals(
+                || referenceDef.getContainer().equals(
                     classDef.jdoGetObjectId());
-        Multiplicity multiplicity = ModelHelper.toMultiplicity((String) referenceDef.objGetValue("multiplicity"));
+        Multiplicity multiplicity = ModelHelper.toMultiplicity((String) referenceDef.getMultiplicity());
         String visibility = (String) referenceDef.objGetValue("visibility");
         List<?> qualifierNames = referencedEnd.objGetList("qualifierName");
         List<?> qualifierTypes = referencedEnd.objGetList("qualifierType");
         boolean isChangeable =
-            ((Boolean) referenceDef.objGetValue("isChangeable")).booleanValue();
+            ((Boolean) referenceDef.isChangeable()).booleanValue();
         boolean isDerived =
-            ((Boolean) association.objGetValue("isDerived")).booleanValue();
+            ((Boolean) association.isDerived()).booleanValue();
         boolean includeExtensions = this.format == Format.JMI1 && !inherited;
         // Check whether this reference is stored as attribute
         // required for ...Class.create...() operations
         if (this.model.referenceIsStoredAsAttribute(referenceDef)) {
-            SysLog.trace("the reference is stored as attribute", referenceDef.objGetValue("qualifiedName"));
+            SysLog.trace("the reference is stored as attribute", referenceDef.getQualifiedName());
             ModelElement_1_0 referenceAsAttribute = new ModelElement_1(referenceDef);
             this.processedAttributes.add(referenceAsAttribute);
             if (!qualifierNames.isEmpty()) {
@@ -386,7 +386,7 @@ public class Mapper_1 extends AbstractMapper_1 implements Mapper_1_1 {
                 String newMultiplicity =
                     qualifierTypes.size() == 1
                         && PrimitiveTypes.STRING.equals(((Path) qualifierTypes
-                            .get(0)).getBase()) ? Multiplicity.MAP.toString()
+						.get(0)).getLastSegment().toClassicRepresentation()) ? Multiplicity.MAP.toString()
                         : ModelHelper.UNBOUND;
                 SysLog.trace("Adjust multiplicity to "
                     + ModelHelper.UNBOUND, newMultiplicity);
@@ -394,7 +394,7 @@ public class Mapper_1 extends AbstractMapper_1 implements Mapper_1_1 {
                 // this ensures that the instance creator uses a multivalued parameter for this reference attribute
                 referenceAsAttribute.objSetValue("multiplicity", newMultiplicity);
             }
-            referenceAsAttribute.objSetValue("isDerived", association.objGetValue("isDerived"));
+            referenceAsAttribute.objSetValue("isDerived", association.isDerived());
         }
         try {
             if (VisibilityKind.PUBLIC_VIS.equals(visibility)) {
@@ -611,7 +611,7 @@ public class Mapper_1 extends AbstractMapper_1 implements Mapper_1_1 {
         SysLog.trace("operation", operationDef.jdoGetObjectId());
         boolean includeInClass =
             this.format == Format.JPA3
-                || operationDef.objGetValue("container").equals(
+                || operationDef.getContainer().equals(
                     classDef.jdoGetObjectId());
         if (VisibilityKind.PUBLIC_VIS.equals(operationDef
             .objGetValue("visibility"))) {
@@ -675,7 +675,7 @@ public class Mapper_1 extends AbstractMapper_1 implements Mapper_1_1 {
 
         SysLog.trace("class", classDef.jdoGetObjectId());
         boolean isAbstract =
-            ((Boolean) classDef.objGetValue("isAbstract")).booleanValue();
+            ((Boolean) classDef.isAbstract()).booleanValue();
         try {
             if (this.format == Format.JMI1 && !isAbstract) {
                 classMapper.mapBegin();
@@ -716,7 +716,7 @@ public class Mapper_1 extends AbstractMapper_1 implements Mapper_1_1 {
             if (((supertypeDef == null) || !supertypeDef
                 .objGetList("feature")
                 .contains(attributeDef.jdoGetObjectId()))
-                && !((Boolean) attributeDef.objGetValue("isDerived"))
+                && !((Boolean) attributeDef.isDerived())
                     .booleanValue()
                 && VisibilityKind.PUBLIC_VIS.equals(attributeDef
                     .objGetValue("visibility"))) {
@@ -724,9 +724,9 @@ public class Mapper_1 extends AbstractMapper_1 implements Mapper_1_1 {
                 allAttributes.add(att);
                 // required attribute
                 String multiplicity =
-                    (String) attributeDef.objGetValue("multiplicity");
+                    (String) attributeDef.getMultiplicity();
                 SysLog.trace(attributeDef
-                    .objGetValue("qualifiedName")
+                    .getQualifiedName()
                     .toString(), multiplicity);
                 if (Multiplicity.SINGLE_VALUE.toString().equals(attributeDef
                     .objGetValue("multiplicity"))) {
@@ -794,9 +794,7 @@ public class Mapper_1 extends AbstractMapper_1 implements Mapper_1_1 {
                             feature,
                             this.model));
                     } else if (feature.isReferenceType()) {
-                        ModelElement_1_0 referencedEnd =
-                            this.model.getElement(feature
-                                .objGetValue("referencedEnd"));
+                        ModelElement_1_0 referencedEnd = this.model.getElement(feature.getReferencedEnd());
                         List<?> qualifierTypes =
                             referencedEnd.objGetList("qualifierType");
                         // skip references for which a qualifier exists and the
@@ -817,7 +815,7 @@ public class Mapper_1 extends AbstractMapper_1 implements Mapper_1_1 {
             }
         }
         boolean classIsAbstract =
-            ((Boolean) classDef.objGetValue("isAbstract")).booleanValue();
+            ((Boolean) classDef.isAbstract()).booleanValue();
         try {
             if (this.format == Format.JMI1 && !classIsAbstract) {
                 // standard creators
@@ -906,7 +904,7 @@ public class Mapper_1 extends AbstractMapper_1 implements Mapper_1_1 {
 
         SysLog.trace("structure field", structureFieldDef.jdoGetObjectId());
         Multiplicity multiplicity = ModelHelper.toMultiplicity(
-            (String) structureFieldDef.objGetValue("multiplicity")
+            (String) structureFieldDef.getMultiplicity()
         );
 
         // required for ...Class.create...() operations
@@ -917,7 +915,7 @@ public class Mapper_1 extends AbstractMapper_1 implements Mapper_1_1 {
             // getter interface only if modelAttribute.container = modelClass.
             // Otherwise inherit from super interfaces.
             if (this.format == Format.JPA3
-                || structureFieldDef.objGetValue("container").equals(
+                || structureFieldDef.getContainer().equals(
                     classDef.jdoGetObjectId())) {
                 // query interface
                 if (queryMapper != null) {
@@ -1092,7 +1090,6 @@ public class Mapper_1 extends AbstractMapper_1 implements Mapper_1_1 {
      * 
      * @throws ServiceException
      */
-    @SuppressWarnings("resource")
     public void externalize(
         String qualifiedPackageName,
         Model_1_0 model,
@@ -1161,7 +1158,7 @@ public class Mapper_1 extends AbstractMapper_1 implements Mapper_1_1 {
                 .hasNext();) {
                 ModelElement_1_0 currentPackage = pkgs.next();
                 String currentPackageName =
-                    (String) currentPackage.objGetValue("qualifiedName");
+                    (String) currentPackage.getQualifiedName();
                 if (!this.excludePackage(currentPackageName)) {
                     SysLog.detail("Processing package", currentPackageName);
                     PackageMapper packageMapper = null;
@@ -1460,10 +1457,7 @@ public class Mapper_1 extends AbstractMapper_1 implements Mapper_1_1 {
                                     }
                                 }
                                 this.mapEndQuery(queryMapper);
-                                String elementName =
-                                    Identifier.CLASS_PROXY_NAME
-                                        .toIdentifier((String) element
-                                            .objGetValue("name"));
+                                String elementName = Identifier.CLASS_PROXY_NAME.toIdentifier((String) element.getName());
                                 if (structureMapper != null) {
                                     this.mapEndStructure(structureMapper);
                                     structWriter.flush();
@@ -1503,7 +1497,7 @@ public class Mapper_1 extends AbstractMapper_1 implements Mapper_1_1 {
                                     this.mapException(element, exceptionMapper);
                                     exceptionWriter.flush();
                                     String elementName = Identifier.CLASS_PROXY_NAME.toIdentifier(
-                                        (String) element.objGetValue("name"), 
+                                        (String) element.getName(), 
                                         null, // removablePrefix
                                         null, // prependablePrefix
                                         "exception", // removableSuffix
@@ -1569,9 +1563,8 @@ public class Mapper_1 extends AbstractMapper_1 implements Mapper_1_1 {
                                 AbstractNames
                                     .openmdx2PackageName(
                                         new StringBuffer(),
-                                        (String) currentPackage
-                                            .objGetValue("name"))
-                                    .toString(),
+                                        (String) currentPackage.getName()
+                                    ).toString(),
                                 '.' + this.fileExtension);
                     }
                 }

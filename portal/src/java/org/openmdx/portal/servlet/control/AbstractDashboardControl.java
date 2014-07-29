@@ -8,7 +8,7 @@
  * This software is published under the BSD license
  * as listed below.
  * 
- * Copyright (c) 2009-2011, OMEX AG, Switzerland
+ * Copyright (c) 2009-2014, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -57,17 +57,22 @@ import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.naming.Path;
 import org.openmdx.portal.servlet.Action;
 import org.openmdx.portal.servlet.ApplicationContext;
+import org.openmdx.portal.servlet.CssClass;
 import org.openmdx.portal.servlet.HtmlEncoder_1_0;
 import org.openmdx.portal.servlet.ViewPort;
 import org.openmdx.portal.servlet.WebKeys;
-import org.openmdx.portal.servlet.view.ShowObjectView;
-import org.openmdx.portal.servlet.view.View;
+import org.openmdx.portal.servlet.component.ShowObjectView;
+import org.openmdx.portal.servlet.component.View;
 
-public abstract class AbstractDashboardControl
-	extends Control 
-	implements Serializable {
+public abstract class AbstractDashboardControl extends Control implements Serializable {
 	
-	//-----------------------------------------------------------------------
+	/**
+	 * Constructor.
+	 * 
+	 * @param id
+	 * @param locale
+	 * @param localeAsIndex
+	 */
 	public AbstractDashboardControl(
         String id,
         String locale,
@@ -79,7 +84,11 @@ public abstract class AbstractDashboardControl
 			localeAsIndex
 		);
 	}
-	//-----------------------------------------------------------------------
+
+	/**
+	 * DashletDescr
+	 *
+	 */
 	public static class DashletDescr {
 
 		public DashletDescr(
@@ -107,16 +116,34 @@ public abstract class AbstractDashboardControl
 		
 	}
 	
-	//-----------------------------------------------------------------------
+	/**
+	 * Get id suffix.
+	 * 
+	 * @param p
+	 * @return
+	 */
 	protected abstract String getDashboardIdSuffix(
 		ViewPort p
 	);
 	
-	//-----------------------------------------------------------------------
+	/**
+	 * Get style.
+	 * 
+	 * @return
+	 */
 	protected abstract String getDashboardStyle(
 	);
 	
-	//-----------------------------------------------------------------------
+	/**
+	 * Get dashboard.
+	 * 
+	 * @param p
+	 * @param dashboardId
+	 * @param settings
+	 * @param dashletFilter
+	 * @param dashboard
+	 * @param forEditing
+	 */
 	protected void getDashboard(
 		ViewPort p,
 		String dashboardId,
@@ -165,19 +192,29 @@ public abstract class AbstractDashboardControl
 		}
 	}
 	
-	//-----------------------------------------------------------------------
+	/**
+	 * Get max for vertical order.
+	 * 
+	 * @return
+	 */
 	protected int getMaxVerticalOrder(
 	) {
 		return 10;
 	}
 	
-	//-----------------------------------------------------------------------
+	/**
+	 * Get max for horizontal order.
+	 * 
+	 * @return
+	 */
 	protected int getMaxHorizontalOrder(
 	) {
 		return 10;
 	}
 	
-	//-----------------------------------------------------------------------
+	/* (non-Javadoc)
+	 * @see org.openmdx.portal.servlet.control.Control#paint(org.openmdx.portal.servlet.ViewPort, boolean)
+	 */
 	@Override
     public void paint(
     	ViewPort p, 
@@ -236,18 +273,18 @@ public abstract class AbstractDashboardControl
 						Action action = new Action(
 							Action.EVENT_INVOKE_WIZARD,
 							new Action.Parameter[]{
-								new Action.Parameter(Action.PARAMETER_OBJECTXRI, showView.getRefObject().refGetPath().toXRI()),
+								new Action.Parameter(Action.PARAMETER_OBJECTXRI, showView.getObject().refGetPath().toXRI()),
 								new Action.Parameter(Action.PARAMETER_ID, dashletId)
 							},
 							"",
 							true
 						);
 						CharSequence dashletHRef = p.getEvalHRef(action).toString().replace(WebKeys.SERVLET_NAME, "wizards/Dashboard/" + dashletDescr.name + ".jsp");
-						p.write("      <td class=\"dashlet\" colspan=\"", dashletDescr.width,"\" height=\"100%\" valign=\"top\">");
+						p.write("      <td class=\"", CssClass.dashlet.toString(), "\" colspan=\"", dashletDescr.width,"\" height=\"100%\" valign=\"top\">");
 						p.write("        <table cellspacing=\"0\" cellpadding=\"0\" border=\"0\" width=\"100%\">");
 						if(dashletDescr.label != null && dashletDescr.label.length() > 0) {
 							p.write("          <tr>");
-							p.write("            <td class=\"dashletTitle\" title=\"V:", dashletDescr.orderY, ", H:", dashletDescr.orderX, ", W:", dashletDescr.width, "\">", dashletDescr.label, "</td>");
+							p.write("            <td class=\"", CssClass.dashletTitle.toString(), "\" title=\"V:", dashletDescr.orderY, ", H:", dashletDescr.orderX, ", W:", dashletDescr.width, "\">", dashletDescr.label, "</td>");
 							p.write("          </tr>");
 						}
 						p.write("          <tr>");
@@ -307,15 +344,14 @@ public abstract class AbstractDashboardControl
 							p.write("                      </table>");
 							p.write("                    </td>");
 							p.write("                    <td style=\"horizontal-align:right;vertical-align:bottom;\">");
-							p.write("                      <input type=\"submit\" class=\"abutton\" name=\"Delete.", dashletId, "\" value=\"-\" onclick=\"javascript:$('Command').value=this.name;\" />");
+							p.write("                      <input type=\"submit\" class=\"", CssClass.btn.toString(), " ", CssClass.btnDefault.toString(), "\" name=\"Delete.", dashletId, "\" value=\"-\" onclick=\"javascript:$('Command').value=this.name;\" />");
 							p.write("                    </td>");
 							p.write("                  </tr>");
 							p.write("                </table>");
 							p.write("                <p>");
-						}
-						else {
+						} else {
 							p.write("                <script language=\"javascript\" type=\"text/javascript\">");
-	                        p.write("                  new Ajax.Updater('", dashletId, "', ", dashletHRef, ", {asynchronous:true, evalScripts: true});");							
+	                        p.write("                  jQuery.ajax({type: 'get', url: ", dashletHRef, ", dataType: 'html', success: function(data){$('", dashletId, "').innerHTML=data;evalScripts(data);}});");							
 							p.write("                </script>");
 						}
 						p.write("              </div>");
@@ -335,6 +371,8 @@ public abstract class AbstractDashboardControl
 	//-----------------------------------------------------------------------
 	// Members
 	//-----------------------------------------------------------------------
+	private static final long serialVersionUID = -380329879327788318L;
+
 	public static final String SHARED_DASHLET_MARKER = "*";
 	public static final String DASHBOARD_PROPERTY_DASHLETS = "dashlets";
 	public static final String DASHLET_PROPERTY_ID = "id";

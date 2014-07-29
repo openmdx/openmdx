@@ -5,10 +5,9 @@
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
  * ====================================================================
  *
- * This software is published under the BSD license
- * as listed below.
+ * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2009, OMEX AG, Switzerland
+ * Copyright (c) 2009-2014, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -134,7 +133,7 @@ public class PersistenceManagerTarget implements ImportTarget {
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.ILLEGAL_STATE,
                 "The same object must not be imported twice from the same source",
-                new BasicException.Parameter("externaId", externalId.toXRI())
+                new BasicException.Parameter("externaId", externalId)
             );
         }
         String modelClassName = Object_2Facade.getObjectClass(objectHolder);

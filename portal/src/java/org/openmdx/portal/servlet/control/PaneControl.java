@@ -1,14 +1,14 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Description: ReferencePaneControl
+ * Description: PaneControl
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
  * ====================================================================
  *
  * This software is published under the BSD license
  * as listed below.
  * 
- * Copyright (c) 2004-2007, OMEX AG, Switzerland
+ * Copyright (c) 2004-2014, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -54,17 +54,25 @@ package org.openmdx.portal.servlet.control;
 
 import java.io.Serializable;
 
-//-----------------------------------------------------------------------------
-public abstract class PaneControl
-    extends Control
-    implements Serializable {
+/**
+ * PaneControl
+ *
+ */
+public abstract class PaneControl extends Control implements Serializable {
   
-    //-------------------------------------------------------------------------
+    /**
+     * Constructor.
+     * 
+     * @param id
+     * @param locale
+     * @param localeAsIndex
+     * @param paneDef
+     * @param paneIndex
+     */
     public PaneControl(
         String id,
         String locale,
         int localeAsIndex,
-        org.openmdx.ui1.jmi1.Pane pane,
         int paneIndex
     ) {
         super(
@@ -72,35 +80,24 @@ public abstract class PaneControl
             locale,
             localeAsIndex
         );
-        this.pane = pane;
         this.paneIndex = paneIndex;
     }
   
-    //-------------------------------------------------------------------------
+    /**
+     * Get pane index.
+     * 
+     * @return
+     */
     public int getPaneIndex(
     ) {
         return this.paneIndex;
     }
     
     //-------------------------------------------------------------------------
-    public org.openmdx.ui1.jmi1.Pane getPane(
-    ) {
-        return this.pane;
-    }
-    
-    //-------------------------------------------------------------------------
-    public String getToolTip(
-    ) {
-        org.openmdx.ui1.jmi1.Pane pane = this.pane;
-        return this.localeAsIndex < pane.getToolTip().size()
-            ? pane.getToolTip().get(this.localeAsIndex)
-            : !pane.getToolTip().isEmpty() ? pane.getToolTip().get(0) : "N/A";
-    }
-    
+    // Members
     //-------------------------------------------------------------------------
     private static final long serialVersionUID = 3258126938563294520L;
 
-    private final org.openmdx.ui1.jmi1.Pane pane;
     private final int paneIndex;
     
 }

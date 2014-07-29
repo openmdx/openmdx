@@ -47,7 +47,6 @@
  */
 package org.openmdx.base.accessor.spi;
 
-import org.openmdx.base.exception.ServiceException;
 
 
 /**
@@ -61,6 +60,6 @@ public interface Delegating_1_0<T>{
      * @return the delegate
      */
     T objGetDelegate(
-    ) throws ServiceException;
+    );
 
 }

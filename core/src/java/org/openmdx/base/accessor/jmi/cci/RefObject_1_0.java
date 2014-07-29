@@ -98,7 +98,6 @@ public interface RefObject_1_0 extends RefObject {
    * must be of the same class or a subtype of the target.
    * 
    * @param existing existing object.
-   * @throws JmiServiceException thrown if object can not be initialized. 
    * 
    * @deprecated use {@link PersistenceHelper#clone(Object, String...)}
    */
@@ -122,7 +121,6 @@ public interface RefObject_1_0 extends RefObject {
    *         they are initialized with a default value.
    * @param setOptionalToNull if true, optional features are set to true, otherwise
    *         they are left untouched.
-   * @throws JmiServiceException thrown if object can not be initialized. 
    */
   public void refInitialize(
     boolean setRequiredToNull,
@@ -138,7 +136,6 @@ public interface RefObject_1_0 extends RefObject {
    * @param value binary or character output stream.
    * @param position stream is returned starting from position.
    * @return length of the stream.
-   * @throws JmiServiceException
    */
   public long refGetValue(
     String feature,
@@ -154,7 +151,6 @@ public interface RefObject_1_0 extends RefObject {
    * @param feature feature to be retrieved.
    * @param newValue binary or character input stream.
    * @param length length of the stream.
-   * @throws JmiServiceException
    */
   public void refSetValue(
     String feature,

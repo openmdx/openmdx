@@ -1,16 +1,13 @@
 // ====================================================================
-// Project:     openmdx, http://www.openmdx.org/
-// Name:        $Id: guicontrol.js,v 1.13 2012/05/21 04:30:07 cmu Exp $
+// Project:     openMDX/Portal, http://www.openmdx.org/
 // Description: java script helpers
-// Revision:    $Revision: 1.13 $
 // Owner:       OMEX AG, Switzerland, http://www.omex.ch
-// Date:        $Date: 2012/05/21 04:30:07 $
 // ====================================================================
 //
 // This software is published under the BSD license
 // as listed below.
 //
-// Copyright (c) 2004, OMEX AG, Switzerland
+// Copyright (c) 2004-2014, OMEX AG, Switzerland
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or
@@ -60,20 +57,17 @@ var selectedFilterTab = null;
 var shownPopup = null;
 var POPUP_FIELD = null;
 var POPUP_OPTIONS = null;
-var dragObj = new Object();
-dragObj.zIndex = 0;
-var dragIfr = new Object();
 var panelsFilter = new Array('panelFilter0');
 var pageHasCharts = false;
 var browser = new Object();
-    browser.agt = navigator.userAgent.toLowerCase();
-    browser.is_ie    = ((browser.agt.indexOf("msie") != -1) && (browser.agt.indexOf("opera") == -1));
-    browser.is_opera = (browser.agt.indexOf("opera") != -1);
-    browser.is_mac   = (browser.agt.indexOf("mac") != -1);
-    browser.is_mac_ie= (browser.is_ie && browser.is_mac);
-    browser.is_win_ie= (browser.is_ie && !browser.is_mac);
-    browser.is_gecko = (navigator.product == "Gecko");
-    //alert('agent='+browser.agt+'\r\n'+'ie='+browser.is_ie+'\r\n'+'opera='+browser.is_opera+'\r\n'+'mac='+browser.is_mac+'\r\n'+'mac_ie='+browser.is_mac_ie+'\r\n'+'win_ie='+browser.is_win_ie+'\r\n'+'gecko='+browser.is_gecko+'\r\n');
+
+browser.agt = navigator.userAgent.toLowerCase();
+browser.is_ie    = ((browser.agt.indexOf("msie") != -1) && (browser.agt.indexOf("opera") == -1));
+browser.is_opera = (browser.agt.indexOf("opera") != -1);
+browser.is_mac   = (browser.agt.indexOf("mac") != -1);
+browser.is_mac_ie= (browser.is_ie && browser.is_mac);
+browser.is_win_ie= (browser.is_ie && !browser.is_mac);
+browser.is_gecko = (navigator.product == "Gecko");
 
 //---------------------------------------------------------------------------
 //emulation of .innerText for Mozilla
@@ -83,6 +77,32 @@ if(browser.is_gecko) {
     r.selectNodeContents(this);
     return r.toString();
   });
+}
+
+//---------------------------------------------------------------------------
+function ObjectFinder() {
+  this.selectAndClose = selectAndClose;
+  this.findObject = findObject;
+  this.referenceField = new Array();
+  this.titleField = new Array();
+}
+
+//---------------------------------------------------------------------------
+function findObject(href, objectTitle, objectReference, id) {
+	this.referenceField[id] = objectReference;
+	this.titleField[id] = objectTitle;
+	win = window.open(href + '&filtervalues=' + encodeURIComponent(objectTitle.value), "OF", "help=yes,status=yes,scrollbars=yes,resizable=yes,dependent=yes,alwaysRaised=yes", true); 
+	win.focus();
+}
+    	    
+//---------------------------------------------------------------------------
+function selectAndClose(objectReference, objectTitle, id, win) {
+	this.referenceField[id].value = objectReference;
+	this.titleField[id].value = objectTitle;
+	try {
+		this.referenceField[id].onchange();
+	} catch(e) {}
+	win.close();
 }
 
 //---------------------------------------------------------------------------
@@ -126,6 +146,7 @@ Array.prototype.hasMember=function(testItem){
   return 0
 };
 
+//---------------------------------------------------------------------------
 function uniqueInt(){
   var num,maxNum=100000;
   if(!uniqueInt.a||maxNum<=uniqueInt.a.length)uniqueInt.a=[];
@@ -135,6 +156,7 @@ function uniqueInt(){
   return num
 }
 
+//---------------------------------------------------------------------------
 function checkTextareaLimits(el,maxLines,maxChar){
   if(!el.x){
     el.x=uniqueInt();
@@ -143,8 +165,6 @@ function checkTextareaLimits(el,maxLines,maxChar){
   window['int'+el.x]=setInterval(function(){
     var lines=el.value.replace(/\r/g,'').split('\n'), i=lines.length, lines_removed, char_removed;
     if(maxLines&&i>maxLines){
-      //alert('You can not enter\nmore than '+maxLines+' lines');
-      //el.style.backgroundColor = bgColorError;
       lines=lines.slice(0,maxLines);
       lines_removed=1;
     }
@@ -154,112 +174,9 @@ function checkTextareaLimits(el,maxLines,maxChar){
         lines[i]=lines[i].slice(0,maxChar);
         char_removed=1
       }
-      //if(char_removed)alert('You can not enter more\nthan '+maxChar+' characters per line')
-      //if(char_removed) {el.style.backgroundColor = bgColorError;}
     }
     if(char_removed||lines_removed)el.value=lines.join('\n')
   },50);
-}
-
-//---------------------------------------------------------------------------
-function showPanel(panels, tabClass, tab, name) {
-  if (tabClass=='tab') {
-      <!-- Object Tab -->
-      if (selectedObjTab) {
-        selectedObjTab.className = tabClass;
-      }
-      selectedObjTab = tab
-      tab.className = 'S' + tab.className;
-  } else {
-      if (tabClass=='opTab') {
-        /*
-         <!-- Operations Tab -->
-        if (selectedOpTab) {
-            selectedOpTab.className = tabClass;
-        }
-        selectedOpTab = tab
-        if (tab) {tab.className = 'S' + tab.className;}
-        */
-      } else {
-        <!-- Filter Tab -->
-        if (selectedFilterTab) {
-            selectedFilterTab.className = tabClass;
-        }
-        selectedFilterTab = tab
-      }
-  }
-  for(i = 0; i < panels.length; i++) {
-    if(document.getElementById(panels[i])) {
-      if((name == panels[i]) || (name == '')) {
-        var eltStyle = document.getElementById(panels[i]).style;
-        //document.getElementById(panels[i]).style.display = 'block';
-        //document.getElementById(panels[i]).style.width = '100%';
-        eltStyle.position = 'relative';
-        eltStyle.display = 'block';
-        eltStyle.visibility = 'visible';
-        eltStyle.height = 'auto';
-      }
-      else {
-        //document.getElementById(panels[i]).style.width = '99%';
-        document.getElementById(panels[i]).style.display =  'none';
-      }
-    }
-  }
-  if (!browser.is_ie) {
-    // refresh for all browsers except IE
-    if (pageHasCharts) {window.onresize();};
-  };
-  return false;
-}
-
-//---------------------------------------------------------------------------
-function selectGroupTab(grouptab, tabClass) {
-  /*
-  if (selectedgroupTab) {
-  	selectedgroupTab.className = tabClass;
-  }
-  selectedgroupTab = grouptab
-  */
-  grouptab.className = 'S' + grouptab.className;
-  // find out whether selectedgroupTab is contained in collapsed tab range
-  // and if so then expand this particular tab range
-  if (grouptab.parentNode) {
-    if (grouptab.parentNode.tagName == "SPAN") {
-      var el = getElement(grouptab.parentNode.id+'Tab');
-      toggleTab(el, grouptab.parentNode.id);
-    }
-  }
-  showPanel(panelsOp, 'opTab', null, '1');
-  return false;
-}
-
-//---------------------------------------------------------------------------
-function toggleTab(tab, name) {
-  var el = getElement(name);
-  if (el.style.display == 'none') {
-    // expand/fly-out
-    el.style.display = 'inline';
-    tab.firstChild.data = '<';
-  } else {
-    // collapse/fly-in
-    el.style.display = 'none';
-    tab.firstChild.data = '>';
-  }
-  return false;
-}
-//---------------------------------------------------------------------------
-function toggleGridBlock(tab, name, className) {
-  var el = getElement(name);
-  if (el.style.display == 'none') {
-    // expand/fly-out
-    el.style.display = 'block';
-    tab.className = 'S' + className + 'hover';
-  } else {
-    // collapse/fly-in
-    el.style.display = 'none';
-    tab.className = className + 'hover';
-  }
-  return false;
 }
 
 //---------------------------------------------------------------------------
@@ -313,7 +230,6 @@ function getRealBottom(id) {
   return getRealTop(id) + getElement(id).offsetHeight;
 }
 
-
 //---------------------------------------------------------------------------
 function cloneObject(what) {
     for (i in what) {
@@ -322,7 +238,6 @@ function cloneObject(what) {
 }
 
 //---------------------------------------------------------------------------
-
 function CloneImg(imgNode) {
 	var im = document.createElement("img")
 	im.src = imgNode.src;
@@ -337,308 +252,16 @@ function CloneImg(imgNode) {
 }
 
 //---------------------------------------------------------------------------
-function dragPopupStart(event, id) {
-
-  var el;
-  var x, y;
-
-  // If an element id was given, find it. Otherwise use the element being
-  // clicked on.
-  if (id) {
-    dragObj.elNode = document.getElementById(id);
-  }
-  else {
-    if (browser.is_gecko) { /* Mozilla */
-      dragObj.elNode = event.target;
-    }
-    else {
-      dragObj.elNode = window.event.srcElement;
-    }
-    // If this is a text node, use its parent element.
-    if (dragObj.elNode.nodeType == 3) {
-      dragObj.elNode = dragObj.elNode.parentNode;
-    }
-  }
-  dragIfr.elNode = getElement('DivShim');
-
-  // Get cursor position with respect to the page.
-  if (browser.is_gecko) {
-    /* Mozilla */
-    x = event.clientX + window.scrollX;
-    y = event.clientY + window.scrollY;
-  }
-  else {
-    x = window.event.clientX + document.documentElement.scrollLeft + document.body.scrollLeft;
-    y = window.event.clientY + document.documentElement.scrollTop + document.body.scrollTop;
-  }
-
-  // Save starting positions of cursor and element.
-  dragObj.cursorStartX = x;
-  dragObj.cursorStartY = y;
-  dragObj.elStartLeft = parseInt(dragObj.elNode.style.left, 10);
-  dragObj.elStartTop = parseInt(dragObj.elNode.style.top,  10);
-  if (isNaN(dragObj.elStartLeft)) dragObj.elStartLeft = 0;
-  if (isNaN(dragObj.elStartTop)) dragObj.elStartTop  = 0;
-
-  dragIfr.cursorStartX = x;
-  dragIfr.cursorStartY = y;
-  dragIfr.elStartLeft = parseInt(dragIfr.elNode.style.left, 10);
-  dragIfr.elStartTop = parseInt(dragIfr.elNode.style.top,  10);
-  if (isNaN(dragIfr.elStartLeft)) dragIfr.elStartLeft = 0;
-  if (isNaN(dragIfr.elStartTop))  dragIfr.elStartTop  = 0;
-
-  // Update element's z-index.
-  dragObj.elNode.style.zIndex = 600;
-  dragIfr.elNode.style.zIndex = dragObj.elNode.style.zIndex-1;
-
-  // Capture mousemove and mouseup events on the page.
-  if (browser.is_gecko) {
-    /* Mozilla */
-    document.addEventListener("mousemove", dragPopupGo,   true);
-    document.addEventListener("mouseup",   dragPopupStop, true);
-    //event.preventDefault();
-  }
-  else {
-    document.attachEvent("onmousemove", dragPopupGo);
-    document.attachEvent("onmouseup", dragPopupStop);
-    window.event.cancelBubble = true;
-    window.event.returnValue = false;
-  }
-}
-
-//---------------------------------------------------------------------------
-function dragAndDropStart(event, id, location, dropTarget) {
-
-  var x, y;
-
-  // store location
-  dragObj.location = location;
-  // get dropTarget
-  dragObj.targetNode = document.getElementById(dropTarget);
-
-  // If an element id was given, find it. Otherwise use the element being clicked on.
-
-  if (id)
-    dragObj.srcNode = document.getElementById(id);
-  else {
-    if (document.all) /* not Mozilla */
-      dragObj.srcNode = window.event.srcElement;
-    else
-      dragObj.srcNode = event.target;
-
-    // If this is a text node, use its parent element.
-
-    if (dragObj.srcNode.nodeType == 3)
-      dragObj.srcNode = dragObj.srcNode.parentNode;
-  }
-
-  // hide drag source
-  dragObj.srcNode.style.visibility = 'hidden';
-
-  // clone image before activating drag operation
-  dragObj.dragId = CloneImg(dragObj.srcNode);
-  dragObj.elNode = document.getElementById(dragObj.dragId);
-
-  // Get cursor position with respect to the page.
-
-  if (document.all) {
-    /* not Mozilla */
-    x = window.event.clientX + document.documentElement.scrollLeft
-      + document.body.scrollLeft;
-    y = window.event.clientY + document.documentElement.scrollTop
-      + document.body.scrollTop;
-  } else {
-    x = event.clientX + window.scrollX;
-    y = event.clientY + window.scrollY;
-  }
-
-  // Save starting positions of cursor and element.
-  dragObj.cursorStartX = x;
-  dragObj.cursorStartY = y;
-  dragObj.elStartLeft  = parseInt(dragObj.elNode.style.left, 10);
-  dragObj.elStartTop   = parseInt(dragObj.elNode.style.top,  10);
-  if (isNaN(dragObj.elStartLeft)) dragObj.elStartLeft = 0;
-  if (isNaN(dragObj.elStartTop))  dragObj.elStartTop  = 0;
-
-  // Update element's z-index.
-
-  dragObj.elNode.style.zIndex = 600;
-
-  // Capture mousemove and mouseup events on the page.
-
-  if (document.all) {
-    /* not Mozilla */
-    document.attachEvent("onmousemove", dragAndDropGo);
-    document.attachEvent("onmouseup",   dragAndDropStop);
-    window.event.cancelBubble = true;
-    window.event.returnValue = false;
-  } else {
-    document.addEventListener("mousemove", dragAndDropGo,   true);
-    document.addEventListener("mouseup",   dragAndDropStop, true);
-    event.preventDefault();
-  }
-}
-
-//---------------------------------------------------------------------------
-function dragAndDropGo(event) {
-
-  var x, y;
-
-  // Get cursor position with respect to the page.
-
- if (document.all) {
-   /* not Mozilla */
-    x = window.event.clientX + document.documentElement.scrollLeft
-      + document.body.scrollLeft;
-    y = window.event.clientY + document.documentElement.scrollTop
-      + document.body.scrollTop;
-  } else {
-    x = event.clientX + window.scrollX;
-    y = event.clientY + window.scrollY;
-  }
-
-  // Move drag element by the same amount the cursor has moved.
-  dragObj.elNode.style.left = (dragObj.elStartLeft + x - dragObj.cursorStartX) + "px";
-  dragObj.elNode.style.top  = (dragObj.elStartTop  + y - dragObj.cursorStartY) + "px";
-
-  if (document.all) {
-    /* not Mozilla */
-    window.event.cancelBubble = true;
-    window.event.returnValue = false;
-  } else
-    event.preventDefault();
-
-  // hovering over dragTarget?
-  if ((getRealTop(dragObj.targetNode.id) < getRealBottom(dragObj.elNode.id)) &&
-      (getRealBottom(dragObj.targetNode.id) > getRealTop(dragObj.elNode.id)) &&
-      (getRealLeft(dragObj.targetNode.id) < getRealRight(dragObj.elNode.id)) &&
-      (getRealRight(dragObj.targetNode.id) > getRealLeft(dragObj.elNode.id))) {
-        /* dragObj.targetNode.style.backgroundColor = dragObj.srcNode.backgroundColor */
-        if (dragObj.srcNode.currentStyle)
-	      dragObj.targetNode.style.backgroundColor = dragObj.srcNode.currentStyle["backgroundColor"];
-        else if (window.getComputedStyle){
-          var elstyle = window.getComputedStyle(dragObj.srcNode, "");
-          dragObj.targetNode.style.backgroundColor = elstyle.getPropertyValue("background-color");
-        }
-  }
-  else {
-    dragObj.targetNode.style.backgroundColor = '';
-  }
-}
-
-//---------------------------------------------------------------------------
-function dragPopupGo(event) {
-  var x, y;
-
-  // Get cursor position with respect to the page.
-  if (document.all) {
-   /* not Mozilla */
-    x = window.event.clientX + document.documentElement.scrollLeft + document.body.scrollLeft;
-    y = window.event.clientY + document.documentElement.scrollTop + document.body.scrollTop;
-  }
-  else {
-    x = event.clientX + window.scrollX;
-    y = event.clientY + window.scrollY;
-  }
-
-  // Move drag element by the same amount the cursor has moved.
-  dragObj.elNode.style.left = (dragObj.elStartLeft + x - dragObj.cursorStartX) + "px";
-  dragObj.elNode.style.top  = (dragObj.elStartTop  + y - dragObj.cursorStartY) + "px";
-  // and then reposition iframe
-  var IfrRef = getElement('DivShim');
-  dragIfr.elNode.style.left = (dragIfr.elStartLeft + x - dragIfr.cursorStartX) + "px";
-  dragIfr.elNode.style.top  = (dragIfr.elStartTop  + y - dragIfr.cursorStartY) + "px";
-
-  if (document.all) {
-    /* not Mozilla */
-    window.event.cancelBubble = true;
-    window.event.returnValue = false;
-  }
-  else  {
-    //event.preventDefault();
-  }
-}
-
-//---------------------------------------------------------------------------
-// Stop capturing mousemove and mouseup events.
-function dragPopupStop(event) {
-  if (document.all) {
-    /* not Mozilla */
-    document.detachEvent("onmousemove", dragPopupGo);
-    document.detachEvent("onmouseup", dragPopupStop);
-  }
-  else {
-    document.removeEventListener("mousemove", dragPopupGo,   true);
-    document.removeEventListener("mouseup", dragPopupStop, true);
-  }
-}
-
-//---------------------------------------------------------------------------
-function dragAndDropStop(event) {
-
-  // Stop capturing mousemove and mouseup events.
-
-  if (document.all) {
-    /* not Mozilla */
-    document.detachEvent("onmousemove", dragAndDropGo);
-    document.detachEvent("onmouseup",   dragAndDropStop);
-  } else {
-    document.removeEventListener("mousemove", dragAndDropGo,   true);
-    document.removeEventListener("mouseup",   dragAndDropStop, true);
-  }
-
-  if (isNaN(parseInt(dragObj.elNode.style.left)) || isNaN(parseInt(dragObj.elNode.style.top))) {
-    // not dragged --> simulate click
-    if (dragObj.location.length > 0) parent.location=dragObj.location;
-  } else {
-    // dragged
-    if ((getRealTop(dragObj.targetNode.id) < getRealBottom(dragObj.elNode.id)) &&
-      (getRealBottom(dragObj.targetNode.id) > getRealTop(dragObj.elNode.id)) &&
-      (getRealLeft(dragObj.targetNode.id) < getRealRight(dragObj.elNode.id)) &&
-      (getRealRight(dragObj.targetNode.id) > getRealLeft(dragObj.elNode.id))) {
-      // dropped on target, i.e. copy location
-      dragObj.targetNode.value = dragObj.location;
-
-    }
-    // simulate click if object was not dragged by more than threshold of 5px
-    if ((Math.abs(parseInt(dragObj.elNode.style.left)-dragObj.elStartLeft)<5) && (Math.abs(parseInt(dragObj.elNode.style.top)-dragObj.elStartTop)<5)) {
-      //simulate click
-      if (dragObj.location.length > 0) parent.location=dragObj.location;
-    }
-
-		// remove drag node
-		dragObj.elNode.parentNode.removeChild(dragObj.elNode);
-
-		// unhide original drag source
-		dragObj.srcNode.style.visibility = 'visible';
-		// restore target
-		dragObj.targetNode.style.backgroundColor = '';
-  }
-}
-
-//---------------------------------------------------------------------------
 function prepareShowPopup(caller, popVar, popId, field, options) {
   POPUP_FIELD = field;
   POPUP_OPTIONS = options;
-  var pos = 0;
-  if(shownPopup) {
-    shownPopup.hide();
-  }
-  shownPopup = popVar;
-  $(popId).style.display='block';
-  if(!popVar){
-    popVar = new YAHOO.widget.Panel(popId, {zindex:20000, close:true, visible:false, constraintoviewport:true, modal:true});
-    popVar.cfg.queueProperty('keylisteners', new YAHOO.util.KeyListener(document, {keys:27}, {fn:popVar.hide, scope:popVar, correctScope:true}));
-    popVar.render();
-  }
-  popVar.show();
   return popVar;
 }
+
 //---------------------------------------------------------------------------
 function editstrings_showPopup(event, caller, popVar, popId, field, options) {
   popVar = prepareShowPopup(caller, popVar, popId, field, options);
   editstrings_on_load();
-  popVar.moveTo(event.clientX+1, event.clientY);
   return popVar;
 }
 
@@ -646,7 +269,6 @@ function editstrings_showPopup(event, caller, popVar, popId, field, options) {
 function editbooleans_showPopup(event, caller, popVar, popId, field, options) {
   popVar = prepareShowPopup(caller, popVar, popId, field, options);
   editbooleans_on_load();
-  popVar.moveTo(event.clientX+1, event.clientY);
   return popVar;
 }
 
@@ -654,7 +276,6 @@ function editbooleans_showPopup(event, caller, popVar, popId, field, options) {
 function editdates_showPopup(event, caller, popVar, popId, field, options) {
   popVar = prepareShowPopup(caller, popVar, popId, field, options);
   editdates_on_load();
-  popVar.moveTo(event.clientX+1, event.clientY);
   return popVar;
 }
 
@@ -662,7 +283,6 @@ function editdates_showPopup(event, caller, popVar, popId, field, options) {
 function editdatetimes_showPopup(event, caller, popVar, popId, field, options) {
   popVar = prepareShowPopup(caller, popVar, popId, field, options);
   editdatetimes_on_load();
-  popVar.moveTo(event.clientX+1, event.clientY);
   return popVar;
 }
 
@@ -670,7 +290,6 @@ function editdatetimes_showPopup(event, caller, popVar, popId, field, options) {
 function editcodes_showPopup(event, caller, popVar, popId, field, options) {
   popVar = prepareShowPopup(caller, popVar, popId, field, options);
   editcodes_on_load();
-  popVar.moveTo(event.clientX+1, event.clientY);
   return popVar;
 }
 
@@ -678,7 +297,6 @@ function editcodes_showPopup(event, caller, popVar, popId, field, options) {
 function editnumbers_showPopup(event, caller, popVar, popId, field, options) {
   popVar = prepareShowPopup(caller, popVar, popId, field, options);
   editnumbers_on_load();
-  popVar.moveTo(event.clientX+1, event.clientY);
   return popVar;
 }
 
@@ -690,37 +308,6 @@ function move_topRight_to_bot_center(mover_id, fixer_id) {
     var fix_lt = getRealLeft(fixer_id);
     el.style.left = (fix_lt + getElement(fixer_id).offsetWidth/2) - (el.offsetWidth/2) - (el.clientWidth/2) + 'px';
     el.style.top = fix_bot + 'px';
-  }
-}
-
-//---------------------------------------------------------------------------
-function move_bottomRight_to_top_center(mover_id, fixer_id) {
-  // probably not correct...
-  var fixer_posOff = Element.positionedOffset($(fixer_id));
-  var el = getElement(mover_id);
-  el.style.left = fixer_posOff.left + 'px';
-  el.style.top = fixer_posOff.top + 'px';
-}
-
-//---------------------------------------------------------------------------
-function move_topLeft_to_bot_center(mover_id, fixer_id) {
-  var el = getElement(mover_id);
-  if (el) {
-    var fix_bot = getRealBottom(fixer_id);
-    var fix_lt = getRealLeft(fixer_id);
-    el.style.left = (fix_lt + getElement(fixer_id).offsetWidth/2) - (el.offsetWidth/2) + (el.clientWidth/2) + 'px';
-    el.style.top = fix_bot + 'px';
-  }
-}
-
-//---------------------------------------------------------------------------
-function move_to_rt_center(mover_id, fixer_id) {
-  var el = getElement(mover_id);
-  if (el) {
-    var fix_top = getRealTop(fixer_id);
-    var fix_rt = getRealRight(fixer_id);
-    el.style.left = fix_rt + 'px';
-    el.style.top = (fix_top + getElement(fixer_id).offsetHeight/2) - (el.offsetHeight/2) + 'px';
   }
 }
 
@@ -788,67 +375,17 @@ function removeThousandsSeparator(Str) {
   Str = Str.replace(/(\.|,|'|\s|&nbsp;)/g, '');
   return Str;
 }
-//---------------------------------------------------------------------------
-function makeZebraTable(tableID, headerRows) {
-  var tableEl = document.getElementById(tableID)
-  if (tableEl==null) {return;}
-  var tableClass=tableEl.className;
-  var zebraClass=tableClass+'zebra';
-  var hoverClass=tableClass+'hover';
-  var selectedClass=tableClass+'selected';
-  var tableRows=tableEl.rows;
-  var replaceStr='';
-  var j=headerRows; /* set row counter to start AFTER header rows [note that IE ignores THEAD in .rows */
-  while (j<tableRows.length) {
-    if((tableRows[j].className) && (tableRows[j].className!='rowDetails') && (tableRows[j].getElementsByTagName('td').length>0)) {
-      //addClass=j%2==0?' '+zebraClass:'';
-      //tableRows[j].className=tableRows[j].className+addClass;
-      tableRows[j].onclick=function() {
-        if(this.className.match(selectedClass)) {
-          replaceStr=this.className.match(' '+selectedClass)?' '+selectedClass:selectedClass;
-          this.className=this.className.replace(replaceStr,'');
-        } else {
-          this.className+=this.className?' '+selectedClass:selectedClass;
-        }
-      }
-      tableRows[j].onmouseover=function() {
-        this.className=this.className+' '+hoverClass;
-        if(!this.className.match(selectedClass)) {
-          this.style.borderColorTop = this.style.color; /* temp storage OK as width=0 */
-          this.style.borderColorBottom = this.style.backgroundColor; /* temp storage OK as width=0 */
-          this.style.color = '';
-          this.style.backgroundColor = '';
-        }
-      }
-      tableRows[j].onmouseout=function() {
-        replaceStr=this.className.match(' '+hoverClass)?' '+hoverClass:hoverClass;
-        this.className=this.className.replace(replaceStr,'');
-        this.className=this.className.replace(replaceStr,''); // required to clear double entries
-        if(!this.className.match(selectedClass)) {
-          this.style.color =  this.style.borderColorTop;
-          this.style.backgroundColor = this.style.borderColorBottom;
-          this.style.borderColorTop = '';
-          this.style.borderColorBottom = '';
-        }
-      }
-    }
-	j++;
-  }
-}
 
 //---------------------------------------------------------------------------
-
 function getSelectedGridRows(tableID, headerRows) {
   /* returns a string with objectIDs of selected rows (e.g. "a093847+b93837+f993838+")      */
   /* or empty string (if no rows are selected); individual objectIDs are terminated by " " */
   var tableEl = document.getElementById(tableID)
-  var tableClass=tableEl.className;
-  var selectedClass=tableClass+'selected';
-  var tableRows=tableEl.rows;
-  var selectedStr='';
-  var j=headerRows; /* set row counter to start AFTER header rows [note that IE ignores THEAD in .rows */
-
-  while (j<tableRows.length) {
+  var selectedClass = 'info';
+  var tableRows = tableEl.rows;
+  var selectedStr = '';
+  var j = headerRows;
+  while (j < tableRows.length) {
     if(tableRows[j].getElementsByTagName('td').length>0) {
       if(tableRows[j].className.match(selectedClass)) {
         /*get objectID of this row */
@@ -869,217 +406,45 @@ function getSelectedGridRows(tableID, headerRows) {
 }
 
 //---------------------------------------------------------------------------
-
 function selectGridRows(tableID, headerRows, select) {
   var tableEl = document.getElementById(tableID)
-  var tableClass=tableEl.className;
-  var selectedClass=tableClass+'selected';
-  var tableRows=tableEl.rows;
-  var j=headerRows; /* set row counter to start AFTER header rows [note that IE ignores THEAD in .rows */
-
-  while (j<tableRows.length) {
-    try{tableRows[j].onmouseover();}catch(e){};
-    if(tableRows[j].className &&
-      ((tableRows[j].className.match(selectedClass) && !select) ||
-       (!tableRows[j].className.match(selectedClass) && select)
-      )
-    ) {
-      try{tableRows[j].onclick();}catch(e){};
-    }
-    try{tableRows[j].onmouseout();}catch(e){};
+  var tableRows = tableEl.rows;
+  var j = headerRows;
+  while (j < tableRows.length) {
+    try {
+    	selectGridRow(tableRows[j]);
+    } catch(e) {};
     j++;
   }
 }
 
 //---------------------------------------------------------------------------
-
-function insertGridRow(tableID, rowID, tabOffset) {
-  /* inserts a (structurally matching) row with ID="rowID" into the table with ID="tableID"   */
-  /* tabOffset is used to calculate the tabIndex of the cell and (if required) the name index */
-  var tableNode = document.getElementById(tableID);
-  var tbodyNode = tableNode.getElementsByTagName("tbody").item(0);
-  var newRow = document.getElementById(rowID).cloneNode(true);
-  var cells = newRow.getElementsByTagName('td');
-  newRow.id = newRow.id + '-' + tabOffset.toString();
-  var currCellEl = null;
-  var splitName = null;
-  var colNum = 0;
-  var lastTabIndex = 0;
-//  try {
-    while (colNum < cells.length) {
-      if (cells[colNum].firstChild) {
-        curCellEl = cells[colNum].firstChild;
-        while (curCellEl) {
-          if (curCellEl.tabIndex) {
-            // note: Mozilla does not support tabIndex for some objects!
-            lastTabIndex = curCellEl.tabIndex + tabOffset;
-            curCellEl.tabIndex = lastTabIndex;
-          }
-//          if (curCellEl.id) {
-//            if (curCellEl.id.match('cal_')) {
-//              curCellEl.id = curCellEl.id + lastTabIndex;
-//              alert(curCellEl.id);
-//            }
-//          }
-          if (curCellEl.name) {
-            splitName = curCellEl.name.split(/[\[|\]]/);
-            nameIdx = parseInt(splitName[1]);
-            curCellEl.name = splitName[0] + '[' + (nameIdx + tabOffset).toString() + ']';
-            if (splitName[2]) {
-              curCellEl.name = curCellEl.name + splitName[2];
-            }
-            curCellEl.id = curCellEl.name;
-            //alert('inserted: name='+curCellEl.name + ' | ' + 'ID='+curCellEl.id);
-          }
-          curCellEl = curCellEl.nextSibling;
-        }
-      }
-      colNum++
-    }
-    tbodyNode.appendChild(newRow)
-//  }
-//  catch (e) {
-//    deleteGridRow(newRow)
-//  }
+function selectGridRow(e) {
+	if(e.className == '') {
+		e.className = 'info';
+	} else {
+		e.className='';
+	};	
 }
 
 //---------------------------------------------------------------------------
-
-function cloneGridRow(tableID, elInRowToClone, tabOffset, rowMultiplier) {
-  /* clones the row "rowToClone" and inserts the cloned row into the table with ID="tableID"  */
-  /* tabOffset is used to calculate the tabIndex of the cell and (if required) the name index */
-  var tableNode = document.getElementById(tableID);
-  var tbodyNode = tableNode.getElementsByTagName("tbody").item(0);
-  var newRow = null;
-  // allow cloning of cloned rows
-  var cloneIMGnode = elInRowToClone.nextSibling;
-  while (cloneIMGnode.nodeType == 3) {cloneIMGnode = cloneIMGnode.nextSibling;}
-  visibleStatus = cloneIMGnode.style.display;
-  cloneIMGnode.style.display = 'block';
-  var sourceRow = elInRowToClone.parentNode.parentNode;
-  while (sourceRow) {
-    // located bounding TR node
-    if (sourceRow.tagName == "TR") {
-      newRow = sourceRow.cloneNode(true);
-      sourceRow = null;
-    } else {
-      sourceRow = sourceRow.parentNode;
-    }
-  }
-  // restore visibility status of clone icon
-  cloneIMGnode.style.display = visibleStatus;
-  if (newRow != null) {
-    var cells = newRow.getElementsByTagName('td');
-    newRow.id = newRow.id + '-' + tabOffset.toString();
-    var currCellEl = null;
-    var splitName = null;
-    var colNum = 0;
-//  try {
-      while (colNum < cells.length) {
-        if (cells[colNum].firstChild) {
-          curCellEl = cells[colNum].firstChild;
-          while (curCellEl) {
-            if (curCellEl.tabIndex) {
-              // note: Mozilla does not support tabIndex for some objects!
-              curCellEl.tabIndex = (curCellEl.tabIndex % rowMultiplier) + tabOffset;
-            }
-            if (curCellEl.name) {
-              if ((curCellEl.name.indexOf("refMofId") >= 0) && (curCellEl.value.indexOf("xri:@") == 0 )) {
-                curCellEl.value = 'clonedFrom:' + curCellEl.value
-              }
-              splitName = curCellEl.name.split(/[\[|\]]/);
-              nameIdx = (parseInt(splitName[1]) % rowMultiplier);
-              curCellEl.name = splitName[0] + '[' + (nameIdx + tabOffset).toString() + ']';
-              if (splitName[2]) {
-                curCellEl.name = curCellEl.name + splitName[2];
-              }
-              curCellEl.id = curCellEl.name;
-              //alert('cloned: name='+curCellEl.name + ' | ' + 'ID='+curCellEl.id + ' | ' + 'value='+curCellEl.value);
-            }
-            curCellEl = curCellEl.nextSibling;
-          }
-        }
-        colNum++
-      }
-      tbodyNode.appendChild(newRow)
-//  }
-//  catch (e) {
-//    deleteGridRow(newRow)
-//  }
-  }
-}
-
-//---------------------------------------------------------------------------
-
-function deleteGridRow(clickedEl) {
-  /* removes the row containing the clicked element from the table */
-  while (clickedEl) {
-    if (clickedEl.tagName == "TR") {
-      clickedEl.parentNode.removeChild(clickedEl);
-      clickedEl = null;
-    } else {
-      clickedEl = clickedEl.parentNode;
-    }
-  }
-}
-
-//---------------------------------------------------------------------------
-
-function updateCollapsableRows (tableID, headerRows, anchorID, currentLevel, collapse) {
-  /* anchorID = "Tx-m-n-o-p-..." */
-  /* currentLevel designates the current level */
-  var tableEl = document.getElementById(tableID)
-  var tableRows=tableEl.rows;
-  var j=headerRows; /* set row counter to start AFTER header rows [note that IE ignores THEAD in .rows */
-  var currentLevelPos = currentLevel+1;
-  var levels = anchorID.split('-');
-  var currentLevelNum = parseInt(levels[currentLevelPos]);
-  var i = currentLevelPos;
-  var parentLevels = levels[i];
-  while (i>0) {i--; parentLevels = levels[i]+parentLevels;}
-  var anchorParentLevels = parentLevels;
-  while (j<tableRows.length) {
-    if (tableRows[j].id != anchorID) {
-      levels = tableRows[j].id.split('-');
-      if (parseInt(levels[currentLevelPos])==currentLevelNum) {
-        i = currentLevelPos;
-        parentLevels = levels[i];
-        while (i>0) {i--; parentLevels = levels[i]+parentLevels;}
-        if (parentLevels == anchorParentLevels) {
-          if (collapse) {
-            tableRows[j].style.display = 'none';
-            if (tableRows[j].collapseCount) {
-              tableRows[j].collapseCount++;
-            } else {
-              tableRows[j].collapseCount = 1;
-            }
-          } else {
-            if (tableRows[j].collapseCount == 1) {
-              tableRows[j].style.display = ''; // do NOT use block to show row because Firefox/Opera do not put it back into the original table!
-            }
-            tableRows[j].collapseCount--;
-          }
-        }
-      }
-    }
-    j++;
-  }
-}
-
-//---------------------------------------------------------------------------
-
 function updateXriField (titleField, selectedItem) {
+	selectedItemHtml = selectedItem.innerHTML;
 	if(
-	  (titleField.id.indexOf(".Title") != -1) &&
-	  (selectedItem.childNodes[1] != null) &&
-	  (selectedItem.childNodes[1].firstChild != null) &&
-	  (selectedItem.childNodes[1].firstChild.firstChild != null)
+		(selectedItemHtml != null) &&
+		(selectedItemHtml.indexOf("xri://") >= 0)
 	) {
-		xri = selectedItem.childNodes[1].firstChild.firstChild.nodeValue;
-		xriField = titleField.id.substring(0, titleField.id.indexOf(".Title"));
-		document.getElementById(xriField).value = selectedItem.childNodes[1].firstChild.firstChild.nodeValue;
-  }
+		posStartSpan = selectedItemHtml.indexOf("<span>");
+		posStartXri = selectedItemHtml.indexOf("xri://", posStartSpan);
+		posEndXri = selectedItemHtml.indexOf("</div>", posStartXri)
+		if(posStartSpan > 0 && posStartXri > 0 && posEndXri > 0) {
+			xriFieldId = titleField.id.substring(0, titleField.id.indexOf(".Title"));
+			document.getElementById(xriFieldId).value = selectedItemHtml.substring(posStartXri, posEndXri);
+			titleField.value = selectedItemHtml.substring(0, posStartSpan);
+		}
+	}
 }
+
 //---------------------------------------------------------------------------
 function navSelect(liElt) {
   try {
@@ -1090,26 +455,7 @@ function navSelect(liElt) {
     liElt.parentNode.className = "selected";
   } catch(e){};
 }
-//---------------------------------------------------------------------------
-function inspTabSelect(aElt, content) {
-  try {
-    var aElts = aElt.parentNode.getElementsByTagName("A");
-    for (var i=0; i<aElts.length; i++){
-      aElts[i].className='';
-    }
-    aElt.className = "selected";
-    var inspContent = aElt.parentNode.nextSibling;
-    while ((inspContent.nodeType!=1) || (inspContent.id!="inspContent")) {inspContent=inspContent.nextSibling;}
 
-    var divElt = (inspContent.getElementsByTagName("DIV"))[0];
-    while (divElt) {
-      divElt.className= (content == '' ? 'selected' : 'hidden');
-      divElt= divElt.nextSibling;
-    }
-    $(content).className = 'selected';
-    if (pageHasCharts) {window.onresize();};
-  } catch(e){};
-}
 //---------------------------------------------------------------------------
 function loadingIndicator(gridContent) {
   //gridContent must be node, not just an ID
@@ -1133,96 +479,35 @@ function loadingIndicator(gridContent) {
     }
   } catch(e){};
 }
+
+//---------------------------------------------------------------------------
 function gTabSelect(aElt, expand) {
   try {
     if (expand) {
-      var aElts = aElt.parentNode.getElementsByTagName("A");
-      for (var i=0; i<aElts.length; i++){
-        if (aElts[i].className=='hidden') {
-          aElts[i].className='';
-        };
+      var aElts = aElt.parentNode.parentNode.getElementsByTagName("li");
+      for(var i = 0; i < aElts.length; i++){
+        if (aElts[i].className == 'hidden') {
+          aElts[i].className = '';
+        }
       }
       aElt.style.display = 'none';
-    }
-    else {
-      var gridContent = aElt.parentNode.nextSibling;
-      while (gridContent.tagName!="DIV") {gridContent=gridContent.nextSibling;}
-      loadingIndicator(gridContent);
+    } else {
+      var gridContent = aElt.parentNode.parentNode.nextElementSibling;
+      if(gridContent.tagName == 'DIV') {
+        loadingIndicator(gridContent);
+      }
       // activate newly selected tab
-      var aElts = aElt.parentNode.getElementsByTagName("A");
-      for (var i=0; i<aElts.length; i++){
-        if (aElts[i].className!='hidden') {
-          aElts[i].className='';
+      var aElts = aElt.parentNode.parentNode.getElementsByTagName("li");
+      for(var i = 0; i < aElts.length; i++){
+        if(aElts[i].className != 'hidden') {
+          aElts[i].className='hidden-print';
         }
       }
-      aElt.className = "selected";
+      aElt.parentNode.className = 'active';
     }
   } catch(e){};
 }
-//---------------------------------------------------------------------------
-function yuiPrint() {
-  try {
-    var disp_setting="toolbar=no,location=yes,directories=no,menubar=yes,";
-        disp_setting+="scrollbars=yes,width=650, height=600, left=100, top=25,";
-        disp_setting+="resizable=yes";
-    var content_value = "";
-    if ($('paneLeft')) {$('paneLeft').style.display='none';}
-    if (content_value == null || content_value.length == 0) {
-		    try {content_value = $('contentHeaderYesLeftYes').innerHTML;} catch(e) {};
-    }
-    if (content_value == null || content_value.length == 0) {
-		    try {content_value = $('contentHeaderNoLeftYes').innerHTML;} catch(e) {};
-    }
-    if (content_value == null || content_value.length == 0) {
-		    try {content_value = $('contentHeaderYesLeftNo').innerHTML;} catch(e) {};
-    }
-    if (content_value == null || content_value.length == 0) {
-		    try {content_value = $('contentHeaderNoLeftNo').innerHTML;} catch(e) {};
-    }
-    if (content_value == null || content_value.length == 0) {
-		    try {content_value = $('contentHeaderYesLeftYesNoScroll').innerHTML;} catch(e) {};
-    }
-    if (content_value == null || content_value.length == 0) {
-		    try {content_value = $('contentHeaderNoLeftYesNoScroll').innerHTML;} catch(e) {};
-    }
-    if (content_value == null || content_value.length == 0) {
-		    try {content_value = $('contentHeaderYesLeftNoNoScroll').innerHTML;} catch(e) {};
-    }
-    if (content_value == null || content_value.length == 0) {
-		    try {content_value = $('contentHeaderNoLeftNoNoScroll').innerHTML;} catch(e) {};
-    }
-    if ($('paneLeft')) {$('paneLeft').style.display='block';}
-    var docprint=window.open("","",disp_setting);
-    docprint.document.open();
-    docprint.document.write('<html><head><style>');
-    for (var S = 0; S < document.styleSheets.length; S++){
-      if (document.styleSheets[S].cssText) {
-        for (var S = 0; S < document.styleSheets.length; S++){
-          docprint.document.write(document.styleSheets[S].cssText);
-        }
-      } else {
-        if (document.styleSheets[S].cssRules) {
-          for (var R = 0; R < document.styleSheets[S].cssRules.length; R++) {
-            docprint.document.write(document.styleSheets[S].cssRules[R].cssText);
-          }
-        } else if (document.styleSheets[S].rules) {
-          for (var R = 0; R < document.styleSheets[S].rules.length; R++) {
-            docprint.document.write(document.styleSheets[S].rules[R].cssText);
-          }
-        }
-      }
-    }
-    docprint.document.write('#menuOp {display:none;} #menuOpPanel {display:none;} .gridTableHeaderFull, .gridTableHeader {background-color:#eee;}');
-    docprint.document.write('</style>');
-    docprint.document.write('<script>function getEncodedHRef(components){var href = encodeURI(components[0]);for(i=1;i<components.length; i+=2){if(i==1){href+="?";}else{href+="&";}href+=components[i]+"="+encodeURIComponent(components[i+1]);}return href;}</script>');
-    docprint.document.write('<script>sfinit = function(ULelt){};</script>');
-    docprint.document.write('</head><body class="yui-skin-sam" onLoad="self.print()">');
-    docprint.document.write(content_value);
-    docprint.document.write('</body></html>');
-    docprint.document.close();
-    docprint.focus();
-  } catch(e){};
-}
+
 //---------------------------------------------------------------------------
 var HTMLeditTextAreaId = "";
 function loadHTMLedit(textareaID, urlPrefix) {
@@ -1231,6 +516,8 @@ function loadHTMLedit(textareaID, urlPrefix) {
   win = window.open(urlPrefix + 'javascript/wymeditor/htmledit.htm', '_blank', "titlebar=no,menubar=no,help=yes,status=yes,scrollbars=yes,resizable=yes,dependent=yes,alwaysRaised=yes", true);
   win.focus();
 }
+
+//---------------------------------------------------------------------------
 var WIKYeditTextAreaId = "";
 function loadWIKYedit(textareaID, urlPrefix) {
   WIKYeditTextAreaId = textareaID;
@@ -1238,3 +525,411 @@ function loadWIKYedit(textareaID, urlPrefix) {
   win = window.open(urlPrefix + 'javascript/wiky/wikyedit.htm', '_blank', "titlebar=no,menubar=no,help=yes,status=yes,scrollbars=yes,resizable=yes,dependent=yes,alwaysRaised=yes", true);
   win.focus();
 }
+
+//---------------------------------------------------------------------------
+function evalScripts(html) {
+	try{
+		eval(jQuery(html).filter('script').text());
+	} catch(e) {
+		console.log(e);
+	};
+	try {
+		eval(jQuery(html).find('script').text());
+	} catch(e) {
+		console.log(e);
+	};
+}
+
+//---------------------------------------------------------------------------
+// script.aculo.us controls.js v1.9.0, Thu Dec 23 16:54:48 -0500 2010
+
+// Copyright (c) 2005-2010 Thomas Fuchs (http://script.aculo.us, http://mir.aculo.us)
+//           (c) 2005-2010 Ivan Krstic (http://blogs.law.harvard.edu/ivan)
+//           (c) 2005-2010 Jon Tirsen (http://www.tirsen.com)
+// Contributors:
+//  Richard Livsey
+//  Rahul Bhargava
+//  Rob Wills
+//
+// script.aculo.us is freely distributable under the terms of an MIT-style license.
+// For details, see the script.aculo.us web site: http://script.aculo.us/
+
+// Autocompleter.Base handles all the autocompletion functionality
+// that's independent of the data source for autocompletion. This
+// includes drawing the autocompletion menu, observing keyboard
+// and mouse events, and similar.
+//
+// Specific autocompleters need to provide, at the very least,
+// a getUpdatedChoices function that will be invoked every time
+// the text inside the monitored textbox changes. This method
+// should get the text for which to provide autocompletion by
+// invoking this.getToken(), NOT by directly accessing
+// this.element.value. This is to allow incremental tokenized
+// autocompletion. Specific auto-completion logic (AJAX, etc)
+// belongs in getUpdatedChoices.
+//
+// Tokenized incremental autocompletion is enabled automatically
+// when an autocompleter is instantiated with the 'tokens' option
+// in the options parameter, e.g.:
+// new Ajax.Autocompleter('id','upd', '/url/', { tokens: ',' });
+// will incrementally autocomplete with a comma as the token.
+// Additionally, ',' in the above example can be replaced with
+// a token array, e.g. { tokens: [',', '\n'] } which
+// enables autocompletion on multiple tokens. This is most
+// useful when one of the tokens is \n (a newline), as it
+// allows smart autocompletion after linebreaks.
+
+Element.collectTextNodes = function(element) {
+  return $A($(element).childNodes).collect( function(node) {
+    return (node.nodeType==3 ? node.nodeValue :
+      (node.hasChildNodes() ? Element.collectTextNodes(node) : ''));
+  }).flatten().join('');
+};
+
+Element.collectTextNodesIgnoreClass = function(element, className) {
+  return $A($(element).childNodes).collect( function(node) {
+    return (node.nodeType==3 ? node.nodeValue :
+      ((node.hasChildNodes() && !Element.hasClassName(node,className)) ?
+        Element.collectTextNodesIgnoreClass(node, className) : ''));
+  }).flatten().join('');
+};
+
+var Autocompleter = { };
+Autocompleter.Base = Class.create({
+  baseInitialize: function(element, update, options) {
+    element          = $(element);
+    this.element     = element;
+    this.update      = $(update);
+    this.hasFocus    = false;
+    this.changed     = false;
+    this.active      = false;
+    this.index       = 0;
+    this.entryCount  = 0;
+    this.oldElementValue = this.element.value;
+
+    if(this.setOptions)
+      this.setOptions(options);
+    else
+      this.options = options || { };
+
+    this.options.paramName    = this.options.paramName || this.element.name;
+    this.options.tokens       = this.options.tokens || [];
+    this.options.frequency    = this.options.frequency || 0.4;
+    this.options.minChars     = this.options.minChars || 1;
+    this.options.onShow       = this.options.onShow ||
+      function(element, update){
+        if(!update.style.position || update.style.position=='absolute') {
+          update.style.position = 'absolute';
+          Position.clone(element, update, {
+            setHeight: false,
+            offsetTop: element.offsetHeight
+          });
+        }
+        update.style.display = 'block'; /* Effect.Appear(update,{duration:0.15}); */
+      };
+    this.options.onHide = this.options.onHide ||
+      function(element, update){
+    	update.style.display = 'none'; /* new Effect.Fade(update,{duration:0.15}) */ 
+    };
+
+    if(typeof(this.options.tokens) == 'string')
+      this.options.tokens = new Array(this.options.tokens);
+    // Force carriage returns as token delimiters anyway
+    if (!this.options.tokens.include('\n'))
+      this.options.tokens.push('\n');
+
+    this.observer = null;
+
+    this.element.setAttribute('autocomplete','off');
+
+    Element.hide(this.update);
+
+    Event.observe(this.element, 'blur', this.onBlur.bindAsEventListener(this));
+    Event.observe(this.element, 'keyup', this.onKeyPress.bindAsEventListener(this)); // not supported by all browsers
+    Event.observe(this.element, 'input', this.onKeyPress.bindAsEventListener(this));
+  },
+
+  show: function() {
+    if(Element.getStyle(this.update, 'display')=='none') this.options.onShow(this.element, this.update);
+    if(!this.iefix &&
+      (Prototype.Browser.IE) &&
+      (Element.getStyle(this.update, 'position')=='absolute')) {
+      new Insertion.After(this.update,
+       '<iframe id="' + this.update.id + '_iefix" '+
+       'style="display:none;position:absolute;filter:progid:DXImageTransform.Microsoft.Alpha(opacity=0);" ' +
+       'src="javascript:false;" frameborder="0" scrolling="no"></iframe>');
+      this.iefix = $(this.update.id+'_iefix');
+    }
+    if(this.iefix) setTimeout(this.fixIEOverlapping.bind(this), 50);
+  },
+
+  fixIEOverlapping: function() {
+    Position.clone(this.update, this.iefix, {setTop:(!this.update.style.height)});
+    this.iefix.style.zIndex = 1;
+    this.update.style.zIndex = 2;
+    Element.show(this.iefix);
+  },
+
+  hide: function() {
+    this.stopIndicator();
+    if(Element.getStyle(this.update, 'display')!='none') this.options.onHide(this.element, this.update);
+    if(this.iefix) Element.hide(this.iefix);
+  },
+
+  startIndicator: function() {
+    if(this.options.indicator) Element.show(this.options.indicator);
+  },
+
+  stopIndicator: function() {
+    if(this.options.indicator) Element.hide(this.options.indicator);
+  },
+
+  onKeyPress: function(event) {
+    if(this.active)
+      switch(event.keyCode) {
+       case Event.KEY_TAB:
+       case Event.KEY_RETURN:
+         this.selectEntry();
+         Event.stop(event);
+       case Event.KEY_ESC:
+         this.hide();
+         this.active = false;
+         Event.stop(event);
+         return;
+       case Event.KEY_LEFT:
+       case Event.KEY_RIGHT:
+         return;
+       case Event.KEY_UP:
+         this.markPrevious();
+         this.render();
+         Event.stop(event);
+         return;
+       case Event.KEY_DOWN:
+         this.markNext();
+         this.render();
+         Event.stop(event);
+         return;         
+    } else if(
+        event.keyCode==Event.KEY_TAB || 
+        event.keyCode==Event.KEY_RETURN ||
+        (Prototype.Browser.WebKit > 0 && event.keyCode == 0)
+    ) return;
+    this.changed = true;
+    this.hasFocus = true;
+    if(this.observer) clearTimeout(this.observer);
+    this.observer = setTimeout(this.onObserverEvent.bind(this), this.options.frequency*1000);
+  },
+
+  activate: function() {
+    this.changed = false;
+    this.hasFocus = true;
+    this.getUpdatedChoices();
+  },
+
+  onHover: function(event) {
+    var element = Event.findElement(event, 'LI');
+    if(this.index != element.autocompleteIndex)
+    {
+        this.index = element.autocompleteIndex;
+        this.render();
+    }
+    Event.stop(event);
+  },
+
+  onClick: function(event) {
+    var element = Event.findElement(event, 'LI');
+    this.index = element.autocompleteIndex;
+    this.selectEntry();
+    this.hide();
+  },
+
+  onBlur: function(event) {
+	if(this.active) {
+	    this.selectEntry();
+	    setTimeout(this.hide.bind(this), 250);
+	    this.hasFocus = false;
+	    this.active = false;
+	    this.element.blur();
+	}
+  },
+
+  render: function() {
+    if(this.entryCount > 0) {
+      for (var i = 0; i < this.entryCount; i++)
+        this.index==i ?
+          Element.addClassName(this.getEntry(i),"selected") :
+          Element.removeClassName(this.getEntry(i),"selected");
+      if(this.hasFocus) {
+        this.show();
+        this.active = true;
+      }
+    } else {
+      this.active = false;
+      this.hide();
+    }
+  },
+
+  markPrevious: function() {
+    if(this.index > 0) this.index--;
+      else this.index = this.entryCount-1;
+    this.getEntry(this.index).scrollIntoView(true);
+  },
+
+  markNext: function() {
+    if(this.index < this.entryCount-1) this.index++;
+      else this.index = 0;
+    this.getEntry(this.index).scrollIntoView(false);
+  },
+
+  getEntry: function(index) {
+    return this.update.firstChild.childNodes[index];
+  },
+
+  getCurrentEntry: function() {
+    return this.getEntry(this.index);
+  },
+
+  selectEntry: function() {
+    this.active = false;
+    this.updateElement(this.getCurrentEntry());
+  },
+
+  updateElement: function(selectedElement) {
+    if (this.options.updateElement) {
+      this.options.updateElement(selectedElement);
+      return;
+    }
+    var value = '';
+    if (this.options.select) {
+      var nodes = $(selectedElement).select('.' + this.options.select) || [];
+      if(nodes.length>0) value = Element.collectTextNodes(nodes[0], this.options.select);
+    } else
+      value = Element.collectTextNodesIgnoreClass(selectedElement, 'informal');
+
+    var bounds = this.getTokenBounds();
+    if (bounds[0] != -1) {
+      var newValue = this.element.value.substr(0, bounds[0]);
+      var whitespace = this.element.value.substr(bounds[0]).match(/^\s+/);
+      if (whitespace)
+        newValue += whitespace[0];
+      this.element.value = newValue + value + this.element.value.substr(bounds[1]);
+    } else {
+      this.element.value = value;
+    }
+    this.oldElementValue = this.element.value;
+    this.element.focus();
+
+    if (this.options.afterUpdateElement)
+      this.options.afterUpdateElement(this.element, selectedElement);
+  },
+
+  updateChoices: function(choices) {
+    if(!this.changed && this.hasFocus) {
+      this.update.innerHTML = choices;
+      Element.cleanWhitespace(this.update);
+      Element.cleanWhitespace(this.update.down());
+
+      if(this.update.firstChild && this.update.down().childNodes) {
+        this.entryCount =
+          this.update.down().childNodes.length;
+        for (var i = 0; i < this.entryCount; i++) {
+          var entry = this.getEntry(i);
+          entry.autocompleteIndex = i;
+          this.addObservers(entry);
+        }
+      } else {
+        this.entryCount = 0;
+      }
+
+      this.stopIndicator();
+      this.index = 0;
+
+      if(this.entryCount==1 && this.options.autoSelect) {
+        this.selectEntry();
+        this.hide();
+      } else {
+        this.render();
+      }
+    }
+  },
+
+  addObservers: function(element) {
+    Event.observe(element, "mouseover", this.onHover.bindAsEventListener(this));
+    Event.observe(element, "click", this.onClick.bindAsEventListener(this));
+  },
+
+  onObserverEvent: function() {
+    this.changed = false;
+    this.tokenBounds = null;
+    if(this.getToken().length>=this.options.minChars) {
+      this.getUpdatedChoices();
+    } else {
+      this.active = false;
+      this.hide();
+    }
+    this.oldElementValue = this.element.value;
+  },
+
+  getToken: function() {
+    var bounds = this.getTokenBounds();
+    return this.element.value.substring(bounds[0], bounds[1]).strip();
+  },
+
+  getTokenBounds: function() {
+    if (null != this.tokenBounds) return this.tokenBounds;
+    var value = this.element.value;
+    if (value.strip().empty()) return [-1, 0];
+    var diff = arguments.callee.getFirstDifferencePos(value, this.oldElementValue);
+    var offset = (diff == this.oldElementValue.length ? 1 : 0);
+    var prevTokenPos = -1, nextTokenPos = value.length;
+    var tp;
+    for (var index = 0, l = this.options.tokens.length; index < l; ++index) {
+      tp = value.lastIndexOf(this.options.tokens[index], diff + offset - 1);
+      if (tp > prevTokenPos) prevTokenPos = tp;
+      tp = value.indexOf(this.options.tokens[index], diff + offset);
+      if (-1 != tp && tp < nextTokenPos) nextTokenPos = tp;
+    }
+    return (this.tokenBounds = [prevTokenPos + 1, nextTokenPos]);
+  }
+});
+
+//---------------------------------------------------------------------------
+Autocompleter.Base.prototype.getTokenBounds.getFirstDifferencePos = function(newS, oldS) {
+  var boundary = Math.min(newS.length, oldS.length);
+  for (var index = 0; index < boundary; ++index)
+    if (newS[index] != oldS[index])
+      return index;
+  return boundary;
+};
+
+//---------------------------------------------------------------------------
+Ajax.Autocompleter = Class.create(Autocompleter.Base, {
+  initialize: function(element, update, url, options) {
+    this.baseInitialize(element, update, options);
+    this.options.asynchronous  = true;
+    this.options.onComplete    = this.onComplete.bind(this);
+    this.options.defaultParams = this.options.parameters || null;
+    this.url                   = url;
+  },
+
+  getUpdatedChoices: function() {
+    this.startIndicator();
+
+    var entry = encodeURIComponent(this.options.paramName) + '=' +
+      encodeURIComponent(this.getToken());
+
+    this.options.parameters = this.options.callback ?
+      this.options.callback(this.element, entry) : entry;
+
+    if(this.options.defaultParams)
+      this.options.parameters += '&' + this.options.defaultParams;
+
+    new Ajax.Request(this.url, this.options);
+  },
+
+  onComplete: function(request) {
+    this.updateChoices(request.responseText);
+  }
+});
+
+//---------------------------------------------------------------------------

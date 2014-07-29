@@ -165,7 +165,7 @@ public class UiContext
             return "N/A";
         }
         else {
-            List label = inspector.getLabel();
+            List<String> label = inspector.getLabel();
             return localeAsIndex < label.size() ? 
                 (String)label.get(localeAsIndex) : 
                 	label.isEmpty() ? "" : (String)label.get(0);

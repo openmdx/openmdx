@@ -8,7 +8,7 @@
  * This software is published under the BSD license
  * as listed below.
  * 
- * Copyright (c) 2004-2007, OMEX AG, Switzerland
+ * Copyright (c) 2004-2014, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -70,15 +70,28 @@ import org.openmdx.base.exception.ServiceException;
 import org.openmdx.kernel.log.SysLog;
 import org.openmdx.portal.servlet.ApplicationContext;
 import org.openmdx.portal.servlet.Autocompleter_1_0;
+import org.openmdx.portal.servlet.CssClass;
 import org.openmdx.portal.servlet.HtmlEncoder_1_0;
 import org.openmdx.portal.servlet.ViewPort;
-import org.openmdx.portal.servlet.control.EditObjectControl;
+import org.openmdx.portal.servlet.control.EditInspectorControl;
 
-public class NumberValue
-    extends AttributeValue
-    implements Serializable {
+/**
+ * NumberValue
+ *
+ */
+public class NumberValue extends AttributeValue implements Serializable {
   
-    //-------------------------------------------------------------------------
+    /**
+     * Create number attribute value.
+     * 
+     * @param object
+     * @param fieldDef
+     * @param hasThousandsSeparator
+     * @param minValue
+     * @param maxValue
+     * @param application
+     * @return
+     */
     public static AttributeValue createNumberValue(
         Object object,
         FieldDef fieldDef,
@@ -109,7 +122,16 @@ public class NumberValue
             );
     }
     
-    //-------------------------------------------------------------------------
+    /**
+     * Constructor.
+     * 
+     * @param object
+     * @param fieldDef
+     * @param hasThousandsSeparator
+     * @param minValue
+     * @param maxValue
+     * @param application
+     */
     protected NumberValue(
         Object object,
         FieldDef fieldDef,
@@ -131,14 +153,23 @@ public class NumberValue
         this.hasThousandsSeparator = hasThousandsSeparator;
     }
 
-    //-------------------------------------------------------------------------
+    /**
+     * Get locale by name.
+     * 
+     * @param localeAsString
+     * @return
+     */
     protected Locale getLocaleByName(
         String localeAsString
     ) {
         return availableLocales.get(localeAsString);
     }
     
-    //-------------------------------------------------------------------------
+    /**
+     * Get decimal formatter.
+     * 
+     * @return
+     */
     private DecimalFormat getDecimalFormat(
     ) {
         if(this.decimalFormat == null) {
@@ -157,51 +188,67 @@ public class NumberValue
         return this.decimalFormat;            
     }
   
-    //-------------------------------------------------------------------------
+    /**
+     * Test whether s is a number.
+     * 
+     * @param s
+     * @return
+     */
+    protected boolean isNumber(
+    	String s
+    ) {
+    	try {
+    		new BigDecimal(s);
+    		return true;
+    	} catch(Exception e) {
+    		return false;
+    	}
+    }
+    
+    /* (non-Javadoc)
+     * @see org.openmdx.portal.servlet.attribute.AttributeValue#getValue(boolean)
+     */
     @Override
     public Object getValue(
-        boolean shortFormat
+    		boolean shortFormat
     ) {
-        Object value = super.getValue(shortFormat);
-        DecimalFormat formatter = this.getDecimalFormat();        
-        if(value == null) {
-          return "";
-        }
-        else if(value instanceof Collection) {
-          List<String> values = new ArrayList<String>();
-          for(Iterator i = ((Collection)value).iterator(); i.hasNext(); ) {
-              Object number = i.next();
-              if(number instanceof Number) {
-                  values.add(
-                      formatter.format(number)
-                  );
-              }
-              else {
-            	  SysLog.error(
-                      "Collection contains non Number values", 
-                      (this.object instanceof RefObject ? "object=" + ((RefObject)this.object).refMofId() + "; " : "" ) +  
-                      "feature=" + this.fieldDef.qualifiedFeatureName + "; values=" + value + "; element=" + number + "; element class=" + (number == null ? null : number.getClass().getName())
-                  );
-              }          
-          }
-          return values;
-        }
-        else {
-            if(value instanceof Number) {
-                return formatter.format(value);
-            }
-            else {
-            	SysLog.error(
-                    "Attribute value is not a Number", 
-                    (this.object instanceof RefObject ? "object=" + ((RefObject)this.object).refMofId() + "; " : "" ) + 
-                    "feature=" + this.fieldDef.qualifiedFeatureName + "; value=" + value + "; value class=" + (value == null ? null : value.getClass().getName())
-                );
-                return "#ERR";
-            }
-        }
+    	Object value = super.getValue(shortFormat);
+    	DecimalFormat formatter = this.getDecimalFormat();        
+    	if(value == null) {
+    		return "";
+    	} else if(value instanceof Collection) {
+    		List<String> values = new ArrayList<String>();
+    		for(Iterator i = ((Collection)value).iterator(); i.hasNext(); ) {
+    			Object number = i.next();
+    			if(number instanceof Number) {
+    				values.add(formatter.format(number));
+    			} else {
+    				SysLog.error(
+						"Collection contains non Number values", 
+						(this.object instanceof RefObject ? "object=" + ((RefObject)this.object).refMofId() + "; " : "" ) +  
+						"feature=" + this.fieldDef.qualifiedFeatureName + "; values=" + value + "; element=" + number + "; element class=" + (number == null ? null : number.getClass().getName())
+					);
+    			}          
+    		}
+    		return values;
+    	} else if(value instanceof Number) {
+    		return formatter.format(value);
+    	} else if(value instanceof String && this.isNumber((String)value)) {
+    		return value;
+    	} else {
+    		SysLog.error(
+				"Attribute value is not a Number", 
+				(this.object instanceof RefObject ? "object=" + ((RefObject)this.object).refMofId() + "; " : "" ) + 
+				"feature=" + this.fieldDef.qualifiedFeatureName + "; value=" + value + "; value class=" + (value == null ? null : value.getClass().getName())
+			);
+    		return "#ERR";
+    	}
     }
-  
-    //-------------------------------------------------------------------------
+
+    /* (non-Javadoc)
+     * @see org.openmdx.portal.servlet.attribute.AttributeValue#getDefaultValue()
+     */
+    @Override
     public Object getDefaultValue(
     ) {      
         DecimalFormat formatter = this.getDecimalFormat();
@@ -210,19 +257,29 @@ public class NumberValue
             : formatter.format(this.defaultValue);
     }
   
-    //-------------------------------------------------------------------------
+    /**
+     * Get min value.
+     * 
+     * @return
+     */
     public BigDecimal getMinValue(
     ) {      
         return this.minValue;
     }
 
-    //-------------------------------------------------------------------------
+    /**
+     * Get max value.
+     * 
+     * @return
+     */
     public BigDecimal getMaxValue(
     ) {      
         return this.maxValue;
     }
 
-    //-------------------------------------------------------------------------
+    /* (non-Javadoc)
+     * @see org.openmdx.portal.servlet.attribute.AttributeValue#paint(org.openmdx.portal.servlet.attribute.Attribute, org.openmdx.portal.servlet.ViewPort, java.lang.String, java.lang.String, org.openmdx.base.accessor.jmi.cci.RefObject_1_0, int, int, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, boolean)
+     */
     @Override
     public void paint(
         Attribute attribute,
@@ -249,7 +306,7 @@ public class NumberValue
             id = (id == null) || (id.length() == 0) ? 
                 feature + "[" + Integer.toString(tabIndex) + "]" : 
                 id;            
-            p.write("<td class=\"label\" title=\"", (title == null ? "" : htmlEncoder.encode(title, false)), "\"><span class=\"nw\">", htmlEncoder.encode(label, false), "</span></td>");            
+            p.write("<td class=\"", CssClass.fieldLabel.toString(), "\" title=\"", (title == null ? "" : htmlEncoder.encode(title, false)), "\"><span class=\"", CssClass.nw.toString(), "\">", htmlEncoder.encode(label, false), "</span></td>");            
             if(this.isSingleValued()) {
                 p.write("<td ", rowSpanModifier, ">");
                 Autocompleter_1_0 autocompleter = this.getAutocompleter(
@@ -267,7 +324,7 @@ public class NumberValue
                         false,
                         null,
                         null,
-                        "class=\"valueL valueAC\"",
+                        "class=\"" + CssClass.valueL + " " + CssClass.valueAC + "\"",
                         null, // imgTag
                         null // onChangeValueScript
                     );
@@ -280,23 +337,25 @@ public class NumberValue
                     String maxValueModifier = maxValue.compareTo(new BigDecimal(Long.MAX_VALUE)) >= 0 ? 
                         "" : 
                         "if (parseInt(removeThousandsSeparator(this.value))>" + maxValue + ") {this.value=" + maxValue + ";};";
-                    String classModifier = this.isMandatory() ?
-                        "valueR mandatory" :
-                        "valueR";
+                    String classModifier = this.isMandatory() 
+                    	? CssClass.valueR + " " + CssClass.mandatory 
+                    	: CssClass.valueR.toString();
                     p.debug("  <!-- " + minValue + " | " + maxValue + " | " + new BigDecimal(Long.MIN_VALUE) + " | " + new BigDecimal(Long.MAX_VALUE) + " | -->");
                     p.write("  <input id=\"", id, "\" name=\"", id, "\" type=\"text\" class=\"", classModifier, lockedModifier, "\" ", readonlyModifier, " tabindex=\"" + tabIndex, "\" value=\"", stringifiedValue, "\" onkeypress=\"javascript: var kc = null; if (window.event) {kc = window.event.keyCode;} else {kc = event.which;}; if (!(((kc>=37) && (kc<=40)) || ((kc>=44) && (kc<=46)) || ((kc>=48) && (kc<=57)) || (kc==0) || (kc==8) || (kc==9) || (kc==13))) {if (window.event) {window.event.returnValue=false;} else {event.preventDefault();}}\" onchange=\"javascript: ", minValueModifier, " ", maxValueModifier, ";\"");
                     p.writeEventHandlers("    ", attribute.getEventHandler());
                     p.write("  >");
                 }
                 p.write("</td>");
-                p.write("<td class=\"addon\" ", rowSpanModifier, "></td>");
+                p.write("<td class=\"", CssClass.addon.toString(), "\" ", rowSpanModifier, "></td>");
             } else {
                 p.write("<td ", rowSpanModifier, ">");
-                p.write("  <textarea id=\"", id, "\" name=\"", id, "\" class=\"multiStringLocked\" rows=\"" + attribute.getSpanRow(), "\" cols=\"20\" readonly tabindex=\"" + tabIndex, "\">", stringifiedValue, "</textarea>");
+                p.write("  <textarea id=\"", id, "\" name=\"", id, "\" class=\"", CssClass.multiStringLocked.toString(), "\" rows=\"" + attribute.getSpanRow(), "\" cols=\"20\" readonly tabindex=\"" + tabIndex, "\">", stringifiedValue, "</textarea>");
                 p.write("</td>");
-                p.write("<td class=\"addon\" ", rowSpanModifier, ">");
+                p.write("<td class=\"", CssClass.addon.toString(), "\" ", rowSpanModifier, ">");
                 if(readonlyModifier.isEmpty()) {
-                    p.write("    ", p.getImg("class=\"popUpButton\" id=\"", id, ".popup\" border=\"0\" alt=\"Click to edit\" src=\"", p.getResourcePath("images/edit"), p.getImgType(), "\" onclick=\"javascript:multiValuedHigh=", this.getUpperBound("1..10"), "; popup_", EditObjectControl.EDIT_NUMBERS, " = ", EditObjectControl.EDIT_NUMBERS, "_showPopup(event, this.id, popup_", EditObjectControl.EDIT_NUMBERS, ", 'popup_", EditObjectControl.EDIT_NUMBERS, "', $('", id, "'), new Array());\""));
+    				p.write("<a role=\"button\" data-toggle=\"modal\" href=\"#popup_", EditInspectorControl.EDIT_NUMBERS, "\" noclick=\"javascript:multiValuedHigh=", this.getUpperBound("1..10"), "; ", EditInspectorControl.EDIT_NUMBERS, "_showPopup(event, this.id, popup_", EditInspectorControl.EDIT_NUMBERS, ", 'popup_", EditInspectorControl.EDIT_NUMBERS, "', $('", id, "'), new Array());\">");
+    				p.write("    ", p.getImg("class=\"", CssClass.popUpButton.toString(), "\" id=\"", id, ".popup\" border=\"0\" alt=\"Click to edit\" src=\"", p.getResourcePath("images/edit"), p.getImgType(), "\" "));
+    				p.write("</a>");
                 }
                 p.write("</td>");
             }
@@ -322,7 +381,7 @@ public class NumberValue
     }
 
     //-------------------------------------------------------------------------
-    // Variables
+    // Members
     //-------------------------------------------------------------------------
     private static final long serialVersionUID = 3256439222591238964L;
     

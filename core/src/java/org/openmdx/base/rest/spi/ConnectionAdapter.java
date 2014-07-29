@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2009-2012, OMEX AG, Switzerland
+ * Copyright (c) 2009-2014, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -138,7 +138,7 @@ public class ConnectionAdapter
      */
     protected static final Path TRANSACTION_OBJECTS = new Path(
         "xri://@openmdx*org.openmdx.kernel/transaction"
-    ).lock();
+    );
 
     protected LocalTransaction newTransactionProxy(
         boolean localTransactionDemarcation
@@ -171,7 +171,7 @@ public class ConnectionAdapter
      */
     @Override
     public RestConnectionSpec getConnectionSpec() {
-        return super.getConnectionSpec();
+        return getMetaData().getConnectionSpec();
     }
     
     /**

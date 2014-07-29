@@ -202,7 +202,7 @@ implements UnicodeTransformer_1_0
             new BasicException.Parameter("source",source),
             new BasicException.Parameter("index",index)
         ); 
-        int unit = source[index];
+        int unit = source[index] & 0x000000FF;
         if(unit < 0x80 || unit >= 0xC0) throw BasicException.newStandAloneExceptionStack(
             BasicException.Code.DEFAULT_DOMAIN,
             BasicException.Code.BAD_PARAMETER,

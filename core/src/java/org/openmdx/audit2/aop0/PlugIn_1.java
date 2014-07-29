@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2009-2012, OMEX AG, Switzerland
+ * Copyright (c) 2009-2014, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -125,7 +125,7 @@ public class PlugIn_1 implements Configuration, PlugIn_1_0 {
      */
     private static final Path SEGMENT_PATTERN = new Path(
         "xri://@openmdx*($..)/provider/($..)/segment/($..)"
-    ).lock();
+    );
 
     /**
      * Maps the data paths to audit paths
@@ -207,7 +207,7 @@ public class PlugIn_1 implements Configuration, PlugIn_1_0 {
 	protected Path toPattern(String value) {
 	    if (value != null) {
 	        Path pattern = new Path(value);
-	        if(pattern.containsWildcard()) {
+	        if(pattern.isPattern()) {
 	            return pattern;
 	        }
 	    }
@@ -233,9 +233,9 @@ public class PlugIn_1 implements Configuration, PlugIn_1_0 {
     protected Path toPrefix(String value) {
         if (value != null) {
             Path candidate = new Path(value);
-            if (candidate.toXRI().endsWith("/($...)")) {
+            if (candidate.toXRI().endsWith("/($...)")) { // TODO simplify
                 Path parent = candidate.getParent();
-                if (!parent.containsWildcard()) {
+                if (!parent.isPattern()) {
                     return parent;
                 }
             }
@@ -614,7 +614,7 @@ public class PlugIn_1 implements Configuration, PlugIn_1_0 {
                     if(beforeImage != null && !beforeImage.jdoIsPersistent()) {
                         if(
                         	candidate.jdoIsDeleted() || 
-                        	candidate.thereRemainDirtyFeaturesAfterRemovingTheUnmodifiedOnes() || 
+                        	candidate.thereRemainDirtyFeaturesAfterRemovingTheUnmodifiedOnes(beforeImage) || 
                         	!unitOfWork.isUpdateAvoidanceEnabled()
                         ){
                             auditBeforeImages.put(

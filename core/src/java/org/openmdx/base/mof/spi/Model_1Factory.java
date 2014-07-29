@@ -273,17 +273,11 @@ public class Model_1Factory {
     ) {
         try {
             final URL modelDump = getModelDump();
-            final boolean restoreModel = modelDump != null;
-            ModelBuilder_1_0 modelBuilder = restoreModel ? Classes.newApplicationInstance(
+            ModelBuilder_1_0 modelBuilder = Classes.newApplicationInstance(
                 ModelBuilder_1_0.class, 
                 ModelBuilder_1_0.BUILDER_CLASS_NAME,
                 Boolean.valueOf(xmlValidation),
-                modelDump
-            ) :  Classes.newApplicationInstance(
-                ModelBuilder_1_0.class, 
-                ModelBuilder_1_0.BUILDER_CLASS_NAME,
-                Boolean.valueOf(xmlValidation),
-                getModelPackages()
+                modelDump != null ? modelDump : getModelPackages()
             );
             return modelBuilder.build();
         }  catch (Exception exception) {

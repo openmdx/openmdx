@@ -1,7 +1,7 @@
 import org.openmdx.base.naming.*;
 import org.openmdx.portal.servlet.*;
 import org.openmdx.portal.servlet.texts.*;
-import org.openmdx.portal.servlet.view.*;
+import org.openmdx.portal.servlet.component.*;
 import org.openmdx.portal.servlet.control.*;
 import org.openmdx.base.accessor.jmi.cci.*;
 
@@ -12,13 +12,17 @@ if(rootObjects.length > 0) {
     Path objectPath = new Path(rootObjects[0].refMofId());
     segmentName = objectPath.get(4);
 }
-p.write("<div id=\"", app.getPanelState("Header") == 0 ? "logoTable" : "logoTableNH", "\">");
+if(forEditing) {
+	p.write("<div id=\"logoTable\">");
+} else {
+	p.write("<div id=\"panelLogo\" class=\"", app.getPanelState("Header") == 0 ? "logoTable" : "logoTableNH", "\">");
+}
 p.write("  <table id=\"headerlayout\">");
 p.write("    <tr id=\"headRow\">");
 p.write("      <td id=\"head\" colspan=\"2\">");
 p.write("        <table id=\"info\">");
 p.write("          <tr>");
-p.write("            <td id=\"headerCellLeft\" onclick=\"javascript:try{if(rootMenu.cfg.config.visible.value){rootMenu.hide();}else{rootMenu.show();}}catch(e){};\"><img id=\"logoLeft\" src=\"", p.getResourcePath("images/"), "logoLeft.gif\" alt=\"", app.getApplicationName(), "\" title=\"\" /></td>");
+p.write("            <td id=\"headerCellLeft\"><img id=\"logoLeft\" class=\"hidden-xs\" src=\"", p.getResourcePath("images/"), "logoLeft.gif\" alt=\"", app.getApplicationName(), "\" title=\"\" /><img id=\"logoLeft\" class=\"visible-xs\" style=\"width:100px;\" src=\"", p.getResourcePath("images/"), "logoLeft.gif\" alt=\"", app.getApplicationName(), "\" title=\"\" /></td>");
 p.write("            <td id=\"headerCellSpacerLeft\"></td>");
 p.write("            <td id=\"headerCellMiddle\">");
 p.write("              <table id=\"headerMiddleLayout\">");
@@ -26,26 +30,24 @@ p.write("                <tr id=\"hm1\">");
 p.write("                  <td>");        
 SessionInfoControl.paintRolesMenu(p, forEditing);
 p.write("                  </td>");
-p.write("                  <td rowspan=\"2\">");
+p.write("                  <td rowspan=\"2\" class=\"hidden-xs\">");
 p.write("                    <div id=\"segmentLogo\">");
 p.write("                      <img src=\"./images/segment_", segmentName, ".gif\" alt=\"", segmentName, "\" title=\"", segmentName, "\" />");
 p.write("                    </div>");
 p.write("                  </td>");
-p.write("                  <td>");
-SessionInfoControl.paintLogoffButton(p, forEditing, "abutton");
+p.write("                  <td class=\"hidden-xs\">");
 p.write("                  </td>");
 p.write("                </tr>");
 p.write("                <tr id=\"hm2\">");    
 p.write("                  <td>");
 SessionInfoControl.paintLocalesMenu(p, forEditing);
 p.write("                  </td>");
-p.write("                  <td>");
-SessionInfoControl.paintSaveSettingsButton(p, forEditing, "abutton");
+p.write("                  <td class=\"hidden-xs\">");
 p.write("                  </td>");
 p.write("                </tr>");
 p.write("              </table>");
 p.write("            </td>");
-p.write("            <td id=\"headerCellRight\"><img id=\"logoRight\" src=\"", p.getResourcePath("images/"), "logoRight.gif\" alt=\"\" title=\"\" /></td>");
+p.write("            <td id=\"headerCellRight\" class=\"hidden-xs\"><img id=\"logoRight\" src=\"", p.getResourcePath("images/"), "logoRight.gif\" alt=\"\" title=\"\" /></td>");
 p.write("          </tr>");
 p.write("        </table>");
 p.write("      </td>");

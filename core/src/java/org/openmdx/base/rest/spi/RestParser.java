@@ -1,13 +1,13 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Description: REST Format
+ * Description: REST Parser
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2010-2013, OMEX AG, Switzerland
+ * Copyright (c) 2010-2014, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -107,7 +107,7 @@ import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.DefaultHandler;
 
 /**
- * REST Format
+ * REST Parser
  */
 public class RestParser {
 
@@ -304,7 +304,7 @@ public class RestParser {
      * 
      * @return a <code>Source</code>
      */
-    @SuppressWarnings("resource")
+//  @SuppressWarnings("resource")
     public static RestSource asSource(
         ObjectInput input
     ){
@@ -393,7 +393,7 @@ public class RestParser {
                 return this.getQuery(xri);
             } else if (this.isStructureType(typeName)) {
                 return (MappedRecord) this.values.peek();
-            } else if (xri.isTransientObjectId()){
+            } else if (xri.isTransactionalObjectId()){
                 Object_2Facade facade = this.getObject(null);
                 MappedRecord delegate = facade.getDelegate();
                 return xri.equals(facade.getPath()) ? delegate : Records.getRecordFactory().singletonMappedRecord(
@@ -708,7 +708,7 @@ public class RestParser {
         throws ServiceException {
             return featureDef == null ? 
                 PrimitiveTypes.STRING : 
-                (String) model.getElementType(featureDef).objGetValue("qualifiedName");
+                (String) model.getElementType(featureDef).getQualifiedName();
         }
 
         /**

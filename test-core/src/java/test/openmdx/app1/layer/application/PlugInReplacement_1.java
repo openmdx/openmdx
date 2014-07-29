@@ -103,7 +103,7 @@ public class PlugInReplacement_1 extends VirtualObjects_1 {
                         BasicException.Code.DEFAULT_DOMAIN,
                         BasicException.Code.BAD_PARAMETER,
                         "The message template text must not be null",
-                        new BasicException.Parameter("xri", objectId.toXRI()),
+                        new BasicException.Parameter("xri", objectId),
                         new BasicException.Parameter("text", text)
                     );
                 }

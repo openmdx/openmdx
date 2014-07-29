@@ -1,4 +1,4 @@
-REM Test test::openmdx::preferences2
+﻿REM Test test::openmdx::preferences2
 
   DROP TABLE PREFERENCES2_SEGMENT ;
   CREATE TABLE PREFERENCES2_SEGMENT (
@@ -187,7 +187,6 @@ REM Test test::openmdx::app1
     object_oid VARCHAR2 (100) NULL ,
     p$$object_oid$0 VARCHAR2 (100)  NULL ,
     p$$object_oid$1 VARCHAR2 (100)  NULL ,
-    object_idx INTEGER NULL ,
     p$$object_parent__rid VARCHAR2 (100)  NULL ,
     p$$object_parent__oid VARCHAR2 (100)  NULL ,
     object__class VARCHAR2 (200) NULL ,
