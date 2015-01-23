@@ -52,9 +52,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 import javax.resource.ResourceException;
-import javax.resource.cci.Connection;
 import javax.resource.cci.Interaction;
-import javax.resource.cci.MappedRecord;
 import javax.resource.cci.Record;
 
 import org.openmdx.base.collection.Maps;
@@ -64,6 +62,8 @@ import org.openmdx.base.resource.cci.RestFunction;
 import org.openmdx.base.resource.spi.Port;
 import org.openmdx.base.resource.spi.RestInteractionSpec;
 import org.openmdx.base.rest.cci.ObjectRecord;
+import org.openmdx.base.rest.cci.RequestRecord;
+import org.openmdx.base.rest.cci.RestConnection;
 import org.openmdx.base.rest.cci.ResultRecord;
 import org.openmdx.base.rest.spi.AbstractRestInteraction;
 import org.openmdx.kernel.exception.BasicException;
@@ -71,7 +71,7 @@ import org.openmdx.kernel.exception.BasicException;
 /**
  * REST Switch
  */
-public class Switch_2 implements Port {
+public class Switch_2 implements Port<RestConnection> {
 
     /**
      * Constructor 
@@ -83,7 +83,7 @@ public class Switch_2 implements Port {
      */
     public Switch_2(
         BasicCache_2 virtualObjects, 
-        Map<Path,Port> destinations
+        Map<Path,Port<RestConnection>> destinations
     ) throws ResourceException{
         this.cachingPlugIn = virtualObjects;
         this.destinations = destinations; 
@@ -92,7 +92,7 @@ public class Switch_2 implements Port {
     /**
      * The Switch's destinations
      */
-    protected final Map<Path,Port> destinations;
+    protected final Map<Path,Port<RestConnection>> destinations;
     
     /**
      * Virtual object port
@@ -107,8 +107,9 @@ public class Switch_2 implements Port {
     /* (non-Javadoc)
      * @see org.openmdx.base.resource.sp#getInteraction(javax.resource.cci.Connection)
      */
+    @Override
     public Interaction getInteraction(
-        Connection connection
+        RestConnection connection
     ) throws ResourceException {
         return new SwitchingInteraction(connection);
     }
@@ -130,7 +131,7 @@ public class Switch_2 implements Port {
          * @throws ResourceException 
          */
         SwitchingInteraction(
-            Connection connection
+            RestConnection connection
         ) throws ResourceException{
             super(connection);
             this.enlisted.put(
@@ -147,13 +148,13 @@ public class Switch_2 implements Port {
         /**
          * The enlisted interactions
          */
-        private final ConcurrentMap<Port,Interaction> enlisted = new ConcurrentHashMap<Port,Interaction>();
+        private final ConcurrentMap<Port<RestConnection>,Interaction> enlisted = new ConcurrentHashMap<Port<RestConnection>,Interaction>();
 
         
         /* (non-Javadoc)
          * @see org.openmdx.base.accessor.rest.spi.CacheAccessor_2_0#getDataStoreCache()
          */
-    //  @Override
+        @Override
         public DataStoreCache_2_0 getDataStoreCache(
         ) throws ServiceException {
             return this.cachingInteraction.getDataStoreCache();
@@ -162,7 +163,7 @@ public class Switch_2 implements Port {
         /* (non-Javadoc)
          * @see org.openmdx.base.accessor.rest.spi.CacheProvider_2_0#getCache()
          */
-    //  @Override
+        @Override
         public ManagedConnectionCache_2_0 getManagedConnectionCache(
         ) throws ServiceException {
             return this.cachingInteraction.getManagedConnectionCache();
@@ -177,17 +178,16 @@ public class Switch_2 implements Port {
          * 
          * @throws ResourceException if there is no destination for the given resource identifier
          */
-        protected Port getDestination(
+        protected Port<RestConnection> getDestination(
             Path xri
         ) throws ResourceException {
-            if(!xri.isTransactionalObjectId()) try {
-                if(this.cachingInteraction.getManagedConnectionCache().isAvailable(null, xri)) {
-                    return Switch_2.this.cachingPlugIn;
-                }
-            } catch (ServiceException exception) {
-                throw new ResourceException(exception);
+            if(
+            	!xri.isTransactionalObjectId() &&
+				this.cachingInteraction.getManagedConnectionCache().isAvailable(null, xri)
+			){
+                return Switch_2.this.cachingPlugIn;
             }
-            for(Map.Entry<Path,Port> entry : Switch_2.this.destinations.entrySet()) {
+            for(Map.Entry<Path,Port<RestConnection>> entry : Switch_2.this.destinations.entrySet()) {
                 if(xri.isLike(entry.getKey())) {
                     return entry.getValue();
                 }
@@ -222,7 +222,7 @@ public class Switch_2 implements Port {
         protected Interaction getInteraction(
             Path xri
         ) throws ResourceException {
-            Port destination = this.getDestination(xri);
+            Port<RestConnection> destination = this.getDestination(xri);
             Interaction interaction = this.enlisted.get(destination);
             return interaction == null ? Maps.putUnlessPresent(
                 this.enlisted,
@@ -232,33 +232,28 @@ public class Switch_2 implements Port {
         }
         
         /* (non-Javadoc)
-         * @see org.openmdx.base.rest.spi.AbstractRestInteraction#pass(org.openmdx.base.naming.Path, org.openmdx.base.resource.spi.RestInteractionSpec, javax.resource.cci.MappedRecord, javax.resource.cci.IndexedRecord)
+         * @see org.openmdx.base.rest.spi.AbstractFacadeInteraction#pass(org.openmdx.base.naming.Path, org.openmdx.base.resource.spi.RestInteractionSpec, javax.resource.cci.MappedRecord, javax.resource.cci.IndexedRecord)
          */
         @Override
-        public boolean pass(
-            Path xri,
+        protected boolean pass(
             RestInteractionSpec ispec,
-            MappedRecord input,
+            RequestRecord input,
             Record output
-        ) throws ServiceException {
-            try {
-                Interaction interaction = this.getInteraction(xri);
-                boolean executed = interaction.execute(ispec, input, output);
-                if(
-                    executed && 
-                    interaction != this.cachingInteraction && 
-                    ispec.getFunction() == RestFunction.GET && 
-                    output instanceof ResultRecord
-                ){
-                    ManagedConnectionCache_2_0 cache = this.cachingInteraction.getManagedConnectionCache(); 
-                    for(Object object : (ResultRecord)output) {
-                        cache.put(null, (ObjectRecord)object);
-                    }
+        ) throws ResourceException {
+            Interaction interaction = this.getInteraction(input.getResourceIdentifier());
+            boolean executed = interaction.execute(ispec, input, output);
+            if(
+                executed && 
+                interaction != this.cachingInteraction && 
+                ispec.getFunction() == RestFunction.GET && 
+                output instanceof ResultRecord
+            ){
+                ManagedConnectionCache_2_0 cache = this.cachingInteraction.getManagedConnectionCache(); 
+                for(Object object : (ResultRecord)output) {
+                    cache.put(null, (ObjectRecord)object);
                 }
-                return executed;
-            } catch(ResourceException e) {
-                throw new ServiceException(e);
             }
+            return executed;
         }
         
     }

@@ -58,12 +58,14 @@ import java.util.List;
 import java.util.Map;
 
 import javax.resource.ResourceException;
-import javax.resource.cci.Connection;
 import javax.resource.cci.Interaction;
+import javax.resource.spi.CommException;
 
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.net.CookieManager;
 import org.openmdx.base.resource.spi.RestInteractionSpec;
+import org.openmdx.base.rest.cci.RestConnection;
+import org.openmdx.kernel.exception.BasicException;
 
 /**
  * The Simple Port handles BASIC authentication and cookies
@@ -167,7 +169,7 @@ public class SimplePort extends HttpPort {
     
     @Override
     public Interaction getInteraction(
-        Connection connection
+        RestConnection connection
     ) throws ResourceException {
         return new SimpleInteraction(
             connection, 
@@ -219,7 +221,7 @@ public class SimplePort extends HttpPort {
          * @throws ResourceException 
          */
         protected SimpleInteraction(
-            Connection connection,
+            RestConnection connection,
             HttpContext httpContext,
             CookieHandler cookieHandler
         ) throws ResourceException {
@@ -270,7 +272,7 @@ public class SimplePort extends HttpPort {
         protected HttpURLConnection newConnection(
             URL url,
             RestInteractionSpec interactionSpec
-        ) throws ServiceException {
+        ) throws ResourceException {
             HttpURLConnection urlConnection = super.newConnection(url, interactionSpec);
             try {
                 //
@@ -303,10 +305,17 @@ public class SimplePort extends HttpPort {
                         }
                     }
                 }
-            } catch (UnsupportedEncodingException exception) {
-                throw new ServiceException(exception);
             } catch (IOException exception) {
-                throw new ServiceException(exception);
+                throw new CommException(
+                    "Can't open a connection for the given URL",
+                    BasicException.newEmbeddedExceptionStack(
+                		exception,
+                        BasicException.Code.DEFAULT_DOMAIN,
+                        BasicException.Code.BAD_PARAMETER,
+                        new BasicException.Parameter("url", url),
+                        new BasicException.Parameter("function", interactionSpec.getFunctionName())
+                    )
+                );
             }
             return urlConnection;
         }

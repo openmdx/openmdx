@@ -55,7 +55,6 @@ import java.util.List;
 import javax.jdo.PersistenceManager;
 
 import org.openmdx.base.naming.Path;
-import org.openmdx.base.query.Condition;
 import org.openmdx.base.query.ConditionType;
 import org.openmdx.base.query.LenientPathComparator;
 import org.openmdx.base.query.Quantifier;
@@ -64,6 +63,7 @@ import org.openmdx.base.query.spi.AbstractPattern;
 import org.openmdx.base.query.spi.PathPattern;
 import org.openmdx.base.query.spi.Soundex;
 import org.openmdx.base.resource.Records;
+import org.openmdx.base.rest.cci.ConditionRecord;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.exception.Throwables;
 
@@ -72,14 +72,6 @@ import org.openmdx.kernel.exception.Throwables;
  * Condition based Filter
  */
 public abstract class AbstractFilter implements Selector, Serializable {
-
-    /**
-     * Constructor 
-     */
-    protected AbstractFilter(
-    ){
-        // For Deserialization
-    }
 
     /**
      * Constructor
@@ -92,7 +84,7 @@ public abstract class AbstractFilter implements Selector, Serializable {
      *              if the filter is <code>null</code>
      */
     protected AbstractFilter(
-        Condition[] filter
+        ConditionRecord[] filter
     ){
         this.filter = filter;
         for (
@@ -134,7 +126,7 @@ public abstract class AbstractFilter implements Selector, Serializable {
     /**
      * 
      */
-    protected Condition[] filter;
+    protected ConditionRecord[] filter;
 
     /**
      * 
@@ -153,8 +145,8 @@ public abstract class AbstractFilter implements Selector, Serializable {
      */
     protected abstract Iterator<?> getValuesIterator(
         Object candidate,
-        Condition condition
-    ) throws Exception;
+        ConditionRecord condition
+    );
     
     /**
      * Test two values for equality in the context of a filter
@@ -194,7 +186,7 @@ public abstract class AbstractFilter implements Selector, Serializable {
      * 
      * @param persistenceManager
      */
-    public List<Condition> getDelegate(
+    public List<ConditionRecord> getDelegate(
         PersistenceManager persistenceManager
     ){
         return Arrays.asList(this.filter);
@@ -214,7 +206,7 @@ public abstract class AbstractFilter implements Selector, Serializable {
      * 
      * @return <code>true</code> if the object meets the condition
      */
-    protected boolean meetsCondition(Object candidate, int conditionIndex, Condition condition) {
+    protected boolean meetsCondition(Object candidate, int conditionIndex, ConditionRecord condition) {
         Quantifier quantifier = condition.getQuantifier();
         Iterator<?> iterator;
         try {

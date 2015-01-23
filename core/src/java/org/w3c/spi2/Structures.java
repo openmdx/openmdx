@@ -542,23 +542,6 @@ public class Structures {
         private transient MappedRecord delegate = null;
         
         /**
-         * Maps primitive types to their respective object class
-         */
-        private final static Map<Class<?>,Class<?>> PRIMITIVE_TYPE_TO_OBJECT_CLASS_MAPPING = 
-            new HashMap<Class<?>,Class<?>>();
-        
-        static {
-            PRIMITIVE_TYPE_TO_OBJECT_CLASS_MAPPING.put(Boolean.TYPE, Boolean.class);
-            PRIMITIVE_TYPE_TO_OBJECT_CLASS_MAPPING.put(Character.TYPE, Character.class);
-            PRIMITIVE_TYPE_TO_OBJECT_CLASS_MAPPING.put(Byte.TYPE, Byte.class);
-            PRIMITIVE_TYPE_TO_OBJECT_CLASS_MAPPING.put(Short.TYPE, Short.class);
-            PRIMITIVE_TYPE_TO_OBJECT_CLASS_MAPPING.put(Integer.TYPE, Integer.class);
-            PRIMITIVE_TYPE_TO_OBJECT_CLASS_MAPPING.put(Long.TYPE, Long.class);
-            PRIMITIVE_TYPE_TO_OBJECT_CLASS_MAPPING.put(Float.TYPE, Float.class);
-            PRIMITIVE_TYPE_TO_OBJECT_CLASS_MAPPING.put(Double.TYPE, Double.class);
-        }
-
-        /**
          * Collection modification exception
          */
         private static final String UNMODIFIABLE = "Structure members are unmodifiable";
@@ -778,7 +761,7 @@ public class Structures {
                                 is, vs
                             };
                         }
-                    } else if(toObjectClass(memberType).isInstance(value)) {
+                    } else if(Classes.toObjectClass(memberType).isInstance(value)) {
                         target[slot] = value;
                     } else throw new IllegalArgumentException(
                         "Value of class '" + value.getClass().getName() + 
@@ -927,19 +910,6 @@ public class Structures {
             return recordValues;
         }
 
-        /**
-         * Convert primitive type to object class
-         * 
-         * @param memberClass either a primitive type or an object class
-         * 
-         * @return an object class
-         */
-        private static final Class<?> toObjectClass (Class<?> memberClass){
-            return memberClass.isPrimitive() ?
-                PRIMITIVE_TYPE_TO_OBJECT_CLASS_MAPPING.get(memberClass) :
-                memberClass;
-        }
-        
         /**
          * Unmodifiable Set
          */
@@ -1493,7 +1463,7 @@ public class Structures {
          * Save a mapped record into a Java Bean
          * 
          * @param source
-         * @param target the Java bean to be updated
+         * @param channel the Java bean to be updated
          * 
          * @throws Exception 
          */

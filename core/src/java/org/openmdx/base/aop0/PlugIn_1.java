@@ -98,7 +98,7 @@ public class PlugIn_1
     /**
      * <code>UUID</code> is the default qualifier type.
      */
-    private QualifierType defaultQualifierType = QualifierType.UUID;
+    private QualifierType defaultQualifierType = QualifierType.UID;
     
     /**
      * Retrieve the default qualifier type.
@@ -151,7 +151,7 @@ public class PlugIn_1
         String qualifier
     ) {
         if(qualifier == null && object.isProxy()) {
-            return PathComponent.createPlaceHolder().toString();
+            return org.openmdx.base.naming.TransactionalSegment.getClassicRepresentationOfNewInstance();
         } else if(qualifier == null || PathComponent.isPlaceHolder(qualifier)) {
             UUID uuid = UUIDs.newUUID();
             switch(this.defaultQualifierType) {

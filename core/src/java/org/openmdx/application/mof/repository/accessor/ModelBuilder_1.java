@@ -56,26 +56,34 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.openmdx.application.dataprovider.cci.Dataprovider_1_0;
+import javax.resource.ResourceException;
+
 import org.openmdx.application.mof.cci.ModelAttributes;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.ModelBuilder_1_0;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
 import org.openmdx.base.mof.cci.Model_1_0;
 import org.openmdx.base.naming.Path;
+import org.openmdx.base.resource.spi.Port;
+import org.openmdx.base.rest.cci.RestConnection;
+import org.openmdx.kernel.loading.Classes;
 
 /**
  * Model Builder
+ * <p><em>
+ * Note:<br>
+ * This class is usually instantiated reflectively
+ * </em>
  */
 public class ModelBuilder_1 implements ModelBuilder_1_0 {
 
     /**
      * Create a model repository re-builder
      * 
-     * @param source the URL of the model repository dump
+     * @see org.openmdx.application.mof.repository.accessor.ModelBuilder_1.ModelBuilder_1(Boolean, Set<String>)
      */
     public ModelBuilder_1(
-        Boolean xmlValidation,
+        boolean xmlValidation,
         InputStream dump
     ){
         this(
@@ -86,61 +94,75 @@ public class ModelBuilder_1 implements ModelBuilder_1_0 {
     /**
      * Create a model repository re-builder
      * 
+     * @param xmlValidation switch to enable or disable XML validation
      * @param source the URL of the model repository dump
+     * @param metaModel is ignored
      * 
      * @throws IOException 
+     * 
+     * @see org.openmdx.base.mof.spi.Model_1Factory.loadModel(boolean)
      */
     public ModelBuilder_1(
-        Boolean xmlValidation,
+        boolean xmlValidation,
         URL dump
     ) throws IOException{
         this(
-            new ModelRepositoryLoader(dump.openStream())
+    		xmlValidation,	
+            dump.openStream()
         );
     }
 
     /**
      * Create a model repository builder
-     * @param qualifiedPackageNames the single colon separated package names
+     * 
+     * @param qualifiedPackageNames the single colon separated 
+     *                              fully qualified package names
      * 
      * @return a new model repository builder
+     * 
      * @throws ServiceException  
+     * 
+     * @see org.openmdx.base.mof.spi.Model_1Factory.loadModel(boolean)
+     * @see org.openmdx.base.mof.spi.Model_1Validator.getMetaModel()    
      */
     public ModelBuilder_1(
-        Boolean xmlValidation,
-        Set<String> qualifiedPackageNames
+        boolean xmlValidation,
+        Set<String> qualifiedPackageNames,
+        boolean metaModel
     ) throws ServiceException {
         this(
-            new ModelPackageLoader(
-                null, 
+        	Classes.newPlatformInstance(
+        		"org.openmdx.application.mof.repository.accessor.ModelPackageLoader_1",	
+    			ModelLoader.class,	
+                Boolean.valueOf(xmlValidation),
                 qualifiedPackageNames.toArray(new String[qualifiedPackageNames.size()]), 
-                Boolean.TRUE.equals(xmlValidation)
+                Boolean.valueOf(metaModel)
             )
         );
     }
-
+    
     /**
      * Create a model repository builderModelRepositoryLoader
      * @param modelProvider the model provider
-     * 
      * @return a new model repository builder
-     * @throws ServiceException 
+     * 
+     * @throws ResourceException 
      */
     public ModelBuilder_1(
-        Boolean xmlValidation,
-        Dataprovider_1_0 modelProvider
-    ) throws ServiceException{
+        boolean xmlValidation,
+        Port<RestConnection> modelProvider
+    ) throws ResourceException{
         this(
-            new ModelPackageLoader(
+            new ModelPackageLoader_2(
                 modelProvider, 
-                null, 
-                Boolean.TRUE.equals(xmlValidation)
+                xmlValidation
              )
         );
     }
-
+    
     /**
      * Constructor 
+     * 
      * @param modelLoader
      */
     private ModelBuilder_1(
@@ -181,7 +203,7 @@ public class ModelBuilder_1 implements ModelBuilder_1_0 {
         for(ModelElement_1_0 elementDef : this.modelElements.values()){
             if(
                 elementDef.isInstanceOf("org:omg:model1:TypedElement") &&
-                !"org:omg:model1".equals(elementDef.jdoGetObjectId().get(4))
+                !"org:omg:model1".equals(elementDef.jdoGetObjectId().getSegment(4).toClassicRepresentation())
             ){
                 //
                 // Handle typed elements except the org:omg:model1 members
@@ -216,9 +238,9 @@ public class ModelBuilder_1 implements ModelBuilder_1_0 {
     private void addAssociationDef(
         ModelElement_1_0 elementDef
     ) throws ServiceException {
-        Path referencedEndPath = (Path)elementDef.getReferencedEnd();
-        Path exposedEndPath = (Path)elementDef.getExposedEnd();
-        String referenceName = (String)elementDef.getName();
+        Path referencedEndPath = elementDef.getReferencedEnd();
+        Path exposedEndPath = elementDef.getExposedEnd();
+        String referenceName = elementDef.getName();
         List<AssociationDef> associationDef = associationDefs.get(referenceName);
         if(associationDef == null) {
             this.associationDefs.put(

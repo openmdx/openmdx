@@ -64,11 +64,8 @@ import org.openmdx.portal.servlet.Action;
 import org.openmdx.portal.servlet.ApplicationContext;
 import org.openmdx.portal.servlet.CssClass;
 import org.openmdx.portal.servlet.ViewPort;
-import org.openmdx.portal.servlet.WebKeys;
 import org.openmdx.portal.servlet.attribute.DateValue;
 import org.openmdx.portal.servlet.component.EditObjectView;
-import org.openmdx.portal.servlet.component.Grid;
-import org.openmdx.portal.servlet.component.ReferencePane;
 import org.openmdx.portal.servlet.component.ShowObjectView;
 import org.openmdx.portal.servlet.component.View;
 
@@ -589,61 +586,6 @@ public class PageEpilogControl extends Control implements Serializable {
 	                p.write("});");
 	            }
 	        }   
-        }
-        // No grid panels in edit mode
-        if(!editMode && (view instanceof ShowObjectView)) {
-            ShowObjectView showView = (ShowObjectView)view;
-            // Prepare grid panels
-            List<ReferencePane> referencePanes = showView.getChildren(ReferencePane.class);
-            int nReferencePanes = referencePanes.size();
-            for(int i = 0; i < nReferencePanes; i++) {
-                ReferencePane referencePane = referencePanes.get(i);
-                int paneIndex = referencePane.getPaneIndex();
-                boolean isGroupTabActive = false;
-                int nGridControl = referencePane.getChildren(Grid.class).size();
-                for(int j = 0; j < nGridControl; j++) {
-                    Action selectReferenceTabAction = referencePane.getSelectReferenceAction()[j];
-                    UiGridControl gridControl = referencePane.getControl().getChildren(UiGridControl.class).get(j);
-	            	boolean isRevokeShow = app.getPortalExtension().hasPermission(
-	            		gridControl.getQualifiedReferenceName(), 
-	            		showView.getObject(), 
-	            		app, 
-	            		WebKeys.PERMISSION_REVOKE_SHOW
-	            	);
-	            	if(!isRevokeShow) {
-                        String gridContentId = view.getContainerElementId() == null 
-                        	? "G_" + Integer.toString(paneIndex) 
-                        	: view.getContainerElementId();
-	                    // Tab grouping. Generate hide/show tabs for each group of
-	                    // tabs having a label starting with >>
-	                    String tabTitle = selectReferenceTabAction.getTitle();
-	                    boolean isGroupTab = tabTitle.startsWith(WebKeys.TAB_GROUPING_CHARACTER);
-	                    if(isGroupTab) {
-	                        tabTitle = tabTitle.substring(1);
-	                    }
-	                    // Prolog hidden tabs
-	                    if(!isGroupTabActive && isGroupTab) {
-	                        isGroupTabActive = true;
-	                    }
-	                    // Add tab
-	                    // Get content for selected grid
-	                    if(j == referencePane.getSelectedReference()) {
-	                        p.write("    jQuery.ajax({type: 'get', url: ", p.getEvalHRef(selectReferenceTabAction), ", dataType: 'html', success: function(data){$('", gridContentId, "').innerHTML=data;evalScripts(data);}});");
-	                    }
-	                    // Epilog hidden tabs. Special treatment if last tab of grid is a group tab 
-	                    if(isGroupTabActive && (!isGroupTab || (j == nGridControl-1))) {
-	                        isGroupTabActive = false;
-	                    }
-	            	}
-                }
-            }
-            p.write("");
-            for(int i = 0; i < nReferencePanes; i++) {
-                ReferencePane referencePane = referencePanes.get(i);                
-                int referencePaneIndex = referencePane.getPaneIndex();
-                String referencePaneId = Integer.toString(referencePaneIndex);
-                p.write("    var gridPanel", referencePaneId, " = null;");
-            }
         }
         p.write("");
         if(globals) {

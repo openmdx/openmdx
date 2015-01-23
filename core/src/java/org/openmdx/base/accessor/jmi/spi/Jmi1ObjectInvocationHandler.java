@@ -405,8 +405,8 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
                     if(persistent != ReducedJDOHelper.isPersistent(args[0])) {
                         return Boolean.FALSE;
                     }
-                    Object thisId;
-                    Object thatId;
+                    final Object thisId;
+                    final Object thatId;
                     if (persistent) {
                         thisId = ReducedJDOHelper.getObjectId(proxy);
                         thatId = ReducedJDOHelper.getObjectId(args[0]);
@@ -475,7 +475,7 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
                                 FeatureMapper.MethodSignature.DEFAULT
                         );
                         boolean operation = feature.objGetClass().equals(ModelAttributes.OPERATION);
-                        String featureName = (String)feature.getName();
+                        String featureName = feature.getName();
                         // Getters
                         if(!operation && methodName.startsWith("get")) {
                             if((args == null) || (args.length == 0)) {      

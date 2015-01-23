@@ -602,6 +602,36 @@ public class PathTest {
     	Assert.assertTrue(matches);
     }
     
+    @Test
+    public void whenExternalRepresentationIsRetrievedTwiceThenTheSameObjectIsReturned(){
+    	// Arrange
+    	final Path testee = new Path(new String[]{"org:openmdx:audit2", "provider", "Audit"});
+		// Act
+    	final String xri = testee.toXRI();
+    	// Assert
+    	Assert.assertSame(xri, testee.toXRI());
+    }
+
+    @Test
+    public void whenParentIsRetrievedTwiceThenTheSameObjectIsReturned(){
+    	// Arrange
+    	final Path testee = new Path(new String[]{"org:openmdx:audit2", "provider", "Audit"});
+		// Act
+    	final Path parent = testee.getParent();
+    	// Assert
+    	Assert.assertSame(parent, testee.getParent());
+    }
+
+    @Test
+    public void whenLastSegmentIsRetrievedTwiceThenTheSameObjectIsReturned(){
+    	// Arrange
+    	final Path testee = new Path(new String[]{"org:openmdx:audit2", "provider", "Audit"});
+		// Act
+    	final XRISegment lastSegment = testee.getLastSegment();
+    	// Assert
+    	Assert.assertSame(lastSegment, testee.getLastSegment());
+    }
+    
     private void arrangeActAndAssertAccordingToExpectation(){
         for(Format buildFormat : applicableFormats()) {
             arrangeActAndAssert(buildFormat);

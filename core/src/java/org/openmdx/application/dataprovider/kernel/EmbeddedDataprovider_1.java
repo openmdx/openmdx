@@ -48,7 +48,6 @@
 package org.openmdx.application.dataprovider.kernel;
 
 import javax.resource.ResourceException;
-import javax.resource.cci.Connection;
 import javax.resource.cci.Interaction;
 import javax.resource.spi.ResourceAllocationException;
 import javax.sql.DataSource;
@@ -62,19 +61,13 @@ import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.resource.cci.ConnectionFactory;
 import org.openmdx.base.resource.spi.Port;
 import org.openmdx.base.resource.spi.ResourceExceptions;
+import org.openmdx.base.rest.cci.RestConnection;
 import org.openmdx.kernel.exception.BasicException;
 
 /**
  * Embedded Dataprovider Bean
  */
-public class EmbeddedDataprovider_1 implements Port {
-
-    /**
-     * Constructor 
-     */
-    public EmbeddedDataprovider_1() {
-        super();
-    }
+public class EmbeddedDataprovider_1 implements Port<RestConnection> {
 
     /**
      * The configuration URL
@@ -82,52 +75,31 @@ public class EmbeddedDataprovider_1 implements Port {
     private String configuration;
 
     /**
-     * The data source
-     */
-    private DataSource datasource;
-    
-    /**
-     * The data source URL
-     */
-    private String datasourceName;
-
-    /**
-     * The connections' factory
-     */
-    private ConnectionFactory dataprovider;
-
-    /**
      * The shareable data provider
      */
     private Layer_1 delegate;
     
     /**
-     * Retrieve dataprovider.
-     *
-     * @return Returns the dataprovider.
+     * The data source URL
      */
-    public ConnectionFactory getDataprovider() {
-        return this.dataprovider;
-    }
+    private String datasourceName;
     
     /**
-     * Set dataprovider.
+     * The data source
      * 
-     * @param dataprovider The dataprovider to set.
-     */
-    public void setDataprovider(ConnectionFactory dataprovider) {
-        this.dataprovider = dataprovider;
-    }
-
+	 * @deprecated will not be supported by the dataprovider 2 stack
+	 */
+	 @Deprecated
+    private DataSource datasource;
+    
     /**
-     * Retrieve configuration.
-     *
-     * @return Returns the configuration.
-     */
-    public String getConfiguration() {
-        return this.configuration;
-    }
-        
+     * The connections' factory
+     * 
+	 * @deprecated will not be supported by the dataprovider 2 stack
+	 */
+	 @Deprecated
+    private ConnectionFactory dataprovider;
+
     /**
      * Retrieve the data source name.
      *
@@ -146,33 +118,24 @@ public class EmbeddedDataprovider_1 implements Port {
         this.datasourceName = datasourceName;
     }
 
-    /**
-     * Retrieve the data source.
-     *
-	 * @return the data source
-	 */
-	public DataSource getDatasource() {
-		return datasource;
-	}
-
-	/**
-	 * Set the data source
-	 * 
-	 * @param datasource the datasource to set
-	 */
-	public void setDatasource(DataSource datasource) {
-		this.datasource = datasource;
-	}
-
-	/**
-     * Set configuration.
-     * 
-     * @param configuration The configuration to set.
-     */
-    public void setConfiguration(String configuration) {
-        this.configuration = configuration;
-    }
-
+	 /**
+	  * Set the configuration URL
+	  * 
+	  * @param configuration The configuration URL to set.
+	  */
+	 public void setConfiguration(String configuration) {
+		 this.configuration = configuration;
+	 }
+	 
+	 /**
+	  * Retrieve the configuration URL
+	  *
+	  * @return Returns the configuration URL
+	  */
+	 public String getConfiguration() {
+		 return this.configuration;
+	 }
+	 
     /**
      * Set delegate.
      * 
@@ -191,25 +154,20 @@ public class EmbeddedDataprovider_1 implements Port {
      * 
      * @throws ResourceException
      */
-    protected Port getDelegate(
+    protected Port<RestConnection> getDelegate(
     ) throws ResourceException {
         if(this.delegate == null) try {
             ConfigurationProvider_1_0 configurationProvider = new StandardConfigurationProvider(
-                this.configuration
+            	getConfiguration()
             );
             Configuration configuration = new Configuration();
-            configuration.values(
-                SharedConfigurationEntries.DATAPROVIDER_CONNECTION_FACTORY
-            ).put(
-                Integer.valueOf(0),
-                this.dataprovider
-            );
-            if(this.datasourceName != null) {
+            propagateDataprovider(configuration);
+            if(getDatasourceName() != null) {
                 configuration.values(
                     SharedConfigurationEntries.DATABASE_CONNECTION_FACTORY_NAME
                 ).put(
                     Integer.valueOf(0),
-                    this.datasourceName
+                    getDatasourceName()
                 );
             }
             this.delegate = new Dataprovider_1(
@@ -230,14 +188,76 @@ public class EmbeddedDataprovider_1 implements Port {
         }
         return this.delegate;
     }
-    
+
     /* (non-Javadoc)
      * @see org.openmdx.base.rest.spi.RestPlugIn#getInteraction(javax.resource.cci.Connection)
      */
+    @Override
     public Interaction getInteraction(
-        Connection connection
+		RestConnection connection
     ) throws ResourceException {
-        return this.getDelegate().getInteraction(connection);
+    	return this.getDelegate().getInteraction(connection);
+    }
+    
+	/**
+	 * @deprecated will not be supported by the dataprovider 2 stack
+	 */
+	 @Deprecated
+	private void propagateDataprovider(Configuration configuration) {
+		configuration.values(
+		    SharedConfigurationEntries.DATAPROVIDER_CONNECTION_FACTORY
+		).put(
+		    Integer.valueOf(0),
+		    getDataprovider()
+		);
+	}
+    
+    /**
+     * Retrieve the data source.
+     *
+	 * @return the data source
+     * 
+	 * @deprecated will not be supported by the dataprovider 2 stack
+	 */
+	 @Deprecated
+	public DataSource getDatasource() {
+		return datasource;
+	}
+
+	/**
+	 * Set the data source
+	 * 
+	 * @param datasource the datasource to set
+     * 
+	 * @deprecated will not be supported by the dataprovider 2 stack
+	 */
+	 @Deprecated
+	public void setDatasource(DataSource datasource) {
+		this.datasource = datasource;
+	}
+
+    /**
+     * Retrieve dataprovider.
+     *
+     * @return Returns the dataprovider.
+     * 
+	 * @deprecated will not be supported by the dataprovider 2 stack
+	 */
+	 @Deprecated
+    public ConnectionFactory getDataprovider() {
+        return this.dataprovider;
+    }
+    
+    /**
+     * Set dataprovider.
+     * 
+     * @param dataprovider The dataprovider to set.
+     * 
+	 * @deprecated will not be supported by the dataprovider 2 stack
+	 */
+	 @Deprecated
+    public void setDataprovider(ConnectionFactory dataprovider) {
+        this.dataprovider = dataprovider;
     }
 
 }

@@ -51,6 +51,8 @@ package org.openmdx.application.rest.http;
 
 import java.net.URL;
 
+import javax.resource.ResourceException;
+
 import org.openmdx.base.exception.ServiceException;
 
 
@@ -78,7 +80,7 @@ public interface HttpContext {
     URL newURL(
         String path, 
         String query
-    ) throws ServiceException;
+    ) throws ResourceException;
     
     /**
      * Retrieve URI

@@ -199,14 +199,14 @@ class ModelHelper extends org.openmdx.base.mof.cci.ModelHelper {
                 new BasicException.Parameter("association", association)
             );
         }
-        return ((Boolean)association.isDerived()).booleanValue();
+        return association.isDerived().booleanValue();
     }
 
     //---------------------------------------------------------------------------  
     static String toJavaPackageName(
         String qualifiedPackageName,
         String packageSuffix
-    ) throws ServiceException {
+    ){
         List<String> packageNameComponents = new ArrayList<String>();
         StringTokenizer tokenizer = new StringTokenizer(qualifiedPackageName, ":");
         while(tokenizer.hasMoreTokens()) {

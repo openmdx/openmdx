@@ -78,9 +78,4 @@ public class Queries {
      */
     public static final String ASPECT_QUERY = "org.openmdx.query.Aspect";
     
-    /**
-     * The query extension's key
-     */
-    public static final String QUERY_EXTENSION = "org.openmdx.query.Extension";
-    
 }

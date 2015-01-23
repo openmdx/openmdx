@@ -133,9 +133,9 @@ public class Uml2Mapper_1
         ) {
             ModelElement_1_0 elementDef = (ModelElement_1_0) i.next();
             if(elementDef.objGetClass().equals(ModelAttributes.PACKAGE)) {
-                String qualifiedName = ((String) elementDef.getQualifiedName()).substring(
+                String qualifiedName = elementDef.getQualifiedName().substring(
                     0, 
-                    ((String)elementDef.getQualifiedName()).lastIndexOf(":")
+                    elementDef.getQualifiedName().lastIndexOf(":")
                 );
                 packages.put(qualifiedName, elementDef);
 
@@ -326,8 +326,8 @@ public class Uml2Mapper_1
         else if (elementDef.objGetClass().equals(ModelAttributes.ATTRIBUTE)) {
             ModelElement_1_0 typeDef = this.model.getElement(elementDef.getType());
             boolean refTypeIsPrimitive = typeDef.isPrimitiveType();
-            boolean isDerived = ((Boolean) elementDef.isDerived()).booleanValue();
-            boolean isChangeable = ((Boolean) elementDef.isChangeable()).booleanValue();
+            boolean isDerived = elementDef.isDerived().booleanValue();
+            boolean isChangeable = elementDef.isChangeable().booleanValue();
             mapper.mapAttribute(
                 elementDef,
                 isDerived,

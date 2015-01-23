@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<uml:Model xmi:version="2.1" xmlns:xmi="http://schema.omg.org/spec/XMI/2.1" xmlns:uml="http://www.eclipse.org/uml2/3.0.0/UML" xmi:id="_l_0U4Eb9Ed-o1OTPw_6HJg" name="model">
+<uml:Model xmi:version="20110701" xmlns:xmi="http://www.omg.org/spec/XMI/20110701" xmlns:uml="http://www.eclipse.org/uml2/4.0.0/UML" xmi:id="_l_0U4Eb9Ed-o1OTPw_6HJg" name="model">
   <eAnnotations xmi:id="_9dbckEcCEd-o1OTPw_6HJg" source="org.ietf">
     <references xmi:type="uml:Package" href="org.ietf.uml#_Szs1cLeAEdueCKP_VeXehw"/>
   </eAnnotations>
@@ -32,6 +32,9 @@
   </eAnnotations>
   <eAnnotations xmi:id="_rmL4wEcDEd-o1OTPw_6HJg" source="org.openmdx.generic1">
     <references xmi:type="uml:Package" href="org.openmdx.generic1.uml#_3C7B8A60016D3FF13E0E02A5"/>
+  </eAnnotations>
+  <eAnnotations xmi:id="_rmL4wEcDEd-o1OTPwa6HJg" source="org.openmdx.kernel">
+    <references xmi:type="uml:Package" href="org.openmdx.kernel.uml#_uQRyAAtrEeSrLJCNh24WvQ"/>
   </eAnnotations>
   <eAnnotations xmi:id="_y0TsUEcDEd-o1OTPw_6HJg" source="org.openmdx.role2">
     <references xmi:type="uml:Package" href="org.openmdx.role2.uml#_3C7B8A60016D407129D101F2"/>

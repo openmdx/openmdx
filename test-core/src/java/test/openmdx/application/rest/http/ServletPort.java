@@ -67,7 +67,6 @@ import java.util.Locale;
 import java.util.Map;
 
 import javax.resource.ResourceException;
-import javax.resource.cci.Connection;
 import javax.resource.cci.Interaction;
 import javax.servlet.AsyncContext;
 import javax.servlet.DispatcherType;
@@ -93,13 +92,14 @@ import org.openmdx.application.rest.http.AbstractHttpInteraction;
 import org.openmdx.application.rest.http.servlet.RestServlet_2;
 import org.openmdx.application.rest.http.spi.Message;
 import org.openmdx.base.exception.RuntimeServiceException;
-import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.io.HttpHeaderFieldContent;
 import org.openmdx.base.io.HttpHeaderFieldValue;
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.resource.InteractionSpecs;
 import org.openmdx.base.resource.spi.Port;
+import org.openmdx.base.resource.spi.ResourceExceptions;
 import org.openmdx.base.resource.spi.RestInteractionSpec;
+import org.openmdx.base.rest.cci.RestConnection;
 import org.openmdx.base.rest.spi.RestSource;
 import org.openmdx.base.rest.stream.RestTarget;
 import org.openmdx.base.rest.stream.StandardRestFormatter;
@@ -113,7 +113,7 @@ import org.xml.sax.InputSource;
  * Servlet Port
  */
 public class ServletPort
-    implements Port
+    implements Port<RestConnection>
 {
     /**
      * Constructor 
@@ -170,7 +170,7 @@ public class ServletPort
      * @see org.openmdx.base.resource.spi.Port#getInteraction(javax.resource.cci.Connection)
      */
     public Interaction getInteraction(
-        Connection connection
+        RestConnection connection
     ) throws ResourceException {
         return new ServletInteraction(connection);
     }
@@ -192,7 +192,7 @@ public class ServletPort
          * @throws ServletException 
          */
         protected ServletInteraction(
-            Connection connection
+            RestConnection connection
         ) throws ResourceException {
             super(
                 connection,
@@ -208,11 +208,7 @@ public class ServletPort
             ServletMessage message = new ServletMessage(CONNECT_SPEC, CONNECT_XRI);
             final Map<String, String[]> parameters = message.request.getParameterMap();
             parameters.put("UserName", new String[]{getConnectionUserName()});
-            try {
-                message.execute();
-            } catch (ServiceException exception) {
-                throw new ResourceException(exception);
-            }
+            message.execute();
         }
         /* (non-Javadoc)
          * @see org.openmdx.application.rest.http.AbstractHttpInteraction#newMessage(org.openmdx.base.resource.spi.RestInteractionSpec, org.openmdx.base.naming.Path)
@@ -420,7 +416,7 @@ public class ServletPort
              * @see org.openmdx.application.rest.http.AbstractHttpInteraction.Message#execute()
              */
             public int execute(
-            ) throws ServiceException {
+            ) throws ResourceException {
                 try {
                     setRequestField("Content-Type", MIME_TYPE + ";charset=UTF-8");
                     setRequestField("Accept", MIME_TYPE);
@@ -430,9 +426,9 @@ public class ServletPort
                     ServletPort.this.servlet.service(this.request, this.response);
                     this.response.commit();
                 } catch (ServletException exception) {
-                    throw new ServiceException(exception);
+                	throw ResourceExceptions.toResourceException(exception);
                 } catch (IOException exception) {
-                    throw new ServiceException(exception);
+                	throw ResourceExceptions.toResourceException(exception);
                 } finally {
                     ServletInteraction.this.session.accessed = System.currentTimeMillis();
                 }
@@ -448,7 +444,7 @@ public class ServletPort
              * @see org.openmdx.application.rest.http.AbstractHttpInteraction.Message#getResponseBody()
              */
             public RestSource getResponseBody(
-            ) throws ServiceException {
+            ) throws ResourceException {
                 InputSource source = this.response.body.getInputSource();
                 return new RestSource(
                     ServletInteraction.this.contextURL,

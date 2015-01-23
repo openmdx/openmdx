@@ -53,8 +53,8 @@ import java.util.Collection;
 import java.util.Collections;
 
 import org.openmdx.base.query.AnyTypeCondition;
-import org.openmdx.base.query.Condition;
 import org.openmdx.base.query.ConditionType;
+import org.openmdx.base.rest.cci.ConditionRecord;
 import org.w3c.cci2.AnyTypePredicate;
 
 /**
@@ -167,7 +167,7 @@ public class Jmi1ObjectPredicateInvocationHandler extends Jmi1QueryInvocationHan
             // Add subquery as filter property to parent query
             String featureName = this.predicate.getFeatureName();
             boolean exists = false;
-            Conditions: for(Condition condition: this.predicate.getQuery().refGetFilter().getCondition()) {
+            Conditions: for(ConditionRecord condition: this.predicate.getQuery().refGetFilter().getCondition()) {
                 if(
                     condition.getFeature().equals(featureName) &&
                     condition.getQuantifier() == this.predicate.quantifier

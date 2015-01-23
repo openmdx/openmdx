@@ -158,7 +158,7 @@ public class RequestedMessage
     /* (non-Javadoc)
      * @see javax.resource.cci.Record#getRecordName()
      */
-//  @Override
+    @Override
     public String getRecordName(
     ) {
         return this.getMessage().getRecordName();
@@ -167,7 +167,7 @@ public class RequestedMessage
     /* (non-Javadoc)
      * @see javax.resource.cci.Record#getRecordShortDescription()
      */
-//  @Override
+    @Override
     public String getRecordShortDescription() {
         return this.getMessage().getRecordShortDescription();
     }
@@ -175,7 +175,7 @@ public class RequestedMessage
     /* (non-Javadoc)
      * @see javax.resource.cci.Record#setRecordName(java.lang.String)
      */
-//  @Override
+    @Override
     public void setRecordName(String name) {
         this.getMessage().setRecordName(name);
     }
@@ -183,7 +183,7 @@ public class RequestedMessage
     /* (non-Javadoc)
      * @see javax.resource.cci.Record#setRecordShortDescription(java.lang.String)
      */
-//  @Override
+    @Override
     public void setRecordShortDescription(String description) {
         this.getMessage().setRecordShortDescription(description);
     }
@@ -191,7 +191,7 @@ public class RequestedMessage
     /* (non-Javadoc)
      * @see java.util.Map#clear()
      */
-//  @Override
+    @Override
     public void clear() {
        this.getMessage().clear();
     }
@@ -199,7 +199,7 @@ public class RequestedMessage
     /* (non-Javadoc)
      * @see java.util.Map#containsKey(java.lang.Object)
      */
-//  @Override
+    @Override
     public boolean containsKey(Object key) {
         return this.getMessage().containsKey(key);
     }
@@ -207,7 +207,7 @@ public class RequestedMessage
     /* (non-Javadoc)
      * @see java.util.Map#containsValue(java.lang.Object)
      */
-//  @Override
+    @Override
     public boolean containsValue(Object value) {
         return this.getMessage().containsValue(value);
     }
@@ -215,7 +215,7 @@ public class RequestedMessage
     /* (non-Javadoc)
      * @see java.util.Map#entrySet()
      */
-//  @Override
+    @Override
     public Set entrySet() {
         return this.getMessage().entrySet();
     }
@@ -223,7 +223,7 @@ public class RequestedMessage
     /* (non-Javadoc)
      * @see java.util.Map#get(java.lang.Object)
      */
-//  @Override
+    @Override
     public Object get(Object key) {
         return this.getMessage().get(key);
     }
@@ -231,7 +231,7 @@ public class RequestedMessage
     /* (non-Javadoc)
      * @see java.util.Map#isEmpty()
      */
-//  @Override
+    @Override
     public boolean isEmpty() {
         return this.getMessage().isEmpty();
     }
@@ -239,7 +239,7 @@ public class RequestedMessage
     /* (non-Javadoc)
      * @see java.util.Map#keySet()
      */
-//  @Override
+    @Override
     public Set keySet() {
         return this.getMessage().keySet();
     }
@@ -247,7 +247,7 @@ public class RequestedMessage
     /* (non-Javadoc)
      * @see java.util.Map#put(java.lang.Object, java.lang.Object)
      */
-//  @Override
+    @Override
     public Object put(Object key, Object value) {
         return this.getMessage().put(key, value);
     }
@@ -255,7 +255,7 @@ public class RequestedMessage
     /* (non-Javadoc)
      * @see java.util.Map#putAll(java.util.Map)
      */
-//  @Override
+    @Override
     public void putAll(Map t) {
         this.getMessage().putAll(t);
     }
@@ -263,7 +263,7 @@ public class RequestedMessage
     /* (non-Javadoc)
      * @see java.util.Map#remove(java.lang.Object)
      */
-//  @Override
+    @Override
     public Object remove(Object key) {
         return this.getMessage().remove(key);
     }
@@ -271,7 +271,7 @@ public class RequestedMessage
     /* (non-Javadoc)
      * @see java.util.Map#size()
      */
-//  @Override
+    @Override
     public int size() {
         return this.getMessage().size();
     }
@@ -279,7 +279,7 @@ public class RequestedMessage
     /* (non-Javadoc)
      * @see java.util.Map#values()
      */
-//  @Override
+    @Override
     public Collection values() {
         return this.getMessage().values();
     }
@@ -293,23 +293,23 @@ public class RequestedMessage
     /* (non-Javadoc)
      * @see org.openmdx.base.resource.cci.ObjectRecord#getPath()
      */
-//  @Override
-    public Path getPath() {
-        return this.getMessage().getPath();
+    @Override
+    public Path getResourceIdentifier() {
+        return this.getMessage().getResourceIdentifier();
     }
 
     /* (non-Javadoc)
      * @see org.openmdx.base.resource.cci.ObjectRecord#setPath(org.openmdx.base.naming.Path)
      */
-//  @Override
-    public void setPath(Path path) {
-        this.getMessage().setPath(path);
+    @Override
+    public void setResourceIdentifier(Path path) {
+        this.getMessage().setResourceIdentifier(path);
     }
 
     /* (non-Javadoc)
      * @see org.openmdx.base.rest.cci.MessageRecord#getBody()
      */
-//  @Override
+    @Override
     public MappedRecord getBody() {
         return this.getMessage().getBody();
     }
@@ -317,7 +317,7 @@ public class RequestedMessage
     /* (non-Javadoc)
      * @see org.openmdx.base.rest.cci.MessageRecord#getMessageId()
      */
-//  @Override
+    @Override
     public String getMessageId() {
         return this.getMessage().getMessageId();
     }
@@ -325,7 +325,7 @@ public class RequestedMessage
     /* (non-Javadoc)
      * @see org.openmdx.base.rest.cci.MessageRecord#getTarget()
      */
-//  @Override
+    @Override
     public Path getTarget() {
         return this.getMessage().getTarget();
     }
@@ -333,7 +333,7 @@ public class RequestedMessage
     /* (non-Javadoc)
      * @see org.openmdx.base.rest.cci.MessageRecord#setBody(javax.resource.cci.MappedRecord)
      */
-//  @Override
+    @Override
     public void setBody(MappedRecord body) {
         this.getMessage().setBody(body);
     }
@@ -341,7 +341,7 @@ public class RequestedMessage
     /* (non-Javadoc)
      * @see org.openmdx.base.rest.cci.MessageRecord#getCorellationId()
      */
-//  @Override
+    @Override
     public String getCorellationId() {
         return getMessage().getCorellationId();
     }

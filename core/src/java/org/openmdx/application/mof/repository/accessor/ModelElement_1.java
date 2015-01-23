@@ -988,12 +988,16 @@ public class ModelElement_1 implements ModelElement_1_0, Delegating_1_0<ObjectRe
 	@Override
 	public boolean isReference(
 	) throws ServiceException {
+	    final boolean reply;
 		if(this.isReference == null) {
-	    	this.isReference =
-	    		this.isReferenceType() ||
-	    		(this.getExposedEnd() != null && this.getReferencedEnd() != null);
+	    	reply = this.isReferenceType() || (
+	    	    this.getExposedEnd() != null && this.getReferencedEnd() != null
+	    	);
+            this.isReference = Boolean.valueOf(reply);
+	    } else {
+	        reply = this.isReference.booleanValue();
 	    }
-		return this.isReference;	
+        return reply;
 	}
 
 	//-------------------------------------------------------------------------

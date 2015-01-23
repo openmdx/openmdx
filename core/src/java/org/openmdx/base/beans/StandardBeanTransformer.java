@@ -86,21 +86,19 @@ import org.w3c.spi2.Datatypes;
  */
 public class StandardBeanTransformer implements BeanTransformer {
 
-	private static Object xstream = null;
+    private static Object xstream = null;
     private static Method xstreamFromXML = null;
-    private static Method xstreamToXML = null;
     
     {
-    	try {
-	    	xstream = Classes.getApplicationClass("com.thoughtworks.xstream.XStream").newInstance();
-	    	xstreamFromXML = xstream.getClass().getMethod("fromXML", String.class);
-	    	xstreamToXML = xstream.getClass().getMethod("toXML", Object.class);
-    		SysLog.info("XStream found. Using java.beans.XMLEncoder / XMLDecoder as fallback");
-    	} catch(Exception e) {
-    		SysLog.info("XStream not found. Fallback to java.beans.XMLEncoder / XMLDecoder");
-    	}
+        try {
+            xstream = Classes.getApplicationClass("com.thoughtworks.xstream.XStream").newInstance();
+            xstreamFromXML = xstream.getClass().getMethod("fromXML", String.class);
+            SysLog.info("XStream found. Using as fallback for XML decoding");
+        } catch(Exception e) {
+        	// no-op
+        }
     }
-
+	
     /* (non-Javadoc)
      * @see org.openmdx.base.text.conversion.spi.JavaBeanTransformer#encode(java.lang.Object, org.openmdx.base.exception.ExceptionListener)
      */
@@ -109,13 +107,6 @@ public class StandardBeanTransformer implements BeanTransformer {
         Object javaBean,
         ExceptionListener exceptionListener
     ) {
-    	if(xstreamToXML != null) {
-    		try {
-	   			return (String)xstreamToXML.invoke(xstream, javaBean);
-	    	} catch(Exception e) {
-	    		throw new RuntimeServiceException(e);
-	    	}
-    	}
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         XMLEncoder encoder = new XMLEncoder(out);
         if(exceptionListener != null) {
@@ -185,34 +176,34 @@ public class StandardBeanTransformer implements BeanTransformer {
             return null;
         } else {
         	String stringifiedBean = encodedJavaBean.toString();
-        	if(xstreamFromXML != null && !stringifiedBean.startsWith("<?xml")) {
-	    		try {
-		   			return xstreamFromXML.invoke(xstream, stringifiedBean);
-		    	} catch(Exception e) {
-		    		throw new RuntimeServiceException(e);
-		    	}
-	        } else {
-	            StringInputStream source = new StringInputStream(
-	            	stringifiedBean,
-	                "UTF-8"
-	            );
-	            XMLDecoder decoder = new XMLDecoder(
-	                source
-	            );
-	            if(exceptionListener != null) {
-	                decoder.setExceptionListener(
-	                    new ExceptionListenerAdapter(exceptionListener)
-	                );
-	            }
-	            Object value = decoder.readObject();
-	            try {
-	                source.close();
-	            } catch (IOException ignored) {
-	                SysLog.trace("Ignored close failure", ignored);
-	            }
-	            decoder.close();
-	            return value;
-	        }
+            if(xstreamFromXML != null && !stringifiedBean.startsWith("<?xml")) {
+                try {
+                    return xstreamFromXML.invoke(xstream, stringifiedBean);
+                } catch(Exception e) {
+                    throw new RuntimeServiceException(e);
+                }
+            } else {        	
+                StringInputStream source = new StringInputStream(
+                	stringifiedBean,
+                    "UTF-8"
+                );
+                XMLDecoder decoder = new XMLDecoder(
+                    source
+                );
+                if(exceptionListener != null) {
+                    decoder.setExceptionListener(
+                        new ExceptionListenerAdapter(exceptionListener)
+                    );
+                }
+                Object value = decoder.readObject();
+                try {
+                    source.close();
+                } catch (IOException ignored) {
+                    SysLog.trace("Ignored close failure", ignored);
+                }
+                decoder.close();
+                return value;
+            }
         }
     }
 

@@ -77,6 +77,7 @@ import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.persistence.cci.ConfigurableProperty;
 import org.openmdx.base.persistence.spi.AbstractPersistenceManagerFactory;
+import org.openmdx.kernel.configuration.PropertiesProvider;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.exception.BasicException.Parameter;
 import org.openmdx.kernel.jdo.ReducedJDOHelper;
@@ -204,7 +205,7 @@ public class EntityManagerFactory_1
         // Plug-In Configurations
         //
         try {
-            Properties properties = PropertiesConfigurationProvider.toProperties(configuration);
+            Properties properties = PropertiesProvider.toProperties(configuration);
             Configuration viewyManagerConfiguration = PropertiesConfigurationProvider.getConfiguration(
                 properties,
                 "org", "openmdx", "jdo", "ViewManager"
@@ -222,7 +223,7 @@ public class EntityManagerFactory_1
                 );  
                 Factory<PlugIn_1_0> viewPlugInFactory = BeanFactory.newInstance(
                 	PlugIn_1_0.class,
-                    viewPlugInConfiguration.entries()
+                    viewPlugInConfiguration
                 );
                 viewManagerPlugIns.add(viewPlugInFactory.instantiate());
             }
@@ -464,7 +465,7 @@ public class EntityManagerFactory_1
                 section
             );  
             Factory<?> userObjectFactory = BeanFactory.newInstance(
-                userObjectConfiguration.entries()
+                userObjectConfiguration
             );
             final boolean shared = !userObjectFactory.getInstanceClass().isInterface();
             userObjects.put(

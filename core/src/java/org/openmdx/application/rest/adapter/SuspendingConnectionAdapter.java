@@ -55,6 +55,7 @@ import javax.resource.cci.LocalTransaction;
 import javax.resource.cci.Record;
 import javax.resource.spi.EISSystemException;
 import javax.resource.spi.LocalTransactionException;
+import javax.resource.spi.ResourceAllocationException;
 import javax.transaction.HeuristicMixedException;
 import javax.transaction.HeuristicRollbackException;
 import javax.transaction.InvalidTransactionException;
@@ -67,12 +68,11 @@ import javax.transaction.UserTransaction;
 import org.openmdx.application.transaction.TransactionManagerFactory;
 import org.openmdx.application.transaction.UserTransactions;
 import org.openmdx.base.resource.spi.AbstractInteraction;
-import org.openmdx.base.resource.spi.Port;
+import org.openmdx.base.resource.spi.ResourceExceptions;
 import org.openmdx.base.rest.cci.RestConnectionSpec;
 import org.openmdx.base.rest.spi.ConnectionAdapter;
-import org.openmdx.base.transaction.TransactionAttributeType;
+import org.openmdx.base.rest.spi.ConnectionFactoryAdapter;
 import org.openmdx.kernel.exception.BasicException;
-import org.openmdx.kernel.exception.Throwables;
 import org.openmdx.kernel.log.SysLog;
 import org.openmdx.kernel.naming.ComponentEnvironment;
 
@@ -85,21 +85,14 @@ class SuspendingConnectionAdapter extends ConnectionAdapter {
 
 	/**
 	 * Constructor 
-	 *
-	 * @param connectionSpec
-	 * @param delegate
-	 * 
-	 * @throws ResourceException
 	 */
     SuspendingConnectionAdapter(
-        RestConnectionSpec connectionSpec,
-        Port delegate
-    ) throws ResourceException {
+        ConnectionFactoryAdapter connectionFactory, 
+        RestConnectionSpec connectionSpec
+    ){
         super(
-            false, // useLocalTransactionDemarcation
-            connectionSpec,
-            TransactionAttributeType.REQUIRES_NEW,
-            delegate
+            connectionFactory, 
+            connectionSpec
         );
     }
     
@@ -108,7 +101,6 @@ class SuspendingConnectionAdapter extends ConnectionAdapter {
      */
     @Override
     protected LocalTransaction newTransactionProxy(
-        boolean localTransactionDemarcation
     ) {
         return new LocalTransactionManagerAdapter();
     }
@@ -192,15 +184,17 @@ class SuspendingConnectionAdapter extends ConnectionAdapter {
          * @exception ResourceException
          */
         private TransactionManager getTransactionManager(
-            ) throws ResourceException {
+        ) throws ResourceException {
             if(this.transactionManager == null) {
                 try {
                     this.transactionManager = ComponentEnvironment.lookup(TransactionManager.class);
                 } catch (BasicException exception) {
-                    throw new EISSystemException(
-                        "REQUIRES_NEW requires a TransactionManager which could not be acquired",
-                        exception
-                    );
+                	throw ResourceExceptions.initHolder(
+	                    new ResourceAllocationException(
+	                        "REQUIRES_NEW requires a TransactionManager which could not be acquired",
+	                        BasicException.newEmbeddedExceptionStack(exception)
+	                    )
+	                );
                 }
             }
             return this.transactionManager;
@@ -237,9 +231,19 @@ class SuspendingConnectionAdapter extends ConnectionAdapter {
                     getUserTransaction().begin();
                 }
             } catch (SystemException exception) {
-                throw new EISSystemException(exception);
+            	throw ResourceExceptions.initHolder(
+                    new javax.resource.spi.EISSystemException(
+	                    "Unable to start the current transaction",
+                        BasicException.newEmbeddedExceptionStack(exception)
+                    )
+                );
             } catch (javax.transaction.NotSupportedException exception) {
-                throw new javax.resource.NotSupportedException(exception);
+            	throw ResourceExceptions.initHolder(
+                    new javax.resource.NotSupportedException(
+	                    "Unable to start the current transaction",
+                        BasicException.newEmbeddedExceptionStack(exception)
+                    )
+                );
             }
         }
 
@@ -256,17 +260,47 @@ class SuspendingConnectionAdapter extends ConnectionAdapter {
                     getUserTransaction().commit();
                 }
             } catch (SystemException exception) {
-                throw new EISSystemException(exception);
+            	throw ResourceExceptions.initHolder(
+                    new javax.resource.spi.EISSystemException(
+	                    "Unable to commit the current transaction",
+                        BasicException.newEmbeddedExceptionStack(exception)
+                    )
+                );
             } catch (SecurityException exception) {
-                throw new javax.resource.spi.SecurityException(exception);
+            	throw ResourceExceptions.initHolder(
+                    new javax.resource.spi.SecurityException(
+	                    "Unable to commit the current transaction",
+                        BasicException.newEmbeddedExceptionStack(exception)
+                    )
+                );
             } catch (IllegalStateException exception) {
-                throw new javax.resource.spi.IllegalStateException(exception);
+            	throw ResourceExceptions.initHolder(
+                    new javax.resource.spi.IllegalStateException(
+	                    "Unable to commit the current transaction",
+                        BasicException.newEmbeddedExceptionStack(exception)
+                    )
+                );
             } catch (RollbackException exception) {
-                throw new LocalTransactionException(exception);
+            	throw ResourceExceptions.initHolder(
+                    new LocalTransactionException(
+	                    "Unable to commit the current transaction",
+                        BasicException.newEmbeddedExceptionStack(exception)
+                    )
+                );
             } catch (HeuristicMixedException exception) {
-                throw new LocalTransactionException(exception);
+            	throw ResourceExceptions.initHolder(
+                    new LocalTransactionException(
+	                    "Unable to commit the current transaction",
+                        BasicException.newEmbeddedExceptionStack(exception)
+                    )
+                );
             } catch (HeuristicRollbackException exception) {
-                throw new LocalTransactionException(exception);
+            	throw ResourceExceptions.initHolder(
+                    new LocalTransactionException(
+	                    "Unable to commit the current transaction",
+                        BasicException.newEmbeddedExceptionStack(exception)
+                    )
+                );
             }
         }
 
@@ -283,7 +317,12 @@ class SuspendingConnectionAdapter extends ConnectionAdapter {
                     getUserTransaction().rollback();
                 }
             } catch (SystemException exception) {
-                throw new EISSystemException(exception);
+            	throw ResourceExceptions.initHolder(
+                    new EISSystemException(
+                        "Unable to roll back the current transaction",
+                        BasicException.newEmbeddedExceptionStack(exception)
+                    )
+                );
             }
         }
 
@@ -296,9 +335,11 @@ class SuspendingConnectionAdapter extends ConnectionAdapter {
             try {
                 return getTransactionManager().suspend();
             } catch (SystemException exception) {
-                throw new EISSystemException(
-                    "Unable to suspend the current transaction",
-                    exception
+            	throw ResourceExceptions.initHolder(
+                    new EISSystemException(
+                        "Unable to suspend the current transaction",
+                        BasicException.newEmbeddedExceptionStack(exception)
+                    )
                 );
             }
         }
@@ -307,26 +348,33 @@ class SuspendingConnectionAdapter extends ConnectionAdapter {
          * @see org.openmdx.base.rest.adapter.TransactionManager_2_0#resumeSuspendedTransaction(javax.transaction.Transaction)
          */
         @Override
-        public void resumeSuspendedTransaction(Transaction transaction)
-            throws ResourceException {
+        public void resumeSuspendedTransaction(
+        	Transaction transaction
+        ) throws ResourceException {
             if(transaction != null) {
                 try {
                     getTransactionManager().resume(transaction);
                 } catch (SystemException exception) {
-                    throw new EISSystemException(
-                        "Unable to resume the suspended transaction",
-                        exception
-                    );
+                	throw ResourceExceptions.initHolder(
+	                    new EISSystemException(
+	                        "Unable to resume the suspended transaction",
+	                        BasicException.newEmbeddedExceptionStack(exception)
+	                    )
+	                );
                 } catch (InvalidTransactionException exception) {
-                    throw new LocalTransactionException(
-                        "Unable to resume the given transaction",
-                        exception
-                    );
+                	throw ResourceExceptions.initHolder(
+	                    new LocalTransactionException(
+	                        "Unable to resume the suspended transaction",
+	                        BasicException.newEmbeddedExceptionStack(exception)
+	                    )
+	                );
                 } catch (IllegalStateException exception) {
-                    throw new javax.resource.spi.IllegalStateException(
+                	throw ResourceExceptions.initHolder(
+	                    new javax.resource.spi.IllegalStateException(
                         "Unable to resume the given transaction",
-                        exception
-                    );
+	                        BasicException.newEmbeddedExceptionStack(exception)
+	                    )
+	                );
                 }
             }
         }
@@ -398,12 +446,15 @@ class SuspendingConnectionAdapter extends ConnectionAdapter {
                         );
                         throw exception;
                     }
-                    throw Throwables.initCause(
-                        new LocalTransactionException("Runtime exception lead to rollback: " + error.getMessage()),
-                        error, 
-                        BasicException.Code.DEFAULT_DOMAIN,
-                        BasicException.Code.ROLLBACK,
-                        "Runtime exception lead to rollback"
+                    throw ResourceExceptions.initHolder(
+                        new LocalTransactionException(
+                        	"Runtime exception lead to rollback: " + error.getMessage(),
+	                        BasicException.newEmbeddedExceptionStack(
+		                        error, 
+		                        BasicException.Code.DEFAULT_DOMAIN,
+		                        BasicException.Code.ROLLBACK
+		                     )
+		                 )
                      );
                 }
                 if(failure == null) {

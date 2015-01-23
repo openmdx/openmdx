@@ -52,6 +52,7 @@ import javax.resource.cci.Connection;
 import javax.resource.cci.Interaction;
 
 import org.openmdx.application.dataprovider.spi.Layer_1;
+import org.openmdx.base.rest.cci.RestConnection;
 
 /**
  * Standard_1
@@ -68,7 +69,7 @@ public class Standard_1 extends Layer_1 {
     
     @Override
     public Interaction getInteraction(
-        Connection connection
+        RestConnection connection
     ) throws ResourceException {
         return new StandardLayerInteraction(connection);
     }
@@ -85,7 +86,7 @@ public class Standard_1 extends Layer_1 {
          * @throws ResourceException
          */
         protected StandardLayerInteraction(
-            Connection connection
+            RestConnection connection
         ) throws ResourceException {
             super(connection);
         }

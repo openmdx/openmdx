@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<uml:Model xmi:version="2.1" xmlns:xmi="http://schema.omg.org/spec/XMI/2.1" xmlns:uml="http://www.eclipse.org/uml2/3.0.0/UML" xmi:id="_lL_5AN67EdmkJO73lqONhA" name="PrimitiveTypes">
+<uml:Model xmi:version="20110701" xmlns:xmi="http://www.omg.org/spec/XMI/20110701" xmlns:uml="http://www.eclipse.org/uml2/4.0.0/UML" xmi:id="_lL_5AN67EdmkJO73lqONhA" name="PrimitiveTypes">
   <packagedElement xmi:type="uml:Package" xmi:id="_3C7B8A60016D3D0C708700E2PP" name="org">
     <packagedElement xmi:type="uml:Package" xmi:id="_3C7B8A60016D3D0C708700E2P" name="omg">
       <packagedElement xmi:type="uml:Package" xmi:id="_3C7B8A60016D3D0C708700E2" name="PrimitiveTypes">

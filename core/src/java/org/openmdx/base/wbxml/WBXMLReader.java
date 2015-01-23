@@ -254,10 +254,9 @@ public class WBXMLReader implements XMLReader {
             //
             // Document type
             //
-            int publicid = readInt();
-            this.plugIn = getPlugIn(
-                publicid == ExternalIdentifiers.LITERAL ? readStringFromTable() : ExternalIdentifiers.toPublicDocumentId(publicid)
-            );
+            final int publicid = readInt();
+            final String publicDocumentId = publicid == ExternalIdentifiers.LITERAL ? readStringFromTable() : ExternalIdentifiers.toPublicDocumentId(publicid);
+			this.plugIn = getPlugIn(publicDocumentId);
             //
             // Character Encoding
             //
@@ -719,35 +718,11 @@ public class WBXMLReader implements XMLReader {
     public void parse(
         final InputSource input
     ) throws IOException, SAXException {
-        this.locator = new Locator(){
-
-        //  @Override
-            public int getColumnNumber() {
-                return -1;
-            }
-
-        //  @Override
-            public int getLineNumber() {
-                return -1;
-            }
-
-        //  @Override
-            public String getPublicId() {
-                return input.getPublicId();
-            }
-
-        //  @Override
-            public String getSystemId() {
-                return input.getSystemId();
-            }
-
-        };
+        this.locator = newLocator(input);
         if(input.getByteStream() != null) {
             parse(input.getByteStream());
-            return;
         } else if(input.getSystemId() != null) {
             parse(new URL(input.getSystemId()).openStream());
-            return;
         } else if(input.getCharacterStream() != null) {
             throw new SAXNotSupportedException(
                 "A WBXML reader needs binary input"
@@ -756,6 +731,41 @@ public class WBXMLReader implements XMLReader {
             throw new SAXException("Empty input source");
         }
     }
+
+    /**
+     * Creates a WBXML Locator
+     * 
+     * @param input the input source
+     * 
+     * @return a WBXML Locator
+     */
+	private Locator newLocator(
+		final InputSource input
+	) {
+		return new Locator(){
+
+            @Override
+            public int getColumnNumber() {
+                return -1;
+            }
+
+            @Override
+            public int getLineNumber() {
+                return -1;
+            }
+
+            @Override
+            public String getPublicId() {
+                return input.getPublicId();
+            }
+
+            @Override
+            public String getSystemId() {
+                return input.getSystemId();
+            }
+
+        };
+	}
 
     /* (non-Javadoc)
      * @see org.xml.sax.XMLReader#parse(java.lang.String)

@@ -51,7 +51,7 @@ package org.openmdx.base.query;
 /**
  * Required to decode legacy XML data
  * 
- * @deprecated use {@link org.openmdx.base.query.Extension}
+ * @deprecated use {@link org.openmdx.base.rest.cci.QueryExtensionRecord}
  */
 @Deprecated
 public class PiggyBackCondition extends Condition {
@@ -59,12 +59,12 @@ public class PiggyBackCondition extends Condition {
     /**
      * Required to decode legacy XML data
      * 
-     * @deprecated use {@link org.openmdx.base.query.Extension}
+     * @deprecated use {@link org.openmdx.base.rest.cci.QueryExtensionRecord}
      */
     @Deprecated
     public PiggyBackCondition(
     ) {
-        super();
+        super((ConditionType)null);
     }
 
     /**
@@ -80,6 +80,7 @@ public class PiggyBackCondition extends Condition {
         super(
             null,
             feature,
+            null,
             values
         );
     }
@@ -101,17 +102,6 @@ public class PiggyBackCondition extends Condition {
             this.getFeature(), 
             this.getValue()
         );
-    }
-
-    /**
-     * Retrieve the condition's type
-     * 
-     * @return <code>null</code>
-     */
-    @Override
-    public ConditionType getType(
-    ) {
-        return null;
     }
 
     /**

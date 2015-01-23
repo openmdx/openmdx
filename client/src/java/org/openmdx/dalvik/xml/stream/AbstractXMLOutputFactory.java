@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2010, OMEX AG, Switzerland
+ * Copyright (c) 2010-2013, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -194,7 +194,7 @@ public abstract class AbstractXMLOutputFactory extends XMLOutputFactory {
         String name
     ) throws IllegalArgumentException {
         if(XMLOutputFactory.IS_REPAIRING_NAMESPACES.equals(name)) {
-            return false;
+            return Boolean.FALSE;
         } else if(XMLOutputFactories.MIME_TYPE.equals(name)) {
             return this.mimeType;
         } else throw BasicException.initHolder(

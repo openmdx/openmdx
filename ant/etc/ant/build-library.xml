@@ -808,6 +808,7 @@ java.util.logging.ConsoleHandler.formatter = ${openmdx.log.formatter}
 			<arg value="--xmi=emf"/>
 			<arg value="--out=${build.dir}/model/models.zip"/>
 			<arg value="--openmdxjdo=${basedir}/src/resource"/>
+			<arg value="--dataproviderVersion=2"/> <!-- The dataproviderVersion default value is 1 -->
 			<arg line="${model.build.formats}"/>
 			<arg value="%"/>
 		</java>
@@ -1103,7 +1104,8 @@ java.util.logging.FileHandler.formatter = ${openmdx.log.formatter}
 					<antcontrib:then>
 						<javac 
 							destdir="${build.dir}/bin" 
-							debug="${build.debug}" 
+							debug="${build.debug}"
+							encoding="UTF-8"
 							optimize="${build.optimize}" 
 							fork="true" 
 							memoryMaximumSize="${build.memory.limit}" 
@@ -1122,7 +1124,8 @@ java.util.logging.FileHandler.formatter = ${openmdx.log.formatter}
 					<antcontrib:else>
 						<javac 
 							destdir="${build.dir}/bin" 
-							debug="${build.debug}" 
+							debug="${build.debug}"
+							encoding="UTF-8"
 							optimize="${build.optimize}" 
 							fork="true" 
 							memoryMaximumSize="${build.memory.limit}" 
@@ -1149,7 +1152,8 @@ java.util.logging.FileHandler.formatter = ${openmdx.log.formatter}
 							<antcontrib:then>
 								<javac 
 									destdir="${build.dir}/bin" 
-									debug="${build.debug}" 
+									debug="${build.debug}"
+									encoding="UTF-8"
 									optimize="${build.optimize}" 
 									fork="true" memoryMaximumSize="${build.memory.limit}" 
 									classpathref="project.lib.classpath" 
@@ -1170,7 +1174,8 @@ java.util.logging.FileHandler.formatter = ${openmdx.log.formatter}
 								<antcontrib:then>
 									<javac 
 										destdir="${build.dir}/bin" 
-										debug="${build.debug}" 
+										debug="${build.debug}"
+										encoding="UTF-8"
 										optimize="${build.optimize}" 
 										fork="true" 
 										memoryMaximumSize="${build.memory.limit}" 
@@ -1189,7 +1194,8 @@ java.util.logging.FileHandler.formatter = ${openmdx.log.formatter}
 							<antcontrib:else>
 								<javac 
 									destdir="${build.dir}/bin" 
-									debug="${build.debug}" 
+									debug="${build.debug}"
+									encoding="UTF-8"
 									optimize="${build.optimize}" 
 									fork="true" memoryMaximumSize="${build.memory.limit}" 
 									classpathref="project.lib.classpath" 
@@ -1214,7 +1220,8 @@ java.util.logging.FileHandler.formatter = ${openmdx.log.formatter}
 							<antcontrib:then>
 								<javac 
 									destdir="${build.dir}/bin" 
-									debug="${build.debug}" 
+									debug="${build.debug}"
+									encoding="UTF-8"
 									optimize="${build.optimize}" 
 									fork="true" 
 									memoryMaximumSize="${build.memory.limit}" 
@@ -1235,7 +1242,8 @@ java.util.logging.FileHandler.formatter = ${openmdx.log.formatter}
 								<antcontrib:then>
 									<javac 
 										destdir="${build.dir}/bin" 
-										debug="${build.debug}" 
+										debug="${build.debug}"
+										encoding="UTF-8"
 										optimize="${build.optimize}" 
 										fork="true" memoryMaximumSize="${build.memory.limit}" 
 										classpathref="project.lib.classpath" 
@@ -1253,7 +1261,8 @@ java.util.logging.FileHandler.formatter = ${openmdx.log.formatter}
 								<echo>JAVAC:standard</echo>
 								<javac 
 									destdir="${build.dir}/bin" 
-									debug="${build.debug}" 
+									debug="${build.debug}"
+									encoding="UTF-8"
 									optimize="${build.optimize}" 
 									fork="true" 
 									memoryMaximumSize="${build.memory.limit}" 

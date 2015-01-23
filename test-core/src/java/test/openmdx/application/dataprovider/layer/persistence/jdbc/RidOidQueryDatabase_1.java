@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2012, OMEX AG, Switzerland
+ * Copyright (c) 2012-2014, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -47,10 +47,7 @@
  */
 package test.openmdx.application.dataprovider.layer.persistence.jdbc;
 
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.List;
+import org.openmdx.base.dataprovider.layer.persistence.jdbc.Database_2;
 
 /**
  * RidOidQueryDatabase_1
@@ -61,65 +58,13 @@ public class RidOidQueryDatabase_1
     org.openmdx.application.dataprovider.layer.persistence.jdbc.RidOidQueryDatabase_1
 {
 
-    /**
-     * Query count for unit tests
-     */
-    private static volatile int queryCount = 0;
-    
-    /**
-     * Query count for unit tests
-     */
-    private static volatile int updateCount = 0;
-    
-    
-    /**
-     * Retrieve queryCount.
-     *
-     * @return Returns the queryCount.
-     */
-    public static int getQueryCount() {
-        return queryCount;
-    }
-
-    /**
-     * Retrieve updateCount.
-     *
-     * @return Returns the updateCount.
-     */
-    public static int getUpdateCount() {
-        return updateCount;
-    }
-
     /* (non-Javadoc)
-     * @see org.openmdx.application.dataprovider.layer.persistence.jdbc.AbstractDatabase_1#executeQuery(java.sql.PreparedStatement, java.lang.String, java.util.List)
+     * @see org.openmdx.application.dataprovider.layer.persistence.jdbc.RidOidQueryDatabase_1#newDatabase2()
      */
     @Override
-    public ResultSet executeQuery(
-        PreparedStatement ps,
-        String statement,
-        List<?> statementParameters, 
-        int fetchSize
-    ) throws SQLException {
-        queryCount++;
-        return super.executeQuery(
-            ps, 
-            statement, 
-            statementParameters, 
-            fetchSize
-        );
-    }
-
-    /* (non-Javadoc)
-     * @see org.openmdx.application.dataprovider.layer.persistence.jdbc.AbstractDatabase_1#executeUpdate(java.sql.PreparedStatement, java.lang.String, java.util.List)
-     */
-    @Override
-    public int executeUpdate(
-        PreparedStatement ps,
-        String statement,
-        List<?> statementParameters
-    ) throws SQLException {
-        updateCount++;
-        return super.executeUpdate(ps, statement, statementParameters);
+    protected Database_2 newDelegate(
+    ) {
+        return new RidOidQueryDatabase_2();
     }
 
 }

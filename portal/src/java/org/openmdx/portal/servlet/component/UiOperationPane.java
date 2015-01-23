@@ -147,8 +147,9 @@ public class UiOperationPane extends OperationPane implements Serializable {
     	SysLog.detail("> paint");
         if(frame == null) {
             String toolTip = this.getToolTip();
-            p.write("<li class=\"", CssClass.dropdown.toString(), "\"><a href=\"#\" class=\"", CssClass.dropdownToggle.toString(), "\" data-toggle=\"dropdown\" onclick=\"javascript:this.parentNode.hide=function(){};\">", toolTip, "</a>");
-            p.write("  <ul class=\"", CssClass.dropdownMenu.toString(), "\" role=\"menu\" style=\"z-index:1010;\">");
+            String id = this.getControl().getId();
+            p.write("<li id=\"", id, "-dropdown\" class=\"", CssClass.dropdown.toString(), "\"><a href=\"#\" class=\"", CssClass.dropdownToggle.toString(), "\" data-toggle=\"dropdown\" onclick=\"javascript:this.parentNode.hide=function(){};\">", toolTip, "</a>");
+            p.write("  <ul id=\"", id, "-menu\" class=\"", CssClass.dropdownMenu.toString(), "\" role=\"menu\" style=\"z-index:1010;\">");
             for(UiOperationTab tab: this.getChildren(UiOperationTab.class)) {
                 tab.paint(
                     p,
@@ -158,6 +159,9 @@ public class UiOperationPane extends OperationPane implements Serializable {
             }
             p.write("  </ul>");
             p.write("</li>");
+            p.write("<script language=\"javascript\" type=\"text/javascript\">");
+            p.write("  if($('", id, "-menu').innerHTML.trim()==''){$('", id, "-dropdown').style.display='none'};");
+            p.write("</script>");
         }
         SysLog.detail("< paint");
     }

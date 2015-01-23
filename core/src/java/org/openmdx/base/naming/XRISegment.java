@@ -52,7 +52,7 @@ import java.io.Serializable;
 /**
  * This class represents an XRI segment
  */
-public abstract class XRISegment implements Serializable {
+public abstract class XRISegment implements Comparable<XRISegment>, Serializable {
 	
 	protected XRISegment(){
 		super();
@@ -119,6 +119,14 @@ public abstract class XRISegment implements Serializable {
 	@Override
 	public String toString() {
 		return toClassicRepresentation();
+	}
+	
+	/* (non-Javadoc)
+	 * @see java.lang.Comparable#compareTo(java.lang.Object)
+	 */
+	@Override
+	public int compareTo(XRISegment that) {
+		return this.toXRIRepresentation().compareTo(that.toXRIRepresentation());
 	}
 
 	public abstract boolean matches(XRISegment candidate);

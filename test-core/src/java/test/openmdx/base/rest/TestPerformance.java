@@ -355,7 +355,7 @@ public class TestPerformance {
                     int k = 0;
                     k < l;
                     k++
-                ) out.writeUTF(p.get(k));
+                ) out.writeUTF(p.getSegment(k).toClassicRepresentation());
                 out.writeUTF("identity");
                 out.writeUTF(v.identity);
                 out.writeUTF("field1");
@@ -416,7 +416,7 @@ public class TestPerformance {
                     int k = 0;
                     k < l;
                     k++
-                ) out.writeUTF(p.get(k));
+                ) out.writeUTF(p.getSegment(k).toClassicRepresentation());
                 out.writeUTF("identity");
                 out.writeUTF((String) v.get("identity"));
                 out.writeUTF("field1");
@@ -479,7 +479,7 @@ public class TestPerformance {
                     int k = 0;
                     k < l;
                     k++
-                ) out.writeUTF(p.get(k));
+                ) out.writeUTF(p.getSegment(k).toClassicRepresentation());
                 out.writeUTF("identity");
                 out.writeUTF(v.getIdentity());
                 out.writeUTF("field1");
@@ -573,7 +573,7 @@ public class TestPerformance {
                         int k = 0;
                         k < l;
                         k++
-                    ) out.writeUTF(p.get(k));
+                    ) out.writeUTF(p.getSegment(k).toClassicRepresentation());
                     out.writeUTF("identity");
                     out.writeUTF(
                         (String)g0.invoke(v, (Object[])null)
@@ -875,7 +875,7 @@ public class TestPerformance {
                          int k = 0;
                          k < l;
                          k++
-                    ) out.writeUTF(p.get(k));
+                    ) out.writeUTF(p.getSegment(k).toClassicRepresentation());
                     ValueObject v = e.getValue();
                     out.writeUTF(v.getIdentity());
                     out.writeLong(v.getField1().getTime());
@@ -985,7 +985,7 @@ public class TestPerformance {
                          int k = 0;
                          k < l;
                          k++
-                    ) out.writeUTF(p.get(k));
+                    ) out.writeUTF(p.getSegment(k).toClassicRepresentation());
                     ValueObject v = e.getValue();
                     out.writeUTF(v.identity);
                     out.writeLong(v.field1.getTime());
@@ -1099,7 +1099,7 @@ public class TestPerformance {
                          int k = 0;
                          k < l;
                          k++
-                    ) out.writeUTF(p.get(k));
+                    ) out.writeUTF(p.getSegment(k).toClassicRepresentation());
                     ValueObject v = e.getValue();
                     out.writeUTF(
                         (String)g0.get(v)
@@ -1222,7 +1222,7 @@ public class TestPerformance {
                          int k = 0;
                          k < l;
                          k++
-                    ) out.writeUTF(p.get(k));
+                    ) out.writeUTF(p.getSegment(k).toClassicRepresentation());
                     Map<String, Object> v = e.getValue();
                     out.writeUTF(
                         (String)v.get("identity")
@@ -1354,7 +1354,6 @@ public class TestPerformance {
         );
     }
 
-    @SuppressWarnings("resource")
     protected final OutputStream newOutputStream(
     ) throws IOException {
         return channel = IN_MEMORY ? new ByteArrayOutputStream(
@@ -1363,7 +1362,6 @@ public class TestPerformance {
         );
     }
     
-    @SuppressWarnings("resource")
     protected final InputStream newInputStream(
     ) throws IOException {
         return IN_MEMORY ? new ByteArrayInputStream(

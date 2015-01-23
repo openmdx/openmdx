@@ -145,7 +145,7 @@ class ObjectView_1
 	public Object getFeatureReplaceingObjectById(
 		ModelElement_1_0 featureDef
 	) throws ServiceException {
-        String feature = (String) featureDef.getName();
+        String feature = featureDef.getName();
         Multiplicity multiplicity = ModelHelper.getMultiplicity(featureDef);
         switch(multiplicity) {
 	        case SINGLE_VALUE: case OPTIONAL: {

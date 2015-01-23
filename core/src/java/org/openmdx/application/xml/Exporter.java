@@ -225,9 +225,9 @@ public class Exporter {
         String attributeName,
         ModelElement_1_0 attributeDef
     ) throws ServiceException{
-        String qualifiedName = (String) attributeDef.getQualifiedName();
+        String qualifiedName = attributeDef.getQualifiedName();
         ModelElement_1_0 attributeType = this.model.getDereferencedType(attributeDef.getType());
-        String typeName = (String) attributeType.getQualifiedName();
+        String typeName = attributeType.getQualifiedName();
         Object attributeValue = this.model.isReferenceType(attributeDef) ? 
            PersistenceHelper.getFeatureReplacingObjectById(object, attributeName) : 
            object.refGetValue(attributeName);
@@ -401,7 +401,7 @@ public class Exporter {
             while(authorities.hasNext()) {
                 Map.Entry<Path,RefObject> authorityEntry = authorities.next();
                 Path authorityId = authorityEntry.getKey();
-                String qualifiedName = authorityId.get(0);
+                String qualifiedName = authorityId.getSegment(0).toClassicRepresentation();
                 this.target.startAuthority(qualifiedName);
                 exportObject(authorityId, authorityEntry.getValue());
                 this.target.endAuthority(qualifiedName);
@@ -519,19 +519,23 @@ public class Exporter {
         String filter
     ){
         List<String> referenceFilter = new ArrayList<String>();
-        StringTokenizer referenceFilterTokenizer = new StringTokenizer(
-            filter, 
-            "\t\n ;,", 
-            false
-        );
-        while (referenceFilterTokenizer.hasMoreTokens()) {
-            String referenceName = referenceFilterTokenizer.nextToken();
-            if(!referenceName.endsWith("]")) {
-                referenceName += "[1]"; // by default maxLevel is 1
+        if(filter != null) {
+            StringTokenizer referenceFilterTokenizer = new StringTokenizer(
+                filter, 
+                "\t\n ;,", 
+                false
+            );
+            while (referenceFilterTokenizer.hasMoreTokens()) {
+                String referenceName = referenceFilterTokenizer.nextToken();
+                if(!referenceName.endsWith("]")) {
+                    referenceName += "[1]"; // by default maxLevel is 1
+                }
+                referenceFilter.add(referenceName);
             }
-            referenceFilter.add(referenceName);
         }
-        return null;
+        return referenceFilter.isEmpty() ? null : new ReferenceFilter(
+            referenceFilter.toArray(new String[referenceFilter.size()])
+        );
     }
         
     /**

@@ -1,8 +1,33 @@
+==============================================================================
+Version 2.14.0                                                      2015-01-23
+==============================================================================
 
-                    =====================================
-                           CHANGE LOG openMDX/Portal
-                    =====================================
+1.    NEW FEATURES
+      none
+      
+2.    CHANGES  
+     
+2.0.  CHANGED FEATURES
+      
+      CR20025970
+      Migration from dataprovider stack version 1 to version 2.
 
+2.1.  FIXED BUGS
+      
+      CR10012452
+      Wizards: exception handling. Improved error handling for in-place wizards.
+      The AbstractWizardController reports the exception to the log file and stores
+      the exception message in the field errorMessasge in case the execution of
+      a command raises an exception. The wizards display the error message instead
+      of terminating abnormally.   
+      
+2.2.  DEPRECATED FEATURES
+      none
+            
+2.3   REMOVED FEATURES
+      none
+
+      
 ==============================================================================
 Version 2.13.0                                                      2014-08-01
 ==============================================================================

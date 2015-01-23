@@ -50,7 +50,6 @@ package org.openmdx.application.dataprovider.spi;
 import java.util.List;
 
 import javax.resource.ResourceException;
-import javax.resource.cci.Connection;
 import javax.resource.cci.ConnectionMetaData;
 import javax.resource.cci.IndexedRecord;
 import javax.resource.cci.Interaction;
@@ -78,8 +77,8 @@ import org.openmdx.base.resource.spi.ResourceExceptions;
 import org.openmdx.base.resource.spi.RestInteractionSpec;
 import org.openmdx.base.rest.cci.MessageRecord;
 import org.openmdx.base.rest.cci.ObjectRecord;
+import org.openmdx.base.rest.cci.RestConnection;
 import org.openmdx.base.rest.cci.ResultRecord;
-import org.openmdx.base.rest.spi.AbstractRestInteraction;
 import org.openmdx.base.rest.spi.Facades;
 import org.openmdx.base.rest.spi.Object_2Facade;
 import org.openmdx.base.rest.spi.Query_2Facade;
@@ -90,7 +89,7 @@ import org.w3c.cci2.SparseArray;
 /**
  * An abstract Dataprovider Layer
  */
-public abstract class Layer_1 implements Dataprovider_1_0, Port {
+public abstract class Layer_1 implements Dataprovider_1_0, Port<RestConnection> {
 
 	/**
 	 * Constructor
@@ -100,27 +99,23 @@ public abstract class Layer_1 implements Dataprovider_1_0, Port {
     	super();
     }
     
+    protected Layer_1 delegation;
+
+    private Configuration configuration;
+
     /**
-     * Provide a response path by appending "*-";
-     * 
-     * @param requestId
-     * 
-     * @return a response path 
+     * The layer's id
+     * @deprecated will not be supported by the Dataprovider 2 stack
      */
-    public Path newReplyId(
-        Path requestId
-    ){
-        return requestId.getParent().getChild(requestId.getLastSegment().toClassicRepresentation() + "*-");
-    }
+    @Deprecated
+    private short id;
     
     /**
-     * Get the layer's id
+     * @deprecated will not be supported by the Dataprovider 2 stack
      */
-    protected final short getId(
-    ){
-        return this.id;
-    }
-
+    @Deprecated
+    private ConnectionFactory connectionFactory;
+    
     /**
      * To be supplied by the dataprovider
      *
@@ -154,35 +149,6 @@ public abstract class Layer_1 implements Dataprovider_1_0, Port {
         return Model_1Factory.getModel();
     }
     
-    protected ConnectionFactory getConnectionFactory(
-    ) {
-        return this.connectionFactory;
-    }
-    
-    /**
-     * Says whether this layer is the terminal layer or not
-     *
-     * @return  true if there is no layer to delegate to
-     */
-    protected final boolean terminal(
-    ){
-        return this.delegation == null;
-    }
-
-    /**
-     * Activates a dataprovider layer with its legacy configuration
-     * 
-     * @param   configuration   the dataprovider'a configuration
-     *
-     * @exception   ServiceException in case of an activation failure
-     */
-    protected void applyLegacyConfiguration(
-        Configuration configuration
-    ) throws ServiceException{
-        // Subclasses should override this method and propagate their
-        // configuration values to corresponding java beans setters.
-    }
-    
     /**
      * Activates a dataprovider layer
      * 
@@ -203,36 +169,217 @@ public abstract class Layer_1 implements Dataprovider_1_0, Port {
         Configuration configuration,
         Layer_1 delegation
     ) throws ServiceException{
+    	SysLog.detail(
+			"Activating " + DataproviderLayers.toString(id) + " layer " + getClass().getName(),
+			configuration
+		);
         this.configuration = configuration;
         this.delegation = delegation;
-        this.id = id;
-        SparseArray<Object> connectionFactories = configuration.values(
-            SharedConfigurationEntries.DATAPROVIDER_CONNECTION_FACTORY
-        );        
-        if(!connectionFactories.isEmpty()) {
-            this.connectionFactory = (ConnectionFactory)connectionFactories.get(Integer.valueOf(0));
-        }        
-        SysLog.detail(
-            "Activating " + DataproviderLayers.toString(id) + " layer " + getClass().getName(),
-            configuration
-        );
-        if(configuration.isOn(SharedConfigurationEntries.LEGACY_CONFIGURATION)) {
-            applyLegacyConfiguration(configuration);
-        }
+        legacyActivation(id, configuration);
     }
-        
-    //-----------------------------------------------------------------------
+
     public Interaction getInteraction(
-        Connection connection
+        RestConnection connection
     ) throws ResourceException {
         return new LayerInteraction(connection);
     }
 
-    //-----------------------------------------------------------------------
+    /* (non-Javadoc)
+     * @see org.openmdx.application.dataprovider.cci.Dataprovider_1_0#process(org.openmdx.application.dataprovider.cci.ServiceHeader, java.util.List, java.util.List)
+     */
+    @SuppressWarnings("unchecked")
+    public ServiceException process(
+        ServiceHeader header,
+        List<DataproviderRequest> requests,
+        List<DataproviderReply> replies
+    ) {
+        try {
+            LayerInteraction interaction = (LayerInteraction)this.getInteraction(
+                new DataproviderConnection(getConnectionFactory(), header)
+            );
+            for(DataproviderRequest request: requests) {
+                DataproviderReply reply = new DataproviderReply(
+                    request.operation() == DataproviderOperations.OBJECT_OPERATION
+                );
+                // Dispatch to layer interaction methods here. Do not let AbstractRestInteraction
+                // do the work because it requires Model_1 which might not be available at this time.
+                switch(request.operation()) {
+                    case DataproviderOperations.OBJECT_RETRIEVAL: {
+                        interaction.get(
+                            request.getInteractionSpec(), 
+                            Facades.asQuery(request.object(), header.isPreferringNotFoundException()), 
+                            reply.getResult()
+                        );
+                        break;
+                    }
+                    case DataproviderOperations.ITERATION_START: {
+                        interaction.find(
+                            request.getInteractionSpec(), 
+                            Facades.asQuery(request.object(), header.isPreferringNotFoundException()), 
+                            reply.getResult()
+                        );
+                        break;
+                    }
+                    case DataproviderOperations.OBJECT_REPLACEMENT: {
+                        interaction.put(
+                            request.getInteractionSpec(), 
+                            Facades.asObject(request.object()), 
+                            reply.getResult()
+                        );
+                        break;
+                    }
+                    case DataproviderOperations.OBJECT_CREATION: {
+                        interaction.create(
+                            request.getInteractionSpec(), 
+                            Facades.asObject(request.object()), 
+                            reply.getResult()
+                        );
+                        break;
+                    }
+                    case DataproviderOperations.OBJECT_REMOVAL: {
+                        interaction.delete(
+                            request.getInteractionSpec(), 
+                            Facades.asQuery(request.object(), header.isPreferringNotFoundException()), 
+                            reply.getResult()
+                        );
+                        break;
+                    }
+                    case DataproviderOperations.OBJECT_OPERATION: {
+                        MappedRecord object = request.object();
+                        MessageRecord input;
+                        if(object instanceof MessageRecord) {
+                            input = (MessageRecord) object;                            
+                        } else {
+                            input = Records.getRecordFactory().createMappedRecord(MessageRecord.class);
+                            if(MessageRecord.NAME.equals(object.getRecordName())) {
+                                input.putAll(object);
+                            } else if(org.openmdx.base.rest.spi.ObjectRecord.isCompatible(object)) {
+                                input.setResourceIdentifier(Object_2Facade.getPath(object));
+                                input.setBody(Object_2Facade.getValue(object));
+                            } else {
+                                throw new ServiceException(
+                                    BasicException.Code.DEFAULT_DOMAIN,
+                                    BasicException.Code.BAD_PARAMETER,
+                                    "Unsupported operation argument",
+                                    new BasicException.Parameter("actual", object.getRecordName()),
+                                    new BasicException.Parameter("supported", MessageRecord.NAME, ObjectRecord.NAME)
+                                );                            
+                            }
+                        }
+                        interaction.invoke(
+                            request.getInteractionSpec(), 
+                            input,
+                            reply.getResponse()
+                        );                            
+                        break;
+                    }
+                    default:
+                        throw new ServiceException(
+                            BasicException.Code.DEFAULT_DOMAIN,
+                            BasicException.Code.ASSERTION_FAILURE,
+                            "Unsupported operation",
+                            new BasicException.Parameter("actual", DataproviderOperations.toString(request.operation())),
+                            new BasicException.Parameter("supported", "OBJECT_RETRIEVAL|OBJECT_RETRIEVAL|OBJECT_REPLACEMENT|OBJECT_REPLACEMENT|OBJECT_REMOVAL")
+                        );                            
+                }              
+                replies.add(reply);
+            }
+            return null;
+        } catch(ServiceException e) {
+            return e;
+        } catch(Exception e) {
+            return new ServiceException(e);
+        }
+    }
+
+    /**
+     * Provide a response path by appending "*-";
+     * 
+     * @param requestId
+     * 
+     * @return a response path 
+     * 
+     * @deprecated will not be supported by the Dataprovider 2 stack
+     */
+    @Deprecated
+    public Path newReplyId(
+        Path requestId
+    ){
+        return requestId.getParent().getChild(requestId.getLastSegment().toClassicRepresentation() + "*-");
+    }
+    
+    @Deprecated
+    private void legacyActivation(short id, Configuration configuration)
+    		throws ServiceException {
+    	this.id = id;
+    	SparseArray<Object> connectionFactories = configuration.values(
+    			SharedConfigurationEntries.DATAPROVIDER_CONNECTION_FACTORY
+    			);        
+    	if(!connectionFactories.isEmpty()) {
+    		this.connectionFactory = (ConnectionFactory)connectionFactories.get(Integer.valueOf(0));
+    	}        
+    	if(configuration.isEnabled(SharedConfigurationEntries.LEGACY_CONFIGURATION, false)) {
+    		applyLegacyConfiguration(configuration);
+    	}
+    }
+    
+    /**
+     * Get the layer's id
+     * 
+     * @deprecated will not be supported by the Dataprovider 2 stack
+     */
+    @Deprecated
+    protected final short getId(
+    ){
+        return this.id;
+    }
+
+    /**
+     * @deprecated will not be supported by the Dataprovider 2 stack
+     */
+    @Deprecated
+    protected ConnectionFactory getConnectionFactory(
+    ) {
+        return this.connectionFactory;
+    }
+    
+    /**
+     * Says whether this layer is the terminal layer or not
+     *
+     * @return  true if there is no layer to delegate to
+     * 
+     * @deprecated will not be supported by the Dataprovider 2 stack
+     */
+    @Deprecated
+    protected final boolean terminal(
+    ){
+        return this.delegation == null;
+    }
+
+    /**
+     * Activates a dataprovider layer with its legacy configuration
+     * 
+     * @param   configuration   the dataprovider'a configuration
+     *
+     * @exception   ServiceException in case of an activation failure
+     * 
+     * @deprecated will not be supported by the Dataprovider 2 stack
+     */
+    @Deprecated
+    protected void applyLegacyConfiguration(
+        Configuration configuration
+    ) throws ServiceException{
+        // Subclasses should override this method and propagate their
+        // configuration values to corresponding java beans setters.
+    }
+    
+    /**
+     * Class LayerInteraction
+     */
     public class LayerInteraction extends AbstractRestInteraction {
         
         public LayerInteraction(
-            Connection connection
+            RestConnection connection
         ) throws ResourceException {
             super(connection);
             this.serviceHeader = ServiceHeader.toServiceHeader(
@@ -276,7 +423,7 @@ public abstract class Layer_1 implements Dataprovider_1_0, Port {
             RestInteractionSpec ispec,
             MessageRecord input
         ) throws ServiceException {
-            Object_2Facade objectFacade = Facades.newObject(input.getPath());
+            Object_2Facade objectFacade = Facades.newObject(input.getResourceIdentifier());
 			objectFacade.setValue(input.getBody());
 			return new DataproviderRequest(
 			    ispec,
@@ -340,7 +487,7 @@ public abstract class Layer_1 implements Dataprovider_1_0, Port {
         protected final LayerInteraction getDelegatingInteraction(
         ) throws ServiceException {
             try {
-                Port delegation = this.getDelegatingLayer();
+                Port<RestConnection> delegation = this.getDelegatingLayer();
                 return delegation == null ?
                     null :
                     (LayerInteraction)delegation.getInteraction(this.getConnection());
@@ -356,7 +503,7 @@ public abstract class Layer_1 implements Dataprovider_1_0, Port {
             IndexedRecord output
         ) throws ServiceException {
             LayerInteraction interaction = this.getDelegatingInteraction();
-            return interaction == null ? false : interaction.get(ispec, input, output);
+            return interaction != null && interaction.get(ispec, input, output);
         }
 
         @Override
@@ -413,15 +560,23 @@ public abstract class Layer_1 implements Dataprovider_1_0, Port {
         
     }
 
-    //-----------------------------------------------------------------------
-    static class DataproviderConnection implements Connection {
+    /**
+     * Class DataproviderConnection
+     */
+    static class DataproviderConnection implements RestConnection {
     
-        public DataproviderConnection(
-            ServiceHeader serviceHeader
+		DataproviderConnection(
+        	ConnectionFactory connectionFactory,	
+            ServiceHeader serviceHeader            
         ) {
+        	this.connectionFactory = connectionFactory;
             this.serviceHeader = serviceHeader;
         }
 
+		final ConnectionFactory connectionFactory;
+		final ServiceHeader serviceHeader;
+        ConnectionMetaData metaData = null;
+		
         /* (non-Javadoc)
          * @see javax.resource.cci.Connection#close()
          */
@@ -491,132 +646,11 @@ public abstract class Layer_1 implements Dataprovider_1_0, Port {
             return null;
         }
         
-        protected ConnectionMetaData metaData = null;
-        protected final ServiceHeader serviceHeader;
-    }
-    
-    //-----------------------------------------------------------------------
-    /* (non-Javadoc)
-     * @see org.openmdx.application.dataprovider.cci.Dataprovider_1_0#process(org.openmdx.application.dataprovider.cci.ServiceHeader, java.util.List, java.util.List)
-     */
-    @SuppressWarnings("unchecked")
-    public ServiceException process(
-        ServiceHeader header,
-        List<DataproviderRequest> requests,
-        List<DataproviderReply> replies
-    ) {
-        try {
-            LayerInteraction interaction = (LayerInteraction)this.getInteraction(
-                new DataproviderConnection(header)
-            );
-            for(DataproviderRequest request: requests) {
-                DataproviderReply reply = new DataproviderReply(
-                    request.operation() == DataproviderOperations.OBJECT_OPERATION
-                );
-                // Dispatch to layer interaction methods here. Do not let AbstractRestInteraction
-                // do the work because it requires Model_1 which might not be available at this time.
-                switch(request.operation()) {
-                    case DataproviderOperations.OBJECT_RETRIEVAL: {
-                        interaction.get(
-                            request.getInteractionSpec(), 
-                            Facades.asQuery(request.object(), header.isPreferringNotFoundException()), 
-                            reply.getResult()
-                        );
-                        break;
-                    }
-                    case DataproviderOperations.ITERATION_START: {
-                        interaction.find(
-                            request.getInteractionSpec(), 
-                            Facades.asQuery(request.object(), header.isPreferringNotFoundException()), 
-                            reply.getResult()
-                        );
-                        break;
-                    }
-                    case DataproviderOperations.OBJECT_REPLACEMENT: {
-                        interaction.put(
-                            request.getInteractionSpec(), 
-                            Facades.asObject(request.object()), 
-                            reply.getResult()
-                        );
-                        break;
-                    }
-                    case DataproviderOperations.OBJECT_CREATION: {
-                        interaction.create(
-                            request.getInteractionSpec(), 
-                            Facades.asObject(request.object()), 
-                            reply.getResult()
-                        );
-                        break;
-                    }
-                    case DataproviderOperations.OBJECT_REMOVAL: {
-                        interaction.delete(
-                            request.getInteractionSpec(), 
-                            Facades.asQuery(request.object(), header.isPreferringNotFoundException()), 
-                            reply.getResult()
-                        );
-                        break;
-                    }
-                    case DataproviderOperations.OBJECT_OPERATION: {
-                        MappedRecord object = request.object();
-                        MessageRecord input;
-                        if(object instanceof MessageRecord) {
-                            input = (MessageRecord) object;                            
-                        } else {
-                            input = (MessageRecord) Records.getRecordFactory().createMappedRecord(MessageRecord.NAME);
-                            if(MessageRecord.NAME.equals(object.getRecordName())) {
-                                input.putAll(object);
-                            } else if(Object_2Facade.isDelegate(object)) {
-                                input.setPath(Object_2Facade.getPath(object));
-                                input.setBody(Object_2Facade.getValue(object));
-                            } else {
-                                throw new ServiceException(
-                                    BasicException.Code.DEFAULT_DOMAIN,
-                                    BasicException.Code.BAD_PARAMETER,
-                                    "Unsupported operation argument",
-                                    new BasicException.Parameter("actual", object.getRecordName()),
-                                    new BasicException.Parameter("supported", MessageRecord.NAME, ObjectRecord.NAME)
-                                );                            
-                            }
-                        }
-                        interaction.invoke(
-                            request.getInteractionSpec(), 
-                            input,
-                            reply.getResponse()
-                        );                            
-                        break;
-                    }
-                    default:
-                        throw new ServiceException(
-                            BasicException.Code.DEFAULT_DOMAIN,
-                            BasicException.Code.ASSERTION_FAILURE,
-                            "Unsupported operation",
-                            new BasicException.Parameter("actual", DataproviderOperations.toString(request.operation())),
-                            new BasicException.Parameter("supported", "OBJECT_RETRIEVAL|OBJECT_RETRIEVAL|OBJECT_REPLACEMENT|OBJECT_REPLACEMENT|OBJECT_REMOVAL")
-                        );                            
-                }              
-                replies.add(reply);
-            }
-            return null;
-        } catch(ServiceException e) {
-            return e;
-        } catch(Exception e) {
-            return new ServiceException(e);
+        @Override
+        public ConnectionFactory getConnectionFactory() {
+        	return this.connectionFactory;
         }
+        
     }
-    
-    //------------------------------------------------------------------------
-    // Variables
-    //------------------------------------------------------------------------
-
-    /**
-     * The layer's id
-     */
-    private short id;
-
-    protected Layer_1 delegation;
-
-    private Configuration configuration;
-
-    private ConnectionFactory connectionFactory;
     
 }

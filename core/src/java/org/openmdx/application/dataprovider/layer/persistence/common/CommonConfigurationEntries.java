@@ -65,11 +65,15 @@ public class CommonConfigurationEntries extends org.openmdx.application.dataprov
 
 	/**
 	 * CHUNK_SIZE defines the large objects' buffer size
+     * 
+     * @deprecated will not be supported by the dataprovider 2 stack
 	 */
 	static public final String CHUNNK_SIZE = "chunkSize";
 
     /**
-     * CHUNK_SIZE defines the large objects' buffer size
+     * Is used for JRE 5/setStreamByValue support only
+     * 
+     * @deprecated will not be supported by the dataprovider 2 stack
      */
     static public final String STREAM_BUFFER_DIRECTORY = "streamBufferDirectory";
 

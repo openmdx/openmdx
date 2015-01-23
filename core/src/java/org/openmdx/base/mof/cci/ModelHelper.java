@@ -79,7 +79,7 @@ public class ModelHelper {
         ModelElement_1_0 featureDef
     ) throws ServiceException{
         Model_1_0 model = featureDef.getModel();
-        String multiplicity = (String) featureDef.getMultiplicity();
+        String multiplicity = featureDef.getMultiplicity();
         if(featureDef.isReference()) {
             ModelElement_1_0 referencedEnd = model.getElement(
                 featureDef.getReferencedEnd()
@@ -151,8 +151,8 @@ public class ModelHelper {
         return model.isReferenceType(feature) ? (
             !model.referenceIsDerived(feature) 
         ) : (
-            !((Boolean)feature.isDerived()).booleanValue() && 
-            ((Boolean)feature.isChangeable()).booleanValue()
+            !Boolean.TRUE.equals(feature.isDerived()) && 
+            Boolean.TRUE.equals(feature.isChangeable())
         );
     }
 
@@ -191,7 +191,7 @@ public class ModelHelper {
 			return Multiplicity.LIST;
 		} else {
 			for(Multiplicity candidate : Multiplicity.values()) {
-				if(candidate.toString().equals(value)){
+				if(candidate.code().equals(value)){
 					return candidate;
 				}
 			}

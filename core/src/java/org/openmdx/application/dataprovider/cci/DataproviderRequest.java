@@ -48,7 +48,6 @@
 package org.openmdx.application.dataprovider.cci;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -62,23 +61,23 @@ import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.spi.Model_1Factory;
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.query.AnyTypeCondition;
-import org.openmdx.base.query.Condition;
 import org.openmdx.base.query.ConditionType;
 import org.openmdx.base.query.Filter;
-import org.openmdx.base.query.OrderSpecifier;
 import org.openmdx.base.query.Quantifier;
 import org.openmdx.base.query.SortOrder;
 import org.openmdx.base.resource.InteractionSpecs;
 import org.openmdx.base.resource.Records;
 import org.openmdx.base.resource.cci.RestFunction;
 import org.openmdx.base.resource.spi.RestInteractionSpec;
+import org.openmdx.base.rest.cci.ConditionRecord;
+import org.openmdx.base.rest.cci.FeatureOrderRecord;
 import org.openmdx.base.rest.cci.MessageRecord;
 import org.openmdx.base.rest.cci.ObjectRecord;
+import org.openmdx.base.rest.cci.QueryFilterRecord;
 import org.openmdx.base.rest.cci.QueryRecord;
+import org.openmdx.base.rest.cci.RequestRecord;
 import org.openmdx.base.rest.spi.Facades;
-import org.openmdx.base.rest.spi.Object_2Facade;
 import org.openmdx.base.rest.spi.Query_2Facade;
-import org.openmdx.base.text.conversion.JavaBeans;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.log.SysLog;
 
@@ -93,7 +92,7 @@ public class DataproviderRequest {
      * and using default index values. 
      */
     public DataproviderRequest(
-        MappedRecord object,
+        RequestRecord object,
         short operation,
         short attributeSelector,
         AttributeSpecifier[] attributeSpecifier
@@ -126,7 +125,7 @@ public class DataproviderRequest {
     //-----------------------------------------------------------------------
     public DataproviderRequest(
         RestInteractionSpec interactionSpec,
-        MappedRecord object
+        RequestRecord object
     ) {
         this.interactionSpec = interactionSpec;
         this.object = object;
@@ -134,7 +133,7 @@ public class DataproviderRequest {
 
     //-----------------------------------------------------------------------
     public DataproviderRequest(
-        MappedRecord object,
+        RequestRecord object,
         short operation,
         FilterProperty[] filter,
         int position,
@@ -161,7 +160,7 @@ public class DataproviderRequest {
 		        this.interactionSpec = interactionSpecs.CREATE;
 		        break;
 		    case DataproviderOperations.OBJECT_REPLACEMENT:
-		        this.interactionSpec = interactionSpecs.PUT;
+		        this.interactionSpec = interactionSpecs.UPDATE;
 		        break;
 		    default:
 		        throw new ServiceException(
@@ -171,7 +170,7 @@ public class DataproviderRequest {
 		            new BasicException.Parameter("operation", DataproviderOperations.toString(operation))
 		        );
 		}
-		MappedRecord input;
+		RequestRecord input;
 		String kind = object.getRecordName();
 		if(ObjectRecord.NAME.equals(kind) || MessageRecord.NAME.equals(kind)) {
 		    input = object;
@@ -220,14 +219,14 @@ public class DataproviderRequest {
     ){        
         switch(attributeSelector) {
             case AttributeSelectors.ALL_ATTRIBUTES:
-                queryFacade.setGroups(Collections.singleton(FetchPlan.ALL));
+                queryFacade.setFetchGroupName(FetchPlan.ALL);
                 break;
             case AttributeSelectors.SPECIFIED_AND_TYPICAL_ATTRIBUTES:
-                queryFacade.setGroups(Collections.singleton(FetchPlan.DEFAULT));
+                queryFacade.setFetchGroupName(FetchPlan.DEFAULT);
                 break;
             case AttributeSelectors.SPECIFIED_AND_SYSTEM_ATTRIBUTES:
             case AttributeSelectors.NO_ATTRIBUTES:
-                queryFacade.setGroups(Collections.singleton(AttributeSelectors.toString(attributeSelector)));
+                queryFacade.setFetchGroupName(AttributeSelectors.toString(attributeSelector));
                 break;
         }                    
     }
@@ -251,15 +250,15 @@ public class DataproviderRequest {
     public Path path(
     ) throws ServiceException {
     	return 
-			Query_2Facade.isDelegate(this.object) ? Facades.asQuery(this.object).getPath() :
-			Object_2Facade.isDelegate(this.object) ? Facades.asObject(this.object).getPath() :
+			org.openmdx.base.rest.spi.QueryRecord.isCompatible(this.object) ? Facades.asQuery(this.object).getPath() :
+			org.openmdx.base.rest.spi.ObjectRecord.isCompatible(this.object) ? Facades.asObject(this.object).getPath() :
 			(Path)this.object.keySet().iterator().next();
     }
 
     //-----------------------------------------------------------------------
     public String objectClass(
     ) throws ServiceException {
-    	return Object_2Facade.isDelegate(this.object) ?
+    	return org.openmdx.base.rest.spi.ObjectRecord.isCompatible(this.object) ?
             Facades.asObject(this.object).getObjectClass() :
             ((MappedRecord)this.object.values().iterator().next()).getRecordName();
     }
@@ -276,7 +275,7 @@ public class DataproviderRequest {
      *
      * @return      an object of DataproviderObject class;
      */
-    public MappedRecord object(
+    public RequestRecord object(
     ) throws ServiceException {
         return this.object;
     }
@@ -333,26 +332,18 @@ public class DataproviderRequest {
     }
 
     //-----------------------------------------------------------------------
-    private Filter getFilter(
+    private QueryFilterRecord getFilter(
         Query_2Facade facade
     ) throws ServiceException {
-        Object recordFilter = facade.getQuery();        
-        if(recordFilter != null) {
-            return (Filter)JavaBeans.fromXML(
-                ((CharSequence)recordFilter)
-            );
-        }
-        return null;        
+        return facade.getQueryFilter();        
     }
     
     //-----------------------------------------------------------------------
     private void setFilter(
         Query_2Facade facade,
-        Filter filter
+        QueryFilterRecord filter
     ) throws ServiceException {
-        facade.setQuery(
-            JavaBeans.toXML(filter)
-        );
+        facade.setQueryFilter(filter);
     }
 
     //-----------------------------------------------------------------------
@@ -361,9 +352,9 @@ public class DataproviderRequest {
         if(this.attributeFilter == null || this.attributeSpecifier == null) {
             this.attributeFilter = NO_FILTER_PROPERTIES;                    
             this.attributeSpecifier = NO_ATTRIBUTE_SPECIFIERS;
-            if(Query_2Facade.isDelegate(this.object)) {
-                Filter filter = this.getFilter(
-                		Facades.asQuery(this.object)
+            if(org.openmdx.base.rest.spi.QueryRecord.isCompatible(this.object)) {
+            	QueryFilterRecord filter = this.getFilter(
+            		Facades.asQuery(this.object)
                 );
                 if(filter != null) {        
                     // cachedAttributeFilter
@@ -373,12 +364,13 @@ public class DataproviderRequest {
                             filterProperties.toArray(new FilterProperty[filterProperties.size()]);
                     // cachedAttributeSpecifier
                     List<AttributeSpecifier> attributeSpecifiers = new ArrayList<AttributeSpecifier>();
-                    for(OrderSpecifier orderSpecifier: filter.getOrderSpecifier()) {
+                    for(FeatureOrderRecord orderSpecifier: filter.getOrderSpecifier()) {
+                    	final SortOrder sortOrder = orderSpecifier.getSortOrder();
                         attributeSpecifiers.add(
                             new AttributeSpecifier(
                                 orderSpecifier.getFeature(),
                                 0, // position
-                                orderSpecifier.getOrder()
+                                (sortOrder == null ? SortOrder.UNSORTED : sortOrder).code()
                             )
                         );
                     }
@@ -412,7 +404,7 @@ public class DataproviderRequest {
         FilterProperty filterProperty
     ) throws ServiceException {
         Query_2Facade facade = Facades.asQuery(this.object); 
-		Filter filter = this.getFilter(facade);
+		QueryFilterRecord filter = this.getFilter(facade);
 		if(filter == null) {
 		    filter = new Filter();
 		}
@@ -448,9 +440,9 @@ public class DataproviderRequest {
     ) throws ServiceException {
         this.attributeFilter = null;
 		Query_2Facade facade = Facades.asQuery(this.object); 
-		Filter filter = this.getFilter(facade);
+		QueryFilterRecord filter = this.getFilter(facade);
 		if(filter != null) {
-		    for(Iterator<Condition> i = filter.getCondition().iterator(); i.hasNext(); ) {
+		    for(Iterator<ConditionRecord> i = filter.getCondition().iterator(); i.hasNext(); ) {
 		        if(i.next().getFeature().equals(feature)) {
 		            i.remove();
 		        }
@@ -516,9 +508,9 @@ public class DataproviderRequest {
      */
     public short attributeSelector(
     ) throws ServiceException {
-        if(Query_2Facade.isDelegate(this.object)) {
+        if(org.openmdx.base.rest.spi.QueryRecord.isCompatible(this.object)) {
 		    Set<?> fetchGroups = Facades.asQuery(this.object).getGroups();
-		    if(fetchGroups == null || fetchGroups.contains(FetchPlan.DEFAULT)) {
+		    if(fetchGroups == null || fetchGroups.isEmpty() || fetchGroups.contains(FetchPlan.DEFAULT)) {
 		        return AttributeSelectors.SPECIFIED_AND_TYPICAL_ATTRIBUTES;
 		    } else if (fetchGroups.contains(FetchPlan.ALL)) {
 		        return AttributeSelectors.ALL_ATTRIBUTES;
@@ -609,7 +601,7 @@ public class DataproviderRequest {
     };
 
     private final RestInteractionSpec interactionSpec;
-    private final MappedRecord object;
+    private final RequestRecord object;
     private transient FilterProperty[] attributeFilter = null;
     private transient AttributeSpecifier[] attributeSpecifier = null;
     private static final InteractionSpecs interactionSpecs = InteractionSpecs.getRestInteractionSpecs(true);

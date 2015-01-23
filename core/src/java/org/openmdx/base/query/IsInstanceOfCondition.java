@@ -53,12 +53,13 @@ import org.openmdx.base.accessor.cci.SystemAttributes;
  * Typed Instance-Of Condition
  */
 public class IsInstanceOfCondition extends Condition {
-    /**
+
+	/**
      * Constructor 
      */
     public IsInstanceOfCondition(
     ) {
-        this.fulfils = false;
+    	super(toConditionType(false));
     }
 
     /**
@@ -78,9 +79,9 @@ public class IsInstanceOfCondition extends Condition {
         super(
             quantifier,
             subClasses ? SystemAttributes.OBJECT_INSTANCE_OF : SystemAttributes.OBJECT_CLASS,
+    		toConditionType(fulfils),		
             (Object[])className
         );
-        this.fulfils = fulfils;
     }
 
     /**
@@ -118,13 +119,8 @@ public class IsInstanceOfCondition extends Condition {
     /**
      * Implements <code>Serializable</code>
      */
-    private static final long serialVersionUID = 4484469304743765342L;
+	private static final long serialVersionUID = -1204381390127466354L;
 
-    /**
-     * Defines whether the condition shall be <code>true</code> of <code>false</code>
-     */
-    private boolean fulfils;
-            
     /**
      * Clone the condition
      * 
@@ -140,31 +136,41 @@ public class IsInstanceOfCondition extends Condition {
             this.getValue()
         );
     }
-
-    /**
-     * Tells whether the condition shall be <code>true</code> or <code>false</code>
-     * 
-     * @return <code>true</code> if the condition shall be fulfilled
-     */
-    public boolean isFulfil() {
-        return this.fulfils;
-    }
-
+    
     /**
      * Defines whether the condition shall be <code>true</code> or <code>false</code>
      * 
      * @param fulful <code>true</code> if the condition shall be fulfilled
      */
     public void setFulfil(
-        boolean fulfil
-    ) {
-        this.fulfils = fulfil;
+		boolean fulfil
+	) {
+    	super.setType(toConditionType(fulfil));
+    }
+    
+    /**
+     * Tells whether the condition shall be <code>true</code> or <code>false</code>
+     * 
+     * @return <code>true</code> if the condition shall be fulfilled
+     */
+    public boolean isFulfil() {
+    	final ConditionType type = getType();
+		switch(type) {
+	    	case IS_IN : return true;
+	    	case IS_NOT_IN : return false;
+	    	default: throw new IllegalStateException("An " + getClass().getSimpleName() + " requires another type: " + type);
+		}
     }
 
-    @Override
-    public ConditionType getType(
-    ) {
-        return this.isFulfil() ? ConditionType.IS_IN : ConditionType.IS_NOT_IN;
+    /**
+     * Convert the fulfil argument to the underlying condition type
+     * 
+     * @param fulfil
+     * 
+     * @return the corresponding condition type
+     */
+    private static ConditionType toConditionType(boolean fulfil) {
+    	return fulfil ? ConditionType.IS_IN : ConditionType.IS_NOT_IN;
     }
-
+    
 }

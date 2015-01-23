@@ -50,6 +50,14 @@ package test.openmdx.base.query;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.openmdx.base.dataprovider.layer.persistence.jdbc.spi.Database_1_Attributes.QUERY_EXTENSION_BOOLEAN_PARAM;
+import static org.openmdx.base.dataprovider.layer.persistence.jdbc.spi.Database_1_Attributes.QUERY_EXTENSION_CLASS;
+import static org.openmdx.base.dataprovider.layer.persistence.jdbc.spi.Database_1_Attributes.QUERY_EXTENSION_CLAUSE;
+import static org.openmdx.base.dataprovider.layer.persistence.jdbc.spi.Database_1_Attributes.QUERY_EXTENSION_DATETIME_PARAM;
+import static org.openmdx.base.dataprovider.layer.persistence.jdbc.spi.Database_1_Attributes.QUERY_EXTENSION_DATE_PARAM;
+import static org.openmdx.base.dataprovider.layer.persistence.jdbc.spi.Database_1_Attributes.QUERY_EXTENSION_DECIMAL_PARAM;
+import static org.openmdx.base.dataprovider.layer.persistence.jdbc.spi.Database_1_Attributes.QUERY_EXTENSION_INTEGER_PARAM;
+import static org.openmdx.base.dataprovider.layer.persistence.jdbc.spi.Database_1_Attributes.QUERY_EXTENSION_STRING_PARAM;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -68,7 +76,6 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.openmdx.application.dataprovider.cci.FilterProperty;
-import static org.openmdx.application.dataprovider.layer.persistence.jdbc.Database_1_Attributes.*;
 import org.openmdx.base.accessor.cci.SystemAttributes;
 import org.openmdx.base.accessor.jmi.cci.RefQuery_1_0;
 import org.openmdx.base.jmi1.BasePackage;
@@ -76,10 +83,10 @@ import org.openmdx.base.jmi1.Provider;
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.persistence.cci.PersistenceHelper;
 import org.openmdx.base.query.ConditionType;
-import org.openmdx.base.query.Extension;
-import org.openmdx.base.query.Filter;
 import org.openmdx.base.query.IsInstanceOfCondition;
 import org.openmdx.base.query.Quantifier;
+import org.openmdx.base.rest.cci.QueryExtensionRecord;
+import org.openmdx.base.rest.cci.QueryFilterRecord;
 import org.openmdx.kernel.id.UUIDs;
 import org.openmdx.kernel.lightweight.naming.NonManagedInitialContextFactoryBuilder;
 
@@ -152,7 +159,7 @@ public class TestQueryExtension {
     public void testQueryFilter(
     ) throws Exception {
         SegmentQuery query = this.clock1.createSegmentQuery();
-        Extension extension = PersistenceHelper.newQueryExtension(query);
+        QueryExtensionRecord extension = PersistenceHelper.newQueryExtension(query);
         extension.setClause(
             "SELECT something FROM somewhere WHERE b0 = ? AND i0 = ? AND i1 = ? AND i2 = ?"
         );
@@ -163,7 +170,7 @@ public class TestQueryExtension {
             new int[]{1, 2, 3}
         );
         assertTrue("Query instance of RefFilter_1_0", query instanceof RefQuery_1_0);
-        Filter filter = ((RefQuery_1_0)query).refGetFilter();
+        QueryFilterRecord filter = ((RefQuery_1_0)query).refGetFilter();
         System.out.println(filter);
         assertEquals("Filter condition count", 1, filter.getCondition().size());
         assertEquals(

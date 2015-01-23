@@ -1,17 +1,13 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: $
- * Description: Source 
- * Revision:    $Revision: $
+ * Description: REST Source 
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: $
  * ====================================================================
  *
- * This software is published under the BSD license
- * as listed below.
+ * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2013, OMEX AG, Switzerland
+ * Copyright (c) 2013-2014, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -55,13 +51,13 @@ package org.openmdx.base.rest.spi;
 import java.io.Closeable;
 import java.io.IOException;
 
-import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.naming.Path;
 import org.openmdx.kernel.exception.BasicException;
 import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 
 /**
- * Source
+ * REST Source
  */
 public class RestSource implements Closeable {
 
@@ -75,7 +71,7 @@ public class RestSource implements Closeable {
     ){
         this.contextURL = ".";
         this.body = body;
-        this.wbxml = true;
+        this.format = Format.WBXML;
         this.exhaust = false;
         this.closeable = null;
     }
@@ -96,7 +92,7 @@ public class RestSource implements Closeable {
     ) {
         this.contextURL = contextURL;
         this.body = body;
-        this.wbxml = RestParser.isBinary(mimeType);
+        this.format = Format.fromMimeType(mimeType);
         this.exhaust = true;
         this.closeable = closeable;
     }
@@ -112,9 +108,9 @@ public class RestSource implements Closeable {
     private final InputSource body;
 
     /**
-     * The WBXML flag
+     * The input format
      */
-    private final boolean wbxml;
+    private final Format format;
     
     /**
      * The exhaust flag
@@ -135,38 +131,40 @@ public class RestSource implements Closeable {
      */
     protected Path getXRI(
         String hrefURL
-    ) throws ServiceException {
+    ) throws SAXException {
         if (hrefURL.startsWith(this.contextURL)) {
             return RestParser.toResourceIdentifier(
                 hrefURL.substring(this.contextURL.length())
             );
-        } else
-            throw new ServiceException(
-                BasicException.Code.DEFAULT_DOMAIN,
-                BasicException.Code.BAD_PARAMETER,
+        }
+        throw BasicException.initHolder(
+        	new SAXException(
                 "The URL does not start with the expected base URL",
-                new BasicException.Parameter("contextURL", this.contextURL),
-                new BasicException.Parameter("url", hrefURL)
-           );
+                BasicException.newEmbeddedExceptionStack(
+            		BasicException.Code.DEFAULT_DOMAIN,
+            		BasicException.Code.BAD_PARAMETER,
+            		new BasicException.Parameter("contextURL", this.contextURL),
+            		new BasicException.Parameter("url", hrefURL)
+        		)
+        	)
+        );		
     }
 
     /**
      * Set up and retrieve the <code>InputSource</code>
      * 
      * @return the <code>InputSource</code>
-     * 
-     * @throws ServiceException
      */
     protected InputSource getBody(
-    ) throws ServiceException {
+    ){
         return this.body;
     }
 
     /**
-     * Tells whether XML or WBXML shall be used
+     * Provide the input format
      */
-    protected boolean isWBXML() {
-        return this.wbxml;
+    protected Format getFormat() {
+        return this.format;
     }
 
     /**
@@ -189,5 +187,18 @@ public class RestSource implements Closeable {
             this.closeable.close();
         }
     }
-    
+ 
+    static enum Format {
+    	XML,
+    	WBXML,
+    	JSON;
+    	
+    	static Format fromMimeType(String mimeType) {
+    		return 
+    			RestParser.isBinary(mimeType) ? WBXML :
+    			"application/json".equals(mimeType)	? JSON :
+    			XML;
+    	}
+    }
+
 }

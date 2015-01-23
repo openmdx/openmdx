@@ -57,8 +57,8 @@ import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
-import org.openmdx.application.dataprovider.layer.persistence.jdbc.DurationMarshaller;
 import org.openmdx.application.dataprovider.layer.persistence.jdbc.LayerConfigurationEntries;
+import org.openmdx.base.dataprovider.layer.persistence.jdbc.datatypes.DurationMarshaller;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.kernel.exception.BasicException;
 

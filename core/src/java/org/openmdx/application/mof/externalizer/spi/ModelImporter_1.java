@@ -53,53 +53,57 @@ import java.util.List;
 import java.util.Set;
 import java.util.StringTokenizer;
 
+import javax.resource.NotSupportedException;
 import javax.resource.ResourceException;
 import javax.resource.cci.MappedRecord;
 
 import org.omg.mof.cci.ScopeKind;
 import org.omg.mof.cci.VisibilityKind;
-import org.openmdx.application.dataprovider.cci.AttributeSelectors;
-import org.openmdx.application.dataprovider.cci.DataproviderRequestProcessor;
-import org.openmdx.application.dataprovider.cci.Dataprovider_1_0;
-import org.openmdx.application.dataprovider.cci.ServiceHeader;
 import org.openmdx.application.mof.cci.ModelAttributes;
 import org.openmdx.application.mof.cci.ModelExceptions;
 import org.openmdx.application.mof.externalizer.cci.ModelImporter_1_0;
-import org.openmdx.base.exception.ServiceException;
+import org.openmdx.base.dataprovider.cci.Channel;
 import org.openmdx.base.mof.cci.AggregationKind;
-import org.openmdx.base.mof.cci.ModelHelper;
-import org.openmdx.base.mof.cci.Multiplicity;
 import org.openmdx.base.naming.Path;
-import org.openmdx.base.resource.Records;
-import org.openmdx.base.rest.cci.MessageRecord;
-import org.openmdx.base.rest.spi.Facades;
-import org.openmdx.base.rest.spi.Object_2Facade;
+import org.openmdx.base.resource.spi.ResourceExceptions;
+import org.openmdx.base.rest.cci.ObjectRecord;
 import org.openmdx.kernel.exception.BasicException;
+import org.openmdx.kernel.exception.Throwables;
 import org.openmdx.kernel.log.SysLog;
 
 /**
  * Common functions for model importers.
  */
 @SuppressWarnings({"rawtypes","unchecked"})
-abstract public class ModelImporter_1
-implements ModelImporter_1_0 {
+abstract public class ModelImporter_1 implements ModelImporter_1_0 {
 
-    protected class Qualifier
-    {
-        private String name = null;
-        private String type = null;
+	/**
+	 * Constructor
+	 */
+    protected ModelImporter_1(
+    ) {
+		super();
+	}
 
-        public Qualifier(String name, String type)
-        {
-            this.name = name;
-            this.type = type;
-        }
+	protected Set segments = null;
+    protected Channel channel = null;
+    protected boolean hasErrors = false;
 
-        public String getName() { return this.name; }
-
-        public String getType() { return this.type; }
-    }
-
+    protected static final String DEFAULT_PARAMETER_MULTIPLICITY = "1..1";
+    protected static final int DEFAULT_PARAMETER_MAX_LENGTH = 1000000;
+    
+    protected static final String DEFAULT_ATTRIBUTE_MULTIPLICITY = "1..1";
+    protected static final int DEFAULT_ATTRIBUTE_MAX_LENGTH = 200;
+    protected static final boolean DEFAULT_ATTRIBUTE_IS_UNIQUE = false;
+    protected static final boolean DEFAULT_ATTRIBUTE_IS_LANGUAGE_NEUTRAL = true;
+    
+    protected static final String PROVIDER_NAME = "Mof";
+    private static final Path PROVIDER_ROOT_PATH = new Path(
+    	"xri://@openmdx*org.omg.model1/provider"
+    ).getChild(
+    	PROVIDER_NAME
+    );
+    
     /**
      * The safe way to create a feature path
      * 
@@ -118,74 +122,53 @@ implements ModelImporter_1_0 {
     }
         
     //---------------------------------------------------------------------------
-    private DataproviderRequestProcessor getChannel(
-    ) throws ServiceException {
-        if(this.channel == null) {
-            this.channel = new DataproviderRequestProcessor(
-                this.header,
-                this.target
-            );
-        }
-        return channel;
-    }
-
-    //---------------------------------------------------------------------------
     protected void createModelElement(
         List scope,
-        MappedRecord object
-    ) throws ServiceException {
+        ObjectRecord object
+    ) throws ResourceException{
         if(scope == null || ((scope.size() >= 2) && "Logical View".equals(scope.get(0)))) {
             // create segment on-demand
-            String modelName = Object_2Facade.getPath(object).get(4);
+            final Path objectId = object.getResourceIdentifier();
+			final String modelName = objectId.getSegment(4).toClassicRepresentation();
             if(!this.segments.contains(modelName)) {
-                MappedRecord segment;
-                segment = Facades.newObject(
-				    Object_2Facade.getPath(object).getPrefix(5),
+                final Path segmentId = objectId.getPrefix(5);
+				ObjectRecord segment = this.channel.newObjectRecord(
+            		segmentId,
 				    "org:omg:model1:Segment"
-				).getDelegate();
-                this.getChannel().addCreateRequest(
-                    segment
-                );
+				);
+				this.channel.addCreateRequest(segment);
                 this.segments.add(modelName);
             }
-            if(ModelAttributes.PACKAGE.equals(Object_2Facade.getObjectClass(object))) {
+            final String objectType = object.getValue().getRecordName();
+			if(ModelAttributes.PACKAGE.equals(objectType)) {
                 try {
-                    this.getChannel().addGetRequest(
-                        Object_2Facade.getPath(object)
-                    );
-                    this.getChannel().addReplaceRequest(
-                        object,
-                        AttributeSelectors.NO_ATTRIBUTES,
-                        null
-                    );
-                }
-                catch(ServiceException e) {
-                    if(e.getExceptionCode() != BasicException.Code.NOT_FOUND) {
+					if(this.channel.addGetRequest(objectId) != null) {
+						this.channel.addUpdateRequest(object);
+					} else {
+	                    this.channel.addCreateRequest(object);
+					}
+                } catch(ResourceException e) {
+                	// TODO for data provider stack 1 only!
+                	final BasicException cause = BasicException.toExceptionStack(e);
+                    if(cause.getExceptionCode() == BasicException.Code.NOT_FOUND) {
+	                    this.channel.addCreateRequest(object);
+                    } else {
                         throw e;
                     }
-                    this.getChannel().addCreateRequest(
-                        object,
-                        AttributeSelectors.NO_ATTRIBUTES,
-                        null
-                    );                    
                 }
-            }
-            else {
+            } else {
                 try {
-                    this.getChannel().addCreateRequest(
-                        object,
-                        AttributeSelectors.NO_ATTRIBUTES,
-                        null
+                    this.channel.addCreateRequest(
+                        object
                     );
-                }
-                catch(ServiceException e) {
-                    if(e.getCause().getExceptionCode() == BasicException.Code.DUPLICATE) {
+                } catch(ResourceException e) {
+                	final BasicException cause = BasicException.toExceptionStack(e);
+                    if(cause.getExceptionCode() == BasicException.Code.DUPLICATE) {
                         // DUPLICATE exception must be caught here, otherwise the 
                         // TogetherExporterPlugin runs into problems (AssociationEnds)
                         // => the duplicate defintion of an object is ignored
                         SysLog.warning("[MOF C-5] The names of the contents of a Namespace must not collide. element=", object);
-                    }
-                    else {
+                    } else {
                         throw e;
                     }
                 }
@@ -195,53 +178,45 @@ implements ModelImporter_1_0 {
 
     //---------------------------------------------------------------------------
     protected void beginImport(
-    ) throws ServiceException {
+    ) throws ResourceException{
 
         SysLog.trace("clearing repository before import");
 
         // clear repository
         try {
             SysLog.trace("removing all elements");
-            this.getChannel().addRemoveRequest(
-                new Path("xri:@openmdx:org.omg.model1/provider/" + this.providerName)
-            );
+            this.channel.addRemoveRequest(PROVIDER_ROOT_PATH);
             this.endImport();
-        } catch(ServiceException e) {
-            if (e.getExceptionCode() != BasicException.Code.NOT_FOUND) {
-                e.log();
+        } catch(ResourceException e) {
+            if (BasicException.toExceptionStack(e).getExceptionCode() != BasicException.Code.NOT_FOUND) {
+                Throwables.log(e);
             }
         }
         // beginImport clears all pending requests and prepares for
         // a new import    
-        try {
-            MessageRecord request = (MessageRecord) Records.getRecordFactory().createMappedRecord(MessageRecord.NAME);
-            request.setPath(PROVIDER_ROOT_PATH.getDescendant("segment", "-", "beginImport"));
-            request.setBody(null);
-            this.getChannel().addOperationRequest(request);
-            this.segments = new HashSet();
-            // create repository root
-            this.getChannel().addCreateRequest(
-                Object_2Facade.newInstance(
-                    new Path("xri:@openmdx:org.omg.model1/provider/" + this.providerName),
-                    "org:openmdx:base:Provider"
-                ).getDelegate()
-            );
-        } catch (ResourceException e) {
-            throw new ServiceException(e);
-        }
+        this.channel.addOperationRequest(
+        	this.channel.newMessageRecord(
+       			PROVIDER_ROOT_PATH.getDescendant("segment", "-", "beginImport")
+       		)
+        );
+        this.segments = new HashSet();
+        // create repository root
+        this.channel.addCreateRequest(
+    		this.channel.newObjectRecord(
+                PROVIDER_ROOT_PATH,
+                "org:openmdx:base:Provider"
+            )
+        );
     }
 
     //---------------------------------------------------------------------------
     protected void endImport(
-    ) throws ServiceException {
-        try {
-            MessageRecord request = (MessageRecord) Records.getRecordFactory().createMappedRecord(MessageRecord.NAME);
-            request.setPath(PROVIDER_ROOT_PATH.getDescendant("segment", "-", "endImport"));
-            request.setBody(null);
-            this.getChannel().addOperationRequest(request);
-        } catch (ResourceException e) {
-            throw new ServiceException(e);
-        }
+    ) throws ResourceException{
+        this.channel.addOperationRequest(
+        	this.channel.newMessageRecord(
+       			PROVIDER_ROOT_PATH.getDescendant("segment", "-", "endImport")
+       		)
+        );
     }
 
     //---------------------------------------------------------------------------
@@ -256,7 +231,7 @@ implements ModelImporter_1_0 {
         String name
     ) {
         if(name.length() == 0) {
-            return new String();
+            return "";
         } else {
             StringBuilder component = new StringBuilder();
             int i = 0;
@@ -278,25 +253,24 @@ implements ModelImporter_1_0 {
     protected Path toElementPath(
         String modelName,
         String elementName
-    ) throws ServiceException {
+    ) throws ResourceException {
         if((modelName == null) || (modelName.length() == 0)) {
-            throw new ServiceException(
-                BasicException.Code.DEFAULT_DOMAIN,
-                BasicException.Code.NOT_SUPPORTED,
-                "element not in namespace. Top level elements not supported.",
-                new BasicException.Parameter("element name", elementName)
+        	throw ResourceExceptions.initHolder(
+        		new NotSupportedException(
+    				"element not in namespace. Top level elements not supported.",
+        			BasicException.newEmbeddedExceptionStack(	
+		                BasicException.Code.DEFAULT_DOMAIN,
+		                BasicException.Code.NOT_SUPPORTED,
+		                new BasicException.Parameter("element name", elementName)
+		            )
+		        )
             );
         }
-        return new Path(
-            new String[]{
-                "org:omg:model1",
-                "provider",
-                this.providerName,
-                "segment",
-                modelName,
-                "element",
-                modelName + ":" + elementName
-            }
+        return PROVIDER_ROOT_PATH.getDescendant(
+            "segment",
+            modelName,
+            "element",
+            modelName + ":" + elementName
         );
     }
 
@@ -314,163 +288,40 @@ implements ModelImporter_1_0 {
 
     //---------------------------------------------------------------------------
     /**
-     * Parses a multiplicity text of the following form:
-     * [["<<"] lowerBound [".." upperBound ] [">>"] BLANK ] string
-     * When no upper bound is specified then upperBound = lowerBound.
-     */
-    protected String parseMultiplicity(
-        String text,
-        MappedRecord container,
-        String elementName,
-        StringBuffer multiplicity
-    ) throws ServiceException {
-        for(Multiplicity candidate : Multiplicity.values()){
-            String value = candidate.toString();
-            if(value.equals(text)) {
-                multiplicity.append(value);
-                return new String();
-            }
-        }
-        if(ModelHelper.UNBOUND.equals(text)) {
-            multiplicity.append(ModelHelper.UNBOUND);
-            return new String();
-        }
-
-        String lowerBound = null;
-        String upperBound = null;
-
-        int stereotypeOpeningPos = text.indexOf("<<");
-        int stereotypeClosingPos = text.indexOf(">>");
-        int lastPos = text.indexOf(" ");
-        int delimiterPos = text.indexOf("..");
-
-        // if text does not contain a multiplicity return 1..1
-        if((delimiterPos < 0) && (stereotypeOpeningPos < 0)) {
-            multiplicity.append(Multiplicity.SINGLE_VALUE.toString());
-            return text;
-        }
-
-        // single value or range?
-        if(delimiterPos < 0) {
-            lowerBound = text.substring(
-                stereotypeOpeningPos < 0 ? 0 : stereotypeOpeningPos + 2,
-                    stereotypeClosingPos < 0 ? (lastPos < 0 ? text.length() : lastPos) : stereotypeClosingPos
-            ).trim();
-            upperBound = lowerBound;
-            Multiplicity l = ModelHelper.toMultiplicity(lowerBound);
-            if(l != null) {
-            	switch(l){
-            		case LIST:
-                        multiplicity.append(Multiplicity.LIST.toString());
-                        return text.substring(lastPos).trim();
-            		case SET:
-                        multiplicity.append(Multiplicity.SET.toString());
-                        return text.substring(lastPos).trim();
-            		case SPARSEARRAY:
-                        multiplicity.append(Multiplicity.SPARSEARRAY.toString());
-                        return text.substring(lastPos).trim();
-            		case STREAM:	
-                        multiplicity.append(Multiplicity.STREAM.toString());
-                        return text.substring(lastPos).trim();
-                    case MAP: case OPTIONAL: case SINGLE_VALUE:
-                        break; // TODO
-            	}
-            }
-        } else {
-            lowerBound = text.substring(
-                stereotypeOpeningPos < 0 ? 0 : stereotypeOpeningPos + 2,
-                    delimiterPos
-            );
-            upperBound = text.substring(
-                delimiterPos + 2,
-                stereotypeClosingPos < 0 ? (lastPos < 0 ? text.length() : lastPos) : stereotypeClosingPos
-            );
-        }
-
-        // check lowerBound, upperBound
-        try {
-            Integer.decode(lowerBound);
-
-            // check upperBound
-            if(!"n".equals(upperBound)) {
-                Integer.decode(upperBound);
-            }
-        } catch(NumberFormatException e) {
-            SysLog.error("multiplicity must be of the form [\"<<\"] lowerBound [\"..\" upperBound ] [\">>\"]");
-            throw new ServiceException(
-                ModelExceptions.MODEL_DOMAIN,
-                ModelExceptions.INVALID_MULTIPLICITY_FORMAT,
-                "multiplicity must be of the form [\"<<\"] lowerBound [\"..\" upperBound ] [\">>\"]",
-                new BasicException.Parameter("multiplicity", text),
-                new BasicException.Parameter("lowerBound", lowerBound),
-                new BasicException.Parameter("upperBound", upperBound),
-                new BasicException.Parameter("container", Object_2Facade.getPath(container)),
-                new BasicException.Parameter("element", elementName)
-            );
-        }
-        multiplicity.append(
-            lowerBound + ".." + upperBound
-        );
-        return text.substring(
-            lastPos < 0 ? text.length() : lastPos
-        ).trim();
-    }
-
-    //---------------------------------------------------------------------------
-    /**
      * Create a reference for all navigable association ends.
      */
     protected void exportAssociationEndAsReference(
-        MappedRecord associationEndDef1,
-        MappedRecord associationEndDef2,
-        MappedRecord associationDef,
+        ObjectRecord associationEndDef1,
+        ObjectRecord associationEndDef2,
+        ObjectRecord associationDef,
         List scope
-    ) throws ServiceException {
+    ) throws ResourceException {
         try {
-            Object_2Facade associationEndDef1Facade = Facades.asObject(associationEndDef1);
-            Object_2Facade associationEndDef2Facade = Facades.asObject(associationEndDef2);        
             if(
-                ((Boolean)associationEndDef2Facade.attributeValue("isNavigable")).booleanValue()
+                ((Boolean)DataproviderMode.DATAPROVIDER_2.attributeValue(associationEndDef2, "isNavigable")).booleanValue()
             ) {
-                Object_2Facade referenceDefFacade = Object_2Facade.newInstance(
+                ObjectRecord referenceDef = this.channel.newObjectRecord(
                     newFeaturePath(
-                        ((Path)associationEndDef1Facade.attributeValue("type")),
-                        (String)associationEndDef2Facade.attributeValue("name")
+                        ((Path)DataproviderMode.DATAPROVIDER_2.attributeValue(associationEndDef1, "type")),
+                        (String)DataproviderMode.DATAPROVIDER_2.attributeValue(associationEndDef2, "name")
                     ),
                     ModelAttributes.REFERENCE
                 );
-                referenceDefFacade.addAllToAttributeValuesAsList("container",
-                    associationEndDef1Facade.getAttributeValuesAsReadOnlyList("type")
-                );
-                referenceDefFacade.addAllToAttributeValuesAsList("type",
-                    associationEndDef2Facade.getAttributeValuesAsReadOnlyList("type")
-                );
-                referenceDefFacade.addToAttributeValuesAsList("referencedEnd",
-                    associationEndDef2Facade.getPath()
-                );
-                referenceDefFacade.addToAttributeValuesAsList("exposedEnd",
-                    associationEndDef1Facade.getPath()
-                );
-                referenceDefFacade.addAllToAttributeValuesAsList("multiplicity",
-                    associationEndDef2Facade.getAttributeValuesAsReadOnlyList("multiplicity")
-                );
-                referenceDefFacade.addAllToAttributeValuesAsList("isChangeable",
-                    associationEndDef2Facade.getAttributeValuesAsReadOnlyList("isChangeable")
-                );
-                referenceDefFacade.addToAttributeValuesAsList("visibility",
-                    VisibilityKind.PUBLIC_VIS
-                );
-                referenceDefFacade.addToAttributeValuesAsList("scope",
-                    ScopeKind.INSTANCE_LEVEL
-                );
+                DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(referenceDef, "container", DataproviderMode.DATAPROVIDER_2.attributeValue(associationEndDef1, "type"));
+                DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(referenceDef, "type", DataproviderMode.DATAPROVIDER_2.attributeValue(associationEndDef2, "type"));
+                DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(referenceDef, "referencedEnd", associationEndDef2.getResourceIdentifier());
+                DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(referenceDef, "exposedEnd", associationEndDef1.getResourceIdentifier());
+                DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(referenceDef, "multiplicity", DataproviderMode.DATAPROVIDER_2.attributeValue(associationEndDef2, "multiplicity"));
+                DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(referenceDef, "isChangeable", DataproviderMode.DATAPROVIDER_2.attributeValue(associationEndDef2, "isChangeable"));
+                DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(referenceDef, "visibility", VisibilityKind.PUBLIC_VIS);
+                DataproviderMode.DATAPROVIDER_2.addToAttributeValuesAsList(referenceDef, "scope", ScopeKind.INSTANCE_LEVEL);
                 createModelElement(
                     scope,
-                    referenceDefFacade.getDelegate()
+                    referenceDef
                 );
             }
-        }
-        catch(Exception e) {
-            throw new ServiceException(e);
+        } catch(RuntimeException e) {
+        	throw ResourceExceptions.toResourceException(e);
         }
     }
 
@@ -479,66 +330,56 @@ implements ModelImporter_1_0 {
      * Verifies/completes association ends
      */
     protected void verifyAndCompleteAssociationEnds(
-        MappedRecord associationEndDef1,
-        MappedRecord associationEndDef2
-    ) throws ServiceException {
+        ObjectRecord associationEndDef1,
+        ObjectRecord associationEndDef2
+    ) throws ResourceException {
         try {
-            Object_2Facade associationEndDef1Facade = Facades.asObject(associationEndDef1);
-            Object_2Facade associationEndDef2Facade = Facades.asObject(associationEndDef2);
             // end1.aggregation=COMPOSITE --> end2.isChangeable=false
-            if(AggregationKind.COMPOSITE.equals(associationEndDef1Facade.attributeValue("aggregation"))) {
-                associationEndDef2Facade.replaceAttributeValuesAsListBySingleton(
-                    "isChangeable",
-                    Boolean.FALSE
-                );
+            if(AggregationKind.COMPOSITE.equals(DataproviderMode.DATAPROVIDER_2.attributeValue(associationEndDef1, "aggregation"))) {
+                DataproviderMode.DATAPROVIDER_2.replaceAttributeValuesAsListBySingleton(associationEndDef2, "isChangeable", Boolean.FALSE);
             }
-            if(AggregationKind.COMPOSITE.equals(associationEndDef2Facade.attributeValue("aggregation"))) {
-                associationEndDef1Facade.replaceAttributeValuesAsListBySingleton(
-                    "isChangeable",
-                    Boolean.FALSE
-                );
+            if(AggregationKind.COMPOSITE.equals(DataproviderMode.DATAPROVIDER_2.attributeValue(associationEndDef2, "aggregation"))) {
+                DataproviderMode.DATAPROVIDER_2.replaceAttributeValuesAsListBySingleton(associationEndDef1, "isChangeable", Boolean.FALSE);
             }
             // end1.aggregation=COMPOSITE --> end2.aggregation=AggregationKind.NONE
             if(
-                (AggregationKind.COMPOSITE.equals(associationEndDef1Facade.attributeValue("aggregation")) && !AggregationKind.NONE.equals(associationEndDef2Facade.getSingletonFromAttributeValuesAsList("aggregation"))) ||
-                (AggregationKind.COMPOSITE.equals(associationEndDef2Facade.attributeValue("aggregation")) && !AggregationKind.NONE.equals(associationEndDef1Facade.getSingletonFromAttributeValuesAsList("aggregation")))
+                (AggregationKind.COMPOSITE.equals(DataproviderMode.DATAPROVIDER_2.attributeValue(associationEndDef1, "aggregation")) && !AggregationKind.NONE.equals(DataproviderMode.DATAPROVIDER_2.getSingletonFromAttributeValuesAsList(associationEndDef2, "aggregation"))) ||
+                (AggregationKind.COMPOSITE.equals(DataproviderMode.DATAPROVIDER_2.attributeValue(associationEndDef2, "aggregation")) && !AggregationKind.NONE.equals(DataproviderMode.DATAPROVIDER_2.getSingletonFromAttributeValuesAsList(associationEndDef1, "aggregation")))
             ) {
-                SysLog.error("Wrong aggregation. end1.aggregation='composite' --> end2.aggregation='none'");
-                throw new ServiceException(
-                    ModelExceptions.MODEL_DOMAIN,
-                    ModelExceptions.INVALID_OPPOSITE_AGGREGATION_FOR_COMPOSITE_AGGREGATION,
-                    "Wrong aggregation. end1.aggregation='composite' --> end2.aggregation='none'",
-                    new BasicException.Parameter("end1", associationEndDef1Facade.getPath()),
-                    new BasicException.Parameter("end1.aggregation", associationEndDef1Facade.attributeValue("aggregation")),
-                    new BasicException.Parameter("end2", associationEndDef2Facade.getPath()),
-                    new BasicException.Parameter("end2.aggregation", associationEndDef2Facade.attributeValue("aggregation"))
-                );
+				throw newModelException(
+	                    "Wrong aggregation. end1.aggregation='composite' --> end2.aggregation='none'",
+	                    ModelExceptions.INVALID_OPPOSITE_AGGREGATION_FOR_COMPOSITE_AGGREGATION,
+	                    new BasicException.Parameter("end1", associationEndDef1.getResourceIdentifier()),
+	                    new BasicException.Parameter("end1.aggregation", DataproviderMode.DATAPROVIDER_2.attributeValue(associationEndDef1, "aggregation")),
+	                    new BasicException.Parameter("end2", associationEndDef2.getResourceIdentifier()),
+	                    new BasicException.Parameter("end2.aggregation", DataproviderMode.DATAPROVIDER_2.attributeValue(associationEndDef2, "aggregation"))
+		        	);
+                
             }
             // end1.aggregation=COMPOSITE --> end2.multiplicity="1..1"
             if(
-                (AggregationKind.COMPOSITE.equals(associationEndDef1Facade.attributeValue("aggregation")) && !("1..1".equals(associationEndDef2Facade.getSingletonFromAttributeValuesAsList("multiplicity")) || "0..1".equals(associationEndDef2Facade.getSingletonFromAttributeValuesAsList("multiplicity")))) ||
-                (AggregationKind.COMPOSITE.equals(associationEndDef2Facade.attributeValue("aggregation")) && !("1..1".equals(associationEndDef1Facade.getSingletonFromAttributeValuesAsList("multiplicity")) || "0..1".equals(associationEndDef1Facade.getSingletonFromAttributeValuesAsList("multiplicity"))))
+                (AggregationKind.COMPOSITE.equals(DataproviderMode.DATAPROVIDER_2.attributeValue(associationEndDef1, "aggregation")) && !("1..1".equals(DataproviderMode.DATAPROVIDER_2.getSingletonFromAttributeValuesAsList(associationEndDef2, "multiplicity")) || "0..1".equals(DataproviderMode.DATAPROVIDER_2.getSingletonFromAttributeValuesAsList(associationEndDef2, "multiplicity")))) ||
+                (AggregationKind.COMPOSITE.equals(DataproviderMode.DATAPROVIDER_2.attributeValue(associationEndDef2, "aggregation")) && !("1..1".equals(DataproviderMode.DATAPROVIDER_2.getSingletonFromAttributeValuesAsList(associationEndDef1, "multiplicity")) || "0..1".equals(DataproviderMode.DATAPROVIDER_2.getSingletonFromAttributeValuesAsList(associationEndDef1, "multiplicity"))))
             ) {
-                SysLog.error("Wrong multiplicity. end1.aggregation='composite' --> end2.multiplicity='1..1'|'0..1'");
-                throw new ServiceException(
-                    ModelExceptions.MODEL_DOMAIN,
-                    ModelExceptions.INVALID_MULTIPLICITY_FOR_COMPOSITE_AGGREGATION,
-                    "Wrong multiplicity. end1.aggregation='composite' --> end2.multiplicity='1..1'|'0..1'",
-                    new BasicException.Parameter("end1", associationEndDef1Facade.getPath()),
-                    new BasicException.Parameter("end1.multiplicity", associationEndDef1Facade.attributeValue("multiplicity")),
-                    new BasicException.Parameter("end1.aggregation", associationEndDef1Facade.attributeValue("aggregation")),
-                    new BasicException.Parameter("end2", associationEndDef2Facade.getPath()),
-                    new BasicException.Parameter("end2.multiplicity", associationEndDef2Facade.attributeValue("multiplicity")),
-                    new BasicException.Parameter("end2.aggregation", associationEndDef2Facade.attributeValue("aggregation"))
-                );
+				throw newModelException(
+	                    "Wrong multiplicity. end1.aggregation='composite' --> end2.multiplicity='1..1'|'0..1'",
+	                    ModelExceptions.INVALID_MULTIPLICITY_FOR_COMPOSITE_AGGREGATION,
+	                    new BasicException.Parameter("end1", associationEndDef1.getResourceIdentifier()),
+	                    new BasicException.Parameter("end1.multiplicity", DataproviderMode.DATAPROVIDER_2.attributeValue(associationEndDef1, "multiplicity")),
+	                    new BasicException.Parameter("end1.aggregation", DataproviderMode.DATAPROVIDER_2.attributeValue(associationEndDef1, "aggregation")),
+	                    new BasicException.Parameter("end2", associationEndDef2.getResourceIdentifier()),
+	                    new BasicException.Parameter("end2.multiplicity", DataproviderMode.DATAPROVIDER_2.attributeValue(associationEndDef2, "multiplicity")),
+	                    new BasicException.Parameter("end2.aggregation", DataproviderMode.DATAPROVIDER_2.attributeValue(associationEndDef2, "aggregation"))
+		        	);
+                
             }
             this.verifyNavigabilityOfCompositeAggregation(associationEndDef1);
             this.verifyNavigabilityOfCompositeAggregation(associationEndDef2);
             this.checkUnnecessaryQualifiers(associationEndDef1);
             this.checkUnnecessaryQualifiers(associationEndDef2);
-        }
-        catch(Exception e) {
-            throw new ServiceException(e);
+        } catch(RuntimeException e) {
+        	e.printStackTrace(); // TODO
+        	throw ResourceExceptions.toResourceException(e);
         }
     }
 
@@ -547,23 +388,20 @@ implements ModelImporter_1_0 {
      * Verifies whether an association end with aggregation 'composite' is navigable
      */
     private void verifyNavigabilityOfCompositeAggregation(
-        MappedRecord associationEndDef
-    ) throws ServiceException {
-        Object_2Facade associationEndDefFacade = Facades.asObject(associationEndDef);
-        if(
-            (AggregationKind.COMPOSITE.equals(associationEndDefFacade.attributeValue("aggregation")) ||
-                AggregationKind.SHARED.equals(associationEndDefFacade.attributeValue("aggregation")))
-                &&
-                !((Boolean)associationEndDefFacade.attributeValue("isNavigable")).booleanValue()
-        ) {
-            SysLog.error("An association end with aggregation 'composite' should be navigable.");
-            throw new ServiceException(
-                ModelExceptions.MODEL_DOMAIN,
-                ModelExceptions.COMPOSITE_AGGREGATION_NOT_NAVIGABLE,
-                "An association end with aggregation 'composite' should be navigable.",
-                new BasicException.Parameter("end", associationEndDefFacade.getPath())
-            );
-        }
+        ObjectRecord associationEndDef
+    ) throws ResourceException {
+    	if(
+		    (AggregationKind.COMPOSITE.equals(DataproviderMode.DATAPROVIDER_2.attributeValue(associationEndDef, "aggregation")) ||
+		        AggregationKind.SHARED.equals(DataproviderMode.DATAPROVIDER_2.attributeValue(associationEndDef, "aggregation")))
+		        &&
+		        !((Boolean)DataproviderMode.DATAPROVIDER_2.attributeValue(associationEndDef, "isNavigable")).booleanValue()
+		) {
+			throw newModelException(
+		            "An association end with aggregation 'composite' should be navigable.",
+		            ModelExceptions.COMPOSITE_AGGREGATION_NOT_NAVIGABLE,
+		            new BasicException.Parameter("end", associationEndDef.getResourceIdentifier())
+		    	);
+		}
     }
 
     //---------------------------------------------------------------------------
@@ -572,86 +410,70 @@ implements ModelImporter_1_0 {
      * unique identifying qualifier
      */
     private void checkUnnecessaryQualifiers(
-        MappedRecord associationEndDef
-    ) throws ServiceException {
-        Object_2Facade associationEndDefFacade = Facades.asObject(associationEndDef);
-        if(
-            (associationEndDefFacade.getSizeOfAttributeValuesAsList("qualifierName") > 0) &&
-            !((Boolean)associationEndDefFacade.attributeValue("isNavigable")).booleanValue()
-        ) {
-            SysLog.error("Found association end with qualifier which is not navigable. Only navigable association ends need a unique identifying qualifier.");
-            throw new ServiceException(
-                ModelExceptions.MODEL_DOMAIN,
-                ModelExceptions.UNNECESSARY_QUALIFIER_FOUND,
-                "Found association end with qualifier which is not navigable. Only navigable association ends need a unique identifying qualifier.",
-                new BasicException.Parameter("end", associationEndDefFacade.getPath())
-            );
-        }
+        ObjectRecord associationEndDef
+    ) throws ResourceException {
+    	if(
+		    (DataproviderMode.DATAPROVIDER_2.attributeHasValue(associationEndDef, "qualifierName")) &&
+		    !((Boolean)DataproviderMode.DATAPROVIDER_2.attributeValue(associationEndDef, "isNavigable")).booleanValue()
+		) {
+			throw newModelException(
+		            "Found association end with qualifier which is not navigable. Only navigable association ends need a unique identifying qualifier.",
+		            ModelExceptions.UNNECESSARY_QUALIFIER_FOUND,
+		            new BasicException.Parameter("end", associationEndDef.getResourceIdentifier())
+		    	);
+		}
     }
 
     //---------------------------------------------------------------------------
     protected void verifyAliasAttributeNumber(
         MappedRecord aliasTypeDef,
         int nAttributes
-    ) throws ServiceException {
+    ) throws ResourceException {
         if (nAttributes != 1)
-        {
-            SysLog.error("an alias type must specify exactly one attribute");
-            throw new ServiceException(
-                ModelExceptions.MODEL_DOMAIN,
-                ModelExceptions.ALIAS_TYPE_REQUIRES_EXACTLY_ONE_ATTRIBUTE,
-                "an alias type must specify exactly one attribute",
-                new BasicException.Parameter("alias type", aliasTypeDef)
-            );
-        }
+			throw newModelException(
+	                "an alias type must specify exactly one attribute",
+	                ModelExceptions.ALIAS_TYPE_REQUIRES_EXACTLY_ONE_ATTRIBUTE,
+	                new BasicException.Parameter("alias type", aliasTypeDef),
+	                new BasicException.Parameter("alias type", aliasTypeDef)
+	        	);
     }
 
     //---------------------------------------------------------------------------
     protected void verifyAliasAttributeName(
         MappedRecord aliasTypeDef,
         String attributeName
-    ) throws ServiceException {
-        if (attributeName.indexOf("::") == -1) {
-            SysLog.error("the name of the single attribute of the alias type must be a qualified type name");
-            throw new ServiceException(
-                ModelExceptions.MODEL_DOMAIN,
-                ModelExceptions.INVALID_ALIAS_ATTRIBUTE_NAME,
-                "the name of the single attribute of the alias type must be a qualified type name",
-                new BasicException.Parameter("alias type", aliasTypeDef),
-                new BasicException.Parameter("attribute name", attributeName)
-            );
-        }
+    ) throws ResourceException {
+        if (attributeName.indexOf("::") == -1)
+			throw newModelException(
+	                "the name of the single attribute of the alias type must be a qualified type name",
+	                ModelExceptions.INVALID_ALIAS_ATTRIBUTE_NAME,
+	                new BasicException.Parameter("alias type", aliasTypeDef),
+	                new BasicException.Parameter("attribute name", attributeName)
+	        	);
     }
 
     //---------------------------------------------------------------------------
     protected void verifyAssociationName(
         String associationName
-    ) throws ServiceException {
+    ) throws ResourceException {
         if (associationName == null || associationName.length() == 0)
-        {
-            SysLog.error("the name of an association cannot be empty");
-            throw new ServiceException(
-                ModelExceptions.MODEL_DOMAIN,
-                ModelExceptions.ASSOCIATION_NAME_IS_EMPTY,
-                "the name of an association cannot be empty"
-            );
-        }
+			throw newModelException(
+                "the name of an association cannot be empty",
+                ModelExceptions.ASSOCIATION_NAME_IS_EMPTY
+        	);
     }
 
     //---------------------------------------------------------------------------
     protected void verifyAssociationEndName(
         MappedRecord associationDef,
         String associationEndName
-    ) throws ServiceException {
-        if(associationEndName == null || associationEndName.length() == 0) {
-            SysLog.error("the name of an association end cannot be empty");
-            throw new ServiceException(
-                ModelExceptions.MODEL_DOMAIN,
-                ModelExceptions.ASSOCIATION_END_NAME_IS_EMPTY,
+    ) throws ResourceException {
+        if(associationEndName == null || associationEndName.length() == 0)
+			throw newModelException(
                 "the name of an association end cannot be empty",
+                ModelExceptions.ASSOCIATION_END_NAME_IS_EMPTY,
                 new BasicException.Parameter("association", associationDef)
-            );
-        }
+        	);
     }
 
     //---------------------------------------------------------------------------
@@ -661,7 +483,7 @@ implements ModelImporter_1_0 {
      */
     protected List parseAssociationEndQualifierAttributes(
         String _qualifierText
-    ) throws ServiceException {
+    ) throws ResourceException {
         List qualifierAttributes = new ArrayList();
 
         /**
@@ -678,16 +500,14 @@ implements ModelImporter_1_0 {
         StringTokenizer tokenizer = new StringTokenizer(qualifierText.trim(), ":; \t", true);
 
         if(tokenizer.hasMoreTokens()) {
-            String qualifierName = getNextToken(tokenizer, qualifierText);
+			String qualifierName = getNextToken(tokenizer, qualifierText);
             String delim = getNextToken(tokenizer, qualifierText);
             if(!delim.equals(":")) {
-                SysLog.error("syntax error in qualifier declaration: missing ':'");
-                throw new ServiceException(
-                    ModelExceptions.MODEL_DOMAIN,
-                    ModelExceptions.MISSING_COLON_IN_QUALIFIER_DECLARATION,
+            	throw newModelException(
                     "syntax error in qualifier declaration: missing ':'",
+                    ModelExceptions.MISSING_COLON_IN_QUALIFIER_DECLARATION,
                     new BasicException.Parameter("qualifier text", qualifierText)
-                );
+            	);
             }
             String qualifierType = javaToQualifiedName(getNextToken(tokenizer, qualifierText));
             Qualifier qualifier = new Qualifier(qualifierName, qualifierType);
@@ -696,25 +516,21 @@ implements ModelImporter_1_0 {
             if(tokenizer.hasMoreTokens()) {
                 delim = getNextToken(tokenizer, qualifierText);
                 if (!delim.equals(";")) {
-                    SysLog.error("syntax error in qualifier declaration: qualifier expressions must be separated by ';'");
-                    throw new ServiceException(
-                        ModelExceptions.MODEL_DOMAIN,
-                        ModelExceptions.MISSING_SEMICOLON_IN_QUALIFIER_DECLARATION,
+                	throw newModelException(
                         "syntax error in qualifier declaration: qualifier expressions must be separated by ';'",
+                        ModelExceptions.MISSING_SEMICOLON_IN_QUALIFIER_DECLARATION,
                         new BasicException.Parameter("qualifier text", qualifierText)
-                    );
+                	);
                 }
                 while (delim.equals(";")) {
                     qualifierName = getNextToken(tokenizer, qualifierText);
                     delim = getNextToken(tokenizer, qualifierText);
                     if (!delim.equals(":")) {
-                        SysLog.error("syntax error in qualifier declaration: missing ':'");
-                        throw new ServiceException(
-                            ModelExceptions.MODEL_DOMAIN,
-                            ModelExceptions.MISSING_COLON_IN_QUALIFIER_DECLARATION,
+                    	throw newModelException(
                             "syntax error in qualifier declaration: missing ':'",
+                            ModelExceptions.MISSING_COLON_IN_QUALIFIER_DECLARATION,
                             new BasicException.Parameter("qualifier text", qualifierText)
-                        );
+                    	);
                     }
                     qualifierType = javaToQualifiedName(getNextToken(tokenizer, qualifierText));
                     qualifier = new Qualifier(qualifierName, qualifierType);
@@ -722,34 +538,50 @@ implements ModelImporter_1_0 {
                     delim = getNextToken(tokenizer, qualifierText);
                 }
             }
-        }
-        return qualifierAttributes;
+		}
+       return qualifierAttributes;
     }
 
     //---------------------------------------------------------------------------
     private String getNextToken(
         StringTokenizer tokenizer,
         String qualifierText
-    ) throws ServiceException {
+    ) throws ResourceException {
         String nextToken = new String();
         if(tokenizer.hasMoreTokens()) {
-            nextToken = tokenizer.nextToken();
+			nextToken = tokenizer.nextToken();
             // skip spaces and tabs
             while (tokenizer.hasMoreTokens() && ( nextToken.equals(" ") || nextToken.equals("\t") )) {
                 nextToken = tokenizer.nextToken();
             }
             if(nextToken.equals(" ") || nextToken.equals("\t")) {
-                SysLog.error("syntax error in qualifier declaration: unexpected end of expression");
-                throw new ServiceException(
-                    ModelExceptions.MODEL_DOMAIN,
-                    ModelExceptions.UNEXPECTED_END_OF_QUALIFIER_DECLARATION,
-                    "syntax error in qualifier declaration: unexpected end of expression",
-                    new BasicException.Parameter("qualifier text", qualifierText)
-                );
+            	throw newModelException(
+            		"syntax error in qualifier declaration: unexpected end of expression", 
+            		ModelExceptions.UNEXPECTED_END_OF_QUALIFIER_DECLARATION,
+					new BasicException.Parameter("qualifier text", qualifierText)
+            	);
             }
-        }
+		}
         return nextToken;
     }
+
+	private static ResourceException newModelException(
+		final String exceptionMessage,
+		final int exceptionCode,
+		final BasicException.Parameter... exceptionParameters
+	) throws ResourceException {
+        SysLog.error(exceptionMessage);
+		return ResourceExceptions.initHolder(
+			new ResourceException(
+		        exceptionMessage,
+				BasicException.newEmbeddedExceptionStack(	
+		            ModelExceptions.MODEL_DOMAIN,
+		            exceptionCode,
+		            exceptionParameters
+		        )
+		    )
+		);
+	}
 
     //---------------------------------------------------------------------------
     /**
@@ -837,27 +669,25 @@ implements ModelImporter_1_0 {
                         qualifiedName.substring(qualifiedName.lastIndexOf("::")+2)
         );
     }
+    
 
-    //---------------------------------------------------------------------------
-    // Constants and Variables
-    //---------------------------------------------------------------------------
-    protected static final String DEFAULT_PARAMETER_MULTIPLICITY = "1..1";
-    protected static final int DEFAULT_PARAMETER_MAX_LENGTH = 1000000;
+    //------------------------------------------------------------------------
+    // Class Qualifier
+    //------------------------------------------------------------------------
+    
+    protected static class Qualifier {
+        private String name = null;
+        private String type = null;
 
-    protected static final String DEFAULT_ATTRIBUTE_MULTIPLICITY = "1..1";
-    protected static final int DEFAULT_ATTRIBUTE_MAX_LENGTH = 200;
-    protected static final boolean DEFAULT_ATTRIBUTE_IS_UNIQUE = false;
-    protected static final boolean DEFAULT_ATTRIBUTE_IS_LANGUAGE_NEUTRAL = true;
+        public Qualifier(String name, String type)
+        {
+            this.name = name;
+            this.type = type;
+        }
 
-    static private final Path PROVIDER_ROOT_PATH = new Path("xri:@openmdx:org.omg.model1/provider/Mof");
+        public String getName() { return this.name; }
 
-    private DataproviderRequestProcessor channel = null;
-    protected Set segments = null;
-    protected ServiceHeader header = null;
-    protected Dataprovider_1_0 target = null;
-    protected String providerName = null;
-    protected boolean hasErrors = false;
+        public String getType() { return this.type; }
+    }
 
 }
-
-//--- End of File -----------------------------------------------------------

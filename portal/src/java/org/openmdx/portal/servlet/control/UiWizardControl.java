@@ -181,20 +181,22 @@ public class UiWizardControl extends WizardControl implements Serializable {
     	Texts_1_0 texts = p.getApplicationContext().getTexts();
         // Wizard menu entries
         if(frame == null) {
-        	List<UiWizardTabControl> children = this.getChildren(UiWizardTabControl.class);
-            if(!children.isEmpty()) {            
-                p.write("<li class=\"", CssClass.dropdown.toString(), "\"><a href=\"#\" class=\"", CssClass.dropdownToggle.toString(), "\" data-toggle=\"dropdown\" onclick=\"javascript:this.parentNode.hide=function(){};\">", texts.getWizardsMenuTitle(), "</a>");
-                p.write("  <ul class=\"", CssClass.dropdownMenu.toString(), "\" style=\"z-index:1010;\">");
-                for(UiWizardTabControl tab: children) {
-                    tab.paint(
-                        p,
-                        frame,
-                        forEditing
-                   );
-                }
-                p.write("  </ul>");
-                p.write("</li>");
+        	String id = this.getId();
+        	List<UiWizardTabControl> children = this.getChildren(UiWizardTabControl.class);          
+            p.write("<li id=\"", id, "-dropdown\" class=\"", CssClass.dropdown.toString(), "\"><a href=\"#\" class=\"", CssClass.dropdownToggle.toString(), "\" data-toggle=\"dropdown\" onclick=\"javascript:this.parentNode.hide=function(){};\">", texts.getWizardsMenuTitle(), "</a>");
+            p.write("  <ul id=\"", id, "-menu\" class=\"", CssClass.dropdownMenu.toString(), "\" style=\"z-index:1010;\">");
+            for(UiWizardTabControl tab: children) {
+                tab.paint(
+                    p,
+                    frame,
+                    forEditing
+               );
             }
+            p.write("  </ul>");
+            p.write("</li>");
+            p.write("<script language=\"javascript\" type=\"text/javascript\">");
+            p.write("  if($('", id, "-menu').innerHTML.trim()==''){$('", id, "-dropdown').style.display='none'};");
+            p.write("</script>");            
         }
         SysLog.detail("< paint");        
     }

@@ -241,9 +241,6 @@ public final class PathComponent
     // Operations not modifying the path
     //------------------------------------------------------------------------
 
-    /**
-     *
-     */
     public boolean isPlaceHolder(
     ){
         return tagField(0);
@@ -259,17 +256,27 @@ public final class PathComponent
     public static boolean isPlaceHolder(
         String segment
     ){
-        return new PathComponent(segment).isPlaceHolder();
+        return segment.startsWith(":");
     }
     
-    /**
-     *
-     */
     public boolean isPrivate(
     ){
         return tagField(this.fields.length-1);
     }
 
+    /**
+     * Tells whether a given XRI segment is a private
+     * 
+     * @param segment an XRI segment
+     * 
+     * @return <code>true</code> if the given XRI segment is private
+     */
+    public static boolean isPrivate(
+        String segment
+    ){
+        return segment.endsWith(":");
+    }
+    
     private boolean tagField(
         int position
     ){
@@ -825,7 +832,6 @@ public final class PathComponent
     ){
         return new PathComponent(fields).add("");
     }
-
 
     //------------------------------------------------------------------------
     // Instance Members

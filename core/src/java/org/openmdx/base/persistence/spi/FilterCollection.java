@@ -51,7 +51,7 @@ import java.io.Serializable;
 import java.util.AbstractCollection;
 import java.util.Iterator;
 
-import org.openmdx.base.query.Filter;
+import org.openmdx.base.rest.cci.QueryFilterRecord;
 
 /**
  * Filter Collection
@@ -64,7 +64,7 @@ public final class FilterCollection<E> extends AbstractCollection<E> implements 
      * @param filter
      */
     public FilterCollection(
-        Filter filter
+        QueryFilterRecord filter
     ){
         this.filter = filter;
     }
@@ -77,14 +77,14 @@ public final class FilterCollection<E> extends AbstractCollection<E> implements 
     /**
      * The filter to be used in the sub-query
      */
-    private final Filter filter;
+    private final QueryFilterRecord filter;
     
     /**
      * Retrieve filter.
      *
      * @return Returns the filter.
      */
-    public Filter getFilter() {
+    public QueryFilterRecord getFilter() {
         return this.filter;
     }
     

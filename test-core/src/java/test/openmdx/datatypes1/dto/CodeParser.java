@@ -47,7 +47,7 @@
  */
 package test.openmdx.datatypes1.dto;
 
-import org.w3c.spi.Parser;
+import org.openmdx.kernel.text.spi.Parser;
 
 /**
  * Code Parser
@@ -66,7 +66,7 @@ public class CodeParser implements Parser {
      */
     @Override
     public boolean handles(Class<?> type) {
-        return Code.class.isAssignableFrom(type);
+        return type != null && Code.class.isAssignableFrom(type);
     }
 
     /* (non-Javadoc)

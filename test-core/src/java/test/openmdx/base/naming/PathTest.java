@@ -131,13 +131,13 @@ public class PathTest extends TestCase {
     ) throws Throwable {
         
         try {
-            path1.get(path1.size()-1);
+            path1.getSegment(path1.size()-1).toClassicRepresentation();
             fail ("Path('').getBase()");
         } catch (ArrayIndexOutOfBoundsException exception) {
         }
                  
-        String   base2 = path2.get(path2.size()-1);
-        String   base3 = path3.get(path3.size()-1);
+        String   base2 = path2.getSegment(path2.size()-1).toClassicRepresentation();
+        String   base3 = path3.getSegment(path3.size()-1).toClassicRepresentation();
         
         assertEquals("Path('a').getBase()"      , "a", base2 );
         assertEquals("Path('a/b0//b1/c').getBase()" , "c", base3 );

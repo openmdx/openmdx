@@ -55,11 +55,6 @@ import org.openmdx.base.exception.ServiceException;
 public interface ModelBuilder_1_0 {
 
     /**
-     * The model repository builder is usually instantiated reflectively
-     */
-    String BUILDER_CLASS_NAME = "org.openmdx.application.mof.repository.accessor.ModelBuilder_1";
-            
-    /**
      * Build a model repository
      * 
      * @return a new model repository

@@ -116,11 +116,8 @@ public class ModelConstraintsChecker_1 {
 
         List violations = new ArrayList();
 
-        for (
-                Iterator it = this.model.getContent().iterator();
-                it.hasNext();
-        ) {
-            verify((ModelElement_1_0)it.next(), violations);
+        for (ModelElement_1_0 element : this.model.getContent()) {
+            verify(element, violations);
         }
 
         if (!violations.isEmpty()) {
@@ -290,8 +287,8 @@ public class ModelConstraintsChecker_1 {
         List violations
     ) throws ServiceException {
         if (
-                ((Boolean)attributeDef.isDerived()).booleanValue() &&
-                ((Boolean)attributeDef.isChangeable()).booleanValue()
+                attributeDef.isDerived().booleanValue() &&
+                attributeDef.isChangeable().booleanValue()
         ) {
             violations.add(
                 new BasicException.Parameter(
@@ -362,7 +359,7 @@ public class ModelConstraintsChecker_1 {
             ModelElement_1_0 qualifierType = this.model.getDereferencedType(associationEndDef.getQualifierType());      
             if(
                 qualifierType.isPrimitiveType() &&
-                !((String)associationEndDef.getMultiplicity()).endsWith("..1")
+                !associationEndDef.getMultiplicity().endsWith("..1")
             ) {
                 violations.add(
                     new BasicException.Parameter(
@@ -659,7 +656,7 @@ public class ModelConstraintsChecker_1 {
             ModelElement_1_0 qualifierType = this.model.getDereferencedType(associationEndDef.getQualifierType());      
             if(
                 !qualifierType.isPrimitiveType() &&
-                ((Boolean)associationEndDef.isChangeable()).booleanValue()
+                associationEndDef.isChangeable().booleanValue()
             ) {
                 violations.add(
                     new BasicException.Parameter(
@@ -700,7 +697,7 @@ public class ModelConstraintsChecker_1 {
         List violations
     ) throws ServiceException {
         if (
-            ((Boolean) classDef.isAbstract()).booleanValue() &&
+            classDef.isAbstract().booleanValue() &&
             ((Boolean) classDef.objGetValue("isSingleton")).booleanValue()
         ) {
             violations.add(
@@ -778,7 +775,7 @@ public class ModelConstraintsChecker_1 {
         ModelElement_1_0 dataTypeDef,
         List violations
     ) throws ServiceException {
-        if (((Boolean)dataTypeDef.isAbstract()).booleanValue()) {
+        if (dataTypeDef.isAbstract().booleanValue()) {
             violations.add(
                 new BasicException.Parameter(
                     ModelConstraints.DATA_TYPES_CANNOT_BE_ABSTRACT,
@@ -851,8 +848,8 @@ public class ModelConstraintsChecker_1 {
             referenceDef.getReferencedEnd()
         );
         if (
-                !((Boolean)referenceDef.isChangeable()).booleanValue() ==
-                    ((Boolean)referencedEnd.isChangeable()).booleanValue()
+                !referenceDef.isChangeable().booleanValue() ==
+                    referencedEnd.isChangeable().booleanValue()
         ) {
             violations.add(
                 new BasicException.Parameter(
@@ -950,8 +947,8 @@ public class ModelConstraintsChecker_1 {
             !AggregationKind.NONE.equals(end1.getAggregation()) && (
                 end1.objGetList("qualifierType").size() < 1 || 
                 !this.model.isPrimitiveType(end1.getQualifierType()) || (
-                    !Multiplicity.OPTIONAL.toString().equals(end1.getMultiplicity()) &&
-                    !Multiplicity.SINGLE_VALUE.toString().equals(end1.getMultiplicity())
+                    !Multiplicity.OPTIONAL.code().equals(end1.getMultiplicity()) &&
+                    !Multiplicity.SINGLE_VALUE.code().equals(end1.getMultiplicity())
                 )
             )
         ) {
@@ -968,7 +965,7 @@ public class ModelConstraintsChecker_1 {
                 !AggregationKind.NONE.equals(end2.getAggregation()) &&
                 ((end2.objGetList("qualifierType").size() < 1) || 
                         !this.model.isPrimitiveType(end2.getQualifierType()) ||
-                        (!Multiplicity.OPTIONAL.toString().equals(end2.getMultiplicity())) && !Multiplicity.SINGLE_VALUE.toString().equals(end2.getMultiplicity()))
+                        (!Multiplicity.OPTIONAL.code().equals(end2.getMultiplicity())) && !Multiplicity.SINGLE_VALUE.code().equals(end2.getMultiplicity()))
         ) {
             violations.add(
                 new BasicException.Parameter(
@@ -1010,7 +1007,7 @@ public class ModelConstraintsChecker_1 {
         if(
                 AggregationKind.NONE.equals(end1.getAggregation()) &&
                 (end1.objGetList("qualifierType").size() >= 1) &&
-                (!this.model.isPrimitiveType(end1.getQualifierType()) || !Multiplicity.OPTIONAL.toString().equals(end1.getMultiplicity())) &&
+                (!this.model.isPrimitiveType(end1.getQualifierType()) || !Multiplicity.OPTIONAL.code().equals(end1.getMultiplicity())) &&
                 (!this.model.isClassType(end1.getQualifierType()) || !ModelHelper.UNBOUND.equals(end1.getMultiplicity()))      
         ) {
             violations.add(
@@ -1028,7 +1025,7 @@ public class ModelConstraintsChecker_1 {
             AggregationKind.NONE.equals(end2.getAggregation()) &&
             end2.objGetList("qualifierType").size() >= 1 && (
                 !this.model.isPrimitiveType(end2.getQualifierType()) || 
-                !Multiplicity.OPTIONAL.toString().equals(end2.getMultiplicity())
+                !Multiplicity.OPTIONAL.code().equals(end2.getMultiplicity())
             ) && (
                 !this.model.isClassType(end2.getQualifierType()) || 
                 !ModelHelper.UNBOUND.equals(end2.getMultiplicity())
@@ -1258,7 +1255,7 @@ public class ModelConstraintsChecker_1 {
         ModelElement_1_0 associationDef,
         List violations
     ) throws ServiceException {
-        if (((Boolean) associationDef.isAbstract()).booleanValue()) {
+        if (associationDef.isAbstract().booleanValue()) {
             violations.add(
                 new BasicException.Parameter(
                     ModelConstraints.ASSOCIATIONS_CANNOT_BE_ABSTRACT,
@@ -1398,7 +1395,7 @@ public class ModelConstraintsChecker_1 {
         ModelElement_1_0 packageDef,
         List violations
     ) throws ServiceException {
-        if (((Boolean)packageDef.isAbstract()).booleanValue()) {
+        if (packageDef.isAbstract().booleanValue()) {
             violations.add(
                 new BasicException.Parameter(
                     ModelConstraints.DATA_TYPES_CANNOT_BE_ABSTRACT,
@@ -1583,7 +1580,7 @@ public class ModelConstraintsChecker_1 {
         //
         // Validate the multiplicity
         //
-        Multiplicity multiplicity = ModelHelper.toMultiplicity((String) elementDef.getMultiplicity());
+        Multiplicity multiplicity = ModelHelper.toMultiplicity(elementDef.getMultiplicity());
         if(multiplicity == null) {
 	        violations.add(
 	            new BasicException.Parameter(

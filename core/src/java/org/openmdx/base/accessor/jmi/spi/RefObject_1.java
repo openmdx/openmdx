@@ -105,7 +105,6 @@ import org.openmdx.base.mof.cci.Multiplicity;
 import org.openmdx.base.mof.cci.Persistency;
 import org.openmdx.base.mof.cci.PrimitiveTypes;
 import org.openmdx.base.naming.Path;
-import org.openmdx.base.naming.PathComponent;
 import org.openmdx.base.persistence.cci.PersistenceHelper;
 import org.openmdx.base.persistence.spi.TransientContainerId;
 import org.openmdx.base.query.Filter;
@@ -341,8 +340,8 @@ class RefObject_1
         }
 
         ModelElement_1_0 type = this.getType(featureDef);
-        String qualifiedTypeName = (String) type.getQualifiedName();
-        String featureName = (String) featureDef.getName();
+        String qualifiedTypeName = type.getQualifiedName();
+        String featureName = featureDef.getName();
 
         /**
          * Attribute or Reference stored as attribute. Don't care about
@@ -419,7 +418,7 @@ class RefObject_1
                  * Get qualifier of exposing association end. This qualifier is
                  * used to construct the reference filter:
                  */
-                String exposedEndName = (String) model.getElement(
+                String exposedEndName = model.getElement(
                     featureDef.getExposedEnd()
                 ).getName();
                 String qualifierName = removeContainerSuffix(
@@ -461,7 +460,7 @@ class RefObject_1
                         return rootPkg.marshal(
                             ((DataObjectManager_1_0) rootPkg.refDelegate()).getObjectById(
                                 this.refGetPath().getDescendant(
-                                    (String)featureDef.getName(), 
+                                    featureDef.getName(), 
                                     (String) qualifier
                                 )
                             )
@@ -481,7 +480,7 @@ class RefObject_1
                             //
                             if(
                                 e.getExceptionCode() != BasicException.Code.NOT_FOUND || 
-                                !Multiplicity.OPTIONAL.toString().equals(featureDef.getMultiplicity())
+                                !Multiplicity.OPTIONAL.code().equals(featureDef.getMultiplicity())
                             ) { 
                                 throw new JmiServiceException(e, this); 
                             }
@@ -509,8 +508,8 @@ class RefObject_1
             ); 
         }
         ModelElement_1_0 type = this.getType(featureDef);
-        String qualifiedTypeName = (String) type.getQualifiedName();
-        String featureName = (String) featureDef.getName();
+        String qualifiedTypeName = type.getQualifiedName();
+        String featureName = featureDef.getName();
         
         // STREAM
         if (ModelHelper.getMultiplicity(featureDef).isStreamValued()) {
@@ -554,8 +553,8 @@ class RefObject_1
         this.assertStructuralFeature(featureDef);
         
         ModelElement_1_0 type = this.getType(featureDef);
-        String qualifiedTypeName = (String) type.getQualifiedName();
-        String featureName = (String) featureDef.getName();
+        String qualifiedTypeName = type.getQualifiedName();
+        String featureName = featureDef.getName();
 
         /**
          * Attribute or Reference stored as attribute.
@@ -673,8 +672,8 @@ class RefObject_1
         
         // STREAM
         if (ModelHelper.getMultiplicity(featureDef).isStreamValued()) {
-            String qualifiedTypeName = (String) type.getQualifiedName();
-            String featureName = (String) featureDef.getName();
+            String qualifiedTypeName = type.getQualifiedName();
+            String featureName = featureDef.getName();
             if (PrimitiveTypes.STRING.equals(qualifiedTypeName)) {
                 this.object.objSetValue(
                     featureName,
@@ -733,10 +732,10 @@ class RefObject_1
             ModelElement_1_0 paramDef = this.object.getModel().getElement(i.next());
             ModelElement_1_0 paramDefType = this.getType(paramDef);
             if ("in".equals(paramDef.getName())) {
-                qualifiedNameInParamType = (String) paramDefType.getQualifiedName();
+                qualifiedNameInParamType = paramDefType.getQualifiedName();
             } 
             else if ("result".equals(paramDef.getName())) {
-                qualifiedNameResultType = (String) paramDefType.getQualifiedName();
+                qualifiedNameResultType = paramDefType.getQualifiedName();
             }
         }
         if (qualifiedNameInParamType == null) { 
@@ -767,7 +766,7 @@ class RefObject_1
         try {
             this.object.execute(
                 InteractionSpecs.newMethodInvocationSpec(
-                    (String) featureDef.getName(),
+                    featureDef.getName(),
                     this.getInteractionVerb(Boolean.TRUE.equals(featureDef.objGetValue("isQuery")))
                 ),
                 input.refDelegate(),
@@ -1067,7 +1066,7 @@ class RefObject_1
             );
         } 
         else if (values instanceof RefContainer && value instanceof RefObject_1_0) {
-            ((RefContainer)values).refAdd(RefContainer.REASSIGNABLE, PathComponent.createPlaceHolder(), value);
+            ((RefContainer)values).refAdd(RefContainer.REASSIGNABLE, org.openmdx.base.naming.TransactionalSegment.getClassicRepresentationOfNewInstance(), value);
         } 
         else {
             throw new JmiServiceException(
@@ -1351,7 +1350,7 @@ class RefObject_1
     final public RefPackage refImmediatePackage(
     ) {
         return "org:openmdx:base:Authority".equals(this.refClass().refMofId())
-        ? this.refOutermostPackage().refPackage(this.refGetPath().get(0))
+        ? this.refOutermostPackage().refPackage(this.refGetPath().getSegment(0).toClassicRepresentation())
             : this.refClass().refImmediatePackage();
     }
 
@@ -1475,7 +1474,7 @@ class RefObject_1
                             if (setRequiredToNull) {
                                 this.setValue(featureDef, null);
                             } else {
-                                String qualifiedTypeName = (String) type.getQualifiedName();
+                                String qualifiedTypeName = type.getQualifiedName();
                                 if (PrimitiveTypes.STRING.equals(qualifiedTypeName)) {
                                     this.setValue(featureDef, "");
                                 } else if (PrimitiveTypes.BOOLEAN.equals(qualifiedTypeName)) {
@@ -1509,14 +1508,11 @@ class RefObject_1
                                 } else if (PrimitiveTypes.BINARY.equals(qualifiedTypeName)) {
                                     this.setValue(featureDef, EMPTY_LARGE_OBJECT);
                                 } else if (this.object.getModel().isStructureType(type)) {
-                                    throw new UnsupportedOperationException(
-                                        "Initialization of structs not supported"
-                                    );
-                                } else if (
-                                    this.object.getModel().isClassType(type) || 
-                                    PrimitiveTypes.OBJECT_ID.equals(qualifiedTypeName)
-                                ) {
+                                    throw new UnsupportedOperationException("Initialization of structs not supported");
+                                } else if (this.object.getModel().isClassType(type)) {
                                     SysLog.detail("Initialization of object references not supported", featureDef);
+                                } else if (PrimitiveTypes.OBJECT_ID.equals(qualifiedTypeName)) {
+                                    this.setValue(featureDef, new Path(new String[0]));
                                 } else if(
                                     "org:omg:model1:PrimitiveType".equals(qualifiedTypeName)
                                 ) {
@@ -1569,7 +1565,7 @@ class RefObject_1
                 ) {
                     this.setValue(
                         featureDef, 
-                        source.refGetValue((String)featureDef.getName())
+                        source.refGetValue(featureDef.getName())
                     );
                 }
             }

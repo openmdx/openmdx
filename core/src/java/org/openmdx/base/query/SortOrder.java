@@ -50,7 +50,7 @@ package org.openmdx.base.query;
 /**
  * Sort Order
  */
-public enum SortOrder {
+public enum SortOrder implements Code {
 
     /**
      * Descending Sort Order (&#x2193;) 

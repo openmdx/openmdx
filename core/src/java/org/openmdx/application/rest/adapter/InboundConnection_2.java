@@ -52,7 +52,6 @@ import static org.openmdx.base.accessor.rest.spi.ControlObjects_2.isTransactionO
 
 import java.io.InputStream;
 import java.io.Reader;
-import java.io.Serializable;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -77,13 +76,14 @@ import javax.jmi.reflect.RefPackage;
 import javax.jmi.reflect.RefStruct;
 import javax.resource.NotSupportedException;
 import javax.resource.ResourceException;
-import javax.resource.cci.Connection;
 import javax.resource.cci.IndexedRecord;
 import javax.resource.cci.Interaction;
 import javax.resource.cci.InteractionSpec;
 import javax.resource.cci.LocalTransaction;
 import javax.resource.cci.MappedRecord;
 import javax.resource.cci.Record;
+import javax.resource.spi.EISSystemException;
+import javax.resource.spi.LocalTransactionException;
 import javax.xml.datatype.Duration;
 import javax.xml.datatype.XMLGregorianCalendar;
 
@@ -106,21 +106,22 @@ import org.openmdx.base.persistence.cci.PersistenceHelper;
 import org.openmdx.base.persistence.cci.Queries;
 import org.openmdx.base.persistence.spi.SharedObjects;
 import org.openmdx.base.persistence.spi.UnitOfWork;
-import org.openmdx.base.query.Filter;
-import org.openmdx.base.query.OrderSpecifier;
 import org.openmdx.base.resource.Records;
+import org.openmdx.base.resource.cci.ConnectionFactory;
 import org.openmdx.base.resource.spi.LocalTransactions;
 import org.openmdx.base.resource.spi.ResourceExceptions;
 import org.openmdx.base.resource.spi.RestInteractionSpec;
+import org.openmdx.base.rest.cci.FeatureOrderRecord;
 import org.openmdx.base.rest.cci.MessageRecord;
+import org.openmdx.base.rest.cci.ObjectRecord;
+import org.openmdx.base.rest.cci.QueryFilterRecord;
+import org.openmdx.base.rest.cci.QueryRecord;
+import org.openmdx.base.rest.cci.RestConnection;
 import org.openmdx.base.rest.cci.RestConnectionSpec;
 import org.openmdx.base.rest.cci.ResultRecord;
 import org.openmdx.base.rest.spi.AbstractConnection;
 import org.openmdx.base.rest.spi.AbstractRestInteraction;
-import org.openmdx.base.rest.spi.Facades;
 import org.openmdx.base.rest.spi.Object_2Facade;
-import org.openmdx.base.rest.spi.Query_2Facade;
-import org.openmdx.base.text.conversion.JavaBeans;
 import org.openmdx.base.transaction.Status;
 import org.openmdx.kernel.exception.BasicException;
 import org.w3c.cci2.BinaryLargeObjects;
@@ -131,10 +132,7 @@ import org.w3c.spi2.Datatypes;
 /**
  * Inbound Connection
  */
-public class InboundConnection_2 
-    extends AbstractConnection
-    implements Serializable
-{
+public class InboundConnection_2 extends AbstractConnection {
 
     /**
      * Constructor 
@@ -143,7 +141,7 @@ public class InboundConnection_2
      * @param persistenceManager
      * @throws ResourceException 
      */
-    public InboundConnection_2(
+    public InboundConnection_2 (
         RestConnectionSpec connectionSpec, 
         PersistenceManager persistenceManager
     ) throws ResourceException{
@@ -155,11 +153,6 @@ public class InboundConnection_2
             persistenceManager
         ) : null;
     }
-
-    /**
-     * Implements <code>Serializable</code>
-     */
-    private static final long serialVersionUID = 279566182728456308L;
 
     /**
      * 
@@ -174,7 +167,7 @@ public class InboundConnection_2
     /**
      * The org::openmdx::base authority id
      */
-    protected static final Path BASE_AUTHORITY = new Path("xri://@openmdx*org.openmdx.base").lock();
+    protected static final Path BASE_AUTHORITY = new Path("xri://@openmdx*org.openmdx.base");
 
     protected UnitOfWork currentUnitOfWork(){
         return (UnitOfWork) PersistenceHelper.currentUnitOfWork(getPersistenceManager());
@@ -237,7 +230,7 @@ public class InboundConnection_2
             this.persistenceManager.close();
         } catch (JDOException exception) {
             throw ResourceExceptions.initHolder(
-                new ResourceException(
+                new EISSystemException(
                     "Connection disposal failure",
                     BasicException.newEmbeddedExceptionStack(
                         exception,
@@ -315,9 +308,11 @@ public class InboundConnection_2
         /**
          * Constructor 
          *
-         * @param connection
+         * @param connection the REST connection
          */
-        protected InboundInteraction(Connection connection) {
+        protected InboundInteraction(
+        	RestConnection connection
+        ) {
             super(connection);
         }
 
@@ -337,27 +332,35 @@ public class InboundConnection_2
         private void validateTransactionStateAndId(
             Path path,
             boolean existence
-        ) throws ServiceException {
+        ) throws ResourceException {
             boolean active =  currentUnitOfWork().isActive(); 
             if(active != existence) {
-                throw new ServiceException(
-                    BasicException.Code.DEFAULT_DOMAIN,
-                    BasicException.Code.ILLEGAL_STATE,
-                    "Invalid transaction state",
-                    new BasicException.Parameter("expected", existence ? "active" : "not active"),
-                    new BasicException.Parameter("actual", active ? "active" : "not active")
+            	throw ResourceExceptions.initHolder(
+	            	new LocalTransactionException(
+	                    "Invalid transaction state",
+	            		BasicException.newEmbeddedExceptionStack(
+		                    BasicException.Code.DEFAULT_DOMAIN,
+		                    BasicException.Code.ILLEGAL_STATE,
+		                    new BasicException.Parameter("expected", existence ? "active" : "not active"),
+		                    new BasicException.Parameter("actual", active ? "active" : "not active")
+		                )
+		            )
                 );
             }
             if(path.size() > 2 && existence) {
-                String requestedId = path.get(2);
+                String requestedId = path.getSegment(2).toClassicRepresentation();
                 String actualId = SharedObjects.getUnitOfWorkIdentifier(getPersistenceManager());
                 if(!requestedId.equals(actualId)) {
-                    throw new ServiceException(
-                        BasicException.Code.DEFAULT_DOMAIN,
-                        BasicException.Code.NOT_FOUND,
-                        "Invalid transaction id",
-                        new BasicException.Parameter("requested", requestedId),
-                        new BasicException.Parameter("actual", actualId)
+                	throw ResourceExceptions.initHolder(
+        	            	new LocalTransactionException(
+	                        "Invalid transaction id",
+    	            		BasicException.newEmbeddedExceptionStack(
+    		                    BasicException.Code.DEFAULT_DOMAIN,
+    		                    BasicException.Code.BAD_PARAMETER,
+    	                        new BasicException.Parameter("requested", requestedId),
+    	                        new BasicException.Parameter("actual", actualId)
+    		                )
+    		            )
                     );
                 }
             }
@@ -370,7 +373,7 @@ public class InboundConnection_2
             return 
                 actualId == null ? null :
                 path.size() == 2 ? path.getChild(actualId) :
-                path.get(2).equals(actualId) ? path.getPrefix(3) :
+                path.getSegment(2).toClassicRepresentation().equals(actualId) ? path.getPrefix(3) :
                 null;
         }
 
@@ -443,7 +446,7 @@ public class InboundConnection_2
             Multiplicity type,
             Map<?,?> source
         ) throws ServiceException, ResourceException{
-            MappedRecord target = Records.getRecordFactory().createMappedRecord(type.toString());
+            MappedRecord target = Records.getRecordFactory().createMappedRecord(type.code());
             for(
                 Iterator<?> i = source.keySet().iterator();
                 i.hasNext();
@@ -640,12 +643,7 @@ public class InboundConnection_2
                     return featureDef.getModel().isReferenceType(featureDef) ? getObjectByResourceIdentifier(jcaValue) : jcaValue;
                 }
             } catch (ServiceException exception) {
-                throw ResourceExceptions.initHolder(
-                    new ResourceException(
-                        exception.getCause().getDescription(),
-                        BasicException.newEmbeddedExceptionStack(exception)
-                    )
-                );
+            	throw ResourceExceptions.toResourceException(exception);
             }
         }
 
@@ -665,10 +663,11 @@ public class InboundConnection_2
             RefObject object,
             Set<String> requestedFeatures, 
             Set<String> fetchGroups
-        ) throws ServiceException {
+        ) throws ResourceException {
             try{
                 RefObject_1_0 refObject = (RefObject_1_0) object;
-                Object_2Facade reply = Facades.newObject(getResourceIdentifier(object));
+                
+                ObjectRecord reply = newObject(getResourceIdentifier(object));
                 reply.setVersion(JDOHelper.getVersion(refObject));
                 MappedRecord jcaValue = Records.getRecordFactory().createMappedRecord(
                     refObject.refClass().refMofId()
@@ -718,9 +717,9 @@ public class InboundConnection_2
                         ).log();
                     }
                 }
-                return reply.getDelegate();
-            } catch (ResourceException exception) {
-                throw new ServiceException(exception);
+                return reply;
+            } catch (ServiceException exception) {
+            	throw ResourceExceptions.toResourceException(exception);
             }
         }
 
@@ -737,16 +736,16 @@ public class InboundConnection_2
          * @throws ResourceException
          */
         private Query toRefQuery(
-            Query_2Facade input
-        ) throws ServiceException {
+            QueryRecord input
+        ) throws ResourceException {
             Query query = getPersistenceManager().newQuery(
                 Queries.QUERY_LANGUAGE, 
-                input.getDelegate()
+                input
             );
             //
             // Fetch Plan
             //
-            Set<String> fetchGroupNames = input.getGroups();
+            Set<String> fetchGroupNames = Collections.singleton(input.getFetchGroupName());
             if(fetchGroupNames != null && !fetchGroupNames.isEmpty()) {
                 query.getFetchPlan().setGroups(fetchGroupNames);
             }
@@ -769,10 +768,11 @@ public class InboundConnection_2
 
         @SuppressWarnings("unchecked")
         private void toRefObject(
-            Path resourceId,
-            RefObject refTarget,
+            UUID transactionalObjectId,
+            Path objectId,
+            RefObject refTarget, 
             MappedRecord jcaSource
-        ) throws ServiceException {
+        ) throws ResourceException {
             try {
                 ModelElement_1_0 classDef = this.model.getElement(refTarget.refClass().refMofId());
                 for(Object rawObjectEntry : jcaSource.entrySet()) {
@@ -785,7 +785,8 @@ public class InboundConnection_2
                             BasicException.Code.DEFAULT_DOMAIN,
                             BasicException.Code.BAD_MEMBER_NAME,
                             "Unknown feature",
-                            new BasicException.Parameter("xri", resourceId),
+                            new BasicException.Parameter("xri", objectId),
+                            new BasicException.Parameter("uuid", transactionalObjectId),
                             new BasicException.Parameter("class", refTarget.refClass().refMofId()),
                             new BasicException.Parameter("feature", featureName)
                         );
@@ -867,13 +868,13 @@ public class InboundConnection_2
                     	}
                     }
                 }
-            } catch (ResourceException exception) {
-                throw new ServiceException(exception);
+            } catch (ServiceException exception) {
+            	throw ResourceExceptions.toResourceException(exception);
             }
         }
 
         /* (non-Javadoc)
-         * @see org.openmdx.base.rest.spi.AbstractRestInteraction#execute(javax.resource.cci.InteractionSpec, javax.resource.cci.Record, javax.resource.cci.Record)
+         * @see org.openmdx.base.rest.spi.AbstractFacadeInteraction#execute(javax.resource.cci.InteractionSpec, javax.resource.cci.Record, javax.resource.cci.Record)
          */
         @Override
         public boolean execute(
@@ -884,21 +885,9 @@ public class InboundConnection_2
             try {
                 return super.execute(ispec, input, output);
             } catch (JDOException  exception) {
-                BasicException cause = BasicException.newEmbeddedExceptionStack(exception);
-                throw ResourceExceptions.initHolder(
-                    new ResourceException(
-                        cause.getDescription(),
-                        cause
-                    )
-                );
+            	throw ResourceExceptions.toResourceException(exception);
             } catch (JmiException exception) {
-                BasicException cause = BasicException.newEmbeddedExceptionStack(exception);
-                throw ResourceExceptions.initHolder(
-                    new ResourceException(
-                        cause.getDescription(),
-                        cause
-                    )
-                );
+            	throw ResourceExceptions.toResourceException(exception);
             }
         }
 
@@ -920,7 +909,7 @@ public class InboundConnection_2
             IndexedRecord output, 
             Set<String> requestedFeatures, 
             Set<String> featchGroups
-        ) throws ServiceException{
+        ) throws ResourceException{
             if(output != null) output.add(
                 this.toJcaRecord(
                     refObject,
@@ -932,30 +921,30 @@ public class InboundConnection_2
         }
 
         /* (non-Javadoc)
-         * @see org.openmdx.base.rest.spi.AbstractRestInteraction#get(org.openmdx.base.resource.spi.RestInteractionSpec, org.openmdx.base.rest.spi.Query_2Facade, javax.resource.cci.IndexedRecord)
+         * @see org.openmdx.base.rest.spi.AbstractFacadeInteraction#get(org.openmdx.base.resource.spi.RestInteractionSpec, org.openmdx.base.rest.spi.Query_2Facade, javax.resource.cci.IndexedRecord)
          */
         @SuppressWarnings("unchecked")
         @Override
         public boolean get(
             RestInteractionSpec ispec,
-            Query_2Facade input,
-            IndexedRecord output
-        ) throws ServiceException {
-            Path xri = input.getPath();
+            QueryRecord input,
+            ResultRecord output
+        ) throws ResourceException {
+            Path xri = input.getResourceIdentifier();
             if(isTransactionObjectIdentifier(xri)) {
                 Path transactionId = getTransactionId(xri);
                 if(transactionId != null) {
-                    if(output != null) try {
-                        output.add(
-                            Object_2Facade.newInstance(
-                                transactionId,
-                                "org:openmdx:kernel:UnitOfWork"
-                            ).getDelegate()
-                        );
-                    } catch (ResourceException exception) {
-                        throw new ServiceException(exception);
+                    if(output == null) {
+                        return false;
+                    } else {
+	                    output.add(
+	                        Object_2Facade.newInstance(
+	                            transactionId,
+	                            "org:openmdx:kernel:UnitOfWork"
+	                        ).getDelegate()
+	                    );
+	                    return true;
                     }
-                    return true;
                 } else {
                     return false;
                 }
@@ -967,34 +956,33 @@ public class InboundConnection_2
                 if(output == null) {
                     return true;
                 } else {
-                    Set<String> features = input.getFeatures();
-                    String query = input.getQuery();
-                    if(query != null && query.startsWith("<?xml")) {
+                    Set<String> features = input.getFeatureName();
+                    final QueryFilterRecord queryFilter = input.getQueryFilter();
+                    if(queryFilter != null) {
                         features = features == null ? new HashSet<String>() : new HashSet<String>(features);
-                        Filter filter = (Filter)JavaBeans.fromXML(query);
-                        for(OrderSpecifier orderSpecifier: filter.getOrderSpecifier()) {
+                        for(FeatureOrderRecord orderSpecifier: queryFilter.getOrderSpecifier()) {
                             features.add(
                                 orderSpecifier.getFeature()
                             );
                         }
                     }
-                    return propagate(refObject, output, features, input.getGroups());
+                    return propagate(refObject, output, features, Collections.singleton(input.getFetchGroupName()));
                 }
 
             }
         }
 
         /* (non-Javadoc)
-         * @see org.openmdx.base.rest.spi.AbstractRestInteraction#create(org.openmdx.base.resource.spi.RestInteractionSpec, org.openmdx.base.rest.spi.ObjectHolder_2Facade, javax.resource.cci.IndexedRecord)
+         * @see org.openmdx.base.rest.spi.AbstractFacadeInteraction#create(org.openmdx.base.resource.spi.RestInteractionSpec, org.openmdx.base.rest.spi.ObjectHolder_2Facade, javax.resource.cci.IndexedRecord)
          */
         @SuppressWarnings("unchecked")
         @Override
         public boolean create(
             RestInteractionSpec ispec,
-            Object_2Facade input,
-            IndexedRecord output
-        ) throws ServiceException {
-            Path xri = input.getPath();
+            ObjectRecord input,
+            ResultRecord output
+        ) throws ResourceException {
+            Path xri = input.getResourceIdentifier();
             if(isTransactionObjectIdentifier(xri)) {
                 validateTransactionStateAndId(xri, false);
                 try {
@@ -1012,19 +1000,18 @@ public class InboundConnection_2
                         );
                     }
                 } catch (JDOException exception) {
-                    throw new ServiceException(exception);
-                } catch (ResourceException exception) {
-                    throw new ServiceException(exception);
+                	throw ResourceExceptions.toResourceException(exception);
                 }
                 return true;
             } else if (xri.isTransactionalObjectId()) {
                 RefPackage refPackage = getObjectByResourceIdentifier(BASE_AUTHORITY).refOutermostPackage();
-                RefObject_1_0 newObject = (RefObject_1_0)refPackage.refClass(input.getObjectClass()).refCreateInstance(
+                RefObject_1_0 newObject = (RefObject_1_0)refPackage.refClass(input.getValue().getRecordName()).refCreateInstance(
                     Collections.singletonList(xri)
                 );
                 this.toRefObject(
+                    input.getTransientObjectId(),
                     xri,
-                    newObject,
+                    newObject, 
                     input.getValue()
                 );
                 return propagate(newObject, output, null, null);
@@ -1032,13 +1019,14 @@ public class InboundConnection_2
                 boolean newId = xri.size() % 2 == 0; 
                 int featurePosition = xri.size() - (newId ? 1 : 2);
                 RefObject refParent = getObjectByResourceIdentifier(xri.getPrefix(featurePosition));
-                RefObject_1_0 refObject = (RefObject_1_0)refParent.refOutermostPackage().refClass(input.getObjectClass()).refCreateInstance(null);
+                RefObject_1_0 refObject = (RefObject_1_0)refParent.refOutermostPackage().refClass(input.getValue().getRecordName()).refCreateInstance(null);
                 this.toRefObject(
+               		input.getTransientObjectId(),
                     xri,
-                    refObject,
+                    refObject, 
                     input.getValue()
                 );
-                Object container = refParent.refGetValue(xri.get(featurePosition));
+                Object container = refParent.refGetValue(xri.getSegment(featurePosition).toClassicRepresentation());
                 if(newId) {
                     @SuppressWarnings("rawtypes")
                     Collection refContainer = (Collection) container;
@@ -1068,7 +1056,7 @@ public class InboundConnection_2
             Class<? extends RefContainer> containerClass,
             String qualifier,
             RefObject object
-        ) throws ServiceException{
+        ) throws ResourceException{
             Class<?>[] argumentClasses = Jmi1ContainerInvocationHandler.getAddArguments(containerClass);
             if(argumentClasses.length == 3) {
                 boolean persistent = qualifier.startsWith("!");
@@ -1078,35 +1066,40 @@ public class InboundConnection_2
                     object
                 };
             } else {
-                throw new ServiceException(
-                    BasicException.Code.DEFAULT_DOMAIN,
-                    BasicException.Code.NOT_IMPLEMENTED,
-                    "More than one qualifier is not yet supported"
+            	throw ResourceExceptions.initHolder(
+            		new NotSupportedException(
+                        "More than one qualifier is not yet supported",
+                        BasicException.newEmbeddedExceptionStack(
+		                    BasicException.Code.DEFAULT_DOMAIN,
+		                    BasicException.Code.NOT_IMPLEMENTED,
+		                    new BasicException.Parameter("argumentClasses", (Object[])argumentClasses)
+		                )
+		            )
                 );
             }
         }
 
 
         /* (non-Javadoc)
-         * @see org.openmdx.base.rest.spi.AbstractRestInteraction#move(org.openmdx.base.resource.spi.RestInteractionSpec, org.openmdx.base.naming.Path, org.openmdx.base.rest.spi.Object_2Facade, javax.resource.cci.IndexedRecord)
+         * @see org.openmdx.base.rest.spi.AbstractFacadeInteraction#move(org.openmdx.base.resource.spi.RestInteractionSpec, org.openmdx.base.naming.Path, org.openmdx.base.rest.spi.Object_2Facade, javax.resource.cci.IndexedRecord)
          */
         @Override
         public boolean move(
             RestInteractionSpec ispec,
-            Path xri,
-            Object_2Facade input,
-            IndexedRecord output
-        ) throws ServiceException {
-            RefObject_1_0 newObject = (RefObject_1_0) getObjectByResourceIdentifier(xri);
+            ObjectRecord input,
+            ResultRecord output
+        ) throws ResourceException {
+            RefObject_1_0 newObject = (RefObject_1_0) getObjectByResourceIdentifier(input.getTransientObjectId());
             this.toRefObject(
-                xri,
-                newObject,
+                input.getTransientObjectId(),
+                input.getResourceIdentifier(),
+                newObject, 
                 input.getValue()
             );
-            Path newResourceIdentifier = input.getPath();
+            Path newResourceIdentifier = input.getResourceIdentifier();
             int featurePosition = newResourceIdentifier.size() - 2;
             RefObject refObject = getObjectByResourceIdentifier(newResourceIdentifier.getPrefix(featurePosition));
-            RefContainer<?> refContainer = (RefContainer<?>) refObject.refGetValue(newResourceIdentifier.get(featurePosition));
+            RefContainer<?> refContainer = (RefContainer<?>) refObject.refGetValue(newResourceIdentifier.getSegment(featurePosition).toClassicRepresentation());
             String qualifier = newResourceIdentifier.getLastSegment().toClassicRepresentation();
             boolean persistent = qualifier.startsWith("!"); 
             refContainer.refAdd(
@@ -1118,15 +1111,14 @@ public class InboundConnection_2
         }
 
         /* (non-Javadoc)
-         * @see org.openmdx.base.rest.spi.AbstractRestInteraction#delete(org.openmdx.base.resource.spi.RestInteractionSpec, org.openmdx.base.rest.spi.ObjectHolder_2Facade, javax.resource.cci.IndexedRecord)
+         * @see org.openmdx.base.rest.spi.AbstractFacadeInteraction#delete(org.openmdx.base.resource.spi.RestInteractionSpec, org.openmdx.base.rest.spi.ObjectHolder_2Facade, javax.resource.cci.IndexedRecord)
          */
         @Override
         public boolean delete(
             RestInteractionSpec ispec,
-            Object_2Facade input,
-            IndexedRecord output
-        ) throws ServiceException {
-            Path xri = input.getPath();
+            ObjectRecord input
+        ) throws ResourceException {
+            Path xri = input.getResourceIdentifier();
             if(isTransactionObjectIdentifier(xri)) {
                 validateTransactionStateAndId(xri, true);
                 try {
@@ -1136,9 +1128,7 @@ public class InboundConnection_2
                         InboundConnection_2.this.localTransaction.rollback();
                     }
                 } catch (JDOException exception) {
-                    throw new ServiceException(exception);
-                } catch (ResourceException exception) {
-                    throw new ServiceException(exception);
+                	throw ResourceExceptions.toResourceException(exception);
                 }
             } else {
                 getObjectByResourceIdentifier(xri).refDelete();
@@ -1147,33 +1137,36 @@ public class InboundConnection_2
         }
 
         /* (non-Javadoc)
-         * @see org.openmdx.base.rest.spi.AbstractRestInteraction#put(org.openmdx.base.resource.spi.RestInteractionSpec, org.openmdx.base.rest.spi.ObjectHolder_2Facade, javax.resource.cci.IndexedRecord)
+         * @see org.openmdx.base.rest.spi.AbstractFacadeInteraction#put(org.openmdx.base.resource.spi.RestInteractionSpec, org.openmdx.base.rest.spi.ObjectHolder_2Facade, javax.resource.cci.IndexedRecord)
          */
         @Override
-        public boolean put(
+        public boolean update(
             RestInteractionSpec ispec,
-            Object_2Facade input,
-            IndexedRecord output
-        ) throws ServiceException {
-            RefObject refObject = getObjectByResourceIdentifier(input.getPath());
+            ObjectRecord input,
+            ResultRecord output
+        ) throws ResourceException {
+            final Path xri = input.getResourceIdentifier();
+			final UUID transientObjectId = input.getTransientObjectId();
+			RefObject refObject = getObjectByResourceIdentifier(transientObjectId == null ? xri : transientObjectId);
             this.toRefObject(
-                input.getPath(),
-                refObject,
+        		transientObjectId,
+                xri,
+                refObject, 
                 input.getValue()
             );
             return propagate(refObject, output, null, null);
         }
 
         /* (non-Javadoc)
-         * @see org.openmdx.base.rest.spi.AbstractRestInteraction#find(org.openmdx.base.resource.spi.RestInteractionSpec, org.openmdx.base.rest.spi.Query_2Facade, javax.resource.cci.IndexedRecord)
+         * @see org.openmdx.base.rest.spi.AbstractFacadeInteraction#find(org.openmdx.base.resource.spi.RestInteractionSpec, org.openmdx.base.rest.spi.Query_2Facade, javax.resource.cci.IndexedRecord)
          */
         @SuppressWarnings("unchecked")
         @Override
         public boolean find(
             RestInteractionSpec ispec,
-            Query_2Facade input,
-            IndexedRecord output
-        ) throws ServiceException {
+            QueryRecord input,
+            ResultRecord output
+        ) throws ResourceException {
             Query query = this.toRefQuery(input);
             List<RefObject> objects = (List<RefObject>)query.execute();
             if(output != null){
@@ -1186,8 +1179,8 @@ public class InboundConnection_2
                         output.add(
                             this.toJcaRecord(
                                 i.next(),
-                                input.getFeatures(), 
-                                input.getGroups()
+                                input.getFeatureName(), 
+                                Collections.singleton(input.getFetchGroupName())
                             )
                         );
                         count++;
@@ -1211,8 +1204,8 @@ public class InboundConnection_2
                             0,
                             this.toJcaRecord(
                                 i.previous(),
-                                input.getFeatures(), 
-                                input.getGroups()
+                                input.getFeatureName(), 
+                                Collections.singleton(input.getFetchGroupName())
                             )
                         );
                     }
@@ -1222,21 +1215,20 @@ public class InboundConnection_2
         }
 
         /* (non-Javadoc)
-         * @see org.openmdx.base.rest.spi.AbstractRestInteraction#delete(org.openmdx.base.resource.spi.RestInteractionSpec, org.openmdx.base.rest.spi.Query_2Facade, javax.resource.cci.IndexedRecord)
+         * @see org.openmdx.base.rest.spi.AbstractFacadeInteraction#delete(org.openmdx.base.resource.spi.RestInteractionSpec, org.openmdx.base.rest.spi.Query_2Facade, javax.resource.cci.IndexedRecord)
          */
         @Override
         public boolean delete(
             RestInteractionSpec ispec,
-            Query_2Facade input,
-            IndexedRecord output
-        ) throws ServiceException {
-            Path xri = input.getPath();
+            QueryRecord input
+        ) throws ResourceException {
+            Path xri = input.getResourceIdentifier();
             if(xri.size() % 2 == 0 || xri.isPattern()) {
                 try {
                     Query query = this.toRefQuery(input);
                     return query.deletePersistentAll() > 0;
                 } catch (JDOException exception) {
-                    throw new ServiceException(exception);
+                	throw ResourceExceptions.toResourceException(exception);
                 }
             } else if(isTransactionObjectIdentifier(xri)) {
                 validateTransactionStateAndId(xri, true);
@@ -1248,9 +1240,7 @@ public class InboundConnection_2
                     }
                     return true;
                 } catch (JDOException exception) {
-                    throw new ServiceException(exception);
-                } catch (ResourceException exception) {
-                    throw new ServiceException(exception);
+                	throw ResourceExceptions.toResourceException(exception);
                 }
             } else {
                 try {
@@ -1265,22 +1255,22 @@ public class InboundConnection_2
                     //
                     // Removal Failure
                     //
-                    throw new ServiceException(exception);
+                	throw ResourceExceptions.toResourceException(exception);
                 }
             }
         }
 
         /* (non-Javadoc)
-         * @see org.openmdx.base.rest.spi.AbstractRestInteraction#invoke(org.openmdx.base.resource.spi.RestInteractionSpec, javax.resource.cci.MessageRecord, javax.resource.cci.MessageRecord)
+         * @see org.openmdx.base.rest.spi.AbstractFacadeInteraction#invoke(org.openmdx.base.resource.spi.RestInteractionSpec, javax.resource.cci.MessageRecord, javax.resource.cci.MessageRecord)
          */
         @Override
         public boolean invoke(
             RestInteractionSpec ispec,
             MessageRecord input,
             MessageRecord output
-        ) throws ServiceException {
+        ) throws ResourceException {
             try {
-                Path xri = input.getPath();
+                Path xri = input.getResourceIdentifier();
                 if(isTransactionCommitIdentifier(xri)) {
                     validateTransactionStateAndId(xri, true );
                     if(InboundConnection_2.this.localTransaction == null) {
@@ -1289,7 +1279,7 @@ public class InboundConnection_2
                         InboundConnection_2.this.localTransaction.commit();
                     }
                     if(output != null) {
-                        output.setPath(newResponseId(xri));
+                        output.setResourceIdentifier(newResponseId(xri));
                         output.setBody(null);
                     }
                 } else {
@@ -1298,11 +1288,11 @@ public class InboundConnection_2
                     RefPackage_1_0 refPackage = (RefPackage_1_0) refObject.refOutermostPackage();
                     MappedRecord arguments = input.getBody();
                     Object reply = refObject.refInvokeOperation(
-                        xri.get(featurePosition), 
+                        xri.getSegment(featurePosition).toClassicRepresentation(), 
                         Collections.singletonList(refPackage.refCreateStruct(arguments))
                     );
                     if(output != null) {
-                        output.setPath(xri);
+                        output.setResourceIdentifier(xri);
                         output.setBody(
                             reply instanceof RefStruct_1_0 ? (MappedRecord)((RefStruct_1_0)reply).refDelegate() : 
                             (MappedRecord)reply
@@ -1311,13 +1301,18 @@ public class InboundConnection_2
                 }
                 return true;
             } catch (RefException exception) {
-                throw new ServiceException(exception);
-            } catch (ResourceException exception) {
-                throw new ServiceException(exception);
+            	throw ResourceExceptions.toResourceException(exception);
             }
         }
 
     }
+
+
+	@Override
+	public ConnectionFactory getConnectionFactory() {
+		// TODO Auto-generated method stub
+		return null;
+	}
 
 }
 

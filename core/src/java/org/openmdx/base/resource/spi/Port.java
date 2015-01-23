@@ -55,7 +55,7 @@ import javax.resource.cci.Interaction;
 /**
  * JCA Plug-In
  */
-public interface Port {
+public interface Port<C extends Connection> {
 
     /**
      * Retrieve a JCA <code>Interaction</code>
@@ -67,7 +67,7 @@ public interface Port {
      * @exception ResourceException of the <code>Interaction</code> can't be provided
      */
     Interaction getInteraction(
-        Connection connection
+        C connection
     ) throws ResourceException;
     
 }

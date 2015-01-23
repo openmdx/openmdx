@@ -120,7 +120,7 @@ public class ShowInspectorControl extends InspectorControl implements Serializab
         for(org.openmdx.ui1.jmi1.OperationPane pane: paneOps) {
             operationPaneControls.add(
                 this.newUiOperationPaneControl(
-                    pane.refGetPath().getBase(), 
+                    pane.refGetPath().getLastSegment().toClassicRepresentation(), 
                     locale,
                     localeAsIndex,
                     controlFactory,
@@ -140,7 +140,7 @@ public class ShowInspectorControl extends InspectorControl implements Serializab
         for(org.openmdx.ui1.jmi1.ReferencePane paneRef: paneRefs) {
             referencePaneControls.add(
             	this.newUiReferencePaneControl(
-	            	paneRef.refGetPath().getBase(), 
+	            	paneRef.refGetPath().getLastSegment().toClassicRepresentation(), 
 	                perspective,
 	                locale, 
 	                localeAsIndex,

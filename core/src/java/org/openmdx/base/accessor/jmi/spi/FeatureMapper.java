@@ -149,7 +149,7 @@ public class FeatureMapper implements Serializable {
         } 
         else {
             featureDef = ((RefMetaObject_1) feature).getElementDef();
-            featureName = (String)featureDef.getName();
+            featureName = featureDef.getName();
         }
         Method accessor = this.accessors.get(featureName);
         if(accessor == null) { 
@@ -209,7 +209,7 @@ public class FeatureMapper implements Serializable {
             featureName = getSimpleName((String) feature);
         } else {
             featureDef = ((RefMetaObject_1) feature).getElementDef();
-            featureName = (String) featureDef.getName();
+            featureName = featureDef.getName();
         }
         Method mutator = this.mutators.get(featureName);
         if(mutator == null) {
@@ -264,7 +264,7 @@ public class FeatureMapper implements Serializable {
             }                
         } else {
             ModelElement_1_0 featureDef = ((RefMetaObject_1) feature).getElementDef();
-            featureName = (String) featureDef.getName();
+            featureName = featureDef.getName();
         }
         Method operation = this.mutators.get(featureName);
         if(operation == null) {
@@ -333,7 +333,7 @@ public class FeatureMapper implements Serializable {
         MethodSignature mode
     ) throws ServiceException {
         String methodName = rawMethodName;
-        String className = (String)this.classDef.getQualifiedName();
+        String className = this.classDef.getQualifiedName();
         ConcurrentMap<String,ModelElement_1_0> features = allFeatures.get(className);
         if(features == null) {
             features = Maps.putUnlessPresent(
@@ -363,9 +363,10 @@ public class FeatureMapper implements Serializable {
                 }
                 // Structural feature
                 else {
-                    String featureName = (String)feature.getName();
+                    String featureName = feature.getName();
                     // non-boolean getter
-                    features.putIfAbsent(
+                    Maps.putUnlessPresent(
+                        features,
                         Identifier.OPERATION_NAME.toIdentifier(
                             AbstractNames.openmdx2AccessorName(
                                 featureName,
@@ -377,7 +378,8 @@ public class FeatureMapper implements Serializable {
                         feature
                     );
                     // non-boolean setter
-                    features.putIfAbsent(
+                    Maps.putUnlessPresent(
+                    	features,
                         Identifier.OPERATION_NAME.toIdentifier(
                             AbstractNames.openmdx2AccessorName(
                                 featureName,
@@ -389,7 +391,8 @@ public class FeatureMapper implements Serializable {
                         feature
                     );
                     // boolean query
-                    features.putIfAbsent(
+                    Maps.putUnlessPresent(
+                    	features,
                         Identifier.OPERATION_NAME.toIdentifier(
                             AbstractNames.openmdx2AccessorName(
                                 featureName,
@@ -401,7 +404,8 @@ public class FeatureMapper implements Serializable {
                         feature
                     );
                     // boolean set
-                    features.putIfAbsent(
+                    Maps.putUnlessPresent(
+                    	features,
                         Identifier.OPERATION_NAME.toIdentifier(
                             AbstractNames.openmdx2AccessorName(
                                 featureName,
@@ -413,7 +417,8 @@ public class FeatureMapper implements Serializable {
                         feature
                     );
                     // add
-                    features.putIfAbsent(
+                    Maps.putUnlessPresent(
+                    	features,
                         Identifier.OPERATION_NAME.toIdentifier(
                             Identifier.OPERATION_NAME.toIdentifier(
                                 featureName,
@@ -426,7 +431,8 @@ public class FeatureMapper implements Serializable {
                         feature
                     );
                     // predicate
-                    features.putIfAbsent(
+                    Maps.putUnlessPresent(
+                    	features,
                         Identifier.OPERATION_NAME.toIdentifier(
                             Identifier.OPERATION_NAME.toIdentifier(
                                 featureName,
@@ -442,7 +448,7 @@ public class FeatureMapper implements Serializable {
             }
             // Postprocess operations
             for(ModelElement_1_0 operation: operations) {
-                String operationName = (String)operation.getName();                
+                String operationName = operation.getName();                
                 // In case a feature accessor with the same name as an operation exists
                 // it is overriden, i.e. operations have precedence
                 features.put(

@@ -67,45 +67,29 @@ public class DelegatingIndexedRecord
 {
 
     /**
-     * 
-     */
-    private static final long serialVersionUID = 3761411910632878384L;
-
-    /**
-     * 
-     */
-    private String recordShortDescription;
-
-    /**
-     * 
-     */
-    private String recordName;
-
-    /**
-     * 
-     */
-    private List source;
-    
-    /**
      * Constructor
      */
     public DelegatingIndexedRecord(
         String recordName,
         String recordShortDescription,
-        List source
+        List delegate
     ) {
         this.recordName = recordName;
         this.recordShortDescription = recordShortDescription;
-        this.source = source;
+        this.delegate = delegate;
     }
 
     /**
-     * Constructor 
+     * Implements <code>Serializable</code>
      */
-    protected DelegatingIndexedRecord(){
-        // for de-serialization
-    }
-
+    private static final long serialVersionUID = 3761411910632878384L;
+    
+    private String recordShortDescription;
+    
+    private String recordName;
+    
+    private List delegate;
+    
     
 
     //------------------------------------------------------------------------
@@ -117,7 +101,7 @@ public class DelegatingIndexedRecord
      */
     @Override
     public int hashCode() {
-        return source.hashCode();
+    	return IndexedRecords.getHashCode(this);
     }
 
     /* (non-Javadoc)
@@ -125,7 +109,7 @@ public class DelegatingIndexedRecord
      */
     @Override
     public boolean equals(Object that) {
-        return source.equals(that);
+    	return IndexedRecords.areEqual(this, that);
     }
     
     /* (non-Javadoc)
@@ -141,186 +125,100 @@ public class DelegatingIndexedRecord
     // Implements List
     //------------------------------------------------------------------------
     
-    /**
-     * @param index
-     * @param element
-     * @return
-     */
     public Object set(int index, Object element) {
-        return source.set(index, element);
+        return delegate.set(index, element);
     }
 
-    /**
-     * @param o
-     * @return
-     */
     public int lastIndexOf(Object o) {
-        return source.lastIndexOf(o);
+        return delegate.lastIndexOf(o);
     }
 
-    /**
-     * @return
-     */
     public ListIterator listIterator() {
-        return source.listIterator();
+        return delegate.listIterator();
     }
 
-    /**
-     * @param index
-     * @param c
-     * @return
-     */
     public boolean addAll(int index, Collection c) {
-        return source.addAll(index, c);
+        return delegate.addAll(index, c);
     }
 
-    /**
-     * @param o
-     * @return
-     */
     public boolean add(Object o) {
-        return source.add(o);
+        return delegate.add(o);
     }
     
-    /**
-     * @param index
-     * @param element
-     */
     public void add(int index, Object element) {
-        source.add(index, element);
+        delegate.add(index, element);
     }
     
-    /**
-     * @return
-     */
     public Object[] toArray() {
-        return source.toArray();
+        return delegate.toArray();
     }
     
-    /**
-     * @param index
-     * @return
-     */
     public Object remove(int index) {
-        return source.remove(index);
+        return delegate.remove(index);
     }
     
-    /**
-     * @param c
-     * @return
-     */
     public boolean addAll(Collection c) {
-        return source.addAll(c);
+        return delegate.addAll(c);
     }
     
-    /**
-     * @param c
-     * @return
-     */
     public boolean retainAll(Collection c) {
-        return source.retainAll(c);
+        return delegate.retainAll(c);
     }
     
-    /**
-     * @param o
-     * @return
-     */
     public boolean contains(Object o) {
-        return source.contains(o);
+        return delegate.contains(o);
     }
     
-    /**
-     * @param c
-     * @return
-     */
     public boolean containsAll(Collection c) {
-        return source.containsAll(c);
+        return delegate.containsAll(c);
     }
     
-    /**
-     * 
-     */
     public void clear() {
-        source.clear();
+        delegate.clear();
     }
     
-    /**
-     * @param index
-     * @return
-     */
     public Object get(int index) {
-        return source.get(index);
+        return delegate.get(index);
     }
     
-    /**
-     * @return
-     */
     public int size() {
-        return source.size();
+        return delegate.size();
     }
     
-    /**
-     * @param c
-     * @return
-     */
     public boolean removeAll(Collection c) {
-        return source.removeAll(c);
+        return delegate.removeAll(c);
     }
     
-    /**
-     * @param index
-     * @return
-     */
     public ListIterator listIterator(int index) {
-        return source.listIterator(index);
+        return delegate.listIterator(index);
     }
     
-    /**
-     * @return
-     */
     public boolean isEmpty() {
-        return source.isEmpty();
+        return delegate.isEmpty();
     }
     
-    /**
-     * @param o
-     * @return
-     */
     public boolean remove(Object o) {
-        return source.remove(o);
+        return delegate.remove(o);
     }
     
-    /**
-     * @return
-     */
     public Iterator iterator() {
-        return source.iterator();
+        return delegate.iterator();
     }
-    
-    /**
-     * @param fromIndex
-     * @param toIndex
-     * @return
-     */
     
     public List subList(int fromIndex, int toIndex) {
-        return source.subList(fromIndex, toIndex);
+        return new DelegatingIndexedRecord(
+        	this.recordName, 
+        	this.recordShortDescription, 
+        	delegate.subList(fromIndex, toIndex)
+        );
     }
     
-    /**
-     * @param a
-     * @return
-     */
     public Object[] toArray(Object[] a) {
-        return source.toArray(a);
+        return delegate.toArray(a);
     }
     
-    /**
-     * @param o
-     * @return
-     */
     public int indexOf(Object o) {
-        return source.indexOf(o);
+        return delegate.indexOf(o);
     }
     
 
@@ -331,7 +229,7 @@ public class DelegatingIndexedRecord
     /* (non-Javadoc)
      * @see javax.resource.cci.Record#getRecordName()
      */
-    public String getRecordName() {
+    public final String getRecordName() {
         return this.recordName;
     }
 
@@ -352,7 +250,7 @@ public class DelegatingIndexedRecord
     /* (non-Javadoc)
      * @see javax.resource.cci.Record#getRecordShortDescription()
      */
-    public String getRecordShortDescription() {
+    public final String getRecordShortDescription() {
         return this.recordShortDescription;
     }
 
@@ -365,11 +263,12 @@ public class DelegatingIndexedRecord
      * @see java.lang.Object#clone()
      */
     @Override
-    public Object clone() throws CloneNotSupportedException {
+    public Object clone(
+    ) {
         return new DelegatingIndexedRecord(
             this.recordName,
             this.recordShortDescription,
-            this.source
+            this.delegate
         );
     }
     

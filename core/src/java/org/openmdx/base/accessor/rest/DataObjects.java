@@ -77,7 +77,7 @@ public class DataObjects {
     public static DataObject_1_0 getDataObject(
         RefObject refObject
     ){
-        return (DataObject_1_0) (
+        return (
             (RefObject_1_0) (refObject instanceof DelegatingRefObject_1_0 ? ((DelegatingRefObject_1_0)refObject).openmdxjdoGetDataObject() : refObject)
         ).refDelegate().objGetDelegate();
     }

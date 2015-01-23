@@ -15,6 +15,7 @@
       <packagedElement xmi:type="uml:PrimitiveType" xmi:id="_3C7B8A60016D3E0F6F8900AB" name="binary"/>
       <packagedElement xmi:type="uml:PrimitiveType" xmi:id="_0ol7wAzPEdqvgN6MK4tabw" name="byte"/>
       <packagedElement xmi:type="uml:PrimitiveType" xmi:id="_Sf14UAzQEdqvgN6MK4tabw" name="character"/>
+      <packagedElement xmi:type="uml:PrimitiveType" xmi:id="_E6T2IAu9EeSrLJCNh24WvQ" name="anyType"/>
     </packagedElement>
   </packagedElement>
 </uml:Model>

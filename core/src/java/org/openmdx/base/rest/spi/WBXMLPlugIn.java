@@ -65,44 +65,95 @@ public class WBXMLPlugIn extends DynamicPlugIn {
     /**
      * Page 0
      */
-    private static final Page page0 = newPage();
+    private static final Page page0 = preparePage0(true);
     
-    static {
-        DynamicPlugIn.addTo(WBXMLPlugIn.page0, CodeSpace.TAG, "org.openmdx.kernel.UnitOfWork");
-        DynamicPlugIn.addTo(WBXMLPlugIn.page0, CodeSpace.TAG, "org.openmdx.kernel.Object");
-        DynamicPlugIn.addTo(WBXMLPlugIn.page0, CodeSpace.TAG, "org.openmdx.kernel.Query");
-        DynamicPlugIn.addTo(WBXMLPlugIn.page0, CodeSpace.TAG, "org.openmdx.kernel.ResultSet");
-        DynamicPlugIn.addTo(WBXMLPlugIn.page0, CodeSpace.TAG, "org.openmdx.kernel.Exception");
-        DynamicPlugIn.addTo(WBXMLPlugIn.page0, CodeSpace.TAG, "_item");
-        DynamicPlugIn.addTo(WBXMLPlugIn.page0, CodeSpace.TAG, "path");
-        DynamicPlugIn.addTo(WBXMLPlugIn.page0, CodeSpace.TAG, "queryType");
-        DynamicPlugIn.addTo(WBXMLPlugIn.page0, CodeSpace.TAG, "query");
-        DynamicPlugIn.addTo(WBXMLPlugIn.page0, CodeSpace.TAG, "position");
-        DynamicPlugIn.addTo(WBXMLPlugIn.page0, CodeSpace.TAG, "size");
-        DynamicPlugIn.addTo(WBXMLPlugIn.page0, CodeSpace.TAG, "groups");
-        DynamicPlugIn.addTo(WBXMLPlugIn.page0, CodeSpace.TAG, "features");
-        DynamicPlugIn.addTo(WBXMLPlugIn.page0, CodeSpace.TAG, "parameters");
-        DynamicPlugIn.addTo(WBXMLPlugIn.page0, CodeSpace.TAG, "element");
-        DynamicPlugIn.addTo(WBXMLPlugIn.page0, CodeSpace.TAG, "description");
-        DynamicPlugIn.addTo(WBXMLPlugIn.page0, CodeSpace.TAG, "parameter");
-        DynamicPlugIn.addTo(WBXMLPlugIn.page0, CodeSpace.TAG, "stackTraceElements");
-        DynamicPlugIn.addTo(WBXMLPlugIn.page0, CodeSpace.TAG, "refresh");
-        DynamicPlugIn.addTo(WBXMLPlugIn.page0, CodeSpace.ATTRIBUTE_NAME, "id");
-        DynamicPlugIn.addTo(WBXMLPlugIn.page0, CodeSpace.ATTRIBUTE_NAME, "href");
-        DynamicPlugIn.addTo(WBXMLPlugIn.page0, CodeSpace.ATTRIBUTE_NAME, "version");
-        DynamicPlugIn.addTo(WBXMLPlugIn.page0, CodeSpace.ATTRIBUTE_NAME, "index");
-        DynamicPlugIn.addTo(WBXMLPlugIn.page0, CodeSpace.ATTRIBUTE_NAME, "hasMore");
-        DynamicPlugIn.addTo(WBXMLPlugIn.page0, CodeSpace.ATTRIBUTE_NAME, "total");
-        DynamicPlugIn.addTo(WBXMLPlugIn.page0, CodeSpace.ATTRIBUTE_NAME, "exceptionDomain");
-        DynamicPlugIn.addTo(WBXMLPlugIn.page0, CodeSpace.ATTRIBUTE_NAME, "exceptionCode");
-        DynamicPlugIn.addTo(WBXMLPlugIn.page0, CodeSpace.ATTRIBUTE_NAME, "exceptionTime");
-        DynamicPlugIn.addTo(WBXMLPlugIn.page0, CodeSpace.ATTRIBUTE_NAME, "exceptionClass");
-        DynamicPlugIn.addTo(WBXMLPlugIn.page0, CodeSpace.ATTRIBUTE_NAME, "declaringClass");
-        DynamicPlugIn.addTo(WBXMLPlugIn.page0, CodeSpace.ATTRIBUTE_NAME, "methodName");
-        DynamicPlugIn.addTo(WBXMLPlugIn.page0, CodeSpace.ATTRIBUTE_NAME, "lineNumber");
-        DynamicPlugIn.addTo(WBXMLPlugIn.page0, CodeSpace.ATTRIBUTE_NAME, "fileName");
-        DynamicPlugIn.addTo(WBXMLPlugIn.page0, CodeSpace.ATTRIBUTE_NAME, "more");
-    }
+	/**
+	 * Prepare page 0
+	 * 
+	 * @param lenient if <code>true</code> then collisions are logged as warnings,
+	 * otherwise they lead to exceptions.
+	 */
+	static Page preparePage0(
+		boolean lenient
+	) {
+		final Page page0 = newPage();
+		DynamicPlugIn.addTo(page0, CodeSpace.TAG, "_item", lenient);
+		DynamicPlugIn.addTo(page0, CodeSpace.TAG, "description", lenient);
+		DynamicPlugIn.addTo(page0, CodeSpace.TAG, "features", lenient);
+		DynamicPlugIn.addTo(page0, CodeSpace.TAG, "groups", lenient);
+		DynamicPlugIn.addTo(page0, CodeSpace.TAG, "org.openmdx.base.Void", lenient);
+		DynamicPlugIn.addTo(page0, CodeSpace.TAG, "org.openmdx.kernel.Condition", lenient);
+		DynamicPlugIn.addTo(page0, CodeSpace.TAG, "org.openmdx.kernel.FeatureOrder", lenient);
+		DynamicPlugIn.addTo(page0, CodeSpace.TAG, "org.openmdx.kernel.Message", lenient);
+		DynamicPlugIn.addTo(page0, CodeSpace.TAG, "org.openmdx.kernel.Object", lenient);
+		DynamicPlugIn.addTo(page0, CodeSpace.TAG, "org.openmdx.kernel.Query", lenient);
+		DynamicPlugIn.addTo(page0, CodeSpace.TAG, "org.openmdx.kernel.QueryExtension", lenient);
+		DynamicPlugIn.addTo(page0, CodeSpace.TAG, "org.openmdx.kernel.QueryFilter", lenient);
+		DynamicPlugIn.addTo(page0, CodeSpace.TAG, "org.openmdx.kernel.ResultSet", lenient);
+		DynamicPlugIn.addTo(page0, CodeSpace.TAG, "org.openmdx.kernel.UnitOfWork", lenient);
+		DynamicPlugIn.addTo(page0, CodeSpace.TAG, "parameter", lenient);
+		DynamicPlugIn.addTo(page0, CodeSpace.TAG, "parameters", lenient);
+		DynamicPlugIn.addTo(page0, CodeSpace.TAG, "position", lenient);
+		DynamicPlugIn.addTo(page0, CodeSpace.TAG, "queryFilter", lenient);		
+		DynamicPlugIn.addTo(page0, CodeSpace.TAG, "queryType", lenient);
+		DynamicPlugIn.addTo(page0, CodeSpace.TAG, "query", lenient);
+		DynamicPlugIn.addTo(page0, CodeSpace.TAG, "refresh", lenient);
+		DynamicPlugIn.addTo(page0, CodeSpace.TAG, "size", lenient);
+		DynamicPlugIn.addTo(page0, CodeSpace.TAG, "stackTraceElements", lenient);
+		DynamicPlugIn.addTo(page0, CodeSpace.ATTRIBUTE_NAME, "declaringClass", lenient);
+		DynamicPlugIn.addTo(page0, CodeSpace.ATTRIBUTE_NAME, "exceptionClass", lenient);
+		DynamicPlugIn.addTo(page0, CodeSpace.ATTRIBUTE_NAME, "exceptionCode", lenient);
+		DynamicPlugIn.addTo(page0, CodeSpace.ATTRIBUTE_NAME, "exceptionDomain", lenient);
+		DynamicPlugIn.addTo(page0, CodeSpace.ATTRIBUTE_NAME, "exceptionTime", lenient);
+		DynamicPlugIn.addTo(page0, CodeSpace.ATTRIBUTE_NAME, "fileName", lenient);
+		DynamicPlugIn.addTo(page0, CodeSpace.ATTRIBUTE_NAME, "hasMore", lenient);
+		DynamicPlugIn.addTo(page0, CodeSpace.ATTRIBUTE_NAME, "href", lenient);
+		DynamicPlugIn.addTo(page0, CodeSpace.ATTRIBUTE_NAME, "id", lenient);
+		DynamicPlugIn.addTo(page0, CodeSpace.ATTRIBUTE_NAME, "index", lenient);
+		DynamicPlugIn.addTo(page0, CodeSpace.ATTRIBUTE_NAME, "lineNumber", lenient);
+		DynamicPlugIn.addTo(page0, CodeSpace.ATTRIBUTE_NAME, "methodName", lenient);
+		DynamicPlugIn.addTo(page0, CodeSpace.ATTRIBUTE_NAME, "total", lenient);
+		DynamicPlugIn.addTo(page0, CodeSpace.ATTRIBUTE_NAME, "more", lenient);
+		DynamicPlugIn.addTo(page0, CodeSpace.ATTRIBUTE_NAME, "type", lenient);
+		DynamicPlugIn.addTo(page0, CodeSpace.ATTRIBUTE_NAME, "version", lenient);
+		DynamicPlugIn.addTo(page0, CodeSpace.ATTRIBUTE_NAME_WITH_VALUE_PREFIX, "type=org:w3c:string", lenient);
+		DynamicPlugIn.addTo(page0, CodeSpace.ATTRIBUTE_NAME_WITH_VALUE_PREFIX, "type=org:w3c:integer", lenient);
+		DynamicPlugIn.addTo(page0, CodeSpace.ATTRIBUTE_NAME_WITH_VALUE_PREFIX, "type=org:w3c:dateTime", lenient);
+		DynamicPlugIn.addTo(page0, CodeSpace.ATTRIBUTE_NAME_WITH_VALUE_PREFIX, "type=org:w3c:date", lenient);
+		DynamicPlugIn.addTo(page0, CodeSpace.ATTRIBUTE_NAME_WITH_VALUE_PREFIX, "type=org:w3c:duration", lenient);
+		DynamicPlugIn.addTo(page0, CodeSpace.ATTRIBUTE_NAME_WITH_VALUE_PREFIX, "type=org:w3c:decimal", lenient);
+		DynamicPlugIn.addTo(page0, CodeSpace.ATTRIBUTE_NAME_WITH_VALUE_PREFIX, "type=org:w3c:boolean", lenient);
+		
+		DynamicPlugIn.addTo(page0, CodeSpace.TAG, "body", lenient);
+		DynamicPlugIn.addTo(page0, CodeSpace.TAG, "booleanParam", lenient);
+		DynamicPlugIn.addTo(page0, CodeSpace.TAG, "dateTimeParam", lenient);
+		DynamicPlugIn.addTo(page0, CodeSpace.TAG, "decimalParam", lenient);
+		DynamicPlugIn.addTo(page0, CodeSpace.TAG, "feature", lenient);
+		DynamicPlugIn.addTo(page0, CodeSpace.TAG, "featureName", lenient);
+		DynamicPlugIn.addTo(page0, CodeSpace.TAG, "orderSpecifier", lenient);
+		DynamicPlugIn.addTo(page0, CodeSpace.TAG, "quantifier", lenient);
+		DynamicPlugIn.addTo(page0, CodeSpace.TAG, "resourceIdentifier", lenient);
+		DynamicPlugIn.addTo(page0, CodeSpace.TAG, "sortOrder", lenient);
+		DynamicPlugIn.addTo(page0, CodeSpace.TAG, "stringParam", lenient);
+		DynamicPlugIn.addTo(page0, CodeSpace.TAG, "transientObjectId", lenient);
+		DynamicPlugIn.addTo(page0, CodeSpace.TAG, "value", lenient);
+		DynamicPlugIn.addTo(page0, CodeSpace.TAG, "version", lenient);
+		
+		/**
+		 * Collisions exclude some entries:
+		 * 
+		DynamicPlugIn.addTo(page0, CodeSpace.TAG, "clause", lenient); // is excluded by queryFilter
+	    DynamicPlugIn.addTo(page0, CodeSpace.TAG, "condition", lenient); // is excluded by queryFilter
+		DynamicPlugIn.addTo(page0, CodeSpace.TAG, "dateParam", lenient); // is excluded by stackTraceElements
+		DynamicPlugIn.addTo(page0, CodeSpace.TAG, "integerParam", lenient); // is excluded by transient object id
+		DynamicPlugIn.addTo(page0, CodeSpace.TAG, "extension", lenient); // is excluded by body
+		DynamicPlugIn.addTo(page0, CodeSpace.TAG, "lock", lenient); // is excluded by position
+		DynamicPlugIn.addTo(page0, CodeSpace.TAG, "org.openmdx.kernel.Exception", lenient); // is excluded by orderSpecifier
+		DynamicPlugIn.addTo(page0, CodeSpace.TAG, "fetchGroupName", lenient); // is excluded by quantifier
+		DynamicPlugIn.addTo(page0, CodeSpace.TAG, "type", lenient); // is excluded by _item
+		 */
+        return page0;
+	}
 
     /*
      * (non-Javadoc)

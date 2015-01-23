@@ -60,7 +60,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.naming.Path;
-import org.openmdx.base.naming.PathComponent;
 
 public class PathTransformationTest {
     
@@ -78,8 +77,6 @@ public class PathTransformationTest {
      * Add an instance variable for each part of the fixture 
      */
     protected String[] iri2;
-    
-    private static final boolean LEGACY_STRING_REPRESENTATION = Boolean.TRUE.booleanValue(); // to avoid dead code warning
     
     @Before
     public void setUp() {
@@ -147,7 +144,7 @@ public class PathTransformationTest {
         Path p1 = new Path(p.toXri());
         assertEquals(
             "p.toString()", 
-            LEGACY_STRING_REPRESENTATION ? "a/b/c/1//2//3" : "xri://@openmdx*a/b/c/(@openmdx*1/2/3)", 
+            "xri://@openmdx*a/b/c/(@openmdx*1/2/3)", 
             p.toString()
         );
         assertEquals("p.toXri()", "xri:@openmdx:a/b/c/(@openmdx:1/2/3)", p.toXri());
@@ -156,7 +153,7 @@ public class PathTransformationTest {
         Path p2 = new Path(new String[]{"x", "y", "a/b/c/1//2//3"});
         assertEquals(
             "p2.toString()", 
-            LEGACY_STRING_REPRESENTATION ? "x/y/a//b//c//1////2////3" : "xri://@openmdx*x/y/(@openmdx*a/b/c/(@openmdx*1/2/3))", 
+            "xri://@openmdx*x/y/(@openmdx*a/b/c/(@openmdx*1/2/3))", 
             p2.toString()
         );
         assertEquals("p2.toXri()", "xri:@openmdx:x/y/(@openmdx:a/b/c/(@openmdx:1/2/3))", p2.toXri());
@@ -168,14 +165,24 @@ public class PathTransformationTest {
 //        assertEquals("xref xri path", "/2/3", xref.getXRIPath().toString());
     }
 
-    @Test
+    @SuppressWarnings("deprecation")
+	@Test
     public void testCR20006216(
     ){
-        PathComponent stateId = new PathComponent("sins:0:");
+        final org.openmdx.base.naming.PathComponent stateId = new org.openmdx.base.naming.PathComponent("sins:0:");
         assertEquals("Object Id", "sins", stateId.get(0));
         assertEquals("State Number", "0", stateId.get(1));
         assertFalse("PlaceHolder", stateId.isPlaceHolder());
         assertTrue("Private", stateId.isPrivate());        
+    }
+
+    @SuppressWarnings("deprecation")
+	@Test
+    public void testCR20020172(
+    ){
+        final String stateId = "sins:0:";
+        assertFalse("PlaceHolder", org.openmdx.base.naming.PathComponent.isPlaceHolder(stateId));
+        assertTrue("Private", org.openmdx.base.naming.PathComponent.isPrivate(stateId));        
     }
     
 }

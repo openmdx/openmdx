@@ -59,9 +59,11 @@ import java.util.List;
 import java.util.logging.Level;
 
 import org.openmdx.base.query.Condition;
-import org.openmdx.base.query.Extension;
 import org.openmdx.base.query.OrderSpecifier;
 import org.openmdx.base.resource.Records;
+import org.openmdx.base.rest.cci.ConditionRecord;
+import org.openmdx.base.rest.cci.FeatureOrderRecord;
+import org.openmdx.base.rest.cci.QueryExtensionRecord;
 import org.openmdx.kernel.log.SysLog;
 
 public class Filter 
@@ -91,9 +93,9 @@ implements Serializable {
         String groupName,
         String iconKey,
         Integer[] order,
-        List<Condition> condition,
-        List<OrderSpecifier> orderSpecifier,
-        List<Extension> extensions,
+        List<? extends ConditionRecord> condition,
+        List<? extends FeatureOrderRecord> orderSpecifier,
+        List<? extends QueryExtensionRecord> extensions,
         Object... context
     ) {
         super(
@@ -146,16 +148,16 @@ implements Serializable {
     }
     
     //-------------------------------------------------------------------------
-    private static List<OrderSpecifier> removeDuplicateOrderSpecifiers(
+    private static List<FeatureOrderRecord> removeDuplicateOrderSpecifiers(
         String name,
-        List<OrderSpecifier> orderSpecifiers,
+        List<? extends FeatureOrderRecord> orderSpecifiers,
         Object[] context
     ) {
         if(orderSpecifiers == null) return null;
         List<String> features = new ArrayList<String>();
-        List<OrderSpecifier> specifiers = new ArrayList<OrderSpecifier>();
+        List<FeatureOrderRecord> specifiers = new ArrayList<FeatureOrderRecord>();
         boolean hasDuplicates = false;
-        for(OrderSpecifier orderSpecifier : orderSpecifiers){
+        for(FeatureOrderRecord orderSpecifier : orderSpecifiers){
             if(!features.contains(orderSpecifier.getFeature())) {
                 specifiers.add(orderSpecifier);
                 features.add(orderSpecifier.getFeature());            
@@ -316,7 +318,7 @@ implements Serializable {
      */
     public boolean hasParameter(
     ) {
-        for(Condition condition : this.getCondition()) {
+        for(ConditionRecord condition : this.getCondition()) {
             for(Object value : condition.getValue()) {
                 if("?".equals(value)) {
                     return true;

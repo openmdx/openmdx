@@ -59,7 +59,7 @@
 	<import file="etc/ant/build-library.xml"/>
 
 	<!-- Slash separated platform list, the last entry being the default -->
-	<property name="project.platform.list" value="jre-1.6"/>
+	<property name="project.platform.list" value="jre-1.7"/>
 
 	<!-- Override the default settings -->
 	<property name="build.include.ant.runtime" value="true"/>

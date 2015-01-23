@@ -100,7 +100,7 @@ public abstract class UiTabControl extends Control implements Serializable {
             for(org.openmdx.ui1.jmi1.FieldGroup fieldGroup: tabDef.<org.openmdx.ui1.jmi1.FieldGroup>getMember()) {
               children.add(
                   this.newFieldGroupControl(
-                      fieldGroup.refGetPath().getBase(),
+                      fieldGroup.refGetPath().getLastSegment().toClassicRepresentation(),
                       locale,
                       localeAsIndex,
                       fieldGroup

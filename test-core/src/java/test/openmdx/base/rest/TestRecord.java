@@ -57,7 +57,6 @@ import javax.resource.cci.MappedRecord;
 
 import junit.framework.Assert;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import org.openmdx.base.resource.Records;
 import org.openmdx.kernel.id.UUIDs;
@@ -70,7 +69,6 @@ public class TestRecord {
 
     private static final int threadCount = 100;
    
-	@Ignore
     @Test
     public void testInternalization() throws ResourceException, InterruptedException{
           Worker[] workers = new Worker[threadCount];

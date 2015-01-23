@@ -76,6 +76,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.openmdx.application.xml.Importer;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.naming.Path;
+import org.openmdx.base.rest.cci.ObjectRecord;
 import org.openmdx.base.rest.spi.Object_2Facade;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
@@ -220,8 +221,8 @@ public class UiUtility {
       if(!elementDefinitions.isEmpty()) {
           MappedRecord obj = elementDefinitions.values().iterator().next();
           Path objPath = Object_2Facade.getPath(obj);
-          providerName = objPath.get(2);
-          segmentName = objPath.get(4);
+          providerName = objPath.getSegment(2).toClassicRepresentation();
+          segmentName = objPath.getSegment(4).toClassicRepresentation();
       }
       String s = null;
       s = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
@@ -266,25 +267,25 @@ public class UiUtility {
               ) {
                   boolean isNested = false;
                   if("org:openmdx:ui1:AlternateElementDefinition".equals(elementDefinitionType)) {
-                      s = "                  <org.openmdx.ui1.ElementDefinition name=\"" + elementFacade.getPath().getParent().getParent().getBase() + "\" _operation=\"null\">\n" +
+                      s = "                  <org.openmdx.ui1.ElementDefinition name=\"" + elementFacade.getPath().getParent().getParent().getLastSegment().toClassicRepresentation() + "\" _operation=\"null\">\n" +
                           "                    <_object/>\n" +
                           "                    <_content>\n" +
                           "                      <alternateElementDefinition>\n" +
-                          "                        <org.openmdx.ui1.AlternateElementDefinition id=\"" + elementFacade.getPath().getBase() + "\" _operation=\"create\">\n" +
+                          "                        <org.openmdx.ui1.AlternateElementDefinition id=\"" + elementFacade.getPath().getLastSegment().toClassicRepresentation() + "\" _operation=\"create\">\n" +
                           "                          <_object>\n";
                       isNested = true;
                   }
                   else if("org:openmdx:ui1:AdditionalElementDefinition".equals(elementDefinitionType)) {
-                      s = "                  <org.openmdx.ui1.ElementDefinition name=\"" + elementFacade.getPath().getParent().getParent().getBase() + "\" _operation=\"null\">\n" +
+                      s = "                  <org.openmdx.ui1.ElementDefinition name=\"" + elementFacade.getPath().getParent().getParent().getLastSegment().toClassicRepresentation() + "\" _operation=\"null\">\n" +
                           "                    <_object/>\n" +
                           "                    <_content>\n" +
                           "                      <additionalElementDefinition>\n" +
-                          "                        <org.openmdx.ui1.AdditionalElementDefinition id=\"" + elementFacade.getPath().getBase() + "\" _operation=\"create\">\n" +
+                          "                        <org.openmdx.ui1.AdditionalElementDefinition id=\"" + elementFacade.getPath().getLastSegment().toClassicRepresentation() + "\" _operation=\"create\">\n" +
                           "                          <_object>\n";
                       isNested = true;
                   }
                   else {
-                      s = "                  <org.openmdx.ui1.ElementDefinition name=\"" + elementFacade.getPath().getBase() + "\" _operation=\"create\">\n" +
+                      s = "                  <org.openmdx.ui1.ElementDefinition name=\"" + elementFacade.getPath().getLastSegment().toClassicRepresentation() + "\" _operation=\"create\">\n" +
                           "                    <_object>\n";
                       isNested = false;
                   }
@@ -441,7 +442,7 @@ public class UiUtility {
       Map<Path,MappedRecord> mergedElementDefinitions,
       int localeIndex
   ) throws ServiceException {
-      Map<Path,MappedRecord> elementDefinitions = new LinkedHashMap<Path,MappedRecord>();
+      Map<Path,ObjectRecord> elementDefinitions = new LinkedHashMap<Path,ObjectRecord>();
       if(file.exists()) {
           System.out.println("Loading " + file);
           try {
@@ -518,7 +519,7 @@ public class UiUtility {
   private void readAsTable(
       File file,
       File templateFile,
-      Map<Path,MappedRecord> elementDefinitions
+      Map<Path,ObjectRecord> elementDefinitions
   ) throws ServiceException {          
       System.out.println("Loading " + templateFile);
       try {
@@ -538,7 +539,7 @@ public class UiUtility {
       try {
           System.out.println("Loading " + file.getAbsolutePath());
           org.w3c.dom.Document mergedElementDefinitions = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(file);
-          for(Iterator<MappedRecord> i = elementDefinitions.values().iterator(); i.hasNext(); ) {
+          for(Iterator<ObjectRecord> i = elementDefinitions.values().iterator(); i.hasNext(); ) {
               MappedRecord elementDefinition = i.next();
               Object_2Facade elementDefinitionFacade;
               try {
@@ -553,7 +554,7 @@ public class UiUtility {
                   mergedElementDefinition = 
                       this.lookupElementDefinition(
                           mergedElementDefinitions, 
-                          elementDefinitionFacade.getPath().getBase()
+                          elementDefinitionFacade.getPath().getLastSegment().toClassicRepresentation()
                       );
               }
               else if("org:openmdx:ui1:AlternateElementDefinition".equals(elementDefinitionType)) {
@@ -561,8 +562,8 @@ public class UiUtility {
                       this.lookupElementDefinitionByType(
                           "AlternateElementDefinition",
                           mergedElementDefinitions, 
-                          elementDefinitionFacade.getPath().getParent().getParent().getBase(), 
-                          elementDefinitionFacade.getPath().getBase()
+                          elementDefinitionFacade.getPath().getParent().getParent().getLastSegment().toClassicRepresentation(), 
+                          elementDefinitionFacade.getPath().getLastSegment().toClassicRepresentation()
                       );
               }
               else if("org:openmdx:ui1:AdditionalElementDefinition".equals(elementDefinitionType)) {
@@ -570,8 +571,8 @@ public class UiUtility {
                       this.lookupElementDefinitionByType(
                           "AdditionalElementDefinition",
                           mergedElementDefinitions, 
-                          elementDefinitionFacade.getPath().getParent().getParent().getBase(), 
-                          elementDefinitionFacade.getPath().getBase()
+                          elementDefinitionFacade.getPath().getParent().getParent().getLastSegment().toClassicRepresentation(), 
+                          elementDefinitionFacade.getPath().getLastSegment().toClassicRepresentation()
                       );
               }
               for(int j = 1; j < locales.size(); j++) { // skip en_US
@@ -625,13 +626,13 @@ public class UiUtility {
           }
           String elementDefinitionType = entryFacade.getObjectClass();
           if("org:openmdx:ui1:ElementDefinition".equals(elementDefinitionType)) {
-              s = "  <ElementDefinition name=\"" + entryFacade.getPath().getBase() + "\">\n";
+              s = "  <ElementDefinition name=\"" + entryFacade.getPath().getLastSegment().toClassicRepresentation() + "\">\n";
           }
           else if("org:openmdx:ui1:AlternateElementDefinition".equals(elementDefinitionType)) {
-              s = "  <AlternateElementDefinition name=\"" + entryFacade.getPath().getParent().getParent().getBase() + "\" id=\"" + entryFacade.getPath().getBase() + "\">\n";                      
+              s = "  <AlternateElementDefinition name=\"" + entryFacade.getPath().getParent().getParent().getLastSegment().toClassicRepresentation() + "\" id=\"" + entryFacade.getPath().getLastSegment().toClassicRepresentation() + "\">\n";                      
           }
           else {
-              s = "  <AdditionalElementDefinition name=\"" + entryFacade.getPath().getParent().getParent().getBase() + "\" id=\"" + entryFacade.getPath().getBase() + "\">\n";                      
+              s = "  <AdditionalElementDefinition name=\"" + entryFacade.getPath().getParent().getParent().getLastSegment().toClassicRepresentation() + "\" id=\"" + entryFacade.getPath().getLastSegment().toClassicRepresentation() + "\">\n";                      
           }
           w.write(s, 0, s.length());
           // label

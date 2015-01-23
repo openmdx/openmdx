@@ -443,7 +443,7 @@ public final class ApplicationContext implements Serializable {
                     );
                     if(parent != null) {
                       for(
-                        Iterator<?> j = ((Collection<?>)parent.refGetValue(quickAccessorsReferenceIdentity.getBase())).iterator();
+                        Iterator<?> j = ((Collection<?>)parent.refGetValue(quickAccessorsReferenceIdentity.getLastSegment().toClassicRepresentation())).iterator();
                         j.hasNext();
                       ) {
                         try {
@@ -671,7 +671,7 @@ public final class ApplicationContext implements Serializable {
                             },
                             // append qualifier in case there are root object labels with same label
                             labels.contains(label) ? 
-                                label + " (" + new Path(rootObject[i].refMofId()).get(4) + ")" : 
+                                label + " (" + new Path(rootObject[i].refMofId()).getSegment(4).toClassicRepresentation() + ")" : 
                                 label,
                             iconKey,
                             isEnabled
@@ -1426,6 +1426,7 @@ public final class ApplicationContext implements Serializable {
     
     /**
      * Get ui element definition for given element id.
+     * 
      * @param id
      * @return
      * @throws ServiceException
@@ -1440,6 +1441,7 @@ public final class ApplicationContext implements Serializable {
     
     /**
      * Get ui element definition for given element id.
+     * 
      * @param qualifiedName
      * @return
      * @throws ServiceException
@@ -1448,9 +1450,7 @@ public final class ApplicationContext implements Serializable {
         String qualifiedName
     ) throws ServiceException {
         org.openmdx.ui1.jmi1.ElementDefinition uiElementDefinition = 
-            this.getUiContext().getUiSegment(this.currentPerspective).getElementDefinition(
-                qualifiedName
-            );
+            this.getUiContext().getUiSegment(this.currentPerspective).getElementDefinition(qualifiedName);
         if(uiElementDefinition == null) {
             uiElementDefinition = this.getUiContext().getUiSegment(UiContext.MAIN_PERSPECTIVE).getElementDefinition(
                 qualifiedName
@@ -1461,6 +1461,7 @@ public final class ApplicationContext implements Serializable {
     
     /**
      * Get form definition for given form.
+     * 
      * @param name
      * @return
      * @throws ServiceException
@@ -1482,6 +1483,7 @@ public final class ApplicationContext implements Serializable {
     
     /**
      * Get definition for given feature.
+     * 
      * @param qualifiedFeatureName
      * @return
      * @throws ServiceException
@@ -1503,6 +1505,7 @@ public final class ApplicationContext implements Serializable {
 
     /**
      * Complete given filter value with configured wildcard patterns.
+     * 
      * @param filterValue
      * @return
      */

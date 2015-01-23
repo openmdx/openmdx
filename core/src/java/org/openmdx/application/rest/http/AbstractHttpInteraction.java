@@ -50,26 +50,30 @@ package org.openmdx.application.rest.http;
 import java.net.HttpURLConnection;
 
 import javax.resource.ResourceException;
-import javax.resource.cci.Connection;
 import javax.resource.cci.IndexedRecord;
 import javax.resource.cci.InteractionSpec;
 import javax.resource.cci.Record;
+import javax.resource.spi.CommException;
 
 import org.openmdx.application.rest.http.spi.Message;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.io.Closeables;
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.resource.cci.RestFunction;
+import org.openmdx.base.resource.spi.ResourceExceptions;
 import org.openmdx.base.resource.spi.RestInteractionSpec;
 import org.openmdx.base.rest.cci.MessageRecord;
+import org.openmdx.base.rest.cci.ObjectRecord;
+import org.openmdx.base.rest.cci.QueryRecord;
+import org.openmdx.base.rest.cci.RestConnection;
+import org.openmdx.base.rest.cci.ResultRecord;
 import org.openmdx.base.rest.spi.AbstractRestInteraction;
-import org.openmdx.base.rest.spi.Object_2Facade;
-import org.openmdx.base.rest.spi.Query_2Facade;
 import org.openmdx.base.rest.spi.RestFormatter;
 import org.openmdx.base.rest.spi.RestFormatters;
 import org.openmdx.base.rest.spi.RestParser;
 import org.openmdx.base.text.conversion.URITransformation;
 import org.openmdx.kernel.exception.BasicException;
+import org.xml.sax.SAXException;
 
 /**
  * Abstract HTTP Interaction
@@ -83,7 +87,7 @@ public abstract class AbstractHttpInteraction extends AbstractRestInteraction {
      * @param contextURL
      */
     protected AbstractHttpInteraction(
-        Connection connection,
+        RestConnection connection,
         String contextURL
     ) {
         super(connection);
@@ -123,11 +127,11 @@ public abstract class AbstractHttpInteraction extends AbstractRestInteraction {
         RestFunction.PUT,
         InteractionSpec.SYNC_SEND
     );
-    
+
     /**
      * The path to create (virtual) connection objects
      */
-    protected static final Path CONNECT_XRI = new Path("xri://@openmdx*org.openmdx.kernel/connection").lock();
+    protected static final Path CONNECT_XRI = new Path("xri://@openmdx*org.openmdx.kernel/connection");
     
     /**
      * Retrieve the connection's user name
@@ -154,7 +158,7 @@ public abstract class AbstractHttpInteraction extends AbstractRestInteraction {
     protected abstract Message newMessage (
         RestInteractionSpec ispec,
         Path xri
-    ) throws ServiceException;
+    ) throws ResourceException;
         
     /**
      * Provide the XRI based URL
@@ -165,7 +169,7 @@ public abstract class AbstractHttpInteraction extends AbstractRestInteraction {
      */
     protected String toRequestURL(
         Path resourceIdentifier
-    ) throws ServiceException{
+    ) throws ResourceException {
         String xri = resourceIdentifier.toXRI();
         return this.contextURL + '/' + URITransformation.encode(
             xri.substring(xri.charAt(14) == '*' ? 15 : 14)
@@ -186,9 +190,9 @@ public abstract class AbstractHttpInteraction extends AbstractRestInteraction {
     private boolean process(
         RestInteractionSpec interactionSpec,
         Path xri,
-        Object_2Facade input,
+        ObjectRecord input,
         IndexedRecord output
-    ) throws ServiceException {
+	) throws ResourceException {
         Message message = newMessage(interactionSpec, xri);
         restFormatter.format(message.getRequestBody(), input);
         return process(message, output);
@@ -207,10 +211,10 @@ public abstract class AbstractHttpInteraction extends AbstractRestInteraction {
      */
     private boolean process(
         RestInteractionSpec interactionSpec,
-        Query_2Facade input,
+        QueryRecord input,
         IndexedRecord output
-    ) throws ServiceException {
-        Message message = newMessage(interactionSpec, input.getPath());
+    ) throws ResourceException {
+        Message message = newMessage(interactionSpec, input.getResourceIdentifier());
         restFormatter.format(message.getRequestBody(), input);
         return process(message, output);
     }
@@ -228,37 +232,64 @@ public abstract class AbstractHttpInteraction extends AbstractRestInteraction {
     private boolean process(
         Message message,
         Record output
-    ) throws ServiceException {
+    ) throws ResourceException {
         int status = message.execute();
         if(status == HttpURLConnection.HTTP_OK){
-            RestParser.parseResponse(
-                output,
-                message.getResponseBody()
-            );
-        } else if (status >= 400) {
-        	BasicException remote;
-        	BasicException local;
             try {
-                remote = RestParser.parseException(message.getResponseBody());
-                local = null;
-            } catch (ServiceException exception) {
-                remote = null;
-                local = exception.getCause();
-            }
-            throw remote == null ? new ServiceException(
-                local,
-                BasicException.Code.DEFAULT_DOMAIN,
-                toExceptionCode(status),
-                "HTTP REST request failed",
-                new BasicException.Parameter("status", status)
-            ) : new ServiceException(
-                remote
-            );
+				RestParser.parseResponse(
+				    output,
+				    message.getResponseBody()
+				);
+			} catch (SAXException exception) {
+				throw ResourceExceptions.initHolder(
+					new CommException(
+						"Unable to parse the response",
+						BasicException.newEmbeddedExceptionStack(exception)
+					)
+				);
+			}
+        } else if (status >= 400) {
+        	throw getResourceException(status, message);
         } else {
             Closeables.close(message.getResponseBody());
         }
         return status >= 200 && status < 300;
     }
+
+	private ResourceException getResourceException(
+		int status, 
+		Message message
+	){
+		try {
+			return ResourceExceptions.toResourceException(
+				RestParser.parseException(message.getResponseBody())
+			);
+		} catch (SAXException exception) {
+		    return ResourceExceptions.initHolder(
+	    		new ResourceException(
+    				"HTTP REST request failed",
+    				BasicException.newEmbeddedExceptionStack(
+						BasicException.toExceptionStack(exception),
+						BasicException.Code.DEFAULT_DOMAIN,
+						toExceptionCode(status),
+						new BasicException.Parameter("status", status)
+					)
+				)
+    		);
+		} catch (ResourceException exception) {
+		    return ResourceExceptions.initHolder(
+	    		new ResourceException(
+    				"HTTP REST request failed as well as retrieving the remote exception",
+    				BasicException.newEmbeddedExceptionStack(
+						BasicException.toExceptionStack(exception),
+						BasicException.Code.DEFAULT_DOMAIN,
+						toExceptionCode(status),
+						new BasicException.Parameter("status", status)
+					)
+				)
+    		);
+		}
+	}
     
     /**
      * Map an openMDX exception code to a HTTP status code
@@ -281,59 +312,57 @@ public abstract class AbstractHttpInteraction extends AbstractRestInteraction {
     }
     
     /* (non-Javadoc)
-     * @see org.openmdx.base.rest.spi.AbstractRestInteraction#create(org.openmdx.base.resource.spi.RestInteractionSpec, org.openmdx.base.rest.spi.Object_2Facade, javax.resource.cci.IndexedRecord)
+     * @see org.openmdx.base.rest.spi.AbstractFacadeInteraction#create(org.openmdx.base.resource.spi.RestInteractionSpec, org.openmdx.base.rest.spi.Object_2Facade, javax.resource.cci.IndexedRecord)
      */
     @Override
     public boolean create(
         RestInteractionSpec interactionSpec,
-        Object_2Facade input,
-        IndexedRecord output
-    ) throws ServiceException {
-        return process(interactionSpec, input.getPath(), input, output);
+        ObjectRecord input,
+        ResultRecord output
+    ) throws ResourceException {
+        return process(interactionSpec, input.getResourceIdentifier(), input, output);
     }
 
     /* (non-Javadoc)
-     * @see org.openmdx.base.rest.spi.AbstractRestInteraction#delete(org.openmdx.base.resource.spi.RestInteractionSpec, org.openmdx.base.rest.spi.Object_2Facade, javax.resource.cci.IndexedRecord)
+     * @see org.openmdx.base.rest.spi.AbstractFacadeInteraction#delete(org.openmdx.base.resource.spi.RestInteractionSpec, org.openmdx.base.rest.spi.Object_2Facade, javax.resource.cci.IndexedRecord)
      */
     @Override
     public boolean delete(
         RestInteractionSpec interactionSpec,
-        Object_2Facade input,
-        IndexedRecord output
-    ) throws ServiceException {
+        ObjectRecord input
+    ) throws ResourceException {
         return process(
             RestFunction.DELETE == interactionSpec.getFunction() ? DELETE_SPEC : interactionSpec, 
-            input.getPath(), 
+            input.getResourceIdentifier(), 
             input, 
-            output
+            null
         );
     }
 
     /* (non-Javadoc)
-     * @see org.openmdx.base.rest.spi.AbstractRestInteraction#delete(org.openmdx.base.resource.spi.RestInteractionSpec, org.openmdx.base.rest.spi.Query_2Facade, javax.resource.cci.IndexedRecord)
+     * @see org.openmdx.base.rest.spi.AbstractFacadeInteraction#delete(org.openmdx.base.resource.spi.RestInteractionSpec, org.openmdx.base.rest.spi.Query_2Facade, javax.resource.cci.IndexedRecord)
      */
     @Override
     public boolean delete(
         RestInteractionSpec interactionSpec,
-        Query_2Facade input,
-        IndexedRecord output
-    ) throws ServiceException {
+        QueryRecord input
+    ) throws ResourceException {
         return process(
             RestFunction.DELETE == interactionSpec.getFunction() ? DELETE_SPEC : interactionSpec, 
             input, 
-            output
+            null
         );
     }
 
     /* (non-Javadoc)
-     * @see org.openmdx.base.rest.spi.AbstractRestInteraction#find(org.openmdx.base.resource.spi.RestInteractionSpec, org.openmdx.base.rest.spi.Query_2Facade, javax.resource.cci.IndexedRecord)
+     * @see org.openmdx.base.rest.spi.AbstractFacadeInteraction#find(org.openmdx.base.resource.spi.RestInteractionSpec, org.openmdx.base.rest.spi.Query_2Facade, javax.resource.cci.IndexedRecord)
      */
     @Override
     public boolean find(
         RestInteractionSpec interactionSpec,
-        Query_2Facade input,
-        IndexedRecord output
-    ) throws ServiceException {
+        QueryRecord input,
+        ResultRecord output
+    ) throws ResourceException {
         return process(
             RestFunction.GET == interactionSpec.getFunction() ? QUERY_SPEC : interactionSpec, 
             input, 
@@ -342,14 +371,14 @@ public abstract class AbstractHttpInteraction extends AbstractRestInteraction {
     }
 
     /* (non-Javadoc)
-     * @see org.openmdx.base.rest.spi.AbstractRestInteraction#get(org.openmdx.base.resource.spi.RestInteractionSpec, org.openmdx.base.rest.spi.Query_2Facade, javax.resource.cci.IndexedRecord)
+     * @see org.openmdx.base.rest.spi.AbstractFacadeInteraction#get(org.openmdx.base.resource.spi.RestInteractionSpec, org.openmdx.base.rest.spi.Query_2Facade, javax.resource.cci.IndexedRecord)
      */
     @Override
     public boolean get(
         RestInteractionSpec interactionSpec,
-        Query_2Facade input,
-        IndexedRecord output
-    ) throws ServiceException {
+        QueryRecord input,
+        ResultRecord output
+    ) throws ResourceException {
         return process(
             RestFunction.GET == interactionSpec.getFunction() ? QUERY_SPEC : interactionSpec, 
             input, 
@@ -358,54 +387,52 @@ public abstract class AbstractHttpInteraction extends AbstractRestInteraction {
     }
 
     /* (non-Javadoc)
-     * @see org.openmdx.base.rest.spi.AbstractRestInteraction#invoke(org.openmdx.base.resource.spi.RestInteractionSpec, javax.resource.cci.MessageRecord, javax.resource.cci.MessageRecord)
+     * @see org.openmdx.base.rest.spi.AbstractFacadeInteraction#invoke(org.openmdx.base.resource.spi.RestInteractionSpec, javax.resource.cci.MessageRecord, javax.resource.cci.MessageRecord)
      */
     @Override
     public boolean invoke(
         RestInteractionSpec interactionSpec,
         MessageRecord input,
         MessageRecord output
-    ) throws ServiceException {
-        Message message = newMessage(interactionSpec, input.getPath());
+    ) throws ResourceException {
+        Message message = newMessage(interactionSpec, input.getResourceIdentifier());
         restFormatter.format(message.getRequestBody(), "in", input);
         return process(message, output);
     }
 
     /* (non-Javadoc)
-     * @see org.openmdx.base.rest.spi.AbstractRestInteraction#move(org.openmdx.base.resource.spi.RestInteractionSpec, org.openmdx.base.naming.Path, org.openmdx.base.rest.spi.Object_2Facade, javax.resource.cci.IndexedRecord)
+     * @see org.openmdx.base.rest.spi.AbstractFacadeInteraction#move(org.openmdx.base.resource.spi.RestInteractionSpec, org.openmdx.base.naming.Path, org.openmdx.base.rest.spi.Object_2Facade, javax.resource.cci.IndexedRecord)
      */
     @Override
     public boolean move(
         RestInteractionSpec interactionSpec,
-        Path xri,
-        Object_2Facade input,
-        IndexedRecord output
-    ) throws ServiceException {
-        return process(interactionSpec, xri, input, output);
+        ObjectRecord input,
+        ResultRecord output
+    ) throws ResourceException {
+        return process(interactionSpec, new Path(input.getTransientObjectId()), input, output);
     }
 
     /* (non-Javadoc)
-     * @see org.openmdx.base.rest.spi.AbstractRestInteraction#put(org.openmdx.base.resource.spi.RestInteractionSpec, org.openmdx.base.rest.spi.Object_2Facade, javax.resource.cci.IndexedRecord)
+     * @see org.openmdx.base.rest.spi.AbstractFacadeInteraction#put(org.openmdx.base.resource.spi.RestInteractionSpec, org.openmdx.base.rest.spi.Object_2Facade, javax.resource.cci.IndexedRecord)
      */
     @Override
-    public boolean put(
+    public boolean update(
         RestInteractionSpec interactionSpec,
-        Object_2Facade input,
-        IndexedRecord output
-    ) throws ServiceException {
-        return process(interactionSpec, input.getPath(), input, output);
+        ObjectRecord input,
+        ResultRecord output
+    ) throws ResourceException {
+        return process(interactionSpec, input.getResourceIdentifier(), input, output);
     }
 
     /* (non-Javadoc)
-     * @see org.openmdx.base.rest.spi.AbstractRestInteraction#validate(org.openmdx.base.resource.spi.RestInteractionSpec, org.openmdx.base.rest.spi.Object_2Facade, javax.resource.cci.IndexedRecord)
+     * @see org.openmdx.base.rest.spi.AbstractFacadeInteraction#validate(org.openmdx.base.resource.spi.RestInteractionSpec, org.openmdx.base.rest.spi.Object_2Facade, javax.resource.cci.IndexedRecord)
      */
     @Override
-    public boolean validate(
+    public boolean verify(
         RestInteractionSpec interactionSpec,
-        Object_2Facade input,
-        IndexedRecord output
-    ) throws ServiceException {
-        return process(interactionSpec, input.getPath(), input, output);
+        ObjectRecord input
+    ) throws ResourceException {
+        return process(interactionSpec, input.getResourceIdentifier(), input, null);
     }
 
 }

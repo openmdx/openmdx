@@ -56,12 +56,12 @@ package org.openmdx.base.query;
  */
 public class IsInCondition extends Condition {
 
-    /**
+	/**
      * Constructor 
      */
     public IsInCondition(
     ) {
-        this.fulfils = false;
+    	super(toConditionType(false));
     }
 
     /**
@@ -81,26 +81,15 @@ public class IsInCondition extends Condition {
         super(
             quantifier,
             feature,
+            toConditionType(fulfil),
             values
         );
-        this.fulfils = fulfil;
     }
 
     /**
      * Implements <code>Serializable</code>
      */
-    private static final long serialVersionUID = 3905809681837732661L;
-
-    /**
-     * Defines whether the condition shall be <code>true</code> of <code>false</code>
-     */
-    private boolean fulfils;
-        
-    @Override 
-    public ConditionType getType(
-    ) {
-        return this.isFulfil() ? ConditionType.IS_IN : ConditionType.IS_NOT_IN;
-    }
+	private static final long serialVersionUID = -7380517630521447732L;
 
     /**
      * Clone the condition
@@ -119,23 +108,39 @@ public class IsInCondition extends Condition {
     }
 
     /**
-     * Tells whether the condition shall be <code>true</code> or <code>false</code>
-     * 
-     * @return <code>true</code> if the condition shall be fulfilled
-     */
-    public boolean isFulfil() {
-        return this.fulfils;
-    }
-
-    /**
      * Defines whether the condition shall be <code>true</code> or <code>false</code>
      * 
      * @param fulful <code>true</code> if the condition shall be fulfilled
      */
     public void setFulfil(
-        boolean fulfil
-    ) {
-        this.fulfils = fulfil;
+		boolean fulfil
+	) {
+    	super.setType(toConditionType(fulfil));
+    }
+    
+    /**
+     * Tells whether the condition shall be <code>true</code> or <code>false</code>
+     * 
+     * @return <code>true</code> if the condition shall be fulfilled
+     */
+    public boolean isFulfil() {
+    	final ConditionType type = getType();
+		switch(type) {
+	    	case IS_IN : return true;
+	    	case IS_NOT_IN : return false;
+	    	default: throw new IllegalStateException("An " + getClass().getSimpleName() + " requires another type: " + type);
+		}
     }
 
+    /**
+     * Convert the fulfil argument to the underlying condition type
+     * 
+     * @param fulfil
+     * 
+     * @return the corresponding condition type
+     */
+    private static ConditionType toConditionType(boolean fulfil) {
+    	return fulfil ? ConditionType.IS_IN : ConditionType.IS_NOT_IN;
+    }
+    
 }

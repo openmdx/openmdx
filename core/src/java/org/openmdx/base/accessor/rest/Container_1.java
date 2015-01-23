@@ -71,8 +71,9 @@ import org.openmdx.base.mof.cci.ModelElement_1_0;
 import org.openmdx.base.mof.cci.Model_1_0;
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.persistence.spi.TransientContainerId;
-import org.openmdx.base.query.Condition;
-import org.openmdx.base.query.Extension;
+import org.openmdx.base.rest.cci.ConditionRecord;
+import org.openmdx.base.rest.cci.QueryExtensionRecord;
+import org.openmdx.base.rest.cci.QueryFilterRecord;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.jdo.ReducedJDOHelper;
 
@@ -102,7 +103,7 @@ class Container_1
         this.ignoreCache = !this.isComposite();
         this.validate = this.openmdxjdoGetDataObjectManager().isProxy() ? null : Boolean.FALSE;
         this.cache = this.ignoreCache || this.isStored() ? null : new ConcurrentHashMap<String,DataObject_1_0>();
-        this.queries = new ConcurrentHashMap<String,BatchingList>();        
+        this.queries = new ConcurrentHashMap<QueryFilterRecord,BatchingList>();        
     }
 
     /**
@@ -151,7 +152,7 @@ class Container_1
     /**
      * Query to list mapping
      */
-    protected final ConcurrentMap<String,BatchingList> queries;
+    protected final ConcurrentMap<QueryFilterRecord,BatchingList> queries;
 
     /**
      * 
@@ -232,7 +233,7 @@ class Container_1
      * @see org.openmdx.base.accessor.rest.AbstractContainer_1#getFilter()
      */
     @Override
-    protected ObjectFilter getFilter() {
+    protected DataObjectFilter getFilter() {
         return null;
     }
 
@@ -282,7 +283,7 @@ class Container_1
      * @see org.openmdx.base.accessor.rest.AbstractContainer_1#getConditions()
      */
     @Override
-    protected List<Condition> getConditions() {
+    protected List<ConditionRecord> getConditions() {
         return null;
     }
 
@@ -290,7 +291,7 @@ class Container_1
      * @see org.openmdx.base.accessor.rest.AbstractContainer_1#getExtension()
      */
     @Override
-    protected List<Extension> getExtensions() {
+    protected List<QueryExtensionRecord> getExtensions() {
         return null;
     }
 
@@ -575,7 +576,7 @@ class Container_1
         	ModelElement_1_0 referencedType = ownerClass == null ?
                 model.getTypes(this.jdoGetObjectId())[2] :
                 model.getElementType(model.getFeatureDef(model.getElement(ownerClass), this.transientContainerId.getFeature(), false));
-	        this.queryType = (String)referencedType.getQualifiedName();
+	        this.queryType = referencedType.getQualifiedName();
         } catch (ServiceException exception) {
             exception.log();
         }
@@ -614,7 +615,7 @@ class Container_1
 
     ConcurrentMap<String, DataObject_1_0> getCache(){
         if(this.cache == null && !this.isIgnoreCache()) {
-            BatchingList stored = this.queries.get("");
+            BatchingList stored = this.queries.get(PLAIN);
             if(stored != null && stored.isSmallerThanCacheThreshold()){
                 this.openmdxjdoRetrieve(this.openmdxjdoGetDataObjectManager().getFetchPlan());
             }

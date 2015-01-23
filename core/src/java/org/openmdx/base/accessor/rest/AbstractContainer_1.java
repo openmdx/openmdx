@@ -78,36 +78,34 @@ import javax.jdo.spi.PersistenceCapable;
 import javax.jdo.spi.StateManager;
 import javax.resource.ResourceException;
 import javax.resource.cci.IndexedRecord;
-import javax.resource.cci.MappedRecord;
 import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.openmdx.base.accessor.cci.Container_1_0;
 import org.openmdx.base.accessor.cci.DataObject_1_0;
 import org.openmdx.base.accessor.cci.SystemAttributes;
 import org.openmdx.base.accessor.rest.spi.AbstractFilter;
+import org.openmdx.base.accessor.rest.spi.ObjectFilter;
 import org.openmdx.base.aop0.PlugIn_1_0;
 import org.openmdx.base.collection.Maps;
 import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
+import org.openmdx.base.mof.cci.ModelHelper;
 import org.openmdx.base.mof.cci.Model_1_0;
 import org.openmdx.base.mof.spi.Model_1Factory;
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.persistence.spi.PersistenceCapableCollection;
 import org.openmdx.base.persistence.spi.StandardFetchPlan;
 import org.openmdx.base.persistence.spi.TransientContainerId;
-import org.openmdx.base.query.AnyTypeCondition;
-import org.openmdx.base.query.Condition;
-import org.openmdx.base.query.ConditionType;
-import org.openmdx.base.query.Extension;
 import org.openmdx.base.query.Filter;
-import org.openmdx.base.query.OrderSpecifier;
-import org.openmdx.base.query.Quantifier;
-import org.openmdx.base.query.Selector;
 import org.openmdx.base.query.SortOrder;
+import org.openmdx.base.rest.cci.ConditionRecord;
+import org.openmdx.base.rest.cci.FeatureOrderRecord;
+import org.openmdx.base.rest.cci.ObjectRecord;
+import org.openmdx.base.rest.cci.QueryExtensionRecord;
+import org.openmdx.base.rest.cci.QueryFilterRecord;
 import org.openmdx.base.rest.cci.ResultRecord;
 import org.openmdx.base.rest.spi.Query_2Facade;
-import org.openmdx.base.text.conversion.JavaBeans;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.exception.Throwables;
 import org.openmdx.kernel.jdo.ReducedJDOHelper;
@@ -185,14 +183,14 @@ abstract class AbstractContainer_1 implements Container_1_0 {
      * 
      * @return the conditions
      */
-    protected abstract List<Condition> getConditions();
+    protected abstract List<ConditionRecord> getConditions();
     
     /**
      * The extension in case of a sub-map
      * 
      * @return the extension
      */
-    protected abstract List<Extension> getExtensions();
+    protected abstract List<QueryExtensionRecord> getExtensions();
     
     /**
      * Tells whether the cache must be ignored
@@ -206,7 +204,7 @@ abstract class AbstractContainer_1 implements Container_1_0 {
      * 
      * @return the filter
      */
-    protected abstract ObjectFilter getFilter();
+    protected abstract DataObjectFilter getFilter();
 
     /**
      * No need to provide caches for new objects
@@ -216,6 +214,8 @@ abstract class AbstractContainer_1 implements Container_1_0 {
         ObjectState.PERSISTENT_CLEAN, 
         ObjectState.PERSISTENT_DIRTY
     );
+    
+    protected static final QueryFilterRecord PLAIN = new Filter();
 
     /* (non-Javadoc)
      * @see org.openmdx.base.persistence.spi.PersistenceCapableCollection#openmdxjdoGetPersistenceManager()
@@ -367,10 +367,10 @@ abstract class AbstractContainer_1 implements Container_1_0 {
     @Override
     public List<DataObject_1_0> values(
         FetchPlan fetchPlan, 
-        OrderSpecifier... criteria
+        FeatureOrderRecord... criteria
     ) {
         return new OrderedValues(
-            ObjectComparator.getInstance(criteria), 
+            DataObjectComparator.getInstance(criteria), 
             fetchPlan == null ? StandardFetchPlan.newInstance(null) : fetchPlan
         );
     }
@@ -379,8 +379,8 @@ abstract class AbstractContainer_1 implements Container_1_0 {
      * @see org.openmdx.base.accessor.cci.Container_1_0#subMap(org.openmdx.base.query.Filter)
      */
     @Override
-    public Container_1_0 subMap(Filter filter) {
-        ObjectFilter objectFilter = ObjectFilter.getInstance(this.getFilter(), filter, isExtent());
+    public Container_1_0 subMap(QueryFilterRecord filter) {
+        DataObjectFilter objectFilter = DataObjectFilter.getInstance(this.getFilter(), filter, isExtent());
 		return objectFilter == null ? this : new Selection_1(this, objectFilter);
     }
 
@@ -454,34 +454,30 @@ abstract class AbstractContainer_1 implements Container_1_0 {
      * @return the stored objects
      */
     BatchingList getStored(
-        ObjectComparator comparator, 
+        DataObjectComparator comparator, 
         Set<String> fetchGroups
     ){
-        final OrderSpecifier[] order = comparator == null ? null : comparator.getDelegate();
-        List<Condition> conditions = getConditions();
-        List<Extension> extensions = getExtensions();
+        final FeatureOrderRecord[] order = comparator == null ? null : comparator.getDelegate();
+        final List<ConditionRecord> conditions = getConditions();
+        final List<QueryExtensionRecord> extensions = getExtensions();
         
-        String query;
-        String key;
+        final QueryFilterRecord query;
+        final QueryFilterRecord key;
         if(
             (conditions == null || conditions.isEmpty()) && 
             (order == null || order.length == 0) &&
             (extensions == null || extensions.isEmpty()) 
         ) {
             query = null;
-            key = "";
-        } else try {
-            key = query = JavaBeans.toXML(
-                new Filter(
-                    conditions, 
-                    order == null ? null : Arrays.asList(order), 
-                    extensions
-                )
+            key = PLAIN;
+        } else {
+            key = query = new Filter(
+                conditions, 
+                order == null ? null : Arrays.asList(order), 
+                extensions
             );
-        } catch (ServiceException exception) {
-            throw new RuntimeServiceException(exception);
         }
-        BatchingList stored = container().queries.get(key);
+        final BatchingList stored = container().queries.get(key);
         return stored == null ? Maps.putUnlessPresent(
             container().queries,
             key, 
@@ -817,14 +813,14 @@ abstract class AbstractContainer_1 implements Container_1_0 {
          * @param fetchGroups 
          */
         OrderedValues(
-            ObjectComparator comparator, 
+            DataObjectComparator comparator, 
             FetchPlan fetchPlan
         ){
             this.comparator = comparator;
             this.fetchPlan = fetchPlan;
         }
 
-        private final ObjectComparator comparator;
+        private final DataObjectComparator comparator;
         protected final FetchPlan fetchPlan;
         
         private BatchingCollection persistent;
@@ -1994,7 +1990,7 @@ abstract class AbstractContainer_1 implements Container_1_0 {
          */
         BatchingList(
             String queryType,
-            String query,
+            QueryFilterRecord query,
             Set<String> fetchGroups
         ) {
             this.queryType = queryType;
@@ -2004,7 +2000,7 @@ abstract class AbstractContainer_1 implements Container_1_0 {
         }
 
         private final String queryType;        
-        private final String query;        
+        private final QueryFilterRecord query;        
         private final Set<String> fetchGroups;
         private Reference<DataObjectSlice>[] sliceCache;
         private Integer total = null;
@@ -2092,7 +2088,7 @@ abstract class AbstractContainer_1 implements Container_1_0 {
         ) throws ServiceException {
             Path memberPattern = getFilter().getIdentityPattern();
             Path parentPattern = memberPattern.getPrefix(memberPattern.size() - 2);
-            String feature = memberPattern.get(parentPattern.size());
+            String feature = memberPattern.getSegment(parentPattern.size()).toClassicRepresentation();
             Model_1_0 model = Model_1Factory.getModel();
             for(Object c : AbstractContainer_1.this.openmdxjdoGetDataObjectManager().getManagedObjects(EMPTY_CACHE_CANDIDATES)){
                 DataObject_1_0 candidate = (DataObject_1_0) c;
@@ -2288,7 +2284,7 @@ abstract class AbstractContainer_1 implements Container_1_0 {
         ) throws ResourceException{
             Query_2Facade query = Query_2Facade.newInstance(AbstractContainer_1.this.container().jdoGetObjectId());
             query.setQueryType(this.queryType);
-            query.setQuery(this.query);
+            query.setQueryFilter(this.query);
             query.setGroups(this.fetchGroups);
             return query;
         }
@@ -2464,7 +2460,7 @@ abstract class AbstractContainer_1 implements Container_1_0 {
                             this.highWaterMark = highWaterMark.intValue();
                         }
                         for(Object o : cache) {
-                            this.slice.add(AbstractContainer_1.this.openmdxjdoGetDataObjectManager().receive((MappedRecord) o));
+                            this.slice.add(AbstractContainer_1.this.openmdxjdoGetDataObjectManager().receive((ObjectRecord) o));
                         }
                         boolean loaded = !this.slice.isEmpty(); 
                         if(loaded && !AbstractContainer_1.this.isIgnoreCache()) {
@@ -2879,450 +2875,6 @@ abstract class AbstractContainer_1 implements Container_1_0 {
         }
                 
     }
-    
-    
-    //------------------------------------------------------------------------
-    // Class ObjectComparator
-    //------------------------------------------------------------------------
-
-    /**
-     * Object Comparator
-     */
-    static final class ObjectComparator implements Comparator<DataObject_1_0> {
-
-        /**
-         * Constructor 
-         *
-         * @param order
-         */
-        private ObjectComparator(
-            OrderSpecifier[] order
-        ){
-            this.order = order;
-        }
-
-        /**
-         * 
-         */
-        private final OrderSpecifier[] order;
-
-        /**
-         * Retrieve an ObjectComparator instance
-         * 
-         * @param order
-         * 
-         * @return an ObjectComparator instance; or <code>null</code> if
-         * the order is <code>null</code> or has length <code>0</code>
-         */
-        static ObjectComparator getInstance(
-            OrderSpecifier[] order
-        ){
-            return order == null || order.length == 0 ? null : new ObjectComparator(order);
-        }
-        
-        @SuppressWarnings({"unchecked", "rawtypes"})
-        private static int compareValues(
-            Object left, 
-            Object right
-        ) {
-            if(left == null) {
-                return right == null ? 0 : -1;
-            } else if (right == null) {
-                return +1;
-            } else if(left instanceof XMLGregorianCalendar) {
-                if(left instanceof ImmutableDatatype<?> != right instanceof ImmutableDatatype<?>){
-                    ImmutableDatatypeFactory datatypeFactory = DatatypeFactories.immutableDatatypeFactory();
-                    return datatypeFactory.toDate((XMLGregorianCalendar) left).compare(datatypeFactory.toDate((XMLGregorianCalendar) right));
-                } else {
-                    return ((XMLGregorianCalendar)left).compare((XMLGregorianCalendar) right);
-                }
-            } else {
-                return ((Comparable)left).compareTo(right);
-            }
-        }
-        
-        @Override
-        public int compare(
-            DataObject_1_0 ox, 
-            DataObject_1_0 oy
-        ) {
-            if(this.order == null){
-                if(ox.jdoIsPersistent()) {
-                    if(oy.jdoIsPersistent()) {
-                        Path ix = (Path) ReducedJDOHelper.getObjectId(ox); 
-                        Path iy = (Path) ReducedJDOHelper.getObjectId(oy); 
-                        return ix.compareTo(iy);
-                    } else {
-                        return +1;
-                    }
-                } else {
-                    if(oy.jdoIsPersistent()) {
-                        return -1;
-                    } else {
-                        UUID ix = (UUID) ReducedJDOHelper.getTransactionalObjectId(ox);
-                        UUID iy = (UUID) ReducedJDOHelper.getTransactionalObjectId(oy);
-                        return ix.compareTo(iy);
-                    }
-                }
-            } else {
-                for(OrderSpecifier s : this.order){
-                    if(s.getSortOrder() != SortOrder.UNSORTED) try {
-                        Object vx = ox.objGetValue(s.getFeature());
-                        Object vy = oy.objGetValue(s.getFeature());
-                        int c = ObjectComparator.compareValues(vx,vy);
-                        if (c != 0) {
-                            return s.getSortOrder() == SortOrder.ASCENDING ? c : -c;
-                        }
-                    } catch (ServiceException excpetion) {
-                        // exclude field from comparison
-                    }
-                }
-                return 0;
-            }
-        }
-
-        @Override
-        public boolean equals(Object that) {
-            return 
-                that instanceof ObjectComparator &&
-                Arrays.equals(this.order, ((ObjectComparator) that).order);
-        }
-
-        @Override
-        public int hashCode() {
-            return Arrays.hashCode(this.order);
-        }
-
-        public OrderSpecifier[] getDelegate(
-        ){
-            return this.order;
-        }
-        
-    }
-    
-    
-    //------------------------------------------------------------------------
-    // Class ObjectFilter
-    //------------------------------------------------------------------------
-    
-    /**
-     * Object Filter
-     */
-    static final class ObjectFilter extends ModelAwareFilter {
-        
-        /**
-         * Constructor for a sub-class aware filter
-         *
-         * @param superFilter
-         * @param filter
-         * @param extentQuery
-         *
-         * @exception   IllegalArgumentException
-         *              in case of an invalid filter property set
-         * @exception   NullPointerException
-         *              if the filter is <code>null</code>
-         */
-        private ObjectFilter(
-            ObjectFilter superFilter,
-            Filter filter, 
-            boolean extentQuery
-        ){
-            super(filter.getCondition());
-            this.superFilter = superFilter;
-            List<Extension> extensions = filter.getExtension();
-            this.extensions =
-                extensions != null ? extensions : // the super filter's extension is superseded
-                superFilter != null ? superFilter.getExtensions() : 
-                null;
-            this.evaluateSuperFilterFirst = ObjectFilter.isSuperFilterEvaluatedFirst(this.filter);
-            this.extentQuery = extentQuery && isIdentityCondition(this.filter[1]);
-        }
-
-        /**
-         * Implements <code>Serializable</code>
-         */
-        private static final long serialVersionUID = 875014812028655977L;
-        
-        /**
-         * 
-         */
-        private final Selector superFilter;
-        
-        /**
-         * The delegate includes the super-filter's conditions
-         */
-        private transient Condition[] delegate;
-        
-        /**
-         * 
-         */
-        private final boolean evaluateSuperFilterFirst;
-        
-        /**
-         * 
-         */
-        private final List<Extension> extensions;
- 
-        /**
-         * 
-         */
-        private final boolean extentQuery;
-        
-        
-        /* (non-Javadoc)
-         * @see org.openmdx.base.accessor.rest.ModelAwareFilter#meetsCondition(java.lang.Object, int, org.openmdx.base.query.Condition)
-         */
-        @Override
-        protected boolean meetsCondition(
-            Object candidate,
-            int conditionIndex,
-            Condition condition
-        ) {
-            if(this.extentQuery && conditionIndex == 1){
-                return true; // Condition handled by containment test
-            } else {
-            	return super.meetsCondition(candidate, conditionIndex, condition);
-            }
-        }
-
-        /**
-         * Object filter factory
-         * 
-         * @param superFilter
-         * @param subFilter
-         * @param extentQuery 
-         * 
-         * @return a new object filter
-         */
-        static final ObjectFilter getInstance (
-            ObjectFilter superFilter,
-            Filter subFilter, 
-            boolean extentQuery
-        ){
-            if(subFilter == null) {
-                return null;
-            }
-            List<Condition> conditions = subFilter.getCondition();
-            List<Extension> extensions = subFilter.getExtension();
-            if(
-                (conditions == null || conditions.isEmpty()) && // TODO detect idempotent conditions
-                (extensions == null || extensions.isEmpty())
-            ){
-                return null;
-            }
-            return new ObjectFilter(
-                superFilter,
-                subFilter,
-                extentQuery
-            );
-        }
-
-        protected static boolean isSuperFilterEvaluatedFirst(
-            Condition[] conditions
-        ){
-            for(Condition condition : conditions) {
-                String name = condition.getFeature(); 
-                if(
-                    SystemAttributes.OBJECT_CLASS.equals(name) ||
-                    SystemAttributes.OBJECT_INSTANCE_OF.equals(name)
-                ) {
-                    return false;
-                }
-            }
-            return true;
-        }
-        
-        /* (non-Javadoc)
-         * @see org.openmdx.base.accessor.rest.ModelAwareFilter#newFilter(org.openmdx.base.query.Filter)
-         */
-        @Override
-        protected AbstractFilter newFilter(Filter delegate) {
-            return getInstance(null, delegate, this.extentQuery);
-        }
-
-        private List<Condition> buildDelegate(
-            PersistenceManager persistenceManager
-        ){
-            List<Condition> delegate = this.superFilter instanceof ObjectFilter ? 
-                ((ObjectFilter)this.superFilter).buildDelegate(persistenceManager) :
-                new ArrayList<Condition>();
-            delegate.addAll(super.getDelegate(persistenceManager));
-            return delegate;
-        }
-
-        /**
-         * Tells whether a filer property has to be updated because it contains 
-         * a transient object id
-         * 
-         * @param property the filter property to be tested
-         * 
-         * @return <code>true</code> if the property contains a transient object id
-         */
-        private boolean containsTransientObjectId(
-            Condition property
-        ){
-            for (Object value : property.getValue()) {
-                if(value instanceof UUID) {
-                    return true;
-                }
-            }
-            return false;
-        }
-
-        /**
-         * Replace transient object id's by appropriate paths
-         * 
-         * @param source the filter property
-         * 
-         * @return a property without transient object ids
-         */
-        private Condition replaceTransientObjectIds(
-            PersistenceManager persistenceManager,
-            Condition property
-        ){
-            Object[] source = property.getValue();
-            Object[] target = new Object[source.length];
-            int i = 0;
-            for(Object value : source) {
-                if(value instanceof UUID) {
-                    Object object = persistenceManager.getObjectById(value);
-                    target[i++] = ReducedJDOHelper.isPersistent(object) ? ReducedJDOHelper.getObjectId(object) : new Path((UUID)value);
-                } else {
-                    target[i++] = value;
-                }
-            }
-            return new AnyTypeCondition(
-                property.getQuantifier(),
-                property.getFeature(),
-                property.getType(),
-                target
-            );
-        }
-
-        @Override
-        public List<Condition> getDelegate(
-            PersistenceManager persistenceManager
-        ) {
-            if(this.delegate == null) {
-                List<Condition> delegate = this.buildDelegate(persistenceManager);
-                this.delegate = new Condition[delegate.size()];
-                int i = 0;
-                for(Condition property : delegate) {
-                    this.delegate[i++] = this.containsTransientObjectId(property) ? this.replaceTransientObjectIds(
-                        persistenceManager,
-                        property
-                    ) : property;
-                }
-            }
-            return Arrays.asList(this.delegate);
-        }
-
-        /**
-         * Retrieve the extension
-         * 
-         * @return the extension
-         */
-        protected List<Extension> getExtensions(
-        ){
-            return this.extensions;
-        }
-        
-        @Override
-        public boolean accept(Object candidate) {
-            return this.superFilter == null ? ( 
-                super.accept(candidate)
-            ) : this.evaluateSuperFilterFirst ? (
-                this.superFilter.accept(candidate) && super.accept(candidate)
-            ) : (
-                super.accept(candidate) && this.superFilter.accept(candidate)
-            );
-        }
-
-        /* (non-Javadoc)
-         * @see org.openmdx.base.query.AbstractFilter#equal(java.lang.Object, java.lang.Object)
-         */
-        @Override
-        protected boolean equal(
-            Object candidate, 
-            Object value
-        ) {
-            if(candidate == value) {
-                return true;
-            } else if(candidate instanceof DataObject_1_0) {
-                if(value instanceof UUID) {
-                    return value.equals(ReducedJDOHelper.getTransactionalObjectId(candidate));
-                } else if(value instanceof Path) {
-                    Path oid = (Path)value;
-                    if(oid.isTransactionalObjectId()) {
-                        return oid.toTransactionalObjectId().equals(ReducedJDOHelper.getTransactionalObjectId(candidate));
-                    } else {
-                        return oid.equals(ReducedJDOHelper.getObjectId(candidate));
-                    }
-                } else {
-                    return false;
-                }
-            } else {
-                return super.equal(candidate, value);
-            }
-        }
-        
-        /**
-         * Retrieve the model class corresponding to the pattern
-         * 
-         * @param pattern
-         * 
-         * @return the qualified model class name
-         */
-        private String getType(Path pattern) {
-            try {
-                return (String)Model_1Factory.getModel().getTypes(pattern)[2].objGetValue("qualifiedName") ;
-            } catch (ServiceException exception) {
-                return "";
-            }
-        }
-
-        private boolean isInstanceOfCondition(
-            Condition condition
-        ){
-            return 
-                SystemAttributes.OBJECT_INSTANCE_OF.equals(condition.getFeature()) &&
-                condition.getQuantifier() == Quantifier.THERE_EXISTS &&
-                condition.getType() == ConditionType.IS_IN &&
-                condition.getValue().length == 1; 
-        }
-        
-        private boolean isInstanceOfCondition(
-            Condition condition,
-            String type
-        ){
-            return 
-                isInstanceOfCondition(condition) &&
-                condition.getValue()[0].equals(type); 
-        }
-
-        private boolean isIdentityCondition(
-            Condition condition
-        ){
-            return 
-                SystemAttributes.OBJECT_IDENTITY.equals(condition.getFeature()) &&
-                condition.getQuantifier() == Quantifier.THERE_EXISTS &&
-                condition.getType() == ConditionType.IS_LIKE &&
-                condition.getValue().length == 1;
-        }
-        
-        protected Path getIdentityPattern(){
-            return new Path((String)this.filter[1].getValue()[0]);
-        }
-        
-        boolean isPlainExtent(){
-            return
-                this.filter.length == 2 && 
-                isIdentityCondition(this.filter[1]) &&
-                isInstanceOfCondition(this.filter[0], getType(getIdentityPattern()));
-        }
-        
-    }
-
     
     //------------------------------------------------------------------------
     // Class JoiningList
@@ -4210,5 +3762,266 @@ abstract class AbstractContainer_1 implements Container_1_0 {
         }
 
     }    
+
+    //------------------------------------------------------------------------
+    // Class ObjectComparator
+    //------------------------------------------------------------------------
+
+    /**
+     * Object Comparator
+     */
+    static final class DataObjectComparator implements Comparator<DataObject_1_0> {
+
+        /**
+         * Constructor 
+         *
+         * @param order
+         */
+        private DataObjectComparator(
+            FeatureOrderRecord[] order
+        ){
+            this.order = order;
+        }
+
+        /**
+         * 
+         */
+        private final FeatureOrderRecord[] order;
+
+        /**
+         * Retrieve an ObjectComparator instance
+         * 
+         * @param order
+         * 
+         * @return an ObjectComparator instance; or <code>null</code> if
+         * the order is <code>null</code> or has length <code>0</code>
+         */
+        static DataObjectComparator getInstance(
+            FeatureOrderRecord[] order
+        ){
+            return order == null || order.length == 0 ? null : new DataObjectComparator(order);
+        }
+        
+        @SuppressWarnings({"unchecked", "rawtypes"})
+        private static int compareValues(
+            Object left, 
+            Object right
+        ) {
+            if(left == null) {
+                return right == null ? 0 : -1;
+            } else if (right == null) {
+                return +1;
+            } else if(left instanceof XMLGregorianCalendar) {
+                if(left instanceof ImmutableDatatype<?> != right instanceof ImmutableDatatype<?>){
+                    ImmutableDatatypeFactory datatypeFactory = DatatypeFactories.immutableDatatypeFactory();
+                    return datatypeFactory.toDate((XMLGregorianCalendar) left).compare(datatypeFactory.toDate((XMLGregorianCalendar) right));
+                } else {
+                    return ((XMLGregorianCalendar)left).compare((XMLGregorianCalendar) right);
+                }
+            } else {
+                return ((Comparable)left).compareTo(right);
+            }
+        }
+        
+        @Override
+        public int compare(
+            DataObject_1_0 ox, 
+            DataObject_1_0 oy
+        ) {
+            if(this.order == null){
+                if(ox.jdoIsPersistent()) {
+                    if(oy.jdoIsPersistent()) {
+                        Path ix = (Path) ReducedJDOHelper.getObjectId(ox); 
+                        Path iy = (Path) ReducedJDOHelper.getObjectId(oy); 
+                        return ix.compareTo(iy);
+                    } else {
+                        return +1;
+                    }
+                } else {
+                    if(oy.jdoIsPersistent()) {
+                        return -1;
+                    } else {
+                        UUID ix = (UUID) ReducedJDOHelper.getTransactionalObjectId(ox);
+                        UUID iy = (UUID) ReducedJDOHelper.getTransactionalObjectId(oy);
+                        return ix.compareTo(iy);
+                    }
+                }
+            } else {
+                for(FeatureOrderRecord s : this.order){
+                    if(s.getSortOrder() != SortOrder.UNSORTED) try {
+                        Object vx = ox.objGetValue(s.getFeature());
+                        Object vy = oy.objGetValue(s.getFeature());
+                        int c = DataObjectComparator.compareValues(vx,vy);
+                        if (c != 0) {
+                            return s.getSortOrder() == SortOrder.ASCENDING ? c : -c;
+                        }
+                    } catch (ServiceException excpetion) {
+                        // exclude field from comparison
+                    }
+                }
+                return 0;
+            }
+        }
+
+        @Override
+        public boolean equals(Object that) {
+            return 
+                that instanceof DataObjectComparator &&
+                Arrays.equals(this.order, ((DataObjectComparator) that).order);
+        }
+
+        @Override
+        public int hashCode() {
+            return Arrays.hashCode(this.order);
+        }
+
+        public FeatureOrderRecord[] getDelegate(
+        ){
+            return this.order;
+        }
+        
+    }
+
+    //------------------------------------------------------------------------
+    // Class DataObjectFilter
+    //------------------------------------------------------------------------
+
+    static class DataObjectFilter extends ObjectFilter {
+
+		protected DataObjectFilter(
+			DataObjectFilter superFilter,
+			QueryFilterRecord filter, 
+			boolean extentQuery
+		) {
+			super(superFilter, filter, extentQuery);
+		}
+
+		/**
+		 * Implements <code>Serializable</code>
+		 */
+		private static final long serialVersionUID = 7352255651343841409L;
+		
+		/* (non-Javadoc)
+		 * @see org.openmdx.base.accessor.rest.ObjectFilter#newFilter(org.openmdx.base.rest.cci.QueryFilterRecord)
+		 */
+		@Override
+		protected AbstractFilter newFilter(QueryFilterRecord delegate) {
+			return new DataObjectFilter(null, delegate, this.extentQuery);
+		}
+
+		/* (non-Javadoc)
+		 * @see org.openmdx.base.accessor.rest.ObjectFilter#equal(java.lang.Object, java.lang.Object)
+		 */
+		@Override
+		protected boolean equal(Object candidate, Object value) {
+	        if(candidate instanceof DataObject_1_0) {
+	        	if(value instanceof UUID) {
+	        		return value.equals(ReducedJDOHelper.getTransactionalObjectId(candidate));
+	        	} else if(value instanceof Path) {
+	        		Path oid = (Path)value;
+	        		if(oid.isTransactionalObjectId()) {
+	        			return oid.toTransactionalObjectId().equals(ReducedJDOHelper.getTransactionalObjectId(candidate));
+	        		} else {
+	        			return oid.equals(ReducedJDOHelper.getObjectId(candidate));
+	        		}
+	        	} else {
+	        		return false;
+	        	}
+	        } else {
+				return super.equal(candidate, value);
+	        }
+		}
+    	
+	    protected ModelElement_1_0 getClassifier(
+    		Object object
+        ){
+    		try {
+				return ((DataObject_1)object).getClassifier();
+			} catch (ServiceException e) {
+				throw new RuntimeServiceException(e);
+			}
+        }
+        
+    	protected boolean isEmpty(
+    		Object object,
+    		final String featureName, 
+    		QueryFilterRecord filter
+    	) throws ServiceException {
+    		return ((DataObject_1)object).objGetContainer(featureName).subMap(filter).isEmpty();
+    	}
+
+        @Override
+        protected Iterator<?> getValuesIterator(
+            Object candidate, 
+            ConditionRecord condition
+        ){
+        	try {
+	            String attribute = condition.getFeature();
+	            DataObject_1 object = (DataObject_1)candidate;
+	            String objectClass = object.objGetClass();
+	            if(SystemAttributes.OBJECT_CLASS.equals(attribute)){
+	                return Collections.singleton(objectClass).iterator();
+	            } else {    
+	                ModelElement_1_0 classifier = getClassifier(candidate);
+	                if(SystemAttributes.OBJECT_INSTANCE_OF.equals(attribute)){
+	                    return newInstanceOfIterator(classifier);
+	                } else if("core".equals(attribute) && isCoreInstance(classifier)){
+	                	return Collections.emptySet().iterator();
+	                } else {
+	                    ModelElement_1_0 featureDef = classifier.getModel().getFeatureDef(classifier, attribute, false);
+	                    switch(ModelHelper.getMultiplicity(featureDef)) {
+	                        case LIST:
+	                            return object.objGetList(attribute).iterator();
+	                        case SET:
+	                            return object.objGetSet(attribute).iterator();
+	                        case SPARSEARRAY:
+	                            return object.objGetSparseArray(attribute).values().iterator();
+	                        default:
+	                            Object value = object.objGetValue(attribute);
+	                            return (
+	                                value == null ? Collections.emptySet() : Collections.singleton(value)
+	                            ).iterator();
+	                    }
+	                }
+	            }
+        	} catch (ServiceException exception) {
+        		throw new RuntimeServiceException(exception);
+        	}
+        }
+        
+	    /**
+	     * Object filter factory
+	     * 
+	     * @param superFilter
+	     * @param subFilter
+	     * @param extentQuery 
+	     * 
+	     * @return a new object filter
+	     */
+	    static DataObjectFilter getInstance (
+	        DataObjectFilter superFilter,
+	        QueryFilterRecord subFilter, 
+	        boolean extentQuery
+	    ){
+	        if(subFilter == null) {
+	            return null;
+	        }
+	        List<ConditionRecord> conditions = subFilter.getCondition();
+	        List<QueryExtensionRecord> extensions = subFilter.getExtension();
+	        if(
+	            (conditions == null || conditions.isEmpty()) && // TODO detect idempotent conditions
+	            (extensions == null || extensions.isEmpty())
+	        ){
+	            return null;
+	        }
+	        return new DataObjectFilter(
+	            superFilter,
+	            subFilter,
+	            extentQuery
+	        );
+	    }
+
+
+    }
     
 }

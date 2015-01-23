@@ -147,6 +147,7 @@ public abstract class AbstractXMLStreamWriter implements XMLStreamWriter, LargeO
         BasicException cause = BasicException.toExceptionStack(exception);
         return new XMLStreamException(cause.getMessage(), cause);
     }
+
     
     /* (non-Javadoc)
      * @see javax.xml.stream.XMLStreamWriter#getNamespaceContext()
@@ -204,7 +205,7 @@ public abstract class AbstractXMLStreamWriter implements XMLStreamWriter, LargeO
     }
     
     /**
-     * Retrieve the current default namespace URIbound
+     * Retrieve the current default namespace URI
      * 
      * @return  the current default namespace URI
      */
@@ -272,7 +273,7 @@ public abstract class AbstractXMLStreamWriter implements XMLStreamWriter, LargeO
      */
     @Override
     public void setDefaultNamespace(
-        String namespaceURI//  @Override
+        String namespaceURI
     ) throws XMLStreamException {
         this.namespaceContext.put(XMLConstants.DEFAULT_NS_PREFIX, namespaceURI);
     }

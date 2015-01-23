@@ -1,14 +1,13 @@
 /*
  * ====================================================================
- * Project:     openMDX/Core, http://www.openmdx.org/
- * Description: RemoteConnectionMetaData 
+ * Project:     openMDX, http://www.openmdx.org/
+ * Description: REST connection meta data
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
  * ====================================================================
  *
- * This software is published under the BSD license
- * as listed below.
+ * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2009, OMEX AG, Switzerland
+ * Copyright (c) 2014, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -46,70 +45,73 @@
  * This product includes software developed by other organizations as
  * listed in the NOTICE file.
  */
-
 package org.openmdx.base.persistence.spi;
 
 import java.io.Serializable;
+import java.util.Collections;
+import java.util.List;
 
+import javax.annotation.Nonnull;
 import javax.resource.ResourceException;
 import javax.resource.cci.ConnectionMetaData;
 
+import org.openmdx.base.Version;
+
 /**
- * RestConnectionMetaData
- *
+ * REST connection meta data
  */
 public class RestConnectionMetaData implements ConnectionMetaData, Serializable {
-    
-    /**
-     * Constructor 
-     *
-     * @param userName
-     */
-    public RestConnectionMetaData(
-        String eisVersion,
-        String userName
-    ) {
-        this.eisVersion = eisVersion;
-        this.userName = userName;
-    }
 
-    /**
-     * Implements <code>Serializable</code>
-     */
-    private static final long serialVersionUID = 5373493733938348266L;
+	/**
+	 * Use the VM's user name
+	 */
+	public RestConnectionMetaData() {
+		this(Collections.singletonList(System.getProperty("user.name")));
+	}
 
-    /**
-     * The EIS user name
-     */
-    private final String userName;
+	/**
+	 * Use the given principal chain
+	 * 
+	 * @param principalChain
+	 */
+	public RestConnectionMetaData(
+		@Nonnull List<String> principalChain
+	) {
+		this.userName = principalChain.toString();
+	}
 
+	/**
+	 * The "encoded" principal chain
+	 */
+	private final String userName;
+	
+	/**
+	 * Implements <code>Serializable</code>
+	 */
+	private static final long serialVersionUID = 7537117823051959371L;
+	
     /**
-     * The EIS user name
-     */
-    private final String eisVersion;
-    
-    /* (non-Javadoc)
-     * @see javax.resource.cci.ConnectionMetaData#getEISProductName()
+     * It's an openMDX connection
      */
     public String getEISProductName(
     ) throws ResourceException {
         return "openMDX/REST";
     }
 
-    /* (non-Javadoc)
-     * @see javax.resource.cci.ConnectionMetaData#getEISProductVersion()
+    /**
+     * with the given openMDX version
      */
     public String getEISProductVersion(
     ) throws ResourceException {
-        return this.eisVersion;
+        return Version.getSpecificationVersion();
     }
 
-    /* (non-Javadoc)
-     * @see javax.resource.cci.ConnectionMetaData#getUserName()
+    /**
+     * Use the stringified principal chain
      */
     public String getUserName(
     ) throws ResourceException {
         return this.userName;
     }
-
+	
 }

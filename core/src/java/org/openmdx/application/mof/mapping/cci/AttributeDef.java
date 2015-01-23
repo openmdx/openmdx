@@ -63,17 +63,17 @@ public class AttributeDef
     Model_1_0 model 
   ) throws ServiceException {
     this(
-        (String)attributeDef.getName(),
-        (String)attributeDef.getQualifiedName(),
+        attributeDef.getName(),
+        attributeDef.getQualifiedName(),
         (String)attributeDef.objGetValue("annotation"),
         new HashSet<Object>(attributeDef.objGetList("stereotype")),
         (String)attributeDef.objGetValue("visibility"),
-        (String)model.getElementType(
+        model.getElementType(
             attributeDef
          ).getQualifiedName(),
-        (String)attributeDef.getMultiplicity(),
-        (Boolean)attributeDef.isChangeable(),
-        (Boolean)attributeDef.isDerived() 
+        attributeDef.getMultiplicity(),
+        attributeDef.isChangeable(),
+        attributeDef.isDerived() 
     );
   }
 

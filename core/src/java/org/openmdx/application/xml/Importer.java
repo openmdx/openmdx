@@ -61,20 +61,21 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 import javax.jdo.PersistenceManager;
-import javax.resource.cci.MappedRecord;
 
-import org.openmdx.application.dataprovider.cci.DataproviderRequestProcessor;
 import org.openmdx.application.xml.jmi.BasicImportPlugIn;
 import org.openmdx.application.xml.jmi.PersistenceManagerTarget;
 import org.openmdx.application.xml.jmi.StateImportPlugIn;
-import org.openmdx.application.xml.spi.DataproviderTarget;
+import org.openmdx.application.xml.spi.Dataprovider_1Target;
+import org.openmdx.application.xml.spi.Dataprovider_2Target;
 import org.openmdx.application.xml.spi.ImportHelper;
 import org.openmdx.application.xml.spi.ImportMode;
 import org.openmdx.application.xml.spi.ImportTarget;
 import org.openmdx.application.xml.spi.MapTarget;
+import org.openmdx.base.dataprovider.cci.Channel;
 import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.naming.Path;
+import org.openmdx.base.rest.cci.ObjectRecord;
 import org.openmdx.kernel.xml.AdaptiveInputStreamReader;
 import org.xml.sax.ErrorHandler;
 import org.xml.sax.InputSource;
@@ -323,7 +324,7 @@ public class Importer {
      * @return the corresponding <code>ImportTarget</code>
      */
     public static ImportTarget asTarget(
-        Map<Path,MappedRecord> target
+        Map<Path,ObjectRecord> target
     ){
         return new MapTarget(target);
     }
@@ -334,11 +335,27 @@ public class Importer {
      * @param target
      * 
      * @return the corresponding <code>ImportTarget</code>
+     * 
+     * @deprecated will not be supported by the data provider 2 stack 
+     */
+    @Deprecated
+    public static ImportTarget asTarget(
+   		org.openmdx.application.dataprovider.cci.DataproviderRequestProcessor target
+    ){
+        return new Dataprovider_1Target(target);
+    }
+    
+    /**
+     * <code>ImportTarget</code> factory method
+     * 
+     * @param target
+     * 
+     * @return the corresponding <code>ImportTarget</code>
      */
     public static ImportTarget asTarget(
-        DataproviderRequestProcessor target
+    		Channel target
     ){
-        return new DataproviderTarget(target);
+        return new Dataprovider_2Target(target);
     }
     
     /**

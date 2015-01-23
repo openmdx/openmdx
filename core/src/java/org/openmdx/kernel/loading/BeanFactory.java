@@ -48,36 +48,52 @@
 package org.openmdx.kernel.loading;
 
 import java.lang.reflect.Array;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 
+import org.openmdx.kernel.configuration.Configuration;
+import org.openmdx.kernel.configuration.MapConfiguration;
 import org.openmdx.kernel.exception.BasicException;
+import org.w3c.cci2.SparseArray;
+import org.w3c.spi.PrimitiveTypeParsers;
 
 /**
  * Bean Factory
+ * <p>
+ * The following configuration entry names are reserved<ul>
+ * <li><code>class</code>, the class to be instantiated
+ * <li><code>interface</code>, the class to be exposed by the factory
+ * </ul>
+ * <p>
+ * The instance is treated as java bean, i.e. it is instantiated via
+ * default constructor and the configuration is applied through its
+ * setters.
  */
 public class BeanFactory<T> implements Factory<T> {
 
-    /**
+	/**
      * Constructor 
      *
-     * @param instanceClass the instance class, often an interface
-     * @param beanClass the Java bean class
-     * @param settings the settings to be kept by the bean factory
+     * @param declaredClass the instance class, often an interface
+     * @param actualClass the Java bean class
+     * @param configuration the configuration to be kept by the bean factory
      */
-    public BeanFactory(
-    	Class<T> instanceClass,	
-        Class<? extends T> beanClass,
-        Map<String,?> settings
+    protected BeanFactory(
+    	Class<T> declaredClass,	
+        Class<? extends T> actualClass,
+        Configuration configuration
     ){
-        this.instanceClass = instanceClass;
-        this.beanClass = beanClass;
-        this.settings = settings;
+        this.declaredClass = declaredClass;
+        this.actualClass = actualClass;
+        this.configuration = configuration;
     }
 
     /**
@@ -86,28 +102,36 @@ public class BeanFactory<T> implements Factory<T> {
      * @param beanClass the Java Bean and instance class
      * @param settings the settings to be kept by the bean factory
      */
-    public BeanFactory(
+    private BeanFactory(
         Class<T> beanClass,
-        Map<String,?> settings
+        Configuration configuration
     ){
-    	this(beanClass, beanClass, settings);
+    	this(beanClass, beanClass, configuration);
     }
     
     /**
      * The instance class
      */
-    private final Class<T> instanceClass;
+    protected final Class<T> declaredClass;
     
     /**
      * The Java Bean class
      */
-    private final Class<? extends T> beanClass;
+    protected final Class<? extends T> actualClass;
 
     /**
-     * 
+     * The configuration is applied to the Java Bean
      */
-    private final Map<String,?> settings;
+    protected final Configuration configuration;
 
+    /**
+     * The class configuration entries are not propagated to the Java Bean.
+     */
+    private final static Collection<String> RESERVED_ENTRIES = Arrays.asList(
+    	"class",
+    	"interface"
+	);
+    
     /**
      * The eagerly acquired Java bean introspector
      */
@@ -116,6 +140,15 @@ public class BeanFactory<T> implements Factory<T> {
         BeanIntrospector.class
     );
 
+    /**
+     * Get the bean instances' class
+     * 
+     * @return the bean instances' class
+     */
+    public Class<T> getInstanceClass(){
+    	return this.declaredClass;
+    }
+    
     /**
      * Create a factory for the given class.
      * <p>
@@ -129,18 +162,20 @@ public class BeanFactory<T> implements Factory<T> {
      * @return a factory for the given class
      */
     public static Factory<?> newInstance(
-		Map<String,?> configuration
+		Configuration configuration
 	){
-    	final HashMap<String, Object> settings = new HashMap<String,Object>(configuration);
-		return settings.containsKey("interface") ? new BeanFactory<Object>(
-			getClass(settings, "interface"),	
-			getClass(settings, "class"),
-		    settings
+    	Class<Object> declaredClass = getClass(configuration, "interface", false);
+    	Class<Object> actualClass = getClass(configuration, "class", true);
+		return configuration.getOptionalValue("interface", String.class) != null ? new BeanFactory<Object>(
+			declaredClass,
+			actualClass,
+			configuration
 		) : new BeanFactory<Object>(
-			getClass(settings, "class"),
-		    settings
+			actualClass,
+			configuration
 		);
     }
+
     
     /**
      * Create a factory for the given class.
@@ -156,13 +191,12 @@ public class BeanFactory<T> implements Factory<T> {
      */
     public static <T> Factory<T> newInstance(
     	Class<T> instanceClass,
-		Map<String,?> configuration
+		Configuration configuration
 	){
-    	final HashMap<String, Object> settings = new HashMap<String,Object>(configuration);
         return new BeanFactory<T>(
 		    instanceClass,
-		    BeanFactory.<T>getClass(settings, "class"),
-		    settings
+		    BeanFactory.<T>getClass(configuration, "class", true),
+		    configuration
 		);
     }
     
@@ -174,17 +208,39 @@ public class BeanFactory<T> implements Factory<T> {
      * 
      * @return a factory for the given class
      */
-    public static Factory<Object> newInstance(
+    public static Factory<?> newInstance(
         String beanClassName,
-        Map<String,?> properties
+        Map<String, ?> properties
     ){
         return newInstance(
         	Object.class,
         	beanClassName, 
-            properties
+            new MapConfiguration(properties, PrimitiveTypeParsers.getExtendedParser())
         );
     }
-    
+
+    /**
+     * Create a factory for the given Java Bean class
+     * 
+     * @param instanceClass
+     * @param beanClassName
+     * @param configuration the Java Bean settings
+     * 
+     * @return a factory for the given class
+     */
+    @SuppressWarnings("unchecked")
+	protected static <T> Factory<T> newInstance(
+    	Class<T> instanceClass,
+        String beanClassName,
+        Configuration configuration
+    ){
+        return new BeanFactory<T>(
+		    instanceClass,
+		    (Class<? extends T>) BeanFactory.getClass("class", beanClassName), 
+		    configuration
+		);
+    }
+
     /**
      * Create a factory for the given Java Bean class
      * 
@@ -199,72 +255,29 @@ public class BeanFactory<T> implements Factory<T> {
         String beanClassName,
         Map<String,?> configuration
     ){
-    	final HashMap<String, Object> settings = new HashMap<String,Object>(configuration);
-        try {
-			return new BeanFactory<T>(
-                instanceClass,
-                Classes.<T>getApplicationClass(beanClassName), 
-                settings
-            );
-        } catch (ClassNotFoundException exception) {
-            throw BasicException.initHolder(
-                new IllegalArgumentException(
-                    "Missing bean class",
-                    BasicException.newEmbeddedExceptionStack(
-                        exception,
-                        BasicException.Code.DEFAULT_DOMAIN,
-                        BasicException.Code.INVALID_CONFIGURATION,
-                        new BasicException.Parameter("className", beanClassName)
-                    )
-                )
-            );
-        }
+    	return newInstance(
+    		instanceClass, 
+    		beanClassName, 
+            new MapConfiguration(configuration, PrimitiveTypeParsers.getExtendedParser())
+    	);
     }
 
     /* (non-Javadoc)
      * @see org.openmdx.base.bean.Factory#instantiate()
      */
+    @Override
     public T instantiate(
     ){
         try {
-            T instance = this.beanClass.newInstance();
-            for(Map.Entry<String, ?> e: this.settings.entrySet()) {
-                Method setter = introspector.getPropertyModifier(this.beanClass, e.getKey()); 
-                Object value = e.getValue();
-                if(setter.getParameterTypes()[0].isArray()) {
-                    Collection<?> values = 
-                        value instanceof Collection<?> ? (Collection<?>)value :
-                        value instanceof Map<?,?> ? ((Map<?,?>)value).values() :
-                        Collections.singleton(value);
-                    value = Array.newInstance(
-                        setter.getParameterTypes()[0].getComponentType(),
-                        values.size()
-                    );
-                    int i = 0;
-                    for(Object v : values) {
-                        Array.set(value, i++, v);
-                    }
-                } else {
-                    if(value instanceof Collection<?>) {
-                        final Collection<?> values = (Collection<?>)value;
-						value = values.isEmpty() ? null : values.iterator().next();
-                    }
-                    else if(value instanceof Map<?,?>) {
-                        final Collection<?> values = ((Map<?,?>)value).values();
-						value = values.isEmpty() ? null : values.iterator().next();
-                    }
-                }
-                setter.invoke(
-                    instance, 
-                    value
-                );
-            }
-            return instance;
+        	return build();
         }  catch (Exception exception) {
             List<BasicException.Parameter> parameters = new ArrayList<BasicException.Parameter>();
-            parameters.add(new BasicException.Parameter("beanClassName", beanClass.getName()));
-            for(Map.Entry<String, ?> property : this.settings.entrySet()) {
-                parameters.add(new BasicException.Parameter(property.getKey(), property.getValue()));
+            parameters.add(new BasicException.Parameter("class", actualClass.getName()));
+            for(String e : this.configuration.singleValuedEntryNames()) {
+                parameters.add(new BasicException.Parameter(e, configuration.getOptionalValue(e, null)));
+            }
+            for(String e : this.configuration.multiValuedEntryNames()) {
+                parameters.add(new BasicException.Parameter(e, configuration.getValues(e, null)));
             }
             throw BasicException.initHolder(
                 new RuntimeException(
@@ -280,82 +293,186 @@ public class BeanFactory<T> implements Factory<T> {
         }
     }
 
-    /**
-     * Get the bean instances' class
-     * 
-     * @return the bean instances' class
-     */
-    public Class<T> getInstanceClass(){
-        return this.instanceClass;
-    }
+	protected T build(
+	) throws Exception {
+		final T javaBeanInstance = this.actualClass.newInstance();
+		populateJavaBean(javaBeanInstance);
+		return javaBeanInstance;
+	}
 
-    /**
-     * Removes a class name from the configuration and retrieves the named class
+	/**
+	 * @param instance
+	 * @throws IllegalAccessExceptionunderbirdrd
+	 * @throws InvocationTargetException
+	 */
+	private void populateJavaBean(
+		T instance
+	) throws IllegalAccessException, InvocationTargetException {
+		for(String entryName: this.configuration.singleValuedEntryNames()) {
+			setPropertyLeniently(instance, entryName);
+		}
+		for(String entryName: this.configuration.multiValuedEntryNames()) {
+			setPropertyLeniently(instance, entryName);
+		}
+	}
+
+	private void setPropertyLeniently(
+		T instance,
+		String entryName
+	) throws IllegalAccessException, InvocationTargetException {
+		if(!RESERVED_ENTRIES.contains(entryName)) {
+			final Method setter = introspector.getPropertyModifier(this.actualClass, entryName); 
+			final Class<?> parameterType = setter.getParameterTypes()[0];
+			Object arg = null;
+			if(parameterType.isArray()) {
+			    arg = toArray(entryName, parameterType);
+			} else if(parameterType == SparseArray.class) {
+			    Type genericParameterType = setter.getGenericParameterTypes()[0];
+			    Class<?> elementType = String.class; // default
+			    if(ParameterizedType.class.isAssignableFrom(genericParameterType.getClass())) {
+			        Type[] actualTypeArguments = ((ParameterizedType)genericParameterType).getActualTypeArguments();
+			        if(actualTypeArguments != null && actualTypeArguments.length > 0) {
+			            try {
+			                elementType = Class.forName(actualTypeArguments[0].toString().split(" ")[1]);
+			            } catch(Exception ignore) {
+			                // ignore
+			            }
+			        }
+			    }
+			    arg = this.configuration.getValues(entryName, elementType);
+			} else {
+			    arg = toSingleValue(entryName, parameterType);
+			}
+			setter.invoke(instance, arg);
+		}
+	}
+
+	/**
+	 * Retrieve the value for the setter
+	 * 
+	 * @param parameterName the name of the parameter corresponds to its configuration entry 
+	 * @param parameterType the parameter type, a primitive or object type
+	 * 
+	 * @return the single-valued parameter value
+	 */
+	private Object toSingleValue(
+		String parameterName, 
+		Class<?> parameterType
+	) {
+		return configuration.getOptionalValue(
+			parameterName, 
+			Classes.toObjectClass(parameterType)
+		);
+	}
+
+	/**
+	 * Retrieve the value for the setter
+	 * 
+	 * @param parameterName the name of the parameter corresponds to its configuration entry 
+	 * @param parameterType the parameter type, an array type
+	 * 
+	 * @return the multi-valued parameter value
+	 */
+	private Object toArray(
+		String parameterName, 
+		Class<?> parameterType
+	) {
+		return toArray(
+			parameterType, 
+			configuration.getValues(
+				parameterName, 
+				Classes.toObjectClass(
+					parameterType.getComponentType()
+				)
+			)
+		);
+	}
+	
+	/**
+	 * Convert a sparse array to an array
+	 * 
+	 * @param argumentClass
+	 * @param value the raw value
+	 * 
+	 * @return an array populated with the given values
+	 */
+	private static Object toArray(
+		final Class<?> argumentClass,
+		final SparseArray<?> values
+	) {
+		final int length = values.isEmpty() ? 0 : values.lastKey().intValue() + 1;
+		final Object target = Array.newInstance(
+			argumentClass.getComponentType(),
+			length
+		);
+		for(ListIterator<?> i = values.populationIterator(); i.hasNext(); ) {
+			final int index = i.nextIndex();
+			final Object value = i.next();
+			Array.set(target, index, value);
+		}
+		return target;
+	}
+
+	/**
+     * Retrieve the class specified by its name
      * 
-     * @param configuration the (modified) configuration
-     * @param classKey the class name entry's key
+     * @param configuration the configuration is used to retrieve the class name
+     * @param kind the kind corresponds to the configuration entry name
+     * @param className the name of the class
      * 
-     * @return the named class, or <code>null</code> in case of a missing optional class
-     * @throws IllegalArgumentException
+     * @return the requested class
      */
-    private static <C> Class<C> getClass(
-    	HashMap<String, ?> configuration,	
-		String classKey
-	) throws IllegalArgumentException {
-    	final Object className = getSingleton(configuration.remove(classKey)); 
-		if(className instanceof String) try {
-            return Classes.<C>getApplicationClass((String)className);
-        } catch (ClassNotFoundException exception) {
+    protected static <C> Class<C> getClass(
+    	Configuration configuration, 
+    	String kind, 
+    	boolean mandatory
+    ){
+    	final String className = configuration.getOptionalValue(kind, String.class);
+    	if(className != null){
+    		return getClass(kind, className);
+    	} else if(mandatory) {
+	        throw BasicException.initHolder(
+                new IllegalArgumentException(
+                    "Missing class name",
+                    BasicException.newEmbeddedExceptionStack(
+                        BasicException.Code.DEFAULT_DOMAIN,
+                        BasicException.Code.INVALID_CONFIGURATION,
+                        new BasicException.Parameter(kind, className)
+                    )
+                )
+            );
+    	} else {
+    		return null;
+    	}
+    }
+    
+    /**
+     * Retrieve the class specified by its name
+     * 
+     * @param kind tells whether we were looking for the instance or the bean class
+     * @param className the name of the class
+     * 
+     * @return the requested class
+     */
+    protected static <C> Class<C> getClass(
+    	String kind, 
+    	String className
+    ){
+    	try {
+			return Classes.<C>getApplicationClass(className);
+		} catch (ClassNotFoundException exception) {
             throw BasicException.initHolder(
                 new IllegalArgumentException(
-                    "Missing bean class",
+                    "Class retrieval failure",
                     BasicException.newEmbeddedExceptionStack(
                         exception,
                         BasicException.Code.DEFAULT_DOMAIN,
                         BasicException.Code.INVALID_CONFIGURATION,
-                        new BasicException.Parameter("classKey", classKey),
-                        new BasicException.Parameter("className", className)
+                        new BasicException.Parameter(kind, className)
                     )
                 )
             );
-        } else {
-            throw BasicException.initHolder(
-                new IllegalArgumentException(
-                    "Missing or invalid name entry",
-                    BasicException.newEmbeddedExceptionStack(
-                        BasicException.Code.DEFAULT_DOMAIN,
-                        BasicException.Code.BAD_PARAMETER,
-                        new BasicException.Parameter("classKey", classKey),
-                        new BasicException.Parameter("className", className)
-                    )
-                )
-            );
-        }
-	}
-
-    /**
-     * Retrieve a single value
-     * 
-     * @param source
-     * 
-     * @return the first or only value
-     */
-    private static Object getSingleton(
-        Object source
-    ){
-        if(source instanceof Collection<?>) {
-            for(Object value : (Collection<?>)source){
-                return value;
-            }
-            return null;
-        } else if(source instanceof Map<?,?>) {
-            for(Object value : ((Map<?,?>)source).values()){
-                return value;
-            }
-            return null;
-        } else {
-            return source;
-        }
+		}
     }
-
+    
 }

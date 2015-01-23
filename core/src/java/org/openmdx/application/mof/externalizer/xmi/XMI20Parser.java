@@ -655,15 +655,9 @@ public class XMI20Parser implements XMIParser {
                         URL packageURL = projectName == null
                             ? new URL(this.modelUri.substring(0, this.modelUri.lastIndexOf('/') + 1) + packageName)
                             : new URL(this.importer.getPathMap().get(projectName) + packageName);
-                        XMIImporter_1 nestedImporter = new XMIImporter_1(
-                            packageURL,
-                            this.importer.getXMIFormat(),
-                            this.importer.getPathMap(),
-                            this.infos,
-                            this.warnings,
-                            this.errors
-                        );
-                        nestedImporter.processNested(
+                        this.importer.newNestedImporter(
+                        	packageURL
+                        ).processNested(
                             this.importer,
                             this.resolver,
                             this.scope

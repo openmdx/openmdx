@@ -100,6 +100,8 @@ import org.openmdx.base.query.IsGreaterOrEqualCondition;
 import org.openmdx.base.query.IsInCondition;
 import org.openmdx.base.query.IsInstanceOfCondition;
 import org.openmdx.base.query.Quantifier;
+import org.openmdx.base.rest.cci.ConditionRecord;
+import org.openmdx.base.rest.cci.QueryFilterRecord;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.log.SysLog;
 import org.openmdx.state2.jmi1.BasicState;
@@ -466,8 +468,8 @@ public class DateStateViews {
         AnyTypePredicate predicate
     ){
         if(predicate == null) return null;
-        Filter original = ((RefQuery_1_0)predicate).refGetFilter();
-        for(Condition condition : original.getCondition()) {
+        QueryFilterRecord original = ((RefQuery_1_0)predicate).refGetFilter();
+        for(ConditionRecord condition : original.getCondition()) {
             String feature = condition.getFeature();
             if (
                 SystemAttributes.CREATED_AT.equals(feature) ||
@@ -508,7 +510,7 @@ public class DateStateViews {
         		new IsInstanceOfCondition("org:openmdx:state2:DateState")
         	);
         } else {
-            Filter original = ((RefQuery_1_0)predicate).refGetFilter();
+            QueryFilterRecord original = ((RefQuery_1_0)predicate).refGetFilter();
             newFilter = new Filter(
                 original.getCondition(),
                 original.getOrderSpecifier(),

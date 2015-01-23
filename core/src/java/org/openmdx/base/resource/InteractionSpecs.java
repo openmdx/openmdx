@@ -84,7 +84,7 @@ public class InteractionSpecs {
             RestFunction.GET,
             InteractionSpec.SYNC_SEND
         );
-        this.PUT = new RestInteractionSpec(
+        this.UPDATE = new RestInteractionSpec(
             RestFunction.PUT,
             retainValues ? InteractionSpec.SYNC_SEND_RECEIVE : InteractionSpec.SYNC_SEND
         );
@@ -121,7 +121,7 @@ public class InteractionSpecs {
     /**
      * A {@link RestFunction#PUT} Object Update Interaction Specification
      */
-    public final RestInteractionSpec PUT;
+    public final RestInteractionSpec UPDATE;
 
     /**
      * A {@link RestFunction#PUT} Object Update Interaction Specification

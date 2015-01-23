@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>openMDX 2 ~ Client (jre-1.6)</name>
+	<name>openMDX 2 ~ Client (jre-1.7)</name>
 	<comment></comment>
 	<projects>
 	</projects>
@@ -18,7 +18,7 @@
 		<link>
 			<name>deliverables</name>
 			<type>2</type>
-			<locationURI>PARENT-1-PROJECT_LOC/jre-1.6/client</locationURI>
+			<locationURI>PARENT-1-PROJECT_LOC/jre-1.7/client</locationURI>
 		</link>
 	</linkedResources>
 </projectDescription>

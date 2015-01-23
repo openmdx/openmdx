@@ -59,7 +59,7 @@
 	<property name="model.transformation.class.path" value="project.bin.classpath"/>
 
 	<!-- Slash separated platform list, the last entry being the default -->
-	<property name="project.platform.list" value="jre-1.6"/>
+	<property name="project.platform.list" value="jre-1.7"/>
 
 	<!-- Included Ant Projects -->
 	<import file="../ant/etc/ant/build-properties.xml"/>
@@ -87,7 +87,7 @@
 	<patternset id="project.junit.test.case">
 		<include name="test/**/Test*.java"/>
 		<include name="org/openmdx/kernel/**/Test*.java"/>
-		<include name="org/openmdx/base/**/*Test.java"/>
+		<include name="org/openmdx/**/*Test.java"/>
 		<exclude name="test/openmdx/base/*"/>
 		<exclude name="test/openmdx/state2/**"/>
 		<patternset refid="build.exclude"/>

@@ -47,69 +47,56 @@
  */
 package org.openmdx.base.query;
 
-import java.io.Serializable;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-
-import org.openmdx.base.resource.Records;
+import org.openmdx.base.rest.spi.ConditionRecord;
 
 /**
  * Abstract Condition
  */
-public abstract class Condition implements Serializable, Cloneable {
+public abstract class Condition extends ConditionRecord {
 
-    /**
+	/**
      * Constructor 
      */
     protected Condition(
+    ){
+    	super();
+    }
+	
+	/**
+     * Constructor 
+     */
+    protected Condition(
+    	ConditionType type	
     ) {
-        this(null, null, (Object[])null);
+        super(type);
     }
 
     /**
-     * Constructor clone
-     *
-     * @param quantifier
-     * @param feature
-     * @param values
+     * Constructor 
+     * 
+     * @param quantifier the quantifier
+     * @param feature the feature name
+     * @param type the condition type
+     * @param values the condition values with their type dependent semantic
      */
     protected Condition(
         Quantifier quantifier,
         String feature,
+    	ConditionType type,	
         Object... values
     ) {
-        this.quantifier = quantifier;
-        this.feature = feature;
-        this.values = values;
+    	super(
+    		quantifier,
+    		feature,
+    		type,
+    		values
+    	);
     }
 
     /**
-     * The quantifier, i.e. &#x2200; or &#x2203;  
-     */
-    private Quantifier quantifier;
-    
-    /**
-     * The unqualified feature name
-     */
-    private String feature;
-    
-    /**
-     * The condition specific values
-     */
-    private Object[] values;
-    
-    private static final String[] TO_STRING_FIELDS = {
-        "quantifier",
-        "feature",
-        "type",
-        "values"
-    };
-    
-    /**
      * Implements <code>Serializable</code>
      */
-    private static final long serialVersionUID = -3115618018740431736L;
+	private static final long serialVersionUID = 396749318163145090L;
 
     /* (non-Javadoc)
      * @see java.lang.Object#clone()
@@ -119,15 +106,6 @@ public abstract class Condition implements Serializable, Cloneable {
     );
 
     /**
-     * Retrieve the quantifier's <code>enum</code> representation
-     * 
-     * @return the quantifier's <code>enum</code> representation
-     */
-    public Quantifier getQuantifier() {
-        return this.quantifier;
-    }
-  
-    /**
      * Set the quantifier's <code>enum</code> representation
      * 
      * @param the quantifier's <code>enum</code> representation
@@ -135,7 +113,7 @@ public abstract class Condition implements Serializable, Cloneable {
     public void setQuantifier(
         Quantifier quantifier
     ) {
-        this.quantifier = quantifier;
+        super.setQuantifier(quantifier);
     }
     
     /**
@@ -147,16 +125,7 @@ public abstract class Condition implements Serializable, Cloneable {
     public void setQuantor(
         short quantor
     ) {
-        this.quantifier = Quantifier.valueOf(quantor);
-    }
-
-    /**
-     * Retrieve the feature name
-     * 
-     * @return the unqualified feature name
-     */
-    public String getFeature() {
-        return this.feature;
+        setQuantifier(Quantifier.valueOf(quantor));
     }
 
     /**
@@ -167,41 +136,7 @@ public abstract class Condition implements Serializable, Cloneable {
     public void setFeature(
         String feature
     ) {
-        this.feature = feature;
-    }
-
-    /**
-     * Retrieve the values (with a condition type specific semantic and cardinality)
-     * 
-     * @return the values
-     */
-    public Object[] getValue(
-    ) {
-        return this.values;
-    }
-
-    /**
-     * Replace the values (with a condition type specific semantic and cardinality)
-     * 
-     * @param the values
-     */
-    public void setValue(
-        Object... values
-    ) {
-        this.values = values;
-    }
-
-    /**
-     * Retrieve one of the values (with a condition type specific semantic)
-     * 
-     * @param index
-     * 
-     * @return the values
-     */
-    public Object getValue(
-        int index
-    ) {
-        return this.values[index];
+        super.setFeature(feature);
     }
 
     /**
@@ -214,7 +149,7 @@ public abstract class Condition implements Serializable, Cloneable {
         int index,
         Object value
     ) {
-        this.values[index] = value;
+    	getValue()[index] = value;
     }
 
     /**
@@ -239,151 +174,13 @@ public abstract class Condition implements Serializable, Cloneable {
         return type == null ? '\uFFFC' : type.symbol();
     }
 
-    /**
-     * Retrieve the condition type's character representation
-     * 
-     * @return the condition type's symbol
-     */
-    public abstract ConditionType getType();
-
-    private String getTypeName(
-        List<?> values
-    ){
-        ConditionType type = this.getType();
-        if(type == null) {
-            return null;
-        } else if (!values.isEmpty() && values.get(0) instanceof Filter){
-            switch(type){
-                case IS_IN: return "WHERE";
-                case IS_NOT_IN: return "WHERE_NOT";
-                default: return type.name();
-            }
-        } else {
-            return type.name();
-        }
-    }
+    //-------------------------------------------------------------------------
+    // Implements Record
+    //-------------------------------------------------------------------------
     
-    private String getDescription(
-        List<?> values
-    ){
-        ConditionType type = this.getType();
-        if(type == null) {
-            return null;
-        } else {
-            StringBuilder description = new StringBuilder();
-            if(this.quantifier != null) {
-                description.append(
-                    this.quantifier.symbol()
-                ).append(
-                    ' '
-                ).append(
-                    this.feature
-                ).append(
-                    " | "
-                ).append(
-                    this.feature
-                ).append(
-                    ' '
-                );
-            }
-            return description.append(
-                type.symbol()
-            ).append(
-                ' '
-            ).append(
-                values
-            ).toString();
-        }
-    }
-    
-    /**
-     * Retrieve the condition's string representation, e.g.<code> 
-     * &#x2026;(&#x2200; color | color &#x2208; ["RED", "GREEN"])&#x2026;</code> 
-     * 
-     * @return the condition's string representation
-     */
     @Override
-    public String toString (
-    ) {
-        List<?> values = this.values == null ? Collections.emptyList() : Arrays.asList(this.values);
-		return Records.getRecordFactory().asMappedRecord(
-		    this.getClass().getName(), 
-		    getDescription(values),
-		    Condition.TO_STRING_FIELDS, 
-		    new Object[]{
-		        this.quantifier,
-		        this.feature, 
-		        getTypeName(values), 
-		        values
-		    }
-		).toString();
-    }
-  
-    /**
-     * Compare ths object to another one
-     * 
-     * @param obj the other object
-     * 
-     * @return <code>true</code> if the other object represents the same condition
-     */
-    @Override
-    public boolean equals(
-        Object obj
-    ) {
-        if(obj instanceof Condition) {
-            Condition that = (Condition)obj;
-            return 
-                this.quantifier == that.quantifier &&
-                this.feature.equals(that.feature) &&
-                this.getType() == that.getType() &&
-                this.areEqual(this.values, that.values);
-        } else {
-            return false;
-        }
+    public String getRecordShortDescription() {
+    	return null;
     }
 
-    
-    /* (non-Javadoc)
-     * @see java.lang.Object#hashCode()
-     */
-    @Override
-    public int hashCode() {
-        return this.feature.hashCode();
-    }
-
-    /**
-     * Compare the value arrays, treating empty and <code>null</code> as equal
-     * 
-     * @param left
-     * @param right
-     * 
-     * @return if the value arrays are equal
-     */
-    protected boolean areEqual(
-        Object[] left,
-        Object[] right
-    ){
-        if(left == null || left.length == 0) {
-            return right == null || right.length == 0; 
-        } else if (right == null){
-            return false;
-        } else {
-            ConditionType type = this.getType();
-            if(
-                type == ConditionType.IS_IN ||
-                type == ConditionType.IS_NOT_IN ||
-                type == ConditionType.IS_LIKE ||
-                type == ConditionType.IS_UNLIKE ||
-                type == ConditionType.SOUNDS_LIKE ||
-                type == ConditionType.SOUNDS_UNLIKE 
-           ){
-               List<Object> l = Arrays.asList(left);
-               List<Object> r = Arrays.asList(right);
-               return r.containsAll(l) && l.containsAll(r);
-            } else {
-               return Arrays.equals(left, right);
-           }
-        }
-    }
-    
 }

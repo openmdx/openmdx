@@ -63,6 +63,28 @@ public interface ExtendedRecordFactory extends RecordFactory {
   // MappedRecord Factory
   //--------------------------------------------------------------------------
 
+  /** 
+   * Creates an <code>MappedRecord</code> of the given type.
+   *  
+   *  @param typedInterface the interface the record shall implement, one of<ul>
+   *  <li>{@link org.openmdx.base.rest.cci.ConditionRecord}
+   *  <li>{@link org.openmdx.base.rest.cci.MessageRecord}
+   *  <li>{@link org.openmdx.base.rest.cci.FeatureOrderRecord}
+   *  <li>{@link org.openmdx.base.rest.cci.ObjectRecord}
+   *  <li>{@link org.openmdx.base.rest.cci.QueryFilterRecord}
+   *  <li>{@link org.openmdx.base.rest.spi.QueryFilterRecord}
+   *  <li>{@link org.openmdx.base.rest.cci.QueryExtensionRecord}
+   *  <li>{@link org.openmdx.base.rest.cci.QueryRecord}
+   *  <li>{@link org.openmdx.base.rest.cci.VoidRecord}
+   *  </ul>
+   *  
+   *  @return a new record of the given type
+   *  @throws ResourceException  Failed to create a MappedRecord.
+   */
+  <T extends MappedRecord> T createMappedRecord(
+	Class<T> typedInterface
+  ) throws ResourceException;
+	
   /**
    * Creates a MappedRecord with the given name, short description and
    * content.  
@@ -122,6 +144,21 @@ public interface ExtendedRecordFactory extends RecordFactory {
   // IndexedRecord Factory
   //--------------------------------------------------------------------------
 
+  /** 
+   * Creates an <code>IndexdRecord</code> of the given type.
+   *  
+   *  @param typedInterface the interface the record shall implement, one of<ul>
+   *  <li>{@link org.openmdx.base.rest.cci.ResultRecord}
+   *  </ul>
+   *  
+   *  @return a new record of the given type
+   *  
+   *  @throws ResourceException  Failed to create a MappedRecord.
+   */
+  <T extends IndexedRecord> T createIndexedRecord(
+	Class<T> typedInterface
+  ) throws ResourceException;
+	
   /**
    * Creates an IndexedRecord with the given name, description and content.  
    * <p>

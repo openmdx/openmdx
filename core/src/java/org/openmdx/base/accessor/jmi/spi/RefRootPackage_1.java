@@ -48,6 +48,7 @@
 package org.openmdx.base.accessor.jmi.spi;
 
 import java.io.Serializable;
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -58,6 +59,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -88,6 +90,7 @@ import javax.jmi.reflect.RefException;
 import javax.jmi.reflect.RefFeatured;
 import javax.jmi.reflect.RefObject;
 import javax.jmi.reflect.RefPackage;
+import javax.resource.ResourceException;
 import javax.resource.cci.InteractionSpec;
 import javax.resource.cci.Record;
 import javax.xml.datatype.XMLGregorianCalendar;
@@ -138,12 +141,10 @@ import org.openmdx.base.persistence.spi.PersistenceCapableCollection;
 import org.openmdx.base.persistence.spi.Transactions;
 import org.openmdx.base.persistence.spi.TransientContainerId;
 import org.openmdx.base.persistence.spi.UnitOfWork;
-import org.openmdx.base.query.Filter;
 import org.openmdx.base.query.Selector;
 import org.openmdx.base.resource.InteractionSpecs;
 import org.openmdx.base.resource.Records;
 import org.openmdx.base.rest.cci.QueryRecord;
-import org.openmdx.base.text.conversion.JavaBeans;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.jdo.ReducedJDOHelper;
 import org.openmdx.kernel.loading.Factory;
@@ -379,7 +380,7 @@ public class RefRootPackage_1
     }
 
     /**
-     * Unmarshal the object independent if its interaction specification
+     * Unmarshal the object independently of its interaction specification
      * 
      * @param source
      * 
@@ -802,7 +803,7 @@ public class RefRootPackage_1
         }
         Model_1_0 model = refModel();
         return 
-            model.isClassType(type) || PrimitiveTypes.OBJECT_ID.equals(type) || model.isStructureType(type) ? RefRootPackage_1.this :
+            model.isClassType(type) || model.isStructureType(type) ? RefRootPackage_1.this :
             IdentityMarshaller.INSTANCE; // fall back
     }
     
@@ -1415,64 +1416,89 @@ public class RefRootPackage_1
          * 
          * @param uriQuery
          * 
-         * @return a parameter mao
+         * @return a modifiable parameter map owned by the caller
          * 
          * @throws ServiceException
          */
-        QueryRecord newQueryRecord(
+        private Map<String, ?> parseQuery(
+        	String uriQuery
+        ) throws ServiceException {
+        	Map<String, Object> parameter = new HashMap<String, Object>();
+        	try {
+	        	for(String nvp : uriQuery.split("&")) {
+	        		int e  = nvp.indexOf('=');
+					parameter.put(
+						nvp.substring(0, e), 
+						URLDecoder.decode(nvp.substring(e + 1), "UTF-8")
+					);
+	        	}
+        	} catch (UnsupportedEncodingException exception) {
+        		throw new ServiceException(exception);
+        	}
+        	return parameter;
+        }
+
+        /**
+         * Decode URI 
+         * 
+         * @param uri
+         * 
+         * @return a modifiable parameter map owned by the caller
+         * 
+         * @throws ServiceException
+         */
+        private Map<String, ?> parseURI(
         	String uri	
         ) throws ServiceException {
         	try {
-	        	QueryRecord queryRecord = (QueryRecord) Records.getRecordFactory().createMappedRecord(QueryRecord.NAME);
 	        	int q = seekParameters(uri);
 	        	if(q < 0) {
-	        		queryRecord.setPath(new Path(uri)); 
+	        		final Path path = new Path(uri);
+					return Collections.singletonMap("path", path); 
 	        	} else {
-		        	for(String nvp : uri.substring(q + 1).split("&")) {
-		        		int e  = nvp.indexOf('=');
-		        		queryRecord.put(
-		        			nvp.substring(0, e), 
-		        			URLDecoder.decode(nvp.substring(e + 1), "UTF-8")
-		        		);
-		        	}
+	        		final String uriQuery = uri.substring(q + 1);
+	        		return parseQuery(uriQuery);
 	        	}
-	        	return queryRecord;
         	} catch (Exception exception) {
         		throw new ServiceException(exception);
 			}
         }
 
         /**
-         * Retrieve the canonical query 
+         * Decode URI 
          * 
-         * @param query a query object
+         * @param uri
          * 
-         * @return a query record
+         * @return a modifiable parameter map owned by the caller
          * 
          * @throws ServiceException
          */
-        QueryRecord toQueryRecord(
-        	Object query
+        private Map<String, ?> parseURI(
+        	URI uri	
         ) throws ServiceException {
-            if(query instanceof String || query instanceof URI) {
-            	return newQueryRecord(query.toString());
-            } else if (query instanceof QueryRecord) {
-            	return (QueryRecord) query;
-            } else throw new ServiceException(
-                BasicException.Code.DEFAULT_DOMAIN,
-                BasicException.Code.BAD_QUERY_CRITERIA,
-                "Unsupported query obbject",
-                new BasicException.Parameter(
-                    "supported", 
-                    String.class.getName(), QueryRecord.class.getName(), URI.class.getName()
-                ),
-                new BasicException.Parameter(
-                    "actual",
-                    query == null ? null : query.getClass().getName()
-                )
-            );
+        	try {
+        		final String uriQuery = uri.getRawQuery();
+        		if(uriQuery == null || uriQuery.isEmpty()) {
+	        		final Path path = new Path(uri.toString());
+					return Collections.singletonMap("path", path); 
+        		} else {
+	        		return parseQuery(uriQuery);
+        		}
+        	} catch (Exception exception) {
+        		throw new ServiceException(exception);
+			}
         }
         
+        private QueryRecord newQueryRecord(
+        ) throws ServiceException {
+        	try {
+	        	QueryRecord queryRecord = Records.getRecordFactory().createMappedRecord(QueryRecord.class);
+	        	return queryRecord;
+        	} catch (ResourceException exception) {
+        		throw new ServiceException(exception);
+			}
+        }
+
         /* (non-Javadoc)
          * @see javax.jdo.PersistenceManager#newQuery(java.lang.String, java.lang.Object)
          */
@@ -1483,53 +1509,42 @@ public class RefRootPackage_1
         ) {
         	try {
 	            if(Queries.QUERY_LANGUAGE.equals(language)) {
-	                QueryRecord queryRecord;
-	                if(query instanceof String || query instanceof URI) {
-	                	queryRecord = newQueryRecord(query.toString());
-	                } else if (query instanceof QueryRecord) {
-	                	queryRecord = (QueryRecord) query;
-	                } else throw new ServiceException(
-	                    BasicException.Code.DEFAULT_DOMAIN,
-	                    BasicException.Code.BAD_QUERY_CRITERIA,
-	                    "Unsupported query obbject",
-	                    new BasicException.Parameter(
-	                        "supported", 
-	                        String.class.getName(), QueryRecord.class.getName(), URI.class.getName()
-	                    ),
-	                    new BasicException.Parameter(
-	                        "actual",
-	                        query == null ? null : query.getClass().getName()
-	                    )
-	                );
-	                Query cciQuery;
-	                if(queryRecord.getQuery() == null) {
-	                	cciQuery = RefRootPackage_1.this.refCreateQuery(
-                    		queryRecord.getQueryType(),
-    	                    true, // subclasses
-    	                    null // xmlQuery
-    	                );
-	                } else if (
-	                	queryRecord.getQuery().startsWith("<?xml") || 
-	                	queryRecord.getQuery().startsWith("<org.openmdx.")
-	                ) {
-	                	cciQuery = RefRootPackage_1.this.refCreateQuery(
-                    		queryRecord.getQueryType(),
-    	                    true, // subclasses
-    	                    (Filter) JavaBeans.fromXML(queryRecord.getQuery())
-    	                );
+	                final QueryRecord queryRecord;
+	                if(query instanceof QueryRecord) {
+	                	queryRecord = (QueryRecord)query;
 	                } else {
-	                	cciQuery = RefRootPackage_1.this.refCreateQuery(
-                    		queryRecord.getQueryType(),
-    	                    true, // subclasses
-    	                    null // xmlQuery
-    	                );
-	                	org.openmdx.base.persistence.spi.Queries.applyStatements(
-	                		cciQuery, 
-	                		queryRecord.getQuery()
-	                	);
+	                    final Map<String, ?> parameter;
+		                queryRecord = newQueryRecord();
+		                if(query instanceof String) {
+		                	parameter = parseURI((String)query);
+		                } else if(query instanceof URI) {
+		                	parameter = parseURI((URI)query);
+		                } else throw new ServiceException(
+		                    BasicException.Code.DEFAULT_DOMAIN,
+		                    BasicException.Code.BAD_QUERY_CRITERIA,
+		                    "Unsupported query object",
+		                    new BasicException.Parameter(
+		                        "supported", 
+		                        String.class.getName(), QueryRecord.class.getName(), URI.class.getName()
+		                    ),
+		                    new BasicException.Parameter(
+		                        "actual",
+		                        query == null ? null : query.getClass().getName()
+		                    )
+		                );
+		                queryRecord.putAll(parameter);
 	                }
-					if(queryRecord.getPath() != null) {
-						RefContainer<?> candidates = RefRootPackage_1.this.refContainer(queryRecord.getPath(), null);
+	                final Query cciQuery = RefRootPackage_1.this.refCreateQuery(
+                		queryRecord.getQueryType(),
+	                    true, // subclasses
+	                    queryRecord.getQueryFilter()
+	                );
+                	org.openmdx.base.persistence.spi.Queries.applyStatements(
+                		cciQuery, 
+                		queryRecord.getQuery()
+                	);
+					if(queryRecord.getResourceIdentifier() != null) {
+						RefContainer<?> candidates = RefRootPackage_1.this.refContainer(queryRecord.getResourceIdentifier(), null);
 						cciQuery.setCandidates(candidates);
 					}
 	                return cciQuery;

@@ -58,86 +58,34 @@ public class PrimitiveTypes {
       // Avoid instantiation
   }
 
-  /**
-   */
   static public final String BOOLEAN = "org:w3c:boolean";
 
-
-
-  /**
-   */
   static public final String SHORT = "org:w3c:short";
 
-
-
-  /**
-   */
   static public final String INTEGER = "org:w3c:integer";
 
-
-
-  /**
-   */
   static public final String LONG = "org:w3c:long";
 
-
-
-  /**
-   */
   static public final String DECIMAL = "org:w3c:decimal";
 
-
-
-  /**
-   */
   static public final String STRING = "org:w3c:string";
 
-
-
-  /**
-   */
   static public final String DATETIME = "org:w3c:dateTime";
 
-
-
-  /**
-   */
   static public final String DATE = "org:w3c:date";
 
-
-
-  /**
-   */
   static public final String ANYURI = "org:w3c:anyURI";
 
-
-
-  /**
-   */
   static public final String BINARY = "org:w3c:binary";
 
-
-
-  /**
-   */
   static public final String OBJECT_ID = "org:openmdx:base:ObjectId";
 
-
-  /**
-   */
   static public final String DURATION = "org:w3c:duration";
 
-  /**
-   */
   static public final String OID = "org:ietf:OID";
 
-  /**
-   */
   static public final String UUID = "org:ietf:UUID";
 
-  /**
-   * 
-   */
   static public final String XRI = "org:oasis-open:XRI";
 
 }

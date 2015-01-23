@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2010-2012, OMEX AG, Switzerland
+ * Copyright (c) 2010-2013, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -650,7 +650,7 @@ public class StandardXMLStreamWriter extends AbstractXMLStreamWriter {
      */
     @Override
     public void writeStartDocument(
-        String encoding,
+        String requestedEncoding,
         String version
     ) throws XMLStreamException {
         try {
@@ -673,19 +673,19 @@ public class StandardXMLStreamWriter extends AbstractXMLStreamWriter {
             //
             // Add encoding and close tag
             //
-            if(encoding == null) {
+            final String encoding;
+            if(requestedEncoding == null) {
                 encoding = this.encoding;
-            } else if (
-                this.encoding != null &&
-                !this.encoding.equalsIgnoreCase(encoding)
-            ) throw BasicException.initHolder(
+            } else if (this.encoding == null || this.encoding.equalsIgnoreCase(requestedEncoding)){
+                encoding = requestedEncoding;
+            } else throw BasicException.initHolder(
                 new XMLStreamException(
                     "Encoding mismatch",
                     BasicException.newEmbeddedExceptionStack(
                         BasicException.Code.DEFAULT_DOMAIN,
                         BasicException.Code.NOT_SUPPORTED,
                         new BasicException.Parameter("expected", this.encoding),
-                        new BasicException.Parameter("actual", encoding)
+                        new BasicException.Parameter("actual", requestedEncoding)
                    )
                 )
             );

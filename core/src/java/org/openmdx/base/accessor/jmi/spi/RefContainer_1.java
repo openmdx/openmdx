@@ -72,15 +72,14 @@ import org.openmdx.base.accessor.jmi.cci.RefQuery_1_0;
 import org.openmdx.base.accessor.view.ObjectView_1_0;
 import org.openmdx.base.collection.MarshallingSequentialList;
 import org.openmdx.base.collection.MarshallingSet;
-import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.marshalling.Marshaller;
 import org.openmdx.base.naming.Path;
-import org.openmdx.base.naming.PathComponent;
 import org.openmdx.base.persistence.spi.PersistenceCapableCollection;
 import org.openmdx.base.query.Condition;
 import org.openmdx.base.query.Filter;
-import org.openmdx.base.query.OrderSpecifier;
+import org.openmdx.base.rest.cci.FeatureOrderRecord;
+import org.openmdx.base.rest.cci.QueryFilterRecord;
 import org.openmdx.kernel.exception.BasicException;
 import org.w3c.cci2.AnyTypePredicate;
 
@@ -125,7 +124,7 @@ public class RefContainer_1
     /* (non-Javadoc)
      * @see javax.jmi.reflect.RefBaseObject#refImmediatePackage()
      */
-//  @Override
+    @Override
     public RefPackage refImmediatePackage() {
         throw new UnsupportedOperationException(
             "refImmediatePackage() is not supported, while refOutermostPackage() is"
@@ -135,7 +134,7 @@ public class RefContainer_1
     /* (non-Javadoc)
      * @see javax.jmi.reflect.RefBaseObject#refMetaObject()
      */
-//  @Override
+    @Override
     public RefObject refMetaObject(
     ) {
         throw new UnsupportedOperationException("Operation not supported by RefContainer_1");
@@ -144,7 +143,7 @@ public class RefContainer_1
     /* (non-Javadoc)
      * @see javax.jmi.reflect.RefBaseObject#refMofId()
      */
-//  @Override
+    @Override
     public String refMofId(
     ) {
         Object containerId = this.jdoGetObjectId();
@@ -154,7 +153,7 @@ public class RefContainer_1
     /* (non-Javadoc)
      * @see javax.jmi.reflect.RefBaseObject#refVerifyConstraints(boolean)
      */
-//  @Override
+    @Override
     public Collection<?> refVerifyConstraints(
         boolean deepVerify
     ) {
@@ -162,7 +161,7 @@ public class RefContainer_1
     }
 
     //  -------------------------------------------------------------------------
-//  @Override
+    @Override
     public RefPackage_1_0 refOutermostPackage(
     ) {
         return (RefPackage_1_0) this.marshaller;
@@ -240,7 +239,7 @@ public class RefContainer_1
             if(exception.getExceptionCode() == BasicException.Code.NOT_FOUND) {
                 return null;
             } else {
-                throw new RuntimeServiceException(
+                throw new JmiServiceException(
                     exception,
                     BasicException.Code.DEFAULT_DOMAIN,
                     BasicException.Code.TRANSFORMATION_FAILURE,
@@ -267,7 +266,7 @@ public class RefContainer_1
     /* (non-Javadoc)
      * @see org.openmdx.base.persistence.spi.PersistenceCapableContainer#openmdxjdoGetPersistenceManager()
      */
-//  @Override
+    @Override
     public PersistenceManager openmdxjdoGetDataObjectManager() {
         return this.container.openmdxjdoGetDataObjectManager();
     }
@@ -275,7 +274,7 @@ public class RefContainer_1
     /* (non-Javadoc)
      * @see org.openmdx.base.persistence.spi.PersistenceCapableContainer#openmdxjdoEvict()
      */
-//  @Override
+    @Override
     public void openmdxjdoEvict(
         boolean allMembers, boolean allSubSets
     ) {
@@ -285,7 +284,7 @@ public class RefContainer_1
     /* (non-Javadoc)
      * @see org.openmdx.base.persistence.spi.PersistenceCapableContainer#openmdxjdoRefreshAll()
      */
-//  @Override
+    @Override
     public void openmdxjdoRefresh() {
         this.container.openmdxjdoRefresh();
     }
@@ -293,7 +292,7 @@ public class RefContainer_1
     /* (non-Javadoc)
      * @see org.openmdx.base.persistence.spi.PersistenceCapableContainer#openmdxjdoRetrieve(javax.jdo.FetchPlan)
      */
-//  @Override
+    @Override
     public void openmdxjdoRetrieve(FetchPlan fetchPlan) {
         this.container.openmdxjdoRetrieve(fetchPlan);
     }
@@ -301,7 +300,7 @@ public class RefContainer_1
     /* (non-Javadoc)
      * @see org.w3c.cci2.Container#getAll(org.w3c.cci2.AnyTypePredicate)
      */
-//  @Override
+    @Override
     public List<RefObject_1_0> getAll(AnyTypePredicate predicate) {
         return this.refGetAll(predicate);
     }
@@ -309,7 +308,7 @@ public class RefContainer_1
     /* (non-Javadoc)
      * @see org.w3c.cci2.Container#removeAll(org.w3c.cci2.AnyTypePredicate)
      */
-//  @Override
+    @Override
     public void removeAll(AnyTypePredicate predicate) {
         this.refRemoveAll(predicate);
     }
@@ -322,7 +321,7 @@ public class RefContainer_1
     /* (non-Javadoc)
      * @see org.openmdx.base.persistence.spi.PersistenceCapableContainer#openmdxjdoIsPersistent()
      */
-//  @Override
+    @Override
     public boolean jdoIsPersistent() {
         return this.container.jdoIsPersistent();
     }
@@ -330,7 +329,7 @@ public class RefContainer_1
     /* (non-Javadoc)
      * @see org.openmdx.base.persistence.spi.Container#openmdxjdoGetContainerId()
      */
-//  @Override
+    @Override
     public Object jdoGetObjectId() {
         return this.container.jdoGetObjectId();
     }
@@ -338,7 +337,7 @@ public class RefContainer_1
     /* (non-Javadoc)
      * @see org.openmdx.base.persistence.spi.Container#openmdxjdoGetTransientContainerId()
      */
-//  @Override
+    @Override
     public Object jdoGetTransactionalObjectId() {
         return this.container.jdoGetTransactionalObjectId();
     }
@@ -346,7 +345,7 @@ public class RefContainer_1
     /* (non-Javadoc)
      * @see org.openmdx.base.persistence.spi.PersistenceCapableContainer#openmdxjdoGetPersistenceManager()
      */
-//  @Override
+    @Override
     public PersistenceManager jdoGetPersistenceManager(){
         return this.refOutermostPackage().refPersistenceManager();
     }
@@ -354,7 +353,7 @@ public class RefContainer_1
     /* (non-Javadoc)
      * @see javax.jdo.spi.PersistenceCapable#jdoReplaceStateManager(javax.jdo.spi.StateManager)
      */
-//  @Override
+    @Override
     public void jdoReplaceStateManager(
         StateManager sm
     ) throws SecurityException {
@@ -364,7 +363,7 @@ public class RefContainer_1
     /* (non-Javadoc)
      * @see javax.jdo.spi.PersistenceCapable#jdoProvideField(int)
      */
-//  @Override
+    @Override
     public void jdoProvideField(int fieldNumber) {
         throw new UnsupportedOperationException("Not supported by persistence capable collections");
     }
@@ -372,7 +371,7 @@ public class RefContainer_1
     /* (non-Javadoc)
      * @see javax.jdo.spi.PersistenceCapable#jdoProvideFields(int[])
      */
-//  @Override
+    @Override
     public void jdoProvideFields(int[] fieldNumbers) {
         throw new UnsupportedOperationException("Not supported by persistence capable collections");
     }
@@ -380,7 +379,7 @@ public class RefContainer_1
     /* (non-Javadoc)
      * @see javax.jdo.spi.PersistenceCapable#jdoReplaceField(int)
      */
-//  @Override
+    @Override
     public void jdoReplaceField(int fieldNumber) {
         throw new UnsupportedOperationException("Not supported by persistence capable collections");
     }
@@ -388,7 +387,7 @@ public class RefContainer_1
     /* (non-Javadoc)
      * @see javax.jdo.spi.PersistenceCapable#jdoReplaceFields(int[])
      */
-//  @Override
+    @Override
     public void jdoReplaceFields(int[] fieldNumbers) {
         throw new UnsupportedOperationException("Not supported by persistence capable collections");
     }
@@ -396,7 +395,7 @@ public class RefContainer_1
     /* (non-Javadoc)
      * @see javax.jdo.spi.PersistenceCapable#jdoReplaceFlags()
      */
-//  @Override
+    @Override
     public void jdoReplaceFlags() {
         throw new UnsupportedOperationException("Not supported by persistence capable collections");
     }
@@ -404,7 +403,7 @@ public class RefContainer_1
     /* (non-Javadoc)
      * @see javax.jdo.spi.PersistenceCapable#jdoCopyFields(java.lang.Object, int[])
      */
-//  @Override
+    @Override
     public void jdoCopyFields(Object other, int[] fieldNumbers) {
         throw new UnsupportedOperationException("Not supported by persistence capable collections");
     }
@@ -412,7 +411,7 @@ public class RefContainer_1
     /* (non-Javadoc)
      * @see javax.jdo.spi.PersistenceCapable#jdoMakeDirty(java.lang.String)
      */
-//  @Override
+    @Override
     public void jdoMakeDirty(String fieldName) {
         throw new UnsupportedOperationException("Not supported by persistence capable collections");
     }
@@ -420,7 +419,7 @@ public class RefContainer_1
     /* (non-Javadoc)
      * @see javax.jdo.spi.PersistenceCapable#jdoGetVersion()
      */
-//  @Override
+    @Override
     public Object jdoGetVersion() {
         throw new UnsupportedOperationException("Not supported by persistence capable collections");
     }
@@ -428,7 +427,7 @@ public class RefContainer_1
     /* (non-Javadoc)
      * @see javax.jdo.spi.PersistenceCapable#jdoIsDirty()
      */
-//  @Override
+    @Override
     public boolean jdoIsDirty() {
         throw new UnsupportedOperationException("Not supported by persistence capable collections");
     }
@@ -436,7 +435,7 @@ public class RefContainer_1
     /* (non-Javadoc)
      * @see javax.jdo.spi.PersistenceCapable#jdoIsTransactional()
      */
-//  @Override
+    @Override
     public boolean jdoIsTransactional() {
         throw new UnsupportedOperationException("Not supported by persistence capable collections");
     }
@@ -444,7 +443,7 @@ public class RefContainer_1
     /* (non-Javadoc)
      * @see javax.jdo.spi.PersistenceCapable#jdoIsNew()
      */
-//  @Override
+    @Override
     public boolean jdoIsNew() {
         throw new UnsupportedOperationException("Not supported by persistence capable collections");
     }
@@ -452,7 +451,7 @@ public class RefContainer_1
     /* (non-Javadoc)
      * @see javax.jdo.spi.PersistenceCapable#jdoIsDeleted()
      */
-//  @Override
+    @Override
     public boolean jdoIsDeleted() {
         throw new UnsupportedOperationException("Not supported by persistence capable collections");
     }
@@ -460,7 +459,7 @@ public class RefContainer_1
     /* (non-Javadoc)
      * @see javax.jdo.spi.PersistenceCapable#jdoIsDetached()
      */
-//  @Override
+    @Override
     public boolean jdoIsDetached() {
         throw new UnsupportedOperationException("Not supported by persistence capable collections");
     }
@@ -468,7 +467,7 @@ public class RefContainer_1
     /* (non-Javadoc)
      * @see javax.jdo.spi.PersistenceCapable#jdoNewInstance(javax.jdo.spi.StateManager)
      */
-//  @Override
+    @Override
     public PersistenceCapable jdoNewInstance(StateManager sm) {
         throw new UnsupportedOperationException("Not supported by persistence capable collections");
     }
@@ -476,7 +475,7 @@ public class RefContainer_1
     /* (non-Javadoc)
      * @see javax.jdo.spi.PersistenceCapable#jdoNewInstance(javax.jdo.spi.StateManager, java.lang.Object)
      */
-//  @Override
+    @Override
     public PersistenceCapable jdoNewInstance(StateManager sm, Object oid) {
         throw new UnsupportedOperationException("Not supported by persistence capable collections");
     }
@@ -484,7 +483,7 @@ public class RefContainer_1
     /* (non-Javadoc)
      * @see javax.jdo.spi.PersistenceCapable#jdoNewObjectIdInstance()
      */
-//  @Override
+    @Override
     public Object jdoNewObjectIdInstance() {
         throw new UnsupportedOperationException("Not supported by persistence capable collections");
     }
@@ -492,7 +491,7 @@ public class RefContainer_1
     /* (non-Javadoc)
      * @see javax.jdo.spi.PersistenceCapable#jdoNewObjectIdInstance(java.lang.Object)
      */
-//  @Override
+    @Override
     public Object jdoNewObjectIdInstance(Object o) {
         throw new UnsupportedOperationException("Not supported by persistence capable collections");
     }
@@ -500,7 +499,7 @@ public class RefContainer_1
     /* (non-Javadoc)
      * @see javax.jdo.spi.PersistenceCapable#jdoCopyKeyFieldsToObjectId(java.lang.Object)
      */
-//  @Override
+    @Override
     public void jdoCopyKeyFieldsToObjectId(Object oid) {
         throw new UnsupportedOperationException("Not supported by persistence capable collections");
     }
@@ -508,7 +507,7 @@ public class RefContainer_1
     /* (non-Javadoc)
      * @see javax.jdo.spi.PersistenceCapable#jdoCopyKeyFieldsToObjectId(javax.jdo.spi.PersistenceCapable.ObjectIdFieldSupplier, java.lang.Object)
      */
-//  @Override
+    @Override
     public void jdoCopyKeyFieldsToObjectId(ObjectIdFieldSupplier fm, Object oid) {
         throw new UnsupportedOperationException("Not supported by persistence capable collections");
     }
@@ -516,7 +515,7 @@ public class RefContainer_1
     /* (non-Javadoc)
      * @see javax.jdo.spi.PersistenceCapable#jdoCopyKeyFieldsFromObjectId(javax.jdo.spi.PersistenceCapable.ObjectIdFieldConsumer, java.lang.Object)
      */
-//  @Override
+    @Override
     public void jdoCopyKeyFieldsFromObjectId(
         ObjectIdFieldConsumer fm,
         Object oid
@@ -532,7 +531,7 @@ public class RefContainer_1
     /* (non-Javadoc)
      * @see org.oasisopen.jmi1.RefContainer#refAdd(java.lang.Object[])
      */
-//  @Override
+    @Override
     public void refAdd(Object... arguments) {
         int objectIndex = arguments.length - 1;
         add(
@@ -544,7 +543,7 @@ public class RefContainer_1
     /* (non-Javadoc)
      * @see org.oasisopen.jmi1.RefContainer#refGet(java.lang.Object[])
      */
-//  @Override
+    @Override
     public RefObject_1_0 refGet(Object... arguments) {
         return get(
             RefContainer_1.toQualifier(arguments.length, arguments)
@@ -554,11 +553,11 @@ public class RefContainer_1
     /* (non-Javadoc)
      * @see org.oasisopen.jmi1.RefContainer#refGetAll(java.lang.Object)
      */
-//  @Override
+    @Override
     public List<RefObject_1_0> refGetAll(Object rawQuery) {
         Object query = rawQuery;
         Container_1_0 source = this.container;
-        OrderSpecifier[] order = null;
+        FeatureOrderRecord[] order = null;
         FetchPlan fetchPlan = null;
         if(query instanceof Object[]) {
             Object[] args = (Object[]) query;
@@ -575,19 +574,19 @@ public class RefContainer_1
                 )
             );
             order = null;            
-        } else if(query instanceof OrderSpecifier[]) {
-            order = (OrderSpecifier[]) query;
-        } else if(query instanceof Filter) {
-            Filter filter = (Filter)query;
-            List<OrderSpecifier> orderSpecifier = filter.getOrderSpecifier();
+        } else if(query instanceof FeatureOrderRecord[]) {
+            order = (FeatureOrderRecord[]) query;
+        } else if(query instanceof QueryFilterRecord) {
+        	QueryFilterRecord filter = (QueryFilterRecord)query;
+            List<FeatureOrderRecord> orderSpecifier = filter.getOrderSpecifier();
             source = this.container.subMap(filter);
-            order = orderSpecifier.toArray(new OrderSpecifier[orderSpecifier.size()]);
+            order = orderSpecifier.toArray(new FeatureOrderRecord[orderSpecifier.size()]);
         } else if(query instanceof RefQuery_1_0) {
             RefQuery_1_0 refQuery = (RefQuery_1_0)query;
-            Filter filter = refQuery.refGetFilter();
-            List<OrderSpecifier> orderSpecifier = filter.getOrderSpecifier();
+            QueryFilterRecord filter = refQuery.refGetFilter();
+            List<FeatureOrderRecord> orderSpecifier = filter.getOrderSpecifier();
             source = this.container.subMap(filter);
-            order = orderSpecifier.toArray(new OrderSpecifier[orderSpecifier.size()]);
+            order = orderSpecifier.toArray(new FeatureOrderRecord[orderSpecifier.size()]);
             fetchPlan = refQuery.getFetchPlan();
         }
         return new MarshallingSequentialList<RefObject_1_0>(
@@ -599,7 +598,7 @@ public class RefContainer_1
     /* (non-Javadoc)
      * @see org.oasisopen.jmi1.RefContainer#refRemove(java.lang.Object[])
      */
-//  @Override
+    @Override
     public void refRemove(Object... arguments) {
         RefObject_1_0 object = this.get(RefContainer_1.toQualifier(arguments.length, arguments));
         if(object != null) {
@@ -614,7 +613,7 @@ public class RefContainer_1
     /* (non-Javadoc)
      * @see org.oasisopen.jmi1.RefContainer#refRemoveAll(java.lang.Object)
      */
-//  @Override
+    @Override
     public long refRemoveAll(Object query) {
         long removed = 0;
         for(RefObject_1_0 refObject : this.refGetAll(query)) {
@@ -642,15 +641,15 @@ public class RefContainer_1
             case 1: 
                 return String.valueOf(arguments[0]);
             default: {
-                if(size % 2 == 1) throw new IllegalArgumentException(
+                if((size & 1) == 1) throw new IllegalArgumentException(
                     "The ref-method was invoked with an odd number of arguments greater than one: " + arguments.length
                 );
                 StringBuilder qualifier = new StringBuilder(
                     arguments[0] == PERSISTENT ? "!" : ""
                 ).append(
                     arguments[1] == null ?
-                        PathComponent.createPlaceHolder().toString() :
-                            String.valueOf(arguments[1])
+                        org.openmdx.base.naming.TransactionalSegment.getClassicRepresentationOfNewInstance() :
+                        String.valueOf(arguments[1])
                 );
                 for(
                     int i = 2;

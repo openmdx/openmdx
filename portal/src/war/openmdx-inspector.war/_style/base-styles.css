@@ -1374,6 +1374,9 @@ textarea.multiStringLocked {
   width: 100%;
   overflow: hidden;
 }
+.alignRight {
+  text-align: right;
+}
 input.valueL, input.valueR {
   width: 100%;
   padding: 1px 0px 1px 0px;
@@ -1461,15 +1464,10 @@ form #inspector {
 .filterInput {
   width: 239px;
 }
-.filterAttr label {
-  font-weight: normal;
-  position: absolute;
-  margin: 10px 0 0 7px;
-}
 .filterAttr input {
   box-sizing: border-box;
   margin: 2px 0 0 0;
-  padding: 5px 5px 5px 150px;
+  padding: 5px 5px 5px 5px;
   font-size: 16px;
   font-weight: normal;
 }

@@ -147,6 +147,7 @@ import org.openmdx.base.mof.cci.Persistency;
 import org.openmdx.base.mof.cci.PrimitiveTypes;
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.naming.PathComponent;
+import org.openmdx.base.naming.TransactionalSegment;
 import org.openmdx.base.persistence.spi.PersistenceCapableCollection;
 import org.openmdx.base.persistence.spi.SharedObjects;
 import org.openmdx.base.query.Filter;
@@ -160,9 +161,8 @@ import org.openmdx.base.resource.Records;
 import org.openmdx.base.resource.spi.MethodInvocationSpec;
 import org.openmdx.base.resource.spi.ResourceExceptions;
 import org.openmdx.base.rest.cci.MessageRecord;
-import org.openmdx.base.rest.spi.Object_2Facade;
+import org.openmdx.base.rest.cci.ObjectRecord;
 import org.openmdx.base.rest.spi.Query_2Facade;
-import org.openmdx.base.text.conversion.JavaBeans;
 import org.openmdx.base.transaction.Status;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.id.UUIDs;
@@ -668,7 +668,7 @@ public class DataObject_1
             if(state == null) {
                 notFound = null;
             } else {
-                String feature = identity.get(identity.size() - 2);
+                String feature = identity.getSegment(identity.size() - 2).toClassicRepresentation();
                 Map<String,Set<String>> values = state.unavailability(existence);
                 notFound = values.get(feature);
                 if(notFound == null && !existence) {
@@ -679,7 +679,7 @@ public class DataObject_1
                 }
             }
             if(notFound != null) {
-                String qualifier = identity.get(identity.size() - 1);
+                String qualifier = identity.getSegment(identity.size() - 1).toClassicRepresentation();
                 if(existence) {
                     notFound.remove(qualifier);
                 } else {
@@ -775,22 +775,21 @@ public class DataObject_1
      */
     @SuppressWarnings("unchecked")
     synchronized DataObject_1 postLoad(
-        MappedRecord objectHolder
+        ObjectRecord objectHolder
     ) throws ServiceException {
         if(this.loadLock) {
         	return null;
         } else try {
         	this.loadLock = true;
-            Object_2Facade facade = Object_2Facade.newInstance(objectHolder);
-            if(this.identity == null || this.identity.equals(facade.getPath())) {
+            if(this.identity == null || this.identity.equals(objectHolder.getResourceIdentifier())) {
                 //
                 // Composite & Transient
                 //
                 if(this.persistentValues == null) {
-                    this.persistentValues = facade.getValue();
-                    this.version = facade.getVersion();
+                    this.persistentValues = objectHolder.getValue();
+                    this.version = objectHolder.getVersion();
                 } else {
-                    MappedRecord source = facade.getValue();
+                    MappedRecord source = objectHolder.getValue();
                     MappedRecord persistentValues = newRecord(source.getRecordName());
                     persistentValues.putAll(source);
                     persistentValues.putAll(this.persistentValues);
@@ -802,21 +801,19 @@ public class DataObject_1
                 //
                 // Shared
                 //
-                DataObject_1 composite = this.dataObjectManager.getObjectById(facade.getPath()); 
+                DataObject_1 composite = this.dataObjectManager.getObjectById(objectHolder.getResourceIdentifier()); 
                 setInaccessibilityReason(
                     new ServiceException(
                         BasicException.Code.DEFAULT_DOMAIN,
                         BasicException.Code.ILLEGAL_STATE,
                         "Shared object proxy had to be replaced by composite object proxy",
                         ExceptionHelper.newObjectIdParameter("shared", this),
-                        new BasicException.Parameter("composite", facade.getPath())
+                        new BasicException.Parameter("composite", objectHolder.getResourceIdentifier())
                         
                     )
                 );
                 return composite.postLoad(objectHolder);
             }
-        } catch (ResourceException exception) {
-            throw new ServiceException(exception);
         } finally {
         	this.loadLock = false;
         }
@@ -872,11 +869,11 @@ public class DataObject_1
                 this.dataObjectManager.getInteractionSpecs().GET,
                 query.getDelegate()
             );
-            if(reply.isEmpty()) {
+            if(reply == null || reply.isEmpty()) {
                 this.setNotFound(jdoGetObjectId());
             } else {
                 this.setFound();
-                return postLoad((MappedRecord) reply.get(0));
+                return postLoad((ObjectRecord) reply.get(0));
             }
         } catch (ResourceException exception) {
             this.setInaccessibilityReason(new ServiceException(exception));
@@ -974,7 +971,6 @@ public class DataObject_1
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.cci.DataObject_1_0#getContainer(boolean)
      */
-//  @Override
     public Container_1 getContainer(
         boolean lazily
     ){
@@ -987,7 +983,7 @@ public class DataObject_1
                     DataObject_1_0 parent = this.dataObjectManager.getObjectById(parentId, false); 
                     if(!parent.objIsInaccessible()) try {
                         this.container = (Container_1) parent.objGetContainer(
-                            identity.get(size)
+                            identity.getSegment(size).toClassicRepresentation()
                         );
                     } catch (ServiceException exception) {
                         return null; // As if the parent were inaccessible
@@ -1458,12 +1454,13 @@ public class DataObject_1
     ) throws ServiceException{
         Map<String,DataObject_1_0> children = new LinkedHashMap<String,DataObject_1_0>();
         for(Map.Entry<String,DataObject_1_0> child : descendants.entrySet()) {
-            if(!child.getValue().jdoIsPersistent()) {
-                PathComponent key = new PathComponent(child.getKey());
-                if(aspect == (key.isPlaceHolder() && key.size() == 3)){    
+            final DataObject_1_0 value = child.getValue();
+			if(!value.jdoIsPersistent()) {
+                final String key = child.getKey();
+				if(aspect == (PathComponent.isPlaceHolder(key) && new PathComponent(key).size() == 3)){    
                     children.put(
-                        child.getKey(),
-                        child.getValue()
+                        key,
+                        value
                     );
                 }
             }
@@ -1592,40 +1589,43 @@ public class DataObject_1
     ) throws ServiceException, ResourceException {
         TransactionalState_1 state = this.getState(false);
         if(state.isLifeCycleEventPending()){
-            Object_2Facade input;
-            if(!state.isFlushed() && this.identity.getLastComponent().isPlaceHolder()) {
-                input = Object_2Facade.newInstance(
-                    new Path(this.jdoGetTransactionalObjectId()),
-                    this.transactionalValuesRecordName
-                );
-                interaction.execute(
-                    this.dataObjectManager.getInteractionSpecs().CREATE,
-                    input.getDelegate()
-                );
-                state.setFlushed(true);
+            ObjectRecord input;
+			if(!state.isFlushed()) {
+				final String base = this.identity.getLastSegment().toClassicRepresentation();
+				if(PathComponent.isPlaceHolder(base)) {
+					input = Records.getRecordFactory().createMappedRecord(ObjectRecord.class);
+					input.setTransientObjectId(this.jdoGetTransactionalObjectId());
+					if(this.transactionalValuesRecordName != null) {
+						input.setValue(
+							Records.getRecordFactory().createMappedRecord(this.transactionalValuesRecordName)
+						);
+					}
+	                interaction.execute(
+	                    this.dataObjectManager.getInteractionSpecs().CREATE,
+	                    input
+	                );
+	                state.setFlushed(true);
+				}
             }
-            input = Object_2Facade.newInstance(
-                this.identity,
-                this.transactionalValuesRecordName
-            );
+			input = Records.getRecordFactory().createMappedRecord(ObjectRecord.class);
+			input.setResourceIdentifier(this.identity);
+			if(this.transactionalValuesRecordName != null) {
+				input.setValue(
+					Records.getRecordFactory().createMappedRecord(this.transactionalValuesRecordName)
+				);
+			}
             if(state.isFlushed()) {
+            	input.setTransientObjectId(this.transientObjectId);
                 Record reply = interaction.execute(
                     this.dataObjectManager.getInteractionSpecs().MOVE,
-                    Records.getRecordFactory().singletonMappedRecord(
-                        "map", 
-                        null, // recordShortDescription
-                        this.transientObjectId, 
-                        input.getDelegate()
-                    )
+                    input
                 );
-                Object_2Facade persistent = Object_2Facade.newInstance(
-                    (MappedRecord)((IndexedRecord)reply).get(0)
-                );
-                this.identity = persistent.getPath();
+                final ObjectRecord persistent = (ObjectRecord)((IndexedRecord)reply).get(0);
+                this.identity = persistent.getResourceIdentifier();
             } else {
                 interaction.execute(
                     InteractionSpecs.getRestInteractionSpecs(false).CREATE,
-                    input.getDelegate()
+                    input
                 );
             }
         }        
@@ -1718,7 +1718,7 @@ public class DataObject_1
      */
     private boolean cardinalityIsInvalid(ModelElement_1_0 classDef, ModelElement_1_0 featureDef) throws ServiceException {
        if (isMandatory(featureDef) && !dataObjectManager.isExemptFromValidation(this, featureDef) && isPersistent(featureDef)) {
-          String featureName = (String) featureDef.getName();
+          String featureName = featureDef.getName();
           if(!ModelHelper.isFeatureHeldByCore(classDef, featureName)) {
               return this.objGetValue(featureName) == null;
           }
@@ -1727,7 +1727,7 @@ public class DataObject_1
     }     
     
     /**
-     * Initialize a newly created object facade
+     * Initialize a newly created object record
      * 
      * @param input
      * @param values
@@ -1735,13 +1735,16 @@ public class DataObject_1
      * @return the initialize facade
      * @throws ResourceException 
      */
-    private Object_2Facade newInput(
+    private ObjectRecord newInput(
     	boolean transactionalId,
     	MappedRecord values
-    ) throws ResourceException{
-    	Object_2Facade input = transactionalId ? 
-    		Object_2Facade.newInstance(this.jdoGetTransactionalObjectId()) :
-			Object_2Facade.newInstance(this.jdoGetObjectId());
+    ) throws ResourceException {
+    	ObjectRecord input = Records.getRecordFactory().createMappedRecord(ObjectRecord.class);
+    	if(transactionalId) {
+    		input.setTransientObjectId(this.jdoGetTransactionalObjectId());
+    	} else {
+    		input.setResourceIdentifier(this.jdoGetObjectId());
+    	}
         input.setVersion(this.jdoGetVersion());
         input.setLock(this.lock);
         if(values != null) {
@@ -1787,13 +1790,13 @@ public class DataObject_1
                         );                    
                     }
                 }
-                Object_2Facade input = newInput(
+                final ObjectRecord input = newInput(
                 	true,
                 	this.persistentValues
                 );
                 interaction.execute(
                     this.dataObjectManager.getInteractionSpecs().CREATE,
-                    input.getDelegate()
+                    input
                 );
                 state.setLifeCycleEventPending(false);
                 state.setFlushed(true);
@@ -1801,13 +1804,13 @@ public class DataObject_1
                 if(state.isLifeCycleEventPending()){
                     if(!this.jdoIsNew() || state.isFlushed()) {
                         String objectClass = DataObject_1.getRecordName(this, false);
-						Object_2Facade input = newInput(
+						final ObjectRecord input = newInput(
                         	false,
                         	objectClass == null ? null : Records.getRecordFactory().createMappedRecord(objectClass)
                         );
                         interaction.execute(
                             this.dataObjectManager.getInteractionSpecs().DELETE,
-                            input.getDelegate()
+                            input
                         );
                         state.setFlushed(false);
                     }
@@ -1835,7 +1838,7 @@ public class DataObject_1
                         }
                     }
                 }
-                Object_2Facade input;
+                final ObjectRecord input;
                 if(this.isProxy()) {
                     if(PathComponent.isPlaceHolder(this.identity.getLastSegment().toClassicRepresentation())) {
                     	input = newInput(
@@ -1844,30 +1847,24 @@ public class DataObject_1
                     	);
                         interaction.execute(
                             this.dataObjectManager.getInteractionSpecs().CREATE,
-                            input.getDelegate()
+                            input
                         );
-                        input.setPath(this.identity);
+                        input.setResourceIdentifier(this.identity);
+                        input.setTransientObjectId(this.transientObjectId);
                         Record reply = interaction.execute(
                             this.dataObjectManager.getInteractionSpecs().MOVE,
-                            Records.getRecordFactory().singletonMappedRecord(
-                                "map", 
-                                null, // recordShortDescription
-                                this.transientObjectId, 
-                                input.getDelegate()
-                            )
+                            input
                         );
-                        Object_2Facade persistent = Object_2Facade.newInstance(
-                            (MappedRecord)((IndexedRecord)reply).get(0)
-                        );
-                        this.identity  = persistent.getPath();
+                        final ObjectRecord persistent =(ObjectRecord)((IndexedRecord)reply).get(0);
+                        this.identity  = persistent.getResourceIdentifier();
                     } else {
                     	input = newInput(
                     		false,
                     		this.persistentValues
                     	);
                         interaction.execute(
-                            this.dataObjectManager.getInteractionSpecs().PUT,
-                            input.getDelegate()
+                            this.dataObjectManager.getInteractionSpecs().UPDATE,
+                            input
                         );
                     }
                     state.setFlushed(true);
@@ -1878,18 +1875,18 @@ public class DataObject_1
                 	);
                     if(state.isFlushed()) {
                         interaction.execute(
-                            this.dataObjectManager.getInteractionSpecs().PUT,
+                            this.dataObjectManager.getInteractionSpecs().UPDATE,
                             Records.getRecordFactory().singletonMappedRecord(
                                 "map", 
                                 null, // recordShortDescription
                                 this.transientObjectId, 
-                                input.getDelegate()
+                                input
                             )
                         );
                     } else {
                         interaction.execute(
                             this.dataObjectManager.getInteractionSpecs().CREATE,
-                            input.getDelegate()
+                            input
                         );
                     }
                 }
@@ -1931,14 +1928,14 @@ public class DataObject_1
                         );
                     }
                 }
-                Object_2Facade input = newInput(
+                final ObjectRecord input = newInput(
                 	false,
                 	this.persistentValues
                 );
                 this.persistentValues = beforeImage;
                 interaction.execute(
-                    this.dataObjectManager.getInteractionSpecs().PUT,
-                    input.getDelegate()
+                    this.dataObjectManager.getInteractionSpecs().UPDATE,
+                    input
                 );
             }
         } catch (ResourceException exception) {
@@ -1987,7 +1984,7 @@ public class DataObject_1
             "Before image should have been set"
         );
         Multiplicity multiplicity = ModelHelper.getMultiplicity(feature);
-        String featureName = (String) feature.getName();
+        String featureName = feature.getName();
         switch(multiplicity) {
         	case SINGLE_VALUE: case OPTIONAL: 
         		return !equal(this.beforeImage.objGetValue(featureName), this.objGetValue(featureName));
@@ -2634,13 +2631,11 @@ public class DataObject_1
                     );
                 }
                 Query_2Facade input = Query_2Facade.forObjectId(this);
-                input.setQuery(
-                    JavaBeans.toXML(
-                        new Filter(
-                            null, // condition
-                            orders,
-                            null // extension
-                        )
+                input.setQueryFilter(
+                    new Filter(
+                        null, // condition
+                        orders,
+                        null // extension
                     )
                 );
                 IndexedRecord indexedRecord = (IndexedRecord) this.dataObjectManager.getInteraction().execute(
@@ -2654,9 +2649,7 @@ public class DataObject_1
                     ExceptionHelper.newObjectIdParameter("id", this),
                     new BasicException.Parameter("feature", missing)
                 );
-                Object_2Facade output = Object_2Facade.newInstance(
-                    (MappedRecord)indexedRecord.get(0)
-                );                
+                ObjectRecord output = (ObjectRecord)indexedRecord.get(0);                
                 persistentValues.putAll(
                     output.getValue()
                 );
@@ -2751,21 +2744,21 @@ public class DataObject_1
                         null // extension
                     );
                     Query_2Facade input = Query_2Facade.forObjectId(this);
-                    input.setQuery(JavaBeans.toXML(attributeSpecifier));
+                    input.setQueryFilter(attributeSpecifier);
                     IndexedRecord indexedRecord = (IndexedRecord) this.dataObjectManager.getInteraction().execute(
                         this.dataObjectManager.getInteractionSpecs().GET,
                         input.getDelegate()
                     );
-                    if(indexedRecord.isEmpty()) throw new ServiceException(
-                        BasicException.Code.DEFAULT_DOMAIN,
-                        BasicException.Code.NOT_FOUND,
-                        "Could not fetch attribute",
-                        ExceptionHelper.newObjectIdParameter("id", this),
-                        new BasicException.Parameter("feature", name)
-                    );
-                    Object_2Facade output = Object_2Facade.newInstance(
-                        (MappedRecord)indexedRecord.get(0)
-                    );                
+                    if(indexedRecord.isEmpty()) {
+                    	throw new ServiceException(
+	                        BasicException.Code.DEFAULT_DOMAIN,
+	                        BasicException.Code.NOT_FOUND,
+	                        "Could not fetch attribute",
+	                        ExceptionHelper.newObjectIdParameter("id", this),
+	                        new BasicException.Parameter("feature", name)
+	                    );
+                    }
+                    ObjectRecord output = (ObjectRecord)indexedRecord.get(0);                
                     persistentValues.putAll(
                         output.getValue()
                     );
@@ -2927,7 +2920,7 @@ public class DataObject_1
         final String featureName,
         final ModelElement_1_0 featureDef
     ) throws ServiceException{
-        String type = (String) featureDef.getModel().getDereferencedType(featureDef.getType()).getQualifiedName();
+        String type = featureDef.getModel().getDereferencedType(featureDef.getType()).getQualifiedName();
         Object persistentValue = this.getPersistentAttribute(
             featureName, 
             true, // stream 
@@ -3192,7 +3185,7 @@ public class DataObject_1
                 "The feature's cache contains already a value of another type",
                 ExceptionHelper.newObjectIdParameter("object", this),
                 new BasicException.Parameter("feature", feature),
-                new BasicException.Parameter("multiplicity", ""),
+                new BasicException.Parameter("multiplicity", multiplicity),
                 new BasicException.Parameter("requested", requested)
             ).log();
         }
@@ -4250,7 +4243,7 @@ public class DataObject_1
             ) {
                 boolean modify = !ManagedAspect.this.containsValue(value);
                 if(modify) {
-                    String key = PathComponent.createPlaceHolder().toString();
+                    String key = TransactionalSegment.getClassicRepresentationOfNewInstance();
                     ManagedAspect.this.put(key, value);
                 }
                 return modify;
@@ -5819,7 +5812,7 @@ public class DataObject_1
         ) throws ServiceException {
             try {
                 MessageRecord input = DataObject_1.newRecord(MessageRecord.NAME);
-                input.setPath(identity.getDescendant(this.operation, UUIDs.newUUID().toString()));
+                input.setResourceIdentifier(identity.getDescendant(this.operation, UUIDs.newUUID().toString()));
                 input.setBody(this.input);
                 MessageRecord replies = (MessageRecord) interaction.execute(
                     jdoGetPersistenceManager().getInteractionSpecs().INVOKE,

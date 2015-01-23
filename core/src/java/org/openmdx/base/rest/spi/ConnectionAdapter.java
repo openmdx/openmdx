@@ -49,14 +49,12 @@ package org.openmdx.base.rest.spi;
 
 import javax.resource.ResourceException;
 import javax.resource.cci.Connection;
-import javax.resource.cci.ConnectionSpec;
 import javax.resource.cci.IndexedRecord;
 import javax.resource.cci.Interaction;
 import javax.resource.cci.InteractionSpec;
 import javax.resource.cci.LocalTransaction;
 import javax.resource.cci.MappedRecord;
 import javax.resource.cci.Record;
-import javax.resource.cci.ResourceAdapterMetaData;
 import javax.resource.spi.EISSystemException;
 import javax.resource.spi.LocalTransactionException;
 
@@ -69,8 +67,8 @@ import org.openmdx.base.resource.InteractionSpecs;
 import org.openmdx.base.resource.Records;
 import org.openmdx.base.resource.cci.ConnectionFactory;
 import org.openmdx.base.resource.spi.AbstractInteraction;
-import org.openmdx.base.resource.spi.Port;
 import org.openmdx.base.rest.cci.MessageRecord;
+import org.openmdx.base.rest.cci.RestConnection;
 import org.openmdx.base.rest.cci.RestConnectionSpec;
 import org.openmdx.base.transaction.TransactionAttributeType;
 import org.openmdx.kernel.exception.BasicException;
@@ -79,44 +77,29 @@ import org.openmdx.kernel.loading.Classes;
 /**
  * Wraps a REST Port into a JCA Connection
  * <p>
- * This class does not supports the transaction attribute REQUIRES_NEW.
+ * Note:<ul>
+ * <li>This class does not supports the transaction attribute REQUIRES_NEW.
+ * <li>This class caches the interaction for re-use.
+ * </ul>
  */
-public class ConnectionAdapter 
-    extends AbstractConnection 
-    implements CacheAccessor_2_0
-{
+public class ConnectionAdapter extends AbstractConnection implements CacheAccessor_2_0 {
 
 	/**
 	 * Constructor 
-	 *
-	 * @param useLocalTransactionDemarcation
-	 * @param connectionSpec
-	 * @param transactionAttributeType 
-	 * @param delegate
-	 * 
-	 * @throws ResourceException
 	 */
     protected ConnectionAdapter(
-    	boolean useLocalTransactionDemarcation,
-        RestConnectionSpec connectionSpec,
-        TransactionAttributeType transactionAttribute, 
-        Port delegate
-    ) throws ResourceException{
-        super(connectionSpec);
-        this.restPlugIn = delegate;
-        this.transactionAttribute = transactionAttribute;
-        this.transactionProxy = newTransactionProxy(useLocalTransactionDemarcation);
+    	ConnectionFactoryAdapter connectionFactory,	
+        RestConnectionSpec connectionSpec
+    ){
+    	super(connectionSpec);
+    	this.connectionFactory = connectionFactory;
+        this.transactionProxy = newTransactionProxy();
     }
-    
+
     /**
-     * The REST interaction
+     * The Connection's Factory
      */
-    protected Interaction interaction;
-    
-    /**
-     * The REST plug-in
-     */
-    private Port restPlugIn;
+    private final ConnectionFactoryAdapter connectionFactory;
 
     /**
      * 
@@ -124,14 +107,14 @@ public class ConnectionAdapter
     private final LocalTransaction transactionProxy;
     
     /**
-     * The transaction attribute
+     * The REST interaction
      */
-    protected final TransactionAttributeType transactionAttribute;
+    protected Interaction interaction;
     
     /**
      * Uses the transaction manager
      */
-    private static ConnectionAdapterFactory connectionAdapterFactory;
+    private static ConnectionAdapterFactory suspendingConnectionAdapterFactory;
     
     /**
      * Virtual Transaction Object Id Reference 
@@ -140,19 +123,17 @@ public class ConnectionAdapter
         "xri://@openmdx*org.openmdx.kernel/transaction"
     );
 
-    protected LocalTransaction newTransactionProxy(
-        boolean localTransactionDemarcation
-    ){
-        return localTransactionDemarcation ?
-            new LocalTransactionAdapter() : 
-            new NoTransactionAdapter();
-    }
-
-    private static ConnectionAdapterFactory getConnectionAdapterFactory(
+	protected LocalTransaction newTransactionProxy() {
+		return this.connectionFactory.isLocalTransactionDemarcationSupported() ?
+			new LocalTransactionAdapter() : 
+			new NoTransactionAdapter();
+	}
+    
+    private static ConnectionAdapterFactory getSuspendingConnectionAdapterFactory(
     ) throws ResourceException {
-        if(connectionAdapterFactory == null) {
+        if(suspendingConnectionAdapterFactory == null) {
             try {
-                connectionAdapterFactory = Classes.newApplicationInstance(
+                suspendingConnectionAdapterFactory = Classes.newApplicationInstance(
                     ConnectionAdapterFactory.class, 
                     "org.openmdx.application.rest.adapter.JTAConnectionAdapterFactory"
                 );
@@ -163,15 +144,7 @@ public class ConnectionAdapter
                 );
             }
         }
-        return connectionAdapterFactory;
-    }
-    
-    /* (non-Javadoc)
-     * @see org.openmdx.base.rest.spi.AbstractConnection#getConnectionSpec()
-     */
-    @Override
-    public RestConnectionSpec getConnectionSpec() {
-        return getMetaData().getConnectionSpec();
+        return suspendingConnectionAdapterFactory;
     }
     
     /**
@@ -179,95 +152,33 @@ public class ConnectionAdapter
      * 
      * @param connectionFactory 
      * @param connectionSpec 
-     * @param transactionAttribute
-     * @param delegate the REST plug-in 
      * 
      * @return the corresponding JCA connection
      * 
      * @throws ResourceException  
      */
-    public static Connection newInstance(
-        ConnectionFactory connectionFactory, 
-        ConnectionSpec connectionSpec, 
-        TransactionAttributeType transactionAttribute,
-        Port delegate
+    static RestConnection newInstance(
+        ConnectionFactoryAdapter connectionFactory, 
+        RestConnectionSpec connectionSpec
     ) throws ResourceException{
-        return newInstance(
-        	connectionFactory == null ? null : connectionFactory.getMetaData(),
-            connectionSpec,
-            transactionAttribute,
-            delegate
-        );
+        return isTransactionSuspensionRequired(connectionFactory) ? 
+           getSuspendingConnectionAdapterFactory().newConnectionAdapter(
+                connectionFactory, 
+                connectionSpec
+           ) : new ConnectionAdapter(
+            	connectionFactory, 
+            	connectionSpec
+           );
     }
 
-    /**
-     * Create a connection using the given port
-     * 
-     * @param connectionFactory 
-     * @param connectionSpec 
-     * @param transactionAttribute
-     * @param delegate the REST plug-in 
-     * 
-     * @return the corresponding JCA connection
-     * 
-     * @throws ResourceException  
-     */
-    public static Connection newInstance(
-        ResourceAdapterMetaData metaData, 
-        ConnectionSpec connectionSpec, 
-        TransactionAttributeType transactionAttribute,
-        Port delegate
-    ) throws ResourceException {
-        return newInstance(
-            metaData != null && metaData.supportsLocalTransactionDemarcation(),
-            (RestConnectionSpec)connectionSpec,
-            transactionAttribute,
-            delegate
-        );
+    private static boolean isTransactionSuspensionRequired(
+        ConnectionFactoryAdapter connectionFactory
+    ){
+    	return 
+    		!connectionFactory.isLocalTransactionDemarcationSupported() &&
+    		connectionFactory.getTransactionAttribute() == TransactionAttributeType.REQUIRES_NEW;
     }
-
-    /**
-     * Create a connection using the given port
-     * 
-     * @param connectionFactory 
-     * @param connectionSpec 
-     * @param transactionAttribute
-     * @param delegate the REST plug-in 
-     * 
-     * @return the corresponding JCA connection
-     * 
-     * @throws ResourceException  
-     */
-    public static Connection newInstance (
-        boolean useLocalTransactionDemarcation, 
-        RestConnectionSpec connectionSpec, 
-        TransactionAttributeType transactionAttribute,
-        Port delegate
-    ) throws ResourceException {
-        return (
-            !useLocalTransactionDemarcation && 
-            transactionAttribute == TransactionAttributeType.REQUIRES_NEW
-        ) ? getConnectionAdapterFactory().newSyspendingConnectionAdapter(
-            connectionSpec, 
-            delegate
-        ) : new ConnectionAdapter(
-            useLocalTransactionDemarcation,
-            connectionSpec,
-            transactionAttribute,
-            delegate
-        );
-    }
-    
-    /* (non-Javadoc)
-     * @see javax.resource.cci.Connection#close()
-     */
-    @Override
-    public void close(
-    ) throws ResourceException {
-        super.close();
-        this.restPlugIn = null;
-    }
-    
+    	
     /**
      * Retrieve the delegate interaction, which may be shared by 
      * different interaction adapters.
@@ -279,7 +190,7 @@ public class ConnectionAdapter
     protected Interaction getDelegate(
     ) throws ResourceException {
         if(this.interaction == null) {
-            this.interaction = this.restPlugIn.getInteraction(this);
+            this.interaction = this.connectionFactory.getPort().getInteraction(this);
         }
         return this.interaction;
     }
@@ -297,11 +208,17 @@ public class ConnectionAdapter
     /* (non-Javadoc)
      * @see javax.resource.cci.Connection#getLocalTransaction()
      */
+	@Override
     public LocalTransaction getLocalTransaction(
     ) throws ResourceException {
         return this.transactionProxy;
     }
 
+	@Override
+	public ConnectionFactory getConnectionFactory() {
+		return this.connectionFactory;
+	}
+    
     
     //------------------------------------------------------------------------
     // Implements CacheProvider_2_0
@@ -387,8 +304,8 @@ public class ConnectionAdapter
                 throw new LocalTransactionException("There is no active transaction");
             }
             try {
-                MessageRecord input = (MessageRecord) Records.getRecordFactory().createMappedRecord(MessageRecord.NAME);
-                input.setPath(Object_2Facade.getPath(this.currentTransaction).getChild("commit"));
+                MessageRecord input = Records.getRecordFactory().createMappedRecord(MessageRecord.class);
+                input.setResourceIdentifier(Object_2Facade.getPath(this.currentTransaction).getChild("commit"));
                 input.setBody(null);
                 ConnectionAdapter.this.interaction.execute(
                     InteractionSpecs.getRestInteractionSpecs(true).INVOKE,
@@ -543,5 +460,6 @@ public class ConnectionAdapter
         }
 
     }
+
 
 }

@@ -53,7 +53,7 @@ package org.openmdx.base.query;
  */
 public class AnyTypeCondition extends Condition {
 
-    /**
+	/**
      * Constructor 
      */
     public AnyTypeCondition(
@@ -63,11 +63,11 @@ public class AnyTypeCondition extends Condition {
 
     /**
      * Constructor 
-     *
-     * @param quantifier
-     * @param feature
-     * @param type
-     * @param values
+     * 
+     * @param quantifier the quantifier
+     * @param feature the feature name
+     * @param type the condition type
+     * @param values the condition values with their type dependent semantic
      */
     public AnyTypeCondition(
         Quantifier quantifier,
@@ -78,20 +78,15 @@ public class AnyTypeCondition extends Condition {
         super(
             quantifier, 
             feature, 
+            type,
             values
         );
-        this.type = type;
     }
 
     /**
      * Implements <code>Serializable</code>
      */
-    private static final long serialVersionUID = -4515329101711432198L;
-
-    /**
-     * The predicate type
-     */
-    private ConditionType type;
+	private static final long serialVersionUID = -1593541490032431549L;
 
     /**
      * Clone the condition
@@ -102,20 +97,11 @@ public class AnyTypeCondition extends Condition {
     public AnyTypeCondition clone(
     ){
         return new AnyTypeCondition(
-            this.getQuantifier(), 
-            this.getFeature(), 
-            this.getType(), 
-            this.getValue()
+            getQuantifier(), 
+            getFeature(), 
+            getType(), 
+            getValue()
         );
-    }
-
-    /* (non-Javadoc)
-     * @see org.openmdx.base.query.Condition#getName()
-     */
-    @Override
-    public ConditionType getType(
-    ) {
-        return this.type;
     }
 
     /**
@@ -126,7 +112,7 @@ public class AnyTypeCondition extends Condition {
     public void setName(
         String name
     ){
-        this.type = ConditionType.valueOf(name);
+    	super.setType(ConditionType.valueOf(name));
     }
     
 }

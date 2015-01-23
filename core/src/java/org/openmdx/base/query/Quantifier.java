@@ -51,7 +51,7 @@ package org.openmdx.base.query;
 /**
  * Quantifier
  */
-public enum Quantifier {
+public enum Quantifier implements Code {
     
     /**
      * Universal Quantifier (&#x2200;) 

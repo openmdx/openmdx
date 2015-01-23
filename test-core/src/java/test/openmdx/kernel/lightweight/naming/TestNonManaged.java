@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2008-2011, OMEX AG, Switzerland
+ * Copyright (c) 2008-2014, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -51,8 +51,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -64,18 +65,48 @@ import javax.naming.NamingException;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.openmdx.kernel.lightweight.naming.NonManagedInitialContextFactoryBuilder;
+import org.openmdx.kernel.lightweight.naming.NonManagedInitialContextFactory;
 
 public class TestNonManaged {
-	
-	@BeforeClass
-	public static void initialize() throws NamingException{
-		NonManagedInitialContextFactoryBuilder.install(Collections.emptyMap());
-	}
+
+    @BeforeClass
+    public static void initialize() throws NamingException{
+        System.setProperty(Context.INITIAL_CONTEXT_FACTORY, NonManagedInitialContextFactory.class.getName());
+    }
 
 	@Test
-	public void start() throws NamingException{
-		Context root = new InitialContext();
+	public void foo() throws NamingException{
+	    populateNonMangedContext();
+	}
+
+    @Test
+    public void bar() throws NamingException{
+        populateNonMangedContext();
+    }
+	
+	private void populateNonMangedContext() throws NamingException{
+	    reset();
+	    populateInitialContext();
+	    populateTopLevelContexts();
+	    populateThirdLevelContexts();
+	}
+
+    	
+	private void reset() throws NamingException{
+	    // Arrange
+        Context root = new InitialContext();
+        Collection<String> names = new ArrayList<String>(); 
+        for(
+            NamingEnumeration<Binding> bindings = root.listBindings("");
+            bindings.hasMoreElements();
+        ){
+            names.add(bindings.nextElement().getName());
+        }
+        // Act
+        for(String name : names) {
+            root.destroySubcontext(name);
+        }
+		// Assert
 		for(
 			NamingEnumeration<Binding> bindings = root.listBindings("");
 			bindings.hasMoreElements();
@@ -85,8 +116,7 @@ public class TestNonManaged {
 		assertEquals("The initial contex's name", "", root.getNameInNamespace());
 	}
 
-	@Test
-	public void populateInitialContext() throws NamingException{
+	private void populateInitialContext() throws NamingException{
 		Context root = new InitialContext();
 		root.createSubcontext("org");
 		root.createSubcontext("ch");
@@ -105,8 +135,7 @@ public class TestNonManaged {
 		assertTrue("Top level contexts", expected.isEmpty());
 	}
 
-	@Test
-	public void populateTopLevelContexts() throws NamingException{
+	private void populateTopLevelContexts() throws NamingException{
 		Context root = new InitialContext();
 		Context org = (Context) root.lookup("org");
 		org.createSubcontext("openmdx");
@@ -127,8 +156,7 @@ public class TestNonManaged {
 		assertTrue("Second level contexts", expected.isEmpty());
 	}
 
-	@Test
-	public void populateThirdLevelContexts(
+	private void populateThirdLevelContexts(
     ) throws NamingException{
 		Context root = new InitialContext();
 		Context openmdx = (Context) root.lookup("org/openmdx");
@@ -147,5 +175,5 @@ public class TestNonManaged {
 		}
 		assertTrue("Thrid level bindings", expected.isEmpty());
 	}
-
+	
 }

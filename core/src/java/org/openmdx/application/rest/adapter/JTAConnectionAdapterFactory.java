@@ -48,11 +48,11 @@
 package org.openmdx.application.rest.adapter;
 
 import javax.resource.ResourceException;
-import javax.resource.cci.Connection;
 
-import org.openmdx.base.resource.spi.Port;
+import org.openmdx.base.rest.cci.RestConnection;
 import org.openmdx.base.rest.cci.RestConnectionSpec;
 import org.openmdx.base.rest.spi.ConnectionAdapterFactory;
+import org.openmdx.base.rest.spi.ConnectionFactoryAdapter;
 
 /**
  * Connection Adapter Factory
@@ -68,13 +68,13 @@ public class JTAConnectionAdapterFactory implements ConnectionAdapterFactory {
      * @see org.openmdx.base.rest.spi.ConnectionAdapterFactory#newConnectionAdapter(boolean, org.openmdx.base.rest.cci.RestConnectionSpec, org.openmdx.base.transaction.TransactionAttributeType, org.openmdx.base.resource.spi.Port)
      */
     @Override
-    public Connection newSyspendingConnectionAdapter(
-        RestConnectionSpec connectionSpec,
-        Port delegate
+    public RestConnection newConnectionAdapter(
+        ConnectionFactoryAdapter connectionFactory, 
+        RestConnectionSpec connectionSpec
     ) throws ResourceException {
         return new SuspendingConnectionAdapter(
-            connectionSpec,
-            delegate
+        	connectionFactory,
+            connectionSpec
         );
     }
 

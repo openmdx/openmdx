@@ -98,18 +98,18 @@ public enum Multiplicity {
 	private Multiplicity(
 		String value
 	){
-		this.value = value;
+		this.code = value;
 	}
   
 	/**
 	 * The external representation
 	 */
-	private final String value;
+	private final String code;
 
 	/**
 	 * Parse the multiplicity 
 	 * 
-	 * @param value the value's String representation
+	 * @param multiplicity the value's String representation
 	 * 
 	 * @return the corresponding enumeration value
 	 * 
@@ -117,10 +117,10 @@ public enum Multiplicity {
 	 * @throws IllegalArgumentException if the value does not match any of Multiplicity's <code>String</code> representations
 	 */
 	public static Multiplicity parse(
-		String value
+		String multiplicity
 	){
 		for(Multiplicity candidate : values()) {
-			if(candidate.value.equals(value)){
+			if(candidate.code.equals(multiplicity)){
 				return candidate;
 			}
 		}
@@ -129,7 +129,7 @@ public enum Multiplicity {
 			null,
 			BasicException.Code.DEFAULT_DOMAIN,
 			BasicException.Code.BAD_PARAMETER,
-			new BasicException.Parameter("value", value)
+			new BasicException.Parameter("value", multiplicity)
 		);
 	}
 	
@@ -167,12 +167,21 @@ public enum Multiplicity {
 		return this == Multiplicity.STREAM;
 	}
 	
+	/**
+	 * Retrieve the multiplicity's representation
+	 * 
+	 * @return the multiplicity's representation
+	 */
+	public String code(){
+		return this.code;
+	}
+	
 	/* (non-Javadoc)
 	 * @see java.lang.Enum#toString()
 	 */
 	@Override
 	public String toString() {
-		return this.value;
+		return code();
 	}
 	
 }

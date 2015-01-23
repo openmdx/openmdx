@@ -235,7 +235,7 @@ public class UiContext
                 this.uiSegmentPaths[perspective].getParent().getParent()
             );
             this.uiSegments[perspective] = (org.openmdx.ui1.jmi1.Segment)provider.getSegment(
-                this.uiSegmentPaths[perspective].getBase()
+                this.uiSegmentPaths[perspective].getLastSegment().toClassicRepresentation()
             );            
         }
         return this.uiSegments[perspective];

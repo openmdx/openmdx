@@ -48,13 +48,13 @@
 package org.openmdx.application.dataprovider.layer.interception;
 
 import javax.resource.ResourceException;
-import javax.resource.cci.Connection;
 import javax.resource.cci.Interaction;
 
 import org.openmdx.application.dataprovider.spi.Layer_1;
+import org.openmdx.base.rest.cci.RestConnection;
 
 /**
- * The standard implementation of the interception layer's plug-in.
+ * @deprecated will not be supported by the dataprovider 2 stack 
  */
 public class Classic_1 extends Layer_1 {
 
@@ -69,7 +69,7 @@ public class Classic_1 extends Layer_1 {
     //--------------------------------------------------------------------------
     @Override
     public Interaction getInteraction(
-        Connection connection
+        RestConnection connection
     ) throws ResourceException {
         return new ClassicLayerInteraction(connection);
     }
@@ -92,7 +92,7 @@ public class Classic_1 extends Layer_1 {
         }
         
         public ClassicLayerInteraction(
-            Connection connection
+            RestConnection connection
         ) throws ResourceException {
             super(connection);
         }

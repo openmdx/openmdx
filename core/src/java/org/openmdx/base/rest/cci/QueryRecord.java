@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2009-2011, OMEX AG, Switzerland
+ * Copyright (c) 2009-2014, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -50,14 +50,13 @@ package org.openmdx.base.rest.cci;
 import java.util.Set;
 
 import javax.resource.cci.MappedRecord;
-import javax.resource.cci.Record;
 
 import org.openmdx.base.naming.Path;
 
 /**
  * <code>org::openmdx::kernel::Query</code>
  */
-public interface QueryRecord extends MappedRecord {
+public interface QueryRecord extends RequestRecord {
     
     /**
      * An object record's name
@@ -65,46 +64,32 @@ public interface QueryRecord extends MappedRecord {
     String NAME = "org:openmdx:kernel:Query";
     
     /**
-     * Retrieve groups.
+     * Retrieve the fetch group name
      *
-     * @return Returns the groups.
+     * @return Returns the fetch group name
      */
-    Set<String> getGroups();
+    String getFetchGroupName();
     
     /**
      * Set the fetch group names
      * 
-     * @param groups The fetch group names
+     * @param fetchGroupName The fetch group name
      */
-    void setGroups(Set<String> groups);
+    void setFetchGroupName(String fetchGroupName);
     
     /**
      * Retrieve the explicitly requested features
      *
      * @return Returns the set of explicitly requested features
      */
-    Set<String> getFeatures();
+    Set<String> getFeatureName();
     
     /**
-     * Set the explicitly requested features
+     * Set the names of the explicitly requested features
      * 
-     * @param features The explicitly requested features
+     * @param featureNames Names of the explicitly requested features
      */
-    void setFeatures(Set<String> features);
-    
-    /**
-     * Retrieve path.
-     *
-     * @return Returns the path.
-     */
-    Path getPath();
-    
-    /**
-     * Set path.
-     * 
-     * @param path The path to set.
-     */
-    void setPath(Path path);
+    void setFeatureName(Set<String> featureNames);
     
     /**
      * Retrieve position.
@@ -125,14 +110,14 @@ public interface QueryRecord extends MappedRecord {
      *
      * @return Returns the query.
      */
-    String getQuery();
+    QueryFilterRecord getQueryFilter();
     
     /**
      * Set query.
      * 
      * @param query The query to set.
      */
-    void setQuery(String query);
+    void setQueryFilter(QueryFilterRecord query);
     
     /**
      * Retrieve queryType.
@@ -147,20 +132,6 @@ public interface QueryRecord extends MappedRecord {
      * @param queryType The queryType to set.
      */
     void setQueryType(String queryType);
-    
-    /**
-     * Retrieve parameters.
-     *
-     * @return Returns the parameters.
-     */
-    Record getParameters();
-    
-    /**
-     * Set parameters.
-     * 
-     * @param parameters The parameters to set.
-     */
-    void setParameters(Record parameters);
     
     /**
      * Retrieve size.
@@ -193,5 +164,38 @@ public interface QueryRecord extends MappedRecord {
      * answering the query
      */
     boolean isRefresh();
+
+    /**
+     * Set the openMDX Query Language statements to be applied to the query
+     * 
+     * @param query the openMDX Query Language statements to be applied to the query
+     */
+    void setQuery(String query);
     
+    /**
+     * Retrieve the openMDX Query Language statements to be applied to the query
+     * 
+     * @return the openMDX Query Language statements to be applied to the query
+     */
+    String getQuery();
+    
+    /**
+     * Deep clone
+     * 
+     * @return a clone of this record
+     */
+    QueryRecord clone();
+    
+    enum Member {
+        featureName,
+    	fetchGroupName,
+    	position,
+    	query,
+    	queryFilter,
+    	queryType,
+        refresh,
+        resourceIdentifier,
+    	size
+    }
+
 }

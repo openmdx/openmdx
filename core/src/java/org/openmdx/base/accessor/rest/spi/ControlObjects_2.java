@@ -47,6 +47,9 @@
  */
 package org.openmdx.base.accessor.rest.spi;
 
+import java.util.Arrays;
+import java.util.Collection;
+
 import org.openmdx.base.naming.Path;
 
 /**
@@ -81,7 +84,14 @@ public class ControlObjects_2 {
     protected static final Path CONNECTION_OBJECT_PATTERN = new Path(
         "xri://@openmdx*org.openmdx.kernel/connection/($..)"
     );
-    
+
+    private static final Collection<String> CONTROL_OBJECT_NAMES = Arrays.asList(
+    	"org:openmdx:kernel:UnitOfWork",	
+    	"org:openmdx:kernel:Object",	
+    	"org:openmdx:kernel:Message",	
+    	"org:openmdx:kernel:ResultSet"	
+    );
+
     /**
      * Tests whether the candidate is a control object 
      * 
@@ -92,9 +102,9 @@ public class ControlObjects_2 {
     public static boolean isControlObjectType(
         String recordName
     ){
-        return recordName.startsWith("org:openmdx:kernel:");
+        return CONTROL_OBJECT_NAMES.contains(recordName);
     }
-    
+
     /**
      * Tests whether the candidate matches 
      * 

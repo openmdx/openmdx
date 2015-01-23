@@ -280,7 +280,7 @@ public class Dataprovider_1 implements Dataprovider_1_0 {
                 	Layer_1.class,
                     configurationProvider.getConfiguration(
                         new String[]{plugIn}
-                    ).entries()
+                    )
                 ).instantiate()
             );
         }

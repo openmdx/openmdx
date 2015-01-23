@@ -201,10 +201,10 @@ public abstract class AbstractPlugIn_1 implements PlugIn_1_0, StoreLifecycleList
      * @throws ServiceException
      */
     protected String getBasicStateQualifier(
-        DataObject_1 object,
-        String qualifier
+        final DataObject_1 object,
+        final String qualifier
     ) throws ServiceException {
-        DataObject_1_0 core = (DataObject_1_0) object.objGetValue("core");
+    	final DataObject_1_0 core = (DataObject_1_0) object.objGetValue("core");
         if(qualifier == null) { 
             throw new ServiceException(
                 BasicException.Code.DEFAULT_DOMAIN,
@@ -218,8 +218,8 @@ public abstract class AbstractPlugIn_1 implements PlugIn_1_0, StoreLifecycleList
             // We are processing a proxy's request
             return qualifier;
         } else {
-            PathComponent pathComponent = new PathComponent(qualifier);
-            if(pathComponent.isPlaceHolder()){
+			if(PathComponent.isPlaceHolder(qualifier)){
+				final PathComponent pathComponent = new PathComponent(qualifier);
                 if(pathComponent.size() != 3) throw new ServiceException(
                     BasicException.Code.DEFAULT_DOMAIN,
                     BasicException.Code.BAD_PARAMETER,
@@ -227,7 +227,7 @@ public abstract class AbstractPlugIn_1 implements PlugIn_1_0, StoreLifecycleList
                     ExceptionHelper.newObjectIdParameter("id", this),
                     new BasicException.Parameter("qualifier",qualifier)
                 );
-                Integer id = successor((Integer) core.objGetValue("stateVersion"));
+                final Integer id = successor((Integer) core.objGetValue("stateVersion"));
                 core.objSetValue(
                     "stateVersion",
                     id
@@ -237,13 +237,14 @@ public abstract class AbstractPlugIn_1 implements PlugIn_1_0, StoreLifecycleList
                     id
                 );
             } else if (core.jdoIsPersistent()) {
-                StringBuilder aspectQualifier = new StringBuilder(core.jdoGetObjectId().getLastSegment().toClassicRepresentation());
+            	final PathComponent pathComponent = new PathComponent(qualifier);
+            	final StringBuilder aspectQualifier = new StringBuilder(core.jdoGetObjectId().getLastSegment().toClassicRepresentation());
                 for(
-                    int i = 1;
-                    i < pathComponent.size();
+                    int i = 1, l = pathComponent.size();
+                    i < l;
                     i++
                 ){
-                    String aspectId = pathComponent.get(i);
+                	final String aspectId = pathComponent.get(i);
                     if(!aspectId.startsWith("!") && !aspectId.startsWith("*")) {
                         aspectQualifier.append('*');
                     }

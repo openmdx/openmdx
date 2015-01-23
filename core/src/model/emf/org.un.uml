@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<uml:Model xmi:version="2.1" xmlns:xmi="http://schema.omg.org/spec/XMI/2.1" xmlns:uml="http://www.eclipse.org/uml2/3.0.0/UML" xmi:id="_6UQFIN67EdmkJO73lqONhA" name="un">
+<uml:Model xmi:version="20110701" xmlns:xmi="http://www.omg.org/spec/XMI/20110701" xmlns:uml="http://www.eclipse.org/uml2/4.0.0/UML" xmi:id="_6UQFIN67EdmkJO73lqONhA" name="un">
   <packagedElement xmi:type="uml:Package" xmi:id="_3C7B8A60016D3C8B7F380249P" name="org">
     <packagedElement xmi:type="uml:Package" xmi:id="_3C7B8A60016D3C8B7F380249" name="un">
       <packagedElement xmi:type="uml:Class" xmi:id="_3C7B8A60016D3C8B7F4400E8" name="Country">

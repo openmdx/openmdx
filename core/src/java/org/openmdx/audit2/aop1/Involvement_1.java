@@ -152,7 +152,7 @@ public class Involvement_1 extends Interceptor_1 {
         ObjectView_1_0 beforeImage,
         ObjectView_1_0 afterImage
     ) throws ServiceException {
-        String featureName = (String) feature.getName();
+        String featureName = feature.getName();
         switch(ModelHelper.getMultiplicity(feature)){
 	        case OPTIONAL: case SINGLE_VALUE: 
 	            return !areEqual(beforeImage.objGetValue(featureName), afterImage.objGetValue(featureName));
@@ -234,7 +234,7 @@ public class Involvement_1 extends Interceptor_1 {
      */
     protected String getUnitOfWorkId(
     ){
-        return self.jdoGetObjectId().get(6);
+        return self.jdoGetObjectId().getSegment(6).toClassicRepresentation();
     }
 
     /**

@@ -55,12 +55,13 @@ package org.openmdx.base.query;
  * </ul>
  */
 public class IsGreaterOrEqualCondition extends Condition {
-    /**
+
+	/**
      * Constructor 
      */
     public IsGreaterOrEqualCondition(
     ) {
-        this.fulfils = false;
+    	super(toConditionType(false));
     }
 
     /**
@@ -80,21 +81,16 @@ public class IsGreaterOrEqualCondition extends Condition {
         super(
             quantifier,
             feature,
+            toConditionType(fulfil),
             expression
         );
-        this.fulfils = fulfil;
     }
 
     /**
      * Implements <code>Serializable</code>
      */
-    private static final long serialVersionUID = 3258134660948504628L;
+	private static final long serialVersionUID = 679373812211390193L;
 
-    /**
-     * Defines whether the condition shall be <code>true</code> of <code>false</code>
-     */
-    private boolean fulfils;
-        
     /**
      * Clone the condition
      * 
@@ -112,31 +108,41 @@ public class IsGreaterOrEqualCondition extends Condition {
     }
 
     /**
-     * Tells whether the condition shall be <code>true</code> or <code>false</code>
-     * 
-     * @return <code>true</code> if the condition shall be fulfilled
-     */
-    public boolean isFulfil() {
-        return this.fulfils;
-    }
-
-    /**
      * Defines whether the condition shall be <code>true</code> or <code>false</code>
      * 
      * @param fulful <code>true</code> if the condition shall be fulfilled
      */
     public void setFulfil(
-        boolean fulfil
-    ) {
-        this.fulfils = fulfil;
+		boolean fulfil
+	) {
+    	super.setType(toConditionType(fulfil));
+    }
+    
+    /**
+     * Tells whether the condition shall be <code>true</code> or <code>false</code>
+     * 
+     * @return <code>true</code> if the condition shall be fulfilled
+     */
+    public boolean isFulfil() {
+    	final ConditionType type = getType();
+		switch(type) {
+    	case IS_GREATER_OR_EQUAL : return true;
+    	case IS_LESS : return false;
+	    	default: throw new IllegalStateException("An " + getClass().getSimpleName() + " requires another type: " + type);
+		}
     }
 
-    @Override
-    public ConditionType getType(
-    ) {
-        return this.isFulfil() ? ConditionType.IS_GREATER_OR_EQUAL : ConditionType.IS_LESS;
+    /**
+     * Convert the fulfil argument to the underlying condition type
+     * 
+     * @param fulfil
+     * 
+     * @return the corresponding condition type
+     */
+    private static ConditionType toConditionType(boolean fulfil) {
+    	return fulfil ? ConditionType.IS_GREATER_OR_EQUAL : ConditionType.IS_LESS;
     }
-
+    
     /**
      * Retrieve the expression to used in the comparison
      * 

@@ -73,9 +73,9 @@ import org.openmdx.base.persistence.spi.FilterCollection;
 import org.openmdx.base.persistence.spi.QueryExtension;
 import org.openmdx.base.persistence.spi.UnitOfWorkFactory;
 import org.openmdx.base.query.ConditionType;
-import org.openmdx.base.query.Extension;
 import org.openmdx.base.query.Filter;
 import org.openmdx.base.query.Quantifier;
+import org.openmdx.base.rest.cci.QueryExtensionRecord;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.jdo.ReducedJDOHelper;
 import org.openmdx.kernel.loading.Classes;
@@ -219,11 +219,11 @@ public class PersistenceHelper {
      * 
      * @return the new query extension 
      */
-    public static Extension newQueryExtension(
+    public static QueryExtensionRecord newQueryExtension(
         AnyTypePredicate query
     ){
-        Extension queryExtension = new QueryExtension();
-        ((Query)query).addExtension(Queries.QUERY_EXTENSION, queryExtension);
+        QueryExtensionRecord queryExtension = new QueryExtension();
+        ((RefQuery_1_0)query).refGetFilter().getExtension().add(queryExtension);
         return queryExtension;
     }
     
@@ -364,7 +364,7 @@ public class PersistenceHelper {
             ){
                 Path childPattern = objectId.getDescendant(e.getKey(),":*");
                 ModelElement_1_0 childType = refPackage.refModel().getElementType(candidate);
-                String extentClassName = (String)childType.getQualifiedName();
+                String extentClassName = childType.getQualifiedName();
                 Class<?> extentClass;
                 try {
                     extentClass = Classes.getApplicationClass(

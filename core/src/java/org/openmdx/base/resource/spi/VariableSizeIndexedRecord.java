@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2010, OMEX AG, Switzerland
+ * Copyright (c) 2004-2014, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -15,16 +15,16 @@
  * conditions are met:
  * 
  * * Redistributions of source code must retain the above copyright
- * notice, this list of conditions and the following disclaimer.
- * 
+ *   notice, this list of conditions and the following disclaimer.
+ *   
  * * Redistributions in binary form must reproduce the above copyright
- * notice, this list of conditions and the following disclaimer in
- * the documentation and/or other materials provided with the
- * distribution.
+ *   notice, this list of conditions and the following disclaimer in
+ *   the documentation and/or other materials provided with the
+ *   distribution.
  * 
  * * Neither the name of the openMDX team nor the names of its
- * contributors may be used to endorse or promote products derived
- * from this software without specific prior written permission.
+ *   contributors may be used to endorse or promote products derived
+ *   from this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
  * CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
@@ -47,6 +47,7 @@
  */
 package org.openmdx.base.resource.spi;
 
+import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -54,6 +55,8 @@ import java.util.ListIterator;
 
 import javax.resource.cci.IndexedRecord;
 
+import org.openmdx.base.resource.cci.Freezable;
+import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.text.MultiLineStringRepresentation;
 import org.openmdx.kernel.text.format.IndentingFormatter;
 
@@ -61,13 +64,13 @@ import org.openmdx.kernel.text.format.IndentingFormatter;
  * Java Connector Architecture:
  * A variable-size IndxedRecord implementation.
  */
-@SuppressWarnings({"rawtypes","unchecked"})
+@SuppressWarnings({"rawtypes"})
 public class VariableSizeIndexedRecord 
-    extends ArrayList
-    implements IndexedRecord, MultiLineStringRepresentation
+    extends AbstractList
+    implements IndexedRecord, MultiLineStringRepresentation, Freezable
 {
 
-    /**
+	/**
      * Creates an IndexedRecord with the specified name and the given content.  
      *
      * @param     recordName
@@ -81,9 +84,9 @@ public class VariableSizeIndexedRecord
         String recordName,
         String recordShortDescription
     ){
-        super();
         this.recordName = recordName;
         this.description = recordShortDescription;
+        this.delegate = new ArrayList<Object>();
     }
 
     /**
@@ -91,7 +94,7 @@ public class VariableSizeIndexedRecord
      *
      * @param     recordName
      *            The name of the record acts as a pointer to the meta 
-     *            information (stored in the metadata repository) for a specific
+     *            information (stored in the meta data repository) for a specific
      *            record type. 
      */
     protected VariableSizeIndexedRecord(
@@ -117,11 +120,11 @@ public class VariableSizeIndexedRecord
         String description,
         Collection<?> initialContent
     ){
-        super(initialContent);
         this.recordName = recordName;
         this.description = description;
+        this.delegate = new ArrayList<Object>(initialContent);
     }
-
+    
     /**
      * The record name
      */
@@ -132,28 +135,76 @@ public class VariableSizeIndexedRecord
      */
     private String description;
 
-    
-    //------------------------------------------------------------------------
-    // Implements Serializable
-    //------------------------------------------------------------------------
+    /**
+     * Implements <code>Freezable</code>
+     */
+    private boolean immutable = false;
 
     /**
-     * Constructor
+     * Extends <code>AbstractList</code>
      */
-    protected VariableSizeIndexedRecord(){
-        // for de-serialization
+    private final List<Object> delegate;
+    
+    /**
+     * Implements <code>Serializable</code>
+     */
+	private static final long serialVersionUID = 169692966585077358L;
+
+
+    //--------------------------------------------------------------------------
+    // Implements Freezable
+    //--------------------------------------------------------------------------
+    
+    /* (non-Javadoc)
+     * @see org.openmdx.base.resource.cci.Freezable#makeImmutable()
+     */
+    @Override
+    public void makeImmutable() {
+    	if(!this.immutable) {
+	    	this.immutable = true;
+	    	for(ListIterator<Object> i = this.delegate.listIterator(); i.hasNext();){
+	    		Object original = i.next();
+	    		Object immutable = Isolation.toImmutable(original);
+	    		if(original != immutable) {
+	    			i.set(immutable);
+	    		}
+	    	}
+    	}
     }
     
-    /**
-     * Serial Version UID
+    /* (non-Javadoc)
+     * @see org.openmdx.base.resource.cci.Freezable#isImmutable()
      */
-    private static final long serialVersionUID = 8633465662532489653L;
+    @Override
+    public boolean isImmutable() {
+    	return this.immutable;
+    }
+    
+	/**
+	 * Asserts that the object is mutable
+	 * 
+	 * @throws IllegalStateException if the record is immutable
+	 */
+	protected void assertMutability(){
+		if(this.immutable) {
+	        throw new IllegalStateException(
+                "This record is frozen",
+                BasicException.newEmbeddedExceptionStack(
+                    BasicException.Code.DEFAULT_DOMAIN,
+                    BasicException.Code.ILLEGAL_STATE,
+                    new BasicException.Parameter("class", getClass().getName()),
+                    new BasicException.Parameter("name", getRecordName()),
+                    new BasicException.Parameter("immutable", Boolean.TRUE)
+                )
+            );
+		}
+	}
 
-
+	
     //--------------------------------------------------------------------------
     // Implements Record
     //--------------------------------------------------------------------------
-
+    
     /**
      * Gets the name of the Record. 
      *
@@ -164,8 +215,8 @@ public class VariableSizeIndexedRecord
     ){
         return this.recordName;
     }
-
-    /**
+    
+	/**
      * Sets the name of the Record. 
      *
      * @param name
@@ -204,65 +255,47 @@ public class VariableSizeIndexedRecord
         this.description = description;
     }
 
+    
+    //--------------------------------------------------------------------------
+    // Implements Cloneable
+    //--------------------------------------------------------------------------
   
-    //--------------------------------------------------------------------------
-    // Implements List
-    //--------------------------------------------------------------------------
-
-    /**
-     * Check if this instance has the same content as another List.
-     * <p>
-     * The Record's name and short description are ignored.
-     *
-     * @return  true if two instances are equal
-     */
-    @Override
-    public boolean equals(
-        Object other
-    ){
-        if (other == this) return true;
-        if (!(other instanceof List)) return false;
-        ListIterator e1 = listIterator();
-        ListIterator e2 = ((List) other).listIterator();
-        while(e1.hasNext() && e2.hasNext()) {
-            Object o1 = e1.next();
-            Object o2 = e2.next();
-            if (!(o1==null ? o2==null : o1.equals(o2))) return false;
-        }
-        return !(e1.hasNext() || e2.hasNext());
-    }
-
-    /**
-     * Returns the hash code for the Record instance. 
-     *
-     * @return hash code
-     */
-    @Override
-    public int hashCode(
-    ){
-        int hashCode = 1;
-        for(Object member : this){
-            hashCode *= 31;
-            if(member != null) hashCode += member.hashCode();
-        }
-        return hashCode;
-    }
-
     /**
      * Creates and returns a copy of this object.
      *
      * @return  a copy of this IndexedRecord instance
      */
     @Override
-    public Object clone(
-    ){
-        return new VariableSizeIndexedRecord(
-            this.recordName,
-            this.description,
-            this
-        );
+    public VariableSizeIndexedRecord clone(
+	){
+    	return new VariableSizeIndexedRecord(
+			this.recordName,
+			this.description,
+			this
+		);
     }
 
+    
+    //--------------------------------------------------------------------------
+    // Implements List
+    //--------------------------------------------------------------------------
+
+    /* (non-Javadoc)
+     * @see java.lang.Object#hashCode()
+     */
+    @Override
+    public int hashCode() {
+    	return IndexedRecords.getHashCode(this);
+    }
+
+    /* (non-Javadoc)
+     * @see java.lang.Object#equals(java.lang.Object)
+     */
+    @Override
+    public boolean equals(Object that) {
+    	return IndexedRecords.areEqual(this, that);
+    }
+    
     /**
      * Returns a multi-line string representation of this IndexedRecord.
      * <p>
@@ -279,5 +312,48 @@ public class VariableSizeIndexedRecord
     ){
         return IndentingFormatter.toString(this);
     }
+
+	/* (non-Javadoc)
+	 * @see java.util.AbstractList#get(int)
+	 */
+	@Override
+	public Object get(int index) {
+		return this.delegate.get(index);
+	}
+
+	/* (non-Javadoc)
+	 * @see java.util.AbstractList#add(int, java.lang.Object)
+	 */
+	@Override
+	public void add(int index, Object element) {
+		assertMutability();
+		delegate.add(index, element);
+	}
+
+	/* (non-Javadoc)
+	 * @see java.util.AbstractList#remove(int)
+	 */
+	@Override
+	public Object remove(int index) {
+		assertMutability();
+		return delegate.remove(index);
+	}
+
+	/* (non-Javadoc)
+	 * @see java.util.AbstractList#set(int, java.lang.Object)
+	 */
+	@Override
+	public Object set(int index, Object element) {
+		assertMutability();
+		return delegate.set(index, element);
+	}
+
+	/* (non-Javadoc)
+	 * @see java.util.AbstractCollection#size()
+	 */
+	@Override
+	public int size() {
+		return delegate.size();
+	}
 
 }

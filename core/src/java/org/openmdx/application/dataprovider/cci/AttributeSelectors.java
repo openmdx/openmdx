@@ -48,6 +48,11 @@
  */
 package org.openmdx.application.dataprovider.cci;
 
+import javax.jdo.FetchPlan;
+
+import org.openmdx.base.exception.ServiceException;
+import org.openmdx.base.rest.cci.QueryRecord;
+
 
 /**
  * The <code>AttributeSelectors</code> class contains constants 
@@ -118,6 +123,18 @@ public class AttributeSelectors {
   }
 
 
+  public static short getAttributeSelector(
+      QueryRecord query
+  ) throws ServiceException {
+      String fetchGroup = query.getFetchGroupName();
+      if(fetchGroup == null || fetchGroup.isEmpty() || FetchPlan.DEFAULT.equals(fetchGroup)) {
+          return AttributeSelectors.SPECIFIED_AND_TYPICAL_ATTRIBUTES;
+      } else if(FetchPlan.ALL.equals(fetchGroup)) {
+          return AttributeSelectors.ALL_ATTRIBUTES;
+      } else {
+          return AttributeSelectors.SPECIFIED_AND_SYSTEM_ATTRIBUTES;
+      }
+  }
 
   /**
    * Returns a string representation of the passed code

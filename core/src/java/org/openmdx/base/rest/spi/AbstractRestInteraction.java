@@ -47,22 +47,21 @@
  */
 package org.openmdx.base.rest.spi;
 
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.util.Collection;
+import java.util.List;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.resource.NotSupportedException;
 import javax.resource.ResourceException;
-import javax.resource.cci.Connection;
 import javax.resource.cci.ConnectionMetaData;
 import javax.resource.cci.IndexedRecord;
+import javax.resource.cci.Interaction;
 import javax.resource.cci.InteractionSpec;
-import javax.resource.cci.MappedRecord;
 import javax.resource.cci.Record;
 
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.base.mof.cci.Model_1_0;
-import org.openmdx.base.mof.spi.Model_1Factory;
+import org.openmdx.base.mof.cci.Multiplicity;
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.resource.Records;
 import org.openmdx.base.resource.spi.AbstractInteraction;
@@ -71,66 +70,65 @@ import org.openmdx.base.resource.spi.RestInteractionSpec;
 import org.openmdx.base.rest.cci.MessageRecord;
 import org.openmdx.base.rest.cci.ObjectRecord;
 import org.openmdx.base.rest.cci.QueryRecord;
+import org.openmdx.base.rest.cci.RequestRecord;
+import org.openmdx.base.rest.cci.RestConnection;
 import org.openmdx.base.rest.cci.RestConnectionMetaData;
 import org.openmdx.base.rest.cci.ResultRecord;
 import org.openmdx.kernel.exception.BasicException;
-import org.openmdx.kernel.id.UUIDs;
 
 /**
  * Abstract REST Interaction
  */
-public class AbstractRestInteraction extends AbstractInteraction<Connection> {
+public class AbstractRestInteraction extends AbstractInteraction<RestConnection> {
 
     /**
-     * Constructor 
-     *
-     * @param connection
+     * Constructor without delegate
      */
     protected AbstractRestInteraction(
-        Connection connection
-    ) {
+        @Nonnull RestConnection connection
+    ){
         super(connection);
     }
 
     /**
-     * Tells whether an object retrieval request shall throw a NOT_FOUND 
-     * exception rather than returning and empty collection when a requested
-     * object does not exist
-     * 
-     * @return <code>true</code> if an object retrieval request shall throw a NOT_FOUND 
-     * exception rather than returning and empty collection when a requested
-     * object does not exist
+     * Constructor with delegate
      */
-    protected boolean isPreferringNotFoundException(){
-        return false;
-    }
-    
-    /**
-     * Provide a request path by appending a UUID
-     * 
-     * @param target
-     * 
-     * @return a request path 
-     */
-    public Path newRequestId(
-        Path target
-    ){
-        return target.getChild(UUIDs.newUUID().toString());
-    }
-    
-    /**
+    protected AbstractRestInteraction(
+    	@Nonnull RestConnection connection,
+		@Nullable Interaction delegate
+	){
+		super(connection, delegate);
+	}
+
+	/**
      * Provide a response path by appending "*-";
      * 
      * @param requestId
      * 
      * @return a response path 
      */
-    public Path newResponseId(
+    protected Path newResponseId(
         Path requestId
     ){
         return requestId.getParent().getChild(requestId.getLastSegment().toClassicRepresentation() + "*-");
     }
 
+    protected QueryRecord newQuery(
+        Path resourceIdentifier
+    ){
+        QueryRecord query = new org.openmdx.base.rest.spi.QueryRecord();
+        query.setResourceIdentifier(resourceIdentifier);
+        return query;
+    }
+    
+    protected ObjectRecord newObject(
+        Path path
+    ){
+        ObjectRecord object = new org.openmdx.base.rest.spi.ObjectRecord();
+        object.setResourceIdentifier(path);
+        return object;
+    }
+    
     /**
      * Retrieve the REST connection specification
      * 
@@ -139,44 +137,20 @@ public class AbstractRestInteraction extends AbstractInteraction<Connection> {
      * @throws ServiceException 
      */
     protected boolean isBulkLoad(
-    ) throws ServiceException{
-        try {
-            ConnectionMetaData metaData = getConnection().getMetaData();
-            return metaData instanceof RestConnectionMetaData && ((RestConnectionMetaData)metaData).isBulkLoad();
-        } catch (ResourceException exception) {
-            throw new ServiceException(exception);
-        }
-    }
-    
-    /**
-     * Lazy model accessor retrieval
-     * 
-     * @return the model accessor
-     */
-    protected final Model_1_0 getModel(){
-        return Model_1Factory.getModel();
+    ) throws ResourceException {
+        ConnectionMetaData metaData = getConnection().getMetaData();
+        return metaData instanceof RestConnectionMetaData && ((RestConnectionMetaData)metaData).isBulkLoad();
     }
     
     /**
      * Pass the request to another handler
-     * <p>
-     * The default implementation returns <code>false</code>
-     * because it doesn't handle the request.
-     * 
-     * @param xri
-     * @param ispec
-     * @param input
-     * @param output
-     * 
-     * @return <code>false</code>
      */
-    public boolean pass(
-        Path xri, 
-        RestInteractionSpec ispec,
-        MappedRecord input, 
+    protected boolean pass(
+        RestInteractionSpec ispec, 
+        RequestRecord input,
         Record output
-    ) throws ServiceException {
-        return false;
+    ) throws ResourceException {
+        return hasDelegate() && super.execute(ispec, input, output);
     }
     
     /**
@@ -186,15 +160,14 @@ public class AbstractRestInteraction extends AbstractInteraction<Connection> {
      * @param input
      * @param output
      */
-    public boolean find(
+    protected boolean find(
         RestInteractionSpec ispec, 
-        Query_2Facade input, 
-        IndexedRecord output
-    ) throws ServiceException {
+        QueryRecord input, 
+        ResultRecord output
+    ) throws ResourceException {
         return pass(
-            input.getPath(), 
-            ispec,
-            input.getDelegate(), 
+            ispec, 
+            input,
             output
         );
     }
@@ -206,15 +179,14 @@ public class AbstractRestInteraction extends AbstractInteraction<Connection> {
      * @param input
      * @param output
      */
-    public boolean get(
+    protected boolean get(
         RestInteractionSpec ispec, 
-        Query_2Facade input, 
-        IndexedRecord output
-    ) throws ServiceException {
+        QueryRecord input, 
+        ResultRecord output
+    ) throws ResourceException {
         return pass(
-            input.getPath(), 
-            ispec,
-            input.getDelegate(), 
+            ispec, 
+            input,
             output
         );
     }
@@ -226,16 +198,14 @@ public class AbstractRestInteraction extends AbstractInteraction<Connection> {
      * @param input
      * @param output
      */
-    public boolean delete(
+    protected boolean delete(
         RestInteractionSpec ispec, 
-        Query_2Facade input, 
-        IndexedRecord output
-    ) throws ServiceException {
+        QueryRecord input
+    ) throws ResourceException {
         return pass(
-            input.getPath(), 
-            ispec,
-            input.getDelegate(), 
-            output
+            ispec, 
+            input,
+            null
         );
     }
 
@@ -246,16 +216,14 @@ public class AbstractRestInteraction extends AbstractInteraction<Connection> {
      * @param input
      * @param output
      */
-    public boolean validate(
+    protected boolean verify(
         RestInteractionSpec ispec, 
-        Object_2Facade input, 
-        IndexedRecord output
-    ) throws ServiceException {
+        ObjectRecord input
+    ) throws ResourceException {
         return pass(
-            input.getPath(), 
-            ispec,
-            input.getDelegate(), 
-            output
+            ispec, 
+            input,
+            null
         );
     }
     
@@ -266,15 +234,14 @@ public class AbstractRestInteraction extends AbstractInteraction<Connection> {
      * @param input
      * @param output
      */
-    public boolean put(
+    protected boolean update(
         RestInteractionSpec ispec, 
-        Object_2Facade input, 
-        IndexedRecord output
-    ) throws ServiceException {
+        ObjectRecord input, 
+        ResultRecord output
+    ) throws ResourceException {
         return pass(
-            input.getPath(), 
-            ispec,
-            input.getDelegate(), 
+            ispec, 
+            input,
             output
         );
     }
@@ -286,16 +253,14 @@ public class AbstractRestInteraction extends AbstractInteraction<Connection> {
      * @param input
      * @param output
      */
-    public boolean delete(
+    protected boolean delete(
         RestInteractionSpec ispec, 
-        Object_2Facade input, 
-        IndexedRecord output
-    ) throws ServiceException {
+        ObjectRecord input
+    ) throws ResourceException {
         return pass(
-            input.getPath(), 
-            ispec,
-            input.getDelegate(), 
-            output
+            ispec, 
+            input,
+            null
         );
     }
     
@@ -306,15 +271,14 @@ public class AbstractRestInteraction extends AbstractInteraction<Connection> {
      * @param input
      * @param output
      */
-    public boolean invoke(
+    protected boolean invoke(
         RestInteractionSpec ispec, 
         MessageRecord input, 
         MessageRecord output
-    ) throws ServiceException {
+    ) throws ResourceException {
         return pass(
-            input.getPath(), 
-            ispec,
-            input, 
+            ispec, 
+            input,
             output
         );
     }
@@ -326,15 +290,14 @@ public class AbstractRestInteraction extends AbstractInteraction<Connection> {
      * @param input
      * @param output
      */
-    public boolean create(
+    protected boolean create(
         RestInteractionSpec ispec, 
-        Object_2Facade input, 
-        IndexedRecord output
-    ) throws ServiceException {
+        ObjectRecord input, 
+        ResultRecord output
+    ) throws ResourceException {
         return pass(
-            input.getPath(), 
-            ispec,
-            input.getDelegate(), 
+            ispec, 
+            input,
             output
         );
     }
@@ -343,62 +306,20 @@ public class AbstractRestInteraction extends AbstractInteraction<Connection> {
      * Make a transient object persistent
      * 
      * @param ispec the PUT interaction specification
-     * @param xri the transient object id
-     * @param input the object facade
+     * @param input the object record
      * @param output the output record, which may be <code>null</code>
-     * 
      * @return <code>true</code> if the object has been made persistent
      */
-    public boolean move(
+    protected boolean move(
         RestInteractionSpec ispec, 
-        Path xri,
-        Object_2Facade input, 
-        IndexedRecord output
-    ) throws ServiceException {
+        ObjectRecord input,
+        ResultRecord output
+    ) throws ResourceException {
         return pass(
-            xri, 
-            ispec,
-            Records.getRecordFactory().singletonMappedRecord( 
-                "map",
-                null, // recordShortDescription, 
-                xri,
-                input.getDelegate()
-            ), 
+            ispec, 
+            input,
             output
         );
-    }
-    
-    /**
-     * Treat the map's keys as resource identifiers
-     * 
-     * @param resourceIdentifier the map's key
-     * 
-     * @return the corresponding <code>Path</code>
-     * 
-     * @throws ResourceException
-     */
-    private Path toResourceIdentifier(
-        Object resourceIdentifier
-    ) throws ResourceException{
-        if(resourceIdentifier instanceof Path) {
-            return (Path) resourceIdentifier;
-        } else if (resourceIdentifier instanceof String) {
-            return new Path((String)resourceIdentifier);
-        } else if (resourceIdentifier instanceof UUID) {
-            return new Path((UUID)resourceIdentifier);
-        } else {
-            throw ResourceExceptions.initHolder(
-                new ResourceException(
-                    "The map's keys should be resource identifiers",
-                    BasicException.newEmbeddedExceptionStack(
-                        BasicException.Code.DEFAULT_DOMAIN,
-                        BasicException.Code.BAD_PARAMETER,
-                        new BasicException.Parameter("actual", resourceIdentifier == null ? null : resourceIdentifier.getClass().getName()),
-                        new BasicException.Parameter("supported", String.class.getName(), Path.class.getName(), UUID.class.getName())
-                    )
-                )
-            );
-        }
     }
     
     /**
@@ -439,213 +360,168 @@ public class AbstractRestInteraction extends AbstractInteraction<Connection> {
      * @see javax.resource.cci.Interaction#execute(javax.resource.cci.InteractionSpec, javax.resource.cci.Record, javax.resource.cci.Record)
      */
     @Override
-    @SuppressWarnings("unchecked")
     public boolean execute(
         InteractionSpec ispec, 
         Record input, 
         Record output
     ) throws ResourceException {
-        assertOpened();
-        try {
-            RestInteractionSpec interactionSpec = AbstractRestInteraction.cast(
-                null, 
-                RestInteractionSpec.class, 
-                ispec, 
-                false
-            );            
-            if(input instanceof MappedRecord) {
-                if(MessageRecord.NAME.equals(input.getRecordName())) {
-                    invoke(
-                        interactionSpec,
-                        AbstractRestInteraction.cast(
-                            "Invocation Request", 
-                            MessageRecord.class, 
-                            input, 
-                            false
-                        ),
-                        AbstractRestInteraction.cast(
-                            "Invocation Reply", 
-                            MessageRecord.class, 
-                            output, 
-                            true
-                        )
-                    );
-                    return true;
-                } else {
-                    MappedRecord inputRecord = (MappedRecord) input;
-                    IndexedRecord outputRecord = AbstractRestInteraction.cast(
-                        "Result Set", 
-                        IndexedRecord.class, 
-                        output, 
-                        true
-                    );
-                    if(Query_2Facade.isDelegate(inputRecord)){
-                        Query_2Facade facade = Query_2Facade.newInstance(inputRecord, isPreferringNotFoundException());
-                        switch(interactionSpec.getFunction()) {
-                            case GET:
-                                return facade.isFindRequest() ? find(
-                                    interactionSpec, 
-                                    facade, 
-                                    outputRecord
-                                ) : get(
-                                    interactionSpec, 
-                                    facade, 
-                                    outputRecord
-                                );
-                            case DELETE: 
-                                return delete(
-                                    interactionSpec, 
-                                    facade, 
-                                    outputRecord
-                                );
-                            default: 
-                                return false;
-                        }
-                    } else if (Object_2Facade.isDelegate(inputRecord)) {
-                        Object_2Facade facade = Object_2Facade.newInstance(inputRecord);
-                        switch(interactionSpec.getFunction()) {
-                            case GET:
-                                return validate(
-                                    interactionSpec, 
-                                    facade, 
-                                    outputRecord
-                                );
-                            case PUT: 
-                                return put(
-                                    interactionSpec, 
-                                    facade, 
-                                    outputRecord
-                                );
-                            case DELETE:
-                                return delete(
-                                    interactionSpec, 
-                                    facade, 
-                                    outputRecord
-                                );
-                            case POST: 
-                                return create(
-                                    interactionSpec, 
-                                    facade, 
-                                    outputRecord
-                                );
-                            default: 
-                                return false;
-                        }
-                    } else if ("map".equals(input.getRecordName())){
-                        switch(interactionSpec.getFunction()) {
-                            case POST: {
-                                for(Map.Entry<?, ?> e : (Set<Map.Entry<?, ?>>) inputRecord.entrySet()) {
-                                    Object_2Facade facade = Facades.newObject(toResourceIdentifier(e.getKey()));
-                                    facade.setValue(
-                                        AbstractRestInteraction.cast(
-                                            "Value", 
-                                            MappedRecord.class, 
-                                            e.getValue(), 
-                                            false
-                                        )
-                                    );
-                                    create(
-                                        interactionSpec,
-                                        facade,
-                                        outputRecord
-                                    );
-                                }
-                                return !inputRecord.isEmpty();
-                            }
-                            case PUT: {
-                                for(Map.Entry<?, ?> e : (Set<Map.Entry<?, ?>>) inputRecord.entrySet()) {
-                                    MappedRecord record = AbstractRestInteraction.cast(
-                                        "Value", 
-                                        MappedRecord.class, 
-                                        e.getValue(), 
-                                        false
-                                    );
-                                    if(Object_2Facade.isDelegate(record)) {
-                                        move(
-                                            interactionSpec,
-                                            toResourceIdentifier(e.getKey()),
-                                            Object_2Facade.newInstance(record),
-                                            outputRecord
-                                        );
-                                    } else {
-                                        throw ResourceExceptions.initHolder(
-                                            new ResourceException(
-                                                "The map's values should be an object holder",
-                                                BasicException.newEmbeddedExceptionStack(
-                                                    BasicException.Code.DEFAULT_DOMAIN,
-                                                    BasicException.Code.BAD_PARAMETER,
-                                                    new BasicException.Parameter("actual", record.getRecordName()),
-                                                    new BasicException.Parameter("supported", ObjectRecord.NAME)
-                                                )
-                                            )
-                                        );
-                                    }
-                                }
-                                return !inputRecord.isEmpty();
-                            }
-                            default:
-                                return false;
-                        }
-                    } else {
-                        throw ResourceExceptions.initHolder(
-                            new NotSupportedException(
-                                "Unexpected mapped input record name",
-                                BasicException.newEmbeddedExceptionStack(
-                                    BasicException.Code.DEFAULT_DOMAIN,
-                                    BasicException.Code.BAD_PARAMETER,
-                                    new BasicException.Parameter("supported", QueryRecord.NAME, ObjectRecord.NAME, MessageRecord.NAME, "map"),
-                                    new BasicException.Parameter("actual", input == null ? null : input.getRecordName())
-                                )
-                            )                        
-                        );
-                    }
-                }
-            } else if (input instanceof IndexedRecord) {
-                if("list".equals(input.getRecordName())){
-                    switch(interactionSpec.getFunction()) {
-                        case GET:
-                            IndexedRecord entries = (IndexedRecord) input;
-                            for(Object resourceIdentifier : entries){
-                                Query_2Facade facade = Facades.newQuery(toResourceIdentifier(resourceIdentifier));
-                                execute(ispec, facade.getDelegate(), output);
-                            }
-                            return !entries.isEmpty();
-                        default:
-                            return false;
-                    }
-                } else {
-                    throw ResourceExceptions.initHolder(
-                        new NotSupportedException(
-                            "Unexpected indexed input record name",
-                            BasicException.newEmbeddedExceptionStack(
-                                BasicException.Code.DEFAULT_DOMAIN,
-                                BasicException.Code.BAD_PARAMETER,
-                                new BasicException.Parameter("supported", "list"),
-                                new BasicException.Parameter("actual", input == null ? null : input.getRecordName())
-                            )
-                        )                        
-                    );
-                }
-            } else {
-                throw ResourceExceptions.initHolder(
-                    new NotSupportedException(
-                        "Unexpected input record",
-                        BasicException.newEmbeddedExceptionStack(
-                            BasicException.Code.DEFAULT_DOMAIN,
-                            BasicException.Code.BAD_PARAMETER,
-                            new BasicException.Parameter("supported", MappedRecord.class.getName(), IndexedRecord.class.getName()),
-                            new BasicException.Parameter("actual", input == null ? null : input.getClass().getName())
-                        )
-                    )
-                );
-            }
-        } catch (ServiceException exception) {
-            throw new ResourceException(
-                exception.getCause().getDescription(),
-                exception.getCause()
+    	assertOpened();
+        RestInteractionSpec interactionSpec = AbstractRestInteraction.cast(
+            "interaction spec", 
+            RestInteractionSpec.class, 
+            ispec, 
+            false // optional
+        );            
+        if(input instanceof MessageRecord) {
+            return handleOperation(interactionSpec, input, output);
+        } else {
+            final ResultRecord outputRecord = AbstractRestInteraction.cast(
+                "output record", 
+                ResultRecord.class, 
+                output, 
+                true
             );
+            if(input instanceof QueryRecord){
+                return handleQuery(interactionSpec, (QueryRecord) input, outputRecord);
+            } else if (input instanceof ObjectRecord) {
+                return handleObject(interactionSpec, (ObjectRecord) input, outputRecord);
+            }
         }
+        throw ResourceExceptions.initHolder(
+    		new NotSupportedException(
+				"Unexpected mapped input record name",
+				BasicException.newEmbeddedExceptionStack(
+					BasicException.Code.DEFAULT_DOMAIN,
+					BasicException.Code.BAD_PARAMETER,
+					new BasicException.Parameter("supported", QueryRecord.NAME, ObjectRecord.NAME, MessageRecord.NAME),
+					new BasicException.Parameter("actual", input == null ? null : input.getRecordName())
+				)
+			)                        
+		);
     }
+
+	private boolean handleOperation(
+		RestInteractionSpec interactionSpec,
+		Record input,
+		Record output
+	) throws ResourceException {
+		final MessageRecord outputRecord = AbstractRestInteraction.cast(
+		    "Invocation Reply", 
+		    MessageRecord.class, 
+		    output, 
+		    true
+		);
+		return invoke(
+		    interactionSpec,
+		    (MessageRecord)input,
+		    outputRecord
+		);
+	}
+
+	private boolean handleObject(
+		RestInteractionSpec interactionSpec,
+		ObjectRecord objectRecord, 
+		ResultRecord outputRecord
+	) throws ResourceException {
+		return objectRecord.getTransientObjectId() == null ? handlePersistentObject(
+	    	interactionSpec, 
+	    	objectRecord,
+			outputRecord
+		) : handleTransientObject(
+	    	interactionSpec, 
+	    	objectRecord,
+			outputRecord
+		);
+	}
+
+	private boolean handleTransientObject(
+		RestInteractionSpec interactionSpec,
+		ObjectRecord objectRecord, 
+		ResultRecord outputRecord
+	) throws ResourceException {
+		switch(interactionSpec.getFunction()) {
+		    case POST: {
+		    	final Path transientObjectId = new Path(objectRecord.getTransientObjectId());
+		    	final ObjectRecord compatibilityObject = objectRecord.clone();
+		    	compatibilityObject.setResourceIdentifier(transientObjectId);
+		        return create(
+		            interactionSpec,
+		            compatibilityObject,
+		            outputRecord
+		        );
+		    }
+		    case PUT: {
+				return move(
+		            interactionSpec,
+		            objectRecord,
+		            outputRecord
+		        );
+		    }
+		    default:
+		        return false;
+		}
+	}
+
+	private boolean handlePersistentObject(
+		RestInteractionSpec interactionSpec,
+		ObjectRecord objectRecord, 
+		ResultRecord outputRecord
+	) throws ResourceException {
+		switch(interactionSpec.getFunction()) {
+		    case GET:
+		        return verify(
+		            interactionSpec, 
+		            objectRecord
+		        );
+		    case PUT: 
+		        return update(
+		            interactionSpec, 
+		            objectRecord, 
+		            outputRecord
+		        );
+		    case DELETE:
+		        return delete(
+		            interactionSpec, 
+		            objectRecord
+		        );
+		    case POST: 
+		        return create(
+		            interactionSpec, 
+		            objectRecord, 
+		            outputRecord
+		        );
+		    default: 
+		        return false;
+		}
+	}
+
+	private boolean handleQuery(
+		RestInteractionSpec interactionSpec,
+		QueryRecord queryRecord, 
+		ResultRecord outputRecord
+	) throws ResourceException {
+		switch(interactionSpec.getFunction()) {
+		    case GET:
+		        final Path xri = queryRecord.getResourceIdentifier();
+		        final boolean findRequest = xri.isContainerPath() || xri.isPattern();
+		        return findRequest ? find(
+		            interactionSpec, 
+		            queryRecord, 
+		            outputRecord
+		        ) : get(
+		            interactionSpec, 
+		            queryRecord, 
+		            outputRecord
+		        );
+		    case DELETE: 
+		        return delete(
+		            interactionSpec, 
+		            queryRecord
+		        );
+		    default: 
+		        return false;
+		}
+	}
     
     /* (non-Javadoc)
      * @see org.openmdx.base.rest.spi.RestConnection#execute(javax.resource.cci.InteractionSpec, javax.resource.cci.Record)
@@ -655,52 +531,48 @@ public class AbstractRestInteraction extends AbstractInteraction<Connection> {
         InteractionSpec ispec, 
         Record input
     ) throws ResourceException {
-        if(ispec instanceof RestInteractionSpec){
-            RestInteractionSpec interactionSpec = (RestInteractionSpec) ispec;
-            Record reply;
-            if(interactionSpec.getInteractionVerb() == InteractionSpec.SYNC_SEND){
-                reply = null;
-            } else if(MessageRecord.NAME.equals(input.getRecordName())) {
-                MessageRecord request = (MessageRecord) input;
-                if(request.getMessageId() == null) try {
-                    request = request.clone();
-                    request.setPath(newRequestId(request.getTarget()));
-                } catch (CloneNotSupportedException exception) {
-                    throw new ResourceException(exception); 
-                }
-                MessageRecord response = (MessageRecord) Records.getRecordFactory().createMappedRecord(MessageRecord.NAME);
-                reply = response;
-            } else {
-                reply = Records.getRecordFactory().createIndexedRecord(ResultRecord.NAME);
-            }
-            if(execute(ispec, input, reply)) {
-                return reply;
-            } else {
-                throw ResourceExceptions.initHolder(
-                    new NotSupportedException(
-                        "This interaction is not supported",
-                        BasicException.newEmbeddedExceptionStack(
-                            BasicException.Code.DEFAULT_DOMAIN,
-                            BasicException.Code.NOT_SUPPORTED,
-                            new BasicException.Parameter("interactionSpec", interactionSpec),
-                            new BasicException.Parameter("input", input)
-                        )
-                    )
-                );
-            }
-        } else {
-            throw ResourceExceptions.initHolder(
-                new NotSupportedException(
-                    "Unexpected Interaction Spec",
-                    BasicException.newEmbeddedExceptionStack(
-                        BasicException.Code.DEFAULT_DOMAIN,
-                        BasicException.Code.BAD_PARAMETER,
-                        new BasicException.Parameter("supported", RestInteractionSpec.class.getName()),
-                        new BasicException.Parameter("actual", ispec == null ? null : ispec.getClass().getName())
-                    )
-                )
-            );
-        }
+    	RestInteractionSpec interactionSpec = AbstractRestInteraction.cast(
+		    "interaction spec", 
+		    RestInteractionSpec.class, 
+		    ispec, 
+		    true
+		);
+        final Record reply = createReply(
+        	input, 
+        	interactionSpec.getInteractionVerb() == InteractionSpec.SYNC_SEND
+        );
+        return execute(interactionSpec, input, reply) ? reply : null;
    }
-    
+
+	public static Record createReply(
+		Record input, 
+		boolean sendOnly
+	) throws ResourceException {
+		if(sendOnly){
+            return null;
+        } else if(input instanceof MessageRecord) {
+            return Records.getRecordFactory().createMappedRecord(MessageRecord.class);
+        } else {
+            return Records.getRecordFactory().createIndexedRecord(ResultRecord.class);
+        }
+	}
+	
+	@SuppressWarnings("unchecked")
+	protected IndexedRecord toIndexedRecordList(
+		List<?> values	
+	) throws ResourceException{
+		final IndexedRecord target = Records.getRecordFactory().createIndexedRecord(Multiplicity.LIST.code());
+		target.addAll(values);
+		return target;
+	}
+
+	@SuppressWarnings("unchecked")
+	protected IndexedRecord toIndexedRecordSet(
+		Collection<?> values	
+	) throws ResourceException{
+		final IndexedRecord target = Records.getRecordFactory().createIndexedRecord(Multiplicity.SET.code());
+		target.addAll(values);
+		return target;
+	}
+
 }

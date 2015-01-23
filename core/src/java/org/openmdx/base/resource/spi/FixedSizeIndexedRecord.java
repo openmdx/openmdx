@@ -105,14 +105,6 @@ final class FixedSizeIndexedRecord
 	// Implements Serializable
 	//------------------------------------------------------------------------
 
-    /**
-     * Constructor
-     */
-    protected FixedSizeIndexedRecord(
-    ){      
-        // for de-serialization
-    }
-    
 	/**
 	 * Serial Version UID
 	 */
@@ -190,8 +182,24 @@ final class FixedSizeIndexedRecord
 	){
 		return IndentingFormatter.toString(this);
 	}
-	
+    
+    /* (non-Javadoc)
+     * @see java.lang.Object#hashCode()
+     */
+    @Override
+    public int hashCode() {
+    	return IndexedRecords.getHashCode(this);
+    }
 
+    /* (non-Javadoc)
+     * @see java.lang.Object#equals(java.lang.Object)
+     */
+    @Override
+    public boolean equals(Object that) {
+    	return IndexedRecords.areEqual(this, that);
+    }
+    
+    	
 	//------------------------------------------------------------------------
 	// Instance members
 	//------------------------------------------------------------------------

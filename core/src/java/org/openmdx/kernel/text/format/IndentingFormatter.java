@@ -144,7 +144,7 @@ public class IndentingFormatter
     }
 
     /**
-     * Create the reacord header
+     * Create the record header
      * 
      * @param   source
      *          the record to be formatted

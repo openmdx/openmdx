@@ -73,8 +73,7 @@ import org.openmdx.base.mof.cci.Multiplicity;
 import org.openmdx.base.mof.spi.Model_1Factory;
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.resource.Records;
-import org.openmdx.base.rest.spi.Facades;
-import org.openmdx.base.rest.spi.Object_2Facade;
+import org.openmdx.base.rest.cci.ObjectRecord;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.state2.spi.Order;
 import org.xml.sax.InputSource;
@@ -249,8 +248,8 @@ public class ObjectAndValidStateComparator {
 	 * @throws ServiceException 
 	 */
 	public List<MappedRecord> compare(
-		SortedMap<Path,MappedRecord> expectedObjects,
-		SortedMap<Path,MappedRecord> actualObjects
+		SortedMap<Path,ObjectRecord> expectedObjects,
+		SortedMap<Path,ObjectRecord> actualObjects
 	) throws ServiceException {
 	    clear();
 		compareObjects(
@@ -281,9 +280,9 @@ public class ObjectAndValidStateComparator {
 		Iterable<InputSource> expected,
 		Iterable<InputSource> actual
 	) throws ServiceException {
-		SortedMap<Path,MappedRecord> expectedObjects = new TreeMap<Path, MappedRecord>();
+		SortedMap<Path,ObjectRecord> expectedObjects = new TreeMap<Path, ObjectRecord>();
 		Importer.importObjects(Importer.asTarget(expectedObjects), expected);
-		SortedMap<Path,MappedRecord> actualObjects = new TreeMap<Path, MappedRecord>();
+		SortedMap<Path,ObjectRecord> actualObjects = new TreeMap<Path, ObjectRecord>();
 		Importer.importObjects(Importer.asTarget(actualObjects), actual);
 		return this.compare(expectedObjects, actualObjects);
 	}
@@ -336,16 +335,16 @@ public class ObjectAndValidStateComparator {
 	        Boolean.TRUE.equals(object.get("validTimeUnique"));
 	}
 	
-	private Object_2Facade getNext(
-		Iterator<MappedRecord>	i,
+	private ObjectRecord getNext(
+		Iterator<ObjectRecord>	i,
 		boolean expected
 	) throws ServiceException{
 		while(i.hasNext()) {
-			Object_2Facade e = Facades.asObject(i.next());
-			MappedRecord object = e.getValue();
+			final ObjectRecord holder = i.next();
+			MappedRecord object = holder.getValue();
 			if(isInstanceOf(object, "org:openmdx:base:Aspect")) {
 			    if(isValidTimeUnique(object)){
-		            return e;
+		            return holder;
 			    }
 				Object core = object.get("core");
 				if(core instanceof Path) {
@@ -353,37 +352,37 @@ public class ObjectAndValidStateComparator {
 					(expected ? aspects.expected : aspects.actual).add(object);
 				} else {
 					this.differences.add(
-						newDifference(e.getPath(), "An aspect has no core reference", (MappedRecord)null, object)
+						newDifference(holder.getResourceIdentifier(), "An aspect has no core reference", (MappedRecord)null, object)
 					);
 				}
 			} else {
-				return e;
+				return holder;
 			}
 		}
 		return null;
 	}
 
 	private void compareObjects(
-		Iterator<MappedRecord> ei,
-		Iterator<MappedRecord> ai
+		Iterator<ObjectRecord> ei,
+		Iterator<ObjectRecord> ai
 	) throws ServiceException {
-		Object_2Facade e = getNext(ei, true);
-		Object_2Facade a = getNext(ai, false);
+		ObjectRecord e = getNext(ei, true);
+		ObjectRecord a = getNext(ai, false);
 		while(e != null || a != null) {
-			while(a != null && (e == null || a.getPath().compareTo(e.getPath()) < 0 )) {
+			while(a != null && (e == null || a.getResourceIdentifier().compareTo(e.getResourceIdentifier()) < 0 )) {
 				this.differences.add(
-					newDifference(a.getPath(), "Unexpected actual object", (MappedRecord)null, a.getValue())
+					newDifference(a.getResourceIdentifier(), "Unexpected actual object", (MappedRecord)null, a.getValue())
 				);
 				a = getNext(ai, true);
 			}
-			while(e != null && (a == null || a.getPath().compareTo(e.getPath()) > 0 )) {
+			while(e != null && (a == null || a.getResourceIdentifier().compareTo(e.getResourceIdentifier()) > 0 )) {
 				this.differences.add(
-					newDifference(e.getPath(), "Missing actual object", e.getValue(), null)
+					newDifference(e.getResourceIdentifier(), "Missing actual object", e.getValue(), null)
 				);
 				e = getNext(ei, false);
 			}
-			if(a != null && e != null && a.getPath().equals(e.getPath())) {
-				compareObject(e.getPath(), e.getValue(), a.getValue(), false);
+			if(a != null && e != null && a.getResourceIdentifier().equals(e.getResourceIdentifier())) {
+				compareObject(e.getResourceIdentifier(), e.getValue(), a.getValue(), false);
 				e = getNext(ei, true);
 				a = getNext(ai, false);
 			}
@@ -522,7 +521,7 @@ public class ObjectAndValidStateComparator {
 		            );
                 } else {
     				Object expectedValue = expected.get(feature);
-    				String qualifiedName = (String) featureDef.getQualifiedName(); 
+    				String qualifiedName = featureDef.getQualifiedName(); 
     				difference = getFeatureComparator(
     					qualifiedName,
     					aspect

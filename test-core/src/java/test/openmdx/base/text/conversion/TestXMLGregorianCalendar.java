@@ -123,22 +123,25 @@ public class TestXMLGregorianCalendar {
 	 "</org.openmdx.base.query.Filter>"
    };
 
-   private Map<?,String> parse(String line) {
-       line = line.trim();
-       if(line.startsWith("<") && line.endsWith(">")){
+   private Map<?,String> parse(int line, String value) {
+       value = value.trim();
+       if(value.startsWith("<") && value.endsWith(">")){
            Map<Object,String> map = new HashMap<Object, String>();
            int i = 0;
-           for(String entry : line.substring(1, line.length() - 1).split("\\s+")){
+           for(String entry : value.substring(1, value.length() - 1).split("\\s+")){
                int e = entry.indexOf('=');
                if(e < 0) {
                    map.put(Integer.valueOf(++i), entry);
                } else {
-                   map.put(entry.substring(0, e), entry.substring(e + 1));
+					String key = entry.substring(0, e);
+	            	if(!exclude(line, key)) {
+	            		map.put(key, entry.substring(e + 1));
+	            	}
                }
            }
            return map;       
        } else {
-           return Collections.singletonMap(Integer.valueOf(0), line);
+           return Collections.singletonMap(Integer.valueOf(0), value);
        }
    }
    
@@ -155,18 +158,13 @@ public class TestXMLGregorianCalendar {
         String line0 = actual.readLine().trim();
         if(line0.startsWith("<?xml")) {
 	        Assert.assertEquals("<?xml...", EXPECTED_XML_DECODER[0], line0);
-	        String line1 = actual.readLine().trim();
-	        Assert.assertTrue(
-	            "<java version=\"...\" class=\"java.beans.XMLDecoder\">", 
-	            line1.startsWith("<java version=\"") && line1.endsWith("\" class=\"java.beans.XMLDecoder\">")
-	        );
-	        for(int i = 2; i < EXPECTED_XML_DECODER.length; i++) {
-	            Assert.assertEquals("Line " + i, parse(EXPECTED_XML_DECODER[i]), parse(actual.readLine()));
+	        for(int i = 1; i < EXPECTED_XML_DECODER.length; i++) {
+	            Assert.assertEquals("Line " + i, parse(i, EXPECTED_XML_DECODER[i]), parse(i, actual.readLine()));
 	        }
         } else {
 	        Assert.assertEquals("<org.openmdx.base.query.Filter>", EXPECTED_XML_STREAM[0], line0);
 	        for(int i = 1; i < EXPECTED_XML_STREAM.length; i++) {
-	            Assert.assertEquals("Line " + i, parse(EXPECTED_XML_STREAM[i]), parse(actual.readLine()));
+	            Assert.assertEquals("Line " + i, parse(-i, EXPECTED_XML_STREAM[i]), parse(-i, actual.readLine()));
 	        }
         }
     }
@@ -192,5 +190,18 @@ public class TestXMLGregorianCalendar {
        Assert.assertTrue("From 2000-04-04 to 2049-12-31 Filter", copy.equals(original));
     }
 
+    /**
+     * Exclude elements from comparison
+     * 
+     * @param line positive line numbers for JavaBean, negative ones for XStream
+     * @param the attribute to be excluded
+     */
+    private boolean exclude(int line, Object key) {
+    	switch(line) {
+	    	case 1: return "version".equals(key);
+	    	case 2: return "id".equals(key);
+    		default: return false;
+    	}
+    }
     
 } 

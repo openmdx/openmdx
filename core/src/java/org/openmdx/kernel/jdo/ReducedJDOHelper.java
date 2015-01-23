@@ -1625,11 +1625,12 @@ public class ReducedJDOHelper implements Constants {
                 // get the "value" attribute's value (optional)
                 Node valueAtt = attributes.getNamedItem(
                     PROPERTY_ATTRIBUTE_VALUE);
-                String value = valueAtt == null
-                    ? null
-                    : valueAtt.getNodeValue().trim();
-
-                p.put(propertyName, value);
+                if(valueAtt != null) {
+                    // The original implementation tried to
+                    // put null into a HashTable
+                    String value = valueAtt.getNodeValue().trim();
+                    p.put(propertyName, value);
+                }
             }
             else if (ELEMENT_INSTANCE_LIFECYCLE_LISTENER.equals(elementName)) {
                 // <instance-lifecycle-listener listener="..." classes="..."/>

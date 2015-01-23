@@ -47,35 +47,32 @@
  */
 package org.openmdx.base.query;
 
-import java.io.Serializable;
-
-import org.openmdx.base.resource.Records;
+import org.openmdx.base.rest.spi.FeatureOrderRecord;
 
 /**
  * Order Specifier
  */
-public class OrderSpecifier implements Serializable, Cloneable {
+public class OrderSpecifier extends FeatureOrderRecord {
 
+	/**
+	 * Constructor 
+	 *
+	 * @param feature
+	 * @param order
+	 */
+	public OrderSpecifier(
+		String feature,
+		SortOrder order
+	) {
+		super(feature, order);
+	}
+	
     /**
      * Constructor 
      */
     public OrderSpecifier(
     ){
-        this(null, (short)-1);        
-    }
-
-    /**
-     * Constructor 
-     *
-     * @param feature
-     * @param order
-     */
-    public OrderSpecifier(
-        String feature,
-        SortOrder order
-    ) {
-        this.feature = feature;
-        this.order = order;
+        this(null, SortOrder.DESCENDING);        
     }
 
     /**
@@ -98,46 +95,30 @@ public class OrderSpecifier implements Serializable, Cloneable {
     }
 
     /**
-     * Implements <code>Serializable</code>
+     * Constructor for Clone
+     * 
+     * @param that the template
      */
-    private static final long serialVersionUID = 6129959553711798810L;
+    private OrderSpecifier(
+    	OrderSpecifier that
+    ){
+    	super(that);
+    }
 
     /**
-     * 
+     * Implements <code>Serializable</code>
      */
-    private String feature;
-    
-    /**
-     * 
-     */
-    private SortOrder order;
-    
-    /**
-     * 
-     */
-    private static final String[] TO_STRING_FIELDS = {
-        "feature",
-        "order"
-    };
-    
+	private static final long serialVersionUID = -8465157113272809016L;
+
     /* (non-Javadoc)
      * @see java.lang.Object#clone()
      */
     @Override
     public OrderSpecifier clone(
     ){
-        return new OrderSpecifier(feature, order);
+        return new OrderSpecifier(this);
     }
 
-    /**
-     * Retrieve sortOrder.
-     *
-     * @return Returns the sortOrder.
-     */
-    public SortOrder getSortOrder() {
-        return this.order;
-    }
-    
     /**
      * Set sortOrder.
      * 
@@ -146,93 +127,33 @@ public class OrderSpecifier implements Serializable, Cloneable {
     public void setSortOrder(
         SortOrder sortOrder
     ) {
-        this.order = sortOrder;
-    }
-
-    public String getFeature() {
-        return this.feature;
+        super.setSortOrder(sortOrder);
     }
 
     public void setFeature(
         String feature
     ) {
-        this.feature = feature;
+        super.setFeature(feature);
     }
 
     public short getOrder() {
-        return this.order == null ? 0 : this.order.code();
+    	final SortOrder sortOrder = getSortOrder();
+        return (sortOrder == null ? SortOrder.UNSORTED : sortOrder).code();
     }
 
     public void setOrder(
         short order
     ) {
-        this.order = SortOrder.valueOf(order);
+    	super.setSortOrder(SortOrder.valueOf(order));
     }
-
     
-    /* (non-Javadoc)
-     * @see java.lang.Object#equals(java.lang.Object)
-     */
+    //-------------------------------------------------------------------------
+    // Implements Record
+    //-------------------------------------------------------------------------
+    
     @Override
-    public boolean equals(Object obj) {
-        if(obj instanceof OrderSpecifier) {
-            OrderSpecifier that = (OrderSpecifier) obj;
-            return 
-                this.order == that.order &&
-                areEqual(this.feature, that.feature);
-        } else {
-            return false;
-        }
-    }
-
-    /* (non-Javadoc)
-     * @see java.lang.Object#hashCode()
-     */
-    @Override
-    public int hashCode() {
-        int code = 0;
-        if(this.feature != null) {
-            code += feature.hashCode();
-        }
-        if(this.order != null) {
-            code ^= this.order.code();
-        }
-        return code;
-    }
-
-    /**
-     * Compare to values
-     * 
-     * @param left
-     * @param right
-     * 
-     * @return <code>true</code> if the values are either equal or both <code>null</code>
-     */
-    private static boolean areEqual(
-        String left,
-        String right
-    ){
-        return left == null ? right == null : left.equals(right);
-    }
-       
-    @Override
-    public String toString(
-    ) {
-        StringBuilder description = new StringBuilder(
-		).append(
-		    this.order == null ? ' ' : order.symbol()
-		).append(
-		    this.feature
-		);
-		return Records.getRecordFactory().asMappedRecord(
-		    getClass().getName(), 
-		    description.toString(),
-		    OrderSpecifier.TO_STRING_FIELDS,
-		    new Object[]{
-		        feature,
-		        this.order
-		    }
-		).toString();
+    public String getRecordShortDescription() {
+    	return null;
     }
 
 }

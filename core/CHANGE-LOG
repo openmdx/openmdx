@@ -1,7 +1,205 @@
-                    =====================================
-                             CHANGE LOG openMDX
-                    =====================================
+==============================================================================
+Version 2.14.0                                                      2015-01-23
+==============================================================================
 
+0.    KNOWN ISSUES
+
+      NONE
+
+1.    NEW FEATURES
+      
+      CR20029290
+      RestServlet_2 supports JSON and Swagger:
+      * Support for application/json in addition to text/xml
+      * Swagger-compliant API at object-level with XRI-suffix :api and :api-ui
+ 
+      CR20025970	
+      ExtendedRecordFactory
+      
+      There is a new createMappedRecord method with the record interface class 
+      as argument.
+
+      CR20020172
+      Query as JCA Record
+      
+      Dalvik update
+        
+2.    CHANGES  
+     
+2.0.  CHANGED FEATURES
+
+      CR20025970	
+      Port
+      
+      A Port has now its Connection class as generic argument. 
+
+      CR20022115
+      Serializability
+      
+      The following classes are no longer Serializable 
+      * InboundConnection_2 
+      * MarshallingStructure_1
+           
+      CR20025970	
+      Parser
+      
+      The Parser interface has been moved from org.w3c.Parser to 
+      org.openmdx.kernel.text.spi.Parser 
+      
+      CR20025970	
+      Dataprovider 2 Stack
+      
+      Boolean configuration values should now match true or false (ignoring
+      case) when specified (either as Boolean or String value). The default
+      value is returned otherwise. 
+
+2.1.  FIXED BUGS
+
+      CR20022115
+      Container_1
+      
+      Container_1.getCache() is again able to cache the plain collection.
+      
+      CR20022115
+      Exporter
+      
+      org.openmdx.application.xml.Exporter.newFilter(String) corrected
+      
+2.2.  DEPRECATED FEATURES
+
+      CR20025970	
+      Dataprovider 2 Stack
+      
+      Some features will not be supported by the Dataprovider 2 stack
+      
+      ALL layers
+      * sequenceSupported
+        This flag seems to be in use no longer
+      * legacyConfiguration
+        The dataprovider 2 stack will apply the Java Bean pattern to
+        its plug-ins
+      * batchSize
+        the dataprovider 2 stack will support the batch size where
+        required by the plug-in implementation
+      * newReplyId()
+        This method seems to be in use no longer
+      * getId()
+        This method seems to be in use no longer
+      * terminal()
+        This method seems to be in use no longer
+      * getConnectionFactory
+        This method seems to be in use no longer
+      * applyLegacyConfiguration()
+        This method seems to be in use no longer
+
+      INTERCEPTION layer
+      * Classic_1
+        The classic implementation of the interception layer did prefer
+        NOT_FOUND exceptions over empty replies.
+      
+      TYPE layer
+      * genericTypePath
+        The generic type path feature did allow some unspecified object
+        types to be treated as org::openmdx::base::BasicObject instances
+ 
+      APPLICATION layer     
+      
+      MODEL layer
+      
+      PERSISTENCE layer
+      * chunkSize     
+        Once upon a time the chunk size had be used to define the large
+        objects' buffer size
+      * streamBufferDirectory
+        The stream buffer directory is was used for the for the 
+        JRE 5/setStreamByValue support only
+      * cloneReply
+        Returning unmodifiable records eliminates the need to clone them.
+
+      Embedded Dataprovider
+      * getDataprovider() & setDataprovider()
+        These methods seem to be no longer in use
+      * getDatasource() & setDatasource()
+        These methods seem to be no longer in use
+      
+2.3.  REMOVED FEATURES
+
+      CR20025970	
+      BeanFactory
+      
+      org.openmdx.kernel.loading.BeanFactory's constructors are now private,
+      the newInstance() factory methods have to be used instead.
+            
+      CR20025970	
+      Dataprovider 2 Stack
+      
+      This unused features have already been removed
+      
+      ALL layers
+      * WORK_AROUND_SUN_APPLICATION_SERVER_BINDINGS
+     
+      INTERCEPTION layer
+      
+      TYPE layer
+ 
+      APPLICATION layer
+      
+      MODEL layer
+      
+      PERSISTENCE layer
+
+      
+==============================================================================
+Version 2.13.1                                                      2014-08-27
+==============================================================================
+
+0.    KNOWN ISSUES
+
+      CR20020172
+      Query as JCA Record
+      
+      Dalvik update still lacking!
+
+1.    NEW FEATURES
+      
+      NONE
+        
+2.    CHANGES  
+     
+2.0.  CHANGED FEATURES
+
+      CR20020172
+      Query as JCA Record
+
+      CR20023803
+      A Path's String representation
+      
+      Path.toString() is now equivalent to Path.toXRI().
+      Its former String representation value is now returned by
+      Path.toClassicRepresentation() 
+
+2.1.  FIXED BUGS
+
+      CR20025037
+      nodeCotainer
+      
+      RSM model for org::openmdx::preferences2 contains a spelling mistake
+      ("nodeCotainer" instead of "nodeContainer").
+      
+2.2.  DEPRECATED FEATURES
+
+      NONE
+      
+2.3.  REMOVED FEATURES
+      
+      CR20020172
+      RestServlet_2
+      
+      The deprecated class org.openmdx.application.rest.http.RestServlet_2 
+      has been removed, org.openmdx.application.rest.http.servlet.RestServlet_2
+      should be used instead.
+
+      
 ==============================================================================
 Version 2.13.0                                                      2014-08-01
 ==============================================================================
@@ -28,7 +226,7 @@ Version 2.13.0                                                      2014-08-01
       CR20023803
       Path Implementation
       
-      A path consists now of it sparent ant its typed base component.
+      A path consists now of its parent ant its typed base component.
 
       CR20023803
       Path Wildcard

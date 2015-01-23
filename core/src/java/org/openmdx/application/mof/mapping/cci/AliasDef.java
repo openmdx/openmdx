@@ -5,7 +5,7 @@
 //Revision: $Revision: 1.2 $
 //Author: $Author: wfro $ 
 //Date: $Date: 2009/01/13 17:34:04 $
-//Copyright: © 2003-2006 OMEX AG
+//Copyright: (c) 2003-2006 OMEX AG
 //
 //////////////////////////////////////////////////////////////////////////////
 package org.openmdx.application.mof.mapping.cci;
@@ -25,7 +25,7 @@ public class AliasDef extends ClassDef {
       aliasDef,
       model
     );
-    this.qualifiedTypeName = (String)model.getElement(
+    this.qualifiedTypeName = model.getElement(
         aliasDef.getType()
     ).getQualifiedName();
   }

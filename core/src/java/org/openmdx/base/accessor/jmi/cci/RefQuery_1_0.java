@@ -53,9 +53,9 @@ import javax.jdo.Query;
 
 import org.openmdx.base.mof.cci.ModelElement_1_0;
 import org.openmdx.base.query.ConditionType;
-import org.openmdx.base.query.Filter;
 import org.openmdx.base.query.Quantifier;
 import org.openmdx.base.query.SortOrder;
+import org.openmdx.base.rest.cci.QueryFilterRecord;
 
 /**
  * The RefQuery_1_0 is an extension to JMI and allows to query the Collections
@@ -117,7 +117,7 @@ public interface RefQuery_1_0 extends Query, Cloneable {
    * 
    * @return a filter
    */
-  Filter refGetFilter(
+  QueryFilterRecord refGetFilter(
   );
 
   /**

@@ -48,9 +48,8 @@
 package org.openmdx.base.rest.spi;
 
 import javax.resource.ResourceException;
-import javax.resource.cci.Connection;
 
-import org.openmdx.base.resource.spi.Port;
+import org.openmdx.base.rest.cci.RestConnection;
 import org.openmdx.base.rest.cci.RestConnectionSpec;
 
 
@@ -60,16 +59,11 @@ import org.openmdx.base.rest.cci.RestConnectionSpec;
 public interface ConnectionAdapterFactory {
     
     /**
-     * Create a suspending connection adapter 
-     *
-     * @param connectionSpec
-     * @param delegate
-     * 
-     * @throws ResourceException
+     * Create a connection adapter 
      */
-    Connection newSyspendingConnectionAdapter(
-        RestConnectionSpec connectionSpec,
-        Port delegate
+    RestConnection newConnectionAdapter(
+        ConnectionFactoryAdapter connectionFactory, 
+        RestConnectionSpec connectionSpec
     ) throws ResourceException;
 
 }

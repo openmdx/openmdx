@@ -147,7 +147,7 @@ public class XMLTarget implements ExportTarget {
         ModelElement_1_0 objectClass = this.model.getElement(object.refClass().refMofId());
         if(!objectClass.objGetList("compositeReference").isEmpty()) {
             ModelElement_1_0 compReference = this.model.getElement(((Path) objectClass.objGetValue("compositeReference")).getLastSegment().toClassicRepresentation());
-            ModelElement_1_0 associationEnd = this.model.getElement(((Path) compReference.getReferencedEnd()).getLastSegment().toClassicRepresentation());
+            ModelElement_1_0 associationEnd = this.model.getElement(compReference.getReferencedEnd().getLastSegment().toClassicRepresentation());
             return (String) associationEnd.objGetValue("qualifierName");
         }
         if("org:openmdx:base:Authority".equals(objectClass.getQualifiedName())) {

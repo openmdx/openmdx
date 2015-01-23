@@ -47,7 +47,9 @@
  */
 package org.openmdx.base.resource.spi;
 
+import javax.resource.NotSupportedException;
 import javax.resource.ResourceException;
+import javax.resource.spi.EISSystemException;
 
 import org.openmdx.kernel.exception.BasicException;
 
@@ -64,10 +66,7 @@ public final class ResourceExceptions {
     }
     
     /**
-     * 
-     * @param <T>
-     * @param resourceException
-     * @return
+     * Links the exception stack with the resource exception
      */
     public static <T extends ResourceException> T initHolder(
         T resourceException
@@ -76,6 +75,60 @@ public final class ResourceExceptions {
             resourceException.getCause().getMessage()
         );
         return resourceException;
+    }
+
+    /**
+     * Wraps the exception into a system exception
+     */
+    public static ResourceException toSystemException(
+        Exception exception
+    ){
+    	if(exception instanceof EISSystemException) {
+    		return (ResourceException) exception;
+    	}
+        final BasicException basicException = BasicException.toExceptionStack(exception);
+        final ResourceException resourceException = new EISSystemException(
+			basicException.getDescription(),
+			basicException
+		);
+        resourceException.setErrorCode(basicException.getMessage());
+		return resourceException;
+    }
+
+    /**
+     * Wraps the exception into a not-supported exception
+     */
+    public static ResourceException toNotSupportedException(
+        Exception exception
+    ){
+    	if(exception instanceof EISSystemException) {
+    		return (ResourceException) exception;
+    	}
+        final BasicException basicException = BasicException.toExceptionStack(exception);
+        final ResourceException resourceException = new NotSupportedException(
+			basicException.getDescription(),
+			basicException
+		);
+        resourceException.setErrorCode(basicException.getMessage());
+		return resourceException;
+    }
+    
+    /**
+     * Wraps the exception into a resource exception
+     */
+    public static ResourceException toResourceException(
+    	Exception exception
+    ){
+    	if(exception instanceof ResourceException) {
+    		return (ResourceException) exception;
+    	}
+        BasicException basicException = BasicException.toExceptionStack(exception);
+        final ResourceException resourceException = new EISSystemException(
+			basicException.getDescription(),
+			basicException
+		);
+        resourceException.setErrorCode(basicException.getMessage());
+		return resourceException;
     }
 
 }

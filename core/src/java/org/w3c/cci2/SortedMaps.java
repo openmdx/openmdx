@@ -62,6 +62,7 @@ import java.util.ListIterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
+import java.util.TreeMap;
 
 /**
  * Sorted Maps
@@ -75,6 +76,9 @@ public class SortedMaps {
     ){
         // Avoid instantiation
     }
+    
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	private static final SparseArray EMPTY_SPARSE_ARRAY = unmodifiableSparseArray(new TreeMap());
 
     /**
      * Returns a <code>SparseArray</code> backed by the specified sorted map.
@@ -93,6 +97,31 @@ public class SortedMaps {
       return new AsSparseArray<E>(s);
     }
 
+    /**
+     * Returns an empty sparse array 
+     * 
+     * @return an an empty sparse array
+     */
+    @SuppressWarnings("unchecked")
+	public static <E> SparseArray<E> emptySparseArray(){
+    	return EMPTY_SPARSE_ARRAY;
+    }
+    
+    /**
+     * Returns a SparseArray containing a single element
+     * 
+     * @param element the single element
+     * 
+     * @return an unmodifiable SparseArray containing the single element
+     */
+    public static <E> SparseArray<E> singletonSparseArray(E element){
+    	return unmodifiableSparseArray(
+    		new TreeMap<Integer,E>(
+    			Collections.singletonMap(Integer.valueOf(0), element)
+    		)
+    	);
+    }
+    
     /**
      * Returns a <code>SparseArray</code> backed by the specified sorted map.
      * The returned sparse array is <code>Serializable</code>.

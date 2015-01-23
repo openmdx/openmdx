@@ -51,14 +51,17 @@ import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
+import javax.resource.NotSupportedException;
 import javax.resource.ResourceException;
-import javax.resource.cci.Connection;
+import javax.resource.spi.CommException;
 
 import org.openmdx.application.rest.http.spi.Message;
 import org.openmdx.application.rest.http.spi.MessageFactory;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.naming.Path;
+import org.openmdx.base.resource.spi.ResourceExceptions;
 import org.openmdx.base.resource.spi.RestInteractionSpec;
+import org.openmdx.base.rest.cci.RestConnection;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.loading.Classes;
 
@@ -76,7 +79,7 @@ class PlainVanillaInteraction extends AbstractHttpInteraction implements HttpInt
      * @throws ResourceException 
      */
     protected PlainVanillaInteraction(
-        Connection connection,
+        RestConnection connection,
         HttpContext httpContext
     ) throws ResourceException {
         super(connection, httpContext.getConnectionURL());
@@ -110,7 +113,7 @@ class PlainVanillaInteraction extends AbstractHttpInteraction implements HttpInt
         RestInteractionSpec interactionSpec,
         Path xri, 
         String query
-    ) throws ServiceException{
+    ) throws ResourceException{
         String uri = toRequestURL(xri);
         return messageFactory.newMessage(
             httpContext, 
@@ -131,7 +134,7 @@ class PlainVanillaInteraction extends AbstractHttpInteraction implements HttpInt
     protected Message newMessage(
         RestInteractionSpec ispec, 
         Path xri
-    ) throws ServiceException {
+    ) throws ResourceException{
         return newHttpMessage(
             httpContext, 
             ispec, 
@@ -148,16 +151,12 @@ class PlainVanillaInteraction extends AbstractHttpInteraction implements HttpInt
     protected void open(
     ) throws ResourceException {
         String userName = getConnectionUserName();
-        try {
-            newHttpMessage(
-                httpContext, 
-                CONNECT_SPEC,
-                CONNECT_XRI, 
-                toQuery(userName)
-            ).execute();
-        } catch (ServiceException exception) {
-            throw new ResourceException(exception);
-        }
+        newHttpMessage(
+		    httpContext, 
+		    CONNECT_SPEC,
+		    CONNECT_XRI, 
+		    toQuery(userName)
+		).execute();
     }
 
     /**
@@ -191,7 +190,7 @@ class PlainVanillaInteraction extends AbstractHttpInteraction implements HttpInt
     protected HttpURLConnection newConnection(
         URL url,
         RestInteractionSpec interactionSpec
-    ) throws ServiceException {
+    ) throws ResourceException{
         try {
             HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
             urlConnection.setRequestMethod(
@@ -207,20 +206,31 @@ class PlainVanillaInteraction extends AbstractHttpInteraction implements HttpInt
             );
             return urlConnection;
         } catch (ClassCastException exception) {
-            throw new ServiceException(
-                exception,
-                BasicException.Code.DEFAULT_DOMAIN,
-                BasicException.Code.NOT_SUPPORTED,
-                "Unexpected URL connection",
-                new BasicException.Parameter("url", url),
-                new BasicException.Parameter("expected", HttpURLConnection.class.getName())
-            );
+            throw ResourceExceptions.initHolder(
+        		new NotSupportedException(
+	        		"Unexpected URL connection",
+	                BasicException.newEmbeddedExceptionStack(
+	            		exception,
+	                    BasicException.Code.DEFAULT_DOMAIN,
+	                    BasicException.Code.NOT_SUPPORTED,
+	                    new BasicException.Parameter("url", url),
+	                    new BasicException.Parameter("expected", HttpURLConnection.class.getName()),
+	                    new BasicException.Parameter("function", interactionSpec.getFunctionName())
+	                )
+	            )
+        	);
         } catch (IOException exception) {
-            throw new ServiceException(
-                BasicException.Code.DEFAULT_DOMAIN,
-                BasicException.Code.BAD_PARAMETER,
-                "Can't open a connection for the given URL",
-                new BasicException.Parameter("url", url)
+            throw ResourceExceptions.initHolder(
+            	new CommException(
+		            "Can't open a connection for the given URL",
+		            BasicException.newEmbeddedExceptionStack(
+		        		exception,
+		                BasicException.Code.DEFAULT_DOMAIN,
+		                BasicException.Code.BAD_PARAMETER,
+		                new BasicException.Parameter("url", url),
+		                new BasicException.Parameter("function", interactionSpec.getFunctionName())
+		            )
+		        )
             );
         } 
     }

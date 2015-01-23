@@ -1,14 +1,13 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
+ * Project:     openMDX, http://www.openmdx.org/
  * Description: ModelImporter_1_0 interface
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
  * ====================================================================
  *
- * This software is published under the BSD license
- * as listed below.
+ * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004, OMEX AG, Switzerland
+ * Copyright (c) 2004-2014, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -16,16 +15,16 @@
  * conditions are met:
  * 
  * * Redistributions of source code must retain the above copyright
- * notice, this list of conditions and the following disclaimer.
+ *   notice, this list of conditions and the following disclaimer.
  * 
  * * Redistributions in binary form must reproduce the above copyright
- * notice, this list of conditions and the following disclaimer in
- * the documentation and/or other materials provided with the
- * distribution.
+ *   notice, this list of conditions and the following disclaimer in
+ *   the documentation and/or other materials provided with the
+ *   distribution.
  * 
  * * Neither the name of the openMDX team nor the names of its
- * contributors may be used to endorse or promote products derived
- * from this software without specific prior written permission.
+ *   contributors may be used to endorse or promote products derived
+ *   from this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
  * CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
@@ -43,16 +42,15 @@
  * 
  * ------------------
  * 
- * This product includes software developed by the Apache Software
- * Foundation (http://www.apache.org/).
+ * This product includes software developed by other organizations as
+ * listed in the NOTICE file.
  */
 package org.openmdx.application.mof.externalizer.cci;
 
-import org.openmdx.application.dataprovider.cci.Dataprovider_1_0;
-import org.openmdx.application.dataprovider.cci.ServiceHeader;
-import org.openmdx.base.exception.ServiceException;
+import javax.resource.ResourceException;
 
-//---------------------------------------------------------------------------
+import org.openmdx.base.dataprovider.cci.Channel;
+
 public interface ModelImporter_1_0 {
 
   /**
@@ -60,12 +58,8 @@ public interface ModelImporter_1_0 {
    * provider which must be a MOF repository. target must be an 
    * org::omg::model1 compliant objects. 
    */
-  public void process(
-    ServiceHeader header,
-    Dataprovider_1_0 target,
-    String providerName
-  ) throws ServiceException;
+  void process(
+    Channel target
+  ) throws ResourceException;
 
 }
-
-//---------------------------------------------------------------------------

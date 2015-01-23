@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JRE 7"/>
+	<classpathentry exported="true" kind="lib" path="lib/annotations-api.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/catalina-ant.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/catalina-ha.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/catalina-tribes.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/catalina.jar" sourcepath="src/catalina.zip"/>
+	<classpathentry exported="true" kind="lib" path="lib/ecj-3.6.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/el-api.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/jasper-el.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/jasper.jar" sourcepath="src/jasper.zip"/>
+	<classpathentry exported="true" kind="lib" path="lib/jsp-api.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/servlet-api.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/tomcat-api.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/tomcat-coyote.jar" sourcepath="src/tomcat-coyote.zip"/>
+	<classpathentry exported="true" kind="lib" path="lib/tomcat-dbcp.jar" sourcepath="src/tomcat-dbcp.zip"/>
+	<classpathentry exported="true" kind="lib" path="lib/tomcat-i18n-es.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/tomcat-i18n-fr.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/tomcat-i18n-ja.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/tomcat-util.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/tomcat-juli.jar"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>

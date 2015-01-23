@@ -341,7 +341,7 @@ public class ObjectInspectorServlet extends HttpServlet {
             this.codeSegmentIdentity = new Path(this.getInitParameter("codeSegment"));
             PersistenceManager pm = this.createPersistenceManagerData(
                 Arrays.asList(
-                	this.portalExtension.getAdminPrincipal(new Path(this.codeSegmentIdentity).get(4))
+                	this.portalExtension.getAdminPrincipal(this.codeSegmentIdentity.getSegment(4).toClassicRepresentation())
                 )
             );
             RefObject_1_0 codeSegment = this.codeSegmentIdentity == null ? null : 
@@ -903,7 +903,7 @@ public class ObjectInspectorServlet extends HttpServlet {
                 app.createPmData();
             } catch(Exception e) {
                 ServiceException e0 = new ServiceException(e);
-                SysLog.warning("Unable to switch to requested role", Arrays.asList(requestedObjectIdentity.get(4), e.getMessage()));
+                SysLog.warning("Unable to switch to requested role", Arrays.asList(requestedObjectIdentity.getSegment(4).toClassicRepresentation(), e.getMessage()));
                 SysLog.warning(e0.getMessage(), e0.getCause());
             }
         }
@@ -1126,7 +1126,7 @@ public class ObjectInspectorServlet extends HttpServlet {
                     RefObject_1_0 refObj = (RefObject_1_0)pm.getObjectById(objectIdentity);
                     String feature = Action.getParameter(parameter, Action.PARAMETER_FEATURE);
                     ModelElement_1_0 featureDef = app.getModel().getElement(feature);
-                    if(Multiplicity.STREAM.toString().equals(featureDef.getMultiplicity())) {
+                    if(Multiplicity.STREAM.code().equals(featureDef.getMultiplicity())) {
                         long length = refObj.refGetValue(feature, os, 0);
                         response.setContentLength(new Long(length).intValue());       
                     } else {

@@ -484,19 +484,17 @@ public class UiReferencePane extends ReferencePane implements Serializable {
     	String formId = SEARCH_FORM_NAME + id;
     	p.write("  <form id=\"", formId, "\" class=\"", CssClass.dialog.toString(), "\" style=\"", formStyle, "\">");
 		p.write("    <fieldset style=\"margin:-5px 0px 5px 0px;\">");
-		p.write("    <table class=\"", CssClass.filterAttr.toString(), "\">");
-		p.write("      <tr>");
-		p.write("        <td style=\"padding:4px;vertical-align:top;\">");
+		p.write("    <div>");
+		p.write("      <div class=\"", CssClass.row.toString(), "\">");
+		p.write("        <div class=\"", CssClass.colMd3.toString(), "\">");
     	Action columnFilterAddAction = searchableColumns.get(0);
     	int count = 0;
-    	int nCols = 1;
     	for(int i = 0; i < searchableColumns.size(); i++) {
     		Action action = searchableColumns.get(i);
     		if(action.getTitle() != null && !action.getTitle().trim().isEmpty()) {
 				if(count > 0 && count % 5 == 0) {	        		
-					p.write("        </td>");
-					p.write("        <td style=\"padding:4px;vertical-align:top;\">");
-					nCols++;
+					p.write("        </div>");
+					p.write("        <div class=\"", CssClass.colMd3.toString(), "\">");
 				}
     			String fieldName = action.getParameter(Action.PARAMETER_NAME);
 				PortalExtension_1_0.SearchFieldDef searchFieldDef = portalExtension.getSearchFieldDef(
@@ -508,8 +506,7 @@ public class UiReferencePane extends ReferencePane implements Serializable {
 					String searchFieldId = formId + "_" + fieldName;
 					p.write("<div class=\"", CssClass.row.toString(), "\">");					
 					p.write("  <div class=\"", CssClass.colSm12.toString(), "\">");
-					p.write("    <label>", htmlEncoder.encode(action.getTitle(), false), ":</label>");
-					p.write("    <input type=\"text\" id=\"", searchFieldId, "\" name=\"", WebKeys.REQUEST_PARAMETER_FILTER_VALUES, ".", fieldName, "\" value=\"", htmlEncoder.encode(grid.getFilterValue(fieldName), false), "\"/>");
+					p.write("    <input type=\"text\" id=\"", searchFieldId, "\" name=\"", WebKeys.REQUEST_PARAMETER_FILTER_VALUES, ".", fieldName, "\" placeholder=\"", htmlEncoder.encode(action.getTitle(), false), "\" style=\"padding:4px;margin:2px;width:100%;\" value=\"", htmlEncoder.encode(grid.getFilterValue(fieldName), false), "\" />");
 					p.write("  </div>");
 					p.write("</div>");
 	                p.write("<div class=\"", CssClass.autocomplete.toString(), "\" id=\"", searchFieldId, ".Update\" style=\"display:none;z-index:1200;\"></div>");
@@ -528,20 +525,19 @@ public class UiReferencePane extends ReferencePane implements Serializable {
 				} else {
 					p.write("<div class=\"", CssClass.row.toString(), "\">");					
 					p.write("  <div class=\"", CssClass.colSm12.toString(), "\">");
-					p.write("    <label>", htmlEncoder.encode(action.getTitle(), false), ":</label>");
-					p.write("    <input type=\"text\" id=\"", formId + "." + fieldName, "\" name=\"", WebKeys.REQUEST_PARAMETER_FILTER_VALUES, ".", fieldName, "\" value=\"", htmlEncoder.encode(grid.getFilterValue(fieldName), false), "\"/>");
+					p.write("    <input type=\"text\" id=\"", formId + "." + fieldName, "\" name=\"", WebKeys.REQUEST_PARAMETER_FILTER_VALUES, ".", fieldName, "\" placeholder=\"",  htmlEncoder.encode(action.getTitle(), false), "\" style=\"padding:4px;margin:2px;width:100%;\" value=\"", htmlEncoder.encode(grid.getFilterValue(fieldName), false), "\"/>");
 					p.write("  </div>");
 					p.write("</div>");
 				}
     			count++;
     		}
     	}
-		p.write("        </td>");
-		p.write("      </tr>");
+		p.write("        </div>");
+		p.write("      </div>");
 		String showSearchFormFieldId = formId + "." + WebKeys.REQUEST_PARAMETER_SHOW_SEARCH_FORM;
 		String resetFilterFieldId = formId + "." + WebKeys.REQUEST_PARAMETER_RESET_FILTER;
-		p.write("      <tr>");
-		p.write("        <td colspan=\"", Integer.toString(nCols), "\" style=\"padding:8px;\" align=\"left\">");
+		p.write("      <div class=\"", CssClass.row.toString(), "\" style=\"margin:5px;\">");
+		p.write("        <div class=\"", CssClass.colSm12.toString(), "\">");
 		p.write("          <div class=\"", CssClass.row.toString(), "\">");
 		p.write("            <div class=\"", CssClass.colSm12.toString(), "\">");
 		p.write("              ", p.getImg("class=\"", CssClass.popUpButton.toString(), "\" src=\"", p.getResourcePath("images/"), WebKeys.ICON_FILTER_HELP, "\" border=\"0\" alt=\"?\" align=\"top\" onclick=\"javascript:void(window.open('helpSearch_", app.getCurrentLocaleAsString(), ".html', 'Help', 'fullscreen=no,toolbar=no,status=no,menubar=no,scrollbars=yes,resizable=yes,directories=no,location=no,width=400'));\""));    		        	
@@ -555,9 +551,9 @@ public class UiReferencePane extends ReferencePane implements Serializable {
 		p.write("              <span><input type=\"checkbox\" ", (showSearchFormOnInit ? "checked" : ""), " style=\"padding:0px;vertical-align:middle;\" onclick=\"javascript:if(this.checked){$('", showSearchFormFieldId, "').value='true'}else{$('", showSearchFormFieldId, "').value='false'};\" /><small style=\"vertical-align:middle;\">&nbsp;", texts.getShowTitle(), "</small></span>");
 		p.write("            </div");
 		p.write("          </div>");
-		p.write("        </td>");
-		p.write("      </tr>");
-		p.write("    </table>");
+		p.write("        </div>");
+		p.write("      </div>");
+		p.write("    </div>");
     	p.write("    </fieldset>");
     	p.write("  </form>");
     }
@@ -590,7 +586,7 @@ public class UiReferencePane extends ReferencePane implements Serializable {
 				p.write("<ul class=\"", CssClass.nav.toString(), " ", CssClass.navTabs.toString(), " ", CssClass.navCondensed.toString(), "\" style=\"position:relative;z-index:", Integer.toString(zIndex+1), ";\">");
 				boolean isGroupTabActive = false;
 				boolean isFirstGroupTab = true;
-				boolean hasTabs = false;
+				int selectedReference = -1;
 				for(int i = 0; i < nReferences; i++) {
 					Action action = this.getSelectReferenceAction()[i];
 					UiGridControl gridControl = control.getChildren(UiGridControl.class).get(i);
@@ -604,7 +600,9 @@ public class UiReferencePane extends ReferencePane implements Serializable {
 						!isRevokeShow && 
 						(grids == null || grids.contains(gridControl.getObjectContainer().getReferenceName()))
 					) {
-						hasTabs = true;
+						if(i == this.getSelectedReference()) {
+							selectedReference = i;
+						}
 						String tabLabel = action.getTitle();
 						boolean isGroupTab = tabLabel.startsWith(WebKeys.TAB_GROUPING_CHARACTER);
 						if(isGroupTab) tabLabel = tabLabel.substring(1);
@@ -634,10 +632,14 @@ public class UiReferencePane extends ReferencePane implements Serializable {
 					}
 				}
 				p.write("</ul>");
-				if(hasTabs) {
+				if(selectedReference >= 0) {
 					p.write("<div id=\"", gridContentId, "\" class=\"", CssClass.gContent.toString(), "\" style=\"position:relative;z-index:", Integer.toString(zIndex), ";\">");
 					p.write("  <div class=\"", CssClass.loading.toString(), "\" style=\"height:40px;\"></div>");
 					p.write("</div>");
+					Action selectReferenceTabAction = this.getSelectReferenceAction()[selectedReference];
+					p.write("<script language=\"javascript\" type=\"text/javascript\">");
+		            p.write("    jQuery.ajax({type: 'get', url: ", p.getEvalHRef(selectReferenceTabAction), ", dataType: 'html', success: function(data){$('", gridContentId, "').innerHTML=data;evalScripts(data);}});");
+		            p.write("</script>");
 				}
 			}
 		} else if(ReferencePaneControl.FRAME_CONTENT.equals(frame)) {

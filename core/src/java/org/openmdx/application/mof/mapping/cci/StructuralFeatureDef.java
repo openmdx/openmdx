@@ -84,8 +84,8 @@ public abstract class StructuralFeatureDef
     // bean setter/getter names
     boolean forBoolean = PrimitiveTypes.BOOLEAN.equals(qualifiedTypeName);
     boolean singleValued = 
-        Multiplicity.SINGLE_VALUE.toString().equals(multiplicity) ||
-        Multiplicity.OPTIONAL.toString().equals(multiplicity);
+        Multiplicity.SINGLE_VALUE.code().equals(multiplicity) ||
+        Multiplicity.OPTIONAL.code().equals(multiplicity);
     this.beanGenericName = AbstractNames.capitalize(name);
     this.beanGetterName = AbstractNames.openmdx2AccessorName(
         name,

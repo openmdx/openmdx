@@ -56,6 +56,7 @@ import javax.jdo.PersistenceManagerFactory;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.resource.cci.ConnectionFactory;
 import org.openmdx.base.resource.spi.Port;
+import org.openmdx.base.rest.cci.RestConnection;
 import org.openmdx.base.rest.connector.EntityManagerProxyFactory_2;
 
 /**
@@ -127,7 +128,7 @@ public class DataManager_2ProxyFactory extends EntityManagerProxyFactory_2 {
      * @throws ServiceException
      */
     @Override
-    protected Port newPort(
+    protected Port<RestConnection> newPort(
         final Object connectionFactory
     ) throws ServiceException{
         return connectionFactory instanceof ConnectionFactory ? super.newPort(

@@ -57,7 +57,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.resource.ResourceException;
-import javax.resource.cci.Connection;
 import javax.resource.cci.IndexedRecord;
 import javax.resource.cci.Interaction;
 import javax.resource.cci.MappedRecord;
@@ -72,6 +71,7 @@ import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.resource.Records;
 import org.openmdx.base.resource.spi.RestInteractionSpec;
+import org.openmdx.base.rest.cci.RestConnection;
 import org.openmdx.base.rest.spi.Facades;
 import org.openmdx.base.rest.spi.Object_2Facade;
 import org.openmdx.base.rest.spi.Query_2Facade;
@@ -89,7 +89,7 @@ public class HardWiredObjects_1 extends Standard_1 {
     // --------------------------------------------------------------------------
     @Override
     public Interaction getInteraction(
-        Connection connection
+        RestConnection connection
     ) throws ResourceException {
         return new LayerInteraction(connection);
     }
@@ -181,7 +181,7 @@ public class HardWiredObjects_1 extends Standard_1 {
      * 
      * @param request
      * 
-     * @return the internalized reference name
+     * @return the reference name
      * @throws ServiceException 
      */
     private String getReferenceName(
@@ -189,9 +189,7 @@ public class HardWiredObjects_1 extends Standard_1 {
     ) throws ServiceException {
         Path path = request.path(); 
         int size = path.size();
-        return path.get(
-            size - 1 - size % 2
-        ).intern();
+        return path.getSegment(size - 1 - size % 2).toClassicRepresentation();
     }
 
     // --------------------------------------------------------------------------
@@ -226,7 +224,7 @@ public class HardWiredObjects_1 extends Standard_1 {
     public class LayerInteraction extends Standard_1.LayerInteraction {
         
         public LayerInteraction(
-            Connection connection
+            RestConnection connection
         ) throws ResourceException {
             super(connection);
         }

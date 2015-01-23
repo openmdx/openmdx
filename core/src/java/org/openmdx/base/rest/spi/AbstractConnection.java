@@ -49,12 +49,12 @@ package org.openmdx.base.rest.spi;
 
 import javax.resource.NotSupportedException;
 import javax.resource.ResourceException;
-import javax.resource.cci.Connection;
 import javax.resource.cci.ResultSetInfo;
 import javax.resource.spi.IllegalStateException;
 
 import org.openmdx.base.Version;
 import org.openmdx.base.resource.spi.ResourceExceptions;
+import org.openmdx.base.rest.cci.RestConnection;
 import org.openmdx.base.rest.cci.RestConnectionMetaData;
 import org.openmdx.base.rest.cci.RestConnectionSpec;
 import org.openmdx.kernel.exception.BasicException;
@@ -62,7 +62,7 @@ import org.openmdx.kernel.exception.BasicException;
 /**
  * Abstract Connection
  */
-public abstract class AbstractConnection implements Connection {
+public abstract class AbstractConnection implements RestConnection {
 
     /**
      * Constructor 
@@ -86,20 +86,7 @@ public abstract class AbstractConnection implements Connection {
      */
     private boolean closed;
     
-    /**
-     * Retrieve connectionSpec.
-     *
-     * @return Returns the connectionSpec.
-     * 
-     * @deprecated use {@link #getMetaData()}.getConnectionSpec();
-     */
-    @Deprecated
-    protected RestConnectionSpec getConnectionSpec(
-    ) {
-        return getMetaData().getConnectionSpec();
-    }
 
-    
     //------------------------------------------------------------------------
     // Implements Connection
     //------------------------------------------------------------------------

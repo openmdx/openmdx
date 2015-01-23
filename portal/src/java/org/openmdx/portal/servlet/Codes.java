@@ -89,6 +89,7 @@ import org.openmdx.base.mof.cci.Multiplicity;
 import org.openmdx.base.mof.spi.Model_1Factory;
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.persistence.cci.UserObjects;
+import org.openmdx.base.rest.cci.ObjectRecord;
 import org.openmdx.base.rest.spi.Object_2Facade;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.loading.Classes;
@@ -243,7 +244,7 @@ public final class Codes implements Serializable {
 	    		for(RefObject_1_0 entry: entryQuery == null ? entries : entries.refGetAll(entryQuery)) {
 	                Short code = 0;
 	                try {
-	                    code = new Short(entry.refGetPath().getBase());
+	                    code = new Short(entry.refGetPath().getLastSegment().toClassicRepresentation());
 	                } catch(Exception ignore) {}
 	                @SuppressWarnings("unchecked")
 	                List<String> shortTexts = (List<String>)entry.refGetValue("shortText");
@@ -345,7 +346,7 @@ public final class Codes implements Serializable {
 		            Set<String> codeEntryContainerNames = (Set<String>)codeEntryContainer.refGetValue("name");
 		        	Set<String> containerNames = new HashSet<String>(codeEntryContainerNames);
 		        	containerNames.add(
-		        		codeEntryContainer.refGetPath().getBase()
+		        		codeEntryContainer.refGetPath().getLastSegment().toClassicRepresentation()
 		        	);
 		        	CodeContainer codeContainer = new CodeContainer(
 		        		codeEntryContainer.refGetPath(),
@@ -417,7 +418,7 @@ public final class Codes implements Serializable {
 	 */
     public static void storeCodes(
     	PersistenceManager pm,
-    	Map<Path,MappedRecord> codes
+    	Map<Path,ObjectRecord> codes
     	) throws ServiceException {
     	String messagePrefix = new Date() + "  ";
     	SysLog.info("Storing " + codes.size() + " code entries");
@@ -427,7 +428,7 @@ public final class Codes implements Serializable {
     	for(int run = 0; run < 5; run++) {
     		boolean hasNewObjects = false;
     		for(
-    			Iterator<MappedRecord> j = codes.values().iterator(); 
+    			Iterator<ObjectRecord> j = codes.values().iterator(); 
     			j.hasNext(); 
     		) {
     			MappedRecord entry = j.next();
@@ -480,11 +481,11 @@ public final class Codes implements Serializable {
     					if(parent != null) {
 							@SuppressWarnings("unchecked")
 							RefContainer<RefObject_1_0> container = (RefContainer<RefObject_1_0>)parent.refGetValue(
-								entryPath.get(entryPath.size() - 2)
+								entryPath.getSegment(entryPath.size() - 2).toClassicRepresentation()
 							);
 							container.refAdd(
 								QualifierType.REASSIGNABLE,
-								entryPath.get(entryPath.size() - 1),
+								entryPath.getSegment(entryPath.size() - 1).toClassicRepresentation(),
 								newEntry
 							);
     					}
@@ -521,7 +522,7 @@ public final class Codes implements Serializable {
 		List<ResourceBundle> bundles
 	) throws ServiceException {
 		RefObject_1_0 codeSegment = (RefObject_1_0)pm.getObjectById(codeSegmentIdentity);
-		Map<Path,MappedRecord> codes = new HashMap<Path,MappedRecord>();
+		Map<Path,ObjectRecord> codes = new HashMap<Path,ObjectRecord>();
 		// Derive class of value containers and entries from existing value containers
 		String classNameContainer = null;
 		String classNameEntry = null;

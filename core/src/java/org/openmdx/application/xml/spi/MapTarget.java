@@ -49,11 +49,9 @@ package org.openmdx.application.xml.spi;
 
 import java.util.Map;
 
-import javax.resource.cci.MappedRecord;
-
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.naming.Path;
-import org.openmdx.base.rest.spi.Object_2Facade;
+import org.openmdx.base.rest.cci.ObjectRecord;
 import org.openmdx.kernel.exception.BasicException;
 
 /**
@@ -66,14 +64,14 @@ public class MapTarget implements ImportTarget {
      * 
      * @param target
      */
-    public MapTarget(Map<Path, MappedRecord> target) {
+    public MapTarget(Map<Path, ObjectRecord> target) {
         this.target = target;
     }
 
     /**
      * The delegate
      */
-    private final Map<Path, MappedRecord> target;
+    private final Map<Path, ObjectRecord> target;
 
     /*
      * (non-Javadoc)
@@ -85,9 +83,9 @@ public class MapTarget implements ImportTarget {
     @SuppressWarnings("unchecked")
     public void importObject(
         ImportMode mode, 
-        MappedRecord objectHolder
+        ObjectRecord objectHolder
     ) throws ServiceException {
-        Path objectId = Object_2Facade.getPath(objectHolder);
+        Path objectId = objectHolder.getResourceIdentifier();
         boolean exists = this.target.containsKey(objectId);
         switch (mode) {
             case UPDATE:
@@ -100,14 +98,14 @@ public class MapTarget implements ImportTarget {
                         new BasicException.Parameter("mode", mode)
                     );
                 }
-                Object_2Facade.getValue(this.target.get(objectId)).putAll(
-                    Object_2Facade.getValue(objectHolder)
+                this.target.get(objectId).getValue().putAll(
+                    objectHolder.getValue()
                 );
                 break;
             case SET:
                 if(exists) {
-                    Object_2Facade.getValue(this.target.get(objectId)).putAll(
-                        Object_2Facade.getValue(objectHolder)
+                    this.target.get(objectId).getValue().putAll(
+                        objectHolder.getValue()
                     );
                 } else {
                     this.target.put(objectId, objectHolder);

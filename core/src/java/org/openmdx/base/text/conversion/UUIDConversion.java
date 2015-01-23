@@ -1,13 +1,13 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
+ * Project:     openMDX, http://www.openmdx.org/
  * Description: UUID conversion
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2013, OMEX AG, Switzerland
+ * Copyright (c) 2004-2014, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without 
@@ -51,6 +51,9 @@ import java.math.BigInteger;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.UUID;
+import java.util.regex.Pattern;
+
+import javax.annotation.Nullable;
 
 import org.ietf.jgss.GSSException;
 import org.ietf.jgss.Oid;
@@ -409,6 +412,31 @@ public class UUIDConversion {
         uid.insert(0, forDigit(6 * msb + lsb));
         return uid.toString();
     }
+
+    /**
+     * Tells whether the candidate can be converted to a UUID.
+     * <p>
+     * At the moment a single format is supported:
+     * <ul>{@link #UUID_FORMAT}
+     * </ul>
+     * 
+     * @param candidate
+     * 
+     * @return <code>true</code> if the candidate is can be converted to a UUID
+     */
+    public static boolean isUUID(
+    	@Nullable String candidate
+    ){
+    	if(candidate == null) {
+    		return false;
+    	}
+		switch(candidate.length()){
+    		case UUID_FORMAT:
+    			return UUID_FORMAT_PATTERN.matcher(candidate).matches();
+    	    default:
+    	    	return false;
+		}
+    }
     
     /**
      * The legacy UID format's length
@@ -434,5 +462,12 @@ public class UUIDConversion {
      * The XRI format's length
      */
     private static final int XRI_FORMAT = 50;
+
+    /**
+     * The Standard UUID format: 5ee6d2b0-bd15-11db-9f75-01430a0101c6
+     */
+    private static Pattern UUID_FORMAT_PATTERN = Pattern.compile(
+    	"[0-9A-Fa-f]{8}(?:-[0-9A-Fa-f]{4}){3}-[0-9A-Fa-f]{12}"
+    );
 
 }

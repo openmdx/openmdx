@@ -47,19 +47,12 @@
  */
 package org.openmdx.base.rest.spi;
 
-import javax.naming.NamingException;
-import javax.naming.Reference;
 import javax.resource.ResourceException;
 import javax.resource.cci.Connection;
 import javax.resource.cci.ConnectionSpec;
-import javax.resource.cci.RecordFactory;
-import javax.resource.cci.ResourceAdapterMetaData;
 
-import org.openmdx.base.Version;
-import org.openmdx.base.resource.Records;
-import org.openmdx.base.resource.cci.ConnectionFactory;
-import org.openmdx.base.resource.spi.RestInteractionSpec;
 import org.openmdx.base.resource.spi.Port;
+import org.openmdx.base.rest.cci.RestConnection;
 import org.openmdx.base.rest.cci.RestConnectionSpec;
 import org.openmdx.base.transaction.TransactionAttributeType;
 
@@ -69,9 +62,9 @@ import org.openmdx.base.transaction.TransactionAttributeType;
  * This adapter allows a <code>ConnectionFactory</code> view on a
  * <code>Port</code>.
  */
-public class ConnectionFactoryAdapter implements ConnectionFactory {
+public class ConnectionFactoryAdapter extends AbstractConnectionFactory {
 
-    /**
+	/**
      * Constructor 
      * 
      * @param port the REST <code>Port</code>
@@ -79,155 +72,41 @@ public class ConnectionFactoryAdapter implements ConnectionFactory {
      * @param transactionAttribute
      */
     public ConnectionFactoryAdapter(
-        final Port port,
+        final Port<RestConnection> port,
         final boolean supportsLocalTransactionDemarcation,
         final TransactionAttributeType transactionAttribute
     ){
        this.port = port;
        this.transactionAttribute = transactionAttribute;
-       this.metaData = new ResourceAdapterMetaData(){
-
-           /** 
-            * Gets a tool displayable name of the resource adapter.
-            *
-            *  @return   String representing the name of the resource adapter
-            */
-           public String getAdapterName() {
-               return "openMDX/REST";
-           }
-
-           /** 
-            * Gets a tool displayable short desription of the resource
-            * adapter.
-            *
-            * @return   String describing the resource adapter
-            */
-           public String getAdapterShortDescription() {
-               return "openMDX/2 Plug-In Wrapper";
-           }
-
-           /** Gets the name of the vendor that has provided the resource 
-            *  adapter.
-            *
-            *  @return   String representing name of the vendor that has 
-            *            provided the resource adapter
-            */
-           public String getAdapterVendorName() {
-               return "openMDX";
-           }
-
-           /** 
-            * Gets the version of the resource adapter.
-            *
-            * @return   String representing version of the resource adapter
-            */
-           public String getAdapterVersion() {
-               return Version.getSpecificationVersion();
-           }
-
-           /** 
-            * Returns an array of fully-qualified names of InteractionSpec
-            * types supported by the CCI implementation for this resource
-            * adapter. Note that the fully-qualified class name is for 
-            * the implementation class of an InteractionSpec. This method 
-            * may be used by tools vendor to find information on the 
-            * supported InteractionSpec types. The method should return 
-            * an array of length 0 if the CCI implementation does not 
-            * define specific InteractionSpec types.
-            *
-            * @return   Array of fully-qualified class names of
-            *           InteractionSpec classes supported by this
-            *           resource adapter's CCI implementation
-            * @see      javax.resource.cci.InteractionSpec
-            */
-           public String[] getInteractionSpecsSupported() {
-               return new String[]{RestInteractionSpec.class.getName()};
-           }
-
-           /** 
-            * Returns a string representation of the version of the 
-            * connector architecture specification that is supported by
-            * the resource adapter.
-            *
-            * @return   String representing the supported version of 
-            *           the connector architecture
-            */
-           public String getSpecVersion() {
-               return "1.5.";
-           }
-
-           /** 
-            * Returns true if the implementation class for the Interaction 
-            * interface implements public boolean execute(InteractionSpec 
-            * ispec, Record input, Record output) method; otherwise the 
-            * method returns false.
-            *
-            * @return   boolean depending on method support
-            * @see      javax.resource.cci.Interaction
-            */
-           public boolean supportsExecuteWithInputAndOutputRecord() {
-               return false;
-           }
-
-           /** 
-            * Returns true if the implementation class for the Interaction
-            * interface implements public Record execute(InteractionSpec
-            * ispec, Record input) method; otherwise the method returns 
-            * false.
-            *
-            * @return   boolean depending on method support
-            * @see      javax.resource.cci.Interaction
-            */
-           public boolean supportsExecuteWithInputRecordOnly() {
-               return true;
-           }
-
-           /** 
-            * Returns true if the resource adapter implements the LocalTransaction
-            * interface and supports local transaction demarcation on the 
-            * underlying EIS instance through the LocalTransaction interface.
-            *
-            * @return  true if resource adapter supports resource manager
-            *          local transaction demarcation through LocalTransaction
-            *          interface; false otherwise
-            * @see     javax.resource.cci.LocalTransaction
-            */
-           public boolean supportsLocalTransactionDemarcation() {
-               return supportsLocalTransactionDemarcation;
-           }
-           
-       };
+       this.supportsLocalTransactionDemarcation = supportsLocalTransactionDemarcation;
     }
     
     /**
      * Implements <code>Serializable</code>
      */
-    private static final long serialVersionUID = 7517838833585266462L;
+	private static final long serialVersionUID = -6265231975243515265L;
 
     /**
      * The underlying REST plug-in
      */
-    private final Port port;
+    private final Port<RestConnection> port;
     
-    /**
-     * Implements <code>Referenceable</code>
-     */
-    private Reference reference;
-    
-    /**
-     * 
-     */
     private final TransactionAttributeType transactionAttribute;
     
-    /**
-     * The resource adapter's meta-data
-     */
-    private final ResourceAdapterMetaData metaData;
+    private final boolean supportsLocalTransactionDemarcation;
     
-    /* (non-Javadoc)
+    TransactionAttributeType getTransactionAttribute() {
+		return this.transactionAttribute;
+	}
+
+	Port<RestConnection> getPort() {
+		return this.port;
+	}
+
+	/* (non-Javadoc)
      * @see org.openmdx.base.resource.cci.ConnectionFactory#getConnection()
      */
-    public Connection getConnection(
+    public RestConnection getConnection(
     ) throws ResourceException {
         return getConnection(
             new RestConnectionSpec(
@@ -240,46 +119,19 @@ public class ConnectionFactoryAdapter implements ConnectionFactory {
     /* (non-Javadoc)
      * @see org.openmdx.base.resource.cci.ConnectionFactory#getConnection(javax.resource.cci.ConnectionSpec)
      */
-    public Connection getConnection(
+    public RestConnection getConnection(
         ConnectionSpec properties
     ) throws ResourceException {
         return ConnectionAdapter.newInstance(
-            getMetaData(), 
-            properties, 
-            this.transactionAttribute,
-            this.port
+    		this,
+            (RestConnectionSpec) properties
         );
     }
 
-    /* (non-Javadoc)
-     * @see org.openmdx.base.resource.cci.ConnectionFactory#getMetaData()
-     */
-    public ResourceAdapterMetaData getMetaData(
-    ) throws ResourceException {
-        return this.metaData;
-    }
+	@Override
+	protected boolean isLocalTransactionDemarcationSupported() {
+		return this.supportsLocalTransactionDemarcation;
+	}
 
-    /* (non-Javadoc)
-     * @see org.openmdx.base.resource.cci.ConnectionFactory#getRecordFactory()
-     */
-    public RecordFactory getRecordFactory(
-    ) throws ResourceException {
-        return Records.getRecordFactory();
-    }
-
-    /* (non-Javadoc)
-     * @see javax.resource.Referenceable#setReference(javax.naming.Reference)
-     */
-    public void setReference(Reference reference) {
-        this.reference = reference;
-    }
-
-    /* (non-Javadoc)
-     * @see javax.naming.Referenceable#getReference()
-     */
-    public Reference getReference(
-    ) throws NamingException {
-        return this.reference;
-    }
-
+	
 }

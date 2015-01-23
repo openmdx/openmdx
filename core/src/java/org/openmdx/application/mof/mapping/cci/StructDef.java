@@ -67,8 +67,8 @@ public class StructDef
     Model_1_0 model
   ) throws ServiceException {
     this(
-      (String)structDef.getName(),
-      (String)structDef.getQualifiedName(),
+      structDef.getName(),
+      structDef.getQualifiedName(),
       (String)structDef.objGetValue("annotation"),
       new HashSet(structDef.objGetList("stereotype")),
       getSupertypes(structDef, model),
@@ -89,8 +89,8 @@ public class StructDef
       ModelElement_1_0 supertype = model.getDereferencedType(i.next());
       supertypes.add(
         new StructDef(
-          (String)supertype.getName(),
-          (String)supertype.getQualifiedName(),
+          supertype.getName(),
+          supertype.getQualifiedName(),
           (String)supertype.objGetValue("annotation"),
           new HashSet(supertype.objGetList("stereotype")),
           null, // do not determine supertypes for this supertype

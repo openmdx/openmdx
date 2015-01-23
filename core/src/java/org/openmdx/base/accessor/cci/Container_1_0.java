@@ -53,8 +53,8 @@ import java.util.Map;
 import javax.jdo.FetchPlan;
 
 import org.openmdx.base.persistence.spi.PersistenceCapableCollection;
-import org.openmdx.base.query.Filter;
-import org.openmdx.base.query.OrderSpecifier;
+import org.openmdx.base.rest.cci.FeatureOrderRecord;
+import org.openmdx.base.rest.cci.QueryFilterRecord;
 
 /**
  * Container_1_0
@@ -87,7 +87,7 @@ public interface Container_1_0
      *              applied to this container.
      */
     Container_1_0 subMap(
-        Filter filter
+        QueryFilterRecord filter
     );
 
     /**
@@ -109,7 +109,7 @@ public interface Container_1_0
      */
     List<DataObject_1_0> values(
         FetchPlan fetchPlan, 
-        OrderSpecifier... criteria
+        FeatureOrderRecord... criteria
     );
 
     /**

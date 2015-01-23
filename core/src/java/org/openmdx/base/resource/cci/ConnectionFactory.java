@@ -55,7 +55,7 @@ import javax.resource.cci.RecordFactory;
 import javax.resource.cci.ResourceAdapterMetaData;
 
 /**
- * Non JUNDI dependent EIS Connection Factory 
+ * Non JNDI dependent EIS Connection Factory 
  **/
 public interface ConnectionFactory extends java.io.Serializable {
   

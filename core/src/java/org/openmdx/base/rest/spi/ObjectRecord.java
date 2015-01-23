@@ -48,9 +48,10 @@
 package org.openmdx.base.rest.spi;
 
 import java.util.Arrays;
-import java.util.Map;
+import java.util.UUID;
 
 import javax.resource.cci.MappedRecord;
+import javax.resource.cci.Record;
 
 import org.openmdx.base.naming.Path;
 
@@ -59,7 +60,7 @@ import org.openmdx.base.naming.Path;
  * Object Record
  */
 public class ObjectRecord 
-    extends AbstractMappedRecord
+    extends AbstractMappedRecord<org.openmdx.base.rest.cci.ObjectRecord.Member>
     implements org.openmdx.base.rest.cci.ObjectRecord 
 {
     
@@ -67,7 +68,7 @@ public class ObjectRecord
      * Constructor 
      */
     public ObjectRecord() {
-        super(KEYS);
+        super();
     }
 
     /**
@@ -76,31 +77,25 @@ public class ObjectRecord
      * @param that
      */
     private ObjectRecord(
-        Map<?,?> that
+		ObjectRecord that
     ){
-        super(KEYS);
-        putAll(that);
+        super(that);
     }
     
+    /**
+     * Allows to share the member information among the instances
+     */
+    private static final Members<Member> MEMBERS = Members.newInstance(Member.class);
+
     /**
      * Implements <code>Serializable</code>
      */
     private static final long serialVersionUID = 1436275899255948883L;
 
     /**
-     * Alphabetically ordered keys
+     * The <code>"resourceIdentifier"</code> entry
      */
-    private static final String[] KEYS = {
-        "lock",
-        "path",
-        "value",
-        "version"
-    };
-
-    /**
-     * The <code>"path"</code> entry
-     */
-    private Path path;
+    private Path resourceIdentifier;
     
     /**
      * The <code>"value"</code> entry
@@ -117,11 +112,25 @@ public class ObjectRecord
      */
     private Object lock;
     
+    /**
+     * The object's transient id
+     */
+    private UUID transientObjectId;
+    
     /* (non-Javadoc)
+	 * @see org.openmdx.base.rest.spi.AbstractMappedRecord#makeImmutable()
+	 */
+	@Override
+	public void makeImmutable() {
+		super.makeImmutable();
+		freeze(value);
+	}
+
+	/* (non-Javadoc)
      * @see org.openmdx.base.resource.spi.AbstractRecord#clone()
      */
     @Override
-    public Object clone(
+    public ObjectRecord clone(
     ){
         return new ObjectRecord(this);
     }
@@ -129,15 +138,15 @@ public class ObjectRecord
     /* (non-Javadoc)
      * @see org.openmdx.base.resource.cci.ObjectRecord#getPath()
      */
-//  @Override
-    public Path getPath() {
-        return this.path;
+    @Override
+    public Path getResourceIdentifier() {
+        return this.resourceIdentifier;
     }
 
     /* (non-Javadoc)
      * @see org.openmdx.base.resource.cci.ObjectRecord#getValue()
      */
-//  @Override
+    @Override
     public MappedRecord getValue() {
         return this.value;
     }
@@ -145,7 +154,7 @@ public class ObjectRecord
     /* (non-Javadoc)
      * @see org.openmdx.base.resource.cci.ObjectRecord#getVersion()
      */
-//  @Override
+    @Override
     public Object getVersion() {
         return this.version;
     }
@@ -153,23 +162,25 @@ public class ObjectRecord
     /* (non-Javadoc)
      * @see org.openmdx.base.resource.cci.ObjectRecord#setPath(org.openmdx.base.naming.Path)
      */
-//  @Override
-    public void setPath(Path path) {
-        this.path = path;
+    @Override
+    public void setResourceIdentifier(Path path) {
+    	assertMutability();
+        this.resourceIdentifier = path;
     }
 
     /* (non-Javadoc)
      * @see org.openmdx.base.resource.cci.ObjectRecord#setValue(javax.resource.cci.MappedRecord)
      */
-//  @Override
+    @Override
     public void setValue(MappedRecord value) {
+    	assertMutability();
         this.value = value;
     }
 
     /* (non-Javadoc)
      * @see org.openmdx.base.resource.cci.ObjectRecord#setVersion(java.lang.Object)
      */
-//  @Override
+    @Override
     public void setVersion(Object version) {
         this.version = version;
     }
@@ -177,7 +188,7 @@ public class ObjectRecord
     /* (non-Javadoc)
 	 * @see org.openmdx.base.rest.cci.ObjectRecord#getLock()
 	 */
-//  @Override
+    @Override
 	public Object getLock() {
 		return this.lock;
 	}
@@ -185,15 +196,31 @@ public class ObjectRecord
 	/* (non-Javadoc)
 	 * @see org.openmdx.base.rest.cci.ObjectRecord#setLock(java.lang.Object)
 	 */
-//  @Override
+    @Override
 	public void setLock(Object lock) {
 		this.lock = lock;
+	}
+
+	/**
+	 * @return the transientObjectId
+	 */
+    @Override
+	public UUID getTransientObjectId() {
+		return this.transientObjectId;
+	}
+
+	/**
+	 * @param transientObjectId the transientObjectId to set
+	 */
+    @Override
+	public void setTransientObjectId(UUID transientObjectId) {
+		this.transientObjectId = transientObjectId;
 	}
 
 	/* (non-Javadoc)
      * @see javax.resource.cci.Record#getRecordName()
      */
-//  @Override
+    @Override
     public String getRecordName() {
         return NAME;
     }
@@ -206,14 +233,15 @@ public class ObjectRecord
      */
     @Override
     protected Object get(
-        int index
+        Member index
     ){
         switch(index) {
-            case 0: return this.lock;
-            case 1: return this.path;
-            case 2: return this.value;
-            case 3: return this.version;
-            default: return null;
+            case lock: return getLock();
+            case resourceIdentifier: return getResourceIdentifier();
+            case transientObjectId: return getTransientObjectId();
+            case value: return getValue();
+            case version: return getVersion();
+            default: return super.get(index);
         }
     }
 
@@ -227,22 +255,27 @@ public class ObjectRecord
      */
     @Override
     protected void put(
-        int index,
+        Member index,
         Object value
     ){
         switch(index) {
-            case 0:
-                this.lock = value;
+            case lock:
+                setLock(value);
                 break;
-            case 1:
-                this.path = (Path) value;
+            case resourceIdentifier:
+                setResourceIdentifier((Path) value);
                 break;
-            case 2: 
-                this.value = (MappedRecord) value;
+            case transientObjectId:
+            	setTransientObjectId((UUID)value);
+            	break;
+            case value: 
+                setValue((MappedRecord) value);
                 break;
-            case 3:
-                this.version = value;
+            case version:
+                setVersion(value);
                 break;
+            default:
+            	super.put(index, value);
         }
     }
 
@@ -271,7 +304,7 @@ public class ObjectRecord
         if(obj instanceof ObjectRecord) {
             ObjectRecord that = (ObjectRecord)obj;
             return 
-            	areMatching(this.path, that.path) &&
+            	areMatching(this.resourceIdentifier, that.resourceIdentifier) &&
             	areMatching(this.value, that.value) &&
             	areMatching(this.version, that.version) &&
             	areMatching(this.lock, that.lock);
@@ -282,7 +315,26 @@ public class ObjectRecord
 
 	@Override
 	public int hashCode() {
-		return this.path == null ? 0 : this.path.hashCode(); 
+		return this.resourceIdentifier == null ? 0 : this.resourceIdentifier.hashCode(); 
 	}
-    
+
+	/**
+	 * Tells whether the candidate is an object record
+	 * 
+	 * @param record the record to be inspected
+	 * 
+	 * @return <code>true</code> if the record's name equals to <code>org:openmdx:kernel:Object</code>.
+	 */
+	public static boolean isCompatible(Record record) {
+	    return NAME.equals(record.getRecordName());
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.openmdx.base.rest.spi.AbstractMappedRecord#members()
+	 */
+	@Override
+	protected Members<Member> members() {
+		return MEMBERS;
+	}
+
 }

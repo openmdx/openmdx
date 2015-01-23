@@ -293,7 +293,7 @@ public class XMIModelMapper implements StringTable {
     ) throws ServiceException {
         try {
             this.pw.writeStartElement("org.omg.model1.Package");
-            this.pw.writeAttribute("qualifiedName", (String)packageDef.getQualifiedName());
+            this.pw.writeAttribute("qualifiedName", packageDef.getQualifiedName());
             this.pw.writeStartElement("_object");
             if(this.derivedFeatures) {
                 this.writeElement(SystemAttributes.OBJECT_IDENTITY, packageDef.jdoGetObjectId().toXRI());
@@ -337,7 +337,7 @@ public class XMIModelMapper implements StringTable {
     ) throws ServiceException {
         try {
             this.pw.writeStartElement("org.omg.model1.PrimitiveType");
-            this.pw.writeAttribute("qualifiedName", (String)primitiveTypeDef.getQualifiedName());
+            this.pw.writeAttribute("qualifiedName", primitiveTypeDef.getQualifiedName());
             this.pw.writeStartElement("_object");
             if(this.derivedFeatures) {
                 this.writeElement(SystemAttributes.OBJECT_IDENTITY, primitiveTypeDef.jdoGetObjectId().toXRI());
@@ -381,7 +381,7 @@ public class XMIModelMapper implements StringTable {
     ) throws ServiceException {
         try {
             this.pw.writeStartElement("org.omg.model1.Attribute");
-            this.pw.writeAttribute("qualifiedName", (String)attributeDef.getQualifiedName());
+            this.pw.writeAttribute("qualifiedName", attributeDef.getQualifiedName());
             this.pw.writeStartElement("_object");
             if(this.derivedFeatures) {
                 this.writeElement(SystemAttributes.OBJECT_IDENTITY, attributeDef.jdoGetObjectId().toXRI());
@@ -423,7 +423,7 @@ public class XMIModelMapper implements StringTable {
     ) throws ServiceException {
         try {
             this.pw.writeStartElement("org.omg.model1.StructureField");
-            this.pw.writeAttribute("qualifiedName", (String)structureFieldDef.getQualifiedName());
+            this.pw.writeAttribute("qualifiedName", structureFieldDef.getQualifiedName());
             this.pw.writeStartElement("_object");
             if(this.derivedFeatures) {
                 this.writeElement(SystemAttributes.OBJECT_IDENTITY, structureFieldDef.jdoGetObjectId().toXRI());
@@ -461,7 +461,7 @@ public class XMIModelMapper implements StringTable {
     ) throws ServiceException {
         try {
             this.pw.writeStartElement("org.omg.model1.Operation");
-            this.pw.writeAttribute("qualifiedName", (String)operationDef.getQualifiedName());
+            this.pw.writeAttribute("qualifiedName", operationDef.getQualifiedName());
             this.pw.writeStartElement("_object");
             if(this.derivedFeatures) {
                 this.writeElement(SystemAttributes.OBJECT_IDENTITY, operationDef.jdoGetObjectId().toXRI());
@@ -507,7 +507,7 @@ public class XMIModelMapper implements StringTable {
     ) throws ServiceException {
         try {
             this.pw.writeStartElement("org.omg.model1.Exception");
-            this.pw.writeAttribute("qualifiedName", (String)exceptionDef.getQualifiedName());
+            this.pw.writeAttribute("qualifiedName", exceptionDef.getQualifiedName());
             this.pw.writeStartElement("_object");
             if(this.derivedFeatures) {
                 this.writeElement(SystemAttributes.OBJECT_IDENTITY, exceptionDef.jdoGetObjectId().toXRI());
@@ -550,7 +550,7 @@ public class XMIModelMapper implements StringTable {
     ) throws ServiceException {
         try {
             this.pw.writeStartElement("org.omg.model1.Parameter");
-            this.pw.writeAttribute("qualifiedName", (String)parameterDef.getQualifiedName());
+            this.pw.writeAttribute("qualifiedName", parameterDef.getQualifiedName());
             this.pw.writeStartElement("_object");
             if(this.derivedFeatures) {
                 this.writeElement(SystemAttributes.OBJECT_IDENTITY, parameterDef.jdoGetObjectId().toXRI());
@@ -588,7 +588,7 @@ public class XMIModelMapper implements StringTable {
     ) throws ServiceException {
         try {
             this.pw.writeStartElement("org.omg.model1.Association");
-            this.pw.writeAttribute("qualifiedName", (String)associationDef.getQualifiedName());
+            this.pw.writeAttribute("qualifiedName", associationDef.getQualifiedName());
             this.pw.writeStartElement("_object");
             if(this.derivedFeatures) {
                 this.writeElement(SystemAttributes.OBJECT_IDENTITY, associationDef.jdoGetObjectId().toXRI());
@@ -633,7 +633,7 @@ public class XMIModelMapper implements StringTable {
         ) throws ServiceException {
         try {
             this.pw.writeStartElement("org.omg.model1.AssociationEnd");
-            this.pw.writeAttribute("qualifiedName", (String)associationEndDef.getQualifiedName());
+            this.pw.writeAttribute("qualifiedName", associationEndDef.getQualifiedName());
             this.pw.writeStartElement("_object");
             if(this.derivedFeatures) {
                 this.writeElement(SystemAttributes.OBJECT_IDENTITY, associationEndDef.jdoGetObjectId().toXRI());
@@ -675,7 +675,7 @@ public class XMIModelMapper implements StringTable {
     ) throws ServiceException {
         try {
             this.pw.writeStartElement("org.omg.model1.Reference");
-            this.pw.writeAttribute("qualifiedName", (String)referenceDef.getQualifiedName());
+            this.pw.writeAttribute("qualifiedName", referenceDef.getQualifiedName());
             this.pw.writeStartElement("_object");
             if(this.derivedFeatures) {
                 this.writeElement(SystemAttributes.OBJECT_IDENTITY, referenceDef.jdoGetObjectId().toXRI());
@@ -720,7 +720,7 @@ public class XMIModelMapper implements StringTable {
     ) throws ServiceException {
         try {
             this.pw.writeStartElement("org.omg.model1.Class");
-            this.pw.writeAttribute("qualifiedName", (String)classDef.getQualifiedName());
+            this.pw.writeAttribute("qualifiedName", classDef.getQualifiedName());
             this.pw.writeStartElement("_object");
             if(this.derivedFeatures) {
                 this.writeElement(SystemAttributes.OBJECT_IDENTITY, classDef.jdoGetObjectId().toXRI());
@@ -776,7 +776,7 @@ public class XMIModelMapper implements StringTable {
     ) throws ServiceException {
         try {
             this.pw.writeStartElement("org.omg.model1.StructureType");
-            this.pw.writeAttribute("qualifiedName", (String)structDef.getQualifiedName());
+            this.pw.writeAttribute("qualifiedName", structDef.getQualifiedName());
             this.pw.writeStartElement("_object");
             if(this.derivedFeatures) {
                 this.writeElement(SystemAttributes.OBJECT_IDENTITY, structDef.jdoGetObjectId().toXRI());
@@ -831,7 +831,7 @@ public class XMIModelMapper implements StringTable {
     ) throws ServiceException {
         try {
             this.pw.writeStartElement("org.omg.model1.AliasType");
-            this.pw.writeAttribute("qualifiedName", (String)aliasTypeDef.getQualifiedName());
+            this.pw.writeAttribute("qualifiedName", aliasTypeDef.getQualifiedName());
             this.pw.writeStartElement("_object");
             if(this.derivedFeatures) {
                 this.writeElement(SystemAttributes.OBJECT_IDENTITY, aliasTypeDef.jdoGetObjectId().toXRI());
@@ -902,9 +902,7 @@ public class XMIModelMapper implements StringTable {
     /**
      * Write model header.
      * 
-     * @param providerName
-     * @param segmentName
-     * @param schemaFileName
+     * @param segmentName the qualified segment name
      */
     public void writeSegmentHeader(
         String segmentName

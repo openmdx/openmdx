@@ -53,17 +53,19 @@ import java.net.URL;
 import java.net.URLEncoder;
 
 import javax.resource.ResourceException;
-import javax.resource.cci.Connection;
 import javax.resource.cci.Interaction;
+import javax.resource.spi.CommException;
 
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.resource.spi.Port;
+import org.openmdx.base.resource.spi.ResourceExceptions;
+import org.openmdx.base.rest.cci.RestConnection;
 import org.openmdx.kernel.exception.BasicException;
 
 /**
  * The abstract port depends on the JDK's URL functionality only
  */
-public class HttpPort implements HttpContext, Port {
+public class HttpPort implements HttpContext, Port<RestConnection> {
 
     /**
      * Constructor 
@@ -172,7 +174,7 @@ public class HttpPort implements HttpContext, Port {
      */
     @Override
     public Interaction getInteraction(
-        Connection connection
+    	RestConnection connection
     ) throws ResourceException {
         return new PlainVanillaInteraction(connection, this);
     }
@@ -201,19 +203,23 @@ public class HttpPort implements HttpContext, Port {
     public URL newURL(
         String path, 
         String query
-    ) throws ServiceException{
+    ) throws ResourceException{
         try {
             return new URL(
                 query == null || "".equals(query) ? path : (path + '?' + query)
              );
         } catch (MalformedURLException exception) {
-            throw new ServiceException(
-                exception,
-                BasicException.Code.DEFAULT_DOMAIN,
-                BasicException.Code.MEDIA_ACCESS_FAILURE,
-                "Invalid URL",
-                new BasicException.Parameter("path", path),
-                new BasicException.Parameter("query", query)
+        	throw ResourceExceptions.initHolder(
+        		new CommException(
+                    "Invalid URL",
+                    BasicException.newEmbeddedExceptionStack(
+		                exception,
+		                BasicException.Code.DEFAULT_DOMAIN,
+		                BasicException.Code.MEDIA_ACCESS_FAILURE,
+		                new BasicException.Parameter("path", path),
+		                new BasicException.Parameter("query", query)
+		           )
+		       )
             );
         } 
     }

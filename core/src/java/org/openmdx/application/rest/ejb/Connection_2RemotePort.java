@@ -67,6 +67,7 @@ import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.resource.spi.AbstractInteraction;
 import org.openmdx.base.resource.spi.Port;
 import org.openmdx.base.resource.spi.ResourceExceptions;
+import org.openmdx.base.rest.cci.RestConnection;
 import org.openmdx.base.rest.cci.ResultRecord;
 import org.openmdx.base.rest.spi.ConnectionAdapter;
 import org.openmdx.kernel.exception.BasicException;
@@ -74,7 +75,7 @@ import org.openmdx.kernel.exception.BasicException;
 /**
  * Remote REST Connection Port
  */
-class Connection_2RemotePort implements Port {
+class Connection_2RemotePort implements Port<RestConnection> {
 
     /**
      * Constructor 
@@ -108,7 +109,7 @@ class Connection_2RemotePort implements Port {
      * @throws ResourceException 
      * @throws ServiceException 
      */
-    static Port newInstance(
+    static Port<RestConnection> newInstance(
         Object delegate
     ) throws ServiceException{  
         //
@@ -196,11 +197,11 @@ class Connection_2RemotePort implements Port {
      * @see org.openmdx.base.resource.spi.PlugIn#getInteraction(javax.resource.cci.Connection)
      */
     public Interaction getInteraction(
-        Connection connection
+    	RestConnection connection
     ) throws ResourceException {
         try {
             return new InteractionAdapter(
-                getConnection(((ConnectionAdapter)connection).getConnectionSpec()),
+                getConnection(((ConnectionAdapter)connection).getMetaData().getConnectionSpec()),
                 connection
             );
         } catch (CreateException exception) {

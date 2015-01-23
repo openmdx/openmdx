@@ -51,7 +51,6 @@ import java.util.Collection;
 import java.util.Map;
 
 import javax.resource.ResourceException;
-import javax.resource.cci.Connection;
 import javax.resource.cci.Interaction;
 import javax.resource.cci.MappedRecord;
 
@@ -61,6 +60,7 @@ import org.openmdx.base.mof.cci.ModelHelper;
 import org.openmdx.base.mof.cci.Multiplicity;
 import org.openmdx.base.mof.cci.Persistency;
 import org.openmdx.base.mof.spi.Model_1Factory;
+import org.openmdx.base.rest.cci.RestConnection;
 import org.openmdx.base.rest.spi.Object_2Facade;
 import org.openmdx.kernel.exception.BasicException;
 
@@ -189,7 +189,7 @@ public class Strict_1 extends Standard_1 {
 
     @Override
     public Interaction getInteraction(
-        Connection connection
+        RestConnection connection
     ) throws ResourceException {
         return new LayerInteraction(connection);
     }
@@ -201,7 +201,7 @@ public class Strict_1 extends Standard_1 {
     public class LayerInteraction extends Standard_1.LayerInteraction {
         
         public LayerInteraction(
-            Connection connection
+            RestConnection connection
         ) throws ResourceException {
             super(connection);
         }

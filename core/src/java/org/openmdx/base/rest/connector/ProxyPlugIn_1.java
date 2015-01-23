@@ -52,7 +52,7 @@ import org.openmdx.base.accessor.rest.UnitOfWork_1;
 import org.openmdx.base.aop0.PlugIn_1_0;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
-import org.openmdx.base.naming.PathComponent;
+import org.openmdx.base.naming.TransactionalSegment;
 
 /**
  * Proxy Plug-In
@@ -74,7 +74,7 @@ class ProxyPlugIn_1 implements PlugIn_1_0 {
         String qualifier
     ) {
         if(qualifier == null && object.getUnitOfWork().getOptimistic()) {
-            return PathComponent.createPlaceHolder().toString();
+            return TransactionalSegment.getClassicRepresentationOfNewInstance();
         }
         return qualifier;
     }

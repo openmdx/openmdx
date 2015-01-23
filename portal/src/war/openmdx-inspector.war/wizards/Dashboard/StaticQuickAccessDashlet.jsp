@@ -158,8 +158,8 @@ org.openmdx.kernel.log.*
 									int pos = menuEntry.indexOf(" > ");
 									if(pos > 0) {
 										String queryString = menuEntry.substring(0, pos);
-										if(!queryString.startsWith("?path=")) {
-											queryString = "?path=" + queryString;
+										if(!queryString.startsWith("?resourceIdentifier=")) {
+											queryString = "?resourceIdentifier=" + queryString;
 										}
 										javax.jdo.Query objectQuery = pm.newQuery(
 											org.openmdx.base.persistence.cci.Queries.QUERY_LANGUAGE,

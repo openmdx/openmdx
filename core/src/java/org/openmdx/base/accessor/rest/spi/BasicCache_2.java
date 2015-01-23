@@ -64,7 +64,6 @@ import javax.cache.CacheFactory;
 import javax.cache.CacheManager;
 import javax.resource.ResourceException;
 import javax.resource.cci.Connection;
-import javax.resource.cci.IndexedRecord;
 import javax.resource.cci.MappedRecord;
 
 import org.openmdx.base.accessor.rest.spi.ManagedConnectionCache_2_0.Mode;
@@ -76,9 +75,11 @@ import org.openmdx.base.resource.spi.Port;
 import org.openmdx.base.resource.spi.ResourceExceptions;
 import org.openmdx.base.resource.spi.RestInteractionSpec;
 import org.openmdx.base.rest.cci.ObjectRecord;
+import org.openmdx.base.rest.cci.QueryRecord;
+import org.openmdx.base.rest.cci.RestConnection;
+import org.openmdx.base.rest.cci.ResultRecord;
 import org.openmdx.base.rest.spi.AbstractRestInteraction;
-import org.openmdx.base.rest.spi.Facades;
-import org.openmdx.base.rest.spi.Query_2Facade;
+import org.openmdx.base.rest.spi.Object_2Facade;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.loading.Classes;
 import org.openmdx.kernel.log.SysLog;
@@ -86,7 +87,7 @@ import org.openmdx.kernel.log.SysLog;
 /**
  * Virtual Object Port 
  */
-public class BasicCache_2 implements Port, DataStoreCache_2_0  {
+public class BasicCache_2 implements Port<RestConnection>, DataStoreCache_2_0  {
     
     /**
      * Constructor 
@@ -138,7 +139,7 @@ public class BasicCache_2 implements Port, DataStoreCache_2_0  {
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.rest.spi.DataStoreCache_2_0#evict(org.openmdx.base.naming.Path)
      */
-//  @Override
+    @Override
     public void evict(
         Path xri
     ) throws ServiceException {
@@ -159,7 +160,7 @@ public class BasicCache_2 implements Port, DataStoreCache_2_0  {
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.rest.spi.DataStoreCache_2_0#evictAll()
      */
-//  @Override
+    @Override
     public void evictAll(
     ) throws ServiceException {
         for(
@@ -177,7 +178,7 @@ public class BasicCache_2 implements Port, DataStoreCache_2_0  {
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.rest.spi.DataStoreCache_2_0#evictAll(org.openmdx.base.naming.Path)
      */
-//  @Override
+    @Override
     public void evictAll(
         Path xriPattern
     ) throws ServiceException {
@@ -198,7 +199,7 @@ public class BasicCache_2 implements Port, DataStoreCache_2_0  {
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.rest.spi.DataStoreCache_2_0#evictAll(java.util.Collection)
      */
-//  @Override
+    @Override
     public void evictAll(
         Collection<Path> xris
     ) throws ServiceException {
@@ -219,7 +220,7 @@ public class BasicCache_2 implements Port, DataStoreCache_2_0  {
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.rest.spi.DataStoreCache_2_0#evictAll(boolean, java.lang.String)
      */
-//  @Override
+    @Override
     public void evictAll(
         boolean subclasses, 
         String pcClass
@@ -241,7 +242,7 @@ public class BasicCache_2 implements Port, DataStoreCache_2_0  {
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.rest.spi.DataStoreCache_2_0#pin(org.openmdx.base.naming.Path)
      */
-//  @Override
+    @Override
     public void pin(
         Path xri
     ) throws ServiceException {
@@ -251,7 +252,7 @@ public class BasicCache_2 implements Port, DataStoreCache_2_0  {
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.rest.spi.DataStoreCache_2_0#pinAll(java.util.Collection)
      */
-//  @Override
+    @Override
     public void pinAll(
         Collection<Path> xris
     ) throws ServiceException {
@@ -261,7 +262,7 @@ public class BasicCache_2 implements Port, DataStoreCache_2_0  {
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.rest.spi.DataStoreCache_2_0#pinAll(org.openmdx.base.naming.Path)
      */
-//  @Override
+    @Override
     public void pinAll(
         Path xriPattern
     ) throws ServiceException {
@@ -271,7 +272,7 @@ public class BasicCache_2 implements Port, DataStoreCache_2_0  {
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.rest.spi.DataStoreCache_2_0#pinAll(boolean, java.lang.String)
      */
-//  @Override
+    @Override
     public void pinAll(
         boolean subclasses, 
         String pcClass
@@ -282,7 +283,7 @@ public class BasicCache_2 implements Port, DataStoreCache_2_0  {
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.rest.spi.DataStoreCache_2_0#unpin(org.openmdx.base.naming.Path)
      */
-//  @Override
+    @Override
     public void unpin(
         Path xri
     ) throws ServiceException {
@@ -292,7 +293,7 @@ public class BasicCache_2 implements Port, DataStoreCache_2_0  {
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.rest.spi.DataStoreCache_2_0#unpinAll(java.util.Collection)
      */
-//  @Override
+    @Override
     public void unpinAll(
         Collection<Path> xris
     ) throws ServiceException {
@@ -302,7 +303,7 @@ public class BasicCache_2 implements Port, DataStoreCache_2_0  {
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.rest.spi.DataStoreCache_2_0#unpinAll(org.openmdx.base.naming.Path)
      */
-//  @Override
+    @Override
     public void unpinAll(
         Path xriPattern
     ) throws ServiceException {
@@ -312,7 +313,7 @@ public class BasicCache_2 implements Port, DataStoreCache_2_0  {
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.rest.spi.DataStoreCache_2_0#unpinAll(boolean, java.lang.String)
      */
-//  @Override
+    @Override
     public void unpinAll(
         boolean subclasses, 
         String pcClass
@@ -462,6 +463,8 @@ public class BasicCache_2 implements Port, DataStoreCache_2_0  {
      * @param factoryClass <code>null</code> or the fully qualified cache factory class name
      * 
      * @return the cache factory
+     * 
+     * @throws CacheException in case of failure
      */
     private CacheFactory getCacheFactory(
         String factoryClass
@@ -486,7 +489,9 @@ public class BasicCache_2 implements Port, DataStoreCache_2_0  {
      * @param configuration the configuration property file URL
      * 
      * @return a new cache
-     * @throws ResourceException 
+     * 
+     * @throws CacheException in case of acquisition failure
+     * @throws ResourceException in case of configuration failure
      */
     private Cache newCache(
         Mode mode,
@@ -506,11 +511,7 @@ public class BasicCache_2 implements Port, DataStoreCache_2_0  {
     /**
      * Retrieve a cache instance
      *
-     * @param mode 
-     * @param userName 
-     * @param cacheName 
-     * @param cacheFactory 
-     * @param configuration
+     * @throws ResourceException in case of failure
      */
     protected Cache getCache(
         Mode mode,
@@ -604,8 +605,8 @@ public class BasicCache_2 implements Port, DataStoreCache_2_0  {
 
     /**
      * Lazy initialization is required for all Java-Bean properties being available
-     * @throws ServiceException 
-     * @throws ResourceException 
+     * 
+     * @throws ServiceException in case of failure
      */
     protected void initialize(
     ) throws ServiceException{
@@ -637,6 +638,11 @@ public class BasicCache_2 implements Port, DataStoreCache_2_0  {
         this.caches = new ConcurrentHashMap<String, BasicConnectionCache>();
     }
 
+    /**
+     * Initializes the cache lazily
+     * 
+     * @throws ServiceException in case of failure
+     */
     protected void assertInitialization(
     ) throws ServiceException{
         if(this.caches == null) {
@@ -655,7 +661,7 @@ public class BasicCache_2 implements Port, DataStoreCache_2_0  {
      * 
      * @return the (non-null) cache key
      * 
-     * @throws ResourceException
+     * @throws ResourceException in case of failure
      */
     private String getCacheKey(
         Connection connection
@@ -711,9 +717,9 @@ public class BasicCache_2 implements Port, DataStoreCache_2_0  {
     /* (non-Javadoc)
      * @see org.openmdx.base.resource.spi.Port#getInteraction(javax.resource.cci.Connection)
      */
-//  @Override
+    @Override
     public CachingInteraction getInteraction(
-        Connection connection
+        RestConnection connection
     ) throws ResourceException {
         return new CachingInteraction(
             connection,
@@ -745,7 +751,7 @@ public class BasicCache_2 implements Port, DataStoreCache_2_0  {
         Cache cache,
         ObjectRecord newObject
     ) throws ResourceException {
-        Path xri = newObject.getPath();
+        Path xri = newObject.getResourceIdentifier();
         ObjectRecord oldObject = (ObjectRecord) cache.peek(xri);
         if(oldObject != null){
             Object oldVersion = oldObject.getVersion();
@@ -756,8 +762,8 @@ public class BasicCache_2 implements Port, DataStoreCache_2_0  {
                 MappedRecord values = Records.getRecordFactory().createMappedRecord(oldValues.getRecordName());
                 values.putAll(oldValues);
                 values.putAll(newValues);
-                ObjectRecord object = (ObjectRecord) Records.getRecordFactory().createMappedRecord(ObjectRecord.NAME);
-                object.setPath(xri);
+                ObjectRecord object = Records.getRecordFactory().createMappedRecord(ObjectRecord.class);
+                object.setResourceIdentifier(xri);
                 object.setVersion(oldVersion);
                 object.setValue(values);
                 cache.put(xri, object);
@@ -782,12 +788,9 @@ public class BasicCache_2 implements Port, DataStoreCache_2_0  {
 
         /**
          * Constructor 
-         *
-         * @param connection
-         * @param cache
          */
         protected CachingInteraction(
-            Connection connection,
+            RestConnection connection,
             ManagedConnectionCache_2_0 cache
         ) {
             super(connection);
@@ -804,7 +807,7 @@ public class BasicCache_2 implements Port, DataStoreCache_2_0  {
          * 
          * @return the managed connection cache
          */
-    //  @Override
+        @Override
         public ManagedConnectionCache_2_0 getManagedConnectionCache(){
             return this.cache;
         }
@@ -812,23 +815,23 @@ public class BasicCache_2 implements Port, DataStoreCache_2_0  {
         /* (non-Javadoc)
          * @see org.openmdx.base.accessor.rest.spi.CacheAccessor_2_0#getDataStoreCache()
          */
-    //  @Override
+        @Override
         public DataStoreCache_2_0 getDataStoreCache(
         ) throws ServiceException {
             return BasicCache_2.this;
         }
 
         /* (non-Javadoc)
-         * @see org.openmdx.base.rest.spi.AbstractRestInteraction#get(org.openmdx.base.resource.spi.RestInteractionSpec, org.openmdx.base.rest.spi.Query_2Facade, javax.resource.cci.IndexedRecord)
+         * @see org.openmdx.base.rest.spi.AbstractFacadeInteraction#get(org.openmdx.base.resource.spi.RestInteractionSpec, org.openmdx.base.rest.spi.Query_2Facade, javax.resource.cci.IndexedRecord)
          */
         @SuppressWarnings("unchecked")
         @Override
         public boolean get(
             RestInteractionSpec ispec,
-            Query_2Facade input,
-            IndexedRecord output
-        ) throws ServiceException {
-            MappedRecord reply = this.cache.peek(input.getPath());
+            QueryRecord input,
+            ResultRecord output
+        ) throws ResourceException {
+            MappedRecord reply = this.cache.peek(input.getResourceIdentifier());
             if(reply == null) {
                 return false;
             } else {
@@ -852,7 +855,7 @@ public class BasicCache_2 implements Port, DataStoreCache_2_0  {
         /**
          * Constructor 
          * 
-         * @throws ServiceException 
+         * @throws ResourceException in case of failure
          */
         protected BasicConnectionCache(
             String userName
@@ -895,10 +898,10 @@ public class BasicCache_2 implements Port, DataStoreCache_2_0  {
             return System.currentTimeMillis() > this.expiration;
         }
         
-    //  @Override
+        @Override
         public ObjectRecord peek(
             Path oid
-        ) throws ServiceException { 
+        ) throws ResourceException { 
             if(this.sownById != null) {
                 ObjectRecord object = this.sownById.get(oid); 
                 if(object != null) {
@@ -908,7 +911,10 @@ public class BasicCache_2 implements Port, DataStoreCache_2_0  {
             }            
             for(Map.Entry<Path,String> entry : BasicCache_2.this.sownByPattern.entrySet()) {
 			    if(oid.isLike(entry.getKey())) {
-			        return Facades.newObject(oid, entry.getValue()).getDelegate();
+			        return Object_2Facade.newInstance(
+					    oid,
+					    entry.getValue()
+					).getDelegate();
 			    }
 			}
             return null;
@@ -972,11 +978,11 @@ public class BasicCache_2 implements Port, DataStoreCache_2_0  {
         /* (non-Javadoc)
          * @see org.openmdx.base.accessor.rest.spi.Cache_2_0#isLCached(org.openmdx.base.naming.Path)
          */
-    //  @Override
+        @Override
         public boolean isAvailable(
             Mode mode, 
             Path xri
-        ) throws ServiceException {
+        ) throws ResourceException {
             if(mode == null || mode == Mode.BASIC) {
                 if(this.sownById != null && this.sownById.containsKey(xri)) {
                     return true;
@@ -994,18 +1000,18 @@ public class BasicCache_2 implements Port, DataStoreCache_2_0  {
         /* (non-Javadoc)
          * @see org.openmdx.base.accessor.rest.spi.Cache_2_0#put(org.openmdx.base.naming.Path, javax.resource.cci.MappedRecord)
          */
-    //  @Override
+        @Override
         public boolean put(
             Mode mode, 
             ObjectRecord object
-        ) throws ServiceException {
+        ) throws ResourceException {
             if(mode == Mode.BASIC) {
                 if(this.sownById == null) synchronized(this) {
                     if(this.sownById == null) {
                         this.sownById = new ConcurrentHashMap<Path, ObjectRecord>();
                     }
                 }
-                Path xri = object.getPath();
+                Path xri = object.getResourceIdentifier();
                 loggers[0].onPut(xri);
                 this.sownById.put(xri, object);
                 return true;
@@ -1016,11 +1022,6 @@ public class BasicCache_2 implements Port, DataStoreCache_2_0  {
 
         /**
          * Evict matching objects
-         * 
-         * @param cache
-         * @param oidPattern
-         * @param subclasses
-         * @param pcClass
          */
         protected void evictAll(
             Collection<ObjectRecord> cache,
@@ -1035,14 +1036,14 @@ public class BasicCache_2 implements Port, DataStoreCache_2_0  {
                 ObjectRecord candidate = i.next();  
                 boolean evict = true;
                 if(oidPattern != null) {
-                    evict &= candidate.getPath().isLike(oidPattern);
+                    evict &= candidate.getResourceIdentifier().isLike(oidPattern);
                 }
                 if(pcClass != null){
                     String candidateClass = candidate.getRecordName();
                     evict &= subclasses ? BasicCache_2.isSubtypeOf(candidateClass, pcClass) : candidateClass.equals(pcClass);
                 }
                 if(evict) {
-                    loggers[0].onEvict(candidate.getPath());
+                    loggers[0].onEvict(candidate.getResourceIdentifier());
                     i.remove();
                 }
             }

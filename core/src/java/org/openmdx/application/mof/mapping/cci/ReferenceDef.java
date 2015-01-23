@@ -90,24 +90,24 @@ public class ReferenceDef extends StructuralFeatureDef {
       ModelElement_1_0 associationDef
   ) throws ServiceException {
       this(
-          (String)referenceDef.getName(),
-          (String)referenceDef.getQualifiedName(),
+          referenceDef.getName(),
+          referenceDef.getQualifiedName(),
           (String)referenceDef.objGetValue("annotation"),
           new HashSet(referenceDef.objGetList("stereotype")),
           (String)referenceDef.objGetValue("visibility"),
-          (String)model.getElementType(referenceDef).getQualifiedName(),
-          (String)referenceDef.getMultiplicity(),
+          model.getElementType(referenceDef).getQualifiedName(),
+          referenceDef.getMultiplicity(),
           getQualifierName(referenceDef, model, "referencedEnd"),
           getQualifierTypeName(referenceDef, model, "referencedEnd"),
-          (Boolean)referenceDef.isChangeable(),
+          referenceDef.isChangeable(),
           Boolean.valueOf(model.referenceIsDerived(referenceDef)),
           getExposedEndName(referenceDef, model),
           getExposedEndQualifiedTypeName(referenceDef, model),
           getQualifierName(referenceDef, model, "exposedEnd"),
           getQualifierTypeName(referenceDef,  model, "exposedEnd"),
           getReferencedEndQualifiedTypeName(referenceDef, model),
-          (String) associationDef.getName(),
-          (String) associationDef.getQualifiedName(),
+          associationDef.getName(),
+          associationDef.getQualifiedName(),
           isComposition(referenceDef, model),
           isShared(referenceDef, model) 
         );
@@ -236,7 +236,7 @@ public class ReferenceDef extends StructuralFeatureDef {
     ModelElement_1_0 exposedEnd = model.getElement(
       referenceDef.getExposedEnd()
     );
-    return (String)model.getElementType(
+    return model.getElementType(
         exposedEnd
     ).getQualifiedName();
   }
@@ -249,7 +249,7 @@ public class ReferenceDef extends StructuralFeatureDef {
     ModelElement_1_0 referencedEnd = model.getElement(
       referenceDef.getReferencedEnd()
     );
-    return (String)model.getElementType(
+    return model.getElementType(
         referencedEnd
     ).getQualifiedName();
   }
@@ -262,7 +262,7 @@ public class ReferenceDef extends StructuralFeatureDef {
     ModelElement_1_0 exposedEnd = model.getElement(
       referenceDef.getExposedEnd()
     );
-    return (String)exposedEnd.getName();
+    return exposedEnd.getName();
   }
   
   //-------------------------------------------------------------------------

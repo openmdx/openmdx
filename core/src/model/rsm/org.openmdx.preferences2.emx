@@ -462,7 +462,7 @@
         <ownedAttribute xmi:id="_UgnSkXTfEeGNposaCGm5NA" name="child" visibility="public" type="_mc1eAHTTEeGNposaCGm5NA" isReadOnly="true" association="_Ugk2UHTfEeGNposaCGm5NA">
           <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_Ugn5oXTfEeGNposaCGm5NA" value="*"/>
           <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_Ugn5oHTfEeGNposaCGm5NA"/>
-          <qualifier xmi:id="_0W2EUHTfEeGNposaCGm5NA" name="nodeCotainer" visibility="private" type="_10u-oBPpEeO-jeqtPWerIg"/>
+          <qualifier xmi:id="_0W2EUHTfEeGNposaCGm5NA" name="nodeContainer" visibility="private" type="_10u-oBPpEeO-jeqtPWerIg"/>
         </ownedAttribute>
         <ownedAttribute xmi:id="_AmjBwBPyEeO-jeqtPWerIg" name="name" visibility="public" isReadOnly="true">
           <ownedComment xmi:id="_d13mMBPzEeO-jeqtPWerIg" annotatedElement="_AmjBwBPyEeO-jeqtPWerIg">

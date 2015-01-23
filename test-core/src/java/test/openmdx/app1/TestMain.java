@@ -164,12 +164,12 @@ import org.openmdx.base.persistence.cci.PersistenceHelper;
 import org.openmdx.base.persistence.cci.UserObjects;
 import org.openmdx.base.persistence.spi.SharedObjects;
 import org.openmdx.base.persistence.spi.TransientContainerId;
-import org.openmdx.base.query.Condition;
 import org.openmdx.base.query.ConditionType;
-import org.openmdx.base.query.Filter;
 import org.openmdx.base.query.Quantifier;
 import org.openmdx.base.resource.cci.ConnectionFactory;
+import org.openmdx.base.rest.cci.ConditionRecord;
 import org.openmdx.base.rest.cci.ObjectRecord;
+import org.openmdx.base.rest.cci.QueryFilterRecord;
 import org.openmdx.base.rest.connector.EntityManagerProxyFactory_2;
 import org.openmdx.base.rest.spi.ConnectionFactoryAdapter;
 import org.openmdx.base.transaction.Status;
@@ -1119,7 +1119,17 @@ public class TestMain {
                         "This is \u00E4n invoice for PG0"
                     );
                     List<Invoice> invoices = segment.getInvoice(invoiceQuery);
-                    assertEquals(1, invoices.size());
+                    try {
+                        assertEquals(1, invoices.size());
+                    } catch(Exception e) {
+                        ServiceException expected = new ServiceException(e);
+                        expected.log();
+                        assertEquals(
+                            "The actual database has no configuration for the requested LIKE flavour",
+                            BasicException.Code.NOT_SUPPORTED,
+                            expected.getExceptionCode()
+                        );
+                    }
                 }
             } finally {
                 super.taskId = null;
@@ -1653,7 +1663,7 @@ public class TestMain {
                         "query=" + URLEncoder.encode("thereExistsM2().equalTo(\"" + cycle2Id + "\")", "UTF-8")
                     ) // a simple String would work as well...
                 );
-                List<Condition> conditions = query.refGetFilter().getCondition();
+                List<ConditionRecord> conditions = query.refGetFilter().getCondition();
                 assertEquals("Conditions", 2, conditions.size());
                 assertEquals("Condition 0", SystemAttributes.OBJECT_INSTANCE_OF, conditions.get(0).getFeature());
                 assertEquals("Condition 0", Quantifier.THERE_EXISTS, conditions.get(0).getQuantifier());
@@ -1678,7 +1688,7 @@ public class TestMain {
                     query, 
                     "forAllDescription().unlike(\"./.\");thereExistsInvoicePosition().productId().like(\"P.*\");forAllProperty().name().equalTo(\"FLAG\")"
                 );
-                List<Condition> conditions = query.refGetFilter().getCondition();
+                List<ConditionRecord> conditions = query.refGetFilter().getCondition();
                 assertEquals("Conditions", 4, conditions.size());
                 assertEquals("Condition 0", SystemAttributes.OBJECT_INSTANCE_OF, conditions.get(0).getFeature());
                 assertEquals("Condition 0", Quantifier.THERE_EXISTS, conditions.get(0).getQuantifier());
@@ -1694,8 +1704,8 @@ public class TestMain {
                 assertEquals("Condition 2", Quantifier.THERE_EXISTS, conditions.get(2).getQuantifier());
                 assertEquals("Condition 2", ConditionType.IS_IN, conditions.get(2).getType());
                 assertEquals("Condition 2", 1, conditions.get(2).getValue().length);
-                assertTrue("Condition 2", conditions.get(2).getValue(0) instanceof Filter);
-                List<Condition> conditions2 = ((Filter)conditions.get(2).getValue(0)).getCondition();
+                assertTrue("Condition 2", conditions.get(2).getValue(0) instanceof QueryFilterRecord);
+                List<ConditionRecord> conditions2 = ((QueryFilterRecord)conditions.get(2).getValue(0)).getCondition();
                 assertEquals("Conditions 2", 2, conditions2.size());
                 assertEquals("Condition 2.0", SystemAttributes.OBJECT_INSTANCE_OF, conditions2.get(0).getFeature());
                 assertEquals("Condition 2.0", Quantifier.THERE_EXISTS, conditions2.get(0).getQuantifier());
@@ -1711,8 +1721,8 @@ public class TestMain {
                 assertEquals("Condition 3", Quantifier.FOR_ALL, conditions.get(3).getQuantifier());
                 assertEquals("Condition 3", ConditionType.IS_IN, conditions.get(3).getType());
                 assertEquals("Condition 3", 1, conditions.get(3).getValue().length);
-                assertTrue("Condition 3", conditions.get(3).getValue(0) instanceof Filter);
-                List<Condition> conditions3 = ((Filter)conditions.get(3).getValue(0)).getCondition();
+                assertTrue("Condition 3", conditions.get(3).getValue(0) instanceof QueryFilterRecord);
+                List<ConditionRecord> conditions3 = ((QueryFilterRecord)conditions.get(3).getValue(0)).getCondition();
                 assertEquals("Conditions 3", 2, conditions3.size());
                 assertEquals("Condition 3.0", SystemAttributes.OBJECT_INSTANCE_OF, conditions3.get(0).getFeature());
                 assertEquals("Condition 3.0", Quantifier.THERE_EXISTS, conditions3.get(0).getQuantifier());
@@ -1885,7 +1895,6 @@ public class TestMain {
                     );
                     assertFalse(unitOfWork.isActive());
                     assertTrue("RuntimeException lead to roll-back", rolledBack);
-                    assertFalse(unitOfWork.isActive());
                 }
             } finally {
                 super.taskId = null;
@@ -3149,7 +3158,10 @@ public class TestMain {
                     thread2.start();
                     thread1.join();
                     thread2.join();
-                    assertTrue("One must fail, one succeed", thread1.isCommitted() ^ thread2.isCommitted());
+                    assertTrue(
+                    	"With " + pause + " ms pause one thread must fail and one succeed", 
+                    	thread1.isCommitted() ^ thread2.isCommitted()
+                    );
                 }
                 for(long pause = 50L; pause < 1000L; pause+=50L) {
                     CountryChanger thread1 = new CountryChanger(anAddressId, "Deutschland" + pause, -1, pause);
@@ -3788,7 +3800,7 @@ public class TestMain {
                 //
                 personQuery = (PersonQuery) PersistenceHelper.newQuery(
                     super.entityManager.getExtent(Person.class),
-                    segment.refMofId() + "/person/($..)"
+                    segment.refMofId() + "/person/($...)"
                 );
                 //
                 // String Feature IS_LIKE Condition
@@ -3803,7 +3815,7 @@ public class TestMain {
                 personQuery.forAllAssignedAddress().elementOf(
                     PersistenceHelper.getCandidates(
                         super.entityManager.getExtent(Address.class),
-                        segment.refMofId() + "/address/($..)"
+                        segment.refMofId() + "/address/($...)"
                     )
                 );
                 List<Person> maasteer = segment.getExtent(personQuery);
@@ -3831,7 +3843,7 @@ public class TestMain {
                 //
                 personQuery = (PersonQuery) PersistenceHelper.newQuery(
                     super.entityManager.getExtent(Person.class),
-                    segment.refMofId() + "/person/($..)"
+                    segment.refMofId() + "/person/($...)"
                 );
                 personQuery.orderByLastName().ascending();
                 ((Query)personQuery).getFetchPlan().setFetchSize(1000);
@@ -4993,7 +5005,7 @@ public class TestMain {
             URL url = new URL(uri);
             System.out.println(url);
             long startLoading = System.currentTimeMillis();
-            Model_1_0 model = new ModelBuilder_1(Boolean.FALSE, url).build();
+            Model_1_0 model = new ModelBuilder_1(false, url).build();
             long restoreTime = System.currentTimeMillis() - startLoading;
             SysLog.performance("Restoring openCRX model " + uri, restoreTime);
             return model;
@@ -5193,15 +5205,15 @@ public class TestMain {
          */
         private void validateCycleQuery(RefQuery_1_0 query) {
             assertTrue("CycleMember1QueryCCI Query Interface", query instanceof CycleMember1Query);
-            List<Condition> m1Conditions = query.refGetFilter().getCondition();
+            List<ConditionRecord> m1Conditions = query.refGetFilter().getCondition();
             assertEquals("m1 Conditions", 2, m1Conditions.size());
             assertEquals("m1 Condition 0", SystemAttributes.OBJECT_INSTANCE_OF, m1Conditions.get(0).getFeature());
             assertEquals("m1 Condition 0", Quantifier.THERE_EXISTS, m1Conditions.get(0).getQuantifier());
             assertEquals("m1 Condition 0", ConditionType.IS_IN, m1Conditions.get(0).getType());
             assertEquals("m1 Condition 0", 1, m1Conditions.get(0).getValue().length);
             assertEquals("m1 Condition 0", "test:openmdx:app1:CycleMember1", m1Conditions.get(0).getValue(0));
-            assertTrue("m1 Condition 1", m1Conditions.get(1).getValue(0) instanceof Filter);
-            List<Condition> m2Conditions = ((Filter)m1Conditions.get(1).getValue(0)).getCondition();
+            assertTrue("m1 Condition 1", m1Conditions.get(1).getValue(0) instanceof QueryFilterRecord);
+            List<ConditionRecord> m2Conditions = ((QueryFilterRecord)m1Conditions.get(1).getValue(0)).getCondition();
             assertEquals("m2 Conditions", 3, m2Conditions.size());
             assertEquals("m2 Condition 0", SystemAttributes.OBJECT_INSTANCE_OF, m2Conditions.get(0).getFeature());
             assertEquals("m2 Condition 0", Quantifier.THERE_EXISTS, m2Conditions.get(0).getQuantifier());
@@ -5629,6 +5641,9 @@ public class TestMain {
             this.userTransaction = ComponentEnvironment.lookup(
                 UserTransaction.class
             );
+            if(this.userTransaction.getStatus() == Status.STATUS_ACTIVE.ordinal()) {
+                this.userTransaction.rollback();
+            }
             this.userTransaction.begin();
             super.resetAuditSegment();
             super.resetDataSegment();

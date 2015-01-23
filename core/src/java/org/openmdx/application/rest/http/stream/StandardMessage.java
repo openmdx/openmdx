@@ -51,19 +51,20 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 
+import javax.resource.ResourceException;
 import javax.resource.cci.InteractionSpec;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamWriter;
 
 import org.openmdx.application.rest.http.HttpContext;
 import org.openmdx.application.rest.http.HttpInteraction;
 import org.openmdx.application.rest.http.spi.Message;
-import org.openmdx.base.exception.ServiceException;
+import org.openmdx.base.resource.spi.ResourceExceptions;
 import org.openmdx.base.resource.spi.RestInteractionSpec;
 import org.openmdx.base.rest.spi.RestFormatters;
 import org.openmdx.base.rest.spi.RestSource;
-import org.openmdx.base.rest.stream.StandardRestFormatter;
 import org.openmdx.base.rest.stream.RestTarget;
-import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamWriter;
+import org.openmdx.base.rest.stream.StandardRestFormatter;
 import org.openmdx.kernel.exception.BasicException;
 import org.xml.sax.InputSource;
 
@@ -176,25 +177,33 @@ public class StandardMessage implements Message, Closeable {
      */
     @Override
     public int execute(
-    ) throws ServiceException {
+    ) throws ResourceException {
         if(this.requestBody != null) try {
             this.requestBody.close();
         } catch (IOException exception) {
-            throw new ServiceException (
-                exception,
-                BasicException.Code.DEFAULT_DOMAIN,
-                BasicException.Code.PROCESSING_FAILURE,
-                "Could not submit REST request"
+        	throw ResourceExceptions.initHolder(
+        		new ResourceException(
+                    "Could not submit REST request",
+                    BasicException.newEmbeddedExceptionStack(
+                    	exception,
+                    	BasicException.Code.DEFAULT_DOMAIN,
+                    	BasicException.Code.PROCESSING_FAILURE
+                    )
+	            )
             );
         }
         try {
             return httpInteraction.getStatus(this.urlConnection);
         } catch (IOException exception) {
-            throw new ServiceException (
-                exception,
-                BasicException.Code.DEFAULT_DOMAIN,
-                BasicException.Code.PROCESSING_FAILURE,
-                "Could not process REST request"
+        	throw ResourceExceptions.initHolder(
+        		new ResourceException(
+                    "Could not process REST request",
+                    BasicException.newEmbeddedExceptionStack(
+                    	exception,
+                    	BasicException.Code.DEFAULT_DOMAIN,
+                    	BasicException.Code.PROCESSING_FAILURE
+                    )
+	            )
             );
         }
     }
@@ -204,11 +213,11 @@ public class StandardMessage implements Message, Closeable {
      */
     @Override
     public final RestTarget getRequestBody(
-    ) throws ServiceException {
+    ) throws ResourceException {
         if(this.requestBody == null) try {
             this.requestBody = newRequestBody();
         } catch (IOException exception) {
-            throw new ServiceException(exception);
+        	toResourceException(exception);
         }
         return this.requestBody;
     }
@@ -218,11 +227,11 @@ public class StandardMessage implements Message, Closeable {
      */
     @Override
     public final RestSource getResponseBody(
-    ) throws ServiceException {
+    ) throws ResourceException {
         if(this.responseBody == null) try {
             this.responseBody = newResponseBody();
         } catch (IOException exception) {
-            throw new ServiceException(exception);
+        	toResourceException(exception);
         }
         return this.responseBody;
     }
@@ -254,4 +263,15 @@ public class StandardMessage implements Message, Closeable {
         }
     }
     
+	protected void toResourceException(
+		IOException exception
+	) throws ResourceException {
+		throw ResourceExceptions.initHolder(
+			new ResourceException(
+				exception.getMessage(),
+				BasicException.newEmbeddedExceptionStack(exception)
+		    )
+		);
+	}
+
 }

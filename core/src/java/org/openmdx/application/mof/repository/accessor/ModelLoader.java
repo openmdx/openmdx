@@ -53,7 +53,7 @@ import org.openmdx.base.exception.ServiceException;
 /**
  * Model Loader
  */
-interface ModelLoader {
+public interface ModelLoader {
 
     /**
      * Populate a models elements

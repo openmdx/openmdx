@@ -49,25 +49,41 @@ package org.openmdx.base.naming;
 
 import java.util.UUID;
 
+import org.openmdx.kernel.id.UUIDs;
+
 /**
  * Transactional Segment
  */
 public class TransactionalSegment extends XRISegment {
 
+	private TransactionalSegment(
+		boolean contained, 
+		UUID transactionalObjectId
+	) {
+		this.transactionalObjectId = transactionalObjectId;
+		this.contained = contained;
+	}
+	
 	TransactionalSegment(
 		int index, 
 		UUID transactionalObjectId
 	) {
-		this.transactionalObjectId = transactionalObjectId;
-		this.contained = index > 0;
+		this(index > 0, transactionalObjectId);
 	}
 
+	private TransactionalSegment(
+		boolean contained, 
+		String classicRepresentation
+	) {
+		this(contained, UUID.fromString(contained ? classicRepresentation.substring(1) : classicRepresentation.substring(10, 46)));
+		this.unifiedRepresentation = classicRepresentation;
+	}
+	
 	TransactionalSegment(
 		int index, 
 		String classicRepresentation
 	) {
-		this(index, index == 0 ? UUID.fromString(classicRepresentation.substring(10, 46)) : UUID.fromString(classicRepresentation.substring(1)));
-		this.unifiedRepresentation = classicRepresentation;
+		this(index > 0, classicRepresentation);
 	}
 	
 	private final UUID transactionalObjectId;
@@ -120,4 +136,13 @@ public class TransactionalSegment extends XRISegment {
 		return this.transactionalObjectId;
 	}
 
+	/**
+	 * Retrieve the classic representation of a new transactional segment
+	 * 
+	 * @return the classic representation of a new transactional segment
+	 */
+	public static String getClassicRepresentationOfNewInstance(){
+    	return ":" + UUIDs.newUUID();
+	}
+	
 }

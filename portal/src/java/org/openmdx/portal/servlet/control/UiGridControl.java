@@ -393,7 +393,7 @@ public class UiGridControl extends Control implements Serializable {
     public String getQualifiedReferenceTypeName(
     ) {
     	if(this.qualifiedReferenceTypeName == null) {
-    		String qualifiedName = this.getObjectContainer().refGetPath().getBase();
+    		String qualifiedName = this.getObjectContainer().refGetPath().getLastSegment().toClassicRepresentation();
     		int pos = qualifiedName.indexOf(":Ref:");
     		if(pos > 0) {
     			this.qualifiedReferenceTypeName = qualifiedName.substring(0, pos) + ":" + this.objectContainer.getReferenceName();

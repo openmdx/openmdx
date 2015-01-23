@@ -67,7 +67,6 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.resource.ResourceException;
-import javax.resource.cci.Connection;
 import javax.resource.cci.IndexedRecord;
 import javax.resource.cci.Interaction;
 import javax.resource.cci.MappedRecord;
@@ -90,6 +89,7 @@ import org.openmdx.base.mof.cci.ModelElement_1_0;
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.query.SortOrder;
 import org.openmdx.base.resource.spi.RestInteractionSpec;
+import org.openmdx.base.rest.cci.RestConnection;
 import org.openmdx.base.rest.spi.Facades;
 import org.openmdx.base.rest.spi.Object_2Facade;
 import org.openmdx.base.rest.spi.Query_2Facade;
@@ -116,7 +116,7 @@ public class InMemory_1 extends AbstractPersistence_1 {
      */
     @Override
     public Interaction getInteraction(
-        Connection connection
+        RestConnection connection
     ) throws ResourceException {
         return new InMemoryLayerInteraction(connection);
     }
@@ -485,7 +485,7 @@ public class InMemory_1 extends AbstractPersistence_1 {
     public class InMemoryLayerInteraction extends OperationAwareLayer_1.LayerInteraction {
         
         public InMemoryLayerInteraction(
-            Connection connection
+            RestConnection connection
         ) throws ResourceException {
             super(connection);
         }
@@ -506,7 +506,7 @@ public class InMemory_1 extends AbstractPersistence_1 {
             DataproviderRequest request = this.newDataproviderRequest(ispec, input);
             DataproviderReply reply = this.newDataproviderReply(output);
             synchronized(InMemory_1.this.referenceMap){
-                Path path = Object_2Facade.getPath(request.object());
+                Path path = input.getPath();
                 Map<String, MappedRecord> reference = InMemory_1.this.getReference(
                     path, 
                     true, // referenceMustExist
@@ -942,11 +942,6 @@ public class InMemory_1 extends AbstractPersistence_1 {
             synchronized(InMemory_1.this.referenceMap){
                 Object_2Facade source = Facades.asObject(request.object());            
                 Path path = source.getPath();
-                Map<String,MappedRecord> container = InMemory_1.this.getReference(
-                    path, 
-                    true, // referenceMustExist 
-                    true // isPreferringNotFoundException
-                );
                 if(path == null) {
                     throw new ServiceException(
                         BasicException.Code.DEFAULT_DOMAIN,
@@ -955,6 +950,11 @@ public class InMemory_1 extends AbstractPersistence_1 {
                         new BasicException.Parameter("path")
                     );
                 }
+                Map<String,MappedRecord> container = InMemory_1.this.getReference(
+                    path, 
+                    true, // referenceMustExist 
+                    true // isPreferringNotFoundException
+                );
                 Object_2Facade target = Facades.asObject(container.get(path.getLastSegment().toClassicRepresentation()));
                 if(target == null) {
                     throw new ServiceException(
@@ -987,7 +987,17 @@ public class InMemory_1 extends AbstractPersistence_1 {
     protected static int INITIAL_REFERENCE_MAP_CAPACITY = 213;
     protected static final Map referenceMaps = new HashMap();
     protected Map<Path,Map<String,MappedRecord>> referenceMap = null;
+    
+    /**
+     * @deprecated the dataprovider 2 stack will support the batch size where
+     * required by the plug-in implementation
+     */
     protected int batchSize = Integer.MAX_VALUE;
+    
+    /**
+     * @deprecated the dataprovider 2 stack will support unmodifiable records
+     * eliminating the need to clone them
+     */
     protected boolean cloneReply = true;
 
 }

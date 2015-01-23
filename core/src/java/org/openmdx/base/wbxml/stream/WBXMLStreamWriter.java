@@ -89,10 +89,6 @@ public class WBXMLStreamWriter extends AbstractXMLStreamWriter implements String
 
     /**
      * Constructor 
-     *
-     * @param plugIn
-     * @param out
-     * @param defaultEncoding 
      */
     public WBXMLStreamWriter(
         PlugIn plugIn,
@@ -278,14 +274,6 @@ public class WBXMLStreamWriter extends AbstractXMLStreamWriter implements String
 
     /**
      * Attribute or processing instruction name/value pairs
-     * 
-     * @param namespaceURI 
-     * @param elementName 
-     * @param name
-     * @param value
-     * @throws XMLStreamException 
-     * @throws IOException 
-     * @throws ServiceException 
      */
     private void appendNameValuePair(
         String namespaceURI,

@@ -1,13 +1,13 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
+ * Project:     openMDX, http://www.openmdx.org/
  * Description: Request Object
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2012, OMEX AG, Switzerland
+ * Copyright (c) 2004-2014, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -51,6 +51,7 @@ import java.io.Serializable;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
 import javax.resource.cci.MappedRecord;
 
@@ -302,10 +303,10 @@ public class RequestedObject
     }
 
     @Override
-    public Object clone(
+    public ObjectRecord clone(
     ){
         try {
-            return Object_2Facade.cloneObject(this.getObject());
+            return (ObjectRecord) Object_2Facade.cloneObject(this.getObject());
         } catch(ServiceException exception) {
             throw new RuntimeServiceException(exception.getCause());
         }
@@ -314,15 +315,15 @@ public class RequestedObject
     /* (non-Javadoc)
      * @see org.openmdx.base.resource.cci.ObjectRecord#getPath()
      */
-//  @Override
-    public Path getPath() {
-        return this.getObject().getPath();
+    @Override
+    public Path getResourceIdentifier() {
+        return this.getObject().getResourceIdentifier();
     }
 
     /* (non-Javadoc)
      * @see org.openmdx.base.resource.cci.ObjectRecord#getValue()
      */
-//  @Override
+    @Override
     public MappedRecord getValue() {
         return this.getObject().getValue();
     }
@@ -330,7 +331,7 @@ public class RequestedObject
     /* (non-Javadoc)
      * @see org.openmdx.base.resource.cci.ObjectRecord#getVersion()
      */
-//  @Override
+    @Override
     public Object getVersion() {
         return this.getObject().getVersion();
     }
@@ -338,15 +339,15 @@ public class RequestedObject
     /* (non-Javadoc)
      * @see org.openmdx.base.resource.cci.ObjectRecord#setPath(org.openmdx.base.naming.Path)
      */
-//  @Override
-    public void setPath(Path path) {
-        this.getObject().setPath(path);
+    @Override
+    public void setResourceIdentifier(Path path) {
+        this.getObject().setResourceIdentifier(path);
     }
 
     /* (non-Javadoc)
      * @see org.openmdx.base.resource.cci.ObjectRecord#setValue(javax.resource.cci.MappedRecord)
      */
-//  @Override
+    @Override
     public void setValue(MappedRecord value) {
         this.getObject().setValue(value);
     }
@@ -354,7 +355,7 @@ public class RequestedObject
     /* (non-Javadoc)
      * @see org.openmdx.base.resource.cci.ObjectRecord#setVersion(java.lang.Object)
      */
-//  @Override
+    @Override
     public void setVersion(Object version) {
         this.getObject().setVersion(version);
     }
@@ -362,7 +363,7 @@ public class RequestedObject
 	/* (non-Javadoc)
 	 * @see org.openmdx.base.rest.cci.ObjectRecord#getLock()
 	 */
-//  @Override
+    @Override
 	public Object getLock() {
 		return this.getObject().getLock();
 	}
@@ -370,9 +371,25 @@ public class RequestedObject
 	/* (non-Javadoc)
 	 * @see org.openmdx.base.rest.cci.ObjectRecord#setLock(java.lang.Object)
 	 */
-//  @Override
+   @Override
 	public void setLock(Object lock) {
 		this.getObject().setLock(lock);
+	}
+
+	/* (non-Javadoc)
+	 * @see org.openmdx.base.rest.cci.ObjectRecord#getTransientObjectId()
+	 */
+	@Override
+	public UUID getTransientObjectId() {
+		return this.getObject().getTransientObjectId();
+	}
+
+	/* (non-Javadoc)
+	 * @see org.openmdx.base.rest.cci.ObjectRecord#setTransientObjectId(java.util.UUID)
+	 */
+	@Override
+	public void setTransientObjectId(UUID transientObjectId) {
+		this.getObject().setTransientObjectId(transientObjectId);
 	}
 
 }

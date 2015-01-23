@@ -48,10 +48,10 @@
 package org.openmdx.application.dataprovider.layer.interception;
 
 import javax.resource.ResourceException;
-import javax.resource.cci.Connection;
 import javax.resource.cci.Interaction;
 
 import org.openmdx.application.dataprovider.spi.Layer_1;
+import org.openmdx.base.rest.cci.RestConnection;
 
 /**
  * The standard implementation of the interception layer's plug-in.
@@ -69,7 +69,7 @@ public class Standard_1 extends Layer_1 {
     //--------------------------------------------------------------------------
     @Override
     public Interaction getInteraction(
-        Connection connection
+        RestConnection connection
     ) throws ResourceException {
         return new StandardLayerInteraction(connection);
     }
@@ -78,7 +78,7 @@ public class Standard_1 extends Layer_1 {
     public class StandardLayerInteraction extends Layer_1.LayerInteraction {
       
         public StandardLayerInteraction(
-            Connection connection
+            RestConnection connection
         ) throws ResourceException {
             super(connection);
         }

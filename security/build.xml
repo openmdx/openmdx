@@ -50,7 +50,7 @@
 	<property name="project.specification.title" value="openMDX/Security" />
 
 	<!-- Slash separated platform list, the last entry being the default -->
-	<property name="project.platform.list" value="jre-1.6" />
+	<property name="project.platform.list" value="jre-1.7" />
 
 	<!-- Slash separated app server list, may be overridden by build properties -->
 	<property name="project.app-server.list" value="jboss-3" />

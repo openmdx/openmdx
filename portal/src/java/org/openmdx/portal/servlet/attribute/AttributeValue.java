@@ -183,9 +183,9 @@ public abstract class AttributeValue implements Serializable {
     ) {
         String multiplicity = this.fieldDef.multiplicity;
         return 
-        	Multiplicity.SINGLE_VALUE.toString().equals(multiplicity) ||
-        	Multiplicity.OPTIONAL.toString().equals(multiplicity) ||
-        	Multiplicity.STREAM.toString().equals(multiplicity);
+        	Multiplicity.SINGLE_VALUE.code().equals(multiplicity) ||
+        	Multiplicity.OPTIONAL.code().equals(multiplicity) ||
+        	Multiplicity.STREAM.code().equals(multiplicity);
     }
 
     /**
@@ -196,7 +196,7 @@ public abstract class AttributeValue implements Serializable {
     public boolean isOptionalValued(
     ) {
         String multiplicity = this.fieldDef.multiplicity;
-        return Multiplicity.OPTIONAL.toString().equals(multiplicity);
+        return Multiplicity.OPTIONAL.code().equals(multiplicity);
     }
 
     /**

@@ -63,12 +63,6 @@ public class SharedConfigurationEntries {
   }
 
   /**
-   * Sun Application Server 8.1 uses URLs as <code>Binding</code> names even 
-   * if <code>isRelative()</code> evauluates to <code>true</code>.
-   */
-  static public boolean WORK_AROUND_SUN_APPLICATION_SERVER_BINDINGS = true;
-  
-  /**
    * The NAMESPACE_ID configuration entry
    */
   static public final String NAMESPACE_ID = "namespaceId";
@@ -85,16 +79,25 @@ public class SharedConfigurationEntries {
   
   /**
    * Key for a JCA <code>ConnectionFactory</code> instance  
+   * 
+   * @deprecated will not be supported by the dataprovider 2 stack
    */
+  @Deprecated
   static public final String DATAPROVIDER_CONNECTION_FACTORY = "dataprovider";
 
   /**
    * SEQUENCE_SUPPORTED flag
+   * 
+   * @deprecated will not be supported by the dataprovider 2 stack
    */
+  @Deprecated
   static public final String SEQUENCE_SUPPORTED = "sequenceSupported";
 
   /**
    * BATCH_SIZE for find operations
+   * 
+   * @deprecated The dataprovider 2 stack will handle this feature at
+   * plug-in level
    */
   static public final String BATCH_SIZE = "batchSize";
 
@@ -108,7 +111,10 @@ public class SharedConfigurationEntries {
    * <li><code>true</code> the plug-ins are deployed as legacy layers
    * <li><code>false</code> the plug-ins are deployed as Java beans
    * </ul>
+   * @deprecated the dataprovider 2 stack will use the Java Bean pattern
+   * to configure its layer plug-ins.
    */
+  @Deprecated
   static public final String LEGACY_CONFIGURATION = "legacyConfiguration";
   
 }

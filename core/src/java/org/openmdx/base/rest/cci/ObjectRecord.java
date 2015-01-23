@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2009-2012, OMEX AG, Switzerland
+ * Copyright (c) 2009-2014, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -47,32 +47,19 @@
  */
 package org.openmdx.base.rest.cci;
 
-import javax.resource.cci.MappedRecord;
+import java.util.UUID;
 
-import org.openmdx.base.naming.Path;
+import javax.resource.cci.MappedRecord;
 
 /**
  * <code>org::openmdx::kernel::Object</code>
  */
-public interface ObjectRecord extends MappedRecord {
+public interface ObjectRecord extends RequestRecord {
     
     /**
      * An object record's name
      */
     String NAME = "org:openmdx:kernel:Object";
-    
-    /**
-     * Retrieve the object's path
-     * 
-     * @return the object's path
-     */
-    Path getPath();
-    
-    /**
-     * 
-     * @param path
-     */
-    void setPath(Path path);
     
     /**
      * Retrieve the object's values
@@ -115,5 +102,40 @@ public interface ObjectRecord extends MappedRecord {
      * @param lock the object's lock
      */
     void setLock(Object lock);
+
+    /**
+     * Retrieves the object's transient id
+     * <p>
+     * This value is used to correlate transient objects
+     * between a persistence manager and its proxy.
+     * 
+     * @return the object's transient id
+     */
+    UUID getTransientObjectId();
+    
+    /**
+     * Set the object's transient id
+     * <p>
+     * This value is used to correlate transient objects
+     * between a persistence manager and its proxy.
+     * 
+     * @param transientObjectId
+     */
+    void setTransientObjectId(UUID transientObjectId);
+    
+    /**
+     * Clone
+     * 
+     * @return a clone of this record
+     */
+    ObjectRecord clone();
+
+    enum Member {
+        lock,
+        resourceIdentifier,
+        transientObjectId,
+        value,
+        version
+    }
 
 }

@@ -380,7 +380,7 @@ public class ShowObjectView extends ObjectView implements Serializable {
                     new Action.Parameter[]{
                         new Action.Parameter(Action.PARAMETER_ID, String.valueOf(ii))
                     },
-                    uiSegmentPath.getBase(),
+                    uiSegmentPath.getLastSegment().toClassicRepresentation(),
                     !isRevokeShow
                 )
             );

@@ -48,10 +48,8 @@
  */
 package org.openmdx.portal.servlet.tag;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
-import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
@@ -69,7 +67,6 @@ import org.openmdx.portal.servlet.WebKeys;
 import org.openmdx.portal.servlet.component.AttributePane;
 import org.openmdx.portal.servlet.component.ReferencePane;
 import org.openmdx.portal.servlet.component.ShowObjectView;
-import org.openmdx.portal.servlet.control.PageEpilogControl;
 import org.openmdx.portal.servlet.control.ReferencePaneControl;
 
 /**
@@ -184,7 +181,6 @@ public class ShowObjectTag extends BaseTag {
 				}
 				p.write("</div>");
 			}
-			List<Action> selectGridActions = new ArrayList<Action>();
 			for(ReferencePane referencePane: view.getChildren(ReferencePane.class)) {
 				referencePane.paint(
 					p,
@@ -192,25 +188,8 @@ public class ShowObjectTag extends BaseTag {
 					false, // forEditing
 					this.grids == null ? null : Arrays.asList(this.grids.split(","))
 				);
-				selectGridActions.add(
-					referencePane.getSelectReferenceAction()[
-						referencePane.getSelectedReference()
-					]
-				);
 			}
 			p.flush();
-			PageEpilogControl epilogControl = new PageEpilogControl(
-				this.getId(),
-				app.getLocale(),
-				app.getCurrentLocaleAsIndex()
-			);
-			epilogControl.paint(
-				p, 
-				null, // frame
-				false, // forEditing
-				false // globals
-			);
-	        p.flush();
 		} catch(Exception e) {
 			throw new JspException(e);
 		}

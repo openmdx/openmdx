@@ -310,7 +310,7 @@ public class Queries {
     /**
      * Apply a statement to a given query
      * 
-     * @param target
+     * @param channel
      * @param statement
      * @throws ServiceException 
      */
@@ -407,15 +407,17 @@ public class Queries {
         Query target, 
         String statements
     ) throws ServiceException{
-		for(
-			int cursor = 0, endOfStatement;
-			cursor < statements.length();
-			cursor = endOfStatement + 1
-		) {
-			endOfStatement = seek(statements, cursor, ';', true);
-			if(endOfStatement < 0) endOfStatement = statements.length();
-			applyStatement(target, statements.substring(cursor, endOfStatement));
-		}
+        if(statements != null) {
+    		for(
+    			int cursor = 0, endOfStatement;
+    			cursor < statements.length();
+    			cursor = endOfStatement + 1
+    		) {
+    			endOfStatement = seek(statements, cursor, ';', true);
+    			if(endOfStatement < 0) endOfStatement = statements.length();
+    			applyStatement(target, statements.substring(cursor, endOfStatement));
+    		}
+        }
     }
         
     static {

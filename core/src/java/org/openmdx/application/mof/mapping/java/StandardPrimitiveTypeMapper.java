@@ -116,8 +116,8 @@ public class StandardPrimitiveTypeMapper implements PrimitiveTypeMapper {
         if(PrimitiveTypes.ANYURI.equals(qualifiedTypeName)) return "java.net.URI";
         if(PrimitiveTypes.XRI.equals(qualifiedTypeName)) return "java.lang.String"; // no standard implementation as openMDX sticks to XRI 2
         if(PrimitiveTypes.UUID.equals(qualifiedTypeName)) return "java.util.UUID";
-        if(PrimitiveTypes.OID.equals(qualifiedTypeName)) return "java.lang.Object";
-        if(PrimitiveTypes.OBJECT_ID.equals(qualifiedTypeName)) return "java.lang.Object";
+        if(PrimitiveTypes.OID.equals(qualifiedTypeName)) return "org.ietf.jgss.Oid";
+        if(PrimitiveTypes.OBJECT_ID.equals(qualifiedTypeName)) return "org.openmdx.base.naming.Path";
         if(hasDefault) {
             return "java.lang.String";
         } else {

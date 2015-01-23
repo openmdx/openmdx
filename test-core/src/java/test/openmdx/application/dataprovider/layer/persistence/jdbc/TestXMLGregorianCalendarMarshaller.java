@@ -56,9 +56,9 @@ import javax.xml.datatype.XMLGregorianCalendar;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.openmdx.application.dataprovider.layer.persistence.jdbc.DataTypes;
 import org.openmdx.application.dataprovider.layer.persistence.jdbc.LayerConfigurationEntries;
-import org.openmdx.application.dataprovider.layer.persistence.jdbc.XMLGregorianCalendarMarshaller;
+import org.openmdx.base.dataprovider.layer.persistence.jdbc.datatypes.XMLGregorianCalendarMarshaller;
+import org.openmdx.base.dataprovider.layer.persistence.jdbc.spi.DataTypes;
 import org.openmdx.base.exception.ServiceException;
 import org.w3c.spi.DatatypeFactories;
 

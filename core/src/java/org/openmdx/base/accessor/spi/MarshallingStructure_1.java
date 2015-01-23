@@ -1,13 +1,13 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Description: SPICE Basic Accessor Object interface
+ * Description: Marshalling Structure
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2008, OMEX AG, Switzerland
+ * Copyright (c) 2004-2014, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -47,7 +47,6 @@
  */
 package org.openmdx.base.accessor.spi;
 
-import java.io.Serializable;
 import java.util.List;
 import java.util.Set;
 import java.util.SortedMap;
@@ -61,13 +60,11 @@ import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.marshalling.Marshaller;
 import org.w3c.cci2.SparseArray;
 
-
 /**
- * The Structure_1_0 interface.
+ * Marshalling Structure
  */
 public class MarshallingStructure_1 
     extends DelegatingStructure_1
-    implements Serializable
 {
 
     /**
@@ -97,11 +94,6 @@ public class MarshallingStructure_1
         this(structure, null);
     }
     
-    /**
-     * Implements <code>Serializable</code>
-     */
-    private static final long serialVersionUID = 3258411716403738167L;
-
     /**
      * The marshaller, unless getMarshaller is overridden;
      */

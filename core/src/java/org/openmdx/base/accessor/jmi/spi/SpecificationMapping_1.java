@@ -59,6 +59,7 @@ import javax.jmi.reflect.RefStruct;
 
 import org.omg.mof.spi.Identifier;
 import org.omg.mof.spi.Names;
+import org.openmdx.base.accessor.jmi.cci.JmiServiceException;
 import org.openmdx.base.collection.Maps;
 import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;
@@ -215,31 +216,19 @@ class SpecificationMapping_1  {
     SpecificationDescriptor getSpecificationDescriptor(
         Class<?> javaClass
     ) throws ServiceException {
-        SpecificationDescriptor descriptor = this.descriptorsForClass.get(javaClass);
+        final SpecificationDescriptor descriptor = this.descriptorsForClass.get(javaClass);
         if(descriptor != null){
             return descriptor;
         }
-        Model_1_0 model = Model_1Factory.getModel();
+        final Model_1_0 model = Model_1Factory.getModel();
         for(ModelElement_1_0 element: model.getContent()) {
             if(model.isClassType(element)) {
-                String qualifiedName = (String)element.getQualifiedName();
-                SpecificationDescriptor candidate = this.descriptorsForName.get(qualifiedName);
-                if(candidate == null) try {
-                    candidate = newSpecificationDescriptor(qualifiedName);
-                } catch (ServiceException exception) {
-                    this.descriptorsForName.putIfAbsent(
-                        qualifiedName.intern(), 
-                        candidate = SpecificationDescriptor.NULL
-                    );
-                }
+                final SpecificationDescriptor candidate = getSpecificationDescriptor(
+                    element.getQualifiedName(), 
+                    javaClass
+                );
                 if(candidate != SpecificationDescriptor.NULL) {
-                    if(
-                        candidate.cci2Interface == javaClass ||
-                        candidate.jmi1Interface == javaClass ||
-                        candidate.jpa3Class == javaClass
-                    ) {
-                        return candidate;
-                    }
+                    return candidate;
                 }
             }
         }
@@ -249,6 +238,39 @@ class SpecificationMapping_1  {
             "No model class found for the given interface",
             new BasicException.Parameter("interface",javaClass.getName())
         );
+    }
+
+    private SpecificationDescriptor getSpecificationDescriptor(
+        String qualifiedName,
+        Class<?> javaClass
+    ) {
+        final SpecificationDescriptor candidate = getRegisteredSpecificationDescriptor(qualifiedName);
+        return (
+            candidate == SpecificationDescriptor.NULL ||
+            candidate.cci2Interface == javaClass ||
+            candidate.jmi1Interface == javaClass ||
+            candidate.jpa3Class == javaClass 
+        ) ? candidate : SpecificationDescriptor.NULL;
+    }
+
+    private SpecificationDescriptor getRegisteredSpecificationDescriptor(
+        String qualifiedName
+    ) {
+        final SpecificationDescriptor candidate = this.descriptorsForName.get(
+            qualifiedName
+        );
+        if(candidate != null) {
+            return candidate;
+        }
+        try {
+            return newSpecificationDescriptor(qualifiedName);
+        } catch (ServiceException exception) {
+            this.descriptorsForName.putIfAbsent(
+                qualifiedName.intern(), 
+                SpecificationDescriptor.NULL
+            );
+            return SpecificationDescriptor.NULL;
+        }
     }
     
     /**
@@ -303,26 +325,33 @@ class SpecificationMapping_1  {
             descriptor
         );
         if(concurrent == null) {
-            this.descriptorsForClass.putIfAbsent(
+            registerForClass(
+                descriptor,
                 descriptor.cci2Interface,
-                descriptor
-            );
-            this.descriptorsForClass.putIfAbsent(
                 descriptor.jmi1Interface,
-                descriptor
+                descriptor.jpa3Class
             );
-            if(descriptor.jpa3Class != null) {
-                this.descriptorsForClass.putIfAbsent(
-                    descriptor.jpa3Class,
-                    descriptor
-                );
-            }
             return descriptor;
         } else {
             return concurrent;
         }
     }
 
+    private void registerForClass(
+        SpecificationDescriptor descriptor,
+        Class<?>... keys
+    ){
+        for(Class<?> key : keys) {
+            if(key != null) {
+                Maps.putUnlessPresent(
+                    this.descriptorsForClass,
+                    key,
+                    descriptor
+                );
+            }
+        }
+    }
+        
     /**
      * Retrieve the exception constructor
      * 

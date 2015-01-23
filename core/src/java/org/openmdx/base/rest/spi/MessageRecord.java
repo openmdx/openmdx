@@ -48,20 +48,17 @@
 
 package org.openmdx.base.rest.spi;
 
-import java.util.Map;
-
-import javax.resource.ResourceException;
 import javax.resource.cci.MappedRecord;
+import javax.resource.cci.Record;
 
 import org.openmdx.base.naming.Path;
-import org.openmdx.base.resource.Records;
 
 
 /**
  * Object Record
  */
 public class MessageRecord 
-    extends AbstractMappedRecord
+    extends AbstractMappedRecord<org.openmdx.base.rest.cci.MessageRecord.Member>
     implements org.openmdx.base.rest.cci.MessageRecord 
 {
     
@@ -69,7 +66,7 @@ public class MessageRecord
      * Constructor 
      */
     public MessageRecord() {
-        super(KEYS);
+    	super();
     }
 
     /**
@@ -78,35 +75,40 @@ public class MessageRecord
      * @param that
      */
     private MessageRecord(
-        Map<?,?> that
+    	MessageRecord that
     ){
-        super(KEYS);
-        putAll(that);
+        super(that);
     }
     
+    /**
+     * Allows to share the member information among the instances
+     */
+    private static final Members<Member> MEMBERS = Members.newInstance(Member.class);
+
     /**
      * Implements <code>Serializable</code>
      */
     private static final long serialVersionUID = 6030385859226659109L;
 
     /**
-     * Alphabetically ordered keys
-     */
-    private static final String[] KEYS = {
-        "body",
-        "path"
-    };
-
-    /**
      * The <code>"path"</code> entry
      */
-    private Path path;
+    private Path resourceIdentifier;
     
     /**
      * The <code>"body"</code> entry
      */
-    private MappedRecord body;
+    private MappedRecord body = VoidRecord.getInstance();
 
+	/* (non-Javadoc)
+	 * @see org.openmdx.base.rest.spi.AbstractMappedRecord#makeImmutable()
+	 */
+	@Override
+	public void makeImmutable() {
+		super.makeImmutable();
+		freeze(this.body);
+	};
+    
     /* (non-Javadoc)
      * @see org.openmdx.base.resource.spi.AbstractRecord#clone()
      */
@@ -119,7 +121,7 @@ public class MessageRecord
     /* (non-Javadoc)
      * @see org.openmdx.base.rest.cci.MessageRecord#getBody()
      */
-//  @Override
+    @Override
     public MappedRecord getBody() {
         return this.body;
     }
@@ -127,37 +129,33 @@ public class MessageRecord
     /* (non-Javadoc)
      * @see org.openmdx.base.rest.cci.MessageRecord#getDestination()
      */
-//  @Override
-    public Path getPath() {
-        return this.path;
+    @Override
+    public Path getResourceIdentifier() {
+        return this.resourceIdentifier;
     }
 
     /* (non-Javadoc)
      * @see org.openmdx.base.rest.cci.MessageRecord#setBody(javax.resource.cci.MappedRecord)
      */
-//  @Override
+    @Override
     public void setBody(MappedRecord body) {
-        if(body != null) {
-            this.body = body;
-        } else try {
-            this.body = Records.getRecordFactory().createMappedRecord("org:openmdx:base:Void");
-        } catch (ResourceException exception) {
-            throw new RuntimeException(exception);
-        } 
+    	assertMutability();
+        this.body = body == null ? VoidRecord.getInstance() : body;
     }
 
     /* (non-Javadoc)
      * @see org.openmdx.base.rest.cci.MessageRecord#setDestination(org.openmdx.base.naming.Path)
      */
-//  @Override
-    public void setPath(Path destination) {
-        this.path = destination;
+    @Override
+    public void setResourceIdentifier(Path destination) {
+    	assertMutability();
+        this.resourceIdentifier = destination;
     }
 
     /* (non-Javadoc)
      * @see javax.resource.cci.Record#getRecordName()
      */
-//  @Override
+    @Override
     public String getRecordName() {
         return NAME;
     }
@@ -170,12 +168,12 @@ public class MessageRecord
      */
     @Override
     protected Object get(
-        int index
+        Member index
     ){
         switch(index) {
-            case 0: return this.body;
-            case 1: return this.path;
-            default: return null;
+            case body: return getBody();
+            case resourceIdentifier: return getResourceIdentifier();
+            default: return super.get(index);
         }
     }
 
@@ -189,16 +187,18 @@ public class MessageRecord
      */
     @Override
     protected void put(
-        int index,
+        Member index,
         Object value
     ){
         switch(index) {
-            case 0:
-                this.body = (MappedRecord) value;
+            case body:
+                setBody((MappedRecord) value);
                 break;
-            case 1: 
-                this.path = (Path) value;
+            case resourceIdentifier: 
+                setResourceIdentifier((Path) value);
                 break;
+            default:
+            	super.put(index, value);
         }
     }
 
@@ -208,31 +208,31 @@ public class MessageRecord
      * @return <code>true</code> if the message id is set
      */
     private final boolean hasId(){
-        return this.path != null && this.path.isObjectPath();
+        return this.resourceIdentifier != null && this.resourceIdentifier.isObjectPath();
     }
     
     /* (non-Javadoc)
      * @see org.openmdx.base.rest.cci.MessageRecord#getTarget()
      */
-//  @Override
+    @Override
     public Path getTarget() {
-        return this.hasId() ? this.path.getParent() : this.path;
+        return this.hasId() ? this.resourceIdentifier.getParent() : this.resourceIdentifier;
     }
 
     /* (non-Javadoc)
      * @see org.openmdx.base.rest.cci.MessageRecord#getMessageId()
      */
-//  @Override
+    @Override
     public String getMessageId() {
-        return this.hasId() ? this.path.getLastSegment().toClassicRepresentation() : null;
+        return this.hasId() ? this.resourceIdentifier.getLastSegment().toClassicRepresentation() : null;
     }
 
     /* (non-Javadoc)
      * @see org.openmdx.base.rest.cci.MessageRecord#getCorellationId()
      */
-//  @Override
+    @Override
     public String getCorellationId() {
-        String messageId = getMessageId();
+        final String messageId = getMessageId();
         if(messageId != null) {
             int d = Math.max(
                 messageId.lastIndexOf('!'), 
@@ -245,4 +245,23 @@ public class MessageRecord
         return null; 
     }
     
+    /**
+     * Tells whether the candidate is a message record
+     * 
+     * @param record the record to be inspected
+     * 
+     * @return <code>true</code> if the record's name equals to <code>org:openmdx:kernel:Message</code>.
+     */
+    public static boolean isCompatible(Record record) {
+        return NAME.equals(record.getRecordName());
+    }
+
+	/* (non-Javadoc)
+	 * @see org.openmdx.base.rest.spi.AbstractMappedRecord#members()
+	 */
+	@Override
+	protected Members<Member> members() {
+		return MEMBERS;
+	}
+
 }

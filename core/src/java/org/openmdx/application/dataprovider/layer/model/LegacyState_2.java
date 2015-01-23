@@ -63,7 +63,7 @@ public class LegacyState_2 extends State_2 {
 	/**
 	 * Tells whether the valid time is unique for objects hosted by this provider.
 	 */
-	private boolean validTimeUnique = false;
+	private boolean validTimeUnique;
     
     /**
      * Retrieve validTimeUnique.
@@ -93,9 +93,7 @@ public class LegacyState_2 extends State_2 {
 		Layer_1 delegation
 	) throws ServiceException {
 		super.activate(id, configuration, delegation);
-		if(configuration.containsEntry(LayerConfigurationEntries.VALID_TIME_UNIQUE)) {
-		    setValidTimeUnique(configuration.isOn(LayerConfigurationEntries.VALID_TIME_UNIQUE));
-		}
+	    setValidTimeUnique(configuration.isEnabled(LayerConfigurationEntries.VALID_TIME_UNIQUE, false));
 	}
 
     /**

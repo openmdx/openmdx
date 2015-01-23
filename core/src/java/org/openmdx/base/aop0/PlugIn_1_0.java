@@ -117,7 +117,7 @@ public interface PlugIn_1_0 {
      * Tells whether the plug-in requires cascaded deletes to be handled by the
      * data object manager
      *  
-     * @param object the anchestor
+     * @param object the ancestor
      *  
      * @return <code>true</code> if the data object manager has to handle
      * cascading deletes 

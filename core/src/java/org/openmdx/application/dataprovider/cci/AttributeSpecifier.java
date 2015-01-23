@@ -48,14 +48,21 @@
 package org.openmdx.application.dataprovider.cci;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
+import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.query.OrderSpecifier;
 import org.openmdx.base.query.SortOrder;
 import org.openmdx.base.resource.Records;
+import org.openmdx.base.rest.cci.FeatureOrderRecord;
+import org.openmdx.base.rest.cci.QueryFilterRecord;
 import org.openmdx.kernel.exception.BasicException;
 
 
@@ -93,30 +100,30 @@ implements Serializable
         Set<String> invalid = new HashSet<String>();
 
         if(
-                name == null
+            name == null
         ) invalid.add("position");
         this.name = name;
 
         if(
-                position < 0
+            position < 0
         ) invalid.add("position");
         this.position = position;
 
         if(
-                size < 0
+            size < 0
         ) invalid.add("size");
         this.size = size;
 
         if(
-                direction != SortOrder.ASCENDING.code() &&
-                direction != SortOrder.DESCENDING.code()
+            direction != SortOrder.ASCENDING.code() &&
+            direction != SortOrder.DESCENDING.code()
         ) invalid.add("direction");
         this.direction = direction;
 
         if(
-                order != SortOrder.UNSORTED.code() &&
-                order != SortOrder.ASCENDING.code() &&
-                order != SortOrder.DESCENDING.code()
+            order != SortOrder.UNSORTED.code() &&
+            order != SortOrder.ASCENDING.code() &&
+            order != SortOrder.DESCENDING.code()
         ) invalid.add("order");
         this.order = order;
 
@@ -245,7 +252,7 @@ implements Serializable
         AttributeSpecifier[] attributeSpecifiers
     ){
         if(attributeSpecifiers == null || attributeSpecifiers.length == 0) {
-            return null;
+            return Collections.emptyList();
         } else {
             OrderSpecifier[] orderSpecifiers = new OrderSpecifier[attributeSpecifiers.length];
             int i = 0;
@@ -310,6 +317,38 @@ implements Serializable
         return this.order;
     }
 
+    public static List<AttributeSpecifier> getAttributeSpecifiers(
+        QueryFilterRecord filter
+    ) {
+        List<AttributeSpecifier> attributeSpecifiers = new ArrayList<AttributeSpecifier>();
+        if(filter != null && filter.getOrderSpecifier() != null) {
+            for(FeatureOrderRecord orderSpecifier: filter.getOrderSpecifier()) {
+                final SortOrder sortOrder = orderSpecifier.getSortOrder();
+                attributeSpecifiers.add(
+                    new AttributeSpecifier(
+                        orderSpecifier.getFeature(),
+                        0, // position
+                        (sortOrder == null ? SortOrder.UNSORTED : sortOrder).code()
+                    )
+                );
+            }
+        }
+        return attributeSpecifiers;
+    }
+
+    public static Map<String,AttributeSpecifier> getAttributeSpecifierAsMap(
+        QueryFilterRecord filter
+    ) throws ServiceException {
+        Map<String,AttributeSpecifier> attributeSpecifierAsMap = new HashMap<String,AttributeSpecifier>();
+        List<AttributeSpecifier> attributeSpecifiers = getAttributeSpecifiers(filter);
+        for(AttributeSpecifier attributeSpecifier: attributeSpecifiers) {
+            attributeSpecifierAsMap.put(
+                attributeSpecifier.name(),
+                attributeSpecifier
+            );
+        }
+        return attributeSpecifierAsMap;
+    }
 
     //------------------------------------------------------------------------
     // Extends Object

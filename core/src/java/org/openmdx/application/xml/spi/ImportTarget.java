@@ -47,9 +47,8 @@
  */
 package org.openmdx.application.xml.spi;
 
-import javax.resource.cci.MappedRecord;
-
 import org.openmdx.base.exception.ServiceException;
+import org.openmdx.base.rest.cci.ObjectRecord;
 
 /**
  * Import Target
@@ -74,7 +73,7 @@ public interface ImportTarget {
      */
     void importObject(
         ImportMode mode,
-        MappedRecord objectHolder
+        ObjectRecord objectHolder
     ) throws ServiceException;
     
     /**

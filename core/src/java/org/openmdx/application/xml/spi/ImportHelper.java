@@ -181,7 +181,7 @@ public class ImportHelper {
         try {
             reader.setFeature(feature, value);
         } catch (SAXException exception) {
-        	SysLog.log(Level.INFO, "Sys|Unable to set SAXReader feature|feature='{0}', value='{1}'", feature, value);
+        	SysLog.log(Level.INFO, "Sys|Unable to set SAXReader feature|feature='{0}', value='{1}'", feature, Boolean.valueOf(value));
         }
     }
     

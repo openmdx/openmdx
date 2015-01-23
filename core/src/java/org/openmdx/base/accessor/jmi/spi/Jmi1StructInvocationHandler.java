@@ -229,7 +229,7 @@ public class Jmi1StructInvocationHandler implements InvocationHandler, Marshalle
     private Object getValue(
         ModelElement_1_0 fieldDef
     ) throws ServiceException {
-        String fieldName = (String)fieldDef.getName();
+        String fieldName = fieldDef.getName();
         Object value = this.delegate.get(fieldName);
         switch(ModelHelper.getMultiplicity(fieldDef)){
 	        case OPTIONAL: case SINGLE_VALUE:

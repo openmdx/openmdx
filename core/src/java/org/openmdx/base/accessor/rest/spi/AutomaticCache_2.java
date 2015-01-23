@@ -192,7 +192,7 @@ public class AutomaticCache_2 extends PinningCache_2 {
         @Override
         public ObjectRecord peek(
             Path oid
-        ) throws ServiceException { 
+        ) throws ResourceException { 
             if(this.cache != null){
                 ObjectRecord object = this.cache.get(oid);
                 if(object != null) {
@@ -270,7 +270,7 @@ public class AutomaticCache_2 extends PinningCache_2 {
         public boolean isAvailable(
             Mode mode, 
             Path xri
-        ) throws ServiceException {
+        ) throws ResourceException {
             return (
                 (mode == null || mode == Mode.AUTOMATIC) &&
                 this.cache != null && 
@@ -286,11 +286,11 @@ public class AutomaticCache_2 extends PinningCache_2 {
         public boolean put(
             Mode mode, 
             ObjectRecord object
-        ) throws ServiceException {
+        ) throws ResourceException {
             if(super.put(mode, object)){
                 return true;
             }
-            if(mode == null || mode == Mode.AUTOMATIC) try {
+            if(mode == null || mode == Mode.AUTOMATIC){
                 if(this.cache == null) synchronized(this) {
                     if(this.cache == null){
                         this.cache = getCache(
@@ -304,8 +304,6 @@ public class AutomaticCache_2 extends PinningCache_2 {
                 }
                 BasicCache_2.put((Cache)this.cache, object);
                 return true;
-            } catch (ResourceException exception) {
-                throw new ServiceException(exception);
             }
             return false;
         }

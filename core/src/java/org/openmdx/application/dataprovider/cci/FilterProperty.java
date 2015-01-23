@@ -47,14 +47,14 @@
  */
 package org.openmdx.application.dataprovider.cci;
 
-import static org.openmdx.application.dataprovider.layer.persistence.jdbc.Database_1_Attributes.QUERY_EXTENSION_BOOLEAN_PARAM;
-import static org.openmdx.application.dataprovider.layer.persistence.jdbc.Database_1_Attributes.QUERY_EXTENSION_CLASS;
-import static org.openmdx.application.dataprovider.layer.persistence.jdbc.Database_1_Attributes.QUERY_EXTENSION_CLAUSE;
-import static org.openmdx.application.dataprovider.layer.persistence.jdbc.Database_1_Attributes.QUERY_EXTENSION_DATETIME_PARAM;
-import static org.openmdx.application.dataprovider.layer.persistence.jdbc.Database_1_Attributes.QUERY_EXTENSION_DATE_PARAM;
-import static org.openmdx.application.dataprovider.layer.persistence.jdbc.Database_1_Attributes.QUERY_EXTENSION_DECIMAL_PARAM;
-import static org.openmdx.application.dataprovider.layer.persistence.jdbc.Database_1_Attributes.QUERY_EXTENSION_INTEGER_PARAM;
-import static org.openmdx.application.dataprovider.layer.persistence.jdbc.Database_1_Attributes.QUERY_EXTENSION_STRING_PARAM;
+import static org.openmdx.base.dataprovider.layer.persistence.jdbc.spi.Database_1_Attributes.QUERY_EXTENSION_BOOLEAN_PARAM;
+import static org.openmdx.base.dataprovider.layer.persistence.jdbc.spi.Database_1_Attributes.QUERY_EXTENSION_CLASS;
+import static org.openmdx.base.dataprovider.layer.persistence.jdbc.spi.Database_1_Attributes.QUERY_EXTENSION_CLAUSE;
+import static org.openmdx.base.dataprovider.layer.persistence.jdbc.spi.Database_1_Attributes.QUERY_EXTENSION_DATETIME_PARAM;
+import static org.openmdx.base.dataprovider.layer.persistence.jdbc.spi.Database_1_Attributes.QUERY_EXTENSION_DATE_PARAM;
+import static org.openmdx.base.dataprovider.layer.persistence.jdbc.spi.Database_1_Attributes.QUERY_EXTENSION_DECIMAL_PARAM;
+import static org.openmdx.base.dataprovider.layer.persistence.jdbc.spi.Database_1_Attributes.QUERY_EXTENSION_INTEGER_PARAM;
+import static org.openmdx.base.dataprovider.layer.persistence.jdbc.spi.Database_1_Attributes.QUERY_EXTENSION_STRING_PARAM;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -66,10 +66,11 @@ import org.openmdx.base.accessor.cci.SystemAttributes;
 import org.openmdx.base.query.AnyTypeCondition;
 import org.openmdx.base.query.Condition;
 import org.openmdx.base.query.ConditionType;
-import org.openmdx.base.query.Extension;
-import org.openmdx.base.query.Filter;
 import org.openmdx.base.query.Quantifier;
 import org.openmdx.base.resource.Records;
+import org.openmdx.base.rest.cci.ConditionRecord;
+import org.openmdx.base.rest.cci.QueryExtensionRecord;
+import org.openmdx.base.rest.cci.QueryFilterRecord;
 import org.openmdx.kernel.id.UUIDs;
 
 
@@ -82,13 +83,6 @@ import org.openmdx.kernel.id.UUIDs;
  * </ol> 
  */
 public final class FilterProperty implements Serializable  {
-
-    /**
-     * Do NOT use! Required for Externalizable.
-     */
-    public FilterProperty(
-    ) {        
-    }
 
     /**
      * Creates a new FilterProperty
@@ -146,7 +140,7 @@ public final class FilterProperty implements Serializable  {
         FilterProperty[] filterProperties
     ){
         if(filterProperties == null || filterProperties.length == 0) {
-            return null;
+            return Collections.emptyList();
         } else {
             Condition[] conditions = new Condition[filterProperties.length];
             int i = 0;
@@ -170,13 +164,13 @@ public final class FilterProperty implements Serializable  {
      * @return the corresponding filter properties
      */
     public static List<FilterProperty> getFilterProperties(
-        Filter filter
+        QueryFilterRecord filter
     ){
         if(filter == null) {
             return Collections.emptyList();
         } else {
             List<FilterProperty> filterProperties = new ArrayList<FilterProperty>();
-            for(Condition condition : filter.getCondition()) {
+            for(ConditionRecord condition : filter.getCondition()) {
                 filterProperties.add(
                     new FilterProperty(
                         Quantifier.codeOf(condition.getQuantifier()),
@@ -186,9 +180,9 @@ public final class FilterProperty implements Serializable  {
                     )
                 );
             }
-            List<Extension> extensions = filter.getExtension();
+            List<QueryExtensionRecord> extensions = filter.getExtension();
             if(extensions != null) {
-            	for(Extension extension: extensions) {
+            	for(QueryExtensionRecord extension: extensions) {
                     String namespace = SystemAttributes.CONTEXT_PREFIX + UUIDs.newUUID() + ':';
                     short piggyBackQuantifier = Quantifier.codeOf(null);
                     short piggyBackOperator = ConditionType.codeOf(null);

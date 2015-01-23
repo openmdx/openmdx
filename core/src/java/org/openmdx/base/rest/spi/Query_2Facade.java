@@ -47,19 +47,21 @@
  */
 package org.openmdx.base.rest.spi;
 
-import java.util.List;
-import java.util.Map;
+import java.util.Collections;
 import java.util.Set;
 import java.util.UUID;
 
 import javax.resource.ResourceException;
-import javax.resource.cci.IndexedRecord;
 import javax.resource.cci.MappedRecord;
 import javax.resource.cci.Record;
 
+import org.openmdx.base.exception.RuntimeServiceException;
+import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.resource.Records;
+import org.openmdx.base.rest.cci.QueryFilterRecord;
 import org.openmdx.base.rest.cci.QueryRecord;
+import org.openmdx.base.text.conversion.JavaBeans;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.jdo.ReducedJDOHelper;
 
@@ -80,7 +82,7 @@ public class Query_2Facade {
         MappedRecord delegate, 
         boolean preferringNotFoundException
     ) throws ResourceException {
-        if(!isDelegate(delegate)) {
+        if(!org.openmdx.base.rest.spi.QueryRecord.isCompatible(delegate)) {
             throw BasicException.initHolder(
                 new ResourceException(
                     "Unsupported query record",
@@ -109,7 +111,7 @@ public class Query_2Facade {
     private Query_2Facade(
         boolean preferringNotFoundException
     ) throws ResourceException {
-        this.delegate = (QueryRecord) Records.getRecordFactory().createMappedRecord(QueryRecord.NAME);
+        this.delegate = Records.getRecordFactory().createMappedRecord(QueryRecord.class);
         this.preferringNotFoundException = preferringNotFoundException;
     }
     
@@ -274,8 +276,6 @@ public class Query_2Facade {
      * 
      * @param object
      * 
-     * @param preferringNotFoundException
-     * 
      * @return a facade for the object's id
      * 
      * @throws ResourceException
@@ -292,11 +292,14 @@ public class Query_2Facade {
      * @param record the record to be tested
      * 
      * @return <code>true</code> if the given record is an object facade delegate
+     * 
+     * @deprecated use {@link org.openmdx.base.rest.spi.QueryRecord#isCompatible(Record)}
      */
+    @Deprecated
     public static boolean isDelegate(
         Record record
     ){
-        return QueryRecord.NAME.equals(record.getRecordName());
+        return org.openmdx.base.rest.spi.QueryRecord.isCompatible(record);
     }
     
     
@@ -307,7 +310,7 @@ public class Query_2Facade {
      */
     public final Path getPath(
     ) {
-        return this.delegate.getPath();
+        return this.delegate.getResourceIdentifier();
     }
     
     /**
@@ -318,59 +321,9 @@ public class Query_2Facade {
     public final void setPath(
         Path path
     ) {
-        this.delegate.setPath(path);
+        this.delegate.setResourceIdentifier(path);
     }
     
-    /**
-     * Retrieve parameters.
-     *
-     * @return Returns the parameters.
-     * 
-     * @throws ResourceException 
-     */
-    public final Record getParameters(
-    ) throws ResourceException {
-        return this.delegate.getParameters();
-    }
-    
-    /**
-     * Set parameters.
-     * 
-     * @param parameters The parameters to set.
-     * 
-     * @throws ResourceException 
-     */
-    @SuppressWarnings("unchecked")
-    public final void setParameters(
-        Object parameters
-    ) throws ResourceException {
-        if (parameters instanceof MappedRecord || parameters instanceof IndexedRecord) {
-            this.delegate.setParameters((Record) parameters);
-        } else if (parameters instanceof List<?>) {
-            IndexedRecord jcaParameters = Records.getRecordFactory().createIndexedRecord("list");
-            jcaParameters.addAll((List<?>)parameters);
-            this.delegate.setParameters(jcaParameters);
-        } else if (parameters instanceof Map<?,?>) {
-            MappedRecord jcaParameters = Records.getRecordFactory().createMappedRecord("map");
-            jcaParameters.putAll((Map<?,?>)parameters);
-            this.delegate.setParameters(jcaParameters);
-        } else if(parameters instanceof Object[]) {
-            this.delegate.setParameters(
-                Records.getRecordFactory().asIndexedRecord("list",null,parameters)
-            );
-        } else throw BasicException.initHolder(
-            new ResourceException(
-                "Unexpected parameters class",
-                BasicException.newEmbeddedExceptionStack(
-                    BasicException.Code.DEFAULT_DOMAIN,
-                    BasicException.Code.BAD_PARAMETER,
-                    new BasicException.Parameter("expected", List.class.getName(), Map.class.getName(), Object[].class.getName()),
-                    new BasicException.Parameter("actual", parameters == null ? null : parameters.getClass().getName())
-                )
-            )
-        );
-    }
-
     /**
      * Retrieve queryType.
      *
@@ -379,7 +332,6 @@ public class Query_2Facade {
     public final String getQueryType() {
         return this.delegate.getQueryType();
     }
-
     
     /**
      * Set queryType.
@@ -394,9 +346,54 @@ public class Query_2Facade {
      * Retrieve query.
      *
      * @return Returns the query.
+     * 
+     * @deprecated use {@link #getQueryFilter()} 
      */
+    @Deprecated
     public final String getQuery() {
-        return this.delegate.getQuery();
+        try {
+			QueryFilterRecord queryFilter = this.delegate.getQueryFilter();
+			return queryFilter == null ? this.delegate.getQuery() : JavaBeans.toXML(queryFilter);
+		} catch (ServiceException e) {
+			throw new RuntimeServiceException(e);
+		}
+    }
+
+    
+    /**
+     * Set query.
+     * 
+     * @param query The query to set.
+     * 
+     * @deprecated use {@link #setQueryFilter(QueryFilterRecord)} or {@link #setExtension(String, Object)}
+     */
+    @Deprecated
+    public final void setQuery(String query) {
+        if(query == null) {
+            this.delegate.setQuery(null);
+            this.delegate.setQueryFilter(null);
+        } else if (query.startsWith("<?xml)")){
+            this.delegate.setQuery(null);
+            try {
+                this.delegate.setQueryFilter(
+                    (QueryFilterRecord)JavaBeans.fromXML(query)
+                );
+            } catch (ServiceException exception) {
+                throw new RuntimeServiceException(exception);
+            }
+        } else {
+            this.delegate.setQuery(query);
+            this.delegate.setQueryFilter(null);
+        }
+    }
+
+    /**
+     * Retrieve query.
+     *
+     * @return Returns the query.
+     */
+    public final QueryFilterRecord getQueryFilter() {
+        return this.delegate.getQueryFilter();
     }
 
     
@@ -405,10 +402,9 @@ public class Query_2Facade {
      * 
      * @param query The query to set.
      */
-    public final void setQuery(String query) {
-        this.delegate.setQuery(query);
+    public final void setQueryFilter(QueryFilterRecord queryFilter) {
+        this.delegate.setQueryFilter(queryFilter);
     }
-
     
     /**
      * Retrieve position.
@@ -459,58 +455,66 @@ public class Query_2Facade {
      * @return the fetch groups
      */
     public final Set<String> getGroups(){
-        return this.delegate.getGroups();
+        String fetchGroupName = this.delegate.getFetchGroupName();
+        return fetchGroupName == null ? Collections.<String>emptySet() : Collections.singleton(fetchGroupName);
     }
 
     /**
      * Set the fetch groups
      * 
      * @throws ResourceException 
+     * 
+     * @deprecated use {@link #setFetchGroupName(String)}
      */
+    @Deprecated
     public final void setGroups(
         Set<String> groups
     ){
-        this.delegate.setGroups(groups);
+        if(groups == null) {
+            setFetchGroupName(null);
+        } else {
+            switch(groups.size()) {
+                case 0: 
+                    setFetchGroupName(null);
+                    break;
+                case 1: 
+                    setFetchGroupName(groups.iterator().next());
+                    break;
+                default: 
+                	throw new RuntimeServiceException(
+	                    BasicException.Code.DEFAULT_DOMAIN,
+	                    BasicException.Code.NOT_SUPPORTED,
+	                    "At most one fetch group may be specified",
+	                    new BasicException.Parameter("groups", groups)
+	                );
+            }
+        }
     }
-
+    
     /**
-     * @return
-     * @see org.openmdx.base.rest.cci.QueryRecord#getFeatures()
+     * Set the fetch group name
+     * 
+     * @param fetchGroupName the fetch group name
+     * 
+     * @throws ResourceException 
      */
+    public final void setFetchGroupName(
+        String fetchGroupName
+    ){
+        this.delegate.setFetchGroupName(fetchGroupName);
+    }
+    
+
     public Set<String> getFeatures() {
-        return this.delegate.getFeatures();
+        return this.delegate.getFeatureName();
     }
 
     /**
      * @param features
      * @see org.openmdx.base.rest.cci.QueryRecord#setFeatures(java.util.Set)
      */
-    public void setFeatures(Set<String> features) {
-        this.delegate.setFeatures(features);
-    }
-
-    /**
-     * Tells whether the object shall be refreshed before answering the query.
-     * 
-     * @param refresh <code>true</code> if the object shall be refreshed before 
-     * answering the query
-     * 
-     * @see org.openmdx.base.rest.cci.QueryRecord#setRefresh(boolean)
-     */
-    public void setRefresh(boolean refresh) {
-        this.delegate.setRefresh(refresh);
-    }
-
-    /**
-     * Tells whether the object shall be refreshed before answering the query.
-     * 
-     * @return <code>true</code> if the object shall be refreshed before 
-     * answering the query
-     * 
-     * @see org.openmdx.base.rest.cci.QueryRecord#isRefresh()
-     */
-    public boolean isRefresh() {
-        return this.delegate.isRefresh();
+    public void setFeatures(Set<String> featureNames) {
+        this.delegate.setFeatureName(featureNames);
     }
 
     /**
@@ -531,8 +535,40 @@ public class Query_2Facade {
      */
     public boolean isFindRequest(
     ){
-        Path xri = getPath();
-        return xri.size() % 2 == 0 || xri.isPattern();
+    	return isFindRequest(getPath());
+    }
+    
+    /**
+     * Tells whether a collection of objects or a single object shall be retrieved
+     * 
+     * @return <code>true</code> if a collection of objects shall be retrieved
+     */
+    public static boolean isFindRequest(
+    	Path xri	
+    ){
+        return xri.isContainerPath() || xri.isPattern();
+    }
+    
+    /**
+     * Tells whether refresh is required before answering the query
+     * 
+     * @return <code>true</code> if refresh is required before answering the query
+     */
+    public boolean isRefresh(){
+        return this.delegate.isRefresh();
+    }
+    
+    /**
+     * Tells whether the object shall be refreshed before answering the query.
+     * 
+     * @param refresh <code>true</code> if the object shall be refreshed before 
+     * answering the query
+     * @throws ResourceException 
+     */
+    public void setRefresh(
+        boolean refresh
+    ) throws ResourceException {
+        this.delegate.setRefresh(refresh);
     }
 
     /* (non-Javadoc)

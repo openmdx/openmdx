@@ -183,7 +183,7 @@ public class TestPerformance {
             @Override
             public void deserialize() throws Exception {
                 RestSource source = sink.asSource();
-                IndexedRecord resultSet = Records.getRecordFactory().createIndexedRecord(ResultRecord.NAME);
+                IndexedRecord resultSet = Records.getRecordFactory().createIndexedRecord(ResultRecord.class);
                 RestParser.parseResponse(resultSet, source);
             }
 
@@ -208,7 +208,7 @@ public class TestPerformance {
             @Override
             public void deserialize() throws Exception {
                 RestSource source = this.sink.asSource();
-                IndexedRecord resultSet = Records.getRecordFactory().createIndexedRecord(ResultRecord.NAME);
+                IndexedRecord resultSet = Records.getRecordFactory().createIndexedRecord(ResultRecord.class);
                 RestParser.parseResponse(resultSet, source);
             }
 
@@ -249,7 +249,7 @@ public class TestPerformance {
     static public void setUp(
     ) throws ResourceException{
         XMLGregorianCalendar today = DateStateViews.today(); 
-        testData = Records.getRecordFactory().createIndexedRecord(ResultRecord.NAME);
+        testData = Records.getRecordFactory().createIndexedRecord(ResultRecord.class);
         for(int i = 0; i < SIZE; i++){
             if(i < SIZE / 5){
                 //

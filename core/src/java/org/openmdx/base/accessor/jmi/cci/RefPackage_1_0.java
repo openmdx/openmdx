@@ -58,7 +58,7 @@ import org.openmdx.base.accessor.spi.PersistenceManager_1_0;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.Model_1_0;
 import org.openmdx.base.naming.Path;
-import org.openmdx.base.query.Filter;
+import org.openmdx.base.rest.cci.QueryFilterRecord;
 
 /**
  * This interface extends the javax.jmi.reflect.RefPackage interface by
@@ -105,7 +105,7 @@ public interface RefPackage_1_0 extends RefPackage {
    RefQuery_1_0 refCreateQuery(
        String filterClassName,
        boolean subclasses, 
-       Filter filter 
+       QueryFilterRecord filter 
    ) throws ServiceException;
 
    /**

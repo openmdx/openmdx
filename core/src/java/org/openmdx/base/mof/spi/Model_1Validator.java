@@ -88,11 +88,18 @@ public class Model_1Validator {
      */
     private static final Set<String> META_MODEL_PACKAGES = Collections.unmodifiableSet(
         Sets.asSet(
+    		"org:oasis-open",
             "org:omg:model1",
+            "org:openmdx:base",
             "org:w3c"
         )
     );
 
+    /**
+     * The cached meta model
+     */
+    private static Model_1_0 metaModel;
+    
     /**
      * Tells whether the model is valid
      * 
@@ -161,14 +168,15 @@ public class Model_1Validator {
 
     private static Model_1_0 getMetaModel(
     ) throws ServiceException{
-        try {
-            ModelBuilder_1_0 metaModelBuilder = Classes.newApplicationInstance(
+    	if(metaModel == null) try {
+            ModelBuilder_1_0 metaModelBuilder = Classes.newPlatformInstance(
+               	"org.openmdx.application.mof.repository.accessor.ModelBuilder_1",	
                 ModelBuilder_1_0.class, 
-                ModelBuilder_1_0.BUILDER_CLASS_NAME,
-                Boolean.TRUE,
-                META_MODEL_PACKAGES
+                Boolean.FALSE, // validation
+                META_MODEL_PACKAGES,
+                Boolean.TRUE // meta-model		
             );
-            return metaModelBuilder.build();
+            metaModel = metaModelBuilder.build();
         } catch (Exception exception) {
             throw new ServiceException(
                 exception,
@@ -177,6 +185,7 @@ public class Model_1Validator {
                 "Meta-data acquisition failure"
             );
         }
+        return metaModel;
     }
     
     private static void validateElements(
@@ -236,7 +245,7 @@ public class Model_1Validator {
                 new BasicException.Parameter("elementName", attribute.getQualifiedName())
             );
         } else {
-            String type = ((Path)attribute.getType()).getLastSegment().toClassicRepresentation();
+            String type = attribute.getType().getLastSegment().toClassicRepresentation();
             if(PrimitiveTypes.DATE.equals(type)) {
                 if(!(value instanceof XMLGregorianCalendar)) {
                     throw new ServiceException(
@@ -396,9 +405,9 @@ public class Model_1Validator {
         Set<String> modelElements = new TreeSet<String>();
         for(ModelElement_1_0 element : model.getContent()){
             if(model.isClassType(element)) {
-                modelElements.add((String)element.getQualifiedName());
+                modelElements.add(element.getQualifiedName());
                 for(Object featureId : element.objGetList("feature")) {
-                    modelElements.add((String)model.getElement(featureId).getQualifiedName()); 
+                    modelElements.add(model.getElement(featureId).getQualifiedName()); 
                 }
             }
         }

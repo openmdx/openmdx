@@ -72,6 +72,7 @@ import org.openmdx.base.accessor.rest.spi.ControlObjects_2;
 import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.io.ObjectInputStream;
+import org.openmdx.base.json.stream.JSONReader;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
 import org.openmdx.base.mof.cci.ModelHelper;
 import org.openmdx.base.mof.cci.Model_1_0;
@@ -82,9 +83,12 @@ import org.openmdx.base.naming.Path;
 import org.openmdx.base.resource.Records;
 import org.openmdx.base.resource.cci.ExtendedRecordFactory;
 import org.openmdx.base.rest.cci.MessageRecord;
+import org.openmdx.base.rest.cci.ObjectRecord;
 import org.openmdx.base.rest.cci.QueryRecord;
 import org.openmdx.base.rest.cci.ResultRecord;
+import org.openmdx.base.rest.spi.RestSource.Format;
 import org.openmdx.base.text.conversion.Base64;
+import org.openmdx.base.text.conversion.UUIDConversion;
 import org.openmdx.base.wbxml.WBXMLReader;
 import org.openmdx.base.xml.spi.LargeObjectWriter;
 import org.openmdx.kernel.collection.ArraysExtension;
@@ -117,12 +121,13 @@ public class RestParser {
     private RestParser() {
         // Avoid instantiation
     }
+    
 
     /**
      * 
      */
     private static final String ITEM_TAG = "_item";
-
+    
     /**
      * The XML Readers
      */
@@ -143,7 +148,7 @@ public class RestParser {
     };
 
     /**
-     * The XML Readers
+     * The WBXML Readers
      */
     private static final ThreadLocal<XMLReader> wbxmlReaders = new ThreadLocal<XMLReader>() {
 
@@ -156,7 +161,22 @@ public class RestParser {
             }
         }
     };
+    
+    /**
+     * The JSON Readers
+     */
+    private static final ThreadLocal<XMLReader> jsonReaders = new ThreadLocal<XMLReader>() {
 
+        @Override
+        protected XMLReader initialValue() {
+            try {
+                return new JSONReader();
+            } catch (Exception e) {
+                throw new RuntimeServiceException(e);
+            }
+        }
+    };
+    
     /**
      * Convert the path info into a resource identifier
      * 
@@ -186,13 +206,18 @@ public class RestParser {
     private static XMLReader getReader(
         RestSource source
     ) throws SAXNotRecognizedException, SAXNotSupportedException {
-        if(source.isWBXML()) {
-            XMLReader xmlReader = RestParser.wbxmlReaders.get();
-            xmlReader.setFeature(WBXMLReader.EXHAUST, source.isToBeExhausted());
-            return xmlReader;
-        } else {
-            return RestParser.xmlReaders.get();
-        }
+    	final Format format = source.getFormat();
+		switch(format) {
+    		case WBXML:
+                XMLReader xmlReader = RestParser.wbxmlReaders.get();
+                xmlReader.setFeature(WBXMLReader.EXHAUST, source.isToBeExhausted());
+                return xmlReader;
+    		case XML:
+                return RestParser.xmlReaders.get();
+    		case JSON:
+    			return RestParser.jsonReaders.get();
+    	}
+    	throw new SAXNotSupportedException("Unsupported input format: " + format);
     }
 
     /**
@@ -211,7 +236,7 @@ public class RestParser {
     public static MappedRecord parseRequest(
         RestSource source, 
         Path xri
-    ) throws ServiceException {
+    ) throws SAXException {
         try {
             StandardHandler handler = new StandardHandler(source);
             XMLReader reader = RestParser.getReader(source);
@@ -220,11 +245,9 @@ public class RestParser {
             source.close();
             return handler.getValue(xri);
         } catch (IOException exception) {
-            throw new ServiceException(exception);
-        } catch (SAXException exception) {
-            throw new ServiceException(exception);
+        	throw new SAXException(exception);
         } catch (RuntimeServiceException exception) {
-            throw new ServiceException(exception);
+        	throw new SAXException(exception);
         }
     }
 
@@ -239,7 +262,7 @@ public class RestParser {
     public static void parseResponse(
         Record target, 
         RestSource source
-    ) throws ServiceException {
+    ) throws SAXException {
         try {
             StandardHandler handler = new StandardHandler(target, source);
             XMLReader reader = RestParser.getReader(source);
@@ -247,11 +270,11 @@ public class RestParser {
             reader.parse(source.getBody());
             source.close();
         } catch (IOException exception) {
-            throw new ServiceException(exception);
+            throw new SAXException(exception);
         } catch (SAXException exception) {
-            throw new ServiceException(exception);
+            throw new SAXException(exception);
         } catch (RuntimeServiceException exception) {
-            throw new ServiceException(exception);
+            throw new SAXException(exception);
         }
     }
 
@@ -267,7 +290,7 @@ public class RestParser {
      */
     public static BasicException parseException(
         RestSource source
-    ) throws ServiceException {
+    ) throws SAXException {
         try {
             ExceptionHandler handler = new ExceptionHandler();
             XMLReader reader = RestParser.getReader(source);
@@ -276,11 +299,9 @@ public class RestParser {
             source.close();
             return handler.getValue();
         } catch (IOException exception) {
-            throw new ServiceException(exception);
-        } catch (SAXException exception) {
-            throw new ServiceException(exception);
+            throw new SAXException(exception);
         } catch (RuntimeServiceException exception) {
-            throw new ServiceException(exception);
+            throw new SAXException(exception);
         }
     }
 
@@ -314,7 +335,6 @@ public class RestParser {
             )
         );
     }
-
 
     // ------------------------------------------------------------------------
     // Class StandardHandler
@@ -370,6 +390,8 @@ public class RestParser {
 
         private String version = null;
 
+        private String id = null;
+        
         private String index = null;
 
         private Record value = null;
@@ -387,23 +409,16 @@ public class RestParser {
          */
         MappedRecord getValue(
         	Path xri
-        ) throws ServiceException {
+        ) throws SAXException {
             String typeName = this.values.peek().getRecordName();
             if (this.isQueryType(typeName)) {
                 return this.getQuery(xri);
             } else if (this.isStructureType(typeName)) {
                 return (MappedRecord) this.values.peek();
             } else if (xri.isTransactionalObjectId()){
-                Object_2Facade facade = this.getObject(null);
-                MappedRecord delegate = facade.getDelegate();
-                return xri.equals(facade.getPath()) ? delegate : Records.getRecordFactory().singletonMappedRecord(
-                    "map",
-                    null,
-                    xri,
-                    delegate
-                );
+            	return this.getObject(null);
             } else {
-                return this.getObject(xri).getDelegate();
+                return this.getObject(xri);
             }
         }
 
@@ -414,29 +429,71 @@ public class RestParser {
          * 
          * @return the interaction's object record
          */
-        Object_2Facade getObject(
+        ObjectRecord getObject(
             Path xri
-        ) throws ServiceException {
-            Object_2Facade object = Facades.newObject(
+        ) throws SAXException {
+        	final Class<ObjectRecord> recordInterface = ObjectRecord.class;
+			ObjectRecord object = newMappedRecord(recordInterface);
+        	object.setResourceIdentifier(
 			    xri == null ? this.source.getXRI(this.href) : xri
 			);
 			object.setValue((MappedRecord) this.values.peek());
 			if (this.version != null) {
 			    object.setVersion(Base64.decode(this.version));
 			}
+			if(UUIDConversion.isUUID(this.id)) {
+				object.setTransientObjectId(UUIDConversion.fromString(this.id));
+			}
 			return object;
         }
-        
+
+		private <T extends MappedRecord> T newMappedRecord(
+			final Class<T> recordInterface
+		) throws SAXException {
+			try {
+				return recordFactory.createMappedRecord(recordInterface);
+			} catch (ResourceException exception) {
+				throw new SAXException(exception);
+			}
+		}
+
+		private MappedRecord newMappedRecord(
+			String typeName
+		) throws SAXException {
+			try {
+				return recordFactory.createMappedRecord(typeName);
+			} catch (ResourceException exception) {
+				throw new SAXException(exception);
+			}
+		}
+
+		private MappedRecord newMappedRecord(
+			final Multiplicity multiplicity
+		) throws SAXException {
+			return newMappedRecord(multiplicity.code());
+		}
+		
+		private IndexedRecord newIndexedRecord(
+			final Multiplicity multiplicity
+		) throws SAXException {
+			try {
+				return recordFactory.createIndexedRecord(multiplicity.code());
+			} catch (ResourceException exception) {
+				throw new SAXException(exception);
+			}
+		}
+		
         /**
          * Retrieve the interaction's query record
          * 
          * @return the interaction's query record
          */
-        MappedRecord getQuery(Path xri)
-        throws ServiceException {
+        MappedRecord getQuery(
+        	Path xri
+        ){
             QueryRecord query = (QueryRecord) this.values.peek();
             if(xri != null) {
-                query.setPath(xri);
+                query.setResourceIdentifier(xri);
             }
             return query;
         }
@@ -457,10 +514,10 @@ public class RestParser {
                     // Object or struct
                     //
                     if (target instanceof IndexedRecord) {
-                        ((IndexedRecord)this.target).add((MappedRecord) this.getObject(null).getDelegate());
+                        ((IndexedRecord)this.target).add((MappedRecord) this.getObject(null));
                         this.values.pop();
                     } else if (this.target instanceof MessageRecord) {
-                        ((MessageRecord)this.target).setPath(this.source.getXRI(this.href));
+                        ((MessageRecord)this.target).setResourceIdentifier(this.source.getXRI(this.href));
                         ((MessageRecord)this.target).setBody((MappedRecord) this.values.peekLast());
                         this.values.pop();
                     } else if(this.values.size() > 1 && isStructureType(this.values.peek().getRecordName())){
@@ -483,8 +540,8 @@ public class RestParser {
          * @throws ServiceException
          */
         @SuppressWarnings("unchecked")
-        private void propagateData()
-            throws ServiceException {
+        private void propagateData(
+        ) throws SAXException {
             if (hasData()) {
                 java.lang.Object data = getData();
                 if(data instanceof String) {
@@ -499,12 +556,12 @@ public class RestParser {
                         PrimitiveTypes.INTEGER.equals(featureType) ? Datatypes.create(Integer.class, text.trim()) : 
                         PrimitiveTypes.DECIMAL.equals(featureType) ? Datatypes.create(BigDecimal.class,text.trim()) : 
                         PrimitiveTypes.BOOLEAN.equals(featureType) ? Datatypes.create(Boolean.class, text.trim()) : 
-                        PrimitiveTypes.OBJECT_ID.equals(featureType) ? text.trim() : 
+                        PrimitiveTypes.OBJECT_ID.equals(featureType) ? Datatypes.create(Path.class, text.trim()) :
                         PrimitiveTypes.DATETIME.equals(featureType) ? Datatypes.create(Date.class,text.trim()) : 
                         PrimitiveTypes.DATE.equals(featureType) ? Datatypes.create(XMLGregorianCalendar.class, text.trim()) : 
                         PrimitiveTypes.ANYURI.equals(featureType) ? Datatypes.create(URI.class, text.trim()) : 
                         PrimitiveTypes.BINARY.equals(featureType) ? Base64.decode(text.trim()) : 
-                        featureType != null && model.isClassType(featureType) ? new Path(text.trim()) : text;
+                        featureType != null && isClassType() ? new Path(text.trim()) : text;
                 }
                 if(data == null && this.multiplicity != Multiplicity.SINGLE_VALUE && this.multiplicity != Multiplicity.OPTIONAL) {
                     SysLog.warning(
@@ -543,12 +600,20 @@ public class RestParser {
             }
         }
 
+		private boolean isClassType() throws SAXException {
+			try {
+				return model.isClassType(featureType);
+			} catch (ServiceException exception) {
+				throw new SAXException(exception);
+			}
+		}
+
         private Multiplicity peekMultivaluedMultiplicity(
         ){
             String type = this.values.peek().getRecordName();
             if(type.indexOf(':') < 0) {
                 for(Multiplicity candidate : Multiplicity.values()) {
-                    if(candidate.toString().equals(type)){
+                    if(candidate.code().equalsIgnoreCase(type)){
                         return candidate;
                     }
                 }
@@ -562,8 +627,8 @@ public class RestParser {
             String uri,
             String localName,
             String qName,
-            Attributes attributes)
-        throws SAXException {
+            Attributes attributes
+        ) throws SAXException {
             super.startElement(uri, localName, qName, attributes);
             try {
                 if ("org.openmdx.kernel.ResultSet".equals(qName)) {
@@ -579,96 +644,127 @@ public class RestParser {
                         }
                     }
                 } else if (qName.indexOf('.') > 0) {
-                    try {
-                        // Begin object or struct
-                        String typeName = qName.replace('.', ':');
-                        MappedRecord mappedRecord = recordFactory.createMappedRecord(typeName);
-                        if(this.isStructureType(typeName)){
-                            if(!this.values.isEmpty()) {
-                                Multiplicity multiplicity = peekMultivaluedMultiplicity();
-                                if(multiplicity == null) {
-                                    ((MappedRecord) this.values.peek()).put(featureName, mappedRecord);
-                                } else {
-                                    switch(multiplicity) {
-                                        case SET:
-                                            ((IndexedRecord)this.values.peek()).add(mappedRecord);
-                                            break;
-                                        case LIST:
-                                            this.index = attributes.getValue("index");
-                                            IndexedRecord list = (IndexedRecord)this.values.peek();
-                                            int index = Integer.parseInt(this.index);
-                                            if(index != list.size()) throw new ServiceException(
-                                                  BasicException.Code.DEFAULT_DOMAIN,
-                                                  BasicException.Code.NOT_SUPPORTED,
-                                                  "List indices must be ascending and without holes",
-                                                  new BasicException.Parameter("multiplicity", this.multiplicity),
-                                                  new BasicException.Parameter("index", this.index),
-                                                  new BasicException.Parameter("item", mappedRecord)
-                                            );
-                                            list.add(mappedRecord);
-                                            break;
-                                        case SPARSEARRAY: case MAP:
-                                            this.index = attributes.getValue("index");
-                                            ((MappedRecord)this.values.peek()).put(this.index, mappedRecord);
-                                            break;
-                                        default:
-                                            throw new ServiceException(
-                                                BasicException.Code.DEFAULT_DOMAIN,
-                                                BasicException.Code.ASSERTION_FAILURE,
-                                                "Unexpected multiplicity",
-                                                new BasicException.Parameter("multiplicity", multiplicity)
-                                            );
-                                    }
-                                }
-                            }
-                        }
-                        String href = attributes.getValue("href");
-                        if(href != null) {
-                             this.href = href;
-                        }
-                        String version = attributes.getValue("version");
-                        if(version != null){
-                            this.version = version;
-                        }
-                        this.values.push(mappedRecord);
-                    } catch (ResourceException exception) {
-                        throw new SAXException(exception);
-                    }
+                    // Begin object or struct
+					String typeName = qName.replace('.', ':');
+					MappedRecord mappedRecord = newMappedRecord(typeName);
+					if(this.isStructureType(typeName)){
+					    if(!this.values.isEmpty()) {
+					        Multiplicity multiplicity = peekMultivaluedMultiplicity();
+					        if(multiplicity == null) {
+					            ((MappedRecord) this.values.peek()).put(featureName, mappedRecord);
+					        } else {
+					            switch(multiplicity) {
+					                case SET:
+					                    ((IndexedRecord)this.values.peek()).add(mappedRecord);
+					                    break;
+					                case LIST:
+					                    this.index = attributes.getValue("index");
+					                    IndexedRecord list = (IndexedRecord)this.values.peek();
+					                    int index = Integer.parseInt(this.index);
+					                    if(index != list.size()) throw new ServiceException(
+					                          BasicException.Code.DEFAULT_DOMAIN,
+					                          BasicException.Code.NOT_SUPPORTED,
+					                          "List indices must be ascending and without holes",
+					                          new BasicException.Parameter("multiplicity", this.multiplicity),
+					                          new BasicException.Parameter("index", this.index),
+					                          new BasicException.Parameter("item", mappedRecord)
+					                    );
+					                    list.add(mappedRecord);
+					                    break;
+					                case SPARSEARRAY: case MAP:
+					                    this.index = attributes.getValue("index");
+					                    ((MappedRecord)this.values.peek()).put(this.index, mappedRecord);
+					                    break;
+					                default:
+					                    throw new ServiceException(
+					                        BasicException.Code.DEFAULT_DOMAIN,
+					                        BasicException.Code.ASSERTION_FAILURE,
+					                        "Unexpected multiplicity",
+					                        new BasicException.Parameter("multiplicity", multiplicity)
+					                    );
+					            }
+					        }
+					    }
+					}
+					String href = attributes.getValue("href");
+					if(href != null) {
+					     this.href = href;
+					}
+					String version = attributes.getValue("version");
+					if(version != null){
+					    this.version = version;
+					}
+					String id = attributes.getValue("id");
+					if(id != null) {
+					     this.id = id;
+					}
+					this.values.push(mappedRecord);
                 } else if (ITEM_TAG.equals(qName)) {
                     this.index = attributes.getValue("index");
+                    final String featureType = attributes.getValue("type");
+                    if(featureType != null) {
+                    	this.featureType = featureType;
+                    }
                 } else {
                     this.featureName = localName;
+                    final String recordName = this.values.peek().getRecordName();
+                    final String type = attributes.getValue("type");
                     ModelElement_1_0 featureDef = getFeatureDef(
-                        this.values.peek().getRecordName(),
-                        this.featureName
-                    );
-                    this.featureType = getFeatureType(featureDef);
+                		recordName,
+                		this.featureName
+            		);
+                    if(type == null) {
+                    	this.featureType = getFeatureType(featureDef);
+                    } else {
+                    	this.featureType = type;
+                    }
                     this.multiplicity = getMultiplicity(featureDef);
                     switch(this.multiplicity) {
-	                    case LIST: case SET: 
-	                        ((MappedRecord) this.values.peek()).put(
-                                this.featureName, 
-                                this.value = recordFactory.createIndexedRecord(this.multiplicity.toString())
-                            );
+	                    case LIST: case SET: {
+	                    	final MappedRecord holder = (MappedRecord) this.values.peek();
+	                    	this.value = (Record) holder.get(this.featureName);
+	                    	if(this.value == null) {
+								final Multiplicity multiplicity2 = this.multiplicity;
+								holder.put(
+								    this.featureName, 
+								    this.value = newIndexedRecord(multiplicity2)
+								);
+	                    	} else {
+	                    		((IndexedRecord)this.value).clear();
+	                    	}
 	                        this.values.push(this.value);
 	                        break;
-	                    case SPARSEARRAY:
-	                        ((MappedRecord) this.values.peek()).put(
-                                this.featureName, 
-                                this.value = recordFactory.createMappedRecord(this.multiplicity.toString())
-                            );
+	                    }
+	                    case SPARSEARRAY: {
+	                    	final MappedRecord holder = (MappedRecord) this.values.peek();
+	                    	this.value = (Record) holder.get(this.featureName);
+	                    	if(this.value == null) {
+		                        holder.put(
+	                                this.featureName, 
+	                                this.value = newMappedRecord(this.multiplicity)
+	                            );
+	                    	} else {
+	                    		((MappedRecord)this.value).clear();
+	                    	}
                             this.values.push(this.value);
 	                        break;
-	                    case OPTIONAL:
-	                        ((MappedRecord) this.values.peek()).put(this.featureName, this.value = null);
+	                    }
+	                    case OPTIONAL: {
+	                    	final MappedRecord holder = (MappedRecord) this.values.peek();
+	                    	this.value = (Record) holder.get(this.featureName);
+	                    	if(this.value == null && !holder.containsKey(this.featureName)) {
+		                        holder.put(
+		                        	this.featureName, 
+		                        	this.value
+		                        );
+	                    	}
 	                        break;
+	                    }
 	                    default:
 	                        this.value = null;
                     }
                 }
             } catch (ServiceException exception) {
-                throw new SAXException(exception);
-            } catch (ResourceException exception) {
                 throw new SAXException(exception);
             }
         }
@@ -734,15 +830,19 @@ public class RestParser {
          * 
          * @return <code>true</code> in case of structure, <code>false</code> in
          *         case of object
-         * 
-         * @throws ServiceException
+         *         
+         * @throws SAXException
          */
         protected boolean isStructureType(
             String typeName
-        ) throws ServiceException {
-            return 
-                !ControlObjects_2.isControlObjectType(typeName) && 
-                model.isStructureType(typeName);
+        ) throws SAXException{
+            try {
+				return 
+					!ControlObjects_2.isControlObjectType(typeName) &&  
+					model.isStructureType(typeName);
+			} catch (ServiceException exception) {
+				throw new SAXException(exception);
+			}
         }
 
         /**
@@ -755,8 +855,9 @@ public class RestParser {
          * 
          * @throws ServiceException
          */
-        protected boolean isQueryType(String typeName)
-        throws ServiceException {
+        protected boolean isQueryType(
+        	String typeName
+        ){
             return QueryRecord.NAME.equals(typeName);
         }
 
@@ -821,8 +922,8 @@ public class RestParser {
          * 
          * @throws ServiceException
          */
-        BasicException getValue()
-        throws ServiceException {
+        BasicException getValue(
+        ){
             return this.stack;
         }
 
@@ -1043,7 +1144,7 @@ public class RestParser {
         /* (non-Javadoc)
          * @see org.openmdx.base.xml.stream.LargeObjectWriter#writeBinaryData(byte[], int, int)
          */
-    //  @Override
+        @Override
         public void writeBinaryData(
             byte[] data, 
             int offset, 
@@ -1055,7 +1156,7 @@ public class RestParser {
         /* (non-Javadoc)
          * @see org.openmdx.base.xml.stream.LargeObjectWriter#writeBinaryData(org.w3c.cci2.BinaryLargeObject)
          */
-    //  @Override
+        @Override
         public void writeBinaryData(
             BinaryLargeObject data
         ){
@@ -1065,7 +1166,7 @@ public class RestParser {
         /* (non-Javadoc)
          * @see org.openmdx.base.xml.stream.LargeObjectWriter#writeCharacterData(org.w3c.cci2.CharacterLargeObject)
          */
-    //  @Override
+        @Override
         public void writeCharacterData(
             CharacterLargeObject data
         ){

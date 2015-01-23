@@ -63,16 +63,18 @@ import javax.jdo.PersistenceManager;
 import javax.resource.ResourceException;
 
 import org.oasisopen.jmi1.RefContainer;
-import org.openmdx.application.dataprovider.layer.persistence.jdbc.Database_1_Attributes;
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
 import org.openmdx.base.accessor.jmi.cci.RefQuery_1_0;
+import org.openmdx.base.dataprovider.layer.persistence.jdbc.spi.Database_1_Attributes;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.persistence.cci.Queries;
 import org.openmdx.base.persistence.spi.QueryExtension;
-import org.openmdx.base.query.Extension;
+import org.openmdx.base.rest.cci.ConditionRecord;
+import org.openmdx.base.rest.cci.FeatureOrderRecord;
+import org.openmdx.base.rest.cci.QueryExtensionRecord;
+import org.openmdx.base.rest.cci.QueryFilterRecord;
 import org.openmdx.base.rest.spi.Query_2Facade;
-import org.openmdx.base.text.conversion.JavaBeans;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.log.SysLog;
 import org.openmdx.portal.servlet.Filter;
@@ -126,12 +128,12 @@ public class UiCompositeGrid extends UiGrid implements Serializable {
      */
     protected javax.jdo.Query newQuery(
     	RefContainer<RefObject_1_0> container,
-    	org.openmdx.base.query.Filter filter
+    	QueryFilterRecord filter
     ) throws ServiceException, ResourceException {
     	UiGridControl control = (UiGridControl)this.control;
     	PersistenceManager pm = JDOHelper.getPersistenceManager(container);
 		Query_2Facade queryFacade = Query_2Facade.newInstance(new Path(container.refMofId()));
-		queryFacade.setQuery(JavaBeans.toXML(filter));
+		queryFacade.setQueryFilter(filter);
 		queryFacade.setQueryType(control.getObjectContainer().getReferencedTypeName());
 		javax.jdo.Query query = pm.newQuery(
 			Queries.QUERY_LANGUAGE, 
@@ -153,16 +155,30 @@ public class UiCompositeGrid extends UiGrid implements Serializable {
         List<RefObject_1_0> filteredObjects = null;
     	UiGridControl control = (UiGridControl)this.control;
        	ObjectView view = this.getView();
+       	Filter preparedFilter = null;
         try {
 	    	RefObject_1_0 parent = (RefObject_1_0)pm.getObjectById(
 	    		view.getObjectReference().getObject().refGetPath()
 	    	);
+	    	if(filter != null) {
+	    		preparedFilter = new Filter(
+		    		filter.getName(),
+		    		filter.getLabel(),
+		    		filter.getGroupName(),
+		    		filter.getIconKey(),
+		    		filter.getOrder(),
+		    		new ArrayList<ConditionRecord>(filter.getCondition()),
+		    		new ArrayList<FeatureOrderRecord>(filter.getOrderSpecifier()),
+		    		new ArrayList<QueryExtensionRecord>(filter.getExtension()),
+		    		filter.getName()
+		        );
+	    	}
 	    	if(preCalcListSize) {
-	    		Extension queryExtension = new QueryExtension();
+	    		QueryExtensionRecord queryExtension = new QueryExtension();
     	    	queryExtension.setClause(
     	    		Database_1_Attributes.HINT_COUNT + "(1=1)"
     	    	);
-	    		filter.getExtension().add(queryExtension);
+    	    	preparedFilter.getExtension().add(queryExtension);
 	    	}
 	        Object allObjects = this.dataBinding.getValue(
 	            parent, 
@@ -173,7 +189,7 @@ public class UiCompositeGrid extends UiGrid implements Serializable {
 	    		@SuppressWarnings("unchecked")
 				RefContainer<RefObject_1_0> container = (RefContainer<RefObject_1_0>)allObjects;
     			filteredObjects = container.refGetAll(
-    				this.newQuery(container, filter)
+    				this.newQuery(container, preparedFilter)
     			);
 	    	} else if(
 	    		allObjects instanceof Object[] &&
@@ -182,13 +198,13 @@ public class UiCompositeGrid extends UiGrid implements Serializable {
 	    	) {
 				@SuppressWarnings("unchecked")
 				RefContainer<RefObject_1_0> container = (RefContainer<RefObject_1_0>)((Object[])allObjects)[0];
-				org.openmdx.base.query.Filter query = ((RefQuery_1_0)((Object[])allObjects)[1]).refGetFilter();
-				if(filter != null) {
+				QueryFilterRecord query = ((RefQuery_1_0)((Object[])allObjects)[1]).refGetFilter();
+				if(preparedFilter != null) {
 					// Order specifiers not allowed in data binding
 					query.getOrderSpecifier().clear();
-					query.getCondition().addAll(filter.getCondition());
-					query.getOrderSpecifier().addAll(filter.getOrderSpecifier());
-					query.getExtension().addAll(filter.getExtension());
+					query.getCondition().addAll(preparedFilter.getCondition());
+					query.getOrderSpecifier().addAll(preparedFilter.getOrderSpecifier());
+					query.getExtension().addAll(preparedFilter.getExtension());
 				}
 				filteredObjects = container.refGetAll(
 					this.newQuery(container, query)
@@ -213,7 +229,7 @@ public class UiCompositeGrid extends UiGrid implements Serializable {
                 "error getting filtered objects",
                 new BasicException.Parameter("object", view.getObject()),
                 new BasicException.Parameter("reference", control.getQualifiedReferenceName()),
-                new BasicException.Parameter("filter", filter),
+                new BasicException.Parameter("filter", preparedFilter),
                 new BasicException.Parameter("principal", view.getApplicationContext().getLoginPrincipal())
             );
             SysLog.warning(e0.getMessage(), e0.getCause());        	

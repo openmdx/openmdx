@@ -1,7 +1,7 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Description: Configuration
+ * Description: Legacy Configuration
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
  * ====================================================================
  *
@@ -51,8 +51,10 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 
 import org.openmdx.base.collection.TreeSparseArray;
 import org.openmdx.base.exception.ServiceException;
@@ -60,42 +62,51 @@ import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.text.MultiLineStringRepresentation;
 import org.openmdx.kernel.text.format.IndentingFormatter;
 import org.w3c.cci2.SparseArray;
+import org.w3c.spi.PrimitiveTypeParsers;
 
 
 /**
- * Note that this implementation is not synchronized. If multiple threads
- * access this dataprovider object concurrently, and at least one of the
- * threads modifies it structurally, it must be synchronized externally. 
- * (A structural modification is any operation that adds or deletes one or
- * more attributes; merely modifying the values associated with an attribute
- * that an instance already contains is not a structural modification.) This
- * is typically accomplished by synchronizing on the dataprovider object
- * itself. 
+ * Legacy Configuration
+ * 
+ * @deprecated will not be supported by the dataprovider 2 stack
  */
+@Deprecated
 public class Configuration
-    implements Cloneable, MultiLineStringRepresentation
+    implements Cloneable, MultiLineStringRepresentation, org.openmdx.kernel.configuration.Configuration
 {
 
     /**
-     *
+     * Constructor
+     * 
+     * @deprecated will not be supported by the dataprovider 2 stack
      */
+    @Deprecated
     public Configuration(
     ){
         super();
     }
 
     /**
-     *
+     * Constructor
+     * 
+     * @deprecated will not be supported by the dataprovider 2 stack
      */
+    @Deprecated
     public Configuration(
         Configuration that
     ){
-        this(that.entries());
+    	for(Map.Entry<String, SparseArray<?>> e : that.entries.entrySet()) {
+    		values(e.getKey()).putAll(e.getValue());
+    	}
+        this.singleValued.addAll(that.singleValuedEntryNames());
     }
 
     /**
-     *
+     * Constructor
+     * 
+     * @deprecated will not be supported by the dataprovider 2 stack
      */
+    @Deprecated
     public Configuration(
         Map<String, ?> source
     ){
@@ -115,6 +126,7 @@ public class Configuration
                     Arrays.asList((Object[])entry.getValue())
                 );
             } else {
+            	this.singleValued.add(name);
                 values = new TreeSparseArray<Object>(
                     Collections.singletonList(entry.getValue())
                 );
@@ -123,6 +135,22 @@ public class Configuration
         }
     }
 
+    
+    //------------------------------------------------------------------------
+    // Variables
+    //------------------------------------------------------------------------
+
+    /**
+     * The store
+     */
+    private final Map<String, SparseArray<?>> entries = new HashMap<String, SparseArray<?>>();
+
+    /**
+     * To distinguish between single- and multi-valued attributes
+     */
+    private final Set<String> singleValued = new HashSet<String>();
+
+    
     //------------------------------------------------------------------------
     // Value list interface
     //------------------------------------------------------------------------
@@ -140,7 +168,7 @@ public class Configuration
         return this.entries.containsKey(entryName);
     } 
 
-    private boolean isEnabled(
+    public boolean isEnabled(
         String entryName,
         boolean defaultValue
     ){
@@ -234,6 +262,8 @@ public class Configuration
                 new BasicException.Parameter("key",key),
                 new BasicException.Parameter("value",value)
             ); 
+        } else {
+        	this.singleValued.add(name);
         }
 
         // Set the value at its correct position. 
@@ -380,19 +410,70 @@ public class Configuration
      * @return    a clone of this instance.
      */
     @Override
-    public Object clone(  
+    public Configuration clone(  
     ){
         return new Configuration(this);
     }
 
 
     //------------------------------------------------------------------------
-    // Variables
+    // Implements Configuration
     //------------------------------------------------------------------------
+    
+	@Override
+	public Set<String> singleValuedEntryNames() {
+		return Collections.unmodifiableSet(this.singleValued);
+	}
 
-    /**
-     *
-     */
-    private Map<String, SparseArray<?>> entries = new HashMap<String, SparseArray<?>>();
+	@Override
+	public Set<String> multiValuedEntryNames() {
+		final Set<String> multiValued = new HashSet<String>(this.entries.keySet());
+		multiValued.removeAll(this.singleValued);
+		return multiValued;
+	}
 
+	@SuppressWarnings("unchecked")
+	@Override
+	public <T> T getValue(String entryName, T defaultValue) {
+		final SparseArray<?> values = this.entries.get(entryName);
+		if(values != null){
+			Object value = values.get(Integer.valueOf(0));
+			if(value != null) return (T) value;
+		}
+		return defaultValue;
+	}
+
+	@Override
+	public <T> T getOptionalValue(String entryName, Class<T> type) {
+		final T value = getValue(entryName, null);
+		return value == null || type == null ? value : type.cast(value);
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public <T> SparseArray<T> getValues(String entryName, Class<T> elementType) {
+		final SparseArray<Object> source = values(entryName);
+		final SparseArray<T> target;
+		if(elementType != null && elementType != String.class) {
+			target = new TreeSparseArray<T>();
+			for(Map.Entry<Integer, ?> e : source.entrySet()) {
+				target.put(
+					e.getKey(), 
+					toValue(elementType, e.getValue())
+				);
+			}
+		} else {
+			target = (SparseArray<T>) source;
+		}
+		return target;
+	}
+
+	@SuppressWarnings("unchecked")
+	private <T> T toValue(Class<T> elementType, Object value) {
+		if(value instanceof String) {
+			return PrimitiveTypeParsers.getExtendedParser().parse(elementType, (String)value);
+		} else {
+			return (T) value;
+		}
+	}
 }

@@ -67,16 +67,16 @@ public class AssociationEndDef extends ElementDef {
         Model_1_0 model
     ) throws ServiceException {
         super( 
-            (String)associationEndDef.getName(),
-            (String)associationEndDef.getQualifiedName(),
+            associationEndDef.getName(),
+            associationEndDef.getQualifiedName(),
             (String)associationEndDef.objGetValue("annotation"),
             new HashSet<Object>(associationEndDef.objGetList("stereotype"))
         );      
         this.associationEndDef = associationEndDef;        
         this.model = model;
-        this.aggregation = (String)associationEndDef.getAggregation();
+        this.aggregation = associationEndDef.getAggregation();
         this.navigable = ((Boolean)associationEndDef.objGetValue("isNavigable")).booleanValue();
-        this.multiplicity = (String)associationEndDef.getMultiplicity();
+        this.multiplicity = associationEndDef.getMultiplicity();
         this.type = this.getQualifiedTypeName(associationEndDef.getType());
         this.qualifierType = this.getQualifiedTypeName(associationEndDef.getQualifierType());
         this.qualifierName = (String)associationEndDef.objGetValue("qualifierName");

@@ -147,11 +147,11 @@ public class Qualifiers {
                     i < iLimit; 
                     i++
                 ) {
-                    String segment = objectId.get(i);
+                    String segment = objectId.getSegment(i).toClassicRepresentation();
                     imageId.add(segment);
                     if(segment.endsWith("%")) return new Path(imageId.toArray(new String[imageId.size()]));
                 }
-                String segment = objectId.get(iLimit);
+                String segment = objectId.getSegment(iLimit).toClassicRepresentation();
                 imageId.add(
                     segment.endsWith("%") ? segment : toAudit2BeforeImageQualifier(segment, unitOfWorkId)
                 ); 
@@ -195,11 +195,11 @@ public class Qualifiers {
                     i < iLimit; 
                     i++
                 ) {
-                    String segment = objectId.get(i);
+                    String segment = objectId.getSegment(i).toClassicRepresentation();
                     imageId.add(segment);
                     if(segment.endsWith("%")) return new Path(imageId.toArray(new String[imageId.size()]));
                 }
-                String segment = objectId.get(iLimit);
+                String segment = objectId.getSegment(iLimit).toClassicRepresentation();
                 imageId.add(
                     segment.endsWith("%") ? segment : toAudit2AfterImageQualifier(segment, modifiedAt)
                 );

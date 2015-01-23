@@ -288,7 +288,7 @@ public class JmiHelper {
                 objectCache, 
                 pm, 
                 model,
-                (String)featureType.getQualifiedName()
+                featureType.getQualifiedName()
             );
             //
             // Store the attribute value to target according to the attribute's multiplicity

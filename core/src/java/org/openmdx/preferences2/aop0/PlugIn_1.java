@@ -88,7 +88,7 @@ public class PlugIn_1
     /* (non-Javadoc)
      * @see org.openmdx.base.aop0.PlugIn_1_0#getQualifier(org.openmdx.base.accessor.rest.DataObject_1, java.lang.String)
      */
-//  @Override
+    @Override
     public String getQualifier(
         DataObject_1 object, 
         String qualifier
@@ -99,7 +99,7 @@ public class PlugIn_1
     /* (non-Javadoc)
      * @see org.openmdx.base.aop0.PlugIn_1_0#postSetCore(org.openmdx.base.accessor.rest.DataObject_1, org.openmdx.base.accessor.rest.DataObject_1)
      */
-//  @Override
+    @Override
     public void postSetCore(
         DataObject_1 target, 
         DataObject_1 core
@@ -110,7 +110,7 @@ public class PlugIn_1
     /* (non-Javadoc)
      * @see org.openmdx.base.aop0.PlugIn_1_0#flush(org.openmdx.base.accessor.rest.UnitOfWork_1, boolean)
      */
-//  @Override
+    @Override
     public void flush(UnitOfWork_1 unitOfWork, boolean beforeCompletion) {
         // Nothing to do
     }
@@ -118,7 +118,7 @@ public class PlugIn_1
     /* (non-Javadoc)
      * @see org.openmdx.base.aop0.PlugIn_1_0#getPlugInObject(java.lang.Class)
      */
-//  @Override
+    @Override
     public <T> T getPlugInObject(
         Class<T> type
     ) {
@@ -128,7 +128,7 @@ public class PlugIn_1
     /* (non-Javadoc)
      * @see org.openmdx.base.aop0.PlugIn_1_0#requiresCallbackOnCascadedDelete(org.openmdx.base.accessor.rest.DataObject_1)
      */
-//  @Override
+    @Override
     public boolean requiresCallbackOnCascadedDelete(
         DataObject_1 object
     ) throws ServiceException {
@@ -138,7 +138,7 @@ public class PlugIn_1
     /* (non-Javadoc)
      * @see org.openmdx.base.aop0.PlugIn_1_0#isExemptFromValidation(org.openmdx.base.accessor.rest.DataObject_1, org.openmdx.base.mof.cci.ModelElement_1_0)
      */
-//  @Override
+    @Override
     public boolean isExemptFromValidation(
         DataObject_1 object,
         ModelElement_1_0 feature
@@ -149,7 +149,7 @@ public class PlugIn_1
     /* (non-Javadoc)
      * @see org.openmdx.base.aop0.PlugIn_1_0#isAspect(org.openmdx.base.accessor.rest.DataObject_1)
      */
-//  @Override
+    @Override
     public Boolean isAspect(
         DataObject_1 object
     ) throws ServiceException {
@@ -159,7 +159,7 @@ public class PlugIn_1
     /* (non-Javadoc)
      * @see javax.jdo.listener.StoreLifecycleListener#preStore(javax.jdo.listener.InstanceLifecycleEvent)
      */
-//  @Override
+    @Override
     public void preStore(InstanceLifecycleEvent event) {
         DataObject_1 persistentInstance = (DataObject_1) event.getPersistentInstance();
         if(persistentInstance.jdoIsNew()) try {
@@ -186,7 +186,7 @@ public class PlugIn_1
     /* (non-Javadoc)
      * @see javax.jdo.listener.StoreLifecycleListener#postStore(javax.jdo.listener.InstanceLifecycleEvent)
      */
-//  @Override
+    @Override
     public void postStore(InstanceLifecycleEvent event) {
         // nothing to do
     }

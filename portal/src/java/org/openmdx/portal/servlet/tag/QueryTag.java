@@ -51,6 +51,7 @@ package org.openmdx.portal.servlet.tag;
 import javax.servlet.jsp.JspException;
 
 import org.openmdx.base.accessor.jmi.cci.RefQuery_1_0;
+import org.openmdx.base.rest.cci.QueryFilterRecord;
 import org.openmdx.portal.servlet.Action;
 import org.openmdx.portal.servlet.Filter;
 import org.openmdx.portal.servlet.Filters;
@@ -100,7 +101,7 @@ public class QueryTag extends BaseTag {
 								if(grid instanceof UiGrid) {
 			                    	UiGrid uiGrid = (UiGrid)grid;                    										
 									Filter defaultFilter = uiGrid.getFilter(Filters.DEFAULT_FILTER_NAME);
-									org.openmdx.base.query.Filter query = ((RefQuery_1_0)this.query).refGetFilter();
+									QueryFilterRecord query = ((RefQuery_1_0)this.query).refGetFilter();
 									if(defaultFilter != null) {
 										uiGrid.setFilter(
 											Filters.DEFAULT_FILTER_NAME, 

@@ -107,9 +107,7 @@ abstract public class AbstractPersistence_1 extends OperationAwareLayer_1 {
                 null :
                     new File(pathname);
         }
-        this.sequenceSupported = configuration.isOn(
-            SharedConfigurationEntries.SEQUENCE_SUPPORTED
-        );
+        this.sequenceSupported = configuration.isEnabled(SharedConfigurationEntries.SEQUENCE_SUPPORTED, false);
     }
 
     //---------------------------------------------------------------------------
@@ -136,16 +134,21 @@ abstract public class AbstractPersistence_1 extends OperationAwareLayer_1 {
 
     /**
      * The chunk size defines the large objects' buffer size
+     * 
+     * @deprecated will not be supported by the dataprovider 2 stack
      */
     private int chunkSize;
 
     /**
-     * 
+     * @deprecated("For JRE 5/setStreamByValue support only")
      */
+    @Deprecated
     private File streamBufferDirectory;
 
     /**
      * Remembers whether sequences should be supported.
+     * 
+     * @deprecated will not be supported by the dataprovider 2 stack
      */
     private boolean sequenceSupported;
 
@@ -153,6 +156,8 @@ abstract public class AbstractPersistence_1 extends OperationAwareLayer_1 {
      * Tells whether this peristence plug-in should suuport sequences
      * 
      * @return true if sequences should be supported
+     * 
+     * @deprecated will not be supported by the dataprovider 2 stack
      */
     protected boolean isSequenceSupported(
     ){
@@ -163,6 +168,8 @@ abstract public class AbstractPersistence_1 extends OperationAwareLayer_1 {
      * Retrieve chunkSize.
      *
      * @return Returns the chunkSize.
+     * 
+     * @deprecated will not be supported by the dataprovider 2 stack
      */
     protected int getChunkSize() {
         return this.chunkSize;
@@ -173,7 +180,10 @@ abstract public class AbstractPersistence_1 extends OperationAwareLayer_1 {
      * Retrieve streamBufferDirectory.
      *
      * @return Returns the streamBufferDirectory.
+     * 
+     * @deprecated("For JRE 5/setStreamByValue support only")
      */
+    @Deprecated
     protected File getStreamBufferDirectory() {
         return this.streamBufferDirectory;
     }

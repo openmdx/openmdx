@@ -48,7 +48,6 @@
 package org.openmdx.application.dataprovider.spi;
 
 import javax.resource.ResourceException;
-import javax.resource.cci.Connection;
 import javax.resource.cci.Interaction;
 import javax.resource.cci.MappedRecord;
 
@@ -59,6 +58,7 @@ import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.resource.spi.RestInteractionSpec;
 import org.openmdx.base.rest.cci.MessageRecord;
+import org.openmdx.base.rest.cci.RestConnection;
 import org.openmdx.base.rest.spi.Facades;
 import org.openmdx.base.rest.spi.Object_2Facade;
 import org.openmdx.kernel.exception.BasicException;
@@ -86,7 +86,7 @@ public abstract class OperationAwareLayer_1 extends Layer_1 {
     //-----------------------------------------------------------------------
     @Override
     public Interaction getInteraction(
-        Connection connection
+        RestConnection connection
     ) throws ResourceException {
         return new LayerInteraction(connection);
     }
@@ -163,7 +163,7 @@ public abstract class OperationAwareLayer_1 extends Layer_1 {
          * @throws ResourceException
          */
         protected LayerInteraction(
-            Connection connection
+            RestConnection connection
         ) throws ResourceException {
             super(connection);
         }
@@ -179,14 +179,12 @@ public abstract class OperationAwareLayer_1 extends Layer_1 {
         ) throws ServiceException {
             ServiceHeader header = this.getServiceHeader();
             DataproviderRequest request = this.newDataproviderRequest(ispec, input);
-            String operationName = request.path().get(
-                request.path().size() - 2
-            );
+            String operationName = request.path().getSegment(request.path().size() - 2).toClassicRepresentation();
             MappedRecord response = this.otherOperation(
                 header, 
                 request, 
                 operationName, 
-                newResponseId(input.getPath())
+                newResponseId(input.getResourceIdentifier())
             ); 
             if(response == null) {
                 super.invoke(
@@ -196,7 +194,7 @@ public abstract class OperationAwareLayer_1 extends Layer_1 {
                 );
             } else {
                 Object_2Facade responseFacade = Facades.asObject(response);
-                output.setPath(responseFacade.getPath());
+                output.setResourceIdentifier(responseFacade.getPath());
                 output.setBody(responseFacade.getValue());
             }
             return true;

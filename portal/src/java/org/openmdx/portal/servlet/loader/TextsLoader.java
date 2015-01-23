@@ -174,7 +174,7 @@ public class TextsLoader extends Loader {
 			locale, 
 			this.context
 		);
-		String segmentName = this.codeSegmentIdentity.get(4);
+		String segmentName = this.codeSegmentIdentity.getSegment(4).toClassicRepresentation();
 		Codes.storeBundles(
 			this.codeSegmentIdentity,
 			TextsBundle.class.getSimpleName(),

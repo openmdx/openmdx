@@ -304,7 +304,7 @@ public class FilterLoader
                     for(org.openmdx.ui1.jmi1.FeatureDefinition featureDefinition: uiContext.getUiSegment(UiContext.MAIN_PERSPECTIVE).<org.openmdx.ui1.jmi1.FeatureDefinition>getFeatureDefinition()) {
                         if(featureDefinition instanceof org.openmdx.ui1.jmi1.StructuralFeatureDefinition) {
                             org.openmdx.ui1.jmi1.StructuralFeatureDefinition structuralFeature = (org.openmdx.ui1.jmi1.StructuralFeatureDefinition)featureDefinition;
-                            String qualifiedReferenceName = structuralFeature.refGetPath().getBase();
+                            String qualifiedReferenceName = structuralFeature.refGetPath().getLastSegment().toClassicRepresentation();
                             ModelElement_1_0 container = this.model.getElement(qualifiedReferenceName.substring(0, qualifiedReferenceName.lastIndexOf(":")));
                             if(
                                 (structuralFeature.isReference() != null) && 

@@ -56,12 +56,12 @@ package org.openmdx.base.query;
  */
 public class IsLikeCondition extends Condition {
 
-    /**
+	/**
      * Constructor 
      */
     public IsLikeCondition(
     ) {
-        this.fulfils = false;
+    	super(toConditionType(false));
     }
 
     /**
@@ -81,21 +81,16 @@ public class IsLikeCondition extends Condition {
         super(
             quantifier,
             feature,
+            toConditionType(fulfil),
             values
         );
-        this.fulfils = fulfil;
     }
 
     /**
      * Implements <code>Serializable</code>
      */
-    private static final long serialVersionUID = 3977016262448788533L;
+	private static final long serialVersionUID = 680523904665291609L;
 
-    /**
-     * Defines whether the condition shall be <code>true</code> of <code>false</code>
-     */
-    private boolean fulfils;
-            
     /**
      * Clone the condition
      * 
@@ -113,29 +108,39 @@ public class IsLikeCondition extends Condition {
     }
 
     /**
-     * Tells whether the condition shall be <code>true</code> or <code>false</code>
-     * 
-     * @return <code>true</code> if the condition shall be fulfilled
-     */
-    public boolean isFulfil() {
-        return this.fulfils;
-    }
-
-    /**
      * Defines whether the condition shall be <code>true</code> or <code>false</code>
      * 
      * @param fulful <code>true</code> if the condition shall be fulfilled
      */
     public void setFulfil(
-        boolean fulfil
-    ) {
-        this.fulfils = fulfil;
+		boolean fulfil
+	) {
+    	super.setType(toConditionType(fulfil));
+    }
+    
+    /**
+     * Tells whether the condition shall be <code>true</code> or <code>false</code>
+     * 
+     * @return <code>true</code> if the condition shall be fulfilled
+     */
+    public boolean isFulfil() {
+    	final ConditionType type = getType();
+		switch(type) {
+	    	case IS_LIKE : return true;
+	    	case IS_UNLIKE : return false;
+	    	default: throw new IllegalStateException("An " + getClass().getSimpleName() + " requires another type: " + type);
+		}
     }
 
-    @Override
-    public ConditionType getType(
-    ) {
-        return this.isFulfil() ? ConditionType.IS_LIKE : ConditionType.IS_UNLIKE;
+    /**
+     * Convert the fulfil argument to the underlying condition type
+     * 
+     * @param fulfil
+     * 
+     * @return the corresponding condition type
+     */
+    private static ConditionType toConditionType(boolean fulfil) {
+    	return fulfil ? ConditionType.IS_LIKE : ConditionType.IS_UNLIKE;
     }
 
 }

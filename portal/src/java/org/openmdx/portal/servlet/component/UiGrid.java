@@ -86,13 +86,15 @@ import org.openmdx.base.mof.cci.Model_1_0;
 import org.openmdx.base.mof.cci.Multiplicity;
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.query.Condition;
-import org.openmdx.base.query.Extension;
 import org.openmdx.base.query.IsBetweenCondition;
 import org.openmdx.base.query.IsInCondition;
 import org.openmdx.base.query.IsLikeCondition;
 import org.openmdx.base.query.OrderSpecifier;
 import org.openmdx.base.query.Quantifier;
 import org.openmdx.base.query.SortOrder;
+import org.openmdx.base.rest.cci.ConditionRecord;
+import org.openmdx.base.rest.cci.FeatureOrderRecord;
+import org.openmdx.base.rest.cci.QueryExtensionRecord;
 import org.openmdx.base.text.conversion.Base64;
 import org.openmdx.base.text.conversion.JavaBeans;
 import org.openmdx.kernel.exception.BasicException;
@@ -169,7 +171,7 @@ public abstract class UiGrid extends Grid implements Serializable {
 	        	new FieldDef(
 	        		featureName,
 	        		qualifiedFeatureName,
-                    Multiplicity.SINGLE_VALUE.toString(),
+                    Multiplicity.SINGLE_VALUE.code(),
                     false, // isChangeable
                     true, // isMandatory
                     null, null, null, null, null, null,
@@ -231,7 +233,7 @@ public abstract class UiGrid extends Grid implements Serializable {
 					new FieldDef(
 						"identity",
 						"org:openmdx:base:ExtentCapable:identity",
-						Multiplicity.SINGLE_VALUE.toString(),
+						Multiplicity.SINGLE_VALUE.code(),
 						false,
 						true,
 						null, null, null, null, null, null,
@@ -254,7 +256,7 @@ public abstract class UiGrid extends Grid implements Serializable {
 								new FieldDef(
 									"identity",
 									"org:openmdx:base:ExtentCapable:identity",
-									Multiplicity.SINGLE_VALUE.toString(),
+									Multiplicity.SINGLE_VALUE.code(),
 									false,
 									true,
 									null, null, null, null, null, null,
@@ -387,9 +389,11 @@ public abstract class UiGrid extends Grid implements Serializable {
                 		SysLog.warning(e.getMessage(), e.getCause());
                 	}
                 }
-                defaultFilter.setName(Filters.DEFAULT_FILTER_NAME);
-                defaultFilter.setGroupName("0");
-                defaultFilter.setIconKey(WebKeys.ICON_FILTER_DEFAULT);                
+                if(defaultFilter != null) {
+	                defaultFilter.setName(Filters.DEFAULT_FILTER_NAME);
+	                defaultFilter.setGroupName("0");
+	                defaultFilter.setIconKey(WebKeys.ICON_FILTER_DEFAULT);
+                }
             }
             this.filters = filters.getPreparedFilters(
                 baseFilterId,
@@ -1257,7 +1261,7 @@ public abstract class UiGrid extends Grid implements Serializable {
 		} else {
 			this.currentFilter = filter;
 			int i = 0;
-			for(Condition condition : this.currentFilter.getCondition()) {
+			for(ConditionRecord condition : this.currentFilter.getCondition()) {
 				for(Object value : condition.getValue()){
 					// Replace ? by filter value entered by user
 					// Replace ${name} by attribute value
@@ -1370,8 +1374,8 @@ public abstract class UiGrid extends Grid implements Serializable {
     	}
     	if(columnDef != null) {
 			Filter filter = add ? this.currentFilter : this.getFilter("All");
-			Map<String,List<Condition>> conditions = new HashMap<String,List<Condition>>();
-			for(Condition condition: filter.getCondition()) {
+			Map<String,List<ConditionRecord>> conditions = new HashMap<String,List<ConditionRecord>>();
+			for(ConditionRecord condition: filter.getCondition()) {
 				if(conditions.containsKey(condition.getFeature())) {
 					conditions.get(
 						condition.getFeature()
@@ -1381,18 +1385,18 @@ public abstract class UiGrid extends Grid implements Serializable {
 				} else {
 					conditions.put(
 						condition.getFeature(),
-						new ArrayList<Condition>(Collections.singletonList(condition))
+						new ArrayList<ConditionRecord>(Collections.singletonList(condition))
 					);
 				}
 			}
-			Map<String,Extension> extensions = new HashMap<String,Extension>();
-			for(Extension extension: filter.getExtension()) {
+			Map<String,QueryExtensionRecord> extensions = new HashMap<String,QueryExtensionRecord>();
+			for(QueryExtensionRecord extension: filter.getExtension()) {
 				extensions.put(
 					extension.getClause(),
 					extension
 				);
 			}
-			List<OrderSpecifier> orderSpecifiers = new ArrayList<OrderSpecifier>(
+			List<FeatureOrderRecord> orderSpecifiers = new ArrayList<FeatureOrderRecord>(
 				filter.getOrderSpecifier()
 			);
 			String qualifiedFeatureName = null;
@@ -1455,7 +1459,7 @@ public abstract class UiGrid extends Grid implements Serializable {
 								Quantifier.THERE_EXISTS,
 								featureName,
 								true,
-								(Object[])null
+								new Object[]{}
 							)
 						);
 						List<Object> values = new ArrayList<Object>();
@@ -1525,7 +1529,7 @@ public abstract class UiGrid extends Grid implements Serializable {
 								);
 							} catch(Exception ignore) {}
 							if(customQuery != null) {
-								for(Condition customQueryCondition: customQuery.getCondition()) {
+								for(ConditionRecord customQueryCondition: customQuery.getCondition()) {
 									if(conditions.containsKey(customQueryCondition.getFeature())) {
 										conditions.get(
 											customQueryCondition.getFeature()
@@ -1535,11 +1539,11 @@ public abstract class UiGrid extends Grid implements Serializable {
 									} else {
 										conditions.put(
 											customQueryCondition.getFeature(), 
-											new ArrayList<Condition>(Collections.singletonList(customQueryCondition))
+											new ArrayList<ConditionRecord>(Collections.singletonList(customQueryCondition))
 										);
 									}
 								}
-								for(Extension customQueryExtension: customQuery.getExtension()) {
+								for(QueryExtensionRecord customQueryExtension: customQuery.getExtension()) {
 									extensions.put(
 										customQueryExtension.getClause(),
 										customQueryExtension
@@ -1556,7 +1560,7 @@ public abstract class UiGrid extends Grid implements Serializable {
     							} else {
 	    							conditions.put(
 	    								condition.getFeature(),
-	    								new ArrayList<Condition>(Collections.singletonList(condition))
+	    								new ArrayList<ConditionRecord>(Collections.singletonList(condition))
 	    							);
     							}
     							this.activeFilterFeatures.add(featureName);
@@ -1574,7 +1578,7 @@ public abstract class UiGrid extends Grid implements Serializable {
 								Quantifier.THERE_EXISTS,
 								featureName,
 								true,
-								(Object[])null
+								new Object[]{}
 							)
 						);
 						List<Object> values = new ArrayList<Object>();
@@ -1608,7 +1612,7 @@ public abstract class UiGrid extends Grid implements Serializable {
 							} else {
 								conditions.put(
 									condition.getFeature(),
-									new ArrayList<Condition>(Collections.singletonList(condition))
+									new ArrayList<ConditionRecord>(Collections.singletonList(condition))
 								);
 							}
 							this.activeFilterFeatures.add(featureName);
@@ -1678,7 +1682,7 @@ public abstract class UiGrid extends Grid implements Serializable {
 						} else {
 							conditions.put(
 								condition.getFeature(),
-								new ArrayList<Condition>(Collections.singletonList(condition))							
+								new ArrayList<ConditionRecord>(Collections.singletonList(condition))							
 							);
 						}
 						this.activeFilterFeatures.add(featureName);
@@ -1717,7 +1721,7 @@ public abstract class UiGrid extends Grid implements Serializable {
 					} else {
 						conditions.put(
 							featureName,
-							new ArrayList<Condition>(Collections.singletonList(condition))
+							new ArrayList<ConditionRecord>(Collections.singletonList(condition))
 						);							
 					}
 					this.activeFilterFeatures.add(featureName);
@@ -1737,10 +1741,10 @@ public abstract class UiGrid extends Grid implements Serializable {
 						);
 					} catch(Exception ignore) {}
 					if(customQuery != null && this.activeFilterFeatures.contains(featureName)) {
-						for(Condition customQueryCondition: customQuery.getCondition()) {
+						for(ConditionRecord customQueryCondition: customQuery.getCondition()) {
 							conditions.remove(customQueryCondition.getFeature());
 						}
-						for(Extension customQueryExtension: customQuery.getExtension()) {
+						for(QueryExtensionRecord customQueryExtension: customQuery.getExtension()) {
 							extensions.remove(customQueryExtension.getClause());
 						}
 					}
@@ -1763,7 +1767,7 @@ public abstract class UiGrid extends Grid implements Serializable {
 								);
 							} catch(Exception ignore) {}
 							if(customQuery != null) {
-								for(Condition customQueryCondition: customQuery.getCondition()) {
+								for(ConditionRecord customQueryCondition: customQuery.getCondition()) {
 									if(conditions.containsKey(customQueryCondition.getFeature())) {
 										conditions.get(
 											customQueryCondition.getFeature()
@@ -1773,11 +1777,11 @@ public abstract class UiGrid extends Grid implements Serializable {
 									} else {
 										conditions.put(
 											customQueryCondition.getFeature(),
-											new ArrayList<Condition>(Collections.singletonList(customQueryCondition))
+											new ArrayList<ConditionRecord>(Collections.singletonList(customQueryCondition))
 										);
 									}
 								}
-								for(Extension customQueryExtension: customQuery.getExtension()) {
+								for(QueryExtensionRecord customQueryExtension: customQuery.getExtension()) {
 									extensions.put(
 										customQueryExtension.getClause(),
 										customQueryExtension
@@ -1791,7 +1795,7 @@ public abstract class UiGrid extends Grid implements Serializable {
     									Quantifier.THERE_EXISTS,
     									featureName,
     									true,
-    									(Object[])null
+    									new Object[]{}
     								)
 								);
 								Condition condition = null;
@@ -1817,7 +1821,7 @@ public abstract class UiGrid extends Grid implements Serializable {
 									} else {
 										conditions.put(
 											condition.getFeature(),
-											new ArrayList<Condition>(Collections.singletonList(condition))
+											new ArrayList<ConditionRecord>(Collections.singletonList(condition))
 										);
 									}
 	    							this.activeFilterFeatures.add(featureName);
@@ -1827,9 +1831,9 @@ public abstract class UiGrid extends Grid implements Serializable {
 					}
 				}
 			}
-			List<Condition> expandedConditions = new ArrayList<Condition>();
-			for(List<Condition> conditionValues: conditions.values()) {
-				for(Condition condition: conditionValues) {
+			List<ConditionRecord> expandedConditions = new ArrayList<ConditionRecord>();
+			for(List<ConditionRecord> conditionValues: conditions.values()) {
+				for(ConditionRecord condition: conditionValues) {
 					expandedConditions.add(condition);
 				}
 			}
@@ -1841,7 +1845,7 @@ public abstract class UiGrid extends Grid implements Serializable {
 				null,
 				expandedConditions,
 				orderSpecifiers,
-				new ArrayList<Extension>(extensions.values()),
+				new ArrayList<QueryExtensionRecord>(extensions.values()),
 				control.getContainerId(), 
 				view.getApplicationContext().getCurrentUserRole(), 
 				view.getObjectReference().getXRI()
@@ -1875,7 +1879,7 @@ public abstract class UiGrid extends Grid implements Serializable {
     	);
     	// apply filter to container
     	if(this.currentFilter != null) {
-            List<OrderSpecifier> orderSpecifier = new ArrayList<OrderSpecifier>(this.currentFilter.getOrderSpecifier());
+            List<FeatureOrderRecord> orderSpecifier = new ArrayList<FeatureOrderRecord>(this.currentFilter.getOrderSpecifier());
     		// Lookup column to be ordered
     		org.openmdx.ui1.jmi1.ValuedField column = null;        
     		for(

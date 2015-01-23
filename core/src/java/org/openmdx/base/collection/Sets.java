@@ -48,6 +48,7 @@
 package org.openmdx.base.collection;
 
 import java.util.AbstractSet;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
@@ -337,7 +338,21 @@ public class Sets {
             );
         }
         
-        /**
+        /* (non-Javadoc)
+		 * @see java.util.AbstractSet#equals(java.lang.Object)
+		 */
+		@Override
+		public boolean equals(Object o) {
+			if(o instanceof ArraySet<?>) {
+				ArraySet<?> that = (ArraySet<?>) o;
+				if(Arrays.equals(this.collection, that.collection)) {
+					return true;
+				}
+			}
+			return super.equals(o);
+		}
+
+		/**
          * Array Iterator
          */
         class ArrayIterator implements Iterator<T> {

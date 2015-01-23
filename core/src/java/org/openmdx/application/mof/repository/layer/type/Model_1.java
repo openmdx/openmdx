@@ -49,11 +49,15 @@
 package org.openmdx.application.mof.repository.layer.type;
 
 import javax.resource.ResourceException;
-import javax.resource.cci.Connection;
 import javax.resource.cci.Interaction;
 
 import org.openmdx.application.dataprovider.spi.Layer_1;
+import org.openmdx.base.rest.cci.RestConnection;
 
+/**
+ * @deprecated will not be brought to the data provider 2 stack
+ */
+@Deprecated
 public class Model_1 extends Layer_1 {
 
     /**
@@ -67,7 +71,7 @@ public class Model_1 extends Layer_1 {
     //---------------------------------------------------------------------------
     @Override
     public Interaction getInteraction(
-        Connection connection
+        RestConnection connection
     ) throws ResourceException {
         return new LayerInteraction(connection);
     }
@@ -82,7 +86,7 @@ public class Model_1 extends Layer_1 {
          * @throws ResourceException
          */
         protected LayerInteraction(
-            Connection connection
+            RestConnection connection
         ) throws ResourceException {
             super(connection);
         }

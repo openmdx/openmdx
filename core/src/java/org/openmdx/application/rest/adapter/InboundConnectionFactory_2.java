@@ -62,23 +62,21 @@ import javax.resource.NotSupportedException;
 import javax.resource.ResourceException;
 import javax.resource.cci.Connection;
 import javax.resource.cci.ConnectionSpec;
-import javax.resource.cci.ResourceAdapterMetaData;
 
-import org.openmdx.base.Version;
 import org.openmdx.base.persistence.cci.ConfigurableProperty;
 import org.openmdx.base.persistence.cci.UserObjects;
 import org.openmdx.base.resource.Records;
 import org.openmdx.base.resource.cci.ConnectionFactory;
 import org.openmdx.base.resource.cci.ExtendedRecordFactory;
 import org.openmdx.base.resource.spi.ResourceExceptions;
-import org.openmdx.base.resource.spi.RestInteractionSpec;
 import org.openmdx.base.rest.cci.RestConnectionSpec;
+import org.openmdx.base.rest.spi.AbstractConnectionFactory;
 import org.openmdx.kernel.exception.BasicException;
 
 /**
  * Inbound REST Connection Factory
  */
-public class InboundConnectionFactory_2 implements ConnectionFactory {
+public class InboundConnectionFactory_2 extends AbstractConnectionFactory {
 
     /**
      * Constructor 
@@ -123,67 +121,6 @@ public class InboundConnectionFactory_2 implements ConnectionFactory {
      * The persistence manager factory
      */
     private transient PersistenceManagerFactory persistenceManagerFactory;
-    
-    /**
-     * The resource adapter's metadata
-     */
-    private final ResourceAdapterMetaData metaData = new ResourceAdapterMetaData(){
-
-        public String getAdapterName() {
-            return "openMDX/REST";
-        }
-
-        public String getAdapterShortDescription() {
-            return "openMDX/2 REST Resource Adapter";
-        }
-
-        public String getAdapterVendorName() {
-            return "openMDX";
-        }
-
-        public String getAdapterVersion() {
-            return Version.getSpecificationVersion();
-        }
-
-        public String[] getInteractionSpecsSupported() {
-            return new String[]{RestInteractionSpec.class.getName()};
-        }
-
-        /**
-         * Retrieve the JCA specification version
-         * 
-         * @return the JCA specification version
-         */
-        public String getSpecVersion() {
-            return "1.5.";
-        }
-
-        public boolean supportsExecuteWithInputAndOutputRecord() {
-            return true; 
-        }
-
-        public boolean supportsExecuteWithInputRecordOnly() {
-            return true;
-        }
-
-        public boolean supportsLocalTransactionDemarcation(
-        ) {
-            Object transactionType = InboundConnectionFactory_2.this.overrides.get(
-                ConfigurableProperty.TransactionType.qualifiedName()
-            );
-            if(transactionType == null) try {
-                transactionType = InboundConnectionFactory_2.this.getPersistenceManagerFactory().getTransactionType();
-            } catch (ResourceException exception) {
-                throw new RuntimeException(
-                    "Unable to determine the connection's transaction type",
-                    exception
-                    
-                );
-            }
-            return Constants.RESOURCE_LOCAL.equals(transactionType);
-        }
-        
-    };
 
     /**
      * Retrieve the connection factory's delegate
@@ -327,16 +264,6 @@ public class InboundConnectionFactory_2 implements ConnectionFactory {
         }
     }
 
-
-    /* (non-Javadoc)
-     * @see org.openmdx.base.resource.cci.ConnectionFactory#getMetaData()
-     */
-    public ResourceAdapterMetaData getMetaData(
-    ) throws ResourceException {
-        return this.metaData;
-    }
-
-
     /* (non-Javadoc)
      * @see org.openmdx.base.resource.cci.ConnectionFactory#getRecordFactory()
      */
@@ -344,5 +271,25 @@ public class InboundConnectionFactory_2 implements ConnectionFactory {
     ) throws ResourceException {
         return Records.getRecordFactory();
     }
+
+	/* (non-Javadoc)
+	 * @see org.openmdx.base.rest.spi.AbstractConnectionFactory#isLocalTransactionDemarcationSupported()
+	 */
+	@Override
+	protected boolean isLocalTransactionDemarcationSupported() {
+        Object transactionType = InboundConnectionFactory_2.this.overrides.get(
+            ConfigurableProperty.TransactionType.qualifiedName()
+        );
+        if(transactionType == null) try {
+            transactionType = InboundConnectionFactory_2.this.getPersistenceManagerFactory().getTransactionType();
+        } catch (ResourceException exception) {
+            throw new RuntimeException(
+                "Unable to determine the connection's transaction type",
+                exception
+                
+            );
+        }
+        return Constants.RESOURCE_LOCAL.equals(transactionType);
+	};
 
 }

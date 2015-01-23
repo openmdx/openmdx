@@ -88,8 +88,10 @@ import org.openmdx.base.query.IsGreaterCondition;
 import org.openmdx.base.query.IsGreaterOrEqualCondition;
 import org.openmdx.base.query.IsInCondition;
 import org.openmdx.base.query.IsInstanceOfCondition;
-import org.openmdx.base.query.OrderSpecifier;
 import org.openmdx.base.query.Quantifier;
+import org.openmdx.base.rest.cci.ConditionRecord;
+import org.openmdx.base.rest.cci.FeatureOrderRecord;
+import org.openmdx.base.rest.cci.QueryFilterRecord;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.jdo.ReducedJDOHelper;
 import org.openmdx.state2.cci.DateStateContext;
@@ -138,7 +140,7 @@ public class StateCapableContainer_1
     private StateCapableContainer_1(
         ObjectView_1_0 parent,
         Container_1_0 container,
-        Filter criteria,
+        QueryFilterRecord criteria,
         boolean defaultType
     ){
         this.parent = parent;
@@ -337,7 +339,7 @@ public class StateCapableContainer_1
     		Model_1_0 model = parent.getModel();
     		Set<String> values = new HashSet<String>();
             ModelElement_1_0 classDef = model.getDereferencedType(type);
-            values.add((String) classDef.getQualifiedName());
+            values.add(classDef.getQualifiedName());
             for(Object path : classDef.objGetList("allSubtype")) {
             	values.add(((Path)path).getLastSegment().toClassicRepresentation());
             }
@@ -361,26 +363,26 @@ public class StateCapableContainer_1
     }
 
     private static boolean isTypeCondition(
-        Condition condition
+        ConditionRecord condition
     ){
     	return condition instanceof IsInstanceOfCondition || TYPE_FEATURES.contains(condition.getFeature());
     }
 
     private static boolean isInstanceOfCondition(
-        Condition condition
+        ConditionRecord condition
     ){
     	return SystemAttributes.OBJECT_INSTANCE_OF.equals(condition.getFeature());
     }
 
-	private Condition toCoreCondition(
-        Condition condition
+	private ConditionRecord toCoreCondition(
+        ConditionRecord condition
     ) throws ServiceException{
     	if(isInstanceOfCondition(condition)){
             Model_1_0 model = this.parent.getModel();
     		Set<String> values = new HashSet<String>();
     		for(Object qualifiedTypeName : condition.getValue()) {
     	        ModelElement_1_0 classDef = model.getDereferencedType(qualifiedTypeName);
-    	        values.add((String) classDef.getQualifiedName());
+    	        values.add(classDef.getQualifiedName());
     	        for(Object path : classDef.objGetList("allSubtype")) {
     	        	values.add(((Path)path).getLastSegment().toClassicRepresentation());
     	        }
@@ -404,7 +406,7 @@ public class StateCapableContainer_1
     }
     
     private boolean isStateFilter(
-        Condition condition
+        ConditionRecord condition
     ){
         Model_1_0 model = this.parent.getModel();
         for(Object value : condition.getValue()) {
@@ -423,7 +425,7 @@ public class StateCapableContainer_1
      * @see org.openmdx.base.collection.FilterableMap#subMap(java.lang.Object)
      */
     @Override
-    public Container_1_0 subMap(Filter filter) {
+    public Container_1_0 subMap(QueryFilterRecord filter) {
     	if(filter == null) {
     		return this;
     	} else {
@@ -432,10 +434,10 @@ public class StateCapableContainer_1
 	        if(viewKind != ViewKind.TIME_POINT_VIEW){
 	        	boolean stated = false;
 	            for(
-	            	ListIterator<Condition> i = filter.getCondition().listIterator();
+	            	ListIterator<ConditionRecord> i = filter.getCondition().listIterator();
 	            	i.hasNext();
 	            ){	
-            		Condition condition = i.next();
+            		ConditionRecord condition = i.next();
 	                if(isTypeCondition(condition)) {
 	                	if(viewKind == null) {
 		                    if(isStateFilter(condition)) {
@@ -501,7 +503,7 @@ public class StateCapableContainer_1
      */
     @Override
     public List<DataObject_1_0> values(
-        FetchPlan fetchPlan, OrderSpecifier... criteria
+        FetchPlan fetchPlan, FeatureOrderRecord... criteria
     ) {
         return this.selection.values(fetchPlan, criteria);
     }
@@ -779,15 +781,18 @@ public class StateCapableContainer_1
     private String toKey(
         String qualifier
     ){
-        PathComponent component = new PathComponent(qualifier);
-        if(component.isPlaceHolder() && component.size() == 3) {
-            return component.get(1);
-        } else if (component.isPrivate()) {
-            return component.getPrefix(component.size() - 2).toString();
-        } else {
-            // TODO support aspect specific PathComponent patterns
-            return qualifier;
+        if(PathComponent.isPlaceHolder(qualifier)) {
+            final PathComponent component = new PathComponent(qualifier);
+            if(component.size() == 3){
+            	return component.get(1);
+            }
         }
+        if (PathComponent.isPrivate(qualifier)) {
+        	final PathComponent component = new PathComponent(qualifier);
+            return component.getPrefix(component.size() - 2).toString();
+        }
+        // TODO support aspect specific PathComponent patterns
+        return qualifier;
     }
 
     /**

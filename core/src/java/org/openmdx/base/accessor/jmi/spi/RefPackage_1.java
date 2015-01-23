@@ -79,8 +79,8 @@ import org.openmdx.base.mof.cci.Model_1_0;
 import org.openmdx.base.mof.cci.Multiplicity;
 import org.openmdx.base.mof.spi.Model_1Factory;
 import org.openmdx.base.naming.Path;
-import org.openmdx.base.query.Filter;
 import org.openmdx.base.resource.Records;
+import org.openmdx.base.rest.cci.QueryFilterRecord;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.jdo.ReducedJDOHelper;
 import org.w3c.cci2.SparseArray;
@@ -259,19 +259,19 @@ public class RefPackage_1 implements Jmi1Package_1_0, Serializable {
         Object source
     ) throws ResourceException{
         if(source instanceof List<?>) {
-            IndexedRecord target = Records.getRecordFactory().createIndexedRecord(Multiplicity.LIST.toString());
+            IndexedRecord target = Records.getRecordFactory().createIndexedRecord(Multiplicity.LIST.code());
             for(Object value : (List<?>)source){
                 target.add(toStructValue(value));
             }
             return target;
         } else if (source instanceof Set<?>) {
-            IndexedRecord target = Records.getRecordFactory().createIndexedRecord(Multiplicity.SET.toString());
+            IndexedRecord target = Records.getRecordFactory().createIndexedRecord(Multiplicity.SET.code());
             for(Object value : (Set<?>)source){
                 target.add(toStructValue(value));
             }
             return target;
         } else if (source instanceof SparseArray<?>) {
-            MappedRecord target = Records.getRecordFactory().createMappedRecord(Multiplicity.SPARSEARRAY.toString());
+            MappedRecord target = Records.getRecordFactory().createMappedRecord(Multiplicity.SPARSEARRAY.code());
             for(Object e : target.entrySet()) {
                 Map.Entry<?, ?> entry = (Map.Entry<?, ?>) e;
                 target.put(
@@ -311,7 +311,7 @@ public class RefPackage_1 implements Jmi1Package_1_0, Serializable {
     public RefQuery_1_0 refCreateQuery(
         String type,
         boolean subclasses, 
-        Filter filter
+        QueryFilterRecord filter
     ) throws ServiceException {
         String qualifiedClassName = type.endsWith("Query") ? type.substring(0, type.length() - "Query".length()) : type;
         Mapping_1_0 mapping = this.refMapping();
@@ -453,7 +453,7 @@ public class RefPackage_1 implements Jmi1Package_1_0, Serializable {
                 this.refModel().isStructureType(structType)
             ) {
                 return this.refCreateStruct(
-                    (String)((ModelElement_1_0)structType).getQualifiedName(),
+                    ((ModelElement_1_0)structType).getQualifiedName(),
                     args
                 );
             }

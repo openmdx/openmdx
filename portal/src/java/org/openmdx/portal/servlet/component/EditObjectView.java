@@ -185,7 +185,7 @@ public class EditObjectView extends ObjectView implements Serializable {
         	this.setParent(
         		(RefObject_1_0)pm.getObjectById(editObjectIdentity.getParent().getParent())
         	);
-        	this.setForReference(editObjectIdentity.getParent().getBase());
+        	this.setForReference(editObjectIdentity.getParent().getLastSegment().toClassicRepresentation());
         }
     }
 

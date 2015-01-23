@@ -57,6 +57,9 @@ public class LayerConfigurationEntries extends org.openmdx.application.dataprovi
    * If set to true, the objects returned by get and find operations are cloned. 
    * Cloning the reply prevents stored objects to be modified directly. The
    * default is true.
+   * 
+   * @deprecated the dataprovider 2 stack will support unmodifiable records
+   * eliminating the need to clone them
    */
   static public final String CLONE_REPLY = "cloneReply";
   

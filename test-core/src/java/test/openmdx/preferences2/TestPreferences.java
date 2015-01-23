@@ -79,7 +79,7 @@ import org.openmdx.preferences2.jmi1.Segment;
 import org.openmdx.preferences2.prefs.AutocommittingPreferencesFactory;
 import org.openmdx.preferences2.prefs.Retrievable;
 
-import test.openmdx.application.dataprovider.layer.persistence.jdbc.RidOidQueryDatabase_1;
+import test.openmdx.application.dataprovider.layer.persistence.jdbc.RidOidQueryDatabase_2;
 
 /**
  * Class Loading Test
@@ -335,9 +335,9 @@ public class TestPreferences {
         boolean touch
     ) throws ResourceException, BackingStoreException {
         ((Retrievable)root).retrieveAll();
-        int expectedCount = touch ? RidOidQueryDatabase_1.getUpdateCount() : RidOidQueryDatabase_1.getQueryCount(); 
+        int expectedCount = touch ? RidOidQueryDatabase_2.getUpdateCount() : RidOidQueryDatabase_2.getQueryCount(); 
         jdkTraversePreferences(root, touch);
-        int actualCount = touch ? RidOidQueryDatabase_1.getUpdateCount() : RidOidQueryDatabase_1.getQueryCount(); 
+        int actualCount = touch ? RidOidQueryDatabase_2.getUpdateCount() : RidOidQueryDatabase_2.getQueryCount(); 
         assertEquals("No DB access necessary", expectedCount, actualCount);
     }
 

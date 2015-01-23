@@ -63,6 +63,7 @@ import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.persistence.cci.PersistenceHelper;
 import org.openmdx.base.persistence.cci.UnitOfWork;
+import org.openmdx.base.rest.cci.ObjectRecord;
 import org.openmdx.base.rest.spi.Object_2Facade;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.exception.Throwables;
@@ -123,9 +124,10 @@ public class PersistenceManagerTarget implements ImportTarget {
     /* (non-Javadoc)
      * @see org.openmdx.application.xml.spi.ImportTarget#importObject(org.openmdx.application.xml.spi.ImportTarget.Mode, javax.resource.cci.MappedRecord)
      */
+    @Override
     public void importObject(
         ImportMode mode, 
-        MappedRecord objectHolder
+        ObjectRecord objectHolder
     ) throws ServiceException {
         Path externalId = Object_2Facade.getPath(objectHolder);
         if(this.cache.containsKey(externalId)) {
@@ -191,6 +193,7 @@ public class PersistenceManagerTarget implements ImportTarget {
     /* (non-Javadoc)
      * @see org.openmdx.application.xml.spi.ImportTarget#importEpilog()
      */
+    @Override
     public void importEpilog(
         boolean success
     ) throws ServiceException {
@@ -237,6 +240,7 @@ public class PersistenceManagerTarget implements ImportTarget {
     /* (non-Javadoc)
      * @see org.openmdx.application.xml.spi.ImportTarget#importProlog()
      */
+    @Override
     public void importProlog(
     ) throws ServiceException {
         //

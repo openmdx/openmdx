@@ -1,15 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: $
- * Description: Target 
- * Revision:    $Revision: $
+ * Description: REST Target 
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: $
  * ====================================================================
  *
- * This software is published under the BSD license
- * as listed below.
+ * This software is published under the BSD license as listed below.
  * 
  * Copyright (c) 2013, OMEX AG, Switzerland
  * All rights reserved.
@@ -112,8 +108,6 @@ public abstract class RestTarget implements Target {
 
     /**
      * Terminates and flushes the document
-     * 
-     * @throws BasicException 
      */
     @Override
     public void close(

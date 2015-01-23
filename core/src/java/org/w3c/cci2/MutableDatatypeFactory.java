@@ -51,8 +51,8 @@ package org.w3c.cci2;
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
 
-import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.kernel.exception.BasicException;
+import org.openmdx.kernel.exception.Throwables;
 
 /**
  * Mutable Datatype Factory
@@ -81,12 +81,14 @@ public class MutableDatatypeFactory {
         if(datatypeFactory == null) try {
             datatypeFactory = DatatypeFactory.newInstance();
         } catch (DatatypeConfigurationException exception) {
-            throw new RuntimeServiceException(
-                exception,
-                BasicException.Code.DEFAULT_DOMAIN,
-                BasicException.Code.INVALID_CONFIGURATION,
-                "Datatype factory acquisition failure"
-            ).log();
+            throw Throwables.log(
+            	Throwables.initCause(
+	                new RuntimeException("Datatype factory acquisition failure"),
+	                exception,
+	                BasicException.Code.DEFAULT_DOMAIN,
+	                BasicException.Code.INVALID_CONFIGURATION
+	           )
+            );
         }
         return datatypeFactory;
     }

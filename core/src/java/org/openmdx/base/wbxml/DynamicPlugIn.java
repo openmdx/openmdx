@@ -50,6 +50,7 @@ import java.util.logging.Level;
 
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.kernel.exception.BasicException;
+import org.openmdx.kernel.exception.Throwables;
 import org.openmdx.kernel.log.SysLog;
 
 /**
@@ -123,32 +124,52 @@ public class DynamicPlugIn extends AbstractPlugIn {
     /**
      * Register values for page 0
      * 
-     * @param codeTarget
-     * @param value
-     */
-    protected static void addTo(Page page0, CodeSpace codeSpace, String value) {
-        String[] target = page0.get(codeSpace);
-        int index = getIndex(value);
+     * @param page0 the target page
+     * @param codeSpace the code space the value belongs to
+     * @param value the value to be registered
+ 	 * @param lenient if <code>true</code> then collisions are logged as warnings,
+	 * otherwise they lead to exceptions.
+    */
+    protected static void addTo(Page page0, CodeSpace codeSpace, String value, boolean lenient) {
+    	final int index = getIndex(value);
+        final String[] target = page0.get(codeSpace);
+        final Integer codePage = Integer.valueOf(0);
+        final Integer codePoint = Integer.valueOf(index);
         if (target[index] == null) {
             target[index] = value;
-            SysLog.log(
+			SysLog.log(
                 Level.FINE,
                 "Value \"{0}\" is mapped to [{1}, {2}, {3}]",
                 value,
                 codeSpace,
-                Integer.valueOf(0),
-                Integer.valueOf(index)
+                codePage,
+                codePoint
            );
         } else if (!value.equals(target[index])) {
-            SysLog.log(
-                Level.WARNING,
-                "Both values \"{0}\" and \"{4}\" are mapped to [{1}, {2}, {3}]]",
-                value,
-                codeSpace,
-                Integer.valueOf(0),
-                Integer.valueOf(index),
-                target[index]
-           );
+        	if(lenient){
+				SysLog.log(
+	                Level.WARNING,
+	                "Both values \"{0}\" and \"{4}\" are mapped to [{1}, {2}, {3}]]",
+	                value,
+	                codeSpace,
+	                codePage,
+	                codePoint,
+	                target[index]
+	            );
+        	} else {
+                throw Throwables.initCause(
+                    new IllegalArgumentException(
+                    	"There are two values which can't be put into the same dynamically built code page"
+                    ),
+                    null, // exception 
+        			BasicException.Code.DEFAULT_DOMAIN, 
+        			BasicException.Code.DUPLICATE,
+        			new BasicException.Parameter("code space", codeSpace),
+        			new BasicException.Parameter("code page", codePage),
+        			new BasicException.Parameter("code point", codePoint),
+        			new BasicException.Parameter("conflicting values", value, target[index])
+        		);
+        	}
         }
     }
 
@@ -186,7 +207,7 @@ public class DynamicPlugIn extends AbstractPlugIn {
     ){
         return Math.abs(value.hashCode() % Page.SIZE);
     }
-    
+
     /**
      * Retrieve an exact-match token
      * 
@@ -525,7 +546,7 @@ public class DynamicPlugIn extends AbstractPlugIn {
             throw new ServiceException(
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.ILLEGAL_STATE,
-                "An ext1(int) invocation must immediately be preceeded by an ext1(java.lamg.String) invocation",
+                "An ext1(int) invocation must immediately be preceeded by an ext1(java.lang.String) invocation",
                 new BasicException.Parameter("token"),
                 new BasicException.Parameter("value", argument));
         }

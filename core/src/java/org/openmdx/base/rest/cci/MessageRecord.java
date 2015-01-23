@@ -56,26 +56,12 @@ import org.openmdx.base.naming.Path;
 /**
  * Message Record
  */
-public interface MessageRecord extends MappedRecord {
+public interface MessageRecord extends RequestRecord {
 
     /**
      * An message record's name
      */
     String NAME = "org:openmdx:kernel:Message";
-    
-    /**
-     * Retrieve the message's destination and id
-     * 
-     * @return the destination and id
-     */
-    Path getPath();
-    
-    /**
-     * Set the message's destination and id
-     * 
-     * @param path the message's destination and id
-     */
-    void setPath(Path path);
     
     /**
      * Retrieve the message body
@@ -95,7 +81,7 @@ public interface MessageRecord extends MappedRecord {
     /**
      * Retrieve the target
      * 
-     * @return the arget
+     * @return the target
      */
     Path getTarget();
     
@@ -117,8 +103,15 @@ public interface MessageRecord extends MappedRecord {
      * Clone the record
      * 
      * @return a shallow clone
+     * 
+     * @throws CloneNotSupportedException in case of a <code>RequestedMessage</code>
      */
     MessageRecord clone(
     ) throws CloneNotSupportedException;
-    
+
+    enum Member {
+        body,
+        resourceIdentifier
+    }
+
 }

@@ -49,11 +49,14 @@ package org.openmdx.base.resource.spi;
 
 import java.util.List;
 
+import javax.resource.NotSupportedException;
 import javax.resource.ResourceException;
 import javax.resource.cci.IndexedRecord;
 import javax.resource.cci.MappedRecord;
+import javax.resource.cci.Record;
 
 import org.openmdx.base.resource.cci.ExtendedRecordFactory;
+import org.openmdx.kernel.exception.BasicException;
 
 /**
  * This <code>RecordFactory</code> is able to create variable-size and fixed-size
@@ -109,18 +112,78 @@ public class StandardRecordFactory implements ExtendedRecordFactory {
      * @exception NotSupportedException
      *            Operation not supported
      */
-//  @Override
+    @Override
     public MappedRecord createMappedRecord(
         String recordName
     ) throws ResourceException {
         return 
+    		org.openmdx.base.rest.cci.ConditionRecord.NAME.equals(recordName) ? new org.openmdx.base.rest.spi.ConditionRecord() : 
+    		org.openmdx.base.rest.cci.MessageRecord.NAME.equals(recordName) ? new org.openmdx.base.rest.spi.MessageRecord() : 
+			org.openmdx.base.rest.cci.FeatureOrderRecord.NAME.equals(recordName) ? new org.openmdx.base.rest.spi.FeatureOrderRecord() : 
             org.openmdx.base.rest.cci.ObjectRecord.NAME.equals(recordName) ? new org.openmdx.base.rest.spi.ObjectRecord() : 
+        	org.openmdx.base.rest.cci.QueryFilterRecord.NAME.equals(recordName) ? new org.openmdx.base.rest.spi.QueryFilterRecord() : 
+    		org.openmdx.base.rest.cci.QueryExtensionRecord.NAME.equals(recordName) ? new org.openmdx.base.rest.spi.QueryExtensionRecord() : 
             org.openmdx.base.rest.cci.QueryRecord.NAME.equals(recordName) ? new org.openmdx.base.rest.spi.QueryRecord() : 
-            org.openmdx.base.rest.cci.MessageRecord.NAME.equals(recordName) ? new org.openmdx.base.rest.spi.MessageRecord() : 
+            org.openmdx.base.rest.cci.VoidRecord.NAME.equals(recordName) ? org.openmdx.base.rest.spi.VoidRecord.getInstance() : 
             new VariableSizeMappedRecord(recordName);
     }
 
-    /**
+    /* (non-Javadoc)
+	 * @see org.openmdx.base.resource.cci.ExtendedRecordFactory#createMappedRecord(java.lang.Class)
+	 */
+	@Override
+	public <T extends MappedRecord> T createMappedRecord(
+		Class<T> typedInterface
+	) throws ResourceException {
+		return cast(
+			typedInterface, 
+    		org.openmdx.base.rest.cci.ConditionRecord.class == typedInterface ? new org.openmdx.base.rest.spi.ConditionRecord() : 
+	        org.openmdx.base.rest.cci.MessageRecord.class == typedInterface ? new org.openmdx.base.rest.spi.MessageRecord() : 
+	    	org.openmdx.base.rest.cci.FeatureOrderRecord.class == typedInterface ? new org.openmdx.base.rest.spi.FeatureOrderRecord() : 
+	        org.openmdx.base.rest.cci.ObjectRecord.class == typedInterface ? new org.openmdx.base.rest.spi.ObjectRecord() : 
+	        org.openmdx.base.rest.cci.QueryFilterRecord.class == typedInterface ? new org.openmdx.base.rest.spi.QueryFilterRecord() : 
+	        org.openmdx.base.rest.cci.QueryExtensionRecord.class == typedInterface ? new org.openmdx.base.rest.spi.QueryExtensionRecord() : 
+	        org.openmdx.base.rest.cci.QueryRecord.class == typedInterface ? new org.openmdx.base.rest.spi.QueryRecord() : 
+	        org.openmdx.base.rest.cci.VoidRecord.class == typedInterface ? org.openmdx.base.rest.spi.VoidRecord.getInstance() :
+			null
+		);
+	}
+
+	/* (non-Javadoc)
+	 * @see org.openmdx.base.resource.cci.ExtendedRecordFactory#createIndexedRecord(java.lang.Class)
+	 */
+	@Override
+	public <T extends IndexedRecord> T createIndexedRecord(
+		Class<T> typedInterface
+	) throws ResourceException {
+		return cast(
+			typedInterface,
+    		org.openmdx.base.rest.cci.ResultRecord.class == typedInterface ? new org.openmdx.base.rest.spi.ResultRecord() : 
+			null
+		);
+	}
+
+	private static <T extends Record> T cast(
+		Class<T> typedInterface, 
+		final Record record
+	) throws NotSupportedException {
+		if(record == null) {
+			throw ResourceExceptions.initHolder(
+				new NotSupportedException(
+					"Unsupported record interface",
+					BasicException.newEmbeddedExceptionStack(
+						BasicException.Code.DEFAULT_DOMAIN,
+						BasicException.Code.BAD_PARAMETER,
+						new BasicException.Parameter("interfaceName", typedInterface.getName()),
+						new BasicException.Parameter("isInterface", typedInterface.isInterface())
+					)
+				)
+			);
+		}
+		return typedInterface.cast(record);
+	}
+
+	/**
      * Creates an IndexedRecord with the specified name and the given content.  
      *
      * @param     recordName
@@ -138,7 +201,7 @@ public class StandardRecordFactory implements ExtendedRecordFactory {
      * @exception NotSupportedException
      *            Operation not supported
      */
-//  @Override
+    @Override
     public IndexedRecord createIndexedRecord(
         String recordName
     ) throws ResourceException {
@@ -178,7 +241,7 @@ public class StandardRecordFactory implements ExtendedRecordFactory {
      * @exception	NullPointerException
      *						if <code>values</code> is null.
      */
-//  @Override
+    @Override
     public MappedRecord asMappedRecord(
         String recordName,
         String recordShortDescription,
@@ -196,7 +259,7 @@ public class StandardRecordFactory implements ExtendedRecordFactory {
     /* (non-Javadoc)
      * @see org.openmdx.base.resource.cci.ExtendedRecordFactory#singletonMappedRecord(java.lang.String, java.lang.String, java.lang.Object, java.lang.Object)
      */
-//  @Override
+    @Override
     public MappedRecord singletonMappedRecord(
         String recordName,
         String recordShortDescription,
@@ -234,7 +297,7 @@ public class StandardRecordFactory implements ExtendedRecordFactory {
      *			  if <code>values</code> is neither an array not a list.
      * 
      */
-//  @Override
+    @Override
     public IndexedRecord asIndexedRecord(
         String recordName,
         String recordShortDescription,
@@ -268,7 +331,7 @@ public class StandardRecordFactory implements ExtendedRecordFactory {
     /* (non-Javadoc)
      * @see org.openmdx.base.resource.cci.ExtendedRecordFactory#singletonIndexedRecord(java.lang.String, java.lang.String, java.lang.Object)
      */
-//  @Override
+    @Override
     public IndexedRecord singletonIndexedRecord(
         String recordName,
         String recordShortDescription,

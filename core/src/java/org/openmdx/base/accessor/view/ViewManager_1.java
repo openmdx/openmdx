@@ -389,7 +389,7 @@ public class ViewManager_1
                     new BasicException.Parameter("feature", featureName)
                 ); 
             }
-            String cciFeatureName = (String) featureDef.getName(); 
+            String cciFeatureName = featureDef.getName(); 
             if (!model.isReferenceType(featureDef)) throw new ServiceException(
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.BAD_MEMBER_NAME,

@@ -101,7 +101,7 @@ public class PlugIn_1 implements PlugIn_1_0 {
             Path objectId = view.jdoGetObjectId();
             Configuration configuration = this.getConfiguration(dataObject);
             if(objectId.startsWith(configuration.getAuditSegmentId(view.jdoGetPersistenceManager()))) {
-                String type = objectId.get(objectId.size() - 2);
+                String type = objectId.getSegment(objectId.size() - 2).toClassicRepresentation();
                 //
                 // org::openmdx::audit2
                 //

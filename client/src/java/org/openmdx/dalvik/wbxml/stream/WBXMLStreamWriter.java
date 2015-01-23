@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD licensev as listed below.
  * 
- * Copyright (c) 2010-2012, OMEX AG, Switzerland
+ * Copyright (c) 2010-2013, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -91,10 +91,6 @@ public class WBXMLStreamWriter extends AbstractXMLStreamWriter {
 
     /**
      * Constructor 
-     *
-     * @param plugIn
-     * @param out
-     * @param defaultEncoding TODO
      */
     public WBXMLStreamWriter(
         PlugIn plugIn,
@@ -135,16 +131,17 @@ public class WBXMLStreamWriter extends AbstractXMLStreamWriter {
     private void appendValue(
         int value
     ) throws IOException{
-        byte[] buf = new byte[5];
+        int source = value;
+        byte[] target = new byte[5];
         int idx = 0;
         do {
-            buf[idx++] = (byte) (value & 0x7f);
-            value = value >> 7;
-        } while (value != 0);
+            target[idx++] = (byte) (source & 0x7f);
+            source >>= 7;
+        } while (source != 0);
         while (idx > 1) {
-            this.out.write(buf[--idx] | 0x80);
+            this.out.write(target[--idx] | 0x80);
         }
-        this.out.write(buf[0]);
+        this.out.write(target[0]);
     }
 
     /**
@@ -206,11 +203,41 @@ public class WBXMLStreamWriter extends AbstractXMLStreamWriter {
         }
     }
 
+    /**
+     * Append an in-line string or a string reference
+     * 
+     * @param value
+     * 
+     * @throws IOException
+     */
+    private void appendString(
+        String value
+    ) throws IOException {
+        StringToken token = this.plugIn.findStringToken(value);
+        if(token ==  null) {
+            this.out.write(GlobalTokens.STR_I);
+            this.appendValue(value);
+        } else {
+            this.out.write(GlobalTokens.STR_T);
+            appendValue(token.getCode());
+            return;
+        }
+    }
+    
+    /**
+     * Determines whether we are using a dynamic plug-in
+     * 
+     * @return <code>true</code> if we are using a dynamic plug-in
+     */
+    protected boolean isDynamic() {
+        return this.plugIn instanceof DynamicPlugIn;
+    }
+    
     protected void appendNewToken(
         CodeToken token,
         String value
     ) throws IOException{
-        if(this.plugIn instanceof DynamicPlugIn) {
+        if(isDynamic()) {
             this.out.write(GlobalTokens.EXT_T_0);
             this.appendValue(token.intValue());
             this.out.write(GlobalTokens.EXT_I_0);
@@ -222,7 +249,7 @@ public class WBXMLStreamWriter extends AbstractXMLStreamWriter {
         StringToken token,
         String value
     ) throws IOException{
-        if(this.plugIn instanceof DynamicPlugIn) {
+        if(isDynamic()) {
             this.out.write(GlobalTokens.EXT_T_1);
             this.appendValue(token.getCode());
             this.out.write(GlobalTokens.EXT_I_1);
@@ -232,13 +259,6 @@ public class WBXMLStreamWriter extends AbstractXMLStreamWriter {
 
     /**
      * Attribute or processing instruction name/value pairs
-     * 
-     * @param namespaceURI 
-     * @param elementName 
-     * @param name
-     * @param value
-     * @throws XMLStreamException 
-     * @throws IOException 
      */
     private void appendNameValuePair(
         String namespaceURI,
@@ -273,12 +293,10 @@ public class WBXMLStreamWriter extends AbstractXMLStreamWriter {
                 if(attributeToken.length() > name.length()) {
                     int remaining = name.length() + 1 + value.length() - attributeToken.length();
                     if(remaining > 0){
-                        this.out.write(GlobalTokens.STR_I);
-                        this.appendValue(value.substring(value.length() - remaining));
+                        appendString(value.substring(value.length() - remaining));
                     }
                 } else {
-                    this.out.write(GlobalTokens.STR_I);
-                    this.appendValue(value);
+                    appendString(value);
                 }
 
             }
@@ -326,6 +344,7 @@ public class WBXMLStreamWriter extends AbstractXMLStreamWriter {
     ) throws XMLStreamException {
         try {
             out.close();
+            this.plugIn.reset();
         } catch (IOException exception) {
             throw toXMLStreamException(exception);
         }
@@ -410,8 +429,7 @@ public class WBXMLStreamWriter extends AbstractXMLStreamWriter {
     ) throws XMLStreamException {
         this.flushStartElement(true);
         try {
-            this.out.write(GlobalTokens.STR_I);
-            appendValue(data);
+            appendString(data);
         } catch (IOException exception) {
             throw toXMLStreamException(exception);
         }
@@ -426,8 +444,7 @@ public class WBXMLStreamWriter extends AbstractXMLStreamWriter {
     ) throws XMLStreamException {
         this.flushStartElement(true);
         try {
-            this.out.write(GlobalTokens.STR_I);
-            appendValue(data);
+            appendString(data);
         } catch (IOException exception) {
             throw toXMLStreamException(exception);
         }
@@ -470,7 +487,7 @@ public class WBXMLStreamWriter extends AbstractXMLStreamWriter {
                     public void flush(
                     ) throws IOException {
                         out.write(super.buf, 0, super.count);
-                    };
+                    }
 
                 };
                 BinaryLargeObjects.streamCopy(

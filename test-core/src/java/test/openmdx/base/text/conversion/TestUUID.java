@@ -55,7 +55,7 @@ import java.util.HashSet;
 import java.util.UUID;
 
 import org.ietf.jgss.Oid;
-import org.junit.Ignore;
+import org.junit.Assume;
 import org.junit.Test;
 import org.openmdx.base.text.conversion.UUIDConversion;
 import org.openmdx.base.text.format.UUIDFormatter;
@@ -260,13 +260,12 @@ public class TestUUID {
 
     /**
      * Test UUID based Oid
-     * <p>
-     * http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6418433 seems not to be resolved completely
      */
     @Test
-    @Ignore 
     public void testOid(
     ) throws Exception {
+    	final String javaVersion = System.getProperty("java.specification.version");
+    	Assume.assumeTrue("1.6".compareTo(javaVersion) < 0); // i.e  javaVersion > 1.6
         for(int i = 0; i < OBJECT_ID_UUID.length; i++){
             UUID uuid = UUID.fromString(OBJECT_ID_UUID[i]);
             Oid oid = new Oid(OBJECT_ID_DOT[i]);

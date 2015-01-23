@@ -8,7 +8,7 @@
  * This software is published under the BSD license
  * as listed below.
  * 
- * Copyright (c) 2011, OMEX AG, Switzerland
+ * Copyright (c) 2011-2015, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -50,7 +50,6 @@
 package org.openmdx.portal.servlet.action;
 
 import java.io.IOException;
-import java.io.OutputStream;
 import java.io.PrintWriter;
 
 import javax.servlet.http.HttpServletRequest;
@@ -62,15 +61,22 @@ import javax.servlet.http.HttpServletResponse;
  */
 public abstract class AbstractAction {
     
+    /**
+     * Get response writer with characterEncoding=UTF-8 and contentType=text/html.
+     * 
+     * @param request
+     * @param response
+     * @return
+     * @throws IOException
+     */
     protected PrintWriter getWriter(
         HttpServletRequest request,
         HttpServletResponse response        
     ) throws IOException {
-        OutputStream os = response.getOutputStream(); 
         response.setContentType("text/html");
-        // Do not cache replies
+        response.setCharacterEncoding("UTF-8");
         response.addDateHeader("Expires", -1);
-        return new PrintWriter(os);
+        return response.getWriter();
     }
 	
 }

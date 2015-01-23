@@ -50,7 +50,6 @@ package org.openmdx.base.rest.spi;
 import java.io.Serializable;
 import java.lang.reflect.Array;
 import java.util.AbstractList;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -94,7 +93,7 @@ public class Object_2Facade {
     private Object_2Facade(
         MappedRecord delegate
     ) throws ResourceException {
-        if(!isDelegate(delegate)) {
+        if(!org.openmdx.base.rest.spi.ObjectRecord.isCompatible(delegate)) {
             throw BasicException.initHolder(
                 new ResourceException(
                     "The delegate has the wrong type",
@@ -115,7 +114,7 @@ public class Object_2Facade {
      */
     private Object_2Facade(
     ) throws ResourceException {
-        this.delegate = (ObjectRecord) Records.getRecordFactory().createMappedRecord(ObjectRecord.NAME);
+        this.delegate = Records.getRecordFactory().createMappedRecord(ObjectRecord.class);
     }
     
     /**
@@ -196,11 +195,14 @@ public class Object_2Facade {
      * @param record the record to be tested
      * 
      * @return <code>true</code> if the given record is an object facade delegate
+     * 
+     * @deprecated use {@link org.openmdx.base.rest.spi.ObjectRecord#isCompatible(Record)}
      */
+    @Deprecated
     public static boolean isDelegate(
         Record record
     ){
-        return ObjectRecord.NAME.equals(record.getRecordName());
+        return org.openmdx.base.rest.spi.ObjectRecord.isCompatible(record);
     }
     
     /**
@@ -219,14 +221,14 @@ public class Object_2Facade {
      */
     public final Path getPath(
     ) {
-        return delegate.getPath();
+        return delegate.getResourceIdentifier();
     }
     
     public static Path getPath(
         MappedRecord delegate
     ) {
         return delegate instanceof ObjectRecord ? 
-            ((ObjectRecord)delegate).getPath() :
+            ((ObjectRecord)delegate).getResourceIdentifier() :
             (Path)delegate.get("path");
     }
     
@@ -247,7 +249,34 @@ public class Object_2Facade {
      * @param path The objectId to set.
      */
     public final void setPath(Path path) {
-        this.delegate.setPath(path);
+        this.delegate.setResourceIdentifier(path);
+    }
+
+    /**
+     * Set transient object id.
+     * 
+     * @param path The transient object id to set.
+     */
+    public final void setTransientObjectId(UUID transientObjectId) {
+        this.delegate.setTransientObjectId(transientObjectId);
+    }
+
+    /**
+     * Retrieve the transient object id.
+     * 
+     * @param path The transient object id to set.
+     */
+    public final UUID getTransientObjectId() {
+        return this.delegate.getTransientObjectId();
+    }
+    
+    /**
+     * Tells whether it is a proxy operation
+     * 
+     * @return <code>false</code> if the transient object id is <code>null</code> 
+     */
+    public boolean isProxyOperation(){
+    	return this.delegate.getTransientObjectId() != null;
     }
     
     /**
@@ -405,7 +434,7 @@ public class Object_2Facade {
                 if(value == null) try {
                     record.put(
                         attributeName,
-                        value = Records.getRecordFactory().createMappedRecord(Multiplicity.MAP.toString())
+                        value = Records.getRecordFactory().createMappedRecord(Multiplicity.MAP.code())
                     );
                 } catch (ResourceException exception) {
                     throw new ServiceException(exception);
@@ -635,7 +664,7 @@ public class Object_2Facade {
      * 
      * @throws ServiceException
      */
-    public static MappedRecord cloneObject(
+    public static ObjectRecord cloneObject(
         MappedRecord object
     ) throws ServiceException {
 		try {
@@ -722,8 +751,8 @@ public class Object_2Facade {
             Object value = this.record.get(this.key);
             if(value instanceof List) {
                 return (List<E>)value;
-            } else {                
-                List<E> values = new ArrayList<E>();
+            } else try {                
+                List<E> values = Records.getRecordFactory().createIndexedRecord(Multiplicity.LIST.code());
                 if(value != null) {
                     values.add((E)value);
                 }
@@ -732,8 +761,10 @@ public class Object_2Facade {
                     values
                 );
                 return values;
+            } catch (ResourceException exception) {
+            	throw new RuntimeServiceException(exception);
             }
-        }
+         }
         
         private List<E> getList(
         ) {

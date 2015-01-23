@@ -83,7 +83,7 @@ public class Uml2ModelMapper {
         ModelElement_1_0 operationDef,
         ModelElement_1_0 returnType
     ) throws ServiceException {
-        String name = (String)operationDef.getName();
+        String name = operationDef.getName();
         Boolean isQuery = operationDef.objGetList("isQuery").isEmpty()
             ? null
             : (Boolean)operationDef.objGetValue("isQuery");
@@ -113,7 +113,7 @@ public class Uml2ModelMapper {
         }
         
         // Stereotype
-        if(operationDef.objGetList("stereotype").isEmpty()) {
+        if(!operationDef.objGetList("stereotype").isEmpty()) {
             pw.print("\t<eAnnotations");
             this.printAttribute("xmi:id", this.createId()); 
             this.printAttribute("source", "keywords"); 
@@ -145,8 +145,8 @@ public class Uml2ModelMapper {
         ModelElement_1_0 parameterDef,
         ModelElement_1_0 parameterTypeDef
     ) throws ServiceException {
-        String name = (String)parameterDef.getName();
-        String typeQualifiedName = (String)parameterTypeDef.getQualifiedName();
+        String name = parameterDef.getName();
+        String typeQualifiedName = parameterTypeDef.getQualifiedName();
         String direction = this.toXMIParameterKind((String)parameterDef.objGetValue("direction"));
 
         if("return".equals(direction)) {
@@ -176,11 +176,11 @@ public class Uml2ModelMapper {
         ModelElement_1_0 end1,
         ModelElement_1_0 end2
     ) throws ServiceException {
-        String name = (String)associationDef.getName();
-        String qualifiedName = (String)associationDef.getQualifiedName();
-        boolean isDerived = ((Boolean)associationDef.isDerived()).booleanValue();
-        String end1QualifiedName = (String)end1.getQualifiedName();
-        String end2QualifiedName = (String)end2.getQualifiedName();
+        String name = associationDef.getName();
+        String qualifiedName = associationDef.getQualifiedName();
+        boolean isDerived = associationDef.isDerived().booleanValue();
+        String end1QualifiedName = end1.getQualifiedName();
+        String end2QualifiedName = end2.getQualifiedName();
         String end1Id = this.getAssociationEndId(end1QualifiedName);
         String end2Id = this.getAssociationEndId(end2QualifiedName);
         
@@ -223,14 +223,14 @@ public class Uml2ModelMapper {
         List qualifierTypes,
         boolean mapAsAttribute
     ) throws ServiceException {
-        String name = (String)associationEndDef.getName();
-        String qualifiedName = (String)associationEndDef.getQualifiedName();
-        boolean isChangeable = ((Boolean)associationEndDef.isChangeable()).booleanValue();
-        boolean isDerived = ((Boolean)associationDef.isDerived()).booleanValue();
-        String multiplicity = (String)associationEndDef.getMultiplicity();        
-        String qualifiedTypeName = (String)associationEndTypeDef.getQualifiedName();
-        String aggregation = (String)associationEndDef.getAggregation();
-        String associationQualifiedName = (String)associationDef.getQualifiedName();        
+        String name = associationEndDef.getName();
+        String qualifiedName = associationEndDef.getQualifiedName();
+        boolean isChangeable = associationEndDef.isChangeable().booleanValue();
+        boolean isDerived = associationDef.isDerived().booleanValue();
+        String multiplicity = associationEndDef.getMultiplicity();        
+        String qualifiedTypeName = associationEndTypeDef.getQualifiedName();
+        String aggregation = associationEndDef.getAggregation();
+        String associationQualifiedName = associationDef.getQualifiedName();        
         
         if(mapAsAttribute) {
             pw.write(indent, 0, nTabs); 
@@ -254,7 +254,7 @@ public class Uml2ModelMapper {
             if(!associationEndDef.objGetList("qualifierName").isEmpty()) {
                 String qualifierName = (String)associationEndDef.objGetValue("qualifierName");
                 ModelElement_1_0 qualifierType = (ModelElement_1_0)qualifierTypes.get(0);
-                String qualifierTypeName = (String)qualifierType.getQualifiedName();
+                String qualifierTypeName = qualifierType.getQualifiedName();
                 
                 pw.write(indent, 0, nTabs);
                 pw.print("\t<qualifier");
@@ -290,8 +290,8 @@ public class Uml2ModelMapper {
     public void mapPrimitiveType(
         ModelElement_1_0 primitiveTypeDef
     ) throws ServiceException {
-        String name = (String)primitiveTypeDef.getName();
-        String qualifiedName = (String)primitiveTypeDef.getQualifiedName();
+        String name = primitiveTypeDef.getName();
+        String qualifiedName = primitiveTypeDef.getQualifiedName();
 
         pw.write(indent, 0, nTabs);
         pw.print("<ownedMember");
@@ -324,7 +324,7 @@ public class Uml2ModelMapper {
             this.printAttribute("value", "1");
             pw.println("/>");                        
         }
-        else if(Multiplicity.OPTIONAL.toString().equals(multiplicity)) {
+        else if(Multiplicity.OPTIONAL.code().equals(multiplicity)) {
             // Upper value
             pw.write(indent, 0, nTabs);
             pw.print("\t<upperValue");
@@ -380,9 +380,9 @@ public class Uml2ModelMapper {
         ModelElement_1_0 typeDef,
         boolean referencedTypeIsPrimitive
     ) throws ServiceException {
-        String name = (String)attributeDef.getName();
-        String typeQualifiedName = (String)typeDef.getQualifiedName();
-        String multiplicity = (String)attributeDef.getMultiplicity();
+        String name = attributeDef.getName();
+        String typeQualifiedName = typeDef.getQualifiedName();
+        String multiplicity = attributeDef.getMultiplicity();
 
         pw.write(indent, 0, nTabs); 
         pw.print("<ownedAttribute");
@@ -416,9 +416,9 @@ public class Uml2ModelMapper {
         ModelElement_1_0 typeDef,
         boolean referencedTypeIsPrimitive
     ) throws ServiceException {
-        String name = (String)aliasTypeDef.getName();
-        String qualifiedName = (String)aliasTypeDef.getQualifiedName();
-        String typeQualifiedName = (String)typeDef.getQualifiedName();
+        String name = aliasTypeDef.getName();
+        String qualifiedName = aliasTypeDef.getQualifiedName();
+        String typeQualifiedName = typeDef.getQualifiedName();
 
         pw.write(indent, 0, nTabs); 
         pw.print("<ownedMember");
@@ -462,7 +462,7 @@ public class Uml2ModelMapper {
         pw.write("<ownedMember");
         this.printAttribute("xmi:type", "uml:Package");
         this.printAttribute("xmi:id", this.createId());
-        this.printAttribute("name", (String)packageDef.getName()); 
+        this.printAttribute("name", packageDef.getName()); 
         pw.println(">");
         nTabs += 1;
     }
@@ -492,9 +492,9 @@ public class Uml2ModelMapper {
         boolean hasFeatures,
         boolean asStructureType
     ) throws ServiceException {
-        String name = (String)classDef.getName();
-        String classId = this.getClassifierId((String)classDef.getQualifiedName());
-        boolean isAbstract = ((Boolean)classDef.isAbstract()).booleanValue();
+        String name = classDef.getName();
+        String classId = this.getClassifierId(classDef.getQualifiedName());
+        boolean isAbstract = classDef.isAbstract().booleanValue();
 
         pw.write(indent, 0, nTabs); 
         pw.print("<ownedMember");
@@ -539,7 +539,7 @@ public class Uml2ModelMapper {
             pw.print("\t<generalization");
             this.printAttribute("xmi:id", this.createId());            
             ModelElement_1_0 parentClassDef = (ModelElement_1_0)it.next();
-            String parentClassQualifiedName = (String)parentClassDef.getQualifiedName();
+            String parentClassQualifiedName = parentClassDef.getQualifiedName();
             this.printAttribute("general", this.getClassifierId(parentClassQualifiedName));
             pw.println("/>");            
         }

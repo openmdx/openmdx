@@ -65,7 +65,6 @@ import java.util.Set;
 import java.util.Stack;
 import java.util.StringTokenizer;
 
-import javax.resource.cci.MappedRecord;
 import javax.xml.datatype.Duration;
 import javax.xml.datatype.XMLGregorianCalendar;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -74,6 +73,7 @@ import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.ModelHelper;
 import org.openmdx.base.mof.cci.Multiplicity;
 import org.openmdx.base.naming.Path;
+import org.openmdx.base.rest.cci.ObjectRecord;
 import org.openmdx.base.rest.spi.Facades;
 import org.openmdx.base.rest.spi.Object_2Facade;
 import org.openmdx.base.text.conversion.Base64;
@@ -121,7 +121,7 @@ public class ImportHandler extends DefaultHandler {
     private final SimpleDateFormat localMillisecondFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
 
     // stack of objects currently open
-    private Stack<MappedRecord> objectStack = null;
+    private Stack<ObjectRecord> objectStack = null;
 
     // Path length of the request collection's first element
     private int pendingAt = -1;
@@ -134,7 +134,7 @@ public class ImportHandler extends DefaultHandler {
     private Map<String,Map<String,String>> objectElements = null;
 
     // state/context of current object
-    private MappedRecord currentObject = null;
+    private ObjectRecord currentObject = null;
 
     /**
      * The current object's operation
@@ -486,7 +486,7 @@ public class ImportHandler extends DefaultHandler {
     public void startDocument(
     ) throws SAXException {
         this.currentPath = new Path("");
-        this.objectStack = new Stack<MappedRecord>();
+        this.objectStack = new Stack<ObjectRecord>();
         this.objectElements = new HashMap<String,Map<String,String>>();
         this.currentObject = null;
         this.currentAttributeValue = null;
@@ -627,15 +627,14 @@ public class ImportHandler extends DefaultHandler {
             // <"_item"> start element of value of a multi-valued attribute
             //
             this.currentAttributeOperation = attributes.getValue("_operation");
-            int position = attributes.getValue("_position") == null ? 0 : Integer.parseInt(
-                attributes.getValue("_position")
-            );
+            final String _position = attributes.getValue("_position");
+			int position = _position == null ? 0 : Integer.parseInt(_position);
             this.currentAttributePosition = position == -1 ? this.currentAttributePosition + 1 : position;
             this.currentAttributeKey = attributes.getValue("_key");
         } else if (
-            Multiplicity.SET.toString().equals(attributeMultiplicity) ||
-            Multiplicity.LIST.toString().equals(attributeMultiplicity) ||
-            Multiplicity.SPARSEARRAY.toString().equals(attributeMultiplicity) ||
+            Multiplicity.SET.code().equals(attributeMultiplicity) ||
+            Multiplicity.LIST.code().equals(attributeMultiplicity) ||
+            Multiplicity.SPARSEARRAY.code().equals(attributeMultiplicity) ||
             ModelHelper.UNBOUND.equals(attributeMultiplicity)
         ) {
             try {
@@ -655,7 +654,7 @@ public class ImportHandler extends DefaultHandler {
                 throw new SAXException(exception);
             }
         } else if (
-            Multiplicity.MAP.toString().equals(attributeMultiplicity)
+            Multiplicity.MAP.code().equals(attributeMultiplicity)
         ) {
             try {
                 // multi-valued attribute with attributes 'offset', 'multiplicity' last
@@ -866,7 +865,7 @@ public class ImportHandler extends DefaultHandler {
                         //
                         boolean notSupported = false;
                         int absolutePosition = this.currentAttributeOffset + this.currentAttributePosition;
-                        if (Multiplicity.SET.toString().equalsIgnoreCase(this.currentAttributeMultiplicity)) {
+                        if (Multiplicity.SET.code().equalsIgnoreCase(this.currentAttributeMultiplicity)) {
                             // SET
                             List<Object> values = facade.getAttributeValuesAsGuardedList(attributeName);
                             if (
@@ -881,7 +880,7 @@ public class ImportHandler extends DefaultHandler {
                                 notSupported = true;
                             }
                         } else if (
-                    		Multiplicity.LIST.toString().equalsIgnoreCase(this.currentAttributeMultiplicity) || 
+                    		Multiplicity.LIST.code().equalsIgnoreCase(this.currentAttributeMultiplicity) || 
                     		ModelHelper.UNBOUND.equals(this.currentAttributeMultiplicity)
                         ) {
                             // LIST
@@ -901,7 +900,7 @@ public class ImportHandler extends DefaultHandler {
                             }
                         } else if (
                             this.currentAttributeMultiplicity == null || 
-                            Multiplicity.SPARSEARRAY.toString().equalsIgnoreCase(this.currentAttributeMultiplicity)
+                            Multiplicity.SPARSEARRAY.code().equalsIgnoreCase(this.currentAttributeMultiplicity)
                         ) {
                             // SPARSEARRAY
                             // In case of v2 format the multiplicity is not set
@@ -924,7 +923,7 @@ public class ImportHandler extends DefaultHandler {
                                 notSupported = true;
                             }
                         } else if (
-                            Multiplicity.MAP.toString().equalsIgnoreCase(this.currentAttributeMultiplicity)
+                            Multiplicity.MAP.code().equalsIgnoreCase(this.currentAttributeMultiplicity)
                         ) {
                             Map<String, Object> values = facade.attributeValuesAsMap(attributeName);
                             if(this.currentAttributeKey == null) {
@@ -978,7 +977,7 @@ public class ImportHandler extends DefaultHandler {
                 // </item> is the end tag for a value of a multi-valued attribute.
                 // Leave currentPath unchanged.
                 this.currentPath = this.currentPath.getParent();
-                if(Multiplicity.MAP.toString().equals(this.currentAttributeMultiplicity)) {
+                if(Multiplicity.MAP.code().equals(this.currentAttributeMultiplicity)) {
                     this.currentAttributeMultiplicity = null;
                 }
              }

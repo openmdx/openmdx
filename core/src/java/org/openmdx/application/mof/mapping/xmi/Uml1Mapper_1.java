@@ -157,9 +157,9 @@ public class Uml1Mapper_1
 
       if(elementDef.objGetClass().equals(ModelAttributes.PACKAGE))
       {
-        String qualifiedName = ((String)elementDef.getQualifiedName()).substring(
+        String qualifiedName = elementDef.getQualifiedName().substring(
           0,
-          ((String)elementDef.getQualifiedName()).lastIndexOf(":")
+          elementDef.getQualifiedName().lastIndexOf(":")
         );
         packages.put(
           qualifiedName,
@@ -338,8 +338,8 @@ public class Uml1Mapper_1
     else if(elementDef.objGetClass().equals(ModelAttributes.ATTRIBUTE)) {
       ModelElement_1_0 typeDef = this.model.getElement(elementDef.getType());
       boolean refTypeIsPrimitive = typeDef.objGetClass().equals(ModelAttributes.PRIMITIVE_TYPE);
-      boolean isDerived = ((Boolean)elementDef.isDerived()).booleanValue();
-      boolean isChangeable = ((Boolean)elementDef.isChangeable()).booleanValue();
+      boolean isDerived = elementDef.isDerived().booleanValue();
+      boolean isChangeable = elementDef.isChangeable().booleanValue();
       writer.writeAttribute(elementDef, isDerived, isChangeable, typeDef, refTypeIsPrimitive);
     }
     else if(elementDef.objGetClass().equals(ModelAttributes.ASSOCIATION)) {

@@ -53,29 +53,37 @@ import java.io.ObjectOutput;
 import java.io.OutputStream;
 import java.io.Reader;
 import java.io.StringWriter;
+import java.math.BigDecimal;
+import java.net.URI;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+import javax.resource.ResourceException;
 import javax.resource.cci.IndexedRecord;
 import javax.resource.cci.MappedRecord;
+import javax.resource.spi.ResourceAllocationException;
+import javax.xml.datatype.XMLGregorianCalendar;
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 
+import org.ietf.jgss.Oid;
 import org.openmdx.base.accessor.rest.spi.ControlObjects_2;
 import org.openmdx.base.collection.Maps;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.io.ObjectOutputStream;
+import org.openmdx.base.mof.cci.PrimitiveTypes;
 import org.openmdx.base.naming.Path;
+import org.openmdx.base.resource.spi.ResourceExceptions;
 import org.openmdx.base.rest.cci.MessageRecord;
+import org.openmdx.base.rest.cci.ObjectRecord;
+import org.openmdx.base.rest.cci.QueryRecord;
 import org.openmdx.base.rest.cci.ResultRecord;
-import org.openmdx.base.rest.spi.Facades;
-import org.openmdx.base.rest.spi.Object_2Facade;
-import org.openmdx.base.rest.spi.Query_2Facade;
 import org.openmdx.base.rest.spi.RestFormatter;
 import org.openmdx.base.rest.spi.Target;
 import org.openmdx.base.text.conversion.Base64;
@@ -173,14 +181,15 @@ public class StandardRestFormatter implements RestFormatter {
     @Override
     public void format(
         Target target, 
-        Object_2Facade source
-    ) throws ServiceException {
-        Path resourceIdentifier = source.getPath();
-        StandardRestFormatter.printRecord(
+        ObjectRecord source
+    ) throws ResourceException {
+        Path resourceIdentifier = source.getResourceIdentifier();
+        final UUID transientObjectId = source.getTransientObjectId();
+        formatRecord(
             (RestTarget)target,
             0,
             resourceIdentifier,
-            null,
+            transientObjectId == null ? null : transientObjectId.toString(),
             (byte[]) source.getVersion(),
             null, // index
             source.getValue()
@@ -198,16 +207,16 @@ public class StandardRestFormatter implements RestFormatter {
     @Override
     public void format(
         Target target, 
-        Query_2Facade source
-    ) throws ServiceException {
-        StandardRestFormatter.printRecord(
+        QueryRecord source
+    ) throws ResourceException {
+    	formatRecord(
             (RestTarget)target, 
             0, 
             null, // XRI
             "query",
             null, // Version
             null, // index
-            source.getDelegate()
+            source
         );
     }
 
@@ -225,7 +234,7 @@ public class StandardRestFormatter implements RestFormatter {
         Target target, 
         Path xri, 
         IndexedRecord source
-    ) throws ServiceException {
+    ) throws ResourceException {
         try {
             RestTarget restTarget = (RestTarget)target;
             XMLStreamWriter writer = restTarget.getWriter();
@@ -243,11 +252,11 @@ public class StandardRestFormatter implements RestFormatter {
                 }
             }
             for (Object record : source) {
-                Object_2Facade object = Facades.asObject((MappedRecord) record);
-                StandardRestFormatter.printRecord(
+                ObjectRecord object = (ObjectRecord) record;
+                printRecord(
                     restTarget, 
                     1, 
-                    object.getPath(), 
+                    object.getResourceIdentifier(), 
                     null, 
                     (byte[]) object.getVersion(), 
                     null, // index
@@ -257,7 +266,16 @@ public class StandardRestFormatter implements RestFormatter {
             writer.writeEndElement(); // "org.openmdx.kernel.ResultSet"
             writer.writeEndDocument();
         } catch (XMLStreamException exception) {
-            throw new ServiceException(exception);
+        	throw ResourceExceptions.initHolder(
+        		new ResourceException(
+        			"Unable to write the REST request to the given stream",
+                    BasicException.newEmbeddedExceptionStack(
+                        exception,
+                        BasicException.Code.DEFAULT_DOMAIN,
+                        BasicException.Code.TRANSFORMATION_FAILURE
+                    )
+                )
+        	);
         }
     }
 
@@ -274,11 +292,11 @@ public class StandardRestFormatter implements RestFormatter {
         Target target, 
         String id, 
         MessageRecord source
-    ) throws ServiceException {
-        StandardRestFormatter.printRecord(
+    ) throws ResourceException {
+    	formatRecord(
             (RestTarget)target, 
             0, 
-            source.getPath(), 
+            source.getResourceIdentifier(), 
             id,
             null, // Version
             null, // index
@@ -291,9 +309,11 @@ public class StandardRestFormatter implements RestFormatter {
      * 
      * @param target
      * @param indent
-     * @param tag
      * @param index
      * @param value
+     * @param anyType tells whether the value's type can't be derived from the model
+     * @throws IOException 
+     * @throws XMLStreamException 
      * 
      * @throws ServiceException
      */
@@ -301,8 +321,9 @@ public class StandardRestFormatter implements RestFormatter {
         RestTarget target,
         int indent,
         Object index,
-        Object value
-    ) throws ServiceException {
+        Object value, 
+        boolean anyType
+    ) throws XMLStreamException {
         if (value instanceof MappedRecord && isStructureType((MappedRecord)value)){
             printRecord(
                 target,
@@ -319,7 +340,8 @@ public class StandardRestFormatter implements RestFormatter {
                 indent,
                 ITEM_TAG,
                 index,
-                value
+                value, 
+                anyType
             );
         }
     }
@@ -332,18 +354,22 @@ public class StandardRestFormatter implements RestFormatter {
      * @param tag
      * @param index
      * @param value
+     * @param anyType tells whether the value's type can't be derived from the model
+     * @throws XMLStreamException 
      * 
      * @throws ServiceException
+     * @throws IOException 
      */
     private static void printValue(
         RestTarget target,
         int indent,
         String tag,
         Object index,
-        Object value
-    ) throws ServiceException {
+        Object value, 
+        boolean anyType
+    ) throws XMLStreamException {
+        XMLStreamWriter writer = target.getWriter();
         try {
-            XMLStreamWriter writer = target.getWriter();
             if(value == null && index == null)  {
                 writer.writeEmptyElement(tag);
             } else {
@@ -351,105 +377,128 @@ public class StandardRestFormatter implements RestFormatter {
                 if (index != null) {
                     writer.writeAttribute("index", index.toString());
                 }
+                if (anyType) {
+                    writer.writeAttribute("type", getPrimitiveType(value));
+                }
                 if (value == null) {
                     // wait for the tag to be closed
-                } else if (value instanceof MappedRecord && isStructureType((MappedRecord)value)){
-                    printRecord(
-                        target,
-                        indent + 2,
-                        null, // xri
-                        null, // id
-                        null, // version
-                        index,
-                        (MappedRecord)value // record
-                    );
-                } else if (value instanceof Path) {
-                    Path xri = (Path) value;
-                    writer.writeAttribute("href", target.toURL(xri));
-                    writer.writeCharacters(xri.toXRI());
-                } else if (value instanceof String) {
-                    writer.writeCData((String) value);
-                } else if (value instanceof Date) {
-                    writer.writeCharacters(
-                        DateTimeFormat.EXTENDED_UTC_FORMAT.format((Date) value)
-                    );
-                } else if (value instanceof char[]) {
-                    char[] text = (char[]) value;
-                    writer.writeCharacters(text, 0, text.length);
-                } else if (writer instanceof LargeObjectWriter) {
-                    if (value instanceof BinaryLargeObject) {
-                        ((LargeObjectWriter) writer).writeBinaryData(
-                            (BinaryLargeObject) value
-                        );
-                    } else if (value instanceof CharacterLargeObject) {
-                        ((LargeObjectWriter) writer).writeCharacterData(
-                            (CharacterLargeObject) value
-                        );
-                    } else if (value instanceof InputStream) {
-                        ((LargeObjectWriter) writer).writeBinaryData(
-                            BinaryLargeObjects.valueOf((InputStream) value)
-                        );
-                    } else if (value instanceof Reader) {
-                        ((LargeObjectWriter) writer).writeCharacterData(
-                            CharacterLargeObjects.valueOf((Reader) value)
-                        );
-                    } else if (value instanceof byte[]) {
-                        ((LargeObjectWriter) writer).writeBinaryData(
-                            BinaryLargeObjects.valueOf((byte[]) value)
-                        );
-                    } else {
-                        //
-                        // Data types other than large objects
-                        //
-                        writer.writeCharacters(value.toString());
-                    }
                 } else {
-                    if (value instanceof BinaryLargeObject) {
-                        Base64.encode(
-                            ((BinaryLargeObject) value).getContent(),
-                            new CharacterWriter(writer)
-                        );
-                    } else if (value instanceof CharacterLargeObject) {
-                        CharacterLargeObject source = (CharacterLargeObject) value;
-                        Long length = source.getLength();
-                        StringWriter data = length == null ? new StringWriter(
-                        ) : new StringWriter(
-                            length.intValue()
-                        );
-                        CharacterLargeObjects.streamCopy(
-                            source.getContent(),
-                            0l,
-                            data
-                        );
-                        writer.writeCData(data.toString());    
-
-                    } else if (value instanceof InputStream) {
-                        Base64.encode(
-                            (InputStream) value, 
-                            new CharacterWriter(writer)
-                        );
-                    } else if (value instanceof Reader) {
-                        StringWriter data = new StringWriter();
-                        CharacterLargeObjects.streamCopy((Reader) value, 0l, data);
-                        writer.writeCData(data.toString());
-                    } else if (value instanceof byte[]) {
-                        writer.writeCharacters(Base64.encode((byte[]) value));
-                    } else {
-                        //
-                        // Data types other than large objects
-                        //
-                        writer.writeCharacters(value.toString());
-                    }
-                }
+                	if (value instanceof MappedRecord && isStructureType((MappedRecord)value)){
+	                    printRecord(
+	                        target,
+	                        indent + 2,
+	                        null, // xri
+	                        null, // id
+	                        null, // version
+	                        index,
+	                        (MappedRecord)value // record
+	                    );
+	                } else if (value instanceof Path) {
+	                    Path xri = (Path) value;
+	                    writer.writeAttribute("href", target.toURL(xri));
+	                    writer.writeCharacters(xri.toXRI());
+	                } else if (value instanceof String) {
+	                    writer.writeCData((String) value);
+	                } else if (value instanceof Date) {
+	                    writer.writeCharacters(
+	                        DateTimeFormat.EXTENDED_UTC_FORMAT.format((Date) value)
+	                    );
+	                } else if (value instanceof char[]) {
+	                    char[] text = (char[]) value;
+	                    writer.writeCharacters(text, 0, text.length);
+	                } else if (writer instanceof LargeObjectWriter) {
+	                    if (value instanceof BinaryLargeObject) {
+	                        ((LargeObjectWriter) writer).writeBinaryData(
+	                            (BinaryLargeObject) value
+	                        );
+	                    } else if (value instanceof CharacterLargeObject) {
+	                        ((LargeObjectWriter) writer).writeCharacterData(
+	                            (CharacterLargeObject) value
+	                        );
+	                    } else if (value instanceof InputStream) {
+	                        ((LargeObjectWriter) writer).writeBinaryData(
+	                            BinaryLargeObjects.valueOf((InputStream) value)
+	                        );
+	                    } else if (value instanceof Reader) {
+	                        ((LargeObjectWriter) writer).writeCharacterData(
+	                            CharacterLargeObjects.valueOf((Reader) value)
+	                        );
+	                    } else if (value instanceof byte[]) {
+	                        ((LargeObjectWriter) writer).writeBinaryData(
+	                            BinaryLargeObjects.valueOf((byte[]) value)
+	                        );
+	                    } else {
+	                        //
+	                        // Data types other than large objects
+	                        //
+	                        writer.writeCharacters(value.toString());
+	                    }
+	                } else {
+	                    if (value instanceof BinaryLargeObject) {
+	                        Base64.encode(
+	                            ((BinaryLargeObject) value).getContent(),
+	                            new CharacterWriter(writer)
+	                        );
+	                    } else if (value instanceof CharacterLargeObject) {
+	                        CharacterLargeObject source = (CharacterLargeObject) value;
+	                        Long length = source.getLength();
+	                        StringWriter data = length == null ? new StringWriter(
+	                        ) : new StringWriter(
+	                            length.intValue()
+	                        );
+	                        CharacterLargeObjects.streamCopy(
+	                            source.getContent(),
+	                            0l,
+	                            data
+	                        );
+	                        writer.writeCData(data.toString());    
+	
+	                    } else if (value instanceof InputStream) {
+	                        Base64.encode(
+	                            (InputStream) value, 
+	                            new CharacterWriter(writer)
+	                        );
+	                    } else if (value instanceof Reader) {
+	                        StringWriter data = new StringWriter();
+	                        CharacterLargeObjects.streamCopy((Reader) value, 0l, data);
+	                        writer.writeCData(data.toString());
+	                    } else if (value instanceof byte[]) {
+	                        writer.writeCharacters(Base64.encode((byte[]) value));
+	                    } else {
+	                        //
+	                        // Data types other than large objects
+	                        //
+	                        writer.writeCharacters(value.toString());
+	                    }
+	                }
+	            }
                 writer.writeEndElement(); // tag
             }
+        } catch (ServiceException exception) {
+        	throw new XMLStreamException(exception);
         } catch (IOException exception) {
-            throw new ServiceException(exception);
-        } catch (XMLStreamException exception) {
-            throw new ServiceException(exception);
+        	throw new XMLStreamException(exception);
         }
     }
 
+    private static String getPrimitiveType(Object value) {
+    	return
+    		value instanceof String ? PrimitiveTypes.STRING :
+    		value instanceof Short ? PrimitiveTypes.SHORT :
+    		value instanceof Long ? PrimitiveTypes.LONG :
+    		value instanceof Integer ? PrimitiveTypes.INTEGER :
+    		value instanceof BigDecimal ? PrimitiveTypes.DECIMAL :
+    		value instanceof Boolean ? PrimitiveTypes.BOOLEAN :
+    		value instanceof Path ? PrimitiveTypes.OBJECT_ID :
+    		value instanceof Date ? PrimitiveTypes.DATETIME :
+    		value instanceof XMLGregorianCalendar ? PrimitiveTypes.DATE :
+    		value instanceof URI ? PrimitiveTypes.ANYURI :
+    		value instanceof byte[] ? PrimitiveTypes.BINARY :
+    		value instanceof UUID ? PrimitiveTypes.UUID :
+    		value instanceof Oid ? PrimitiveTypes.OID :
+    		"org:w3c:anyType";
+    }
+    
     /**
      * Print Exception
      * 
@@ -577,18 +626,41 @@ public class StandardRestFormatter implements RestFormatter {
     }
 
     /**
-     * Print Record
-     * 
-     * @param target
-     * @param indent
-     * @param xri
-     * @param id
-     * @param version
-     * @param index 
-     * @param record
-     * @throws IOException
+     * Format Record
      */
-    @SuppressWarnings("unchecked")
+    private static void formatRecord(
+        RestTarget target,
+        int indent,
+        Path xri,
+        String id,
+        byte[] version,
+        Object index, 
+        MappedRecord record
+    ) throws ResourceException {
+    	try {
+			printRecord(target, indent, xri, id, version, index, record);
+		} catch (XMLStreamException exception) {
+            throw ResourceExceptions.initHolder(
+                new ResourceAllocationException(
+                    "Unable to format the given record",
+                    BasicException.newEmbeddedExceptionStack(
+                        exception,
+                        BasicException.Code.DEFAULT_DOMAIN,
+                        BasicException.Code.TRANSFORMATION_FAILURE,
+	                    new BasicException.Parameter("xri", xri),
+	                    new BasicException.Parameter("id", id),
+	                    new BasicException.Parameter("type", record.getRecordName()),
+	                    new BasicException.Parameter("index", index),
+	                    new BasicException.Parameter("indentation", Integer.valueOf(indent))
+                    )
+                )
+            );
+		}
+    }
+    
+    /**
+     * Print Record
+     */
     private static void printRecord(
         RestTarget target,
         int indent,
@@ -597,67 +669,79 @@ public class StandardRestFormatter implements RestFormatter {
         byte[] version,
         Object index, 
         MappedRecord record
-    ) throws ServiceException {
-        try {
-            XMLStreamWriter writer = target.getWriter();
-            String tag = record.getRecordName().replace(':', '.');
-            writer.writeStartElement(tag);
-            if(id != null) {
-                target.getWriter().writeAttribute("id", id);
-            }
-            if(xri != null) {
-                target.getWriter().writeAttribute("href", target.toURL(xri));
-            }
-            if (version != null) {
-                target.getWriter().writeAttribute("version", Base64.encode(version));
-            }
-            if (index != null) {
-                writer.writeAttribute("index", index.toString());
-            }
-            Set<Map.Entry<String, ?>> entries = record.entrySet();
-            for (Map.Entry<String, ?> entry : entries) {
-                String feature = entry.getKey();
-                Object value = entry.getValue();
-                try {
-                    printValue(target, indent, xri, feature, value);
-                } catch (Exception exception) {
-                    SysLog.warning(
-                        "Collection element print failure",
-                        new ServiceException(
-                            exception,
-                            BasicException.Code.DEFAULT_DOMAIN,
-                            BasicException.Code.PROCESSING_FAILURE,
-                            "Unable to retrieve feature value",
-                            new BasicException.Parameter("hrefContext", target.getBase()),
-                            new BasicException.Parameter("xri", xri),
-                            new BasicException.Parameter("feature", feature)
-                        )
-                    );
-                }
-            }
-            target.getWriter().writeEndElement(); // tag
-        } catch (XMLStreamException exception) {
-            throw new ServiceException(exception);
+    ) throws XMLStreamException{
+        XMLStreamWriter writer = target.getWriter();
+        String tag = record.getRecordName().replace(':', '.');
+        writer.writeStartElement(tag);
+        if(id != null) {
+            target.getWriter().writeAttribute("id", id);
         }
+        if(xri != null) {
+            target.getWriter().writeAttribute("href", target.toURL(xri));
+        }
+        if (version != null) {
+            target.getWriter().writeAttribute("version", Base64.encode(version));
+        }
+        if (index != null) {
+            writer.writeAttribute("index", index.toString());
+        }
+        Set<Map.Entry<String, ?>> entries = record.entrySet();
+        for (Map.Entry<String, ?> entry : entries) {
+            String feature = entry.getKey();
+            Object value = entry.getValue();
+            try {
+                printValue(target, indent, xri, feature, value, isAnyType(record.getRecordName(), feature));
+            } catch (Exception exception) {
+                SysLog.warning(
+                    "Collection element print failure",
+                    new ServiceException(
+                        exception,
+                        BasicException.Code.DEFAULT_DOMAIN,
+                        BasicException.Code.PROCESSING_FAILURE,
+                        "Unable to retrieve feature value",
+                        new BasicException.Parameter("hrefContext", target.getBase()),
+                        new BasicException.Parameter("xri", xri),
+                        new BasicException.Parameter("id", id),
+                        new BasicException.Parameter("feature", feature)
+                    )
+                );
+            }
+        }
+        target.getWriter().writeEndElement(); // tag
     }
 
-    /**
+	/**
+	 * Determines whether value's type is modeled as <code>org::w3c::anyType</code>
+	 * 
+	 * @param recordName the value holder's model type
+	 * @param feature the unqualified feature name
+	 * 
+	 * @return <code>true</code> if the value's type is modeled as <code>org::w3c::anyType</code>
+	 */
+	private static boolean isAnyType(String recordName, String feature) {
+		return "value".equals(feature) && "org:openmdx:kernel:Condition".equals(recordName);
+	}
+
+	/**
      * @param target
      * @param indent
      * @param xri
      * @param feature
      * @param value
+     * @param anyType tells whether the value's type can't be derived from the model
+     * 
      * @throws XMLStreamException
-     *  
      * @throws ServiceException 
+	 * @throws IOException 
      */
     private static void printValue(
         RestTarget target,
         int indent,
         Path xri,
         String feature,
-        Object value
-    ) throws XMLStreamException, ServiceException {
+        Object value, 
+        boolean anyType
+    ) throws XMLStreamException {
         XMLStreamWriter writer = target.getWriter();
         if (value instanceof Collection<?>) {
             //
@@ -675,7 +759,8 @@ public class StandardRestFormatter implements RestFormatter {
                             target,
                             indent + 2,
                             Integer.valueOf(index++), 
-                            v
+                            v, 
+                            anyType
                         );
                     } catch (Exception exception) {
                         SysLog.warning(
@@ -728,7 +813,8 @@ public class StandardRestFormatter implements RestFormatter {
                                 target,
                                 indent + 2,
                                 e.getKey(),
-                                e.getValue()
+                                e.getValue(), 
+                                anyType
                             );
                         } catch (Exception exception) {
                             SysLog.warning(
@@ -757,7 +843,8 @@ public class StandardRestFormatter implements RestFormatter {
                 indent + 1, 
                 feature, 
                 null, // index
-                value
+                value, 
+                anyType
             );
         }
     }

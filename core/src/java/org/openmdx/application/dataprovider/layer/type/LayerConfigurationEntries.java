@@ -64,6 +64,8 @@ public class LayerConfigurationEntries extends org.openmdx.application.dataprovi
    * of these paths are generic. This means that no type checking occurs. 
    * The objects may be of any type and may have any attributes. The 
    * Application Layer is responsible for handling these objects. 
+   * 
+   * @deprecated will not be supported by the dataprovider 2 stack
    */
   static public final String GENERIC_TYPE_PATH = "genericTypePath";
 

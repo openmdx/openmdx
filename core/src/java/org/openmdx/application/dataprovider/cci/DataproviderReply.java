@@ -58,6 +58,7 @@ import javax.resource.cci.Record;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.resource.Records;
 import org.openmdx.base.rest.cci.MessageRecord;
+import org.openmdx.base.rest.cci.ObjectRecord;
 import org.openmdx.base.rest.cci.ResultRecord;
 
 /**
@@ -85,8 +86,8 @@ public class DataproviderReply implements Serializable {
     ) throws ServiceException {
         try {
             this.delegate = message ? 
-                Records.getRecordFactory().createMappedRecord(MessageRecord.NAME) :
-                Records.getRecordFactory().createIndexedRecord(ResultRecord.NAME);
+                Records.getRecordFactory().createMappedRecord(MessageRecord.class) :
+                Records.getRecordFactory().createIndexedRecord(ResultRecord.class);
         } catch(ResourceException e) {
             throw new ServiceException(e);
         }
@@ -183,9 +184,9 @@ public class DataproviderReply implements Serializable {
         );
     }
 
-    public MappedRecord getObject(
+    public ObjectRecord getObject(
     ){
-        return (MappedRecord)((ResultRecord)this.delegate).get(0);
+        return (ObjectRecord)((ResultRecord)this.delegate).get(0);
     }
                 
     @Override

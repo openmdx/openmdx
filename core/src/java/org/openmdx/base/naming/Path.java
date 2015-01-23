@@ -498,6 +498,7 @@ public final class Path implements Comparable<Path>, Cloneable, Serializable {
     public XRISegment getSegment(
     	int index
 	) {
+    	validatePosition(index);
     	return getPrefix(index + 1).getLastSegment(); 
     }
     
@@ -550,7 +551,7 @@ public final class Path implements Comparable<Path>, Cloneable, Serializable {
     public org.openmdx.base.naming.PathComponent getComponent(
         int position
     ) {
-    	return new org.openmdx.base.naming.PathComponent(this.get(position)); 
+    	return new org.openmdx.base.naming.PathComponent(this.getSegment(position).toClassicRepresentation()); 
     }
 
     /**
@@ -800,8 +801,7 @@ public final class Path implements Comparable<Path>, Cloneable, Serializable {
     public String get(
         int position
     ) {
-    	validatePosition(position);        
-    	return getPrefix(position + 1).getLastSegment().toClassicRepresentation();
+    	return getSegment(position).toClassicRepresentation();
     }
 
     /**
@@ -844,7 +844,7 @@ public final class Path implements Comparable<Path>, Cloneable, Serializable {
      * @exception       ArrayIndexOutOfBoundsException
      *                  if position is outside the specified range
      *                  
-     * @deprecated use {@link #getSegments()}.subList(position,{@link #size()})
+     * @deprecated use {@link #getSegments()}.subList(position,{@link #size()}).toArray(new String[{@link #size()}-position}])
      */
     @Deprecated
     public String[] getSuffix(
@@ -852,7 +852,7 @@ public final class Path implements Comparable<Path>, Cloneable, Serializable {
     ){
     	validateSize(position);
     	final int length = this.size - position;
-		String[] suffix = new String[length];
+		final String[] suffix = new String[length];
     	int i = length;
     	for(Path cursor = this; i > 0; cursor = cursor.parent) {
     		suffix[--i] = cursor.getLastSegment().toClassicRepresentation();
@@ -934,7 +934,7 @@ public final class Path implements Comparable<Path>, Cloneable, Serializable {
             index < suffix.length;
             index++
         ) {
-            if(!suffix[index].equals(this.get(offset+index))) return false;
+            if(!suffix[index].equals(this.getSegment(offset+index).toClassicRepresentation())) return false;
         }
         return true; 
     }
@@ -1040,7 +1040,7 @@ public final class Path implements Comparable<Path>, Cloneable, Serializable {
      * @return <code>true</code> if the path refers to an object
      */
     public boolean isObjectPath(){
-        return this.size % 2 == 1;
+        return (this.size & 1) == 1;
     }
     
     /**
@@ -1152,14 +1152,15 @@ public final class Path implements Comparable<Path>, Cloneable, Serializable {
     // Class Segment List
     //--------------------------------------------------------------------------
 
-    private class SegmentList extends AbstractList<XRISegment> {
-
+    class SegmentList extends AbstractList<XRISegment> {
+        
 		@Override
 		public XRISegment get(int index) {
 			return getSegment(index);
 		}
 
-		@Override
+		@SuppressWarnings("synthetic-access")
+        @Override
 		public int size() {
 			return Path.this.size;
 		}

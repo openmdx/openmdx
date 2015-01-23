@@ -61,19 +61,24 @@ import java.util.SortedSet;
 import java.util.StringTokenizer;
 import java.util.TreeSet;
 
+import javax.resource.ResourceException;
 import javax.resource.cci.MappedRecord;
 
 import org.omg.mof.cci.DirectionKind;
 import org.omg.mof.cci.ScopeKind;
 import org.omg.mof.cci.VisibilityKind;
-import org.openmdx.application.dataprovider.cci.Dataprovider_1_0;
-import org.openmdx.application.dataprovider.cci.ServiceHeader;
 import org.openmdx.application.mof.cci.ModelAttributes;
+import org.openmdx.application.mof.cci.ModelExceptions;
 import org.openmdx.application.mof.externalizer.spi.ModelImporter_1;
+import org.openmdx.base.dataprovider.cci.Channel;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.AggregationKind;
+import org.openmdx.base.mof.cci.ModelHelper;
+import org.openmdx.base.mof.cci.Multiplicity;
 import org.openmdx.base.mof.cci.Stereotypes;
 import org.openmdx.base.naming.Path;
+import org.openmdx.base.resource.spi.ResourceExceptions;
+import org.openmdx.base.rest.cci.ObjectRecord;
 import org.openmdx.base.rest.spi.Facades;
 import org.openmdx.base.rest.spi.Object_2Facade;
 import org.openmdx.kernel.exception.BasicException;
@@ -88,18 +93,11 @@ import org.openmdx.kernel.log.SysLog;
 @SuppressWarnings({"unchecked","rawtypes"})
 public class RoseImporter_1 extends ModelImporter_1 {
 
-    //------------------------------------------------------------------------
-
     /*
      * Constructs a rose importer.
      *
-     * @param header dataprovider service header.
-     *,
      * @param target dataprovider used to store objects. The created model1 objects
      *        are stored using the addSetRequest() operation.
-     *
-     * @param providerName to root path where the objects are stored is 
-     *        'org::omg::model1/provider/<providerName>.
      *
      * @param dirName directory name of the MDL file. Referenced CAT files must
      *        either be prefixed with the macro $curdir or be absolute paths.
@@ -119,15 +117,17 @@ public class RoseImporter_1 extends ModelImporter_1 {
         Map pathMap,
         PrintStream warnings
     ) throws ServiceException {
-
+    	super();
         this.dirName = dirName;
         this.mdlFileName = mdlFileName;
         this.pathMap = pathMap;
         this.warnings = warnings;
-
     }
 
-    //---------------------------------------------------------------------------
+    private final String dirName;
+    private final String mdlFileName;
+    private final Map pathMap;
+    private final PrintStream warnings;
 
     /**
      * Tokenizes rose mdl and cat files. Documentation requires special
@@ -373,7 +373,7 @@ public class RoseImporter_1 extends ModelImporter_1 {
     //---------------------------------------------------------------------------
     private String scopeToPathComponent(
         List scope
-    ) throws ServiceException {
+    ){
 
         if(scope.size() >= 2) {
             StringBuffer scopeAsString = new StringBuffer(
@@ -395,7 +395,7 @@ public class RoseImporter_1 extends ModelImporter_1 {
      */
     private List toScope(
         String name
-    ) throws ServiceException {
+    ){
 
         // parse name into its name components
         StringTokenizer tokenizer = null;
@@ -424,11 +424,12 @@ public class RoseImporter_1 extends ModelImporter_1 {
      * 'Logical View::org::openmdx::address1::CAddress'
      * to a path of the form 
      * 'org::omg::model1/provider/<providerName>/segment/org::openmdx::address1/element/CAddress'
+     * @throws ResourceException 
      *
      */
     private Path roseNameToPath(
         String qualifiedRoseName
-    ) throws ServiceException {
+    ) throws ResourceException{
 
         List scope = toScope(qualifiedRoseName);
         String elementName = (String)scope.get(scope.size()-1);
@@ -448,7 +449,7 @@ public class RoseImporter_1 extends ModelImporter_1 {
     private Path toElementPath(
         List scope,
         String elementName
-    ) throws ServiceException {
+    ) throws ResourceException {
         return toElementPath(
             scopeToPathComponent(scope),
             elementName
@@ -459,12 +460,13 @@ public class RoseImporter_1 extends ModelImporter_1 {
 
     /**
      * Parse an operation parameter as STRUCTURE_FIELD
+     * @throws ResourceException 
      */
-    private MappedRecord parseRoseParameter(
+    private ObjectRecord parseRoseParameter(
         RoseLexer lexer,
         List scope,
         MappedRecord parameterType
-    ) throws ServiceException {
+    ) throws ServiceException, ResourceException {
 
         lexer.assertToken("(");
         lexer.assertToken("object");
@@ -535,7 +537,7 @@ public class RoseImporter_1 extends ModelImporter_1 {
         RoseLexer lexer,
         List scope,
         MappedRecord classDef
-    ) throws ServiceException {
+    ) throws ServiceException, ResourceException {
 
         lexer.assertToken("(");
         lexer.assertToken("object");
@@ -685,7 +687,7 @@ public class RoseImporter_1 extends ModelImporter_1 {
             boolean parametersCreated = false;
 
             while(!lexer.isRightParam()) {
-                MappedRecord parameterDef = this.parseRoseParameter(
+                ObjectRecord parameterDef = this.parseRoseParameter(
                     lexer,
                     scope,
                     parameterTypeFacade.getDelegate()
@@ -911,11 +913,11 @@ public class RoseImporter_1 extends ModelImporter_1 {
     }
 
     //---------------------------------------------------------------------------
-    private MappedRecord parseRoseAssociationEnd(
+    private ObjectRecord parseRoseAssociationEnd(
         RoseLexer lexer,
         List scope,
         MappedRecord associationDef
-    ) throws ServiceException {
+    ) throws ServiceException, ResourceException {
 
         lexer.assertToken("(");
         lexer.assertToken("object");
@@ -1145,7 +1147,7 @@ public class RoseImporter_1 extends ModelImporter_1 {
         List scope,
         MappedRecord classDef,
         boolean isStructureField
-    ) throws ServiceException {
+    ) throws ServiceException, ResourceException {
 
         lexer.assertToken("(");
         lexer.assertToken("object");
@@ -1390,7 +1392,7 @@ public class RoseImporter_1 extends ModelImporter_1 {
     private void parseRoseAssociation(
         RoseLexer lexer,
         List scope
-    ) throws ServiceException {
+    ) throws ServiceException, ResourceException {
 
         String associationName = lexer.getToken();
 
@@ -1427,8 +1429,8 @@ public class RoseImporter_1 extends ModelImporter_1 {
         }
 
         // association ends
-        MappedRecord modelAssociationEnd1 = null;
-        MappedRecord modelAssociationEnd2 = null;
+        ObjectRecord modelAssociationEnd1 = null;
+        ObjectRecord modelAssociationEnd2 = null;
         if("roles".equals(lexer.peekToken())) {
             lexer.assertToken("roles");
             lexer.assertToken("(");
@@ -1501,7 +1503,7 @@ public class RoseImporter_1 extends ModelImporter_1 {
     private void parseRoseClassifier(
         RoseLexer lexer,
         List scope
-    ) throws ServiceException {
+    ) throws ServiceException, ResourceException {
 
         String className = lexer.getToken();
 
@@ -1739,7 +1741,7 @@ public class RoseImporter_1 extends ModelImporter_1 {
     private void parseRoseAttributeValue(
         RoseLexer lexer,
         List scope
-    ) throws ServiceException {
+    ) throws ServiceException, ResourceException {
 
         //SysLog.trace("> parseRoseAttributeValue");
 
@@ -1789,7 +1791,7 @@ public class RoseImporter_1 extends ModelImporter_1 {
     private void parseRoseList(
         RoseLexer lexer,
         List scope
-    ) throws ServiceException {
+    ) throws ServiceException, ResourceException {
 
         // Compartment
         if("Compartment".equals(lexer.peekToken())) {
@@ -1831,7 +1833,7 @@ public class RoseImporter_1 extends ModelImporter_1 {
         RoseLexer lexer,
         List scope,
         boolean usePrefix
-    ) throws ServiceException {
+    ) throws ServiceException, ResourceException {
 
         //SysLog.trace("> parseRoseObject");
 
@@ -2075,7 +2077,7 @@ public class RoseImporter_1 extends ModelImporter_1 {
     private void parseRoseObjects(
         RoseLexer lexer,
         List scope
-    ) throws ServiceException {
+    ) throws ServiceException, ResourceException {
 
         while(lexer.isLeftParam()) {
             parseRoseObject(
@@ -2086,33 +2088,127 @@ public class RoseImporter_1 extends ModelImporter_1 {
         }
     }
 
-    //---------------------------------------------------------------------------
-    public void process(
-        ServiceHeader header,
-        Dataprovider_1_0 target,
-        String providerName
-    ) throws ServiceException {
-
-        this.header = header;
-        this.target = target;
-        this.providerName = providerName;
-        this.beginImport();
-        parseRoseObjects(
-            new RoseLexer(this.dirName + "/" + this.mdlFileName),
-            new ArrayList()
-        );
-        this.endImport();
+    /* (non-Javadoc)
+	 * @see org.openmdx.application.mof.externalizer.cci.ModelImporter_1_0#process(org.openmdx.base.dataprovider.cci.Channel)
+	 */
+	@Override
+	public void process(
+		Channel target
+	) throws ResourceException {
+        this.channel = target;
+        try {
+			this.beginImport();
+			parseRoseObjects(
+				new RoseLexer(this.dirName + "/" + this.mdlFileName),
+				new ArrayList()
+			);
+			this.endImport();
+		} catch (ServiceException exception) {
+			throw ResourceExceptions.toResourceException(exception);
+		}
     }
 
-    //---------------------------------------------------------------------------
-    // Variables
-    //---------------------------------------------------------------------------
+    /**
+     * Parses a multiplicity text of the following form:
+     * [["<<"] lowerBound [".." upperBound ] [">>"] BLANK ] string
+     * When no upper bound is specified then upperBound = lowerBound.
+     */
+    protected String parseMultiplicity(
+        String text,
+        MappedRecord container,
+        String elementName,
+        StringBuffer multiplicity
+    ) throws ServiceException {
+        for(Multiplicity candidate : Multiplicity.values()){
+            String value = candidate.code();
+            if(value.equals(text)) {
+                multiplicity.append(value);
+                return new String();
+            }
+        }
+        if(ModelHelper.UNBOUND.equals(text)) {
+            multiplicity.append(ModelHelper.UNBOUND);
+            return new String();
+        }
 
-    private String dirName = null;
-    private String mdlFileName = null;
-    private Map pathMap = null;
-    private PrintStream warnings = null;
+        String lowerBound = null;
+        String upperBound = null;
+
+        int stereotypeOpeningPos = text.indexOf("<<");
+        int stereotypeClosingPos = text.indexOf(">>");
+        int lastPos = text.indexOf(" ");
+        int delimiterPos = text.indexOf("..");
+
+        // if text does not contain a multiplicity return 1..1
+        if((delimiterPos < 0) && (stereotypeOpeningPos < 0)) {
+            multiplicity.append(Multiplicity.SINGLE_VALUE.code());
+            return text;
+        }
+
+        // single value or range?
+        if(delimiterPos < 0) {
+            lowerBound = text.substring(
+                stereotypeOpeningPos < 0 ? 0 : stereotypeOpeningPos + 2,
+                    stereotypeClosingPos < 0 ? (lastPos < 0 ? text.length() : lastPos) : stereotypeClosingPos
+            ).trim();
+            upperBound = lowerBound;
+            Multiplicity l = ModelHelper.toMultiplicity(lowerBound);
+            if(l != null) {
+            	switch(l){
+            		case LIST:
+                        multiplicity.append(Multiplicity.LIST.code());
+                        return text.substring(lastPos).trim();
+            		case SET:
+                        multiplicity.append(Multiplicity.SET.code());
+                        return text.substring(lastPos).trim();
+            		case SPARSEARRAY:
+                        multiplicity.append(Multiplicity.SPARSEARRAY.code());
+                        return text.substring(lastPos).trim();
+            		case STREAM:	
+                        multiplicity.append(Multiplicity.STREAM.code());
+                        return text.substring(lastPos).trim();
+                    case MAP: case OPTIONAL: case SINGLE_VALUE:
+                        break; // TODO
+            	}
+            }
+        } else {
+            lowerBound = text.substring(
+                stereotypeOpeningPos < 0 ? 0 : stereotypeOpeningPos + 2,
+                    delimiterPos
+            );
+            upperBound = text.substring(
+                delimiterPos + 2,
+                stereotypeClosingPos < 0 ? (lastPos < 0 ? text.length() : lastPos) : stereotypeClosingPos
+            );
+        }
+
+        // check lowerBound, upperBound
+        try {
+            Integer.decode(lowerBound);
+
+            // check upperBound
+            if(!"n".equals(upperBound)) {
+                Integer.decode(upperBound);
+            }
+        } catch(NumberFormatException e) {
+            SysLog.error("multiplicity must be of the form [\"<<\"] lowerBound [\"..\" upperBound ] [\">>\"]");
+            throw new ServiceException(
+                ModelExceptions.MODEL_DOMAIN,
+                ModelExceptions.INVALID_MULTIPLICITY_FORMAT,
+                "multiplicity must be of the form [\"<<\"] lowerBound [\"..\" upperBound ] [\">>\"]",
+                new BasicException.Parameter("multiplicity", text),
+                new BasicException.Parameter("lowerBound", lowerBound),
+                new BasicException.Parameter("upperBound", upperBound),
+                new BasicException.Parameter("container", Object_2Facade.getPath(container)),
+                new BasicException.Parameter("element", elementName)
+            );
+        }
+        multiplicity.append(
+            lowerBound + ".." + upperBound
+        );
+        return text.substring(
+            lastPos < 0 ? text.length() : lastPos
+        ).trim();
+    }
 
 }
-
-//--- End of File -----------------------------------------------------------

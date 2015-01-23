@@ -69,12 +69,7 @@
             <details xmi:id="_MkPyJN65EdmrtKJSXC0_FQ" key="struct"/>
           </eAnnotations>
         </packagedElement>
-        <packagedElement xmi:type="uml:Class" xmi:id="_3C7B8A60016D400E4AD203B8" name="ObjectId">
-          <eAnnotations xmi:id="_MkPyJ965EdmrtKJSXC0_FQ" source="http://www.eclipse.org/uml2/2.0.0/UML">
-            <details xmi:id="_MkPyKN65EdmrtKJSXC0_FQ" key="alias"/>
-          </eAnnotations>
-          <ownedAttribute xmi:id="_3C7B8A60016D400E4B7000A9" name="org::oasis-open::xri"/>
-        </packagedElement>
+        <packagedElement xmi:type="uml:PrimitiveType" xmi:id="_3C7B8A60016D400E4AD203B8" name="ObjectId"/>
         <packagedElement xmi:type="uml:Class" xmi:id="_3C7B8A60016D403CAF5A0142" name="ExtentCapable" isAbstract="true">
           <eAnnotations xmi:id="_MkPyLd65EdmrtKJSXC0_FQ" source="http://www.eclipse.org/uml2/2.0.0/UML">
             <details xmi:id="_MkPyLt65EdmrtKJSXC0_FQ" key="root"/>

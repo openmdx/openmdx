@@ -227,8 +227,8 @@ public abstract class AbstractWizardController {
 		if(assertObjectXri) {
 			this.objectIdentity = new Path(objectXri);
 			this.object = (RefObject_1_0)this.pm.getObjectById(this.objectIdentity);
-			this.providerName = this.object.refGetPath().get(2);
-			this.segmentName = this.object.refGetPath().get(4);		
+			this.providerName = this.object.refGetPath().getSegment(2).toClassicRepresentation();
+			this.segmentName = this.object.refGetPath().getSegment(4).toClassicRepresentation();		
 		}
 		this.texts = this.app.getTexts();
 		this.codes = this.app.getCodes();
@@ -317,6 +317,7 @@ public abstract class AbstractWizardController {
 		Map<String,String[]> parameterMap
 	) throws ServiceException {
 		this.forms.clear();
+		this.errorMessage = "";
 		if(!this.prepare()) {
 			return false;
 		}
@@ -439,7 +440,7 @@ public abstract class AbstractWizardController {
 				    		org.openmdx.ui1.jmi1.FormDefinition formDefinition = this.app.getUiFormDefinition(formName);
 				    		if(formDefinition != null) {
 					    		FormControl form = new org.openmdx.portal.servlet.control.FormControl(
-									formDefinition.refGetPath().getBase(),
+									formDefinition.refGetPath().getLastSegment().toClassicRepresentation(),
 									this.app.getCurrentLocaleAsString(),
 									this.app.getCurrentLocaleAsIndex(),
 									this.app.getUiContext(),
@@ -469,7 +470,8 @@ public abstract class AbstractWizardController {
 					parameterValues.toArray(new Object[parameterValues.size()])
 				);
 			} catch(Exception e) {
-				throw new ServiceException(e);
+				this.errorMessage = "An unexecpted error occurred. The error message is " + e.getMessage() + ". For more information inspect the server log.";
+				new ServiceException(e).log();
 			}
 			return true;
 		} else {
@@ -906,6 +908,16 @@ public abstract class AbstractWizardController {
 		return "";
 	}
 
+	/**
+	 * Retrieve errorMessage.
+	 *
+	 * @return Returns the errorMessage.
+	 */
+	public String getErrorMessage(
+	) {
+		return this.errorMessage;
+    }
+
 	//-----------------------------------------------------------------------
 	// Members
 	//-----------------------------------------------------------------------
@@ -925,6 +937,7 @@ public abstract class AbstractWizardController {
 	private Codes codes;
 	private String providerName;
 	private String segmentName;
+	protected String errorMessage;
 	private Map<String,FormControl> forms = new HashMap<String,FormControl>();
 	private Map<String,String[]> parameterMap = null;
 

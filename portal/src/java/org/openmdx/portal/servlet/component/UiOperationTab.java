@@ -60,6 +60,7 @@ import java.util.List;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.portal.servlet.Action;
 import org.openmdx.portal.servlet.ApplicationContext;
+import org.openmdx.portal.servlet.CssClass;
 import org.openmdx.portal.servlet.ViewPort;
 import org.openmdx.portal.servlet.WebKeys;
 import org.openmdx.portal.servlet.control.UiOperationParamControl;
@@ -221,17 +222,28 @@ public class UiOperationTab extends Component implements Serializable {
         if(frame == null) {
             String operationId = Integer.toString(control.getTabId());
             List<UiOperationParam> operationParams = this.getChildren(UiOperationParam.class);
-        	boolean isRevokeShow = control.hasPermission(
-        		view.getObjectReference().getObject(), 
-        		app, 
-        		WebKeys.PERMISSION_REVOKE_SHOW
-        	);
-        	boolean isRevokeEdit = control.hasPermission(
+            boolean isRevokeShow = app.getPortalExtension().hasPermission(
+            	this.getOperationName(),
+            	view.getObjectReference().getObject(),
+            	app,
+            	WebKeys.PERMISSION_REVOKE_SHOW
+            );
+            boolean isRevokeEdit = app.getPortalExtension().hasPermission(
+            	this.getOperationName(),
+            	view.getObjectReference().getObject(),
+            	app,
+            	WebKeys.PERMISSION_REVOKE_EDIT
+            );
+        	boolean isRevokeObjectEdit = control.hasPermission(
                 view.getObjectReference().getObject(),
                 app,
                 WebKeys.PERMISSION_REVOKE_EDIT
             );
-            if(!isRevokeEdit && !isRevokeShow) {
+            if(
+            	!isRevokeEdit && 
+            	!isRevokeShow && 
+            	!(Ui_1.EDIT_OBJECT_OPERATION_NAME.equals(control.getOperationName()) && isRevokeObjectEdit)
+            ) {
                 // No input parameters so do not get operation dialog
                 if(operationParams.isEmpty() && !control.confirmExecution(app)) {
                     Action invokeOperationAction = control.getInvokeOperationAction(
@@ -239,7 +251,7 @@ public class UiOperationTab extends Component implements Serializable {
                         app
                     );
                     if(Ui_1.EDIT_OBJECT_OPERATION_NAME.equals(control.getOperationName())) {
-                        p.write("    <li><a href=\"javascript:void(0)\" onclick=\"javascript:jQuery.ajax({type: 'get', url: ", p.getEvalHRef(invokeOperationAction), ", dataType: 'html', success: function(data){$('aPanel').innerHTML=data;evalScripts(data);}});return false;\" id=\"opTab", operationId, "\" >", control.getName(), "</a></li>");                        
+                   		p.write("    <li><a href=\"javascript:void(0)\" onclick=\"javascript:jQuery.ajax({type: 'get', url: ", p.getEvalHRef(invokeOperationAction), ", dataType: 'html', success: function(data){$('aPanel').innerHTML=data;evalScripts(data);}});return false;\" id=\"opTab", operationId, "\" >", control.getName(), "</a></li>");
                     } else {
                         p.write("    <li><a href=\"javascript:void(0)\" onmouseover=\"javascript:this.href=", p.getEvalHRef(invokeOperationAction), ";onmouseover=function(){};\" id=\"opTab", operationId, "\" >", control.getName(), "</a></li>");
                     }
@@ -255,10 +267,10 @@ public class UiOperationTab extends Component implements Serializable {
                 // Operation can not be invoked. Do not generate onclick or href actions
                 // no input parameters
                 if(operationParams.isEmpty()) {
-                    p.write("    <li><a href=\"javascript:void(0)\" id=\"opTab", operationId, "\" ><span>", control.getName(), "</span></a></li>");
+                    p.write("    <li class=\"", CssClass.disabled.toString(),"\"><a href=\"javascript:void(0)\" id=\"opTab", operationId, "\" ><span>", control.getName(), "</span></a></li>");
                 } else {
                     // standard operation with input parameters
-                    p.write("    <li><a href=\"javascript:void(0)\" id=\"opTab", operationId, "\" ><span>", control.getName(), "...</span></a></li>");
+                    p.write("    <li class=\"", CssClass.disabled.toString(),"\"><a href=\"javascript:void(0)\" id=\"opTab", operationId, "\" ><span>", control.getName(), "...</span></a></li>");
                 }
             } else {
                 // Operation is hidden

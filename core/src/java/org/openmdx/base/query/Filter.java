@@ -47,20 +47,18 @@
  */
 package org.openmdx.base.query;
 
-import static org.openmdx.application.dataprovider.layer.persistence.jdbc.Database_1_Attributes.QUERY_EXTENSION_BOOLEAN_PARAM;
-import static org.openmdx.application.dataprovider.layer.persistence.jdbc.Database_1_Attributes.QUERY_EXTENSION_CLASS;
-import static org.openmdx.application.dataprovider.layer.persistence.jdbc.Database_1_Attributes.QUERY_EXTENSION_CLAUSE;
-import static org.openmdx.application.dataprovider.layer.persistence.jdbc.Database_1_Attributes.QUERY_EXTENSION_DATETIME_PARAM;
-import static org.openmdx.application.dataprovider.layer.persistence.jdbc.Database_1_Attributes.QUERY_EXTENSION_DATE_PARAM;
-import static org.openmdx.application.dataprovider.layer.persistence.jdbc.Database_1_Attributes.QUERY_EXTENSION_DECIMAL_PARAM;
-import static org.openmdx.application.dataprovider.layer.persistence.jdbc.Database_1_Attributes.QUERY_EXTENSION_INTEGER_PARAM;
-import static org.openmdx.application.dataprovider.layer.persistence.jdbc.Database_1_Attributes.QUERY_EXTENSION_STRING_PARAM;
+import static org.openmdx.base.dataprovider.layer.persistence.jdbc.spi.Database_1_Attributes.QUERY_EXTENSION_BOOLEAN_PARAM;
+import static org.openmdx.base.dataprovider.layer.persistence.jdbc.spi.Database_1_Attributes.QUERY_EXTENSION_CLASS;
+import static org.openmdx.base.dataprovider.layer.persistence.jdbc.spi.Database_1_Attributes.QUERY_EXTENSION_CLAUSE;
+import static org.openmdx.base.dataprovider.layer.persistence.jdbc.spi.Database_1_Attributes.QUERY_EXTENSION_DATETIME_PARAM;
+import static org.openmdx.base.dataprovider.layer.persistence.jdbc.spi.Database_1_Attributes.QUERY_EXTENSION_DATE_PARAM;
+import static org.openmdx.base.dataprovider.layer.persistence.jdbc.spi.Database_1_Attributes.QUERY_EXTENSION_DECIMAL_PARAM;
+import static org.openmdx.base.dataprovider.layer.persistence.jdbc.spi.Database_1_Attributes.QUERY_EXTENSION_INTEGER_PARAM;
+import static org.openmdx.base.dataprovider.layer.persistence.jdbc.spi.Database_1_Attributes.QUERY_EXTENSION_STRING_PARAM;
 
-import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
@@ -68,8 +66,10 @@ import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.openmdx.base.accessor.cci.SystemAttributes;
 import org.openmdx.base.persistence.spi.QueryExtension;
-import org.openmdx.base.resource.Records;
-import org.w3c.cci2.AnyTypePredicate;
+import org.openmdx.base.rest.cci.ConditionRecord;
+import org.openmdx.base.rest.cci.FeatureOrderRecord;
+import org.openmdx.base.rest.cci.QueryExtensionRecord;
+import org.openmdx.base.rest.spi.QueryFilterRecord;
 
 /**
  * A filter allows to retrieve subsets of filterable maps and to sort
@@ -81,51 +81,26 @@ import org.w3c.cci2.AnyTypePredicate;
  * 
  * @see org.openmdx.base.text.conversion.JavaBeans
  */
-public class Filter
-    implements Serializable, AnyTypePredicate, Cloneable {
+public class Filter extends QueryFilterRecord {
 
-    /**
-     * Constructor 
-     *
-     * @param that
-     */
-    private Filter(
-        Filter that
-    ){
-        this.conditions = new ArrayList<Condition>(that.conditions.size());
-        for(Condition condition : that.conditions) {
-            this.conditions.add(condition.clone());
-        }
-        this.orderSpecifiers = new ArrayList<OrderSpecifier>(that.orderSpecifiers.size());
-        for(OrderSpecifier orderSpecifier : this.orderSpecifiers) {
-            this.orderSpecifiers.add(orderSpecifier.clone());
-        }
-        this.extensions = new ArrayList<Extension>(that.extensions.size());
-        for(Extension extension : that.extensions) {
-            this.extensions.add(extension.clone());
-        }
-    }
-
+	/**
+	 * Constructs an empty filter
+	 */
+	public Filter(
+	) {
+		super();
+	}
+	
     /**
      * Constructs a filter with the specified conditions and
      * order specifiers.
      */
     public Filter(
-        List<Condition> conditions,
-        List<OrderSpecifier> orderSpecifiers,
-        List<Extension> extensions
+        List<? extends ConditionRecord> conditions,
+        List<? extends FeatureOrderRecord> orderSpecifiers,
+        List<? extends QueryExtensionRecord> extensions
     ) {
-        this.conditions = conditions == null ? new ArrayList<Condition>() : new ArrayList<Condition>(conditions);
-        this.orderSpecifiers = orderSpecifiers == null ? new ArrayList<OrderSpecifier>() : new ArrayList<OrderSpecifier>(orderSpecifiers);
-        this.extensions = extensions == null ? new ArrayList<Extension>() :  new ArrayList<Extension>(extensions); 
-    }
-
-    /**
-     * Constructs an empty filter
-     */
-    public Filter(
-    ) {
-        this(null, null, null);
+    	super(conditions, orderSpecifiers, extensions);
     }
 
     /**
@@ -136,66 +111,36 @@ public class Filter
         Condition[] conditions,
         OrderSpecifier[] orderSpecifiers
     ) {
-        this(
-            conditions == null ? null : Arrays.asList(conditions),
-            orderSpecifiers == null ? null : Arrays.asList(orderSpecifiers),
-            null
-        );
+    	super(Arrays.asList(conditions), Arrays.asList(orderSpecifiers), null);
     }
     
     /**
      * Constructs a filter with the specified conditions
+     * 
      * @param conditions
      */
     public Filter(
         Condition... conditions
     ) {
-        this(
-            conditions == null ? null : Arrays.asList(conditions),
-            null, // order specifiers
-            null // extension
-        );
+    	super(Arrays.asList(conditions), null, null);
     }
 
+    /**
+     * Constructor for clones 
+     *
+     * @param that
+     */
+    private Filter(
+		Filter that
+	){
+    	super(that);
+    }
+    
     /**
      * Implements <code>Serializable</code>
      */
-    private static final long serialVersionUID = 3257285842266371888L;
+	private static final long serialVersionUID = -2577782503585083499L;
     
-    /**
-     * The conditions
-     */
-    private final List<Condition> conditions;
-    
-    /**
-     * The order
-     */
-    private final List<OrderSpecifier> orderSpecifiers;
-    
-    /**
-     * The query extension
-     */
-    private List<Extension> extensions;
-    
-    /**
-     * The fields for the toString() method
-     */
-    private static final String[] TO_STRING_FIELDS = {
-        "condition",
-        "orderSpecifier",
-        "extension"
-    };
-    
-    /**
-     * Retrieve the conditions.
-     * 
-     * @return the write-through list of filter conditions
-     */
-    public List<Condition> getCondition(
-    ) {
-        return this.conditions;
-    }
-
     /**
      * Retrieve the first value
      * 
@@ -240,8 +185,7 @@ public class Filter
     public void setCondition(
         List<Condition> conditions
     ) {
-        this.conditions.clear();
-        this.conditions.addAll(conditions);
+    	replaceValues(getCondition(), conditions);
     }
         
     /**
@@ -249,12 +193,12 @@ public class Filter
      * 
      * @deprecated use {@link Filter#getCondition()}.set(int,Condition)
      */
-    @Deprecated
+	@Deprecated
     public void setCondition(
         int index,
         Condition condition
     ) {
-        this.conditions.set(
+    	getCondition().set(
             index,
             condition
         );
@@ -265,11 +209,12 @@ public class Filter
      * 
      * @deprecated use {@link Filter#setCondition(List)}
      */
-    @Deprecated
+	@Deprecated
     public void setCondition(
         Condition[] conditions
     ) {
-        this.conditions.clear();
+    	final List<ConditionRecord> target = getCondition();
+    	target.clear();
         if(conditions != null) {
             for(Condition candidateCondition : conditions) {
                 if(candidateCondition.getType() == null) {
@@ -317,7 +262,7 @@ public class Filter
                                     );
                                 }
                             } else {
-                                this.conditions.add(condition);
+                            	target.add(condition);
                             }
                         }
                         this.getExtension().add(extension);
@@ -325,21 +270,12 @@ public class Filter
                     }
                 }
             }
-            this.conditions.addAll(
+            target.addAll(
                 Arrays.asList(conditions)
             );
         }
     }
 
-    /**
-     * Retrieve the order specifiers.
-     * 
-     * @return the write-through list of order specifiers
-     */
-    public List<OrderSpecifier> getOrderSpecifier(){
-        return this.orderSpecifiers;
-    }
-    
     /**
      * Replace the order specifiers
      * 
@@ -348,8 +284,7 @@ public class Filter
     public void setOrderSpecifier(
         List<OrderSpecifier> orderSpecifiers
     ) {
-        this.orderSpecifiers.clear();
-        this.orderSpecifiers.addAll(orderSpecifiers);
+    	replaceValues(getOrderSpecifier(), orderSpecifiers);
     }
     
     /**
@@ -358,10 +293,11 @@ public class Filter
      * @deprecated use {@link Filter#getCondition()}.toArray(new Condition[])
      */
     @Deprecated
-    public OrderSpecifier[] getOrderSpecifierAsArray(
+    public FeatureOrderRecord[] getOrderSpecifierAsArray(
     ) {
-        return this.orderSpecifiers.toArray(
-            new OrderSpecifier[this.orderSpecifiers.size()]
+    	final List<FeatureOrderRecord> orderSpecifier = getOrderSpecifier();
+    	return orderSpecifier.toArray(
+			new FeatureOrderRecord[orderSpecifier.size()]
         );
     }
 
@@ -370,12 +306,12 @@ public class Filter
      * 
      * @deprecated use {@link Filter#getOrderSpecifier()}.set(int,order specifiers)
      */
-    @Deprecated
+	@Deprecated
     public void setOrderSpecifier(
         int index,
         OrderSpecifier orderSpecifier
     ) {
-        this.orderSpecifiers.set(
+        getOrderSpecifier().set(
             index,
             orderSpecifier
         );
@@ -390,22 +326,7 @@ public class Filter
     public void setOrderSpecifier(
         OrderSpecifier[] orderSpecifiers
     ) {
-        this.orderSpecifiers.clear();
-        if(orderSpecifiers != null) {
-            this.orderSpecifiers.addAll(
-                Arrays.asList(orderSpecifiers)
-            );
-        }
-    }
-
-    /**
-     * Retrieve extension.
-     *
-     * @return Returns the extension.
-     */
-    public List<Extension> getExtension(
-    ) {
-        return this.extensions;
+    	replaceValues(getOrderSpecifier(), orderSpecifiers);
     }
 
     /**
@@ -414,12 +335,9 @@ public class Filter
      * @param extension The extension to set.
      */
     public void setExtension(
-        Extension[] extensions
+        QueryExtensionRecord[] extensions
     ) {
-        this.extensions.clear();
-        this.extensions.addAll(
-            Arrays.asList(extensions)
-        );        
+    	replaceValues(getExtension(), extensions);
     }
 
     /**
@@ -428,11 +346,11 @@ public class Filter
      * @param index
      * @param extension
      */
-    public void setExtension(
+	public void setExtension(
         int index, 
-        Extension extension
+        QueryExtensionRecord extension
     ) {
-        this.extensions.set(
+        getExtension().set(
             index, 
             extension
         );
@@ -444,30 +362,21 @@ public class Filter
      * @param extension
      */
     public void setExtension(
-        List<Extension> extension
+        List<QueryExtensionRecord> extension
     ) {
-        this.extensions.clear();
-        this.extensions.addAll(extension);
+    	replaceValues(getExtension(), extension);
     }
 
-    /* (non-Javadoc)
-     * @see java.lang.Object#toString()
-     */
+
+    //-------------------------------------------------------------------------
+    // Implements Record
+    //-------------------------------------------------------------------------
+    
     @Override
-    public String toString(
-    ) {
-        return Records.getRecordFactory().asMappedRecord(
-		    this.getClass().getName(),
-		    null,
-		    Filter.TO_STRING_FIELDS, 
-		    new Object[]{
-		        this.conditions,
-		        this.orderSpecifiers,		        
-		        this.extensions
-		    }
-		).toString();
+    public String getRecordShortDescription() {
+    	return null;
     }
-
+    
     //-------------------------------------------------------------------------
     // Implements Cloneable
     //-------------------------------------------------------------------------
@@ -481,105 +390,5 @@ public class Filter
         return new Filter(this);
     }
 
-    
-    //-------------------------------------------------------------------------
-    // Implements AnyTypePredicate
-    //-------------------------------------------------------------------------
-    
-    /* (non-Javadoc)
-     * @see org.w3c.cci2.AnyTypePredicate#elementOf(java.lang.Object[])
-     */
-    public void elementOf(Object... operands) {
-        throw new UnsupportedOperationException();
-    }
-
-    //-------------------------------------------------------------------------
-    /* (non-Javadoc)
-     * @see org.w3c.cci2.AnyTypePredicate#elementOf(java.util.Collection)
-     */
-    public void elementOf(Collection<?> operands) {
-        throw new UnsupportedOperationException();
-    }
-
-    //-------------------------------------------------------------------------
-    /* (non-Javadoc)
-     * @see org.w3c.cci2.AnyTypePredicate#equalTo(java.lang.Object)
-     */
-    public void equalTo(Object operand) {
-        throw new UnsupportedOperationException();
-    }
-
-    //-------------------------------------------------------------------------
-    /* (non-Javadoc)
-     * @see org.w3c.cci2.AnyTypePredicate#notAnElementOf(java.lang.Object[])
-     */
-    public void notAnElementOf(Object... operands) {
-        throw new UnsupportedOperationException();
-    }
-
-    //-------------------------------------------------------------------------
-    /* (non-Javadoc)
-     * @see org.w3c.cci2.AnyTypePredicate#notAnElementOf(java.util.Collection)
-     */
-    public void notAnElementOf(Collection<?> operands) {
-        throw new UnsupportedOperationException();
-    }
-
-    //-------------------------------------------------------------------------
-    /* (non-Javadoc)
-     * @see org.w3c.cci2.AnyTypePredicate#notEqualTo(java.lang.Object)
-     */
-    public void notEqualTo(Object operand) {
-        throw new UnsupportedOperationException();
-    }
-
-    //-------------------------------------------------------------------------
-    
-    
-    /* (non-Javadoc)
-     * @see java.lang.Object#equals(java.lang.Object)
-     */
-    @Override
-    public boolean equals(Object obj) {
-        if(obj instanceof Filter) {
-            Filter that = (Filter) obj;
-            return 
-                Filter.areEquivalent(this.conditions, that.conditions) && 
-                Filter.areEquivalent(this.orderSpecifiers, that.orderSpecifiers) &&
-                Filter.areEquivalent(this.extensions, that.extensions); 
-        } else {
-            return false;
-        }
-    }
-
-    /* (non-Javadoc)
-     * @see java.lang.Object#hashCode()
-     */
-    @Override
-    public int hashCode() {
-        int code = 0;
-        if(this.conditions != null) {
-            code += conditions.hashCode();
-        }
-        if(this.orderSpecifiers != null) {
-            code += this.orderSpecifiers.hashCode();
-        }
-        return code;
-    }
-
-    /**
-     * Compares two value lists treating <code>null</code> as empty lists
-     * 
-     * @param left
-     * @param right
-     * 
-     * @return if the two lists are similar
-     */
-    private static boolean areEquivalent(
-        List<?> left,
-        List<?> right
-    ){
-        return left == null || left.isEmpty() ? right == null || right.isEmpty() : left.equals(right);
-    }
 
 }

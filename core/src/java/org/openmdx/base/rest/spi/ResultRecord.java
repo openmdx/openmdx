@@ -54,8 +54,10 @@ import java.io.NotSerializableException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
 
-import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.resource.spi.VariableSizeIndexedRecord;
+import org.openmdx.kernel.exception.BasicException;
+import org.openmdx.kernel.exception.Throwables;
+import org.xml.sax.SAXException;
 
 /**
  * Result Record
@@ -146,11 +148,13 @@ public class ResultRecord
                 this, 
                 RestParser.asSource(in)
             );
-        } catch (ServiceException exception) {
-            throw (InvalidObjectException) new InvalidObjectException(
-                exception.getMessage()
-            ).initCause(
-                exception.getCause()
+        } catch (SAXException exception) {
+        	throw Throwables.initCause(
+        		new InvalidObjectException(exception.getMessage()),
+        		exception,
+        		BasicException.Code.DEFAULT_DOMAIN,
+        		BasicException.Code.TRANSFORMATION_FAILURE,
+        		"Unable to read externalized ResultRecord"
             );
         }
     }
@@ -167,10 +171,12 @@ public class ResultRecord
             restFormatter.format(target, null, this);
             target.close();
         } catch (Exception exception) {
-            throw (NotSerializableException) new NotSerializableException(
-                exception.getMessage()
-            ).initCause(
-                exception.getCause()
+			throw Throwables.initCause(
+        		new NotSerializableException(exception.getMessage()),
+        		exception,
+        		BasicException.Code.DEFAULT_DOMAIN,
+        		BasicException.Code.TRANSFORMATION_FAILURE,
+        		"Unable to externalize ResultRecord"
             );
         }
     }

@@ -281,6 +281,30 @@ public class Model_1DiagramDrawer {
             this.id = id;
         }
 
+        /**
+         * Get arrowhead for given association ends.
+         * 
+         * @param associationEnd
+         * @return
+         * @throws ServiceException
+         */
+        private String getArrowhead(
+            ModelElement_1_0 end1,
+            ModelElement_1_0 end2
+        ) throws ServiceException {
+            if(AggregationKind.SHARED.equals(end1.getAggregation())) {
+                return "oboxodiamond";
+            } else if(AggregationKind.COMPOSITE.equals(end1.objGetValue("aggregation"))) {
+                return "oboxdiamond";
+            } else if(AggregationKind.NONE.equals(end1.objGetValue("aggregation")) && !end1.objGetList("qualifierType").isEmpty()) {
+                return "obox";
+            } else if(Boolean.TRUE.equals(end2.objGetValue("isNavigable"))) {
+                return "vee";
+            } else {
+                return "tee";
+            }
+        }
+
         /* (non-Javadoc)
          * @see java.lang.Object#toString()
          */
@@ -324,8 +348,8 @@ public class Model_1DiagramDrawer {
                     s += ",tooltip=\"" + this.associationDef.getQualifiedName() + "\"";                    
                     s += ",headlabel=\"" + exposedEnd.getName() + " [" + ModelHelper.getMultiplicity(exposedEnd) + "]\"";
                     s += ",taillabel=\"" + referencedEnd.getName() + " [" + ModelHelper.getMultiplicity(referencedEnd) + "]\"";
-                    s += ",arrowhead=" + (AggregationKind.SHARED.equals(referencedEnd.getAggregation()) ? "oboxodiamond" : AggregationKind.COMPOSITE.equals(referencedEnd.objGetValue("aggregation")) ? "oboxdiamond" : Boolean.TRUE.equals(exposedEnd.objGetValue("isNavigable")) ? "vee" : "tee");
-                    s += ",arrowtail=" + (AggregationKind.SHARED.equals(exposedEnd.getAggregation()) ? "oboxodiamond" : AggregationKind.COMPOSITE.equals(exposedEnd.objGetValue("aggregation")) ? "oboxdiamond" : Boolean.TRUE.equals(referencedEnd.objGetValue("isNavigable")) ? "vee" : "tee");
+                    s += ",arrowhead=" + this.getArrowhead(referencedEnd, exposedEnd);
+                    s += ",arrowtail=" + this.getArrowhead(exposedEnd, referencedEnd);
                     s += ",color=\"#0000FF\"";
                     boolean hasContraint = false;
                     boolean hasLabelDistance = false;
@@ -398,7 +422,7 @@ public class Model_1DiagramDrawer {
                                         if("name".equals(nv[0])) {
                                             ModelElement_1_0 classDef = model.getElement(nv[1]);
                                             classNode.setClassDef(classDef);
-                                            classNode.setId((String)classDef.getQualifiedName());
+                                            classNode.setId(classDef.getQualifiedName());
                                             classNodes.put(
                                                 classNode.getId(),
                                                 classNode
@@ -455,7 +479,7 @@ public class Model_1DiagramDrawer {
                                             isWildcard = "*".equals(nv[1]);
                                             if(!isWildcard) {
                                                 ModelElement_1_0 associationDef = model.getElement(nv[1]);
-                                                associationNode.setId((String)associationDef.getQualifiedName());
+                                                associationNode.setId(associationDef.getQualifiedName());
                                                 associationNode.setAssociationDef(associationDef);
                                                 associationNodes.put(
                                                     associationNode.getId(), 
@@ -508,7 +532,7 @@ public class Model_1DiagramDrawer {
                                             !associationNodes.containsKey(elementDef.getQualifiedName())
                                         ) {
                                             GraphvizEdge associationNode = new GraphvizEdge();
-                                            associationNode.setId((String)elementDef.getQualifiedName());
+                                            associationNode.setId(elementDef.getQualifiedName());
                                             associationNode.setAssociationDef(elementDef);
                                             associationEdges += "\n\t" + associationNode.toString() + ";";
                                         }

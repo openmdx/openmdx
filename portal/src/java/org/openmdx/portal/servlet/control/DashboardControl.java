@@ -52,7 +52,6 @@ import java.io.Serializable;
 import java.util.Collections;
 import java.util.List;
 
-import org.openmdx.portal.servlet.CssClass;
 import org.openmdx.portal.servlet.ViewPort;
 import org.openmdx.portal.servlet.component.ShowObjectView;
 import org.openmdx.portal.servlet.component.View;

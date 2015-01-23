@@ -49,11 +49,14 @@ package org.openmdx.base.rest.spi;
 
 import java.io.ObjectOutput;
 
+import javax.resource.ResourceException;
 import javax.resource.cci.IndexedRecord;
 
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.rest.cci.MessageRecord;
+import org.openmdx.base.rest.cci.ObjectRecord;
+import org.openmdx.base.rest.cci.QueryRecord;
 import org.openmdx.kernel.exception.BasicException;
 
 /**
@@ -82,8 +85,8 @@ public interface RestFormatter {
      */
     void format(
         Target target, 
-        Object_2Facade source
-    ) throws ServiceException;
+        ObjectRecord source
+    ) throws ResourceException;
 
     /**
      * Format Query
@@ -95,8 +98,8 @@ public interface RestFormatter {
      */
     void format(
         Target target, 
-        Query_2Facade source
-    ) throws ServiceException;
+        QueryRecord source
+    ) throws ResourceException;
 
     /**
      * Format Result Set
@@ -111,7 +114,7 @@ public interface RestFormatter {
         Target target, 
         Path xri, 
         IndexedRecord source
-    ) throws ServiceException;
+    ) throws ResourceException;
 
     /**
      * Format Operation
@@ -125,7 +128,7 @@ public interface RestFormatter {
         Target target, 
         String id, 
         MessageRecord source
-    ) throws ServiceException;
+    ) throws ResourceException;
 
     /**
      * Print Exception

@@ -48,7 +48,6 @@
 package test.openmdx.app1.layer.application;
 
 import javax.resource.ResourceException;
-import javax.resource.cci.Connection;
 import javax.resource.cci.IndexedRecord;
 import javax.resource.cci.Interaction;
 
@@ -56,6 +55,7 @@ import org.openmdx.application.dataprovider.cci.DataproviderRequest;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.resource.spi.RestInteractionSpec;
+import org.openmdx.base.rest.cci.RestConnection;
 import org.openmdx.base.rest.spi.Facades;
 import org.openmdx.base.rest.spi.Object_2Facade;
 import org.openmdx.kernel.exception.BasicException;
@@ -71,7 +71,7 @@ public class PlugInReplacement_1 extends VirtualObjects_1 {
     // --------------------------------------------------------------------------
     @Override
     public Interaction getInteraction(
-        Connection connection
+        RestConnection connection
     ) throws ResourceException {
         return new LayerInteraction(connection);
     }
@@ -80,7 +80,7 @@ public class PlugInReplacement_1 extends VirtualObjects_1 {
     public class LayerInteraction extends VirtualObjects_1.LayerInteraction {
         
         public LayerInteraction(
-            Connection connection
+            RestConnection connection
         ) throws ResourceException {
             super(connection);
         }

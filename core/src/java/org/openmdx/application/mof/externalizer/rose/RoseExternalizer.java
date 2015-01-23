@@ -54,11 +54,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.openmdx.uses.gnu.getopt.Getopt;
-import org.openmdx.uses.gnu.getopt.LongOpt;
-import org.openmdx.application.mof.externalizer.spi.Model_1Accessor;
+import org.openmdx.application.mof.externalizer.cci.ModelExternalizer_1_0;
+import org.openmdx.application.mof.externalizer.spi.ModelExternalizer_1;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.kernel.exception.BasicException;
+import org.openmdx.uses.gnu.getopt.Getopt;
+import org.openmdx.uses.gnu.getopt.LongOpt;
 
 /**
  * Rose Externalizer
@@ -172,8 +173,7 @@ public class RoseExternalizer {
                 );
             }
 
-            Model_1Accessor modelExternalizer = new Model_1Accessor(
-                "Mof", 
+            ModelExternalizer_1_0 modelExternalizer = new ModelExternalizer_1(
                 openmdxjdoDir
             );
 

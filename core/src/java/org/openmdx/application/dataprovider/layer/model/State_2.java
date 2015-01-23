@@ -64,7 +64,7 @@ public class State_2 extends Standard_1 {
 	 * Tells whether the transaction time is unique for object hosted by this
 	 * provider.
 	 */
-	private boolean transactionTimeUnique = false;
+	private boolean transactionTimeUnique;
     
     /**
      * Retrieve transactionTimeUnique.
@@ -94,9 +94,7 @@ public class State_2 extends Standard_1 {
 		Layer_1 delegation
 	) throws ServiceException {
 		super.activate(id, configuration, delegation);
-		if(configuration.containsEntry(LayerConfigurationEntries.TRANSACTION_TIME_UNIQUE)) {
-    		setTransactionTimeUnique(configuration.isOn(LayerConfigurationEntries.TRANSACTION_TIME_UNIQUE));
-		}
+		setTransactionTimeUnique(configuration.isEnabled(LayerConfigurationEntries.TRANSACTION_TIME_UNIQUE, false));
 	}
 
 	/**

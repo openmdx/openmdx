@@ -76,6 +76,7 @@ import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.jmi1.Authority;
 import org.openmdx.base.naming.Path;
+import org.openmdx.base.rest.cci.ObjectRecord;
 import org.openmdx.base.rest.spi.Object_2Facade;
 import org.openmdx.kernel.log.SysLog;
 import org.openmdx.portal.servlet.PortalExtension_1_0;
@@ -117,7 +118,7 @@ public class DataLoader
             try {
                 for(Iterator j = resourcePaths.iterator(); j.hasNext(); ) {        
                     String path = (String)j.next();
-                    Map<Path,MappedRecord> data = new LinkedHashMap<Path,MappedRecord>();
+                    Map<Path,ObjectRecord> data = new LinkedHashMap<Path,ObjectRecord>();
                     if(!path.endsWith("/")) {
                         SysLog.info("Loading " + path);
                         try {
@@ -142,10 +143,9 @@ public class DataLoader
                     Map<Path,RefObject> loadedObjects = new HashMap<Path,RefObject>();
                     for(int runs = 0; runs < 5; runs++) {
                         boolean hasNewObjects = false;
-                        store.currentTransaction().begin();
                         int kk = 0;
                         for(
-                            Iterator<MappedRecord> k = data.values().iterator(); 
+                            Iterator<ObjectRecord> k = data.values().iterator(); 
                             k.hasNext();
                             kk++
                         ) {
@@ -160,71 +160,79 @@ public class DataLoader
                                     existing = (RefObject_1_0)store.getObjectById(
                                         Object_2Facade.getPath(entry)
                                     );
+                                } catch(Exception ignore) { 
+                                	// ignore
                                 }
-                                catch(Exception e) {}
-                                if(existing != null) {
-                                    loadedObjects.put(
-                                        existing.refGetPath(), 
-                                        existing
-                                    );                                    
-                                    JmiHelper.toRefObject(
-                                        entry,
-                                        existing,
-                                        loadedObjects, // object cache
-                                        null, // ignorable features
-                                        true // compareWithBeforeImage
-                                    ); // modified is no longer determined by toRefObject()
+                                try {
+                                	store.currentTransaction().begin();
+	                                if(existing != null) {
+	                                    loadedObjects.put(
+	                                        existing.refGetPath(), 
+	                                        existing
+	                                    );                                    
+	                                    JmiHelper.toRefObject(
+	                                        entry,
+	                                        existing,
+	                                        loadedObjects, // object cache
+	                                        null, // ignorable features
+	                                        true // compareWithBeforeImage
+	                                    ); // modified is no longer determined by toRefObject()
+	                                } else {
+	                                    String qualifiedClassName = Object_2Facade.getObjectClass(entry);
+	                                    String packageName = qualifiedClassName.substring(0, qualifiedClassName.lastIndexOf(':'));
+	                                    RefObject_1_0 newEntry = (RefObject_1_0)((org.openmdx.base.jmi1.Authority)store.getObjectById(
+	                                        Authority.class,
+	                                        "xri://@openmdx*" + packageName.replace(":", ".")
+	                                    )).refImmediatePackage().refClass(qualifiedClassName).refCreateInstance(null);
+	                                    newEntry.refInitialize(false, false);
+	                                    JmiHelper.toRefObject(
+	                                        entry,
+	                                        newEntry,
+	                                        loadedObjects, // object cache
+	                                        null, // ignorable features
+	                                        true // compareWithBeforeImage
+	                                    );
+	                                    Path entryPath = Object_2Facade.getPath(entry);
+	                                    Path parentIdentity = entryPath.getParent().getParent();
+	                                    RefObject_1_0 parent = null;
+	                                    try {
+	                                        parent = loadedObjects.containsKey(parentIdentity) ? 
+	                                        	(RefObject_1_0)loadedObjects.get(parentIdentity) : 
+	                                        	(RefObject_1_0)store.getObjectById(parentIdentity);
+	                                    } catch(Exception e) {}
+	                                    if(parent != null) {
+	                                        RefContainer container = (RefContainer)parent.refGetValue(
+	                                        	entryPath.getSegment(entryPath.size() - 2).toClassicRepresentation()
+	                                        );
+	                                        container.refAdd(
+	                                            QualifierType.REASSIGNABLE,
+	                                            entryPath.getSegment(entryPath.size() - 1).toClassicRepresentation(), 
+	                                            newEntry
+	                                        );
+	                                    }                                    
+	                                    if("bootstrap".equals(location)) {
+	                                        SysLog.info("Creating " + entryPath);
+	                                    }
+	                                    loadedObjects.put(
+	                                    	entryPath, 
+	                                        newEntry
+	                                    );                                    
+	                                    hasNewObjects = true;
+	                                }
+	                                store.currentTransaction().commit();
+                                } catch(Exception e) {
+                                	new ServiceException(e).log();
+                                	try {
+                                		store.currentTransaction().rollback();
+                                	} catch(Exception ignore) {
+                                		// ignore
+                                	}
                                 }
-                                else {
-                                    String qualifiedClassName = Object_2Facade.getObjectClass(entry);
-                                    String packageName = qualifiedClassName.substring(0, qualifiedClassName.lastIndexOf(':'));
-                                    RefObject_1_0 newEntry = (RefObject_1_0)((org.openmdx.base.jmi1.Authority)store.getObjectById(
-                                        Authority.class,
-                                        "xri://@openmdx*" + packageName.replace(":", ".")
-                                    )).refImmediatePackage().refClass(qualifiedClassName).refCreateInstance(null);
-                                    newEntry.refInitialize(false, false);
-                                    JmiHelper.toRefObject(
-                                        entry,
-                                        newEntry,
-                                        loadedObjects, // object cache
-                                        null, // ignorable features
-                                        true // compareWithBeforeImage
-                                    );
-                                    Path entryPath = Object_2Facade.getPath(entry);
-                                    Path parentIdentity = entryPath.getParent().getParent();
-                                    RefObject_1_0 parent = null;
-                                    try {
-                                        parent = loadedObjects.containsKey(parentIdentity) ? 
-                                        	(RefObject_1_0)loadedObjects.get(parentIdentity) : 
-                                        	(RefObject_1_0)store.getObjectById(parentIdentity);
-                                    } 
-                                    catch(Exception e) {}
-                                    if(parent != null) {
-                                        RefContainer container = (RefContainer)parent.refGetValue(
-                                        	entryPath.get(entryPath.size() - 2)
-                                        );
-                                        container.refAdd(
-                                            QualifierType.REASSIGNABLE,
-                                            entryPath.get(entryPath.size() - 1), 
-                                            newEntry
-                                        );
-                                    }                                    
-                                    if("bootstrap".equals(location)) {
-                                        SysLog.info("Creating " + entryPath);
-                                    }
-                                    loadedObjects.put(
-                                    	entryPath, 
-                                        newEntry
-                                    );                                    
-                                    hasNewObjects = true;
-                                }
-                            }
-                            catch(Exception e) {
+                            } catch(Exception e) {
                                 new ServiceException(e).log();
                                 System.out.println(messagePrefix + "STATUS: " + e.getMessage() + " (for more info see log)");
                             }
                         }
-                        store.currentTransaction().commit();
                         if(!hasNewObjects) break;
                     }
                 }

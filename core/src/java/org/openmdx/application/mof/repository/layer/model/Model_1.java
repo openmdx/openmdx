@@ -52,7 +52,6 @@ import java.util.Date;
 import java.util.List;
 
 import javax.resource.ResourceException;
-import javax.resource.cci.Connection;
 import javax.resource.cci.IndexedRecord;
 import javax.resource.cci.Interaction;
 import javax.resource.cci.MappedRecord;
@@ -66,6 +65,7 @@ import org.openmdx.application.mof.repository.utils.ModelUtils;
 import org.openmdx.base.accessor.cci.SystemAttributes;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.resource.spi.RestInteractionSpec;
+import org.openmdx.base.rest.cci.RestConnection;
 import org.openmdx.base.rest.spi.Facades;
 import org.openmdx.base.rest.spi.Object_2Facade;
 import org.openmdx.base.rest.spi.Query_2Facade;
@@ -75,14 +75,9 @@ import org.w3c.format.DateTimeFormat;
 public class Model_1 extends Layer_1 {
 
     //---------------------------------------------------------------------------
-    public Model_1(
-    ) {
-    }
-    
-    //---------------------------------------------------------------------------
     @Override
     public Interaction getInteraction(
-        Connection connection
+        RestConnection connection
     ) throws ResourceException {
         return new LayerInteraction(connection);
     }
@@ -170,7 +165,7 @@ public class Model_1 extends Layer_1 {
     public class LayerInteraction extends Layer_1.LayerInteraction {
       
         public LayerInteraction(
-            Connection connection
+            RestConnection connection
         ) throws ResourceException {
             super(connection);
         }

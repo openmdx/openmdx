@@ -126,7 +126,7 @@ public class DirtyObjects {
         DataObject_1 beforeImage
     ) throws ServiceException {
         Multiplicity multiplicity = ModelHelper.getMultiplicity(feature);
-        String featureName = (String) feature.getName();
+        String featureName = feature.getName();
         switch(multiplicity) {
             case SINGLE_VALUE: case OPTIONAL: 
                 return !equal(beforeImage.objGetValue(featureName), afterImage.objGetValue(featureName));

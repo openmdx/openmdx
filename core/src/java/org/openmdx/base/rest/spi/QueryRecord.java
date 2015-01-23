@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2010-2011, OMEX AG, Switzerland
+ * Copyright (c) 2010-2014, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -47,21 +47,21 @@
  */
 package org.openmdx.base.rest.spi;
 
-import java.util.Map;
+import java.util.Collection;
 import java.util.Set;
 
-import javax.jdo.FetchPlan;
+import javax.resource.cci.IndexedRecord;
 import javax.resource.cci.Record;
 
 import org.openmdx.base.collection.Sets;
 import org.openmdx.base.naming.Path;
-
+import org.openmdx.base.rest.cci.QueryFilterRecord;
 
 /**
  * Query Record
  */
 public class QueryRecord 
-    extends AbstractMappedRecord
+    extends AbstractMappedRecord<org.openmdx.base.rest.cci.QueryRecord.Member>
     implements org.openmdx.base.rest.cci.QueryRecord 
 {
 
@@ -70,154 +70,103 @@ public class QueryRecord
      *
      * @param keys
      */
-    public QueryRecord() {
-        super(KEYS);
+	public QueryRecord() {
+        super();
     }
 
     /**
-     * Constructor 
+     * Constructor for clones 
      *
-     * @param that
+     * @param that the object to be cloned
      */
-    QueryRecord(
-        Map<?,?> that
+    protected QueryRecord(
+    	QueryRecord that
     ){
-        super(KEYS);
-        putAll(that);
-    }
+        super(that);    }
     
     /**
-     * Implements <code>Serializable</code>
+     * The filter to be applied to the query
      */
-    private static final long serialVersionUID = -4816775342123136224L;
-
-    /**
-     * Alphabetically ordered keys
-     */
-    private static final String[] KEYS = {
-        "features",
-        "groups",
-        "parameters",
-        "path",
-        "position",
-        "query",
-        "queryType",
-        "refresh",
-        "size"
-    };
-
-    /**
-     * No explicitly requested features
-     */
-    private static final String[] NO_FEATURES = {
-    };
+    private org.openmdx.base.rest.cci.QueryFilterRecord queryFilter;
     
     /**
-     * The default fetch groups
+     * The names of the explicitely requested features
      */
-    private static final String[] DEFAULT_GROUPS = {
-        FetchPlan.DEFAULT
-    };
-
-    /**
-     * The explicitly requested features
-     */
-    private String[] features = NO_FEATURES;
+    private IndexedRecord featureName;
     
     /**
-     * The fetch groups
+     * The name of the fetch group to be used
      */
-    private String[] groups = DEFAULT_GROUPS;
+    private String fetchGroupName;
     
     /**
-     * 
-     */
-    private Path path;
-    
-    /**
-     * 
+     * The number of objects to be skipped
      */
     private Long position;
     
     /**
-     * 
+     * Tells whether refresh is required before answering the query
+     */
+    private boolean refresh;
+    
+    /**
+     * The resource identifier of the objects to be retrieved
+     */
+    private Path resourceIdentifier;
+
+    /**
+     * The openMDX Query Language statements to be applied to the query
      */
     private String query;
     
     /**
-     * 
+     * The type of the objects to be retrieved
      */
     private String queryType;
     
     /**
-     * 
+     * The number of objects to be retrieved
      */
-    private Record parameters;
+    private Long size;
     
     /**
-     * 
+     * Allows to share the member information among the instances
      */
-    private Long size;    
-    
-    /**
-     * Tells whether the object shall be refreshed before answering the query
-     */
-    private Boolean refresh;
-    
-    /* (non-Javadoc)
-     * @see org.openmdx.base.rest.cci.QueryRecord#getFeatures()
-     */
-//  @Override
-    public Set<String> getFeatures() {
-        return Sets.asSet(this.features);
-    }
-
-    /* (non-Javadoc)
-     * @see org.openmdx.base.rest.cci.QueryRecord#setFeatures(java.util.Set)
-     */
-//  @Override
-    public void setFeatures(Set<String> features) {
-        this.features = toArray(features);
-    }
+    private static final Members<Member> MEMBERS = Members.newInstance(Member.class);
 
     /**
-     * Retrieve groups.
+     * Implements <code>Serializable</code>
+     */
+    private static final long serialVersionUID = -2709873653223744925L;
+
+    /* (non-Javadoc)
+	 * @see org.openmdx.base.rest.spi.AbstractMappedRecord#makeImmutable()
+	 */
+	@Override
+	public void makeImmutable() {
+		super.makeImmutable();
+		freeze(this.queryFilter);
+		freeze(this.featureName);
+	}
+
+	/**
+     * Retrieve resourceIdentifier.
      *
-     * @return Returns the groups.
+     * @return Returns the resourceIdentifier.
      */
-//  @Override
-    public Set<String> getGroups() {
-        return Sets.asSet(this.groups);
+    @Override
+    public Path getResourceIdentifier() {
+        return this.resourceIdentifier;
     }
     
     /**
-     * Set groups.
+     * Set resourceIdentifier.
      * 
-     * @param groups The groups to set.
+     * @param resourceIdentifier The resourceIdentifier to set.
      */
-//  @Override
-    public void setGroups(Set<String> groups) {
-        this.groups = toArray(groups);
-    }
-    
-    /**
-     * Retrieve path.
-     *
-     * @return Returns the path.
-     */
-//  @Override
-    public Path getPath() {
-        return this.path;
-    }
-    
-    /**
-     * Set path.
-     * 
-     * @param path The path to set.
-     */
-//  @Override
-    public void setPath(Path path) {
-        this.path = path;
+    @Override
+    public void setResourceIdentifier(Path path) {
+        this.resourceIdentifier = path;
     }
     
     /**
@@ -225,7 +174,7 @@ public class QueryRecord
      *
      * @return Returns the position.
      */
-//  @Override
+    @Override
     public Long getPosition() {
         return this.position;
     }
@@ -235,7 +184,7 @@ public class QueryRecord
      * 
      * @param position The position to set.
      */
-//  @Override
+    @Override
     public void setPosition(Long position) {
         this.position = position;
     }
@@ -245,19 +194,19 @@ public class QueryRecord
      *
      * @return Returns the query.
      */
-//  @Override
-    public String getQuery() {
-        return this.query;
+    @Override
+    public org.openmdx.base.rest.cci.QueryFilterRecord getQueryFilter() {
+        return this.queryFilter;
     }
     
     /**
-     * Set query.
+     * Set the query filter.
      * 
-     * @param query The query to set.
+     * @param queryFilter The query filter to be set.
      */
-//  @Override
-    public void setQuery(String query) {
-        this.query = query;
+    @Override
+    public void setQueryFilter(org.openmdx.base.rest.cci.QueryFilterRecord queryFilter) {
+        this.queryFilter = queryFilter;
     }
     
     /**
@@ -265,7 +214,7 @@ public class QueryRecord
      *
      * @return Returns the queryType.
      */
-//  @Override
+    @Override
     public String getQueryType() {
         return this.queryType;
     }
@@ -275,29 +224,9 @@ public class QueryRecord
      * 
      * @param queryType The queryType to set.
      */
-//  @Override
+    @Override
     public void setQueryType(String queryType) {
-        this.queryType = queryType;
-    }
-    
-    /**
-     * Retrieve parameters.
-     *
-     * @return Returns the parameters.
-     */
-//  @Override
-    public Record getParameters() {
-        return this.parameters;
-    }
-    
-    /**
-     * Set parameters.
-     * 
-     * @param parameters The parameters to set.
-     */
-//  @Override
-    public void setParameters(Record parameters) {
-        this.parameters = parameters;
+        this.queryType = queryType; 
     }
     
     /**
@@ -305,7 +234,7 @@ public class QueryRecord
      *
      * @return Returns the size.
      */
-//  @Override
+    @Override
     public Long getSize() {
         return this.size;
     }
@@ -315,32 +244,88 @@ public class QueryRecord
      * 
      * @param size The size to set.
      */
-//  @Override
+    @Override
     public void setSize(Long size) {
         this.size = size;
+    }
+
+    private IndexedRecord jcaFeatureName(){
+        if(this.featureName == null) {
+            this.featureName = newSet();
+        }
+        return this.featureName;
+    }
+    
+    /* (non-Javadoc)
+     * @see org.openmdx.base.rest.cci.QueryRecord#getFeatureName()
+     */
+    @SuppressWarnings("unchecked")
+    @Override
+    public Set<String> getFeatureName() {
+        return Sets.asSet(jcaFeatureName());
+    }
+
+    /* (non-Javadoc)
+     * @see org.openmdx.base.rest.cci.QueryRecord#setFeatureName(java.util.Set)
+     */
+    @Override
+    public void setFeatureName(Set<String> featureName) {
+        replaceValues(jcaFeatureName(), featureName);
+    }
+
+    /* (non-Javadoc)
+     * @see org.openmdx.base.rest.cci.QueryRecord#getFetchGroupName()
+     */
+    @Override
+    public String getFetchGroupName() {
+        return this.fetchGroupName;
+    }
+
+    /* (non-Javadoc)
+     * @see org.openmdx.base.rest.cci.QueryRecord#setFetchGroupName(java.lang.String)
+     */
+    @Override
+    public void setFetchGroupName(String fetchGroupName) {
+        this.fetchGroupName = fetchGroupName;
     }
 
     /* (non-Javadoc)
      * @see org.openmdx.base.rest.cci.QueryRecord#setRefresh(boolean)
      */
-//  @Override
+    @Override
     public void setRefresh(boolean refresh) {
-        this.refresh = Boolean.valueOf(refresh);
+        this.refresh = refresh;
     }
 
     /* (non-Javadoc)
      * @see org.openmdx.base.rest.cci.QueryRecord#isRefresh()
      */
-//  @Override
+    @Override
     public boolean isRefresh() {
-        return Boolean.TRUE.equals(this.refresh);
+        return this.refresh;
+    }
+
+    /* (non-Javadoc)
+     * @see org.openmdx.base.rest.cci.QueryRecord#setQuery(java.lang.String)
+     */
+    @Override
+    public void setQuery(String query) {
+        this.query = query;
+    }
+
+    /* (non-Javadoc)
+     * @see org.openmdx.base.rest.cci.QueryRecord#getQuery()
+     */
+    @Override
+    public String getQuery() {
+        return this.query;
     }
 
     /* (non-Javadoc)
      * @see org.openmdx.base.resource.spi.AbstractRecord#clone()
      */
     @Override
-    public Object clone(
+    public QueryRecord clone(
     ){
         return new QueryRecord(this);
     }
@@ -348,7 +333,7 @@ public class QueryRecord
     /* (non-Javadoc)
      * @see javax.resource.cci.Record#getRecordName()
      */
-//  @Override
+    @Override
     public String getRecordName() {
         return NAME;
     }
@@ -361,19 +346,19 @@ public class QueryRecord
      */
     @Override
     protected Object get(
-        int index
+        Member index
     ){
         switch(index) {
-            case 0: return asSet(this.features);
-            case 1: return asSet(this.groups);
-            case 2: return this.parameters;
-            case 3: return this.path;
-            case 4: return this.position;
-            case 5: return this.query;
-            case 6: return this.queryType;
-            case 7: return this.refresh;
-            case 8: return this.size;
-            default: return null;
+            case featureName: return jcaFeatureName();
+            case fetchGroupName: return getFetchGroupName();
+            case position: return getPosition();
+            case query: return getQuery();
+            case queryFilter: return getQueryFilter();
+            case queryType: return getQueryType();
+            case refresh: return Boolean.valueOf(isRefresh());
+            case resourceIdentifier: return toString(getResourceIdentifier());
+            case size: return getSize();
+            default: return super.get(index);
         }
     }
 
@@ -387,38 +372,59 @@ public class QueryRecord
      */
     @Override
     protected void put(
-        int index,
+        Member index,
         Object value
     ){
         switch(index) {
-            case 0: 
-                this.features = toArray(value);
+            case featureName: 
+                replaceValues(jcaFeatureName(), (Collection<?>)value);
                 break;
-            case 1: 
-                this.groups = toArray(value);
+            case fetchGroupName:
+                setFetchGroupName((String) value);
                 break;
-            case 2:
-                this.parameters = (Record) value;
+            case position:
+                setPosition(toLong(value));
                 break;
-            case 3:
-                this.path = toPath(value);
+            case query:
+                setQuery((String) value);
                 break;
-            case 4:
-                this.position = toLong(value);
+            case queryFilter:
+                setQueryFilter((QueryFilterRecord) value);
                 break;
-            case 5:
-                this.query = (String) value;
+            case queryType:
+                setQueryType((String) value);
                 break;
-            case 6:
-                this.queryType = (String) value;
+            case refresh:
+                setRefresh(toBoolean(value));
                 break;
-            case 7: 
-                this.refresh = toBoolean(value);
+            case resourceIdentifier:
+                setResourceIdentifier(toPath(value));
                 break;
-            case 8: 
-                this.size = toLong(value);
+            case size:    
+                setSize(toLong(value));
                 break;
+            default: 
+            	super.put(index, value);
         }
     }
+
+    /**
+     * Tells whether the candidate is a query record
+     * 
+     * @param record the record to be inspected
+     * 
+     * @return <code>true</code> if the record's name equals to <code>org:openmdx:kernel:Query</code>.
+     */
+    public static boolean isCompatible(Record record) {
+        return NAME.equals(record.getRecordName());
+    }
     
+	/* (non-Javadoc)
+	 * @see org.openmdx.base.rest.spi.AbstractMappedRecord#members()
+	 */
+	@Override
+	protected Members<Member> members() {
+		return MEMBERS;
+	}
+
 }

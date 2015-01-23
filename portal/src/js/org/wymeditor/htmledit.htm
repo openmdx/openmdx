@@ -17,59 +17,59 @@
  * 		Jean-François Hovinne (jf.hovinne@wymeditor.org)
  *		Daniel Reszka (d.reszka@wym-editor.org)
 -->
-
 <html>
 <head>
-<title>HTML Edit</title>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<link rel="stylesheet" type="text/css" href="skins/default/screen.css" />
-<style type="text/css" media="screen">
-  .wym_skin_default .wym_iframe iframe { height: 400px; }
-</style>
-<!-- jQuery library is required, see http://jquery.com/ -->
-<script type="text/javascript" src="jquery.js"></script>
-<script type="text/javascript" src="jquery.ui.js"></script>
-<script type="text/javascript" src="jquery.ui.resizable.js"></script>
-<!-- WYMeditor main JS file, packed version -->
-<script type="text/javascript" src="jquery.wymeditor.pack.js"></script>
-<script type="text/javascript" src="plugins/hovertools/jquery.wymeditor.hovertools.js"></script>
-<script type="text/javascript" src="plugins/tidy/jquery.wymeditor.tidy.js"></script>
-<script type="text/javascript" src="plugins/resizable/jquery.wymeditor.resizable.js"></script>
-
-<script type="text/javascript">
-var wed;
-jQuery(function() {
-    jQuery('.wymeditor').wymeditor({
-        stylesheet: 'styles.css',
-		skin: 'silver',                //activate silver skin
-        postInit: function(wym) {
-			wed = wym;
-	        //set the editor's HTML value
-	        wym.html(opener.document.getElementById(opener.HTMLeditTextAreaId).value);
-	        // document.getElementById('editor').innerHTML=opener.document.getElementById(opener.HTMLeditTextAreaId).value
-
-	        //set the status bar value
-	        wym.status('&nbsp;');
-            wym.hovertools();
-            wym.resizable();
-        }
-    });
-});
-
-</script>
-
+	<title>HTML Edit</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<link rel="stylesheet" type="text/css" href="skins/silver/skin.css" />
+	<script type="text/javascript" src="jquery.min.js"></script>
+	<script type="text/javascript" src="jquery-ui.min.js"></script>
+	<!-- WYMeditor main JS file, packed version -->
+	<script type="text/javascript" src="jquery.wymeditor.js"></script>
+	<script type="text/javascript" src="plugins/hovertools/jquery.wymeditor.hovertools.js"></script>
+	<script type="text/javascript" src="plugins/tidy/jquery.wymeditor.tidy.js"></script>
+	<script type="text/javascript" src="plugins/resizable/jquery.wymeditor.resizable.js"></script>
+	<script type="text/javascript">
+		var wed;
+		jQuery(function() {
+		    jQuery('.wymeditor').wymeditor({
+		        stylesheet: 'styles.css',
+				skin: 'silver',
+		        postInit: function(wym) {
+					wed = wym;
+			        wym._html(opener.document.getElementById(opener.HTMLeditTextAreaId).value);
+			        wym.status('&nbsp;');
+		            wym.hovertools();
+		        },
+		    });
+		});
+	</script>
+	<style>
+		input[type=submit] {
+			border-radius: 5px;
+			border: 0;
+			width: 80px;
+			height: 25px;
+			font-family: Tahoma;
+			font-size: 14px;
+			background: #f4f4f4;
+			background: -moz-linear-gradient(top, #f4f4f4 1%, #ededed 100%);
+			background: -webkit-gradient(linear, left top, left bottom, color-stop(1%, #f4f4f4), color-stop(100%, #ededed));
+			background: -webkit-linear-gradient(top, #f4f4f4 1%, #ededed 100%);
+			background: -o-linear-gradient(top, #f4f4f4 1%, #ededed 100%);
+			background: -ms-linear-gradient(top, #f4f4f4 1%, #ededed 100%);
+			background: linear-gradient(to bottom, #f4f4f4 1%, #ededed 100%);
+			filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#f4f4f4', endColorstr='#ededed', GradientType=0);
+		}
+	</style>
 </head>
-
 <body>
-  <form method="post" action="">
-  <textarea class="wymeditor"></textarea>
-  <!--
-  <input type="submit" class="wymupdate" value="click" />
-  -->
-  <div style="padding:5px;">
-    <input type="submit" value="OK" onclick="opener.document.getElementById(opener.HTMLeditTextAreaId).value=wed.html();opener.win.close();return false;"><input type="submit" value="Cancel" onclick="opener.win.close();;return false;">
-  </div>
-  </form>
-
+	<form method="post" action="">
+		<div style="padding: 5px;">
+			<input type="submit" class="btn btn-default" value="OK" onclick="opener.document.getElementById(opener.HTMLeditTextAreaId).value=wed._html();opener.win.close();return false;">
+			<input type="submit" class="btn btn-default" value="Cancel" onclick="opener.win.close();return false;">
+		</div>
+		<textarea class="wymeditor"></textarea>
+	</form>
 </body>
 </html>

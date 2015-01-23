@@ -56,8 +56,10 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.openmdx.kernel.exception.BasicException;
@@ -72,10 +74,45 @@ public class Classes {
     /**
      * Constructor 
      */
-    protected Classes(
+    private Classes(
     ){
         // Avoid instantiation
     }
+
+    /**
+     * Maps primitive types to their corresponding object class
+     */
+    private static final Map<Class<?>, Class<?>> PRIMITIVE_TYPE_TO_OBJECT_CLASS = new HashMap<Class<?>, Class<?>>();
+
+    static {
+    	PRIMITIVE_TYPE_TO_OBJECT_CLASS.put(Boolean.TYPE, Boolean.class);
+    	PRIMITIVE_TYPE_TO_OBJECT_CLASS.put(Character.TYPE, Character.class);
+    	PRIMITIVE_TYPE_TO_OBJECT_CLASS.put(Byte.TYPE, Byte.class);
+    	PRIMITIVE_TYPE_TO_OBJECT_CLASS.put(Short.TYPE, Short.class);
+    	PRIMITIVE_TYPE_TO_OBJECT_CLASS.put(Integer.TYPE, Integer.class);
+    	PRIMITIVE_TYPE_TO_OBJECT_CLASS.put(Long.TYPE, Long.class);
+    	PRIMITIVE_TYPE_TO_OBJECT_CLASS.put(Float.TYPE, Float.class);
+    	PRIMITIVE_TYPE_TO_OBJECT_CLASS.put(Double.TYPE, Double.class);
+    	PRIMITIVE_TYPE_TO_OBJECT_CLASS.put(Void.TYPE, Void.class);
+    }
+
+    /**
+     * Convert primitive types to their respective object class and
+     * leave object classes as they are.
+     * 
+     * @param type a primitive type or an object class
+     * 
+     * @return the corresponding object class in case of a primitive type and 
+     * the type itself otherwise
+     */
+    public static Class<?> toObjectClass(Class<?> type){
+    	return type.isPrimitive() ? PRIMITIVE_TYPE_TO_OBJECT_CLASS.get(type) : type;
+    }
+    
+    
+    //------------------------------------------------------------------------
+    // Class loading
+    //------------------------------------------------------------------------
     
     /**
      * Retrieve the context class loader
@@ -87,11 +124,6 @@ public class Classes {
         return Thread.currentThread().getContextClassLoader();
     }
 
-
-    //------------------------------------------------------------------------
-    // Class loading
-    //------------------------------------------------------------------------
-    
     /**
      * Retrieve information about the the class loaders failing to provide the given class
      * 
@@ -383,9 +415,10 @@ public class Classes {
                         i < argumentCount;
                         i++
                     ){
-                        if(
-                            arguments[i] != null && 
-                            !parameters[i].isInstance(arguments[i]) 
+                        final Object argument = arguments[i];
+						if(
+                            argument != null && 
+                            !toObjectClass(parameters[i]).isInstance(argument) 
                         ) continue Constructors;
                     }
                     return (T) constructor.newInstance(arguments);
@@ -401,7 +434,7 @@ public class Classes {
         }
     }
 
-    /**
+	/**
      * Create a platform specific instance 
      * 
      * @param interfaceClass

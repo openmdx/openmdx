@@ -53,7 +53,9 @@ import java.util.List;
 import junit.framework.Assert;
 
 import org.junit.Test;
-import org.openmdx.application.dataprovider.layer.persistence.jdbc.LikeFlavour;
+import org.openmdx.base.dataprovider.layer.persistence.jdbc.spi.LikeFlavour;
+import org.openmdx.base.exception.ServiceException;
+import org.openmdx.kernel.exception.BasicException;
 
 public class TestLikeFlavour {
 
@@ -71,13 +73,18 @@ public class TestLikeFlavour {
 		LikeFlavour.parse("UNKNOWN");
 	}
 
-	@Test(expected=UnsupportedOperationException.class) // Assert
-	public void whenNotSupportedThenUnsupportedOperationException(){
+	public void whenNotSupportedThenUnsupportedOperationException() {
 		// Arrange
 		List<LikeFlavour> likeFlavour = LikeFlavour.parse("NOT_SUPPORTED");
 		StringBuilder clause = new StringBuilder();
 		// Act
-		LikeFlavour.applyAll(likeFlavour, clause, null, null, null);
+		try {
+			LikeFlavour.applyAll(likeFlavour, clause, null, null, null);
+			Assert.fail("NOT_SUPPORTED expected");
+		} catch (ServiceException expected) {
+			// Assert
+			Assert.assertEquals(BasicException.Code.NOT_SUPPORTED, expected.getExceptionCode()); 
+		}
 	}
 	
 	@Test

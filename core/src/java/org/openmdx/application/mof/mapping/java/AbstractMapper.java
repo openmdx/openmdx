@@ -285,14 +285,18 @@ public abstract class AbstractMapper
         Format format, 
         boolean alwaysAsObject
     ) throws ServiceException {
-        boolean primitiveType = this.model.isPrimitiveType(qualifiedTypeName);
-        if(primitiveType) {
-            return this.primitiveTypeMapper.getFeatureType(qualifiedTypeName, format, alwaysAsObject);
-        } else if(this.model.isStructureType(qualifiedTypeName) && format == Format.JPA3) { 
-            return this.getInterfaceType(qualifiedTypeName);
-        } else {
-            return this.getModelType(qualifiedTypeName);
-        }
+    	if("org:w3c:anyType".equals(qualifiedTypeName)) {
+    		return Object.class.getName();
+    	} else {
+	        boolean primitiveType = this.model.isPrimitiveType(qualifiedTypeName);
+	        if(primitiveType) {
+	            return this.primitiveTypeMapper.getFeatureType(qualifiedTypeName, format, alwaysAsObject);
+	        } else if(this.model.isStructureType(qualifiedTypeName) && format == Format.JPA3) { 
+	            return this.getInterfaceType(qualifiedTypeName);
+	        } else {
+	            return this.getModelType(qualifiedTypeName);
+	        }
+    	}
     }
     
     // -----------------------------------------------------------------------
@@ -765,8 +769,8 @@ public abstract class AbstractMapper
         StructuralFeatureDef featureDef
     ){
         return
-            Multiplicity.SINGLE_VALUE.toString().equals(featureDef.getMultiplicity()) ||
-            Multiplicity.OPTIONAL.toString().equals(featureDef.getMultiplicity()) ?
+            Multiplicity.SINGLE_VALUE.code().equals(featureDef.getMultiplicity()) ||
+            Multiplicity.OPTIONAL.code().equals(featureDef.getMultiplicity()) ?
             "org.w3c.cci2.SimpleTypeOrder" :
             null; // "org.w3c.cci2.MultivaluedTypeOrder" no longer supported
     }

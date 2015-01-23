@@ -87,20 +87,18 @@ import org.openmdx.base.mof.cci.Model_1_0;
 import org.openmdx.base.mof.cci.PrimitiveTypes;
 import org.openmdx.base.mof.spi.Model_1Factory;
 import org.openmdx.base.naming.Path;
-import org.openmdx.base.persistence.cci.Queries;
 import org.openmdx.base.persistence.spi.ExtentCollection;
 import org.openmdx.base.persistence.spi.FilterCollection;
 import org.openmdx.base.persistence.spi.StandardFetchPlan;
 import org.openmdx.base.query.AnyTypeCondition;
-import org.openmdx.base.query.Condition;
 import org.openmdx.base.query.ConditionType;
-import org.openmdx.base.query.Extension;
-import org.openmdx.base.query.Filter;
 import org.openmdx.base.query.IsInstanceOfCondition;
 import org.openmdx.base.query.IsLikeCondition;
 import org.openmdx.base.query.OrderSpecifier;
 import org.openmdx.base.query.Quantifier;
 import org.openmdx.base.query.SortOrder;
+import org.openmdx.base.rest.cci.ConditionRecord;
+import org.openmdx.base.rest.cci.QueryFilterRecord;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.jdo.ReducedJDOHelper;
 import org.openmdx.kernel.log.SysLog;
@@ -132,12 +130,12 @@ public class RefQuery_1 implements RefQuery_1_0 {
      * @param subclasses
      */
     protected RefQuery_1(
-        org.openmdx.base.query.Filter filter,
+        QueryFilterRecord filter,
         Mapping_1_0 mapping,
         String filterType, 
         boolean subclasses
     ) {
-        this.filter = filter == null ? new Filter() : filter;
+        this.filter = filter == null ? new org.openmdx.base.rest.spi.QueryFilterRecord() : filter;
         this.filterType = filterType;
         this.filter.getCondition().add(
             this.filterTypeCondition = new IsInstanceOfCondition(
@@ -161,7 +159,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
         int indexOfFilterTypeCondition = that.indexOfFilterTypeCondition();
         this.filterTypeCondition = indexOfFilterTypeCondition < 0 ?
             that.filterTypeCondition.clone() : 
-            this.filter.getCondition().get(indexOfFilterTypeCondition);
+            (org.openmdx.base.rest.spi.ConditionRecord)this.filter.getCondition().get(indexOfFilterTypeCondition);
         this.mapping = that.mapping;
     }
     
@@ -1409,7 +1407,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
     ) {
         try {
             this.assertModifiable();
-            String featureName = (String)featureDef.getName();
+            String featureName = featureDef.getName();
             SysLog.log(
                 Level.FINEST, 
                 "{0}|quantifier={1}, feature={2}, conditionType={3}, value={4}", 
@@ -1505,7 +1503,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
     }
 
     //-------------------------------------------------------------------------
-    //  @Override
+    @Override
     public void refAddValue(
         ModelElement_1_0 featureDef,
         SortOrder order
@@ -1513,7 +1511,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
         try {
             this.assertModifiable();            
             this.assertAttributeType(featureDef);
-            String name = (String)featureDef.getName(); 
+            String name = featureDef.getName(); 
             SysLog.log(Level.FINEST, "Order by {0} {1}", name, order);
             this.filter.getOrderSpecifier().add(
                 new OrderSpecifier(
@@ -1527,7 +1525,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
     }
 
     //-------------------------------------------------------------------------
-    //  @Override
+    @Override
     public void refAddValue(
         String featureName,
         Quantifier quantifier,
@@ -1547,7 +1545,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
                         new BasicException.Parameter("quantifier", quantifier),
                         new BasicException.Parameter("conditionType", conditionType)
                     );
-                } else if(featureName.equals(filterTypeCondition.getFeature())) {
+                } else if(SystemAttributes.OBJECT_INSTANCE_OF.equals(filterTypeCondition.getFeature())) {
                     Object[] instanceOf = new Object[value.size()];
                     int i = 0;
                     for(Object v : value) {
@@ -1564,7 +1562,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
                             this.filterTypeCondition.getValue()
                         ),
                         new BasicException.Parameter(
-                            featureName, 
+                    		SystemAttributes.OBJECT_INSTANCE_OF, 
                             value
                         )
                     );
@@ -1586,7 +1584,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.jmi.cci.RefFilter_1_0#refAddValue(java.lang.String, short)
      */
-    //  @Override
+    @Override
     public void refAddValue(
         String featureName, 
         SortOrder order
@@ -1631,8 +1629,8 @@ public class RefQuery_1 implements RefQuery_1_0 {
     private Object refGetOrder(
         ModelElement_1_0 featureDef
     ) throws ServiceException {
-        String multiplicity = (String)featureDef.getMultiplicity();
-        String featureName = (String)featureDef.getQualifiedName();
+        String multiplicity = featureDef.getMultiplicity();
+        String featureName = featureDef.getQualifiedName();
         switch(ModelHelper.getMultiplicity(featureDef)) {
 	        case SINGLE_VALUE: case OPTIONAL:
 	            return new RefSimpleTypeOrder(featureName);
@@ -1673,12 +1671,12 @@ public class RefQuery_1 implements RefQuery_1_0 {
 	    	case OPTIONAL:
 	    		return new RefOptionalFeaturePredicate(
     	            Quantifier.THERE_EXISTS,
-    	            (String)featureDef.getQualifiedName()
+    	            featureDef.getQualifiedName()
     	        );
 	    	default:
 	    		return new RefMultiValuedAttributePredicate(
     	            Quantifier.THERE_EXISTS,
-    	            (String)featureDef.getQualifiedName()
+    	            featureDef.getQualifiedName()
     	        );
     	}
     }
@@ -1704,13 +1702,13 @@ public class RefQuery_1 implements RefQuery_1_0 {
         ModelElement_1_0 featureDef
     ){
         try {
-            String qualifiedName = (String) featureDef.getQualifiedName();
-            String name = (String) featureDef.getName();
+            String qualifiedName = featureDef.getQualifiedName();
+            String name = featureDef.getName();
             Model_1_0 model = featureDef.getModel();
             ModelElement_1_0 typeDef = model.getElementType(
                 featureDef
             );
-            String typeName = (String) typeDef.getQualifiedName();
+            String typeName = typeDef.getQualifiedName();
             if(model.isPrimitiveType(typeDef)) {
                 return PrimitiveTypes.BOOLEAN.equals(typeName) ? new RefBooleanTypePredicate(
                     quantifier,
@@ -1747,14 +1745,14 @@ public class RefQuery_1 implements RefQuery_1_0 {
                     qualifiedName
                 ); 
             } else {
-                Filter filterValue = null;
-                for(Condition condition: this.filter.getCondition()) {
+                QueryFilterRecord filterValue = null;
+                for(ConditionRecord condition: this.filter.getCondition()) {
                     if(
                         condition.getFeature().equals(name) && 
                         (condition.getValue().length > 0) && 
-                        (condition.getValue(0) instanceof Filter)
+                        (condition.getValue(0) instanceof QueryFilterRecord)
                     ) {
-                        filterValue = (Filter)condition.getValue(0);
+                        filterValue = (QueryFilterRecord)condition.getValue(0);
                         break;
                     }
                 }
@@ -1788,12 +1786,14 @@ public class RefQuery_1 implements RefQuery_1_0 {
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.jmi.cci.RefFilter_1_0#refMofId()
      */
+    @Override
     public String refMofId() {
         return this.filterType + "Query";
     }
 
     //-------------------------------------------------------------------------
-    public Filter refGetFilter(
+    @Override
+    public QueryFilterRecord refGetFilter(
     ) {
         return this.filter;
     }
@@ -1850,19 +1850,15 @@ public class RefQuery_1 implements RefQuery_1_0 {
     /* (non-Javadoc)
      * @see javax.jdo.Query#addExtension(java.lang.String, java.lang.Object)
      */
+    @Override
     public void addExtension(String key, Object value) {
         this.assertModifiable();
-        //
-        // JDO implementations shall ignore unsupported extensions
-        //
-        if(Queries.QUERY_EXTENSION.equals(key)) {
-            this.filter.getExtension().add((Extension)value);
-        }
     }
 
     /* (non-Javadoc)
      * @see javax.jdo.Query#close(java.lang.Object)
      */
+    @Override
     public void close(Object queryResult) {
         // nothing to do
     }
@@ -1870,6 +1866,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
     /* (non-Javadoc)
      * @see javax.jdo.Query#closeAll()
      */
+    @Override
     public void closeAll() {
         // nothing to do
     }
@@ -1877,6 +1874,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
     /* (non-Javadoc)
      * @see javax.jdo.Query#compile()
      */
+    @Override
     public void compile() {
         // nothing to do
     }
@@ -1884,6 +1882,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
     /* (non-Javadoc)
      * @see javax.jdo.Query#declareImports(java.lang.String)
      */
+    @Override
     public void declareImports(String imports) {
         throw new UnsupportedOperationException("Expression parsing and arguments not supported");
     }
@@ -1891,6 +1890,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
     /* (non-Javadoc)
      * @see javax.jdo.Query#declareParameters(java.lang.String)
      */
+    @Override
     public void declareParameters(String parameters) {
         throw new UnsupportedOperationException("Expression parsing and arguments not supported");
     }
@@ -1898,6 +1898,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
     /* (non-Javadoc)
      * @see javax.jdo.Query#declareVariables(java.lang.String)
      */
+    @Override
     public void declareVariables(String variables) {
         throw new UnsupportedOperationException("Expression parsing and arguments not supported");
     }
@@ -1905,6 +1906,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
     /* (non-Javadoc)
      * @see javax.jdo.Query#deletePersistentAll()
      */
+    @Override
     public long deletePersistentAll(
     ) {
         if(this.pcs instanceof RefContainer<?>) {
@@ -1926,6 +1928,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
     /* (non-Javadoc)
      * @see javax.jdo.Query#deletePersistentAll(java.util.Map)
      */
+    @Override
     public long deletePersistentAll(Map parameters) {
         throw new UnsupportedOperationException("Expression parsing and arguments not supported");
     }
@@ -1933,6 +1936,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
     /* (non-Javadoc)
      * @see javax.jdo.Query#deletePersistentAll(java.lang.Object[])
      */
+    @Override
     public long deletePersistentAll(Object... parameters) {
         throw new UnsupportedOperationException("Expression parsing and arguments not supported");
     }
@@ -1940,6 +1944,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
     /* (non-Javadoc)
      * @see javax.jdo.Query#execute()
      */
+    @Override
     public Object execute(
     ) {
         if(this.pcs instanceof RefContainer<?>) {
@@ -1960,6 +1965,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
     /* (non-Javadoc)
      * @see javax.jdo.Query#execute(java.lang.Object, java.lang.Object, java.lang.Object)
      */
+    @Override
     public Object execute(Object p1, Object p2, Object p3) {
         throw new UnsupportedOperationException("Expression parsing and arguments not supported");
     }
@@ -1967,6 +1973,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
     /* (non-Javadoc)
      * @see javax.jdo.Query#execute(java.lang.Object, java.lang.Object)
      */
+    @Override
     public Object execute(Object p1, Object p2) {
         throw new UnsupportedOperationException("Expression parsing and arguments not supported");
     }
@@ -1974,6 +1981,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
     /* (non-Javadoc)
      * @see javax.jdo.Query#execute(java.lang.Object)
      */
+    @Override
     public Object execute(Object p1) {
         throw new UnsupportedOperationException("Expression parsing and arguments not supported");
     }
@@ -1981,6 +1989,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
     /* (non-Javadoc)
      * @see javax.jdo.Query#executeWithArray(java.lang.Object[])
      */
+    @Override
     public Object executeWithArray(Object... parameters) {
         throw new UnsupportedOperationException("Expression parsing and arguments not supported");
     }
@@ -1988,6 +1997,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
     /* (non-Javadoc)
      * @see javax.jdo.Query#executeWithMap(java.util.Map)
      */
+    @Override
     public Object executeWithMap(Map parameters) {
         throw new UnsupportedOperationException("Expression parsing and arguments not supported");
     }
@@ -1995,6 +2005,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
     /* (non-Javadoc)
      * @see javax.jdo.Query#getFetchPlan()
      */
+    @Override
     public FetchPlan getFetchPlan() {
         if(this.fetchPlan == null) {
             this.fetchPlan = StandardFetchPlan.newInstance(
@@ -2007,6 +2018,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
     /* (non-Javadoc)
      * @see javax.jdo.Query#getIgnoreCache()
      */
+    @Override
     public boolean getIgnoreCache() {
         return false; // ignore-cache is not supported by openMDX
     }
@@ -2014,6 +2026,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
     /* (non-Javadoc)
      * @see javax.jdo.Query#getPersistenceManager()
      */
+    @Override
     public PersistenceManager getPersistenceManager() {
         return null;
     }
@@ -2021,6 +2034,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
     /* (non-Javadoc)
      * @see javax.jdo.Query#isUnmodifiable()
      */
+    @Override
     public boolean isUnmodifiable() {
         return this.unmodifiable;
     }
@@ -2028,6 +2042,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
     /* (non-Javadoc)
      * @see javax.jdo.Query#setCandidates(java.util.Collection)
      */
+    @Override
     public void setCandidates(Collection pcs) {
         if(pcs instanceof ExtentCollection<?>) {
             ExtentCollection extentCollection = (ExtentCollection) pcs;
@@ -2056,6 +2071,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
     /* (non-Javadoc)
      * @see javax.jdo.Query#setCandidates(javax.jdo.Extent)
      */
+    @Override
     public void setCandidates(Extent pcs) {
         throw new UnsupportedOperationException(
             "Extent can't be set via JDO query yet"
@@ -2066,7 +2082,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
     /* (non-Javadoc)
      * @see javax.jdo.Query#setClass(java.lang.Class)
      */
-    //  @Override
+    @Override
     public void setClass(Class cls) {
         if(
             !cls.isInterface() ||
@@ -2091,19 +2107,17 @@ public class RefQuery_1 implements RefQuery_1_0 {
     /* (non-Javadoc)
      * @see javax.jdo.Query#setExtensions(java.util.Map)
      */
+    @Override
     public void setExtensions(
         Map extensions
     ) {
         this.assertModifiable();
-        // JDO implementations shall ignore unsupported extensions
-        this.filter.getExtension().add(
-            (Extension) extensions.get(Queries.QUERY_EXTENSION)
-        );
     }
 
     /* (non-Javadoc)
      * @see javax.jdo.Query#setFilter(java.lang.String)
      */
+    @Override
     public void setFilter(
         String filter
     ) {
@@ -2113,6 +2127,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
     /* (non-Javadoc)
      * @see javax.jdo.Query#setGrouping(java.lang.String)
      */
+    @Override
     public void setGrouping(
         String group
     ) {
@@ -2122,6 +2137,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
     /* (non-Javadoc)
      * @see javax.jdo.Query#setIgnoreCache(boolean)
      */
+    @Override
     public void setIgnoreCache(
         boolean ignoreCache
     ) {
@@ -2133,6 +2149,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
     /* (non-Javadoc)
      * @see javax.jdo.Query#setOrdering(java.lang.String)
      */
+    @Override
     public void setOrdering(String ordering) {
         throw new UnsupportedOperationException("Expression parsing and arguments not supported");
     }
@@ -2140,6 +2157,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
     /* (non-Javadoc)
      * @see javax.jdo.Query#setRange(long, long)
      */
+    @Override
     public void setRange(
         long fromIncl, 
         long toExcl
@@ -2150,6 +2168,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
     /* (non-Javadoc)
      * @see javax.jdo.Query#setRange(java.lang.String)
      */
+    @Override
     public void setRange(String fromInclToExcl) {
         throw new UnsupportedOperationException("set range operations are not supported. Use listIterator(position) instead");
     }
@@ -2157,6 +2176,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
     /* (non-Javadoc)
      * @see javax.jdo.Query#setResult(java.lang.String)
      */
+    @Override
     public void setResult(String data) {
         throw new UnsupportedOperationException("Result classes, projections and aggregate function results not supported");
     }
@@ -2164,6 +2184,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
     /* (non-Javadoc)
      * @see javax.jdo.Query#setResultClass(java.lang.Class)
      */
+    @Override
     public void setResultClass(Class cls) {
         throw new UnsupportedOperationException("Result classes, projections and aggregate function results not supported");
     }
@@ -2171,6 +2192,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
     /* (non-Javadoc)
      * @see javax.jdo.Query#setUnique(boolean)
      */
+    @Override
     public void setUnique(boolean unique) {
         this.assertModifiable();
         this.unique = unique;
@@ -2179,6 +2201,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
     /* (non-Javadoc)
      * @see javax.jdo.Query#setUnmodifiable()
      */
+    @Override
     public void setUnmodifiable() {
         this.unmodifiable = true;
     }
@@ -2186,6 +2209,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
     /* (non-Javadoc)
      * @see javax.jdo.Query#addSubquery(javax.jdo.Query, java.lang.String, java.lang.String)
      */
+    @Override
     public void addSubquery(Query arg0, String arg1, String arg2) {
         throw new UnsupportedOperationException("Operation not supported by RefQuery_1");        
     }
@@ -2193,6 +2217,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
     /* (non-Javadoc)
      * @see javax.jdo.Query#addSubquery(javax.jdo.Query, java.lang.String, java.lang.String, java.lang.String)
      */
+    @Override
     public void addSubquery(Query arg0, String arg1, String arg2, String arg3) {
         throw new UnsupportedOperationException("Operation not supported by RefQuery_1");        
     }
@@ -2200,6 +2225,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
     /* (non-Javadoc)
      * @see javax.jdo.Query#addSubquery(javax.jdo.Query, java.lang.String, java.lang.String, java.lang.String[])
      */
+    @Override
     public void addSubquery(
         Query arg0,
         String arg1,
@@ -2212,6 +2238,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
     /* (non-Javadoc)
      * @see javax.jdo.Query#addSubquery(javax.jdo.Query, java.lang.String, java.lang.String, java.util.Map)
      */
+    @Override
     public void addSubquery(Query arg0, String arg1, String arg2, Map arg3) {
         throw new UnsupportedOperationException("Operation not supported by RefQuery_1");        
     }
@@ -2273,7 +2300,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
     private int indexOfFilterTypeCondition(
     ){
         int i = 0;
-        for(Condition candidate : this.filter.getCondition()) {
+        for(ConditionRecord candidate : this.filter.getCondition()) {
             if(candidate == this.filterTypeCondition) {
                 return i;
             } else {
@@ -2296,8 +2323,8 @@ public class RefQuery_1 implements RefQuery_1_0 {
     protected transient Collection<?> pcs = null;
     protected FetchPlan fetchPlan = null;
     protected final String filterType;
-    protected final Condition filterTypeCondition;
-    protected final Filter filter;
+    protected final org.openmdx.base.rest.spi.ConditionRecord filterTypeCondition;
+    protected final QueryFilterRecord filter;
     private transient Mapping_1_0 mapping;
 
 }

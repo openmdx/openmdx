@@ -58,14 +58,11 @@ import javax.jdo.JDODataStoreException;
 import javax.jdo.JDOFatalDataStoreException;
 import javax.jdo.PersistenceManagerFactory;
 import javax.resource.ResourceException;
-import javax.resource.cci.Connection;
 import javax.resource.cci.Interaction;
-import javax.resource.cci.ResourceAdapterMetaData;
 import javax.resource.spi.ResourceAllocationException;
 
 import org.openmdx.application.configuration.Configuration;
 import org.openmdx.application.spi.PropertiesConfigurationProvider;
-import org.openmdx.base.Version;
 import org.openmdx.base.accessor.cci.DataObjectManager_1_0;
 import org.openmdx.base.accessor.rest.DataObjectManager_1;
 import org.openmdx.base.accessor.rest.spi.BasicCache_2;
@@ -79,10 +76,12 @@ import org.openmdx.base.persistence.spi.PersistenceManagers;
 import org.openmdx.base.resource.cci.ConnectionFactory;
 import org.openmdx.base.resource.spi.Port;
 import org.openmdx.base.resource.spi.ResourceExceptions;
-import org.openmdx.base.resource.spi.RestInteractionSpec;
-import org.openmdx.base.rest.spi.ConnectionAdapter;
+import org.openmdx.base.rest.cci.RestConnection;
 import org.openmdx.base.rest.cci.RestConnectionSpec;
+import org.openmdx.base.rest.spi.ConnectionAdapter;
+import org.openmdx.base.rest.spi.ConnectionFactoryAdapter;
 import org.openmdx.base.transaction.TransactionAttributeType;
+import org.openmdx.kernel.configuration.PropertiesProvider;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.loading.BeanFactory;
 import org.openmdx.kernel.loading.Factory;
@@ -106,7 +105,7 @@ public class EntityManagerProxyFactory_2 extends AbstractPersistenceManagerFacto
         // Data Manager Properties
         // 
         try {
-            Properties properties = PropertiesConfigurationProvider.toProperties(configuration);
+            Properties properties = PropertiesProvider.toProperties(configuration);
             Configuration dataManagerConfiguration = PropertiesConfigurationProvider.getConfiguration(
                 properties,
                 "org", "openmdx", "jdo", "DataManager"
@@ -135,7 +134,7 @@ public class EntityManagerProxyFactory_2 extends AbstractPersistenceManagerFacto
                         PropertiesConfigurationProvider.getConfiguration(
                             properties,
                             toSection(p.next())
-                        ).entries()
+                        )
                     ).instantiate();
                 }
             }
@@ -218,7 +217,7 @@ public class EntityManagerProxyFactory_2 extends AbstractPersistenceManagerFacto
     /**
      * The destinations
      */
-    private final Map<Path,Port> destinations;
+    private final Map<Path,Port<RestConnection>> destinations;
 
     /**
      * The standard plug-ins
@@ -232,56 +231,6 @@ public class EntityManagerProxyFactory_2 extends AbstractPersistenceManagerFacto
      */
     private static final Path PROXY_PATTERN = new Path("%");
     
-    /**
-     * The resource adapter's metadata
-     */
-    private final static ResourceAdapterMetaData RESOURCE_ADAPTER_META_DATA = new ResourceAdapterMetaData(){
-
-        public String getAdapterName() {
-            return "openMDX/REST";
-        }
-
-        public String getAdapterShortDescription() {
-            return "openMDX/2 REST Resource Adapter";
-        }
-
-        public String getAdapterVendorName() {
-            return "openMDX";
-        }
-
-        public String getAdapterVersion() {
-            return Version.getSpecificationVersion();
-        }
-
-        public String[] getInteractionSpecsSupported() {
-            return new String[]{RestInteractionSpec.class.getName()};
-        }
-
-        /**
-         * Retrieve the JCA specification version
-         * 
-         * @return the JCA specification version
-         */
-        public String getSpecVersion() {
-            return "1.5.";
-        }
-
-        public boolean supportsExecuteWithInputAndOutputRecord() {
-            return true; 
-        }
-
-        public boolean supportsExecuteWithInputRecordOnly() {
-            return true;
-        }
-
-        public boolean supportsLocalTransactionDemarcation(
-        ) {
-            return true;
-        }
-        
-    };
-
-        
     /**
      * Acquire the connection factory by its URL and driver name
      * 
@@ -348,7 +297,7 @@ public class EntityManagerProxyFactory_2 extends AbstractPersistenceManagerFacto
             //
             try {
                 Configuration connectionDriverConfiguration = PropertiesConfigurationProvider.getConfiguration(
-                    PropertiesConfigurationProvider.toProperties(configuration),
+                    PropertiesProvider.toProperties(configuration),
                     "org", "openmdx", "jdo", "ConnectionDriver"
                 );
                 connectionDriverProperties.putAll(connectionDriverConfiguration.entries());
@@ -380,21 +329,22 @@ public class EntityManagerProxyFactory_2 extends AbstractPersistenceManagerFacto
      * 
      * @throws ServiceException
      */
-    protected Port newPort(
+    @SuppressWarnings("unchecked")
+	protected Port<RestConnection> newPort(
         final Object connectionFactory
     ) throws ServiceException{
         if(connectionFactory instanceof ConnectionFactory) {
-            return new Port(){
+            return new Port<RestConnection>(){
                 
                 /* (non-Javadoc)
                  * @see org.openmdx.base.resource.spi.Port#getInteraction(javax.resource.cci.Connection)
                  */
                 public Interaction getInteraction(
-                    Connection connection
+                    RestConnection connection
                 ) throws ResourceException {
                     if(connection instanceof ConnectionAdapter) {
                         return ((ConnectionFactory)connectionFactory).getConnection(
-                            ((ConnectionAdapter)connection).getConnectionSpec()
+                            ((ConnectionAdapter)connection).getMetaData().getConnectionSpec()
                         ).createInteraction(
                         );
                     }
@@ -415,8 +365,8 @@ public class EntityManagerProxyFactory_2 extends AbstractPersistenceManagerFacto
         } else if(connectionFactory instanceof Factory<?>) {
             Factory<?> portFactory = (Factory<?>)connectionFactory; 
             Object port = portFactory.instantiate();
-            if(port instanceof Port) {
-                return (Port) port;
+            if(port instanceof Port<?>) {
+                return (Port<RestConnection>) port;
             } else {
                 throw new ServiceException(
                     new ResourceAllocationException(
@@ -504,19 +454,20 @@ public class EntityManagerProxyFactory_2 extends AbstractPersistenceManagerFacto
     ) {
         try {
             RestConnectionSpec connectionSpec = new RestConnectionSpec(userid, password);
-            return new DataObjectManager_1(
+            final Switch_2 port = new Switch_2(
+			    new BasicCache_2(), 
+			    this.destinations
+			);
+            final ConnectionFactoryAdapter connectionFactory = new ConnectionFactoryAdapter(
+            	port,
+            	true, // supportsLocalTransactionDemarcation
+            	TransactionAttributeType.SUPPORTS
+            );
+			return new DataObjectManager_1(
                 this,
                 true, // proxy
                 userid == null ? null : PersistenceManagers.toPrincipalChain(userid),
-                ConnectionAdapter.newInstance(
-                    RESOURCE_ADAPTER_META_DATA,
-                    connectionSpec,     
-                    TransactionAttributeType.SUPPORTS, 
-                    new Switch_2(
-                        new BasicCache_2(), 
-                        this.destinations
-                    )
-                ), 
+                connectionFactory.getConnection(connectionSpec),
                 null, // connection2
                 this.plugIns, 
                 this.optimalFetchSize, 

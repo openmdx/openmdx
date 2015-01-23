@@ -99,7 +99,7 @@ public class UiAttributePaneControl extends AttributePaneControl implements Seri
             org.openmdx.ui1.jmi1.Tab tab = (org.openmdx.ui1.jmi1.Tab) paneDef.getMember().get(i);
             attributeTabControls.add(
                 this.newUiAttributeTabControl(
-                    tab.refGetPath().getBase(), 
+                    tab.refGetPath().getLastSegment().toClassicRepresentation(), 
                     locale, 
                     localeAsIndex,
                     controlFactory,

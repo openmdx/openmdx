@@ -82,7 +82,7 @@ public class PinningCache_2 extends BasicCache_2 {
     /**
      * The cache name is <code>null</code> unless it shall be shared
      */
-    String pinningCacheName;
+    String pinningCacheName = null;
     
     /**
      * The cache configuration URL
@@ -613,7 +613,7 @@ public class PinningCache_2 extends BasicCache_2 {
         @Override
         public ObjectRecord peek(
             Path oid
-        ) throws ServiceException { 
+        ) throws ResourceException { 
             if(this.cache != null){
                 ObjectRecord object = this.cache.get(oid);
                 if(object != null) {
@@ -691,7 +691,7 @@ public class PinningCache_2 extends BasicCache_2 {
         public boolean isAvailable(
             Mode mode, 
             Path xri
-        ) throws ServiceException {
+        ) throws ResourceException {
             return (
                 (mode == null || mode == Mode.PINNING) &&
                 this.cache != null && 
@@ -707,10 +707,10 @@ public class PinningCache_2 extends BasicCache_2 {
         public boolean put(
             Mode mode, 
             ObjectRecord object
-        ) throws ServiceException {
+        ) throws ResourceException {
             if(mode == null || mode == Mode.PINNING) {
-                boolean pinned = isPinned(object.getPath(), object.getValue().getRecordName());
-                if(pinned) try {
+                boolean pinned = isPinned(object.getResourceIdentifier(), object.getValue().getRecordName());
+                if(pinned) {
                     if(this.cache == null) synchronized(this) {
                         if(this.cache == null){
                             this.cache = getCache(
@@ -724,8 +724,6 @@ public class PinningCache_2 extends BasicCache_2 {
                         
                     }
                     BasicCache_2.put((Cache)this.cache, object);
-                } catch (ResourceException exception) {
-                    throw new ServiceException(exception);
                 }
                 return pinned;
             } else {

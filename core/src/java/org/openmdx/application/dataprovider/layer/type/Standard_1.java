@@ -55,7 +55,6 @@ import java.util.List;
 import java.util.Set;
 
 import javax.resource.ResourceException;
-import javax.resource.cci.Connection;
 import javax.resource.cci.IndexedRecord;
 import javax.resource.cci.Interaction;
 import javax.resource.cci.MappedRecord;
@@ -74,6 +73,7 @@ import org.openmdx.base.mof.cci.ModelElement_1_0;
 import org.openmdx.base.mof.cci.Model_1_0;
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.resource.spi.RestInteractionSpec;
+import org.openmdx.base.rest.cci.RestConnection;
 import org.openmdx.base.rest.spi.Facades;
 import org.openmdx.base.rest.spi.Object_2Facade;
 import org.openmdx.base.rest.spi.Query_2Facade;
@@ -101,7 +101,7 @@ public class Standard_1 extends OperationAwareLayer_1 {
     // --------------------------------------------------------------------------
     @Override
     public Interaction getInteraction(
-        Connection connection
+        RestConnection connection
     ) throws ResourceException {
         return new LayerInteraction(connection);
     }
@@ -118,7 +118,15 @@ public class Standard_1 extends OperationAwareLayer_1 {
             configuration, 
             delegation
         );
-        // genericTypes
+        setUpGenericTypeSupport(configuration);
+    }
+
+	/**
+     * @deprecated will not be supported by the dataprovider 2 stack
+	 */
+	private void setUpGenericTypeSupport(Configuration configuration)
+			throws ServiceException {
+		// genericTypes
         this.genericTypes = new ArrayList<Object>(
             configuration.values(
                 LayerConfigurationEntries.GENERIC_TYPE_PATH
@@ -129,9 +137,11 @@ public class Standard_1 extends OperationAwareLayer_1 {
         this.basicObjectClassDef = new ModelElement_1(
             getModel().getDereferencedType("org:openmdx:base:BasicObject")
         );
-    }
+	}
 
-    //---------------------------------------------------------------------------
+	/**
+     * @deprecated will not be supported by the dataprovider 2 stack
+	 */
     private boolean isGenericTypePath(
         Path objectPath  
     ) {
@@ -177,8 +187,7 @@ public class Standard_1 extends OperationAwareLayer_1 {
         }
         if(this.isGenericTypePath(Object_2Facade.getPath(object))) {
             return this.basicObjectClassDef; 
-        }
-        else {        
+        } else {        
             return getModel().getDereferencedType(objectClass);
         }
     }
@@ -306,7 +315,7 @@ public class Standard_1 extends OperationAwareLayer_1 {
     public class LayerInteraction extends OperationAwareLayer_1.LayerInteraction {
         
         public LayerInteraction(
-            Connection connection
+            RestConnection connection
         ) throws ResourceException {
             super(connection);
         }
@@ -426,7 +435,7 @@ public class Standard_1 extends OperationAwareLayer_1 {
             // path matches the model
             //
             Path operationPath = request.path();
-            String operationName = operationPath.get(operationPath.size()-2);
+            String operationName = operationPath.getSegment(operationPath.size()-2).toClassicRepresentation();
             //
             // rewrite reference name with namespace to .../view/<namespaceId>/...
             //
@@ -507,7 +516,15 @@ public class Standard_1 extends OperationAwareLayer_1 {
     //---------------------------------------------------------------------------
     // Variables
     //---------------------------------------------------------------------------
+    
+    /**
+     * @deprecated will not be supported by the dataprovider 2 stack
+     */
     private List<Object> genericTypes = null;
+    
+    /**
+     * @deprecated will not be supported by the dataprovider 2 stack
+     */
     private ModelElement_1_0 basicObjectClassDef = null;
 
 }

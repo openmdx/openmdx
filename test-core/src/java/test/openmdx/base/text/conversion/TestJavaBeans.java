@@ -51,8 +51,8 @@ import static org.junit.Assert.assertNotNull;
 
 import org.junit.Test;
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.base.query.Condition;
 import org.openmdx.base.query.Filter;
+import org.openmdx.base.rest.cci.ConditionRecord;
 import org.openmdx.base.text.conversion.JavaBeans;
 import org.openmdx.kernel.exception.BasicException;
 
@@ -162,7 +162,7 @@ public class TestJavaBeans {
             "</java>"            
         );
         int index = 0;
-        for(Condition condition: filter.getCondition()) {
+        for(ConditionRecord condition: filter.getCondition()) {
             assertNotNull("condition[" + index + "].getValue() for feature '" + condition.getFeature() + "' must not be null", condition.getValue());
             index++;
         }
@@ -217,7 +217,7 @@ public class TestJavaBeans {
 	          	"</org.openmdx.base.query.Filter>"    	
 	        );
 	        int index = 0;
-	        for(Condition condition: filter.getCondition()) {
+	        for(ConditionRecord condition: filter.getCondition()) {
 	            assertNotNull("condition[" + index + "].getValue() for feature '" + condition.getFeature() + "' must not be null", condition.getValue());
 	            index++;
 	        }

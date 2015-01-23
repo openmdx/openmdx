@@ -61,13 +61,14 @@ import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.resource.spi.AbstractInteraction;
 import org.openmdx.base.resource.spi.Port;
 import org.openmdx.base.resource.spi.ResourceExceptions;
+import org.openmdx.base.rest.cci.RestConnection;
 import org.openmdx.base.rest.spi.ConnectionAdapter;
 import org.openmdx.kernel.exception.BasicException;
 
 /**
  * Local REST Connection Port
  */
-class Connection_2LocalPort implements Port {
+class Connection_2LocalPort implements Port<RestConnection> {
     
     /**
      * Constructor 
@@ -92,7 +93,7 @@ class Connection_2LocalPort implements Port {
      * 
      * @throws ServiceException if the port can't be acquired
      */
-    static Port newInstance(
+    static Port<RestConnection> newInstance(
         Object delegate
     ) throws ServiceException {  
         try {
@@ -113,12 +114,12 @@ class Connection_2LocalPort implements Port {
      * @see org.openmdx.base.rest.spi.RestPlugIn#getInteraction(javax.resource.cci.Connection)
      */
     public Interaction getInteraction(
-        Connection connection
+        RestConnection connection
     ) throws ResourceException {
         try {
             return new InteractionAdapter(
                 this.localHome.create(
-                    ((ConnectionAdapter)connection).getConnectionSpec()
+                    ((ConnectionAdapter)connection).getMetaData().getConnectionSpec()
                 ),
                 connection
             );

@@ -883,7 +883,7 @@ public final class BasicException extends Exception {
                 out.append("\tParameters:");
                 out.println();
             }
-            out.append("\t    ").append(String.valueOf(i++)).append(":\t").append(parameter.toString());
+            out.append("\t    ").append(String.valueOf(i++)).append(":\t").append(parameter == null ? "N/A" : parameter.toString());
             out.println();
         }
     }

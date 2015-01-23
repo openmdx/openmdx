@@ -121,6 +121,15 @@ public final class RestInteractionSpec implements InteractionSpec {
         return this.interactionVerb;
     }
     
+    /**
+     * Retrieve the string representation of the interaction verb
+     * 
+     * @return the interaction verb by name
+     */
+    public String getInteractionVerbName(){
+    	return INTERACTION_VERBS[this.interactionVerb];
+    }
+    
     @Override
     public String toString(
     ) {
@@ -134,7 +143,7 @@ public final class RestInteractionSpec implements InteractionSpec {
 		        },
 		        new Object[]{
 		            this.function,
-		            INTERACTION_VERBS[this.interactionVerb]
+		            getInteractionVerbName()
 		        }
 		    )
 		);

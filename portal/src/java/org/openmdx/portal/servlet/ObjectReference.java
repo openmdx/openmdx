@@ -457,7 +457,7 @@ public class ObjectReference
                 SelectObjectAction.EVENT_ID,
                 new Action.Parameter[]{
                     new Action.Parameter(Action.PARAMETER_OBJECTXRI, identity.getParent().getParent().toXRI()),
-                    new Action.Parameter(Action.PARAMETER_REFERENCE_NAME, identity.getParent().getBase())
+                    new Action.Parameter(Action.PARAMETER_REFERENCE_NAME, identity.getParent().getLastSegment().toClassicRepresentation())
                 },
                 parentTitle != null
                     ? parentTitle

@@ -57,7 +57,6 @@ import org.openmdx.base.accessor.view.Interceptor_1;
 import org.openmdx.base.accessor.view.ObjectView_1_0;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
-import org.openmdx.base.naming.Path;
 import org.openmdx.kernel.exception.BasicException;
 
 /**
@@ -110,7 +109,7 @@ abstract public class Object_1 extends Interceptor_1 {
                     new BasicException.Parameter("feature", feature)
                 );
             }
-            String type = ((Path)reference.getType()).getLastSegment().toClassicRepresentation();
+            String type = reference.getType().getLastSegment().toClassicRepresentation();
             //
             // A state capable container is required even if there is no state context  
             // in order to avoid the returning of states not requested explicitly.

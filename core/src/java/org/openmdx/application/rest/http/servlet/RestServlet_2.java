@@ -55,6 +55,7 @@ import static org.openmdx.base.accessor.rest.spi.ControlObjects_2.isTransactionO
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.PrintWriter;
 import java.io.Reader;
 import java.io.StringReader;
 import java.net.URLDecoder;
@@ -94,10 +95,11 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 
 import org.openmdx.application.rest.adapter.InboundConnectionFactory_2;
-import org.openmdx.base.collection.Sets;
+import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.io.HttpHeaderFieldContent;
 import org.openmdx.base.io.HttpHeaderFieldValue;
+import org.openmdx.base.mof.cci.Model_1_0;
 import org.openmdx.base.mof.cci.Multiplicity;
 import org.openmdx.base.mof.spi.Model_1Factory;
 import org.openmdx.base.naming.Path;
@@ -110,6 +112,8 @@ import org.openmdx.base.resource.cci.RestFunction;
 import org.openmdx.base.resource.spi.ResourceExceptions;
 import org.openmdx.base.resource.spi.RestInteractionSpec;
 import org.openmdx.base.rest.cci.MessageRecord;
+import org.openmdx.base.rest.cci.ObjectRecord;
+import org.openmdx.base.rest.cci.QueryRecord;
 import org.openmdx.base.rest.spi.Facades;
 import org.openmdx.base.rest.spi.Object_2Facade;
 import org.openmdx.base.rest.spi.Query_2Facade;
@@ -124,7 +128,9 @@ import org.openmdx.base.xml.stream.XMLOutputFactories;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.exception.Throwables;
 import org.openmdx.kernel.log.SysLog;
+import org.w3c.cci2.BinaryLargeObjects;
 import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 
 /**
  * REST Servlet
@@ -348,7 +354,11 @@ public class RestServlet_2 extends HttpServlet {
     private Path getXri(
         HttpServletRequest request 
     ) {
-        return RestFormatters.toResourceIdentifier(request.getServletPath());
+        String path = request.getServletPath();
+        if(path.endsWith("/")) {
+            path = path.substring(0, path.length() - 1);
+        }
+        return RestFormatters.toResourceIdentifier(path);
     }
 
     /**
@@ -479,42 +489,30 @@ public class RestServlet_2 extends HttpServlet {
         for(
             ListIterator i = ((IndexedRecord)reply).listIterator();
             i.hasNext();
-        ){
+        ) {
             Object oldObject = i.next();
             if(oldObject instanceof Record) {
                 Record oldRecord = (Record) oldObject;
-                if(Object_2Facade.isDelegate(oldRecord)) {
+                if(org.openmdx.base.rest.spi.ObjectRecord.isCompatible(oldRecord)) {
                     Path xri = Object_2Facade.getPath((MappedRecord) oldRecord);
-                    RecordFactory factory = this.connectionFactory.getRecordFactory();
-                    IndexedRecord newRequest;
-                    if(factory instanceof ExtendedRecordFactory) {
-                        newRequest = ((ExtendedRecordFactory)factory).singletonIndexedRecord(
-                            Multiplicity.LIST.toString(),
-                            null,
-                            xri
-                        );
-                    } else {
-                        newRequest = factory.createIndexedRecord(
-                            Multiplicity.LIST.toString()
-                        );
-                        newRequest.add(xri);
+                    QueryRecord query = null;
+                    try {
+                        query = Facades.newQuery(xri).getDelegate();
+                    } catch(Exception ignore) {
+                        // ignore
                     }
-                    Record newReply = interaction.execute(
+                    IndexedRecord output = (IndexedRecord) interaction.execute(
                         InteractionSpecs.getRestInteractionSpecs(true).GET,
-                        newRequest
+                        query
                     );
-                    if(newReply instanceof IndexedRecord) {
-                        IndexedRecord newResultRecord = (IndexedRecord) newReply;
-                        if(!newResultRecord.isEmpty()) {
-                            i.set(newResultRecord.get(0));
-                        }
+                    if(!output.isEmpty()) {
+                        i.set(output.get(0));
                     }
                 }
             }
         }
-        
     }
-    
+
     /**
      * Execution
      * 
@@ -652,12 +650,13 @@ public class RestServlet_2 extends HttpServlet {
         InteractionSpecs interactionSpecs = InteractionSpecs.getRestInteractionSpecs(this.isRetainValues(request));
         switch(restFunction) {
             case GET: return interactionSpecs.GET;
-            case PUT: return interactionSpecs.PUT;
+            case PUT: return interactionSpecs.UPDATE;
             case DELETE: return interactionSpecs.DELETE;
             case POST: return interactionSpecs.CREATE;
             default: return null;
         }
     }
+    
     /**
      * REST DELETE Request
      * 
@@ -689,10 +688,7 @@ public class RestServlet_2 extends HttpServlet {
                     Query_2Facade.newInstance(xri).getDelegate()
                 );
             } else {
-                MappedRecord object = RestParser.parseRequest(
-                    RestServlet_2.getSource(request, response),
-                    xri
-                );
+                final MappedRecord object = parseRequest(request, response);
                 execute(  
                     interaction,
                     !isControlObjectType(object.getRecordName()) && isAutoCommitting(request), 
@@ -739,125 +735,212 @@ public class RestServlet_2 extends HttpServlet {
      * @exception ServletException
      * @exception IOException
      */
-    @SuppressWarnings("unchecked")
     @Override
     protected void doGet(
         HttpServletRequest request, 
         HttpServletResponse response
     ) throws ServletException, IOException {
-        prolog(request, response);
-        Interaction interaction = getInteraction(request);
-        try {
-            Path xri = this.getXri(request);
-            InteractionSpec get = InteractionSpecs.getRestInteractionSpecs(
-                !this.isAutoCommitting(request) && this.isRetainValues(request)
-            ).GET;
-            // Object
-            if(xri.isObjectPath()) {
-                if(xri.isPattern()) {
-                    throw new UnsupportedOperationException("WILDCARD");//  TODO
-                } else {
-                    IndexedRecord input;
-                    RecordFactory factory = this.connectionFactory.getRecordFactory();
-                    if(factory instanceof ExtendedRecordFactory) {
-                        input = ((ExtendedRecordFactory)factory).singletonIndexedRecord(
-                            Multiplicity.LIST.toString(),
-                            null,
-                            xri
-                        );
-                    } else {
-                        input = factory.createIndexedRecord(
-                    		Multiplicity.LIST.toString()
-                        );
-                        input.add(xri);
-                    }
-                    IndexedRecord output = (IndexedRecord) interaction.execute(
-                        get, 
-                        input
-                    );
-                    if(output == null) {
-                        response.setStatus(HttpServletResponse.SC_NO_CONTENT);                    
-                    }  else if(output.isEmpty()) {
-                        response.setStatus(HttpServletResponse.SC_NOT_FOUND);                    
-                    } else {
-                        response.setStatus(HttpServletResponse.SC_OK);                    
-                        ServletTarget target = new ServletTarget(request, response); 
-                        restFormatter.format(target, Facades.asObject((MappedRecord)output.get(0)));
-                        target.close();
-                    }
-                }
-            } else {
-                //
-                // Collection
-                //
-                MappedRecord input;
-                if(request.getHeader("interaction-verb") == null) {
-                    Query_2Facade inputFacade = Facades.newQuery(xri);
-                    String queryType = request.getParameter("queryType");
-                    String query = request.getParameter("query"); 
-                    inputFacade.setQueryType(
-                        queryType == null ? (String)Model_1Factory.getModel().getTypes(xri.getChild(":*"))[2].getQualifiedName() : queryType
-                    );
-                    inputFacade.setQuery(query);
-                    String position = request.getParameter("position");
-                    inputFacade.setPosition(
-                        position == null ? Integer.valueOf(DEFAULT_POSITION) : Integer.valueOf(position)
-                    );
-                    String size = request.getParameter("size");
-                    inputFacade.setSize(
-                        Integer.valueOf(size == null ? DEFAULT_SIZE : Integer.parseInt(size))
-                    );
-                    String[] groups = request.getParameterValues("groups"); 
-                    if(groups != null) {
-                        inputFacade.setGroups(
-                            Sets.asSet(groups)
-                        );
-                    }
-                    input = inputFacade.getDelegate();
-                } else {
-                    input = RestParser.parseRequest(
-                        RestServlet_2.getSource(request, response),
-                        null
-                    );
-                }
-                IndexedRecord output = (IndexedRecord) interaction.execute(
-                    get, 
-                    input
-                );
-                if(output == null) {
-                    response.setStatus(HttpServletResponse.SC_NO_CONTENT);                    
-                } else {
-                    response.setStatus(HttpServletResponse.SC_OK);
-                    ServletTarget target = new ServletTarget(request, response); 
-                    restFormatter.format(target, xri, output);
-                    target.close();
-                }
-            }
-        } catch(ResourceException exception) {
-            this.handleException(
-                request, 
-                response, 
-                exception
-            );
-        } catch(Exception exception) {
-            this.handleException(
-                request, 
-                response, exception
-            );
-        } finally {
+        Model_1_0 model = Model_1Factory.getModel();
+        String servletPath = request.getServletPath();
+        if(servletPath.startsWith("/api-ui")) {
             try {
-                if(this.isAutoCommitting(request)) {
-                    Connection connection = interaction.getConnection();
-                    interaction.close();
-                    connection.close();
-                } else {
-                    interaction.close();
-                }
-            } catch (ResourceException exception) {
-                Throwables.log(exception);
+                BinaryLargeObjects.streamCopy(
+                    request.getServletContext().getResourceAsStream(servletPath), 
+                    0L, 
+                    response.getOutputStream()
+                );
+                response.setStatus(HttpServletResponse.SC_OK);
+            } catch(Exception e) {
+                response.setStatus(HttpServletResponse.SC_NOT_FOUND);
             }
+        } else if(servletPath.startsWith("/api")) {
+            try {
+                if(request.getParameter("xri") != null) {
+                    response.sendRedirect(
+                        request.getContextPath() +
+                        new Path(request.getParameter("xri")).toClassicRepresentation() + "/:api"
+                    );                
+                } else if(request.getParameter("type") != null) {
+                    response.setStatus(HttpServletResponse.SC_OK);
+                    response.setContentType("application/json");
+                    PrintWriter pw = response.getWriter();
+                    new Swagger(
+                        model.getElement(request.getParameter("type"))
+                    ).writeAPI(
+                        pw, 
+                        null, // host 
+                        null, // basePath 
+                        null // description
+                    );
+                    pw.close();      
+                } else {
+                    response.setStatus(HttpServletResponse.SC_NO_CONTENT);                
+                }
+            } catch(Exception exception) {
+                this.handleException(
+                    request, 
+                    response, exception
+                );
+            }
+        } else {
+            prolog(request, response);
+            Interaction interaction = getInteraction(request);
+            try {
+                Path xri = this.getXri(request);
+                InteractionSpec get = InteractionSpecs.getRestInteractionSpecs(
+                    !this.isAutoCommitting(request) && this.isRetainValues(request)
+                ).GET;
+                // Object
+                if(xri.isObjectPath()) {
+                    if(xri.isPattern()) {
+                        throw new UnsupportedOperationException("WILDCARD");//  TODO
+                    } else {
+                        IndexedRecord output = (IndexedRecord) interaction.execute(
+                            get, 
+                            Facades.newQuery(xri).getDelegate()
+                        );
+                        if(output == null) {
+                            response.setStatus(HttpServletResponse.SC_NO_CONTENT);                    
+                        }  else if(output.isEmpty()) {
+                            response.setStatus(HttpServletResponse.SC_NOT_FOUND);                    
+                        } else {
+                            response.setStatus(HttpServletResponse.SC_OK);
+                            ServletTarget target = new ServletTarget(request, response); 
+                            restFormatter.format(target, toObjectRecord(output.get(0)));
+                            target.close();
+                        }
+                    }
+                } else {
+                    if(":api".equals(xri.getLastSegment().toClassicRepresentation())) {
+                        IndexedRecord output = (IndexedRecord) interaction.execute(
+                            get, 
+                            Facades.newQuery(xri.getParent()).getDelegate()
+                        );
+                        if(output == null) {
+                            response.setStatus(HttpServletResponse.SC_NO_CONTENT);                    
+                        }  else if(output.isEmpty()) {
+                            response.setStatus(HttpServletResponse.SC_NOT_FOUND);                    
+                        } else {
+                            response.setStatus(HttpServletResponse.SC_OK);
+                            response.setContentType("application/json");
+                            PrintWriter pw = response.getWriter();
+                            String basePath = request.getContextPath() + request.getServletPath().replace("/:api", "");
+                            String host = null;
+                            {
+                                String requestURL = request.getRequestURL().toString();
+                                int pos1 = requestURL.indexOf("://");
+                                int pos2 = requestURL.indexOf("/", pos1 + 3);
+                                if(pos2 > pos1) {
+                                    host = requestURL.substring(pos1 + 3, pos2);
+                                } else {
+                                    host= null;
+                                }
+                            }
+                            ObjectRecord object = this.toObjectRecord(output.get(0));
+                            new Swagger(
+                                model.getElement(object.getValue().getRecordName())
+                            ).writeAPI(
+                                pw, 
+                                host, 
+                                basePath, 
+                                object.getResourceIdentifier().toXRI()
+                            );
+                            pw.close();
+                        }
+                    } else if(":api-ui".equals(xri.getLastSegment().toClassicRepresentation())) {
+                        response.sendRedirect(
+                            request.getContextPath() +
+                            "/api-ui?url=" + request.getRequestURL().toString().replace(":api-ui", ":api")
+                        );
+                    } else {
+                        // Object query
+                        final MappedRecord input;
+                        if(request.getHeader("interaction-verb") == null) {
+                            Query_2Facade inputFacade = Facades.newQuery(xri);
+                            String queryType = request.getParameter("queryType");
+                            if(queryType == null){
+                                inputFacade.setQueryType(Model_1Factory.getModel().getTypes(xri.getChild(":*"))[2].getQualifiedName());
+                            } else {
+                                inputFacade.setQueryType(queryType);
+                            }
+                            String query = request.getParameter("query"); 
+                            if(query != null) {
+                                inputFacade.setQuery(query);
+                            }
+                            String position = request.getParameter("position");
+                            if(position == null) {
+                                inputFacade.setPosition(Integer.valueOf(DEFAULT_POSITION));
+                            } else {
+                                inputFacade.setPosition(Integer.valueOf(position));
+                            }
+                            String size = request.getParameter("size");
+                            if(size == null) {
+                                inputFacade.setSize(Integer.valueOf(DEFAULT_SIZE));
+                            } else {
+                                inputFacade.setSize(Integer.valueOf(size));
+                            }
+                            String[] groups = request.getParameterValues("groups"); 
+                            if(groups != null) {
+                            	switch(groups.length) {
+                            	case 0:
+                                    inputFacade.setFetchGroupName(null);
+                                    break;
+                            	case 1:
+                                    inputFacade.setFetchGroupName(groups[0]);
+                                    break;
+                            	default:
+                                	throw new RuntimeServiceException(
+                	                    BasicException.Code.DEFAULT_DOMAIN,
+                	                    BasicException.Code.NOT_SUPPORTED,
+                	                    "At most one fetch group may be specified",
+                	                    new BasicException.Parameter("groups", (Object[])groups)
+                	                );
+                            	}
+                            }
+                            input = inputFacade.getDelegate();
+                        } else {
+                            input = parseRequest(request, response);
+                        }
+                        IndexedRecord output = (IndexedRecord) interaction.execute(
+                            get, 
+                            input
+                        );
+                        if(output == null) {
+                            response.setStatus(HttpServletResponse.SC_NO_CONTENT);                    
+                        } else {
+                            response.setStatus(HttpServletResponse.SC_OK);
+                            ServletTarget target = new ServletTarget(request, response); 
+                            restFormatter.format(target, xri, output);
+                            target.close();
+                        }
+                    }
+                }
+            } catch(ResourceException exception) {
+                this.handleException(
+                    request, 
+                    response, 
+                    exception
+                );
+            } catch(Exception exception) {
+                this.handleException(
+                    request, 
+                    response, exception
+                );
+            } finally {
+                try {
+                    if(this.isAutoCommitting(request)) {
+                        Connection connection = interaction.getConnection();
+                        interaction.close();
+                        connection.close();
+                    } else {
+                        interaction.close();
+                    }
+                } catch (ResourceException exception) {
+                    Throwables.log(exception);
+                }
+            }
+            epilog(request, response);
         }
-        epilog(request, response);
     }
 
     /**
@@ -928,11 +1011,8 @@ public class RestServlet_2 extends HttpServlet {
         } else {
             Interaction interaction = getInteraction(request);
             try {
-                MappedRecord value = RestParser.parseRequest(
-                    RestServlet_2.getSource(request, response),
-                    xri
-                ); 
-                if(Object_2Facade.isDelegate(value)) {
+                final MappedRecord value = parseRequest(request, response);
+                if(org.openmdx.base.rest.spi.ObjectRecord.isCompatible(value)) {
                     MappedRecord input;
                     if(xri.equals(Object_2Facade.getPath(value))) {
                         input = value;
@@ -940,13 +1020,13 @@ public class RestServlet_2 extends HttpServlet {
                         RecordFactory factory = this.connectionFactory.getRecordFactory();
                         if(factory instanceof ExtendedRecordFactory) {
                             input = ((ExtendedRecordFactory)factory).singletonMappedRecord(
-                                Multiplicity.MAP.toString(),
+                                Multiplicity.MAP.code(),
                                 null,
                                 xri,
                                 value
                             );
                         } else {
-                            input = factory.createMappedRecord(Multiplicity.MAP.toString());
+                            input = factory.createMappedRecord(Multiplicity.MAP.code());
                             input.put(xri, value);
                         }
                     }
@@ -965,12 +1045,12 @@ public class RestServlet_2 extends HttpServlet {
                         for(Object record : output){
                             restFormatter.format(
                                 target, 
-                                Facades.asObject((MappedRecord) record)
+                                toObjectRecord(record)
                             );
                         }
                         target.close();
                     }
-                } else if(Query_2Facade.isDelegate(value)) {
+                } else if(org.openmdx.base.rest.spi.QueryRecord.isCompatible(value)) {
                     boolean multivalued;
                     if(xri.size() % 2 == 0) {
                        multivalued = true;
@@ -993,13 +1073,13 @@ public class RestServlet_2 extends HttpServlet {
                     } else{
                        response.setStatus(HttpServletResponse.SC_OK);
                        ServletTarget target = new ServletTarget(request, response);
-                       restFormatter.format(target, Facades.asObject((MappedRecord) output.get(0)));
+                       restFormatter.format(target, toObjectRecord(output.get(0)));
                        target.close();
                     }
                 } else {
                     MappedRecord input = this.connectionFactory.getRecordFactory().createMappedRecord(MessageRecord.NAME);
                     if(input instanceof MessageRecord) {
-                        ((MessageRecord)input).setPath(xri);
+                        ((MessageRecord)input).setResourceIdentifier(xri);
                         ((MessageRecord)input).setBody(value);
                     } else {
                          input.put("path", xri);
@@ -1019,8 +1099,8 @@ public class RestServlet_2 extends HttpServlet {
                         if(output instanceof MessageRecord) {
                             reply = (MessageRecord) output;
                         } else {
-                            reply = (MessageRecord) Records.getRecordFactory().createMappedRecord(MessageRecord.NAME);
-                            reply.setPath(xri);
+                            reply = Records.getRecordFactory().createMappedRecord(MessageRecord.class);
+                            reply.setResourceIdentifier(xri);
                             reply.setBody(value);
                         }
                         response.setStatus(HttpServletResponse.SC_OK);
@@ -1074,27 +1154,8 @@ public class RestServlet_2 extends HttpServlet {
         prolog(request, response);
         Interaction interaction = getInteraction(request);
         try {
-            MappedRecord input;
-            Path xri = this.getXri(request);
-            try {
-                input = RestParser.parseRequest(
-                    RestServlet_2.getSource(request, response),
-                    xri
-                );
-            } catch (ServiceException exception) {
-                throw ResourceExceptions.initHolder(
-                    new CommException(
-                        "Request could not be parsed properly",
-                        BasicException.newEmbeddedExceptionStack(
-                            exception,
-                            BasicException.Code.DEFAULT_DOMAIN,
-                            BasicException.Code.TRANSFORMATION_FAILURE,
-                            new BasicException.Parameter("xri", xri)
-                        )
-                    )
-                );
-            }
-            IndexedRecord output = (IndexedRecord) execute(  
+            MappedRecord input = parseRequest(request, response);
+            IndexedRecord output = (IndexedRecord)execute(  
                 interaction,
                 isAutoCommitting(request), 
                 true, 
@@ -1109,7 +1170,7 @@ public class RestServlet_2 extends HttpServlet {
                 for(Object record : output) {
                     restFormatter.format(
                         target, 
-                        Facades.asObject((MappedRecord) record)
+                        toObjectRecord(record)
                     );
                 }
                 target.close();
@@ -1139,6 +1200,45 @@ public class RestServlet_2 extends HttpServlet {
             }
         }
         epilog(request, response);
+    }
+
+	private MappedRecord parseRequest(
+		HttpServletRequest request,
+		HttpServletResponse response
+	) throws CommException {
+		Path xri = this.getXri(request);
+		try {
+		    return RestParser.parseRequest(
+		        RestServlet_2.getSource(request, response),
+		        xri
+		    );
+		} catch (SAXException exception) {
+		    throw ResourceExceptions.initHolder(
+		        new CommException(
+		            "Request could not be parsed properly",
+		            BasicException.newEmbeddedExceptionStack(
+		                exception,
+		                BasicException.Code.DEFAULT_DOMAIN,
+		                BasicException.Code.TRANSFORMATION_FAILURE,
+		                new BasicException.Parameter("xri", xri)
+		            )
+		        )
+		    );
+		}
+	}
+
+    private ObjectRecord toObjectRecord(Object record) throws ServiceException {
+        if (org.openmdx.base.rest.spi.ObjectRecord.isCompatible((Record)record)) {
+            return (ObjectRecord) record;
+        } else {
+            throw new ServiceException(
+                BasicException.Code.DEFAULT_DOMAIN,
+                BasicException.Code.BAD_PARAMETER,
+                "Unexpected record type",
+                new BasicException.Parameter("expected", org.openmdx.base.rest.cci.ObjectRecord.NAME),
+                new BasicException.Parameter("actual", ((Record)record).getRecordName())
+            );
+        }
     }
 
     /**
@@ -1325,7 +1425,7 @@ public class RestServlet_2 extends HttpServlet {
     private static RestSource getSource(
         HttpServletRequest request, 
         HttpServletResponse response
-    ) throws ServiceException {
+    ) throws SAXException {
         try {
             HttpHeaderFieldValue contentHeader = new HttpHeaderFieldValue(
                 request.getHeaders("Content-Type")
@@ -1351,7 +1451,7 @@ public class RestServlet_2 extends HttpServlet {
                 null
             );
         } catch (IOException exception) {
-            throw new ServiceException(exception);
+            throw new SAXException(exception);
         }
     }
     

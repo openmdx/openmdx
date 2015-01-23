@@ -98,11 +98,11 @@ private ClassDef(
       MetaData_1_0 metaData
   ) throws ServiceException {
       this( 
-        (String)classDef.getName(),
-        (String)classDef.getQualifiedName(),
+        classDef.getName(),
+        classDef.getQualifiedName(),
         (String)classDef.objGetValue("annotation"),
         new HashSet(classDef.objGetList("stereotype")),
-        ((Boolean)classDef.isAbstract()).booleanValue(),
+        classDef.isAbstract().booleanValue(),
         lazySuperTypes ? null : getSuperTypes(classDef, model, metaData), 
         classDef.objGetList("allSupertype"),    
         lazySuperTypes ? classDef : null, 

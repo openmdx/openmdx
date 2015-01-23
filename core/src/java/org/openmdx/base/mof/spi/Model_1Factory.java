@@ -186,8 +186,6 @@ public class Model_1Factory {
     /**
      * The model repository content to be restored
      * 
-     * @param model
-     * 
      * @return the URL of the model repository content to be restored
      *  
      * @throws IOException
@@ -273,11 +271,12 @@ public class Model_1Factory {
     ) {
         try {
             final URL modelDump = getModelDump();
-            ModelBuilder_1_0 modelBuilder = Classes.newApplicationInstance(
+            ModelBuilder_1_0 modelBuilder = Classes.newPlatformInstance(
+            	"org.openmdx.application.mof.repository.accessor.ModelBuilder_1",	
                 ModelBuilder_1_0.class, 
-                ModelBuilder_1_0.BUILDER_CLASS_NAME,
                 Boolean.valueOf(xmlValidation),
-                modelDump != null ? modelDump : getModelPackages()
+                modelDump != null ? modelDump : getModelPackages(),
+                Boolean.FALSE // meta-model		
             );
             return modelBuilder.build();
         }  catch (Exception exception) {
@@ -294,6 +293,5 @@ public class Model_1Factory {
             );
         }
     }
-    
-    
+        
 }

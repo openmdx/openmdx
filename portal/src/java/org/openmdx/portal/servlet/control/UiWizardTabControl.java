@@ -59,6 +59,7 @@ import java.net.URLEncoder;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.portal.servlet.Action;
 import org.openmdx.portal.servlet.ApplicationContext;
+import org.openmdx.portal.servlet.CssClass;
 import org.openmdx.portal.servlet.PortalExtension_1_0;
 import org.openmdx.portal.servlet.ViewPort;
 import org.openmdx.portal.servlet.WebKeys;
@@ -233,7 +234,7 @@ public class UiWizardTabControl extends UiOperationTabControl implements Seriali
                     }
                 }
             } else if(!isRevokeShow) {
-                p.write("    <li><a href=\"javascript:void(0)\" id=\"op", Integer.toString(tabId), "\"><span>", this.getName(), "</span></a></li>");                
+                p.write("    <li class=\"", CssClass.disabled.toString(),"\"><a href=\"javascript:void(0)\" id=\"op", Integer.toString(tabId), "\"><span>", this.getName(), "</span></a></li>");                
             }
         }
     }

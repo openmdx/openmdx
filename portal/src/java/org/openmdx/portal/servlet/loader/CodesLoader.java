@@ -70,6 +70,7 @@ import javax.servlet.ServletContext;
 import org.openmdx.application.xml.Importer;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.naming.Path;
+import org.openmdx.base.rest.cci.ObjectRecord;
 import org.openmdx.base.rest.spi.Object_2Facade;
 import org.openmdx.kernel.log.SysLog;
 import org.openmdx.portal.servlet.Codes;
@@ -117,7 +118,7 @@ public class CodesLoader extends Loader {
 		// Iterate all code directories. Each directory may contain segment 
 		// and locale specific code files
 		for(String dir: dirs) {
-			Map<Path,MappedRecord> mergedCodes = new LinkedHashMap<Path,MappedRecord>();
+			Map<Path,ObjectRecord> mergedCodes = new LinkedHashMap<Path,ObjectRecord>();
 			int fallbackLocaleIndex = 0;
 			// Iterate all configured locales
 			for(int j = 0; j < locale.length; j++) {
@@ -131,7 +132,7 @@ public class CodesLoader extends Loader {
 				}
 				try {
 					for(String codeResourcePath: codeResourcePaths) {        
-						Map<Path,MappedRecord> codes = new LinkedHashMap<Path,MappedRecord>();
+						Map<Path,ObjectRecord> codes = new LinkedHashMap<Path,ObjectRecord>();
 						if(!codeResourcePath.endsWith("/")) {
 							SysLog.info("Loading " + codeResourcePath);
 							try {
@@ -145,11 +146,11 @@ public class CodesLoader extends Loader {
 							}
 						}
 						// Merge entries
-						Set<Entry<Path,MappedRecord>> entrySet = j == 0 
+						Set<Entry<Path,ObjectRecord>> entrySet = j == 0 
 							? codes.entrySet() 
 							: mergedCodes.entrySet();
-						for(Iterator<Entry<Path,MappedRecord>> l = entrySet.iterator(); l.hasNext(); ) {
-							Entry<Path,MappedRecord> e = l.next();
+						for(Iterator<Entry<Path,ObjectRecord>> l = entrySet.iterator(); l.hasNext(); ) {
+							Entry<Path,ObjectRecord> e = l.next();
 							// Merge entry
 							if(
 								(j > 0) &&

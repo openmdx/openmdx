@@ -52,10 +52,10 @@ import org.openmdx.base.accessor.cci.SystemAttributes;
 import org.openmdx.base.accessor.view.ObjectView_1_0;
 import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.base.query.Condition;
 import org.openmdx.base.query.ConditionType;
-import org.openmdx.base.query.Filter;
 import org.openmdx.base.query.Quantifier;
+import org.openmdx.base.rest.cci.ConditionRecord;
+import org.openmdx.base.rest.cci.QueryFilterRecord;
 
 /**
  * org::openmdx::state2 aware extent
@@ -110,11 +110,11 @@ public abstract class Extent_1 extends org.openmdx.base.aop1.Extent_1 {
      * @see org.openmdx.base.collection.FilterableMap#subMap(java.lang.Object)
      */
     @Override
-    public Container_1_0 subMap(Filter filter) {
+    public Container_1_0 subMap(QueryFilterRecord filter) {
         if(filter == null) {
             return null;
         } else try {
-            for(Condition filterProperty : filter.getCondition()){
+            for(ConditionRecord filterProperty : filter.getCondition()){
                 if(
                     Quantifier.THERE_EXISTS == filterProperty.getQuantifier() &&
                     SystemAttributes.OBJECT_INSTANCE_OF.equals(filterProperty.getFeature()) &&

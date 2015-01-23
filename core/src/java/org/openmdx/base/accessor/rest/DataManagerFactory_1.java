@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2009-2013, OMEX AG, Switzerland
+ * Copyright (c) 2009-2014, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -47,7 +47,8 @@
  */
 package org.openmdx.base.accessor.rest;
 
-import static org.openmdx.application.dataprovider.cci.SharedConfigurationEntries.*;
+import static org.openmdx.application.dataprovider.cci.SharedConfigurationEntries.DATABASE_CONNECTION_FACTORY_NAME;
+import static org.openmdx.application.dataprovider.cci.SharedConfigurationEntries.DATAPROVIDER_CONNECTION_FACTORY;
 
 import java.net.URL;
 import java.util.Collections;
@@ -81,9 +82,11 @@ import org.openmdx.base.persistence.spi.AbstractPersistenceManagerFactory;
 import org.openmdx.base.persistence.spi.PersistenceManagers;
 import org.openmdx.base.resource.cci.ConnectionFactory;
 import org.openmdx.base.resource.spi.Port;
+import org.openmdx.base.rest.cci.RestConnection;
 import org.openmdx.base.rest.cci.RestConnectionSpec;
 import org.openmdx.base.rest.spi.ConnectionFactoryAdapter;
 import org.openmdx.base.transaction.TransactionAttributeType;
+import org.openmdx.kernel.configuration.PropertiesProvider;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.loading.BeanFactory;
 import org.openmdx.kernel.loading.Resources;
@@ -103,12 +106,13 @@ public class DataManagerFactory_1
      *
      * @param configuration
      */
-    protected DataManagerFactory_1(
+    @SuppressWarnings("unchecked")
+	protected DataManagerFactory_1(
         final Map<?,?> configuration
     ){
         super(configuration);
         try {
-            Properties properties = PropertiesConfigurationProvider.toProperties(configuration);
+            Properties properties = PropertiesProvider.toProperties(configuration);
             Configuration persistenceManagerConfiguration = PropertiesConfigurationProvider.getConfiguration(
                 properties,
                 "org", "openmdx", "jdo", "DataManager"
@@ -144,7 +148,7 @@ public class DataManagerFactory_1
                             PropertiesConfigurationProvider.getConfiguration(
                                 properties,
                                 toSection(plugIns.get(Integer.valueOf(i)))
-                            ).entries()
+                            )
                         ).instantiate();
                     }
                 }
@@ -155,11 +159,11 @@ public class DataManagerFactory_1
                     PropertiesConfigurationProvider.getConfiguration(
                         properties,
                         cachePlugIn.split("\\.")
-                    ).entries()
+                    )
                 ).instantiate();
                 String connectionFactoryName = super.getConnectionFactoryName();
-                Map<Path,Port> destinations = new LinkedHashMap<Path,Port>();
-                Port port = new Switch_2(
+                Map<Path,Port<RestConnection>> destinations = new LinkedHashMap<Path,Port<RestConnection>>();
+                Port<RestConnection> port = new Switch_2(
                     this.cachePlugIn, 
                     destinations
                 );
@@ -174,7 +178,7 @@ public class DataManagerFactory_1
                     supportsLocalTransaction,
                     TransactionAttributeType.REQUIRES_NEW
                 );
-                Map<String,Port> raw = new LinkedHashMap<String,Port>();
+                Map<String,Port<RestConnection>> raw = new LinkedHashMap<String,Port<RestConnection>>();
                 SparseArray<?> restPlugIns = persistenceManagerConfiguration.values(
                     "restPlugIn"
                 );
@@ -187,7 +191,7 @@ public class DataManagerFactory_1
                     int index = i.nextIndex();
                     String pattern = i.next().toString();
                     String restPlugIn = (String) restPlugIns.get(Integer.valueOf(index));
-                    Port destination = raw.get(restPlugIn);
+                    Port<RestConnection> destination = raw.get(restPlugIn);
                     if(destination == null){
                         Configuration plugInConfiguration = PropertiesConfigurationProvider.getConfiguration(
                             properties,
@@ -212,7 +216,7 @@ public class DataManagerFactory_1
                         }
                         destination = BeanFactory.newInstance(
                         	Port.class,
-                            plugInConfiguration.entries()
+                            plugInConfiguration
                         ).instantiate();
                         raw.put(
                             restPlugIn,
@@ -439,8 +443,6 @@ public class DataManagerFactory_1
 
     /**
      * Retrieve the data store cache
-     * 
-     * @param dataManagerFactory the data manager factory
      * 
      * @return the data store cache
      */

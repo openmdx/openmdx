@@ -175,7 +175,7 @@ public class QueryMapper
             //
             this.pw.println("  /**");
             if (
-                Multiplicity.OPTIONAL.toString().equals(featureDef.getMultiplicity())
+                Multiplicity.OPTIONAL.code().equals(featureDef.getMultiplicity())
             ) {
                 this.pw.println(
                     MapperUtils.wrapText(
@@ -218,7 +218,7 @@ public class QueryMapper
             //
             this.pw.println("  /**");
             if (
-                Multiplicity.OPTIONAL.toString().equals(featureDef.getMultiplicity())
+                Multiplicity.OPTIONAL.code().equals(featureDef.getMultiplicity())
             ) {
                 this.pw.println(
                     MapperUtils.wrapText(

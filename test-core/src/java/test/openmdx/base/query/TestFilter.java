@@ -63,7 +63,6 @@ import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.persistence.spi.QueryExtension;
 import org.openmdx.base.query.AnyTypeCondition;
 import org.openmdx.base.query.ConditionType;
-import org.openmdx.base.query.Extension;
 import org.openmdx.base.query.Filter;
 import org.openmdx.base.query.IsBetweenCondition;
 import org.openmdx.base.query.IsGreaterCondition;
@@ -75,6 +74,7 @@ import org.openmdx.base.query.OrderSpecifier;
 import org.openmdx.base.query.Quantifier;
 import org.openmdx.base.query.SortOrder;
 import org.openmdx.base.query.SoundsLikeCondition;
+import org.openmdx.base.rest.cci.QueryExtensionRecord;
 import org.openmdx.base.text.conversion.JavaBeans;
 import org.w3c.spi2.Datatypes;
 
@@ -177,11 +177,11 @@ public class TestFilter {
             ),
             null // extension
         );
-        Extension extension = new QueryExtension();
+        QueryExtensionRecord extension = new QueryExtension();
         extension.setClause("SELECT something FROM somewhere WHERE b0 = ? AND i0 = ? AND i1 = ? AND i2 = ?");
-        extension.setBooleanParam(true);
-        extension.setIntegerParam(1,2,3);
-        filter.getExtension().add(extension);      
+        extension.setBooleanParam(new boolean[]{true});
+        extension.setIntegerParam(new int[]{1,2,3});
+        filter.getExtension().add(extension);
         //
         // CR20018833
         // 

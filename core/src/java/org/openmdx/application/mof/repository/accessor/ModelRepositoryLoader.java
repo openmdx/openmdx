@@ -52,8 +52,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.resource.cci.MappedRecord;
-
 import org.openmdx.application.xml.spi.ImportHelper;
 import org.openmdx.application.xml.spi.ImportMode;
 import org.openmdx.application.xml.spi.MapTarget;
@@ -61,6 +59,7 @@ import org.openmdx.base.accessor.cci.SystemAttributes;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
 import org.openmdx.base.naming.Path;
+import org.openmdx.base.rest.cci.ObjectRecord;
 import org.openmdx.base.rest.spi.Object_2Facade;
 import org.xml.sax.InputSource;
 
@@ -105,13 +104,13 @@ class ModelRepositoryLoader implements ModelLoader {
     }
 
     /**
-     * @param target
+     * @param channel
      * @throws ServiceException
      */
     private void reCreateModelElements(
         Model_1 model
     ) throws ServiceException {
-        for(Map.Entry<Path, MappedRecord> entry : getContent().entrySet()) {
+        for(Map.Entry<Path, ObjectRecord> entry : getContent().entrySet()) {
             if(!"org:omg:model1:Segment".equals(Object_2Facade.getObjectClass(entry.getValue()))){
                 target.put(
                     entry.getKey().getLastSegment().toClassicRepresentation(),
@@ -128,9 +127,9 @@ class ModelRepositoryLoader implements ModelLoader {
      * 
      * @throws ServiceException
      */
-    private Map<Path, MappedRecord> getContent(
+    private Map<Path, ObjectRecord> getContent(
     ) throws ServiceException {
-        Map<Path, MappedRecord> content = new HashMap<Path, MappedRecord>();
+        Map<Path, ObjectRecord> content = new HashMap<Path, ObjectRecord>();
         new ImportHelper().importObjects(
             new MapTarget(content),
             ImportHelper.asSource(new InputSource(this.source)), 

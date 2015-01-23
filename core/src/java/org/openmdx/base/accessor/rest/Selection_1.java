@@ -58,8 +58,8 @@ import org.openmdx.base.accessor.cci.DataObject_1_0;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.persistence.spi.TransientContainerId;
-import org.openmdx.base.query.Condition;
-import org.openmdx.base.query.Extension;
+import org.openmdx.base.rest.cci.ConditionRecord;
+import org.openmdx.base.rest.cci.QueryExtensionRecord;
 import org.openmdx.kernel.jdo.ReducedJDOHelper;
 
 /**
@@ -75,7 +75,7 @@ final class Selection_1 extends AbstractContainer_1 {
      */
     Selection_1(
         Container_1_0 superMap,
-        ObjectFilter selector
+        DataObjectFilter selector
     ){
     	this.container = (Container_1) superMap.container();
         this.superMap = superMap;
@@ -90,7 +90,7 @@ final class Selection_1 extends AbstractContainer_1 {
     /**
      * 
      */
-    private final ObjectFilter objectFilter;
+    private final DataObjectFilter objectFilter;
     
     /**
      * 
@@ -113,7 +113,7 @@ final class Selection_1 extends AbstractContainer_1 {
      * @see org.openmdx.base.accessor.rest.AbstractContainer_1#getFilter()
      */
     @Override
-    protected ObjectFilter getFilter() {
+    protected DataObjectFilter getFilter() {
         return this.objectFilter;
     }
 
@@ -129,7 +129,7 @@ final class Selection_1 extends AbstractContainer_1 {
      * @see org.openmdx.base.accessor.rest.AbstractContainer_1#getConditions()
      */
     @Override
-    protected List<Condition> getConditions() {
+    protected List<ConditionRecord> getConditions() {
         return objectFilter.getDelegate(this.openmdxjdoGetDataObjectManager());
     }
     
@@ -137,7 +137,7 @@ final class Selection_1 extends AbstractContainer_1 {
      * @see org.openmdx.base.accessor.rest.AbstractContainer_1#getExtension()
      */
     @Override
-    protected List<Extension> getExtensions() {
+    protected List<QueryExtensionRecord> getExtensions() {
         return objectFilter.getExtensions();
     }
     

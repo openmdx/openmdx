@@ -51,16 +51,8 @@ package org.openmdx.base.query;
 /**
  * Condition Type
  */
-public enum ConditionType {
+public enum ConditionType implements Code {
     
-// /**
-//   * The operator WHERE_NOT (&#x27CA) expects one or more conditions as &laquo;right&raquo; operand.
-//   */
-//  WHERE_NOT(
-//      (short)-7,
-//      '\u27CA'
-//  ),
-
     /**
      * The operator SOUNDS_UNLIKE (&#x226D) expects one or more values as &laquo;right&raquo; operand.
      */
@@ -168,14 +160,6 @@ public enum ConditionType {
     SOUNDS_LIKE(
         (short)6,
         '\u224D'
-//  ),
-//
-//  /**
-//   * The operator WHERE (&#x007C) expects one or more conditions as &laquo;right&raquo; operand.
-//   */
-//  WHERE(
-//      (short)7,
-//      '\u007C'
     );
 
     /**
@@ -261,7 +245,6 @@ public enum ConditionType {
         short code
     ){
         switch(code){
-//          case -7: return WHERE_NOT;
             case -6: return SOUNDS_UNLIKE;
             case -5: return IS_UNLIKE;
             case -4 : return IS_OUTSIDE;
@@ -275,7 +258,6 @@ public enum ConditionType {
             case +4 : return IS_BETWEEN;
             case +5 : return IS_LIKE;
             case +6 : return SOUNDS_LIKE;
-//          case +7 : return WHERE;
             default: throw new IllegalArgumentException(
                 "Invalid condition type code: " + code
             );

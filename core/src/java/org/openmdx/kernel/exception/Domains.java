@@ -174,11 +174,8 @@ public class Domains {
                     );
                 }
             }
-        } catch (Exception exception) {
-            SysLog.warning(
-                "Could not access resource bundle for domain '" + domainId + "'", 
-                exception
-            );
+        } catch (Exception e) {
+            SysLog.info("Could not access resource bundle for domain '. Applying default." + domainId + "'", e);
         }
         return domain;
     }

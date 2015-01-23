@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2013, OMEX AG, Switzerland
+ * Copyright (c) 2004-2014, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -61,12 +61,13 @@ public class IsBetweenCondition extends Condition {
      */
     public IsBetweenCondition(
     ) {
-        super(
+    	this(
             null, // quantifier
             null, //feature
-            new Object[]{null, null} // values
+            false, // fulfil
+            null, // lower bound
+            null // upper bound
         );
-        this.fulfils = false;
     }
 
     /**
@@ -88,10 +89,10 @@ public class IsBetweenCondition extends Condition {
         super(
             quantifier,
             feature,
+            toConditionType(fulfil),
             lowerBound, 
             upperBound
         );
-        this.fulfils = fulfil;
     }
 
     /**
@@ -99,11 +100,6 @@ public class IsBetweenCondition extends Condition {
      */
     private static final long serialVersionUID = 4050479036709154872L;
 
-    /**
-     * Defines whether the condition shall be <code>true</code> of <code>false</code>
-     */
-    private boolean fulfils;
-        
     /**
      * Clone the condition
      * 
@@ -122,31 +118,41 @@ public class IsBetweenCondition extends Condition {
     }
 
     /**
-     * Tells whether the condition shall be <code>true</code> or <code>false</code>
-     * 
-     * @return <code>true</code> if the condition shall be fulfilled
-     */
-    public boolean isFulfil() {
-        return this.fulfils;
-    }
-
-    /**
      * Defines whether the condition shall be <code>true</code> or <code>false</code>
      * 
      * @param fulful <code>true</code> if the condition shall be fulfilled
      */
     public void setFulfil(
-        boolean fulfil
-    ) {
-        this.fulfils = fulfil;
+		boolean fulfil
+	) {
+    	super.setType(toConditionType(fulfil));
+    }
+    
+    /**
+     * Tells whether the condition shall be <code>true</code> or <code>false</code>
+     * 
+     * @return <code>true</code> if the condition shall be fulfilled
+     */
+    public boolean isFulfil() {
+    	final ConditionType type = getType();
+		switch(type) {
+	    	case IS_BETWEEN : return true;
+	    	case IS_OUTSIDE : return false;
+	    	default: throw new IllegalStateException("An " + getClass().getSimpleName() + " requires another type: " + type);
+		}
     }
 
-    @Override
-    public ConditionType getType(
-    ) {
-        return this.isFulfil() ? ConditionType.IS_BETWEEN : ConditionType.IS_OUTSIDE;
+    /**
+     * Convert the fulfil argument to the underlying condition type
+     * 
+     * @param fulfil
+     * 
+     * @return the corresponding condition type
+     */
+    private static ConditionType toConditionType(boolean fulfil) {
+    	return fulfil ? ConditionType.IS_BETWEEN : ConditionType.IS_OUTSIDE;
     }
-
+    
     /**
      * Retrieve the condition's lower bound
      * 

@@ -47,6 +47,8 @@
  */
 package org.openmdx.application.rest.http.spi;
 
+import javax.resource.ResourceException;
+
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.rest.spi.RestSource;
 import org.openmdx.base.rest.spi.Target;
@@ -62,7 +64,7 @@ public interface Message {
      * @return the request entity body accessor
      */
     Target getRequestBody(
-    ) throws ServiceException;
+    ) throws ResourceException;
     
     /**
      * Set a request or entity header field
@@ -83,7 +85,7 @@ public interface Message {
      * @exception ServiceException
      */
     int execute(
-    ) throws ServiceException;
+    ) throws ResourceException;
     
     /**
      * Retrieve the response entity body accessor
@@ -91,7 +93,7 @@ public interface Message {
      * @return the response entity body accessor
      */
     RestSource getResponseBody(
-    ) throws ServiceException;
+    ) throws ResourceException;
     
     /**
      * Retrieve a response or entity header field

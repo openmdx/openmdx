@@ -108,7 +108,7 @@ public class XMIMapper_1 extends AbstractMapper_1 {
         List<ModelElement_1_0> packagesToExport = this.getMatchingPackages(qualifiedPackageName);
         // Export all matching packages
         for(ModelElement_1_0 currentPackage: packagesToExport) {
-            String currentPackageName = (String)currentPackage.getQualifiedName();
+            String currentPackageName = currentPackage.getQualifiedName();
             // Model as text/xml
             try {
                 ByteArrayOutputStream bs = new ByteArrayOutputStream();
@@ -167,7 +167,7 @@ public class XMIMapper_1 extends AbstractMapper_1 {
         List<String> packagesToExport = new ArrayList<String>();
         for(ModelElement_1_0 packageToExport :  this.getMatchingPackages("%")) {
             packagesToExport.add(
-                (String)packageToExport.getQualifiedName()
+                packageToExport.getQualifiedName()
             );
         }
         this.createXMIModel(
@@ -261,7 +261,7 @@ public class XMIMapper_1 extends AbstractMapper_1 {
 
                         // Attribute
                         if(this.model.isAttributeType(featureDef)) {  
-                            boolean isChangeable = ((Boolean)featureDef.isChangeable()).booleanValue();
+                            boolean isChangeable = featureDef.isChangeable().booleanValue();
                             if(
                                     isPublic && 
                                     (isChangeable || allFeatures) 
@@ -282,7 +282,7 @@ public class XMIMapper_1 extends AbstractMapper_1 {
                             ModelElement_1_0 referencedEnd = this.model.getElement(featureDef.getReferencedEnd());
                             boolean isNavigable = ((Boolean)referencedEnd.objGetValue("isNavigable")).booleanValue();
                             boolean isChangeable = 
-                                ((Boolean)featureDef.isChangeable()).booleanValue() ||
+                                featureDef.isChangeable().booleanValue() ||
                                 //
                                 // CR0004024
                                 //
@@ -335,7 +335,7 @@ public class XMIMapper_1 extends AbstractMapper_1 {
                             ModelElement_1_0 qualifierType = this.model.getDereferencedType(modelAssociationEnd.objGetList("qualifierType").get(j));
                             XMISchemaWriter.writeQualifierAttributes(
                                 qualifierName, 
-                                (String)qualifierType.getQualifiedName(),
+                                qualifierType.getQualifiedName(),
                                 this.model.isPrimitiveType(qualifierType)
                             );    
                         }
@@ -433,12 +433,12 @@ public class XMIMapper_1 extends AbstractMapper_1 {
      */
     private void writePackage(String forPackage, XMIModelMapper XMIModelWriter)
         throws ServiceException {
-        String segmentName = this.model.getElement(forPackage).jdoGetObjectId().get(4);
+        String segmentName = this.model.getElement(forPackage).jdoGetObjectId().getSegment(4).toClassicRepresentation();
         XMIModelWriter.writeSegmentHeader(segmentName);
         for(ModelElement_1_0 elementDef : this.model.getContent()){
             SysLog.trace("modelElement", elementDef.jdoGetObjectId());
             // CR0001066; only write model elements contained in the defining model (segment name)
-            if(segmentName.equals(elementDef.jdoGetObjectId().get(4))) {
+            if(segmentName.equals(elementDef.jdoGetObjectId().getSegment(4).toClassicRepresentation())) {
                 writeElement(XMIModelWriter, elementDef);
             }
         }    
@@ -479,7 +479,7 @@ public class XMIMapper_1 extends AbstractMapper_1 {
         List<String> forPackages
     ) throws ServiceException {
         if(forPackages.size() == 1) {
-            return this.model.getElement(forPackages.get(0)).jdoGetObjectId().get(2);
+            return this.model.getElement(forPackages.get(0)).jdoGetObjectId().getSegment(2).toClassicRepresentation();
         } else {
             return DEFAULT_PROVIDER_NAME;
         }
@@ -497,7 +497,7 @@ public class XMIMapper_1 extends AbstractMapper_1 {
         }
         for(ModelElement_1_0 candidate : this.model.getContent()) {
             Path xri = candidate.jdoGetObjectId();
-            String segmentName  = xri.get(4);
+            String segmentName  = xri.getSegment(4).toClassicRepresentation();
             if(segmentNames.contains(segmentName)) {
                 target.addString(xri.toXRI());
             }

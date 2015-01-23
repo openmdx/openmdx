@@ -51,9 +51,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import org.w3c.spi.Parser;
+import org.openmdx.kernel.text.spi.Parser;
 import org.w3c.spi.PrimitiveTypeParsers;
-import org.w3c.spi.StandardPrimitiveTypeParser;
 
 /**
  * Date
@@ -67,10 +66,6 @@ public class Datatypes {
         // Avoid instantiation
     }
     
-    private static final List<Parser> PRIMITIVE_TYPE_PARSERS = PrimitiveTypeParsers.getParser(
-        StandardPrimitiveTypeParser.getInstance()
-    );
-
     /**
      * Create a value from its string representation 
      * 
@@ -86,18 +81,14 @@ public class Datatypes {
         Class<V> valueClass,
         String string
     ){
-        //
-        // Handle primitive types
-        //
-        for(Parser primitiveTypeParser : PRIMITIVE_TYPE_PARSERS) {
-            if(primitiveTypeParser.handles(valueClass)) {
-                return primitiveTypeParser.parse(valueClass, string);
-            }
-        }
-        //
-        // Handle null-values and non-primitive types
-        // 
-        return create(valueClass, (Object)string);
+    	final Parser primitiveTypeParser = PrimitiveTypeParsers.getExtendedParser();
+    	return primitiveTypeParser.handles(valueClass) ? primitiveTypeParser.parse(
+    		valueClass,
+    		string
+    	) : create(
+    		valueClass, 
+    		(Object)string
+    	);
     }
 
     /**

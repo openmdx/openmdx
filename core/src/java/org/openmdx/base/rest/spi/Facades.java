@@ -128,6 +128,27 @@ public class Facades {
             throw new ServiceException(e);
 		}
     }
+
+    /**
+     * Creates a facade for a new object with the given path and the given 
+     * object class.
+     * 
+     * @param objectId the object's id
+     * @param objectClass the fully qualified model name
+     * 
+     * @return a facade for the newly created object
+     * 
+     * @throws ServiceException
+     */
+    public static Object_2Facade newObject2(
+    	Path objectId,
+    	String objectClass
+    ) throws ResourceException {
+		return Object_2Facade.newInstance(
+	        objectId,
+	        objectClass
+	    );
+    }
     
     /**
      * Wrap a MappedRecord into a query facade

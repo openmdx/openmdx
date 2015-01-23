@@ -90,7 +90,6 @@ import javax.resource.cci.Connection;
 import javax.resource.cci.Interaction;
 import javax.resource.cci.InteractionSpec;
 import javax.resource.cci.LocalTransaction;
-import javax.resource.cci.MappedRecord;
 
 import org.openmdx.base.accessor.cci.DataObjectManager_1_0;
 import org.openmdx.base.accessor.cci.DataObject_1_0;
@@ -101,6 +100,7 @@ import org.openmdx.base.accessor.rest.spi.ManagedConnectionCache_2_0;
 import org.openmdx.base.accessor.spi.PersistenceManager_1_0;
 import org.openmdx.base.aop0.PlugIn_1_0;
 import org.openmdx.base.collection.ConcurrentWeakRegistry;
+import org.openmdx.base.collection.Maps;
 import org.openmdx.base.collection.Registry;
 import org.openmdx.base.collection.Sets;
 import org.openmdx.base.exception.ServiceException;
@@ -122,9 +122,8 @@ import org.openmdx.base.persistence.spi.Transactions;
 import org.openmdx.base.persistence.spi.TransientContainerId;
 import org.openmdx.base.query.Selector;
 import org.openmdx.base.resource.InteractionSpecs;
+import org.openmdx.base.rest.cci.ObjectRecord;
 import org.openmdx.base.rest.cci.RestConnectionSpec;
-import org.openmdx.base.rest.spi.Facades;
-import org.openmdx.base.rest.spi.Object_2Facade;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.exception.Throwables;
 import org.openmdx.kernel.jdo.ReducedJDOHelper;
@@ -138,17 +137,6 @@ public class DataObjectManager_1 implements Marshaller, DataObjectManager_1_0 {
 
     /**
      * Constructor 
-     *
-     * @param factory
-     * @param proxy 
-     * @param principalChain
-     * @param connection
-     * @param connection2 
-     * @param plugIns 
-     * @param optimalFetchSize
-     * @param cacheThreshold
-     * @param connectionSpec 
-     * @throws ResourceException 
      */
     public DataObjectManager_1(
         PersistenceManagerFactory factory,
@@ -319,7 +307,7 @@ public class DataObjectManager_1 implements Marshaller, DataObjectManager_1_0 {
     private final FetchPlan fetchPlan = StandardFetchPlan.newInstance(null);
 
     /**
-     * The Apsect Specific Context instance 
+     * The Aspect Specific Context instance 
      */
     protected final AspectObjectDispatcher aspectSpecificContexts = new AspectObjectDispatcher();
     
@@ -1834,31 +1822,6 @@ public class DataObjectManager_1 implements Marshaller, DataObjectManager_1_0 {
                     } else {
                     	transientObjectId = null;
                     }
-                    for(
-                        int i = id.size();
-                        i > 6;
-                    ){
-                    	i -= 2;
-                    	id = id.getPrefix(i);
-                        DataObject_1_0 anchestor = this.persistentRegistry.get(id);
-                        if(
-                            anchestor != null &&
-                            anchestor.jdoIsNew()
-                        ) {
-                            // throw 
-                            BasicException.initHolder(
-                                new JDOObjectNotFoundException(
-                                    "There exists no object with the given id while one of its anchestors is new",
-                                    BasicException.newEmbeddedExceptionStack(
-                                        BasicException.Code.DEFAULT_DOMAIN,
-                                        BasicException.Code.NOT_FOUND,
-                                        new BasicException.Parameter("xri", xri),
-                                        new BasicException.Parameter("anchestor", id)
-                                    )
-                                )
-                            ).printStackTrace();;
-                        }
-                    }
                     object = new DataObject_1(
                         this,
                         xri,
@@ -1866,11 +1829,39 @@ public class DataObjectManager_1 implements Marshaller, DataObjectManager_1_0 {
                         null, // objectClass
                         false // untouchable
                     );
-                    DataObject_1 newObject = validate ? object.objRetrieve(false, this.getFetchPlan(), null, false, true) : object;
-                    if(object == newObject) {
-                        object = this.persistentRegistry.putUnlessPresent(xri, object); 
+                    if(validate){
+	                    for(
+	                        int i = id.size();
+	                        i > 6;
+	                    ){
+	                    	i -= 2;
+	                    	id = id.getPrefix(i);
+	                        DataObject_1_0 ancestor = this.persistentRegistry.get(id);
+	                        if(
+	                            ancestor != null &&
+	                            ancestor.jdoIsNew()
+	                        ) {
+	                            throw BasicException.initHolder(
+	                                new JDOObjectNotFoundException(
+	                                    "There exists no object with the given id while one of its ancestors is new",
+	                                    BasicException.newEmbeddedExceptionStack(
+	                                        BasicException.Code.DEFAULT_DOMAIN,
+	                                        BasicException.Code.NOT_FOUND,
+	                                        new BasicException.Parameter("xri", xri),
+	                                        new BasicException.Parameter("anchestor", id)
+	                                    )
+	                                )
+	                            );
+	                        }
+	                    }
+	                    final DataObject_1 newObject = object.objRetrieve(false, this.getFetchPlan(), null, false, true);
+	                    if(object == newObject) {
+	                        object = this.persistentRegistry.putUnlessPresent(xri, object); 
+	                    } else {
+	                        this.persistentRegistry.put(xri, object = newObject);
+	                    }
                     } else {
-                        this.persistentRegistry.put(xri, object = newObject);
+                        object = this.persistentRegistry.putUnlessPresent(xri, object); 
                     }
                 } else if(validate) {
                     object.objRetrieve(false, this.getFetchPlan(), null, false, true);
@@ -1937,10 +1928,12 @@ public class DataObjectManager_1 implements Marshaller, DataObjectManager_1_0 {
     // Implements ReplyListener
     //------------------------------------------------------------------------
 
-    DataObject_1_0 receive(MappedRecord record) {
+    DataObject_1_0 receive(ObjectRecord record) {
         try {
-            Object_2Facade facade = Facades.asObject(record);
-            DataObject_1 dataObject = getObjectById(facade.getPath(), false);
+            DataObject_1 dataObject = getObjectById(
+            	record.getResourceIdentifier(), 
+            	false
+            );
             dataObject.postLoad(record);
             return dataObject;
         } catch (ServiceException exception) {
@@ -2190,10 +2183,10 @@ public class DataObjectManager_1 implements Marshaller, DataObjectManager_1_0 {
             else {
                 Map<Class<?>,Object> contexts = this.sharedContexts.get(transactionalObjectId);
                 if(contexts == null) {
-                	contexts = new IdentityHashMap<Class<?>,Object>();
-                    this.sharedContexts.putIfAbsent(
+                	contexts = Maps.putUnlessPresent(
+                	    this.sharedContexts,
                         transactionalObjectId,
-                        contexts
+                        new IdentityHashMap<Class<?>,Object>()
                     );
                 }
                 contexts.put(

@@ -59,6 +59,7 @@ import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.query.SortOrder;
 import org.openmdx.base.rest.cci.MessageRecord;
+import org.openmdx.base.rest.cci.ObjectRecord;
 import org.openmdx.base.rest.spi.Facades;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.id.UUIDs;
@@ -171,7 +172,7 @@ public final class DataproviderRequestProcessor
      * @exception   ServiceException
      *              if no valid request can be added
      */
-    public MappedRecord addGetRequest(
+    public ObjectRecord addGetRequest(
         Path path
     ) throws ServiceException {
         return this.addGetRequest(
@@ -201,7 +202,7 @@ public final class DataproviderRequestProcessor
      * @exception   ServiceException
      *              if no valid request can be added
      */
-    public MappedRecord addGetRequest(
+    public ObjectRecord addGetRequest(
         Path path,
         short attributeSelector,
         AttributeSpecifier[] attributeSpecifier
@@ -269,7 +270,7 @@ public final class DataproviderRequestProcessor
      *              if no valid request can be added
      */
     public MappedRecord addCreateRequest(
-        MappedRecord object
+        ObjectRecord object
     ) throws ServiceException {
         return this.addCreateRequest(
             object,
@@ -299,7 +300,7 @@ public final class DataproviderRequestProcessor
      *              if no valid request can be added
      */
     public MappedRecord addCreateRequest(
-        MappedRecord object,
+        ObjectRecord object,
         short attributeSelector,
         AttributeSpecifier[] attributeSpecifier
     ) throws ServiceException {
@@ -337,7 +338,7 @@ public final class DataproviderRequestProcessor
      *              if no valid request can be added
      */
     public void addCreateRequest(
-        MappedRecord object,
+        ObjectRecord object,
         short attributeSelector,
         AttributeSpecifier[] attributeSpecifier,
         DataproviderReplyListener listener
@@ -358,7 +359,7 @@ public final class DataproviderRequestProcessor
      * Adds a replace request retrieving the typical attributes.
      *
      * @param       object
-     *              thr object to be modified
+     *              the object to be modified
      *
      * @return      the reply
      *
@@ -366,7 +367,7 @@ public final class DataproviderRequestProcessor
      *              if no valid request can be added
      */
     public MappedRecord addReplaceRequest(
-        MappedRecord object
+        ObjectRecord object
     ) throws ServiceException {
         return this.addReplaceRequest(
             object,
@@ -396,7 +397,7 @@ public final class DataproviderRequestProcessor
      *              if no valid request can be added
      */
     public MappedRecord addReplaceRequest(
-        MappedRecord object,
+        ObjectRecord object,
         short attributeSelector,
         AttributeSpecifier[] attributeSpecifier
     ) throws ServiceException {
@@ -434,7 +435,7 @@ public final class DataproviderRequestProcessor
      *              if no valid request can be added
      */
     public void addReplaceRequest(
-        MappedRecord object,
+        ObjectRecord object,
         short attributeSelector,
         AttributeSpecifier[] attributeSpecifier,
         DataproviderReplyListener listener
@@ -797,7 +798,7 @@ public final class DataproviderRequestProcessor
     ) throws ServiceException {
         try {
             if(request.getMessageId() == null) {
-            	request.setPath(request.getPath().getChild(uuidAsString()));
+            	request.setResourceIdentifier(request.getResourceIdentifier().getChild(uuidAsString()));
             }
             this.dispatch(
                 new DataproviderRequest(
@@ -868,7 +869,7 @@ public final class DataproviderRequestProcessor
 
     //------------------------------------------------------------------------
     @Override
-    public Object clone(  
+    public DataproviderRequestProcessor clone(  
     ){
         return new DataproviderRequestProcessor(
             this.serviceHeader,
@@ -889,7 +890,6 @@ public final class DataproviderRequestProcessor
 
     final protected Dataprovider_1_0 dataprovider;
     protected boolean isBatching = false;
-    final protected List<DataproviderReplyListener[]> batchListeners = new ArrayList<DataproviderReplyListener[]>();
     final protected List<DataproviderRequest> workingUnitRequests = new ArrayList<DataproviderRequest>();
     final protected List<DataproviderReplyListener> workingUnitListeners = new ArrayList<DataproviderReplyListener>();
     final protected ServiceHeader serviceHeader;

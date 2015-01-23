@@ -73,15 +73,16 @@ public class ModelUtils {
      * @param forClass is a constant from ModelTypes
      *
      */
-    public static List getallSupertype(
+    public static List<String> getallSupertype(
         String forClass
     ) throws ServiceException {
-        //SysLog.trace("> getallSupertype for " + forClass);
         ModelElement_1_0 modelElement = modelTypeNames.get(forClass);
-        //SysLog.trace("modelElement=" + modelElement);
-        return modelElement == null ? 
-            null : 
-            modelElement.objGetList("allSupertype");
+        if(modelElement == null) {
+        	return null;
+        } else {
+        	final List allSupertype = modelElement.objGetList("allSupertype");
+        	return allSupertype;
+        }
     }
 
     //-------------------------------------------------------------------------
@@ -92,13 +93,16 @@ public class ModelUtils {
      * @param forClass is a constant from ModelTypes
      *
      */
-    public static List getsubtype(
+    public static List<String> getsubtype(
         String forClass
     ) throws ServiceException {
         ModelElement_1_0 modelElement = modelTypeNames.get(forClass);
-        return modelElement == null ? 
-            null : 
-            modelElement.objGetList("subtype");
+        if(modelElement == null) {
+        	return null;
+        } else {
+        	final List subtype = modelElement.objGetList("subtype");
+        	return subtype;
+        }
     }
 
     //-------------------------------------------------------------------------
@@ -113,9 +117,12 @@ public class ModelUtils {
         String forClass
     ) throws ServiceException {
         ModelElement_1_0 modelElement = modelTypeNames.get(forClass);
-        return modelElement == null ? 
-            null : 
-            modelElement.objGetList("supertype");
+        if(modelElement == null) {
+        	return null;
+        } else {
+        	final List supertype = modelElement.objGetList("supertype");
+        	return supertype;
+        }
     }
 
     //-------------------------------------------------------------------------
@@ -160,7 +167,7 @@ public class ModelUtils {
 
         // add modelElement itself
         allSupertype.add(
-            modelElement.jdoGetObjectId().get(0)
+            modelElement.jdoGetObjectId().getSegment(0).toClassicRepresentation()
         );
         modelElement.objGetList("allSupertype").clear();
         modelElement.objGetList("allSupertype").addAll(
@@ -184,12 +191,12 @@ public class ModelUtils {
         ) {
             if(
                 (supertype = (ModelElement_1_0)i.next()).objGetList("allSupertype").contains(
-                    modelElement.jdoGetObjectId().get(0)
+                    modelElement.jdoGetObjectId().getSegment(0).toClassicRepresentation()
                 ) &&
-                !subtypes.contains(supertype.jdoGetObjectId().get(0))
+                !subtypes.contains(supertype.jdoGetObjectId().getSegment(0).toClassicRepresentation())
             ) {
                 subtypes.add(
-                    supertype.jdoGetObjectId().get(0)
+                    supertype.jdoGetObjectId().getSegment(0).toClassicRepresentation()
                 );
             }
         } 

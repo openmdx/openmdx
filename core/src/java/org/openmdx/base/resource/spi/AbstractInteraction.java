@@ -47,6 +47,9 @@
  */
 package org.openmdx.base.resource.spi;
 
+import java.util.Date;
+import java.util.List;
+
 import javax.resource.NotSupportedException;
 import javax.resource.ResourceException;
 import javax.resource.cci.Connection;
@@ -56,7 +59,10 @@ import javax.resource.cci.Record;
 import javax.resource.cci.ResourceWarning;
 import javax.resource.spi.IllegalStateException;
 
+import org.openmdx.base.persistence.spi.PersistenceManagers;
 import org.openmdx.kernel.exception.BasicException;
+import org.openmdx.kernel.log.SysLog;
+import org.w3c.cci2.ImmutableDateTime;
 
 /**
  * Abstract Interaction
@@ -65,7 +71,7 @@ import org.openmdx.kernel.exception.BasicException;
  */
 public abstract class AbstractInteraction<C extends Connection> implements Interaction {
 
-    /**
+	/**
      * Constructor 
      *
      * @param connection
@@ -73,19 +79,37 @@ public abstract class AbstractInteraction<C extends Connection> implements Inter
     protected AbstractInteraction(
         C connection
     ) {
-        this.connection = connection;
+        this(connection, null);
     }
 
     /**
-     * The open flag
+     * Constructor 
+     *
+     * @param connection
      */
-    private volatile boolean closed = false;
+    protected AbstractInteraction(
+        C connection,
+        Interaction delegate
+    ) {
+        this.connection = connection;
+        this.delegate = delegate;
+    }
 
+    /**
+     * The delegate, may be <code>null</code>
+     */
+    private final Interaction delegate;
+    
     /**
      * The open flag
      */
     private volatile boolean opened = false;
     
+    /**
+     * The open flag
+     */
+    private volatile boolean closed = false;
+
     /**
      * The chain of warnings
      */
@@ -95,7 +119,16 @@ public abstract class AbstractInteraction<C extends Connection> implements Inter
      * The <code>Interaction</code>'s owner
      */
     private final C connection;
+    
+    /**
+     * The interaction time
+     */
+    private final Date interactionTime = new ImmutableDateTime(System.currentTimeMillis());
 
+    protected final boolean hasDelegate(){
+    	return this.delegate != null;
+    }
+    
 	/**
      * The interaction is opened lazily
      * 
@@ -143,7 +176,7 @@ public abstract class AbstractInteraction<C extends Connection> implements Inter
     }
     
     /**
-     * Add a warning to the chain
+     * Add a warning to the head of the chain
      * 
      * @param warning
      */
@@ -151,15 +184,30 @@ public abstract class AbstractInteraction<C extends Connection> implements Inter
     protected final void addWarning(
         ResourceWarning warning
     ){
-        if(this.warnings == null) {
-            this.warnings = warning;
-        } else {
-            ResourceWarning chain = this.warnings;
-            while(chain.getLinkedWarning() != null) {
-                chain = chain.getLinkedWarning();
-            }
-            chain.setLinkedWarning(warning);
-        }
+    	if(this.warnings != null) {
+    		warning.setLinkedWarning(this.warnings);    		
+    	} else if(hasDelegate()) {
+			try {
+				warning.setLinkedWarning(this.delegate.getWarnings());
+			} catch (ResourceException exception) {
+				warning.setLinkedWarning(
+					new ResourceWarning(
+						"Unable to retrieve the delegate's warnings", 
+						exception
+					)
+				);
+			} finally {
+				try {
+					this.delegate.clearWarnings();
+				} catch (ResourceException exception) {
+					SysLog.warning(
+						"Unable to clear the delegate's warnings", 
+						exception
+					);
+				}
+			}
+		}
+        this.warnings = warning;
     }
     
     /* (non-Javadoc)
@@ -168,25 +216,36 @@ public abstract class AbstractInteraction<C extends Connection> implements Inter
     public final void clearWarnings(
     ) throws ResourceException {
         this.warnings = null;
+        if(hasDelegate()) {
+	        this.delegate.clearWarnings();
+        }
     }
 
     /* (non-Javadoc)
      * @see javax.resource.cci.Interaction#close()
      */
+    @Override
     public void close(
     ) throws ResourceException {
         assertNotClosed();
+        if(hasDelegate()) {
+	        this.delegate.close();
+        }
         this.closed = true;
     }
 
     /* (non-Javadoc)
      * @see javax.resource.cci.Interaction#execute(javax.resource.cci.InteractionSpec, javax.resource.cci.Record, javax.resource.cci.Record)
      */
+    @Override
     public boolean execute(
         InteractionSpec ispec, 
         Record input, 
         Record output
     ) throws ResourceException {
+    	if(hasDelegate()) {
+    		return this.delegate.execute(ispec, input, output);
+    	}
         throw ResourceExceptions.initHolder(
             new NotSupportedException(
                 "Execution with input and output record is not supported",
@@ -201,10 +260,14 @@ public abstract class AbstractInteraction<C extends Connection> implements Inter
     /* (non-Javadoc)
      * @see javax.resource.cci.Interaction#execute(javax.resource.cci.InteractionSpec, javax.resource.cci.Record)
      */
+    @Override
     public Record execute(
         InteractionSpec ispec, 
         Record input
     ) throws ResourceException {
+    	if(hasDelegate()) {
+    		return this.delegate.execute(ispec, input);
+    	}
         throw ResourceExceptions.initHolder(
             new NotSupportedException(
                 "Execution with input record and return value is not supported",
@@ -220,6 +283,7 @@ public abstract class AbstractInteraction<C extends Connection> implements Inter
     /* (non-Javadoc)
      * @see javax.resource.cci.Interaction#getConnection()
      */
+    @Override
     public final C getConnection(
     ) {
         return this.connection;
@@ -228,9 +292,31 @@ public abstract class AbstractInteraction<C extends Connection> implements Inter
     /* (non-Javadoc)
      * @see javax.resource.cci.Interaction#getWarnings()
      */
+    @Override
     public final ResourceWarning getWarnings(
     ) throws ResourceException {
         return this.warnings;
     }
 
+    /**
+     * Provide the actual principal chain
+     * 
+     * @return the principal chain
+     * 
+     * @throws ResourceException
+     */
+    protected List<String> getPrincipalChain(
+    ) throws ResourceException{
+    	return PersistenceManagers.toPrincipalChain(connection.getMetaData().getUserName());
+    }
+
+    /**
+     * The default value is the date and time when the interaction has been created
+     * 
+     * @return the interaction time
+     */
+    protected Date getInteractionTime(){
+    	return this.interactionTime;
+    }
+    
 }

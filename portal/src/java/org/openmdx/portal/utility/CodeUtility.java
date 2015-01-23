@@ -68,9 +68,9 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.Map.Entry;
 
 import javax.resource.ResourceException;
 import javax.resource.cci.MappedRecord;
@@ -80,6 +80,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.openmdx.application.xml.Importer;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.naming.Path;
+import org.openmdx.base.rest.cci.ObjectRecord;
 import org.openmdx.base.rest.spi.Object_2Facade;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
@@ -178,7 +179,7 @@ public class CodeUtility {
       // en_US files are leading. process all files
       for(int u = 0; u < en_US_files.length; u++) {
           // read files containing locale-specific texts and add to en_US
-          Map<Path,MappedRecord> codes = new LinkedHashMap<Path,MappedRecord>();
+          Map<Path,ObjectRecord> codes = new LinkedHashMap<Path,ObjectRecord>();
           System.out.println("Loading " + en_US_files[u]);
           try {
               Importer.importObjects(
@@ -200,7 +201,7 @@ public class CodeUtility {
 	          try {
 	              System.out.println("Loading " + file.getAbsolutePath());
 	              org.w3c.dom.Document mergedCodes = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(file);
-	              for(Iterator<MappedRecord> i = codes.values().iterator(); i.hasNext(); ) {
+	              for(Iterator<ObjectRecord> i = codes.values().iterator(); i.hasNext(); ) {
 	                  MappedRecord code = i.next();
 	                  Object_2Facade codeFacade;
 	                  try {
@@ -212,8 +213,8 @@ public class CodeUtility {
 	                  Map mergedCode = 
 	                      this.lookupCode(
 	                          mergedCodes, 
-	                          codeFacade.getPath().getParent().getParent().getBase(), 
-	                          codeFacade.getPath().getBase()
+	                          codeFacade.getPath().getParent().getParent().getLastSegment().toClassicRepresentation(), 
+	                          codeFacade.getPath().getLastSegment().toClassicRepresentation()
 	                      );
 	                  for(int j = 1; j < locale.size(); j++) { // skip en_US
 	                      String shortText = (String)mergedCode.get(locale.get(j) + "_short");
@@ -259,8 +260,8 @@ public class CodeUtility {
 	                  if(codes.size() > 0) {
 	                      MappedRecord obj = codes.values().iterator().next();
 	                      Path objPath = Object_2Facade.getPath(obj);
-	                      providerName = objPath.get(2);
-	                      segmentName = objPath.get(4);
+	                      providerName = objPath.getSegment(2).toClassicRepresentation();
+	                      segmentName = objPath.getSegment(4).toClassicRepresentation();
 	                  }
 	                  String s = null;
 	                  s = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
@@ -278,7 +279,7 @@ public class CodeUtility {
 	                      "                <valueContainer>\n";
 	                  w.write(s, 0, s.length());
 	                  boolean firstContainer = true;
-	                  for(Iterator<MappedRecord> i = codes.values().iterator(); i.hasNext(); ) {
+	                  for(Iterator<ObjectRecord> i = codes.values().iterator(); i.hasNext(); ) {
 	                      MappedRecord element = i.next();
 	                      Object_2Facade elementFacade;
 	                      try {
@@ -294,7 +295,7 @@ public class CodeUtility {
 	                                  "                  </org.opencrx.kernel.code1.CodeValueContainer>\n";
 	                              w.write(s, 0, s.length());
 	                          }
-	                          s = "                  <org.opencrx.kernel.code1.CodeValueContainer name=\"" + elementFacade.getPath().getBase() + "\" _operation=\"create\">\n" +
+	                          s = "                  <org.opencrx.kernel.code1.CodeValueContainer name=\"" + elementFacade.getPath().getLastSegment().toClassicRepresentation() + "\" _operation=\"create\">\n" +
 	                              "                    <_object/>\n" +
 	                              "                    <_content>\n" +
 	                              "                      <entry>\n";
@@ -313,7 +314,7 @@ public class CodeUtility {
 	                              String longText = elementFacade.attributeValuesAsList("longText").size() > j
 	                                ? (String)elementFacade.attributeValuesAsList("longText").get(j)
 	                                : "";
-	                              s = "                        <org.opencrx.kernel.code1.CodeValueEntry code=\"" + elementFacade.getPath().getBase() + "\" _operation=\"create\">\n" +
+	                              s = "                        <org.opencrx.kernel.code1.CodeValueEntry code=\"" + elementFacade.getPath().getLastSegment().toClassicRepresentation() + "\" _operation=\"create\">\n" +
 	                                  "                          <_object>\n";
 	                              w.write(s, 0, s.length());
 	                              if(shortText.length() > 0) {
@@ -404,14 +405,14 @@ public class CodeUtility {
 			for(int i = 0; i < locale.size(); i++) {              
 				// Read entries
 				File file =  new File(sourceDir.getAbsolutePath() + File.separatorChar + locale.get(i) + File.separatorChar + en_US_files[u].getName());
-				Map<Path,MappedRecord> codes = new HashMap<Path,MappedRecord>();
+				Map<Path,ObjectRecord> codes = new HashMap<Path,ObjectRecord>();
 				if(file.exists()) {
 					System.out.println("loading " + file);
 					try {
 						Importer.importObjects(
 							Importer.asTarget(codes),
 							Importer.asSource(file)
-							);
+						);
 					} catch(ServiceException e) {
 						e.log();
 						System.out.println("STATUS: " + e.getMessage());
@@ -468,7 +469,7 @@ public class CodeUtility {
 			Map sortedCodes = new TreeMap();
 			for(Iterator i = mergedCodes.entrySet().iterator(); i.hasNext(); ) {
 				Entry entry = (Entry)i.next();
-				String codeKey = ((Path)entry.getKey()).getBase();
+				String codeKey = ((Path)entry.getKey()).getLastSegment().toClassicRepresentation();
 				try {
 					sortedCodes.put(
 						new Integer(codeKey),
@@ -507,7 +508,7 @@ public class CodeUtility {
 				for(Iterator<MappedRecord> i = codeValueContainers.iterator(); i.hasNext(); ) {
 					MappedRecord codeValueContainer = i.next();
 					Path codeValueContainerPath = Object_2Facade.getPath(codeValueContainer);
-					s = "  <CodeValueContainer name=\"" + codeValueContainerPath.getBase() + "\">\n";
+					s = "  <CodeValueContainer name=\"" + codeValueContainerPath.getLastSegment().toClassicRepresentation() + "\">\n";
 					w.write(s, 0, s.length());
 					for(Iterator<MappedRecord> j = sortedCodes.values().iterator(); j.hasNext(); ) {
 						MappedRecord entry = j.next();
@@ -518,8 +519,8 @@ public class CodeUtility {
 						catch (ResourceException e) {
 							throw new ServiceException(e);
 						}
-						if(codeValueContainerPath.getBase().equals(entryFacade.getPath().getParent().getParent().getBase())) {
-							s = "    <CodeValueEntry code=\"" + entryFacade.getPath().getBase() + "\">\n";
+						if(codeValueContainerPath.getLastSegment().toClassicRepresentation().equals(entryFacade.getPath().getParent().getParent().getLastSegment().toClassicRepresentation())) {
+							s = "    <CodeValueEntry code=\"" + entryFacade.getPath().getLastSegment().toClassicRepresentation() + "\">\n";
 							w.write(s, 0, s.length());
 							for(int k = 0; k < locale.size(); k++) {
 								// shortText

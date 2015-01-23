@@ -112,7 +112,7 @@ public class UiOperationTabControl extends UiTabControl implements Serializable 
 			for(org.openmdx.ui1.jmi1.FieldGroup fieldGroup: tabDef.<org.openmdx.ui1.jmi1.FieldGroup>getMember()) {
 				this.fieldGroupControls.add(
 					this.newOperationParamControl(
-						fieldGroup.refGetPath().getBase(),
+						fieldGroup.refGetPath().getLastSegment().toClassicRepresentation(),
 						locale,
 						localeAsIndex,
 						fieldGroup

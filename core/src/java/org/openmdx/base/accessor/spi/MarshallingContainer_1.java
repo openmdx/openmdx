@@ -59,8 +59,8 @@ import org.openmdx.base.accessor.cci.DataObject_1_0;
 import org.openmdx.base.collection.MarshallingMap;
 import org.openmdx.base.collection.MarshallingSequentialList;
 import org.openmdx.base.marshalling.Marshaller;
-import org.openmdx.base.query.Filter;
-import org.openmdx.base.query.OrderSpecifier;
+import org.openmdx.base.rest.cci.FeatureOrderRecord;
+import org.openmdx.base.rest.cci.QueryFilterRecord;
 
 /**
  * A Marshalling Filterable Map
@@ -87,9 +87,9 @@ public class MarshallingContainer_1
 
     private final PersistenceManager persistenceManager;
     
-//  @Override
+    @Override
     public Container_1_0 subMap(
-        Filter filter
+        QueryFilterRecord filter
     ) {
         return new MarshallingContainer_1(
             this.persistenceManager,
@@ -98,7 +98,7 @@ public class MarshallingContainer_1
         );
     }
 
-//  @Override
+    @Override
     public Container_1_0 container() {
         return new MarshallingContainer_1(
             this.persistenceManager,
@@ -125,9 +125,9 @@ public class MarshallingContainer_1
     // Implements Container_1_0
     //------------------------------------------------------------------------
     
-//  @Override
+    @Override
     public List<DataObject_1_0> values(
-        FetchPlan fetchPlan, OrderSpecifier... criteria
+        FetchPlan fetchPlan, FeatureOrderRecord... criteria
     ) {
         return new MarshallingSequentialList<DataObject_1_0>(
             super.marshaller,
@@ -138,7 +138,7 @@ public class MarshallingContainer_1
     /* (non-Javadoc)
      * @see org.openmdx.base.persistence.spi.PersistenceCapableContainer#openmdxjdoGetPersistenceManager()
      */
-//  @Override
+    @Override
     public PersistenceManager openmdxjdoGetDataObjectManager() {
         return this.getDelegate().openmdxjdoGetDataObjectManager();
     }
@@ -146,12 +146,12 @@ public class MarshallingContainer_1
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.cci.Container_1_0#retrieveAll(boolean)
      */
-//  @Override
+    @Override
     public void openmdxjdoRetrieve(FetchPlan fetchPlan) {
         this.getDelegate().openmdxjdoRetrieve(fetchPlan);
     }
 
-//  @Override
+    @Override
     public boolean isRetrieved() {
         return this.getDelegate().isRetrieved();
     }
@@ -159,7 +159,7 @@ public class MarshallingContainer_1
     /* (non-Javadoc)
      * @see org.openmdx.base.persistence.spi.PersistenceCapableContainer#openmdxjdoEvict()
      */
-//  @Override
+    @Override
     public void openmdxjdoEvict(boolean allMembers, boolean allSubSets) {
         this.getDelegate().openmdxjdoEvict(allMembers, allSubSets);
     }
@@ -167,7 +167,7 @@ public class MarshallingContainer_1
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.cci.Container_1_0#refreshAll()
      */
-//  @Override
+    @Override
     public void openmdxjdoRefresh() {
         this.getDelegate().openmdxjdoRefresh();
     }
@@ -180,12 +180,12 @@ public class MarshallingContainer_1
     /* (non-Javadoc)
      * @see org.openmdx.base.persistence.spi.PersistenceCapableContainer#openmdxjdoGetPersistenceManager()
      */
-//  @Override
+    @Override
     public PersistenceManager jdoGetPersistenceManager(){
         return this.persistenceManager;
     }
 
-    //  @Override
+    @Override
     public boolean jdoIsPersistent() {
         return this.getDelegate().jdoIsPersistent();
    }
@@ -193,12 +193,12 @@ public class MarshallingContainer_1
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.cci.Container_1_0#getContainerId()
      */
-//  @Override
+    @Override
     public Object jdoGetObjectId() {
         return this.getDelegate().jdoGetObjectId();
     }
 
-//  @Override
+    @Override
     public Object jdoGetTransactionalObjectId() {
         return this.getDelegate().jdoGetTransactionalObjectId();
     }
@@ -206,7 +206,7 @@ public class MarshallingContainer_1
     /* (non-Javadoc)
      * @see javax.jdo.spi.PersistenceCapable#jdoReplaceStateManager(javax.jdo.spi.StateManager)
      */
-//  @Override
+    @Override
     public void jdoReplaceStateManager(
         StateManager sm
     ) throws SecurityException {
@@ -216,7 +216,7 @@ public class MarshallingContainer_1
     /* (non-Javadoc)
      * @see javax.jdo.spi.PersistenceCapable#jdoProvideField(int)
      */
-//  @Override
+    @Override
     public void jdoProvideField(int fieldNumber) {
         throw new UnsupportedOperationException("Not supported by persistence capable collections");
     }
@@ -224,7 +224,7 @@ public class MarshallingContainer_1
     /* (non-Javadoc)
      * @see javax.jdo.spi.PersistenceCapable#jdoProvideFields(int[])
      */
-//  @Override
+    @Override
     public void jdoProvideFields(int[] fieldNumbers) {
         throw new UnsupportedOperationException("Not supported by persistence capable collections");
     }
@@ -232,7 +232,7 @@ public class MarshallingContainer_1
     /* (non-Javadoc)
      * @see javax.jdo.spi.PersistenceCapable#jdoReplaceField(int)
      */
-//  @Override
+    @Override
     public void jdoReplaceField(int fieldNumber) {
         throw new UnsupportedOperationException("Not supported by persistence capable collections");
     }
@@ -240,7 +240,7 @@ public class MarshallingContainer_1
     /* (non-Javadoc)
      * @see javax.jdo.spi.PersistenceCapable#jdoReplaceFields(int[])
      */
-//  @Override
+    @Override
     public void jdoReplaceFields(int[] fieldNumbers) {
         throw new UnsupportedOperationException("Not supported by persistence capable collections");
     }
@@ -248,7 +248,7 @@ public class MarshallingContainer_1
     /* (non-Javadoc)
      * @see javax.jdo.spi.PersistenceCapable#jdoReplaceFlags()
      */
-//  @Override
+    @Override
     public void jdoReplaceFlags() {
         throw new UnsupportedOperationException("Not supported by persistence capable collections");
     }
@@ -256,7 +256,7 @@ public class MarshallingContainer_1
     /* (non-Javadoc)
      * @see javax.jdo.spi.PersistenceCapable#jdoCopyFields(java.lang.Object, int[])
      */
-//  @Override
+    @Override
     public void jdoCopyFields(Object other, int[] fieldNumbers) {
         throw new UnsupportedOperationException("Not supported by persistence capable collections");
     }
@@ -264,7 +264,7 @@ public class MarshallingContainer_1
     /* (non-Javadoc)
      * @see javax.jdo.spi.PersistenceCapable#jdoMakeDirty(java.lang.String)
      */
-//  @Override
+    @Override
     public void jdoMakeDirty(String fieldName) {
         throw new UnsupportedOperationException("Not supported by persistence capable collections");
     }
@@ -272,7 +272,7 @@ public class MarshallingContainer_1
     /* (non-Javadoc)
      * @see javax.jdo.spi.PersistenceCapable#jdoGetVersion()
      */
-//  @Override
+    @Override
     public Object jdoGetVersion() {
         throw new UnsupportedOperationException("Not supported by persistence capable collections");
     }
@@ -280,7 +280,7 @@ public class MarshallingContainer_1
     /* (non-Javadoc)
      * @see javax.jdo.spi.PersistenceCapable#jdoIsDirty()
      */
-//  @Override
+    @Override
     public boolean jdoIsDirty() {
         throw new UnsupportedOperationException("Not supported by persistence capable collections");
     }
@@ -288,7 +288,7 @@ public class MarshallingContainer_1
     /* (non-Javadoc)
      * @see javax.jdo.spi.PersistenceCapable#jdoIsTransactional()
      */
-//  @Override
+    @Override
     public boolean jdoIsTransactional() {
         throw new UnsupportedOperationException("Not supported by persistence capable collections");
     }
@@ -296,7 +296,7 @@ public class MarshallingContainer_1
     /* (non-Javadoc)
      * @see javax.jdo.spi.PersistenceCapable#jdoIsNew()
      */
-//  @Override
+    @Override
     public boolean jdoIsNew() {
         throw new UnsupportedOperationException("Not supported by persistence capable collections");
     }
@@ -304,7 +304,7 @@ public class MarshallingContainer_1
     /* (non-Javadoc)
      * @see javax.jdo.spi.PersistenceCapable#jdoIsDeleted()
      */
-//  @Override
+    @Override
     public boolean jdoIsDeleted() {
         throw new UnsupportedOperationException("Not supported by persistence capable collections");
     }
@@ -312,7 +312,7 @@ public class MarshallingContainer_1
     /* (non-Javadoc)
      * @see javax.jdo.spi.PersistenceCapable#jdoIsDetached()
      */
-//  @Override
+    @Override
     public boolean jdoIsDetached() {
         throw new UnsupportedOperationException("Not supported by persistence capable collections");
     }
@@ -320,7 +320,7 @@ public class MarshallingContainer_1
     /* (non-Javadoc)
      * @see javax.jdo.spi.PersistenceCapable#jdoNewInstance(javax.jdo.spi.StateManager)
      */
-//  @Override
+    @Override
     public PersistenceCapable jdoNewInstance(StateManager sm) {
         throw new UnsupportedOperationException("Not supported by persistence capable collections");
     }
@@ -328,7 +328,7 @@ public class MarshallingContainer_1
     /* (non-Javadoc)
      * @see javax.jdo.spi.PersistenceCapable#jdoNewInstance(javax.jdo.spi.StateManager, java.lang.Object)
      */
-//  @Override
+    @Override
     public PersistenceCapable jdoNewInstance(StateManager sm, Object oid) {
         throw new UnsupportedOperationException("Not supported by persistence capable collections");
     }
@@ -336,7 +336,7 @@ public class MarshallingContainer_1
     /* (non-Javadoc)
      * @see javax.jdo.spi.PersistenceCapable#jdoNewObjectIdInstance()
      */
-//  @Override
+    @Override
     public Object jdoNewObjectIdInstance() {
         throw new UnsupportedOperationException("Not supported by persistence capable collections");
     }
@@ -344,7 +344,7 @@ public class MarshallingContainer_1
     /* (non-Javadoc)
      * @see javax.jdo.spi.PersistenceCapable#jdoNewObjectIdInstance(java.lang.Object)
      */
-//  @Override
+    @Override
     public Object jdoNewObjectIdInstance(Object o) {
         throw new UnsupportedOperationException("Not supported by persistence capable collections");
     }
@@ -352,7 +352,7 @@ public class MarshallingContainer_1
     /* (non-Javadoc)
      * @see javax.jdo.spi.PersistenceCapable#jdoCopyKeyFieldsToObjectId(java.lang.Object)
      */
-//  @Override
+    @Override
     public void jdoCopyKeyFieldsToObjectId(Object oid) {
         throw new UnsupportedOperationException("Not supported by persistence capable collections");
     }
@@ -360,7 +360,7 @@ public class MarshallingContainer_1
     /* (non-Javadoc)
      * @see javax.jdo.spi.PersistenceCapable#jdoCopyKeyFieldsToObjectId(javax.jdo.spi.PersistenceCapable.ObjectIdFieldSupplier, java.lang.Object)
      */
-//  @Override
+    @Override
     public void jdoCopyKeyFieldsToObjectId(ObjectIdFieldSupplier fm, Object oid) {
         throw new UnsupportedOperationException("Not supported by persistence capable collections");
     }
@@ -368,7 +368,7 @@ public class MarshallingContainer_1
     /* (non-Javadoc)
      * @see javax.jdo.spi.PersistenceCapable#jdoCopyKeyFieldsFromObjectId(javax.jdo.spi.PersistenceCapable.ObjectIdFieldConsumer, java.lang.Object)
      */
-//  @Override
+    @Override
     public void jdoCopyKeyFieldsFromObjectId(
         ObjectIdFieldConsumer fm,
         Object oid

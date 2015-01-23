@@ -47,6 +47,7 @@
  */
 package org.openmdx.base.accessor.rest.spi;
 
+import javax.resource.ResourceException;
 import javax.resource.cci.MappedRecord;
 
 import org.openmdx.base.exception.ServiceException;
@@ -71,7 +72,7 @@ public interface ManagedConnectionCache_2_0 {
     boolean isAvailable(
         Mode mode, 
         Path xri
-    ) throws ServiceException;
+    ) throws ResourceException;
     
     /**
      * Retrieve object from the cache
@@ -83,7 +84,7 @@ public interface ManagedConnectionCache_2_0 {
      */
     MappedRecord peek(
         Path xri
-    ) throws ServiceException;
+    ) throws ResourceException;
     
     /**
      * Offer values to the cache
@@ -97,7 +98,7 @@ public interface ManagedConnectionCache_2_0 {
     boolean put(
         Mode mode,
         ObjectRecord object
-    ) throws ServiceException;    
+    ) throws ResourceException;    
     
     
     //------------------------------------------------------------------------

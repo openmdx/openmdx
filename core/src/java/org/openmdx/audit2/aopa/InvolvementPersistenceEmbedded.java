@@ -48,7 +48,6 @@
 package org.openmdx.audit2.aopa;
 
 import javax.resource.ResourceException;
-import javax.resource.cci.Connection;
 import javax.resource.cci.IndexedRecord;
 import javax.resource.cci.Interaction;
 
@@ -56,6 +55,7 @@ import org.openmdx.application.dataprovider.layer.application.Standard_1;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.resource.spi.RestInteractionSpec;
+import org.openmdx.base.rest.cci.RestConnection;
 import org.openmdx.base.rest.spi.Object_2Facade;
 
 /**
@@ -75,7 +75,7 @@ public class InvolvementPersistenceEmbedded extends Standard_1 {
      */
     @Override
     public Interaction getInteraction(
-        Connection connection
+        RestConnection connection
     ) throws ResourceException {
         return new LayerInteraction(connection);
     }
@@ -97,7 +97,7 @@ public class InvolvementPersistenceEmbedded extends Standard_1 {
          * @throws ResourceException
          */
         public LayerInteraction(
-            Connection connection
+            RestConnection connection
         ) throws ResourceException {
             super(connection);
         }
