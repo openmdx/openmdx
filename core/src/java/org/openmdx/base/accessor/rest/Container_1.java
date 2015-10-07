@@ -51,8 +51,11 @@ import static org.openmdx.base.naming.SpecialResourceIdentifiers.EXTENT_REFERENC
 
 import java.io.Flushable;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -65,12 +68,17 @@ import javax.jdo.PersistenceManager;
 
 import org.openmdx.base.accessor.cci.Container_1_0;
 import org.openmdx.base.accessor.cci.DataObject_1_0;
+import org.openmdx.base.accessor.cci.SystemAttributes;
+import org.openmdx.base.aop1.Aspects;
+import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.AggregationKind;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
 import org.openmdx.base.mof.cci.Model_1_0;
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.persistence.spi.TransientContainerId;
+import org.openmdx.base.query.ConditionType;
+import org.openmdx.base.query.Quantifier;
 import org.openmdx.base.rest.cci.ConditionRecord;
 import org.openmdx.base.rest.cci.QueryExtensionRecord;
 import org.openmdx.base.rest.cci.QueryFilterRecord;
@@ -122,7 +130,7 @@ class Container_1
     private final TransientContainerId transientContainerId;
 
     /**
-     * The owner might be replaced by an aspect's core object
+     * The container's owner
      */
     private final DataObject_1 owner;
 
@@ -271,7 +279,7 @@ class Container_1
         return this.owner.jdoGetPersistenceManager();
     }
 
-    /* (non-Javadoc)
+	/* (non-Javadoc)
      * @see org.openmdx.base.accessor.rest.AbstractContainer_1#container()
      */
     @Override
@@ -637,4 +645,73 @@ class Container_1
         // Nothing to do in this implementation
     }
 
+	/* (non-Javadoc)
+	 * @see org.openmdx.base.accessor.rest.AbstractContainer_1#subMap(org.openmdx.base.rest.cci.QueryFilterRecord)
+	 */
+	@Override
+	public Container_1_0 subMap(QueryFilterRecord filter) {
+		if(isAspectQuery(filter)) {
+			final Object objectId = filter.getCondition().get(1).getValue(0);
+			final Object core;
+			if(objectId instanceof Path) {
+				final Path xri = (Path) objectId;
+				core = get(xri.getLastSegment().toClassicRepresentation());
+			} else {
+				core = jdoGetPersistenceManager().getObjectById(objectId);
+			}
+			if(core instanceof DataObject_1) {
+				final Container_1_0 aspects = ((DataObject_1)core).getAspects(this);
+				if(aspects != null) {
+					new org.openmdx.base.rest.spi.QueryFilterRecord(
+						filter.getCondition().subList(0, 1),
+						filter.getOrderSpecifier(),
+						filter.getExtension()
+					);
+					return aspects.subMap(filter);
+				}
+			}
+		}
+		return super.subMap(filter);
+	}
+
+	private boolean isAspectQuery(
+		QueryFilterRecord filter
+	){
+		if(
+			filter != null &&	
+			filter.getCondition().size() == 2 &&
+			filter.getExtension().isEmpty() &&
+			filter.getOrderSpecifier().isEmpty()
+		){
+			final ConditionRecord aspectConditionCandidate = filter.getCondition().get(0);
+			if(testsEquality(aspectConditionCandidate, SystemAttributes.OBJECT_INSTANCE_OF)){
+				final String qualifiedClassName = (String)aspectConditionCandidate.getValue(0);
+				if(Aspects.isAspectBaseClass(qualifiedClassName)) {
+					final ConditionRecord coreConditionCandidate = filter.getCondition().get(1);
+					if(testsEquality(coreConditionCandidate, "core")){
+						final Object objectId = coreConditionCandidate.getValue(0);
+						if(objectId instanceof Path){
+							Path xri = (Path) objectId;
+							return xri.getParent().equals(jdoGetObjectId());
+						} else {
+							return objectId instanceof UUID;
+						}
+					}
+				}
+			}
+		}
+		return false;
+	}
+
+	private boolean testsEquality(
+		final ConditionRecord condition,
+		final String feature
+	) {
+		return feature.equals(condition.getFeature()) &&
+		Quantifier.THERE_EXISTS == condition.getQuantifier() &&
+		ConditionType.IS_IN == condition.getType() &&
+		condition.getValue().length == 1;
+	}
+	
+	
 }

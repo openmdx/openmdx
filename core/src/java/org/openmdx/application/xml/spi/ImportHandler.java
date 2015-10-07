@@ -49,6 +49,7 @@ package org.openmdx.application.xml.spi;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.math.BigDecimal;
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -64,6 +65,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
 import java.util.StringTokenizer;
+import java.util.logging.Level;
 
 import javax.xml.datatype.Duration;
 import javax.xml.datatype.XMLGregorianCalendar;
@@ -79,7 +81,9 @@ import org.openmdx.base.rest.spi.Object_2Facade;
 import org.openmdx.base.text.conversion.Base64;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.exception.Throwables;
+import org.openmdx.kernel.loading.Resources;
 import org.openmdx.kernel.log.SysLog;
+import org.openmdx.kernel.xml.EntityMapper;
 import org.w3c.spi2.Datatypes;
 import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
@@ -198,6 +202,10 @@ public class ImportHandler extends DefaultHandler {
         "+00:00", "-00:00"
     };
 
+
+    private static final String LEGACY_RESOURCE_RPEFIX = "xri:+resource/";
+    private static final String STANDARD_RESOURCE_PREFIX = "xri://+resource/";
+    
     /**
      * Determine the document URL
      * 
@@ -1157,77 +1165,62 @@ public class ImportHandler extends DefaultHandler {
         return nameComponent.toString();
     }
 
-    /**
-     * @throws SAXException 
-     * 
-     */
     private InputSource getSchemaInputSource(
         String schemaUri
-    ) throws SAXException{
-        URL schemaUrl = null;
-        try {
-            if (this.url != null) {
-                if (
-                    this.url.toString().startsWith("file:") && 
-                    !this.url.toString().startsWith("file:/") && 
-                    !this.url.toString().startsWith("file:./")
-                ) {
-                    schemaUrl = new URL(
-                        new URL("file:./" + this.url.toString().substring(5)), 
-                        schemaUri
-                    );
-                } else {
-                    schemaUrl = new URL(this.url, schemaUri);
-                }
-            }
-            if (
-                schemaUrl != null && 
-                schemaUrl.toString().startsWith("resource:")
-            ) {
-                schemaUrl = new URL(
-                    "xri://+resource/" + schemaUri.substring(schemaUri.lastIndexOf("../") + 3)
-                );
-                SysLog.warning(
-                    "Deprecated URL schema 'resource', use 'xri://+resource/...'!",
-                    "Schema URI '" + schemaUri + "' transformed to URL '" + schemaUrl
-                );
-            } else if (schemaUri.startsWith("xri:+resource/")) {
-                schemaUrl = new URL("xri://+resource/" + schemaUri.substring(14));
-                SysLog.warning(
-                    "Deprecated XRI 1 format 'xri:+resource', use 'xri://+resource/...'!",
-                    "Schema URI '" + schemaUri + "' transformed to URL '" + schemaUrl
-                );
-            } else if (schemaUri.startsWith("xri://+resource/")) {
-                schemaUrl = new URL(schemaUri);
-            } else if (schemaUrl == null) {
-                throw BasicException.initHolder(
-            		new SAXException(
-                        "Schema access failed. xsi:noNamespaceSchemaLocation must be an URL supported by openMDX, i.e. http:/, file:/, xri://+resource/, ...",
-    	            	BasicException.newEmbeddedExceptionStack(
-	                        BasicException.Code.DEFAULT_DOMAIN,
-	                        BasicException.Code.INVALID_CONFIGURATION,
-	                        new BasicException.Parameter("schema URI", schemaUri)
-    	                )
-    	            )
-                );
-            }
-            SysLog.detail("Document URL", this.url);
-            SysLog.detail("Schema URI", schemaUri);
-            SysLog.detail("Schema URL", schemaUrl);
-            return new InputSource(schemaUrl.openStream());
-        } catch (IOException exception) {
-            throw BasicException.initHolder(
-        		new SAXException(
-	        		"Schema access failed",
-	            	BasicException.newEmbeddedExceptionStack(
-	                    exception,
-	                    BasicException.Code.DEFAULT_DOMAIN,
-	                    BasicException.Code.INVALID_CONFIGURATION,
-	                    new BasicException.Parameter("document", this.url),
-	                    new BasicException.Parameter("schema",schemaUrl)
-	                )
-	            )
+    ) throws SAXException {
+        final InputStream schemaSource;
+        if (schemaUri.startsWith(STANDARD_RESOURCE_PREFIX)){
+            schemaSource = Resources.getResourceAsStream(schemaUri.substring(STANDARD_RESOURCE_PREFIX.length()));
+        } else if(schemaUri.startsWith(LEGACY_RESOURCE_RPEFIX)) {
+            SysLog.warning(
+                "Deprecated XRI 1 format 'xri:+resource', use 'xri://+resource/...'!",
+                schemaUri
             );
+            schemaSource = Resources.getResourceAsStream(schemaUri.substring(LEGACY_RESOURCE_RPEFIX.length()));
+        } else {
+            schemaSource = getSchemaSource(schemaUri);
+        }
+        if (schemaSource == null) {
+            throw BasicException.initHolder(
+                new SAXException(
+                    "Schema access failed. xsi:noNamespaceSchemaLocation must be an URL supported by openMDX, i.e. http:/, file:/, xri://+resource/, ...",
+                    BasicException.newEmbeddedExceptionStack(
+                        BasicException.Code.DEFAULT_DOMAIN,
+                        BasicException.Code.INVALID_CONFIGURATION,
+                        new BasicException.Parameter("document", this.url),
+                        new BasicException.Parameter("schema", schemaUri)
+                    )
+                )
+            );
+        }
+        SysLog.log(Level.FINE, "Sys|Providing schema|Document={0}, Schema={1}", this.url, schemaUri);
+        return new InputSource(schemaSource);
+    }
+
+    /**
+     * @param schemaUri
+     * 
+     * @return the schema input stream, or <code>null</code> in case of failure
+     */
+    private InputStream getSchemaSource(String schemaUri) {
+        try {
+            final URL schemaUrl = new URL(getContextURL(), schemaUri);
+            SysLog.detail("Schema URL", schemaUrl);
+            return schemaUrl.openStream();
+        } catch (IOException exception) {
+            return null;
+        }
+    }
+
+    private URL getContextURL()
+        throws MalformedURLException {
+        final String uri = this.url.toString();
+        if (this.url.toString().startsWith("file:")
+            && !this.url.toString().startsWith("file:/")
+            && !this.url.toString().startsWith("file:./")) {
+            return new URL("file:./" + uri.substring(5));
+        } else {
+            return this.url;
         }
     }
 

@@ -310,7 +310,9 @@ org.openmdx.portal.servlet.component.*
 					p.flush();
 %>
 					<iframe name="UserDialogResponse" id="UserDialogResponse" style="display:none;" onload="javascript:var t=this.contentDocument.body.innerHTML;if(t){$('UserDialog').innerHTML=t;};"></iframe>
+					<div id="OperationDialogPlaceHolder" style="display:none;"></div>
 					<div id="UserDialog"><div id="UserDialogWait" class="<%= CssClass.hidden %>" /></div></div>
+					<div id="UserDialogPlaceHolder" style="display:none;"></div>
 					<script language="javascript" type="text/javascript">try {if($('header')){$('OperationDialogEmbedder').click();}}catch(e){};</script>
 					<div id="aPanel">
 <%

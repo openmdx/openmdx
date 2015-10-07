@@ -299,12 +299,14 @@ public class ObjectInspectorServlet extends HttpServlet {
         try {
             if(this.getInitParameter("evaluator") != null) {
                 this.portalExtension = Classes.<PortalExtension_1_0>getApplicationClass(this.getInitParameter("evaluator")).newInstance();
-            }
-            else if(this.getInitParameter("portalExtension") != null) {
+            } else if(this.getInitParameter("portalExtension") != null) {
                 this.portalExtension = Classes.<PortalExtension_1_0>getApplicationClass(this.getInitParameter("portalExtension")).newInstance();
             }
+            if(this.portalExtension instanceof DefaultPortalExtension) {
+            	((DefaultPortalExtension)this.portalExtension).setServletContext(context);
+            }
         } catch(Exception e) {
-        	this.log("loading PortalExtension failed", e);
+        	this.log("Unable to load custom portal extension", e);
         }
         // Reload UI
         this.reloadUi();

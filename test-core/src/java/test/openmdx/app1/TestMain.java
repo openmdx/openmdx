@@ -3800,7 +3800,7 @@ public class TestMain {
                 //
                 personQuery = (PersonQuery) PersistenceHelper.newQuery(
                     super.entityManager.getExtent(Person.class),
-                    segment.refMofId() + "/person/($...)"
+                    segment.refMofId() + "/person/($..)"
                 );
                 //
                 // String Feature IS_LIKE Condition
@@ -3815,7 +3815,7 @@ public class TestMain {
                 personQuery.forAllAssignedAddress().elementOf(
                     PersistenceHelper.getCandidates(
                         super.entityManager.getExtent(Address.class),
-                        segment.refMofId() + "/address/($...)"
+                        segment.refMofId() + "/address/($..)"
                     )
                 );
                 List<Person> maasteer = segment.getExtent(personQuery);
@@ -3843,7 +3843,7 @@ public class TestMain {
                 //
                 personQuery = (PersonQuery) PersistenceHelper.newQuery(
                     super.entityManager.getExtent(Person.class),
-                    segment.refMofId() + "/person/($...)"
+                    segment.refMofId() + "/person/($..)"
                 );
                 personQuery.orderByLastName().ascending();
                 ((Query)personQuery).getFetchPlan().setFetchSize(1000);

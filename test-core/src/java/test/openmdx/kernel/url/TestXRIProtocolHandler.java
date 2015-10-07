@@ -91,7 +91,7 @@ public class TestXRIProtocolHandler {
     protected static URL newURL(
         String uri
     ) throws MalformedURLException{
-        URL url = new URL(uri);
+        URL url = new URL(null, uri);
         assertEquals("Absolute XRI", uri, url.toExternalForm());
         return url;
     }

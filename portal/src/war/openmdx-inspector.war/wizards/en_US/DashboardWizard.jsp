@@ -340,12 +340,13 @@ org.openmdx.base.naming.*
 				</select>
 				<input type="submit" class="<%= CssClass.btn.toString() + " " + CssClass.btnDefault.toString() %>" name="<%= COMMAND_ADD %>" tabindex="9020" value="+" onclick="javascript:$('Command').value=this.name;" />
 				&nbsp;&nbsp;&nbsp;&nbsp;
-				<input type="submit" class="<%= CssClass.btn.toString() + " " + CssClass.btnDefault.toString() %>" name="<%= COMMAND_APPLY %>" id="<%= COMMAND_APPLY %>" tabindex="9000" value="<%= COMMAND_APPLY %>" onclick="javascript:$('Command').value=this.name;" />
+				<input type="submit" class="<%= CssClass.btn.toString() + " " + CssClass.btnDefault.toString() %>" name="<%= COMMAND_APPLY %>" id="<%= COMMAND_APPLY %>" tabindex="9000" value="<%= app.getTexts().getOkTitle() %>" onclick="javascript:$('Command').value=this.name;" />
 				<input type="submit" class="<%= CssClass.btn.toString() + " " + CssClass.btnDefault.toString() %>" name="<%= COMMAND_CANCEL %>" id="<%= COMMAND_CANCEL %> %>" tabindex="9010" value="<%= app.getTexts().getCancelTitle() %>" onclick="javascript:$('Command').value=this.name;" />
 			</td>
 		</tr>
 	</table>
 </form>
+<br />
 <script language="javascript" type="text/javascript">
 	Event.observe('<%= FORM_NAME %>', 'submit', function(event) {
 		$('<%= FORM_NAME %>').request({

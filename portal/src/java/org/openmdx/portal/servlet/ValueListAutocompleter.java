@@ -98,7 +98,7 @@ public class ValueListAutocompleter implements Autocompleter_1_0, Serializable {
     	SysLog.detail("> paint");        
         ApplicationContext app = p.getApplicationContext();
         HtmlEncoder_1_0 htmlEncoder = app.getHtmlEncoder();
-        id = (id == null) || (id.length() == 0)
+        id = (id == null) || id.isEmpty()
             ? fieldName + "[" + tabIndex + "]"
             : id;
         p.write("<select id=\"", id, "\" ", (inputFieldClass == null ? "" : inputFieldClass), " name=\"", id, "\" tabindex=\"", Integer.toString(tabIndex), "\">");
@@ -118,12 +118,23 @@ public class ValueListAutocompleter implements Autocompleter_1_0, Serializable {
                         ? d1.compareTo(d2) == 0 ? "selected" : ""
                         : option.equals(currentValue.getValue(false)) ? "selected" : "";                                                        
                 } else {
-                    selectedModifier = option.equals(currentValue.getValue(false)) ? "selected" : "";                    
+                	Object optionValue = null;
+                	if(option instanceof String[]) {
+                		optionValue = ((String[])option)[0];
+                	} else {
+                		optionValue = option;
+                	}
+                    selectedModifier = optionValue.equals(currentValue.getValue(false)) ? "selected" : "";                    
                 }
             }
             if(option instanceof ObjectReference) {
                 ObjectReference r = (ObjectReference)option;
                 p.write("  <option ", selectedModifier, " value=\"", r.getXRI(), "\">", r.getTitle());
+            } else if(option instanceof String[]) {
+            	String[] optionValueLabel = (String[])option;
+                String valueEncoded = htmlEncoder.encode("" + optionValueLabel[0], false);
+                String labelEncoded = htmlEncoder.encode("" + (optionValueLabel.length == 2 ? optionValueLabel[1] : optionValueLabel[0]), false);
+                p.write("  <option ", selectedModifier, " value=\"", valueEncoded, "\">", (labelEncoded == null || labelEncoded.isEmpty() ? valueEncoded : valueEncoded + " - " + labelEncoded));                
             } else {
                 String optionEncoded = htmlEncoder.encode("" + option, false);
                 p.write("  <option ", selectedModifier, " value=\"", optionEncoded, "\">", optionEncoded);                

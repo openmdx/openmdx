@@ -8,7 +8,7 @@
 =
 = This software is published under the BSD license as listed below.
 = 
-= Copyright (c) 2004-2014, OMEX AG, Switzerland
+= Copyright (c) 2004-2015, OMEX AG, Switzerland
 = All rights reserved.
 = 
 = Redistribution and use in source and binary forms, with or without 
@@ -260,7 +260,7 @@
 		name="java-archives" 
 		depends="deliverables-init,build"
 	>
-    <openmdx:archive
+        <openmdx:archive
 			destfile="${deliver.dir}/lib/openmdx-system.jar"
 			format="jar"
 		>
@@ -270,6 +270,17 @@
 				<attribute name="Implementation-Title" value="openmdx-system for ${build.target.platform}"/>
 			</openmdx:archivemanifest>
 			<openmdx:archivefileset dir="${build.dir}/bin">
+				<patternset refid="openmdx-system.content"/>
+			</openmdx:archivefileset>
+		</openmdx:archive>
+        <openmdx:archive
+			destfile="${deliver.dir}/source-archive/openmdx-system.java-sources.zip"
+			format="zip"
+		>
+			<openmdx:archivefileset dir="${basedir}/src/java">
+				<patternset refid="openmdx-system.content"/>
+			</openmdx:archivefileset>
+			<openmdx:archivefileset dir="${build.dir}/src/java" whenmissing="skip">
 				<patternset refid="openmdx-system.content"/>
 			</openmdx:archivefileset>
 		</openmdx:archive>
@@ -302,13 +313,23 @@
 				<patternset refid="jcache.content"/>
 			</openmdx:archivefileset>
 		</openmdx:archive>
+        <openmdx:archive
+			destfile="${deliver.dir}/source-archive/openmdx-base.java-sources.zip"
+			format="zip"
+		>
+			<openmdx:archivefileset dir="${basedir}/src/java">
+				<patternset refid="openmdx-base.content"/>
+			</openmdx:archivefileset>
+			<openmdx:archivefileset dir="${build.dir}/src/java" whenmissing="skip">
+				<patternset refid="openmdx-base.content"/>
+			</openmdx:archivefileset>
+		</openmdx:archive>
 	</target>
 	
 	<!-- ******************************************************************* -->
 	<!-- * web-archives -->
 	<!-- ******************************************************************* -->
 	<target name="web-archives" depends="deliverables-init,java-archives">
-		<mkdir dir="${deliver.dir}/deployment-unit"/>
 		<openmdx:archive
 			format="war" 
 			destfile="${deliver.dir}/deployment-unit/openmdx-junit.war"
@@ -383,6 +404,7 @@
 				<include name="${build.target.platform}/core/lib/j2ee-apis.jar"/>
 				<include name="${build.target.platform}/core/deployment-unit/*"/>
 				<include name="${build.target.platform}/core/lib/*"/>
+				<include name="${build.target.platform}/core/source-archive/*"/>
 				<include name="${build.target.platform}/core/src/*"/>
 				<exclude name="${build.target.platform}/core/src/*/*.jsl.*"/>
 				<include name="openmdx.version.properties"/>
@@ -429,7 +451,6 @@
 		depends="api-doc-init" 
 		unless="api-doc.is.up-to-date"
 	>
-		<mkdir dir="${build.dir}/doc/api"/>
 		<javadoc 
 			destdir="${build.dir}/doc/api" 
 			author="true" 
@@ -503,7 +524,6 @@ The Java API documentation for ${project.specification.title} has been generated
 ${build.dir}/doc/api/index.html
 ------------------------------------------------------------------------------------------------
 	    </echo>
-		<mkdir dir="${deliver.dir}/doc"/>
 	    <openmdx:archive
 			destfile="${deliver.dir}/doc/${ant.project.name}.javadoc.zip"
 			format="zip"

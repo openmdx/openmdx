@@ -48,6 +48,7 @@
 package org.openmdx.kernel.loading;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 import java.util.Enumeration;
 import java.util.Iterator;
@@ -74,6 +75,24 @@ public class Resources {
     private static final ClassLoader getClassLoader(
     ){
         return Thread.currentThread().getContextClassLoader();
+    }
+    
+    /**
+     * Returns an input stream for reading the specified resource.
+     *
+     * <p> The search order is described in the documentation for {@link
+     * #getResource(String)}.  </p>
+     *
+     * @param  name
+     *         The resource name
+     *
+     * @return  An input stream for reading the resource, or <tt>null</tt>
+     *          if the resource could not be found
+     */
+    public static InputStream getResourceAsStream(
+        String name
+    ) {
+        return getClassLoader().getResourceAsStream(name);
     }
 
     /**
@@ -111,6 +130,7 @@ public class Resources {
         return getMetaInfResources(getClassLoader(), entry);
     }
 
+    
     public static Iterable<URL> getMetaInfResources(
         ClassLoader classLoader,
         String entry
@@ -136,7 +156,7 @@ public class Resources {
             String name
         ){
             this.classLoader = classLoader;
-            this.name = name; // toMetaInfPath(entry);            
+            this.name = name;            
         }
 
         final ClassLoader classLoader;

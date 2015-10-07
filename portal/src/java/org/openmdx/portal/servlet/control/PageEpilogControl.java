@@ -611,10 +611,14 @@ public class PageEpilogControl extends Control implements Serializable {
 	        p.write("          if (scrollTop > 150) {");
 	        p.write("            jQuery('#nav').addClass('OperationMenuFloat');");
 	        p.write("            if(jQuery(window).height() > jQuery('#OperationDialog').height() + 100) {");
+	        p.write("              jQuery('#OperationDialogPlaceHolder').css({'display':'block'});");
+	        p.write("              jQuery('#OperationDialogPlaceHolder').css({'height': jQuery('#OperationDialog').height() + 20});");
 	        p.write("              jQuery('#OperationDialog').addClass('modal-content OperationDialogFloat');");	        
 	        p.write("              jQuery('#OperationDialog').css({'width':'80%'});");
 	        p.write("            }");
 	        p.write("            if(jQuery(window).height() > jQuery('#UserDialog').height() + 100) {");
+	        p.write("              jQuery('#UserDialogPlaceHolder').css({'display':'block'});");
+	        p.write("              jQuery('#UserDialogPlaceHolder').css({'height': jQuery('#UserDialog').height() + 20});");
 	        p.write("              jQuery('#UserDialog').addClass('modal-content OperationDialogFloat');");
 	        p.write("              jQuery('#UserDialog').css({'width':'80%'});");
 	        p.write("            }");
@@ -622,8 +626,10 @@ public class PageEpilogControl extends Control implements Serializable {
 	        p.write("            jQuery('#nav').removeClass('OperationMenuFloat');");
 	        p.write("            jQuery('#OperationDialog').removeClass('modal-content OperationDialogFloat');");
 	        p.write("            jQuery('#OperationDialog').attr('style','');");
+	        p.write("            jQuery('#OperationDialogPlaceHolder').css({'display':'none'});");
 	        p.write("            jQuery('#UserDialog').removeClass('modal-content OperationDialogFloat');");
 	        p.write("            jQuery('#UserDialog').attr('style','');");
+	        p.write("            jQuery('#UserDialogPlaceHolder').css({'display':'none'});");
 	        p.write("          }");
 	        p.write("        }");
 	        p.write("      });");

@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2003-2014, OMEX AG, Switzerland
+ * Copyright (c) 2003-2015, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without 
@@ -197,7 +197,19 @@
 				<patternset refid="openmdx-ldap.content" />
 			</openmdx:archivefileset>
 		</openmdx:archive>
+        <openmdx:archive
+			destfile="${deliver.dir}/source-archive/openmdx-ldap.java-sources.zip"
+			format="zip"
+		>
+			<openmdx:archivefileset dir="${basedir}/src/java">
+				<patternset refid="openmdx-ldap.content" />
+			</openmdx:archivefileset>
+			<openmdx:archivefileset dir="${build.dir}/src/java" whenmissing="skip">
+				<patternset refid="openmdx-ldap.content" />
+			</openmdx:archivefileset>
+		</openmdx:archive>
 	</target>
+	
 	<target name="java-archives" depends="deliverables-init,build,java-archive-ldap">
 		<openmdx:archive destfile="${deliver.dir}/lib/openmdx-security.jar" format="jar" duplicate="preserve">
 			<openmdx:archivemanifest refid="project.manifest" />
@@ -218,6 +230,17 @@
 				<patternset refid="openmdx-security.content" />
 			</openmdx:archivefileset>
 		</openmdx:archive>
+        <openmdx:archive
+			destfile="${deliver.dir}/source-archive/openmdx-security.java-sources.zip"
+			format="zip"
+		>
+			<openmdx:archivefileset dir="${basedir}/src/java">
+				<patternset refid="openmdx-security.content" />
+			</openmdx:archivefileset>
+			<openmdx:archivefileset dir="${build.dir}/src/java" whenmissing="skip">
+				<patternset refid="openmdx-security.content" />
+			</openmdx:archivefileset>
+		</openmdx:archive>
 		<openmdx:archive destfile="${deliver.dir}/lib/openmdx-resource.jar" format="jar" duplicate="preserve">
 			<openmdx:archivemanifest refid="project.manifest" />
 			<openmdx:archivemanifest>
@@ -234,6 +257,17 @@
 				<patternset refid="openmdx-resource.content" />
 			</openmdx:archivefileset>
 		</openmdx:archive>
+        <openmdx:archive
+			destfile="${deliver.dir}/source-archive/openmdx-resource.java-sources.zip"
+			format="zip"
+		>
+			<openmdx:archivefileset dir="${basedir}/src/java">
+				<patternset refid="openmdx-resource.content" />
+			</openmdx:archivefileset>
+			<openmdx:archivefileset dir="${build.dir}/src/java" whenmissing="skip">
+				<patternset refid="openmdx-resource.content" />
+			</openmdx:archivefileset>
+		</openmdx:archive>
 		<openmdx:archive destfile="${deliver.dir}/lib/openmdx-radius.jar" format="jar">
 			<openmdx:archivemanifest refid="project.manifest" />
 			<openmdx:archivemanifest>
@@ -247,6 +281,17 @@
 				<patternset refid="openmdx-radius.content" />
 			</openmdx:archivefileset>
 		</openmdx:archive>
+        <openmdx:archive
+			destfile="${deliver.dir}/source-archive/openmdx-radius.java-sources.zip"
+			format="zip"
+		>
+			<openmdx:archivefileset dir="${basedir}/src/java">
+				<patternset refid="openmdx-radius.content" />
+			</openmdx:archivefileset>
+			<openmdx:archivefileset dir="${build.dir}/src/java" whenmissing="skip">
+				<patternset refid="openmdx-radius.content" />
+			</openmdx:archivefileset>
+		</openmdx:archive>
 		<openmdx:archive destfile="${deliver.dir}/lib/openmdx-pki.jar" format="jar">
 			<openmdx:archivemanifest refid="project.manifest" />
 			<openmdx:archivemanifest>
@@ -254,6 +299,17 @@
 				<attribute name="Implementation-Title" value="openmdx-pki for ${build.target.platform}" />
 			</openmdx:archivemanifest>
 			<openmdx:archivefileset dir="${build.dir}/bin">
+				<patternset refid="openmdx-pki.content" />
+			</openmdx:archivefileset>
+		</openmdx:archive>
+        <openmdx:archive
+			destfile="${deliver.dir}/source-archive/openmdx-pki.java-sources.zip"
+			format="zip"
+		>
+			<openmdx:archivefileset dir="${basedir}/src/java">
+				<patternset refid="openmdx-pki.content" />
+			</openmdx:archivefileset>
+			<openmdx:archivefileset dir="${build.dir}/src/java" whenmissing="skip">
 				<patternset refid="openmdx-pki.content" />
 			</openmdx:archivefileset>
 		</openmdx:archive>
@@ -267,13 +323,23 @@
 				<patternset refid="openmdx-authentication.content" />
 			</openmdx:archivefileset>
 		</openmdx:archive>
+        <openmdx:archive
+			destfile="${deliver.dir}/source-archive/openmdx-authentication.java-sources.zip"
+			format="zip"
+		>
+			<openmdx:archivefileset dir="${basedir}/src/java">
+				<patternset refid="openmdx-authentication.content" />
+			</openmdx:archivefileset>
+			<openmdx:archivefileset dir="${build.dir}/src/java" whenmissing="skip">
+				<patternset refid="openmdx-authentication.content" />
+			</openmdx:archivefileset>
+		</openmdx:archive>
 	</target>
 
 	<!-- ******************************************************************* -->
 	<!-- * Java API Documentation -->
 	<!-- ******************************************************************* -->
-	<target name="api-doc" description="Generate the Java API documentation" depends="api-doc-init" unless="api-doc.is.up-to-date">
-		<mkdir dir="${build.dir}/doc/api" />
+	<target name="api-doc" description="Generate the Java API documentation" depends="deliverables-init,api-doc-init" unless="api-doc.is.up-to-date">
 		<javadoc destdir="${build.dir}/doc/api" author="true" version="true" locale="en" use="true" windowtitle="${project.specification.title} API" doctitle="${project.specification.title} API ${project.specification.version}" maxmemory="512m" excludepackagenames="org.openmdx.test.*">
 			<packageset dir="${basedir}/src/java" />
 			<packageset dir="${build.dir}/src/java" />
@@ -294,7 +360,6 @@ The Java API documentation for ${project.specification.title} has been generated
 ${build.dir}/doc/api/index.html
 ------------------------------------------------------------------------------------------------
 	    </echo>
-		<mkdir dir="${deliver.dir}/doc" />
 		<openmdx:archive destfile="${deliver.dir}/doc/${ant.project.name}.javadoc.zip" format="zip">
 			<openmdx:archivefileset dir="${build.dir}/doc/api">
 				<include name="**" />

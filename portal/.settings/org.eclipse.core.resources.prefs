@@ -1,3 +1,24 @@
-#Mon Feb 20 11:33:56 CET 2006
 eclipse.preferences.version=1
-encoding/<project>=ISO-8859-1
+encoding//src/war/openmdx-inspector.war/WEB-INF/config/texts/bg_BG/texts.properties=UTF-8
+encoding//src/war/openmdx-inspector.war/WEB-INF/config/texts/cs_CZ/texts.properties=UTF-8
+encoding//src/war/openmdx-inspector.war/WEB-INF/config/texts/de_CH/texts.properties=UTF-8
+encoding//src/war/openmdx-inspector.war/WEB-INF/config/texts/el_GR/texts.properties=UTF-8
+encoding//src/war/openmdx-inspector.war/WEB-INF/config/texts/es_CO/texts.properties=UTF-8
+encoding//src/war/openmdx-inspector.war/WEB-INF/config/texts/es_MX/texts.properties=UTF-8
+encoding//src/war/openmdx-inspector.war/WEB-INF/config/texts/fa_IR/texts.properties=UTF-8
+encoding//src/war/openmdx-inspector.war/WEB-INF/config/texts/fi_FI/texts.properties=UTF-8
+encoding//src/war/openmdx-inspector.war/WEB-INF/config/texts/fr_FR/texts.properties=UTF-8
+encoding//src/war/openmdx-inspector.war/WEB-INF/config/texts/hu_HU/texts.properties=UTF-8
+encoding//src/war/openmdx-inspector.war/WEB-INF/config/texts/it_IT/texts.properties=UTF-8
+encoding//src/war/openmdx-inspector.war/WEB-INF/config/texts/ja_JP/texts.properties=UTF-8
+encoding//src/war/openmdx-inspector.war/WEB-INF/config/texts/ko_KR/texts.properties=UTF-8
+encoding//src/war/openmdx-inspector.war/WEB-INF/config/texts/nl_NL/texts.properties=UTF-8
+encoding//src/war/openmdx-inspector.war/WEB-INF/config/texts/pl_PL/texts.properties=UTF-8
+encoding//src/war/openmdx-inspector.war/WEB-INF/config/texts/pt_BR/texts.properties=UTF-8
+encoding//src/war/openmdx-inspector.war/WEB-INF/config/texts/pt_PT/texts.properties=UTF-8
+encoding//src/war/openmdx-inspector.war/WEB-INF/config/texts/ro_RO/texts.properties=UTF-8
+encoding//src/war/openmdx-inspector.war/WEB-INF/config/texts/ru_RU/texts.properties=UTF-8
+encoding//src/war/openmdx-inspector.war/WEB-INF/config/texts/sk_SK/texts.properties=UTF-8
+encoding//src/war/openmdx-inspector.war/WEB-INF/config/texts/sv_SE/texts.properties=UTF-8
+encoding//src/war/openmdx-inspector.war/WEB-INF/config/texts/tr_TR/texts.properties=UTF-8
+encoding//src/war/openmdx-inspector.war/WEB-INF/config/texts/zh_CN/texts.properties=UTF-8

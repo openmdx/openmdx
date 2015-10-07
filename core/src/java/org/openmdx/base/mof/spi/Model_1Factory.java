@@ -82,6 +82,11 @@ public class Model_1Factory {
     private static volatile Model_1_0 model;
 
     /**
+     * Avoid compile time dependency on model builder class
+     */
+    final static private String MODEL_BUILDER_1_CLASS = "org.openmdx.application.mof.repository.accessor.ModelBuilder_1";
+    
+    /**
      * Tells whether the model repository is already prepared
      * 
      * @return <code>true</code> if the model is loaded
@@ -271,8 +276,7 @@ public class Model_1Factory {
     ) {
         try {
             final URL modelDump = getModelDump();
-            final String MODEL_BUILDER_1_CLASS = "org.openmdx.application.mof.repository.accessor.ModelBuilder_1";
-            ModelBuilder_1_0 modelBuilder = null;
+            final ModelBuilder_1_0 modelBuilder;
             if(modelDump == null) {
                 modelBuilder = Classes.newPlatformInstance(
                     MODEL_BUILDER_1_CLASS,	

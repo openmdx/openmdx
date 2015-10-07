@@ -263,6 +263,7 @@ public class Database_1 extends OperationAwareLayer_1 {
             LayerConfigurationEntries.REFERENCE_ID_FORMAT_REF_TABLE
         ));
         this.database.setUseNormalizedReferences(configuration.isEnabled(LayerConfigurationEntries.USE_NORMALIZED_REFERENCES, false));
+        this.database.setNormalizeObjectIds(configuration.isEnabled(LayerConfigurationEntries.USE_NORMALIZED_OBJECT_IDS, false));
         this.database.setSetSizeColumns(configuration.isEnabled(LayerConfigurationEntries.SET_SIZE_COLUMNS, false));
         this.database.setPathMacroName(configuration.<String>values(LayerConfigurationEntries.PATH_MACRO_NAME));
         this.database.setPathMacroValue(configuration.<String>values(LayerConfigurationEntries.PATH_MACRO_VALUE));

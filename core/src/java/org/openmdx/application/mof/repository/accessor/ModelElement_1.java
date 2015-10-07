@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2014, OMEX AG, Switzerland
+ * Copyright (c) 2004-2015, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -1000,6 +1000,21 @@ public class ModelElement_1 implements ModelElement_1_0, Delegating_1_0<ObjectRe
         return reply;
 	}
 
+	/* (non-Javadoc)
+	 * @see org.openmdx.base.mof.cci.ModelElement_1_0#getDereferencedType()
+	 */
+	@Override
+	public ModelElement_1_0 getDereferencedType(
+	) throws ServiceException {
+		if(this.dereferencedType == null) {
+			this.dereferencedType = ModelHelper.getElementType(
+                this,
+                this.model.getModelElements()
+            );	
+		}
+		return this.dereferencedType;
+	}
+
 	//-------------------------------------------------------------------------
     // Variables
     //-------------------------------------------------------------------------
@@ -1037,6 +1052,7 @@ public class ModelElement_1 implements ModelElement_1_0, Delegating_1_0<ObjectRe
     private Path type = null;
     private Path qualifierType = null;
     private String multiplicity = null;
+    private ModelElement_1_0 dereferencedType = null;
     
 }
 

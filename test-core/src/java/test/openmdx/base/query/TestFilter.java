@@ -186,7 +186,7 @@ public class TestFilter {
         // CR20018833
         // 
         XMLDecoder decoder = new XMLDecoder(
-            new URL("xri://+resource/test/openmdx/query/CR20018833.xml").openStream()
+            new URL(null, "xri://+resource/test/openmdx/query/CR20018833.xml", new org.openmdx.kernel.url.protocol.xri.Handler()).openStream()
         );
         Filter filter1 = (Filter) decoder.readObject();
         decoder.close();

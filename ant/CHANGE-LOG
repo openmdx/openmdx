@@ -4,6 +4,41 @@
                     =====================================
 
 ==============================================================================
+Version 2.14.3                                                      2015-09-07
+==============================================================================
+
+0.    KNOWN ISSUES
+
+      NONE
+
+1.    NEW FEATURES
+      
+      NONE
+        
+2.    CHANGES  
+     
+2.0.  CHANGED FEATURES
+ 
+      20039314
+      Optional openmdx-system.jar
+      
+      openmdx-system.jar is only required if one wants to use
+      XRI based URLs with +resource or +zip authorities, such as
+      the TestXRIProtolHandler class.
+      
+2.1.  FIXED BUGS
+
+      NONE
+      
+2.2.  DEPRECATED FEATURES
+
+      NONE
+      
+2.3.  REMOVED FEATURES
+
+      NONE
+
+==============================================================================
 Version 2.11.2                                                      2012-12-23
 ==============================================================================
 

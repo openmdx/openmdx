@@ -399,7 +399,7 @@ public class RestServlet_2 extends HttpServlet {
         ) {
             exceptionStack = exceptionStack.getCause();
         }
-        SysLog.detail("Resource Exception", exceptionStack);
+        SysLog.warning("Resource Exception", exceptionStack);
         response.setStatus(toStatusCode(exceptionStack.getExceptionCode()));
         ServletTarget target = new ServletTarget(request, response);
         restFormatter.format(target, exceptionStack);
@@ -1001,7 +1001,7 @@ public class RestServlet_2 extends HttpServlet {
                                 BasicException.Code.ILLEGAL_STATE,
                                 new BasicException.Parameter(
                                     "AutoCommit",
-                                    isAutoCommitting(request)
+                                    this.isAutoCommitting(request)
                                 )
                             )
                         )
@@ -1010,6 +1010,7 @@ public class RestServlet_2 extends HttpServlet {
             }
         } else {
             Interaction interaction = getInteraction(request);
+            boolean isAutoCommitting = this.isAutoCommitting(request);
             try {
                 final MappedRecord value = parseRequest(request, response);
                 if(org.openmdx.base.rest.spi.ObjectRecord.isCompatible(value)) {
@@ -1032,7 +1033,7 @@ public class RestServlet_2 extends HttpServlet {
                     }
                     IndexedRecord output = (IndexedRecord) execute(
                         interaction,
-                        !isTransactionObjectIdentifier(xri) && isAutoCommitting(request),
+                        !isTransactionObjectIdentifier(xri) && isAutoCommitting,
                         true, 
                         InteractionSpecs.getRestInteractionSpecs(isRetainValues(request)).CREATE, 
                         input
@@ -1059,7 +1060,7 @@ public class RestServlet_2 extends HttpServlet {
                     } else{
                        multivalued = false;
                     }
-                    InteractionSpec get = InteractionSpecs.getRestInteractionSpecs(!this.isAutoCommitting(request) && this.isRetainValues(request)).GET;
+                    InteractionSpec get = InteractionSpecs.getRestInteractionSpecs(!isAutoCommitting && this.isRetainValues(request)).GET;
                     IndexedRecord output = (IndexedRecord) interaction.execute(get, value);
                     if(output == null) {
                        response.setStatus(HttpServletResponse.SC_NO_CONTENT);
@@ -1087,7 +1088,7 @@ public class RestServlet_2 extends HttpServlet {
                     }
                     MappedRecord output = (MappedRecord) execute(  
                         interaction,
-                        !isTransactionCommitIdentifier(xri) && isAutoCommitting(request), 
+                        !isTransactionCommitIdentifier(xri) && isAutoCommitting, 
                         false, 
                         InteractionSpecs.getRestInteractionSpecs(true).INVOKE, 
                         input
@@ -1122,7 +1123,7 @@ public class RestServlet_2 extends HttpServlet {
                 );
             } finally {
                 try {
-                    if(this.isAutoCommitting(request)) {
+                    if(isAutoCommitting) {
                         Connection connection = interaction.getConnection();
                         interaction.close();
                         connection.close();

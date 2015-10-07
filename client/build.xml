@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2013-2014, OMEX AG, Switzerland
+ * Copyright (c) 2013-2015, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without 
@@ -240,6 +240,26 @@
 				<include name="javax/transaction/Synchronization.*" />
 			</openmdx:archivefileset>
 		</openmdx:archive>
+        <openmdx:archive
+			destfile="${deliver.dir}/source-archive/openmdx-client.java-sources.zip"
+			format="zip"
+		>
+			<openmdx:archivefileset dir="${basedir}/src/java">
+				<patternset refid="openmdx-client.content" />
+			</openmdx:archivefileset>
+			<!-- openmdx:archivefileset dir="${build.dir}/src/java" whenmissing="skip">
+				<patternset refid="openmdx-client.content" />
+			</openmdx:archivefileset -->
+			<openmdx:archivefileset src="${project.home}/${build.target.platform}/security/source-archive/openmdx-security.java-sources.zip">
+				<patternset refid="openmdx-common.content" />
+			</openmdx:archivefileset>
+			<openmdx:archivefileset src="${project.home}/${build.target.platform}/core/source-archive/openmdx-system.java-sources.zip">
+				<patternset refid="openmdx-common.content" />
+			</openmdx:archivefileset>
+			<openmdx:archivefileset src="${project.home}/${build.target.platform}/core/source-archive/openmdx-base.java-sources.zip">
+				<patternset refid="openmdx-common.content" />
+			</openmdx:archivefileset>
+		</openmdx:archive>
 		<unzip 
 			src="${deliver.dir}/lib/openmdx-client.jar"
 			dest="${build.dir}/src/resource/org/openmdx/dalvik/metainf"
@@ -264,6 +284,20 @@
 				<patternset refid="openmdx-dalvik.content" />
 			</openmdx:archivefileset>
 			<openmdx:archivefileset src="${project.home}/${build.target.platform}/client/lib/openmdx-client.jar">
+				<patternset refid="openmdx-dalvik.content" />
+			</openmdx:archivefileset>
+		</openmdx:archive>
+        <openmdx:archive
+			destfile="${deliver.dir}/source-archive/openmdx-dalvik.java-sources.zip"
+			format="zip"
+		>
+			<openmdx:archivefileset dir="${basedir}/src/java">
+				<patternset refid="openmdx-dalvik.content" />
+			</openmdx:archivefileset>
+			<openmdx:archivefileset dir="${build.dir}/src/java" whenmissing="skip">
+				<patternset refid="openmdx-dalvik.content" />
+			</openmdx:archivefileset>
+			<openmdx:archivefileset src="${deliver.dir}/source-archive/openmdx-client.java-sources.zip">
 				<patternset refid="openmdx-dalvik.content" />
 			</openmdx:archivefileset>
 		</openmdx:archive>

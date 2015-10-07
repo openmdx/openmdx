@@ -306,9 +306,11 @@
 			<attribute name="Implementation-Vendor-Id" value="${project.vendor.id}"/>
 			<attribute name="Implementation-Version" value="${project.implementation.version}-${build.starttime}"/>
 		</openmdx:archivemanifest>
+		<mkdir dir="${deliver.dir}/source-archive"/>
 		<mkdir dir="${deliver.dir}/deployment-unit"/>
 		<mkdir dir="${deliver.dir}/lib"/>
 		<mkdir dir="${deliver.dir}/src"/>
+		<mkdir dir="${deliver.dir}/doc"/>
 		<mkdir dir="${src.archive.dir}"/>
 		<antcontrib:if>
 			<isset property="unix.distribution"/>
@@ -667,7 +669,6 @@ java.util.logging.ConsoleHandler.formatter = ${openmdx.log.formatter}
 			maxmemory="${build.memory.limit}" 
 			classpathref="${model.transformation.class.path}"
 		>
-			<sysproperty key="java.protocol.handler.pkgs" value="org.openmdx.kernel.url.protocol"/>
 			<sysproperty key="user.language" value="en"/>
 			<sysproperty key="user.region" value="US"/>
 			<sysproperty key="file.encoding" value="Cp1252"/>
@@ -706,7 +707,6 @@ java.util.logging.ConsoleHandler.formatter = ${openmdx.log.formatter}
 			maxmemory="${build.memory.limit}" 
 			classpathref="${model.transformation.class.path}"
 		>
-			<sysproperty key="java.protocol.handler.pkgs" value="org.openmdx.kernel.url.protocol"/>
 			<sysproperty key="user.language" value="en"/>
 			<sysproperty key="user.region" value="US"/>
 			<sysproperty key="file.encoding" value="Cp1252"/>
@@ -730,7 +730,6 @@ java.util.logging.ConsoleHandler.formatter = ${openmdx.log.formatter}
 			maxmemory="${build.memory.limit}" 
 			classpathref="${model.transformation.class.path}"
 		>
-			<sysproperty key="java.protocol.handler.pkgs" value="org.openmdx.kernel.url.protocol"/>
 			<sysproperty key="user.language" value="en"/>
 			<sysproperty key="user.region" value="US"/>
 			<sysproperty key="file.encoding" value="Cp1252"/>
@@ -763,7 +762,6 @@ java.util.logging.ConsoleHandler.formatter = ${openmdx.log.formatter}
 			maxmemory="${build.memory.limit}" 
 			classpathref="${model.transformation.class.path}"
 		>
-			<sysproperty key="java.protocol.handler.pkgs" value="org.openmdx.kernel.url.protocol"/>
 			<sysproperty key="user.language" value="en"/>
 			<sysproperty key="user.region" value="US"/>
 			<sysproperty key="file.encoding" value="Cp1252"/>
@@ -794,7 +792,6 @@ java.util.logging.ConsoleHandler.formatter = ${openmdx.log.formatter}
 			maxmemory="${build.memory.limit}" 
 			classpathref="${model.transformation.class.path}"
 		>
-			<sysproperty key="java.protocol.handler.pkgs" value="org.openmdx.kernel.url.protocol"/>
 			<sysproperty key="user.language" value="en"/>
 			<sysproperty key="user.region" value="US"/>
 			<sysproperty key="file.encoding" value="Cp1252"/>
@@ -858,7 +855,6 @@ java.util.logging.ConsoleHandler.formatter = ${openmdx.log.formatter}
 		<java classname="org.openmdx.base.mof.spi.Model_1DiagramDrawer" fork="true" classpathref="project.bin.classpath">
 			<arg value="src/model/graphviz/diagrams" />
 			<arg value="${build.dir}/model/diagrams/dot" />
-			<sysproperty key="java.protocol.handler.pkgs" value="org.openmdx.kernel.url.protocol" />
 		</java>
 		<copy todir="${album.path}">
 			<fileset dir="${build.dir}/model/diagrams/dot" />
@@ -1498,6 +1494,8 @@ java.util.logging.FileHandler.formatter = ${openmdx.log.formatter}
 	* Java API Documentation
 	********************************************************************-->
 	<target name="api-doc-init" depends="build">
+		<mkdir dir="${build.dir}/doc/api" />
+		<mkdir dir="${deliver.dir}/doc"/>
 		<tstamp>
 			<format property="build.year" pattern="yyyy"/>
 			<format property="build.starttime" pattern="${datetime.data.pattern}" timezone="UTC"/>

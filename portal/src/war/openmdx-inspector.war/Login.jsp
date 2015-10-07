@@ -92,12 +92,9 @@ org.openmdx.portal.servlet.*
 			localeStr = localeStr.substring(0, 5);
 		}
 		String defaultLocale = "en_US";
-		List activeLocales = new ArrayList();
+		Map<String,String> activeLocales = new LinkedHashMap<String,String>();
 %><%@ include file="login-locales.jsp" %><%
-		if(!activeLocales.contains(defaultLocale)) {
-			activeLocales.add(defaultLocale);
-		}
-		if((localeStr == null) || !activeLocales.contains(localeStr)) {
+		if((localeStr == null) || !activeLocales.containsKey(localeStr)) {
 			localeStr = defaultLocale;
 		}
 		request.getSession().setAttribute(org.openmdx.portal.servlet.WebKeys.LOCALE_KEY, localeStr);
@@ -120,6 +117,25 @@ org.openmdx.portal.servlet.*
 			}
 		}
 		localeStr = (String)session.getAttribute(org.openmdx.portal.servlet.WebKeys.LOCALE_KEY);
+		// Load locale-specific texts (overload texts.properties with custom-specific texts)
+		java.util.Properties texts = new java.util.Properties();
+		String textsDir = "/WEB-INF/config/texts/" + localeStr + "/";
+		texts.load(
+			new java.io.InputStreamReader(
+				request.getServletContext().getResourceAsStream(textsDir + "texts.properties"),
+				"UTF-8"
+			)
+		);
+		for(String textsPath: new TreeSet<String>(request.getServletContext().getResourcePaths(textsDir))) {
+			if(!textsPath.endsWith("/texts.properties")) {
+				texts.load(
+					new java.io.InputStreamReader(
+						request.getServletContext().getResourceAsStream(textsPath),
+						"UTF-8"
+					)
+				);
+			}
+		}
 		String timezone = (String)session.getAttribute(org.openmdx.portal.servlet.WebKeys.TIMEZONE_KEY);
 		java.math.BigDecimal initialScale = (java.math.BigDecimal)session.getAttribute(org.openmdx.portal.servlet.WebKeys.INITIAL_SCALE_KEY);
 		boolean loginFailed = "true".equals((String)request.getSession().getAttribute("loginFailed"));
@@ -141,7 +157,7 @@ org.openmdx.portal.servlet.*
 	    String servletUrl = request.getContextPath() + "/" + WebKeys.SERVLET_NAME  + (queryString == null ? "" : "?" + queryString);
 %>
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
-<html dir="<%= dir.get(localeStr) %>">
+<html dir="<%= texts.get("dir") %>">
 <head>
 	<title>Login</title>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
@@ -214,12 +230,12 @@ org.openmdx.portal.servlet.*
                       <td style="width:50px;" />
                       <td style="vertical-align: middle; padding-right:5px;white-space:nowrap;">
                         <ul dir="ltr" id="<%=CssClass.ssfNav %>" class="<%=CssClass.ssfNav %>" style="width:220px;" onmouseover="sfinit(this);">
-                          <li id="flyout"><a href="#"><img src="<%=request.getContextPath()%>/images/panel_down.gif" alt="" style="border:none 0px white;float:right;top:-20px;" /><%= localeStr %> - <%= textsLocale.get(localeStr) %>&nbsp;</a>
+                          <li id="flyout"><a href="#"><img src="<%=request.getContextPath()%>/images/panel_down.gif" alt="" style="border:none 0px white;float:right;top:-20px;" /><%= localeStr %> - <%= texts.get("LocaleTitle") %>&nbsp;</a>
                             <ul onclick="this.style.left='-999em';" onmouseout="this.style.left='';">
 <%
-                              for (int i = 0; i < activeLocales.size(); i++) {
+                              for(String locale: activeLocales.keySet()) {
 %>
-                                <li><a href="#" onclick="javascript:window.location.href='Login.jsp?<%= org.openmdx.portal.servlet.WebKeys.LOCALE_KEY %>=<%= activeLocales.get(i).toString() %>&<%= org.openmdx.portal.servlet.WebKeys.TIMEZONE_KEY %>=<%= URLEncoder.encode(timezone) %>&<%= org.openmdx.portal.servlet.WebKeys.INITIAL_SCALE_KEY %>=<%= initialScale %>';"><span style="font-family:courier;"><%= activeLocales.get(i).toString() %>&nbsp;&nbsp;</span><%= textsLocale.get(activeLocales.get(i)).toString() %></a></li>
+                                <li><a href="#" onclick="javascript:window.location.href='Login.jsp?<%= org.openmdx.portal.servlet.WebKeys.LOCALE_KEY %>=<%= locale %>&<%= org.openmdx.portal.servlet.WebKeys.TIMEZONE_KEY %>=<%= URLEncoder.encode(timezone) %>&<%= org.openmdx.portal.servlet.WebKeys.INITIAL_SCALE_KEY %>=<%= initialScale %>';"><span style="font-family:courier;"><%= locale %>&nbsp;&nbsp;</span><%= activeLocales.get(locale) %></a></li>
 <%
                               }
 %>
@@ -240,19 +256,19 @@ org.openmdx.portal.servlet.*
   </div>
   <div class="container">
     <form role="form" class="form-signin" style="max-width:400px;margin:0 auto;" method="POST" action="j_security_check" accept-charset="UTF-8">
-      <h2 class="form-signin-heading"><%= textsLogin.get(localeStr) %></h2>
-      <input type="text" name="j_username" autofocus="" placeholder="<%= textsUsername.get(localeStr) %>" class="form-control" />
-      <input type="password" name="j_password" placeholder="<%= textsPassword.get(localeStr) %>" class="form-control" />
+      <h2 class="form-signin-heading"><%= texts.get("LoginText") %></h2>
+      <input type="text" name="j_username" autofocus="" placeholder="<%= texts.get("UsernameText") %>" class="form-control" />
+      <input type="password" name="j_password" placeholder="<%= texts.get("PasswordText") %>" class="form-control" />
       <br />
-      <button type="submit" class="btn btn-lg btn-primary btn-block"><%= textsLogin.get(localeStr) %></button>
+      <button type="submit" class="btn btn-lg btn-primary btn-block"><%= texts.get("LoginText") %></button>
       <br />
       <%@ include file="login-note.html" %>      
 <%
       if(loginFailed) {
 %>
         <br />
-        <div class="alert alert-danger">
-          <%= textsLoginFailed.get(localeStr) %>
+        <div class="alert alert-danger text-center">
+          <%= texts.get("LoginFailedText") %>
         </div>
 <%
       }

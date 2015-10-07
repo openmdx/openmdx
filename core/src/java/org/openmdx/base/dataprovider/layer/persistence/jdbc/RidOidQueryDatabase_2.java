@@ -86,8 +86,7 @@ public class RidOidQueryDatabase_2 extends Database_2 {
         String objectIdColumn = joinColumns.get(joinColumns.size() - 1);
         return objectIdColumn.lastIndexOf('.') < 0 ? objectIdColumn : objectIdColumn.substring(objectIdColumn.lastIndexOf('.') + 1);
     }
-    
-    
+        
     /* (non-Javadoc)
 	 * @see org.openmdx.application.dataprovider.layer.persistence.jdbc.AbstractDatabase_1#toMultiValueView(java.lang.String)
 	 */
@@ -103,7 +102,6 @@ public class RidOidQueryDatabase_2 extends Database_2 {
     protected boolean isAspectBaseClass(String qualifiedClassName) {
         return this.enableAspectFilterSubstitution && super.isAspectBaseClass(qualifiedClassName);
     }
-
 
     /* (non-Javadoc)
      * @see org.openmdx.application.dataprovider.layer.persistence.jdbc.AbstractDatabase_1#isBaseClass(java.lang.String)

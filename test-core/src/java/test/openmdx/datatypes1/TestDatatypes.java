@@ -432,19 +432,6 @@ public class TestDatatypes  {
         );
     }
 
-    @Ignore
-    @Test
-    public void testVolatile(
-    ) throws Exception{
-        try {
-            storeDatatypes("Volatile", "Native");
-            retrieveDatatypes("Volatile", "Native");
-        } catch(Exception exception) {
-            SysLog.error("Exception", exception);
-            throw exception;
-        }
-    }
-
     /**
      * Enrich NullPointerException when accessing unset primitive values
      */

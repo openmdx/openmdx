@@ -2,12 +2,12 @@
 <!--
 =======================================================================
 = Description: ant build for openMDX/Portal
-= Copyright:   (c) 2004-2013 OMEX AG
+= Owner:       OMEX AG, Switzerland, http://www.omex.ch
 =======================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2014, OMEX AG, Switzerland
+ * Copyright (c) 2004-2015, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without 
@@ -275,6 +275,17 @@
 				<patternset refid="openmdx-portal.jar.content"/>
 			</openmdx:archivefileset>
 		</openmdx:archive>		
+        <openmdx:archive
+			destfile="${deliver.dir}/source-archive/openmdx-portal.java-sources.zip"
+			format="zip"
+		>
+			<openmdx:archivefileset dir="${basedir}/src/java">
+				<patternset refid="openmdx-portal.jar.content"/>
+			</openmdx:archivefileset>
+			<openmdx:archivefileset dir="${build.dir}/src/java" whenmissing="skip">
+				<patternset refid="openmdx-portal.jar.content"/>
+			</openmdx:archivefileset>
+		</openmdx:archive>
 	</target>
 
 	<!-- ******************************************************************* -->

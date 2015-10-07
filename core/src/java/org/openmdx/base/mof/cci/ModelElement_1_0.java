@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2008, OMEX AG, Switzerland
+ * Copyright (c) 2004-2015, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -149,4 +149,13 @@ public interface ModelElement_1_0 extends DataObject_1_0 {
      */
     public boolean isReference() throws ServiceException;
         
+    /**
+     * CR20020817 support
+     * 
+     * @return the dereferenced type
+     * 
+     * @throws ServiceException 
+     */
+    ModelElement_1_0 getDereferencedType() throws ServiceException;
+    
 }

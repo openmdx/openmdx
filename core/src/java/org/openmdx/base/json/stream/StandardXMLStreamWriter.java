@@ -251,6 +251,7 @@ public class StandardXMLStreamWriter extends AbstractXMLStreamWriter {
 	    Writer writer
 	) {
 		super();
+	    this.serializeAsArray("objects");
 		this.convention = convention;
 		this.writer = writer;
 		this.namespaceContext = convention;
@@ -383,9 +384,17 @@ public class StandardXMLStreamWriter extends AbstractXMLStreamWriter {
 			if(root == null) {
 			    writer.write("null");
 			} else if(root.length() == 1 && root.has("objects")) {
-			    // Optimize JSON in case root has only the key "objects"
-                 JSONObject object = root.getJSONObject("objects");
-                 object.write(writer);
+			    if(root.get("objects") instanceof JSONArray) {
+                    JSONArray array = root.getJSONArray("objects");
+                    if(array.length() == 1) {
+                        array.getJSONObject(0).write(writer);
+                    } else {
+                        array.write(writer);
+                    }
+			    } else {
+	                 JSONObject object = root.getJSONObject("objects");
+	                 object.write(writer);			        
+			    }
 			} else {
 			    root.write(writer);
 			}

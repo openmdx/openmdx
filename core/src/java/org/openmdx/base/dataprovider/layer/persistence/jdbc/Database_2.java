@@ -117,6 +117,7 @@ import org.openmdx.application.dataprovider.spi.EmbeddedFlags;
 import org.openmdx.base.accessor.cci.SystemAttributes;
 import org.openmdx.base.accessor.rest.spi.LockAssertions;
 import org.openmdx.base.accessor.spi.URIMarshaller;
+import org.openmdx.base.aop1.Aspects;
 import org.openmdx.base.collection.TreeSparseArray;
 import org.openmdx.base.dataprovider.layer.persistence.jdbc.datatypes.BooleanMarshaller;
 import org.openmdx.base.dataprovider.layer.persistence.jdbc.datatypes.DurationMarshaller;
@@ -2422,7 +2423,7 @@ public class Database_2 extends AbstractRestPort implements Database_1_0, DataTy
     protected boolean isAspectBaseClass(
         String qualifiedClassName
     ){
-        return ASPECT_BASE_CLASSES.contains(qualifiedClassName);
+        return Aspects.isAspectBaseClass(qualifiedClassName);
     }
     
     /**
@@ -4607,7 +4608,7 @@ public class Database_2 extends AbstractRestPort implements Database_1_0, DataTy
                 dbObject,
                 statedObject,
                 viewAliasName,
-                fixedViewAliasName, 
+                fixedViewAliasName,
                 view1, 
                 true, // joinViewIsPrimary
                 dbObject.getIndexColumn() != null, // joinViewIsIndexed
@@ -4662,8 +4663,8 @@ public class Database_2 extends AbstractRestPort implements Database_1_0, DataTy
                         false, // joinViewIsPrimary
                         dbObject.getIndexColumn() != null, // joinViewIsIndexed
                         joinType,
-                        joinColumn, 
-                        referencedType,  
+                        joinColumn,
+                        referencedType,
                         Collections.singletonList(p), 
                         false, // negate
                         filterValues
@@ -4683,8 +4684,8 @@ public class Database_2 extends AbstractRestPort implements Database_1_0, DataTy
                     false, // joinViewIsPrimary 
                     dbObject.getIndexColumn() != null, // joinViewIsIndexed
                     joinType,
-                    joinColumn, 
-                    referencedType,  
+                    joinColumn,
+                    referencedType,
                     Collections.singletonList(p), 
                     true, // negate
                     filterValues
@@ -5717,21 +5718,21 @@ public class Database_2 extends AbstractRestPort implements Database_1_0, DataTy
         List<String> excludingFilterClauses = new ArrayList<String>();
         List<List<Object>> excludingFilterValues = new ArrayList<List<Object>>();
         this.filterToSqlClauses(
-            conn, 
+            conn,
             joinObject,
             joinWithState,
-            viewAliasName + "v", 
-            view1, 
-            view2, 
+            viewAliasName + "v",
+            view1,
+            view2,
             JoinType.SPECIFIED_COLUMN_WITH_OBJECT_ID, 
-            joinColumn, 
+            viewAliasName + "v." + dbObject.getObjectIdColumn().get(0),
             false,  // stickyViewAlias
-            referencedType, 
-            allFilterProperties, 
-            primaryFilterProperties, 
-            includingFilterClauses, 
-            includingFilterValues, 
-            excludingFilterClauses, 
+            referencedType,
+            allFilterProperties,
+            primaryFilterProperties,
+            includingFilterClauses,
+            includingFilterValues,
+            excludingFilterClauses,
             excludingFilterValues
         );
         boolean isForAll = filterProperty.quantor() == Quantifier.FOR_ALL.code();
@@ -8448,15 +8449,6 @@ public class Database_2 extends AbstractRestPort implements Database_1_0, DataTy
      * The large object marshaller instance
      */
     private LargeObjectMarshaller largeObjectMarshaller;
-
-    /**
-     * The list of aspect base classes may be extended by overriding isAspectBaseClass()
-     */
-    private static final Collection<String> ASPECT_BASE_CLASSES = Arrays.asList(
-        "org:openmdx:state2:DateState",
-        "org:openmdx:state2:DateTimeState",
-        "org:openmdx:role2:Role"
-    );
         
 }
 

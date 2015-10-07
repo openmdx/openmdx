@@ -1030,24 +1030,31 @@ public class DataObject_1
     		}
     	} else {
 	        Container_1 container = this.getContainer(false);
-	        if(container != null && (this.aspects == null || container != this.aspects.container())) {
-	            this.aspects = container.subMap(
-	                new Filter(
-	                    new IsInCondition(
-	                        Quantifier.THERE_EXISTS,
-	                        "core",
-	                        true, // IS_IN,
-	                        this.jdoIsPersistent() ? this.jdoGetObjectId() : this.jdoGetTransactionalObjectId()
-	                    )
-	                )
-	            );
-	            if(this.aspects instanceof Selection_1 && isTransientOrNew()) {
-	                ((Selection_1)this.aspects).markAsEmpty();
-	            }
+	        if(container != null) {
+	        	getAspects(container);
 	        }
     	}
         return this.aspects;
     }
+
+    Container_1_0 getAspects(Container_1 container) {
+		if(this.aspects == null || container != this.aspects.container()) {
+		    this.aspects = container.subMap(
+		        new Filter(
+		            new IsInCondition(
+		                Quantifier.THERE_EXISTS,
+		                "core",
+		                true, // IS_IN,
+		                this.jdoIsPersistent() ? this.jdoGetObjectId() : this.jdoGetTransactionalObjectId()
+		            )
+		        )
+		    );
+		    if(this.aspects instanceof Selection_1 && isTransientOrNew()) {
+		        ((Selection_1)this.aspects).markAsEmpty();
+		    }
+		}
+		return this.aspects;
+	}
 
     boolean isQualified(){
         return this.jdoIsPersistent() || this.qualifier != null;

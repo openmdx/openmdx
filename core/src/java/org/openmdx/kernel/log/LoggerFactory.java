@@ -93,14 +93,7 @@ public class LoggerFactory {
             if(logVersion) { 
                 // No synchronization necessary as Logging the version twice wouldn't hurt
                 logVersion = false;
-                logger.log(
-                    Level.INFO, 
-                    "Sys|openMDX Version|openmdx-system: {0}, openmdx-base: {1}", 
-                    new Object[]{
-                        org.openmdx.system.Version.getImplementationVersion(), 
-                        org.openmdx.base.Version.getImplementationVersion()
-                    }
-                );
+                SysLog.info("openMDX base implementation version", org.openmdx.base.Version.getImplementationVersion());
             }
         }
         return logger;

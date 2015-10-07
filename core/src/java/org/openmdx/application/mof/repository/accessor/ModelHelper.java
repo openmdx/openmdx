@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2013, OMEX AG, Switzerland
+ * Copyright (c) 2013-2015, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -80,7 +80,7 @@ class ModelHelper extends org.openmdx.base.mof.cci.ModelHelper {
         ModelElement_1_0 elementDef,
         Map<String,ModelElement_1_0> elements
     ) throws ServiceException {
-        Object type = elementDef.getType();
+        Path type = elementDef.getType();
         if(type == null) {
             throw new ServiceException(
                 ModelExceptions.MODEL_DOMAIN,

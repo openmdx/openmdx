@@ -2049,8 +2049,7 @@ public class DataObjectManager_1 implements Marshaller, DataObjectManager_1_0 {
                 if(getModel().isInstanceof(object, "org:openmdx:base:Aspect")) {
                     DataObject_1_0 core = (DataObject_1_0) object.objGetValue("core");
                     if(core != null) {
-                        Path corePath = core.jdoGetObjectId(); 
-                        return corePath;
+                        return core.jdoGetObjectId();
                     }
                 }
             }

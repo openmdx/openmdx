@@ -94,6 +94,7 @@ import javax.jdo.JDOHelper;
 import javax.jdo.PersistenceManager;
 import javax.jmi.reflect.RefObject;
 import javax.jmi.reflect.RefStruct;
+import javax.servlet.ServletContext;
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeConstants;
 import javax.xml.datatype.DatatypeFactory;
@@ -839,7 +840,7 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
     				obj.toString();
     	return s;
     }
-    
+
 	/* (non-Javadoc)
 	 * @see org.openmdx.portal.servlet.PortalExtension_1_0#getTitle(java.lang.Object, org.openmdx.portal.servlet.Action, java.lang.String, org.openmdx.portal.servlet.ApplicationContext)
 	 */
@@ -3087,7 +3088,8 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
 	) throws ServiceException {		
 		if(
 			qualifiedReferenceName != null &&
-			featureName != null
+			featureName != null &&
+			app.getCodes() != null
 		) {
 			Model_1_0 model = app.getModel();
 			ModelElement_1_0 referenceDef = null;
@@ -3120,6 +3122,20 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
 		return null;
 	}
 
+	/**
+	 * @return the servletContext
+	 */
+	public ServletContext getServletContext() {
+		return servletContext;
+	}
+
+	/**
+	 * @param servletContext the servletContext to set
+	 */
+	public void setServletContext(ServletContext servletContext) {
+		this.servletContext = servletContext;
+	}
+
     //-------------------------------------------------------------------------
     // Members
     //-------------------------------------------------------------------------
@@ -3141,19 +3157,16 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
      * @return a Datatype Factory Instance
      */
     protected static synchronized DatatypeFactory xmlDatatypeFactory(
-    ){
+    ) {
         if(DefaultPortalExtension.datatypeFactory == null) try {
         	DefaultPortalExtension.datatypeFactory = DatatypeFactory.newInstance();
-        } 
-        catch (DatatypeConfigurationException e) {
+        } catch (DatatypeConfigurationException e) {
           throw new RuntimeServiceException(e);
         }
         return DefaultPortalExtension.datatypeFactory;
     }
-    
+
     private ActionFactory actionFactory;
     private ControlFactory controlFactory;
-
+    private ServletContext servletContext;
 }
-
-//--- End of File -----------------------------------------------------------

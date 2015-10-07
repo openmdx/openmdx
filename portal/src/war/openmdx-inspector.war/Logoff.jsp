@@ -75,8 +75,27 @@ request.setCharacterEncoding("UTF-8");
 	if(localeStr != null && localeStr.length() > 5) {
 		localeStr = localeStr.substring(0, 5);
 	}
+	// Load locale-specific texts (overload texts.properties with custom-specific texts)
+	java.util.Properties texts = new java.util.Properties();
+	String textsDir = "/WEB-INF/config/texts/" + localeStr + "/";
+	texts.load(
+		new java.io.InputStreamReader(
+			request.getServletContext().getResourceAsStream(textsDir + "texts.properties"),
+			"UTF-8"
+		)
+	);
+	for(String textsPath: new TreeSet<String>(request.getServletContext().getResourcePaths(textsDir))) {
+		if(!textsPath.endsWith("/texts.properties")) {
+			texts.load(
+				new java.io.InputStreamReader(
+					request.getServletContext().getResourceAsStream(textsPath),
+					"UTF-8"
+				)
+			);
+		}
+	}	
 	String defaultLocale = "en_US";
-	List activeLocales = new ArrayList();
+	Map<String,String> activeLocales = new LinkedHashMap<String,String>();
 	boolean wasAuthenticated = false;
 
 	if(request.getSession().getAttribute("ObjectInspectorServlet.ApplicationContext") != null) {
@@ -136,7 +155,7 @@ request.setCharacterEncoding("UTF-8");
   <%@ include file="login-header.html" %>
 </div>
 
-	&nbsp;&nbsp;<input class="<%= CssClass.submit %>" type="submit" name="button" value="<%= textsLogin.get(localeStr) == null ? "Login" :  textsLogin.get(localeStr) %>" onclick="javascript:window.location.href='Login.jsp';" >
+	&nbsp;&nbsp;<input class="<%= CssClass.submit %>" type="submit" name="button" value="<%= texts.get("LoginText") == null ? "Login" :  texts.get("LoginText") %>" onclick="javascript:window.location.href='Login.jsp';" >
 
 </body>
 </html>

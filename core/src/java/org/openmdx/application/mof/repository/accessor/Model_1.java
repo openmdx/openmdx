@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2014, OMEX AG, Switzerland
+ * Copyright (c) 2004-2015, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -1053,20 +1053,7 @@ public class Model_1 implements Marshaller, Model_1_0 {
     public ModelElement_1_0 getElementType(
         ModelElement_1_0 elementDef
     ) throws ServiceException {
-    	ModelElement_1_0 elementType = null;
-    	try {
-	        elementType = (ModelElement_1_0)elementDef.objGetValue("dereferencedType");
-    	} catch (IndexOutOfBoundsException exception) {
-    		SysLog.info("CR20020817", exception.getMessage());
-    	}
-        if(elementType == null) {
-            elementType = ModelHelper.getElementType(
-                elementDef,
-                this.modelElements
-            );
-            elementDef.objSetValue("dereferencedType",elementType);
-        }
-        return elementType; 
+    	return elementDef.getDereferencedType();
     }
 
     //-------------------------------------------------------------------------
