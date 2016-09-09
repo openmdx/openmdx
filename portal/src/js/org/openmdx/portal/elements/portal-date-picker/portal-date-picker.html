@@ -1,0 +1,191 @@
+<!-- 
+====================================================================
+Project:     openMDX/Portal, http://www.openmdx.org/
+Description: portal-date-picker
+Owner:       OMEX AG, Switzerland, http://www.omex.ch
+====================================================================
+
+This software is published under the BSD license
+as listed below.
+
+Copyright (c) 2015, OMEX AG, Switzerland
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or
+without modification, are permitted provided that the following
+conditions are met:
+
+* Redistributions of source code must retain the above copyright
+notice, this list of conditions and the following disclaimer.
+
+* Redistributions in binary form must reproduce the above copyright
+notice, this list of condition and the following disclaimer in
+the documentation and/or other materials provided with the
+distribution.
+
+* Neither the name of the openMDX team nor the names of its
+contributors may be used to endorse or promote products derived
+from this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
+CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
+INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS
+BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED
+TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+POSSIBILITY OF SUCH DAMAGE.
+
+------------------
+
+This product includes software developed by the Apache Software
+Foundation (http://www.apache.org/).
+
+-->
+<link rel="import" href="../../../../polymer/components/polymer/polymer.html">
+<link rel="import" href="../../../../polymer/components/iron-icons/iron-icons.html"/>
+<link rel="import" href="../../../../polymer/components/iron-flex-layout/classes/iron-flex-layout.html">
+<link rel="import" href="../../../../polymer/components/paper-button/paper-button.html"/>
+<link rel="import" href="../../../../polymer/components/paper-card/paper-card.html"/>
+<script src="../../../../polymer/components/moment/moment.js"></script>
+<dom-module id="portal-date-picker">
+	<link rel="import" type="css" href="portal-date-picker.css">
+	<template>
+		<paper-card elevation="0">
+			<div class="card-header horizontal justified layout">
+				<paper-button on-tap="back12"><iron-icon icon="icons:arrow-back"></iron-icon></paper-button>							
+				<paper-button on-tap="back1"><iron-icon icon="icons:chevron-left"></iron-icon></paper-button>							
+				<paper-button>{{formattedMonth}} {{formattedYear}}</paper-button>
+				<paper-button on-tap="next1"><iron-icon icon="icons:chevron-right"></iron-icon></paper-button>
+				<paper-button on-tap="next12"><iron-icon icon="icons:arrow-forward"></iron-icon></paper-button>
+			</div>
+			<div class="card-content">
+				<div class="calendar vertical justified layout">
+					<div class="horizontal justified layout">
+						<template is="dom-repeat" items="{{getFormattedDaysOfWeek(locale)}}" as="dayOfWeek">						
+					  		<paper-button class="calendar-week-day">{{dayOfWeek}}</paper-button>
+						</template>
+					</div>
+					<template is="dom-repeat" items="{{calendar}}" as="row" index-as="r">
+				    	<div class="horizontal justified layout">
+					  		<template is="dom-repeat" items="{{row}}" as="dayOfMonth" index-as="c"> 
+					    		<paper-button on-tap="selectDate" class$="{{getDayClass(value, dayOfMonth)}}">{{dateFormat(dayOfMonth, 'DD')}}</paper-button>
+					    	</template>
+					    </div>
+					</template>
+				</div>
+			</div>
+		</paper-card>
+	</template>
+</dom-module>
+<script>
+Polymer({
+	is: 'portal-date-picker',
+	properties: {
+		value: {
+			type: Date,
+			notify: true
+		},
+		locale: {
+			type: String,
+			value: "en"
+		},
+		calendar: {
+			type: Array
+		},
+		firstDayOfMonth: {
+			type: Object,
+			notify: true
+		},
+		formattedYear: {
+			type: String
+		},
+		formattedMonth: {
+			type: String
+		}
+	},
+	ready: function() {
+	    this.firstDayOfMonth = moment({"year": this.value.getFullYear(), "month": this.value.getMonth(), "day": 1});
+	    this.moveMonth(0);
+	},
+	getDayClass: function(value, dayOfMonth) {
+		if(value != null && dayOfMonth.year() == value.getFullYear() && dayOfMonth.month() == value.getMonth() && dayOfMonth.date() == value.getDate()) {
+			return "calendar-day-selected";
+		} else if(dayOfMonth.month() == this.firstDayOfMonth.month()) {
+			return "calendar-day-in-range";
+		} else {
+			return "calendar-day-out-of-range";
+		}
+	},
+	getFormattedDaysOfWeek: function(locale) {
+		var formattedDaysOfWeek = [0, 1, 2, 3, 4, 5, 6].map(function(n) {return moment().day(n).format("dd");});
+	    return formattedDaysOfWeek;
+	},
+    dateFormat: function(date, format) {
+        if(!date) {
+        	return '';
+      	}
+        var value = null;
+        if(date instanceof Date) {
+        	value = moment(date);
+        } else {
+        	value = date;
+        }
+      	value.locale(this.locale);
+      	return value.format(format);
+    },
+	moveMonth: function(n) {
+		this.firstDayOfMonth.add(n, "months");
+	    this.formattedMonth = this.dateFormat(this.firstDayOfMonth, "MMMM");
+	    this.formattedYear = this.dateFormat(this.firstDayOfMonth, "YYYY");
+	    this.buildCalendar();
+	},
+	back1: function() {
+	    this.moveMonth(-1);
+	},
+	back12: function() {
+	    this.moveMonth(-12);
+	},
+	next1: function() {
+	    this.moveMonth(1);
+	},
+	next12: function() {
+	    this.moveMonth(12);
+	},
+	selectDate: function(event) {
+		var selectedDate = event.model.dayOfMonth;
+		var newValue = new Date(this.value);
+	    newValue.setYear(selectedDate.year());
+	    newValue.setMonth(selectedDate.month());
+	    newValue.setDate(selectedDate.date());
+	    this.set("value", newValue);
+	},
+	buildCalendar: function() {
+	    var calendar = [];
+	    var columns = [];
+	    var dayOfMonth = this.firstDayOfMonth.clone();
+	    while(dayOfMonth.day() > moment.localeData().firstDayOfWeek()) {
+	    	dayOfMonth.add(-1, "days");
+	    }
+	    for(var i = 0; i < 6 * 7; i++) {
+			if(i % 7 == 0) {
+				if(columns.length > 0) {
+					calendar.push(columns);					
+				}
+				columns = [];
+			}
+			columns.push(dayOfMonth);
+			dayOfMonth = dayOfMonth.clone().add(1, 'days'); 
+	    }
+		if(columns.length > 0) {
+			calendar.push(columns);					
+		}
+	    this.set("calendar", calendar);
+	}
+});
+</script>

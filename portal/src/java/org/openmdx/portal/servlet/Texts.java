@@ -116,23 +116,27 @@ public class Texts implements Serializable {
 			String key
 		) {
 			String object = null;
-			if(Texts.this.codes != null) {
-                Map<String,Short> shortTexts = Texts.this.codes.getShortTextByText(
-					TextsBundle.class.getSimpleName(), 
-					this.localeIndex, 
-					true // includeAll
-				);
-				if(shortTexts != null && shortTexts.get(key) != null) {
-                    Map<Short,String> longTexts = Texts.this.codes.getLongTextByCode(
+			try {
+				if(Texts.this.codes != null) {
+	                Map<String,Short> shortTexts = Texts.this.codes.getShortTextByText(
 						TextsBundle.class.getSimpleName(), 
 						this.localeIndex, 
 						true // includeAll
 					);
-					object = longTexts.get(shortTexts.get(key));
+					if(shortTexts != null && shortTexts.get(key) != null) {
+	                    Map<Short,String> longTexts = Texts.this.codes.getLongTextByCode(
+							TextsBundle.class.getSimpleName(), 
+							this.localeIndex, 
+							true // includeAll
+						);
+						object = longTexts.get(shortTexts.get(key));
+					}
 				}
-			}
-			return object != null ? object :
-				(String)this.defaultBundle.getObject(key);
+				if(object == null) {
+					object = (String)this.defaultBundle.getObject(key);
+				}
+			} catch(Exception e) {}
+			return object;
 		}
 
 		/* (non-Javadoc)

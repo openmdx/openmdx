@@ -3,16 +3,13 @@
  *
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: build.xml,v 1.109 2011/12/27 18:09:19 wfro Exp $
  * Description: Ant master build file for openMDX
- * Revision:    $Revision: 1.109 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2011/12/27 18:09:19 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2013, OMEX AG, Switzerland
+ * Copyright (c) 2004-2016, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without 
@@ -107,9 +104,6 @@
 		<condition property="include.test-core">
 			<available file="build.xml" filepath="test-core"/>
 		</condition>
-		<condition property="include.test-security">
-			<available file="build.xml" filepath="test-security"/>
-		</condition>
 	</target>
 	
 	<!-- ******************************************************************* -->
@@ -135,8 +129,5 @@
 	</target>
 	<target name="-test-core" depends="-init" if="include.test-core">
 		<ant inheritAll="false" dir="test-core"  target="${ant.target}"/>
-	</target>    
-	<target name="-test-security" depends="-init" if="include.test-security">
-		<ant inheritAll="false" dir="test-security" target="${ant.target}"/>
 	</target>    
 </project>

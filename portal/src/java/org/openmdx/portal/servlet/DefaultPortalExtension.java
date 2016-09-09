@@ -1,14 +1,14 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Description: DefaultEvaluator
+ * Description: DefaultPortalExtension
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
  * ====================================================================
  *
  * This software is published under the BSD license
  * as listed below.
  * 
- * Copyright (c) 2004-2007, OMEX AG, Switzerland
+ * Copyright (c) 2004-2016, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -100,6 +100,7 @@ import javax.xml.datatype.DatatypeConstants;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 
+import org.oasisopen.jmi1.RefContainer;
 import org.openmdx.base.accessor.cci.SystemAttributes;
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
 import org.openmdx.base.accessor.jmi.cci.RefPackage_1_0;
@@ -195,6 +196,7 @@ import org.openmdx.portal.servlet.databinding.CompositeObjectDataBinding;
 import org.openmdx.portal.servlet.databinding.JoiningListDataBinding;
 import org.openmdx.portal.servlet.databinding.ReferencedObjectDataBinding;
 import org.openmdx.portal.servlet.wizards.WizardDefinitionFactory;
+import org.openmdx.ui1.jmi1.ElementDefinition;
 import org.openmdx.ui1.jmi1.FeatureDefinition;
 import org.openmdx.ui1.jmi1.StructuralFeatureDefinition;
 
@@ -1353,11 +1355,11 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
     				}        
     				Attribute feature = (Attribute)fieldMap.get(featureName);
     				if(feature != null) {        
-    					// parse parameter values
+    					// Parse parameter values
     					List<Object> parameterValues = Arrays.asList((Object[])parameterMap.get(key));
-    					StringTokenizer tokenizer = parameterValues.isEmpty() ? 
-    						new StringTokenizer("", "\n", true) : 
-    							new StringTokenizer((String)parameterValues.get(0), "\n\r", true);
+    					StringTokenizer tokenizer = parameterValues.isEmpty() 
+    						? new StringTokenizer("", "\n", true) 
+    						: new StringTokenizer((String)parameterValues.get(0), "\n\r", true);
 						List<String> newValues = new ArrayList<String>();
 						boolean lastTokenIsNewLine = false;
 						while(tokenizer.hasMoreTokens()) {
@@ -1389,16 +1391,19 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
 								featureName, 
 								feature
 							);
-							// text
+							// String
 							if(valueHolder instanceof TextValue) {
-								SysLog.trace("Text value " + feature.getLabel(), Arrays.asList((Object[])parameterMap.get(key)));        
 								// single-valued
 								if(valueHolder.isSingleValued()) {
 									// cat all values into one string
-									String multiLineString = parameterValues.isEmpty() ?
-										"" :
-											(String)parameterValues.get(0);
+									String multiLineString = parameterValues.isEmpty() 
+										? "" 
+										: (String)parameterValues.get(0);
 									String mappedNewValue = multiLineString.length() == 0 ? null : multiLineString;
+									// Mandatory attributes must not be set to null
+									mappedNewValue = valueHolder.isOptionalValued() || mappedNewValue != null 
+										? mappedNewValue 
+										: "";
 									if(target instanceof RefObject) {
 										Object value = this.getValue(
 											valueHolder, 
@@ -1410,8 +1415,10 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
 											valueHolder, 
 											target, 
 											featureName, 
-											value instanceof Collection ? Collections.singletonList(mappedNewValue) : mappedNewValue, 
-												app
+											value instanceof Collection 
+												? Collections.singletonList(mappedNewValue) 
+												: mappedNewValue, 
+											app
 										);
 										modifiedFeatures.add(featureName);
 									} else {
@@ -1457,19 +1464,20 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
 									modifiedFeatures.add(featureName);
 								}
 							} else if(valueHolder instanceof NumberValue) {
-								// number
+								// Number
 								// single-valued
 								if(valueHolder.isSingleValued()) {
 									try {    
 										BigDecimal number = app.parseNumber(
-											newValues.isEmpty() ? "" : ((String)newValues.get(0)).trim()
+											newValues.isEmpty() 
+												? "" 
+												: ((String)newValues.get(0)).trim()
 										);
 										if(number == null) {
-											number = valueHolder.isOptionalValued() ? 
-												null : 
-													BigDecimal.ZERO;
-										}
-										if(number == null) {
+											// Mandatory attributes must not be set to null
+											number = valueHolder.isOptionalValued() || number != null 
+												? number 
+												: BigDecimal.ZERO;
 											Object mappedNewValue = null;
 											if(target instanceof RefObject) {
 												Object value = this.getValue(
@@ -1482,8 +1490,10 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
 													valueHolder, 
 													target, 
 													featureName, 
-													value instanceof Collection ? Collections.singletonList(mappedNewValue) : mappedNewValue, 
-														app
+													value instanceof Collection 
+														? Collections.singletonList(mappedNewValue) 
+														: mappedNewValue, 
+													app
 												);
 												modifiedFeatures.add(featureName);
 											} else {
@@ -1505,8 +1515,10 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
 													valueHolder, 
 													target, 
 													featureName, 
-													value instanceof Collection ? Collections.singletonList(mappedNewValue) : mappedNewValue, 
-														app
+													value instanceof Collection 
+														? Collections.singletonList(mappedNewValue) 
+														: mappedNewValue, 
+													app
 												);
 												modifiedFeatures.add(featureName);
 											} else {
@@ -1528,8 +1540,10 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
 													valueHolder, 
 													target, 
 													featureName, 
-													value instanceof Collection ? Collections.singletonList(mappedNewValue) : mappedNewValue, 
-														app
+													value instanceof Collection 
+														? Collections.singletonList(mappedNewValue) 
+														: mappedNewValue, 
+													app
 												);
 												modifiedFeatures.add(featureName);
 											} else {
@@ -1551,8 +1565,10 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
 													valueHolder, 
 													target, 
 													featureName, 
-													value instanceof Collection ? Collections.singletonList(mappedNewValue) : mappedNewValue, 
-														app
+													value instanceof Collection 
+														? Collections.singletonList(mappedNewValue) 
+														: mappedNewValue, 
+													app
 												);
 												modifiedFeatures.add(featureName);
 											} else {
@@ -1574,8 +1590,10 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
 													valueHolder, 
 													target, 
 													featureName, 
-													value instanceof Collection ? Collections.singletonList(mappedNewValue) : mappedNewValue, 
-														app
+													value instanceof Collection 
+														? Collections.singletonList(mappedNewValue) 
+														: mappedNewValue, 
+													app
 												);
 												modifiedFeatures.add(featureName);
 											} else {
@@ -1665,7 +1683,7 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
 									modifiedFeatures.add(featureName);
 								}
 							} else if(valueHolder instanceof DateValue) {
-								// date
+								// Date
 								SimpleDateFormat dateParser = DateValue.getLocalizedDateFormatter(
 									featureName, 
 									true, 
@@ -1682,26 +1700,36 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
 									try {
 										if(newValues.isEmpty()) {
 											Object mappedNewValue = null;
-											if(target instanceof RefObject) {
-												Object value = this.getValue(
-													valueHolder, 
-													target, 
-													featureName, 
-													app
-												);
-												this.setValue(
-													valueHolder, 
-													target, 
-													featureName, 
-													value instanceof Collection ? Collections.singletonList(mappedNewValue) : mappedNewValue, 
+											// Mandatory attributes must not be set to null
+											mappedNewValue = valueHolder.isOptionalValued() || mappedNewValue != null
+												? mappedNewValue 
+												: PrimitiveTypes.DATE.equals(featureTypeName) 
+													? new Date(0) 
+													: DefaultPortalExtension.xmlDatatypeFactory().newXMLGregorianCalendar(1, 1, 1, 0, 0, 0, 0, 0);
+											if(valueHolder.isOptionalValued()) {
+												if(target instanceof RefObject) {
+													Object value = this.getValue(
+														valueHolder, 
+														target, 
+														featureName, 
 														app
-												);
-												modifiedFeatures.add(featureName);
-											} else {
-												targetAsValueMap(target).put(
-													featureName,
-													mappedNewValue
-												);
+													);
+													this.setValue(
+														valueHolder, 
+														target, 
+														featureName, 
+														value instanceof Collection 
+															? Collections.singletonList(mappedNewValue) 
+															: mappedNewValue, 
+														app
+													);
+													modifiedFeatures.add(featureName);
+												} else {
+													targetAsValueMap(target).put(
+														featureName,
+														mappedNewValue
+													);
+												}
 											}
 										} else {
 											String newValue = (String)newValues.get(0);
@@ -1740,8 +1768,10 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
 															valueHolder, 
 															target, 
 															featureName, 
-															value instanceof Collection ? Collections.singletonList(mappedNewValueDate) : mappedNewValueDate, 
-																app
+															value instanceof Collection 
+																? Collections.singletonList(mappedNewValueDate) 
+																: mappedNewValueDate, 
+															app
 														);
 														modifiedFeatures.add(featureName);
 													} else {
@@ -1764,8 +1794,10 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
 															valueHolder, 
 															target, 
 															featureName, 
-															value instanceof Collection ? Collections.singletonList(mappedNewValue) : mappedNewValue, 
-																app
+															value instanceof Collection 
+																? Collections.singletonList(mappedNewValue) 
+																: mappedNewValue, 
+															app
 														);	                                	  
 														modifiedFeatures.add(featureName);
 													} else {
@@ -1925,28 +1957,29 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
 												xri = (String)newValues.get(0);
 											}
 											try {
-												Object mappedNewValue = (xri == null) || "".equals(xri) ? 
-													null : 
-														new Path(xri);
-												if(target instanceof RefObject) {
-													mappedNewValue = mappedNewValue == null ?
-														null : 
-															JDOHelper.getPersistenceManager(target).getObjectById(
-																mappedNewValue
-																);
-													this.setValue(
-														valueHolder, 
-														target, 
-														featureName, 
-														mappedNewValue, 
-														app
-													);
-													modifiedFeatures.add(featureName);
-												} else {
-													targetAsValueMap(target).put(
-														featureName,
-														mappedNewValue
-													);
+												Object mappedNewValue = (xri == null) || "".equals(xri) 
+													? null 
+													: new Path(xri);
+												// Mandatory attributes must not be set to null
+												if(valueHolder.isOptionalValued() || mappedNewValue != null) {
+													if(target instanceof RefObject) {
+														mappedNewValue = mappedNewValue == null 
+															? null 
+															: JDOHelper.getPersistenceManager(target).getObjectById(mappedNewValue);
+														this.setValue(
+															valueHolder, 
+															target, 
+															featureName, 
+															mappedNewValue, 
+															app
+														);
+														modifiedFeatures.add(featureName);
+													} else {
+														targetAsValueMap(target).put(
+															featureName,
+															mappedNewValue
+														);
+													}
 												}
 											} catch(Exception e) {
 												SysLog.detail(e.getMessage(), e.getCause());
@@ -1970,8 +2003,9 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
 										try {
 											mappedNewValue = newValues.isEmpty() 
 												? (short)0 
-													: Short.valueOf(newValues.get(0).toString());
+												: Short.valueOf(newValues.get(0).toString());
 										} catch(Exception ignore) {}
+										// Mandatory attributes must not be set to null
 										if(mappedNewValue != null) {
 											if(target instanceof RefObject) {
 												Object value = this.getValue(
@@ -2064,11 +2098,15 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
 								if(valueHolder.isSingleValued()) {
 									Boolean mappedNewValue =
 										new Boolean(
-											(newValues.size() > 0) &&
+											!newValues.isEmpty() &&
 											("true".equals(newValues.get(0)) ||
 												"on".equals(newValues.get(0)) ||
 												app.getTexts().getTrueText().equals(newValues.get(0)))
 										);
+									// Mandatory attributes must not be null
+									mappedNewValue = valueHolder.isOptionalValued() || mappedNewValue != null 
+										? mappedNewValue 
+										: Boolean.FALSE;
 									if(target instanceof RefObject) {
 										Object value = this.getValue(
 											valueHolder, 
@@ -2080,8 +2118,10 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
 											valueHolder, 
 											target,
 											featureName, 
-											value instanceof Collection ? Collections.singletonList(mappedNewValue) : mappedNewValue, 
-												app
+											value instanceof Collection 
+												? Collections.singletonList(mappedNewValue) 
+												: mappedNewValue, 
+											app
 										);
 										modifiedFeatures.add(featureName);
 									} else {
@@ -2337,6 +2377,110 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
     		} catch(Exception ignore) {}
     	}
     }
+
+	/**
+	 * Store object. Edit object in case of doCreate=false. Create new object if
+	 * doCreate=true and add to container parent.refGetValue(forReference).
+	 * 
+	 * @param parameterMap
+	 * @param attributeMap
+	 * @throws ServiceException
+	 */
+    @Override
+	public boolean storeObject(
+		RefObject_1_0 parent,
+		RefObject_1_0 object,
+	    Map<String,String[]> parameterMap,
+	    Map<String, Attribute> attributeMap,
+	    boolean doCreate,
+	    String forReference,
+	    ApplicationContext app
+	) throws ServiceException {
+		if(doCreate) {
+			PersistenceManager pm = JDOHelper.getPersistenceManager(parent);
+			try {
+				pm.currentTransaction().begin();
+				this.updateObject(
+					object,
+				    parameterMap,
+				    attributeMap,
+				    app
+				);
+				if(app.getErrorMessages().isEmpty()) {
+					Object[] qualifiers = (Object[])parameterMap.get("qualifier");
+					if(qualifiers == null) {
+						qualifiers = new String[] {
+							UUIDConversion.toUID(UUIDs.newUUID())
+						};
+					}
+					// Prevent CONCURRENT_MODIFICATION in case the parent was updated by some other user
+					pm.refresh(parent);
+					DataBinding dataBinding = null;
+					try {
+						ElementDefinition elementDefinition = app.getUiElementDefinition(
+							parent.refClass().refMofId() + ":" + forReference
+						);
+						dataBinding = elementDefinition == null 
+							? null 
+							: elementDefinition.getDataBindingName() == null 
+								? null
+								: this.getDataBinding(elementDefinition.getDataBindingName());
+					} catch(Exception ignore) {}
+					if(dataBinding != null) {
+						dataBinding.setValue(
+							parent, 
+							forReference, 
+							object,
+							app
+						);
+					} else {
+						Object container = parent.refGetValue(forReference);
+						((RefContainer<?>)container).refAdd(
+						    org.oasisopen.cci2.QualifierType.REASSIGNABLE,
+						    qualifiers.length > 0 ? (String) qualifiers[0] : "",
+						    object
+						);
+					}
+					pm.currentTransaction().commit();
+					return true;
+				} else {
+					try {
+						pm.currentTransaction().rollback();
+					} catch(Exception e1) {}
+				}
+			} catch(Exception e) {
+				try {
+					pm.currentTransaction().rollback();				
+				} catch(Exception e1) {}
+				throw new ServiceException(e);
+			}
+		} else {
+			PersistenceManager pm = JDOHelper.getPersistenceManager(object);
+			try {
+				pm.currentTransaction().begin();
+				app.getPortalExtension().updateObject(
+					object,
+				    parameterMap,
+				    attributeMap,
+				    app
+				);
+				if(app.getErrorMessages().isEmpty()) {
+					pm.currentTransaction().commit();
+					return true;
+				} else {
+					try {
+						pm.currentTransaction().rollback();
+					} catch(Exception ignore) {}
+				}
+			} catch(Exception e) {
+				try {
+					pm.currentTransaction().rollback();
+				} catch(Exception e1) {}
+				throw new ServiceException(e);
+			}
+		}
+		return false;
+	}
 
     /**
      * Returns classes which are in the composition hierarchy of

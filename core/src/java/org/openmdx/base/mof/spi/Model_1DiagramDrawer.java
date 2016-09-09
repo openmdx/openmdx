@@ -153,8 +153,10 @@ public class Model_1DiagramDrawer {
                             List<ModelElement_1_0> operationDefs = new ArrayList<ModelElement_1_0>();
                             for(Object contained: containedElements) {
                                 ModelElement_1_0 element = model.getElement(contained);
-                                if(model.isAttributeType(element) || model.isStructureFieldType(element)) {
+                                if(model.isAttributeType(element)) {
                                     attributeDefs.add(element);
+                                } else if(model.isStructureFieldType(element) && !element.getDereferencedType().isStructureType()) {
+                                    attributeDefs.add(element);                                    
                                 } else if(model.isOperationType(element)) {
                                     operationDefs.add(element);
                                 }
@@ -262,7 +264,16 @@ public class Model_1DiagramDrawer {
         public void setAssociationDef(ModelElement_1_0 associationDef) {
             this.associationDef = associationDef;
         }
-                
+        
+        /**
+         * Set fieldDef.
+         * 
+         * @param fieldDef The fieldDef to set.
+         */
+        public void setFieldDef(ModelElement_1_0 fieldDef) {
+            this.fieldDef = fieldDef;
+        }
+
         /**
          * Retrieve id.
          *
@@ -312,13 +323,46 @@ public class Model_1DiagramDrawer {
         public String toString(
         ) {
             try {
-                if(this.associationDef == null) {
-                    throw new ServiceException(
-                        BasicException.Code.DEFAULT_DOMAIN,
-                        BasicException.Code.ASSERTION_FAILURE,
-                        "Unknown association definition. Specify qualified association name with attribute 'name'"
-                    );
-                } else {
+                if(this.fieldDef != null) {
+                    Model_1_0 model = this.fieldDef.getModel();
+                    ModelElement_1_0 exposedEndType = model.getElement(this.fieldDef.getContainer());
+                    ModelElement_1_0 referencedEndType = this.fieldDef.getDereferencedType();
+                    String dir = "forward";
+                    if(this.parameters.containsKey("dir")) {
+                        dir = this.parameters.get("dir");
+                        this.parameters.remove("dir");
+                    }
+                    String s = 
+                        ("forward".equals(dir) 
+                            ? "\"" + exposedEndType.getQualifiedName() + "\" -> \"" + referencedEndType.getQualifiedName()
+                            : "\"" + referencedEndType.getQualifiedName() + "\" -> \"" + exposedEndType.getQualifiedName()
+                        ) +                            
+                        "\" [";
+                    s += "label=\"\"";
+                    s += ",tooltip=\"\"";                    
+                    s += ",headlabel=\"[1..1]\"";
+                    s += ",taillabel=\"" + this.fieldDef.getName() + " [" + ModelHelper.getMultiplicity(this.fieldDef) + "]\"";
+                    s += ",arrowhead=tee";
+                    s += ",arrowtail=vee";
+                    s += ",color=\"#0000FF\"";
+                    boolean hasContraint = false;
+                    boolean hasLabelDistance = false;
+                    boolean hasStyleInvis = false;                    
+                    for(Map.Entry<String,String> parameter: this.parameters.entrySet()) {
+                        s += "," + parameter.getKey() + "=" + parameter.getValue();
+                        hasContraint = "constraint".equals(parameter.getKey());
+                        hasLabelDistance = "labeldistance".equals(parameter.getKey());
+                        hasStyleInvis = "style".equals(parameter.getKey()) && "invis".equals(parameter.getValue());
+                    }
+                    if(!hasContraint) {
+                        s += ",contraint=false";
+                    }
+                    if(!hasLabelDistance) {
+                        s += ",labeldistance=3";
+                    }
+                    s += "]";
+                    return hasStyleInvis ? "" : s;           
+                } else if(this.associationDef != null) {
                     Model_1_0 model = this.associationDef.getModel();
                     ModelElement_1_0 end1 = model.getElement(this.associationDef.objGetList("content").get(0));
                     ModelElement_1_0 end2 = model.getElement(this.associationDef.objGetList("content").get(1));
@@ -330,7 +374,7 @@ public class Model_1DiagramDrawer {
                     } else {
                         referencedEnd = end2;
                         exposedEnd = end1;
-                    }                    
+                    }            
                     ModelElement_1_0 referencedEndType = model.getElementType(referencedEnd);
                     ModelElement_1_0 exposedEndType = model.getElementType(exposedEnd);
                     String dir = "forward";
@@ -368,6 +412,12 @@ public class Model_1DiagramDrawer {
                     }
                     s += "]";
                     return hasStyleInvis ? "" : s;
+                } else {
+                    throw new ServiceException(
+                        BasicException.Code.DEFAULT_DOMAIN,
+                        BasicException.Code.ASSERTION_FAILURE,
+                        "Unknown association definition. Specify qualified association name with attribute 'name'"
+                    );                    
                 }
             } catch(Exception e) {
                 throw new RuntimeServiceException(e);
@@ -375,7 +425,8 @@ public class Model_1DiagramDrawer {
         }
 
         private String id;
-        private ModelElement_1_0 associationDef;  
+        private ModelElement_1_0 associationDef;
+        private ModelElement_1_0 fieldDef;
         private final Map<String,String> parameters = new HashMap<String,String>();
     }
 
@@ -520,6 +571,7 @@ public class Model_1DiagramDrawer {
                             // ${ASSOCIATION[name=*]}
                             if(dot.indexOf("${ASSOCIATION[name=*]}") >= 0) {
                                 String associationEdges = "";
+                                // Associations
                                 for(ModelElement_1_0 elementDef: model.getContent()) {
                                     if(elementDef.isAssociationType()) {
                                         ModelElement_1_0 end1 = model.getElement(elementDef.objGetList("content").get(0));
@@ -535,6 +587,26 @@ public class Model_1DiagramDrawer {
                                             associationNode.setId(elementDef.getQualifiedName());
                                             associationNode.setAssociationDef(elementDef);
                                             associationEdges += "\n\t" + associationNode.toString() + ";";
+                                        }
+                                    }
+                                }
+                                // Complex structure fields as edges
+                                for(GraphvizNode classNode: classNodes.values()) {
+                                    ModelElement_1_0 classDef = classNode.getClassDef();
+                                    if(model.isStructureType(classDef)) {
+                                        List<Object> elements = classDef.objGetList("content");
+                                        for(Object element: elements) {
+                                            ModelElement_1_0 fieldDef = model.getElement(element);
+                                            if(model.isStructureFieldType(fieldDef)) {
+                                                ModelElement_1_0 fieldDefType = fieldDef.getDereferencedType();
+                                                if(fieldDefType.isStructureType() && classNodes.containsKey(fieldDefType.getQualifiedName())) {
+                                                    GraphvizEdge fieldNode = new GraphvizEdge();
+                                                    fieldNode.setId(fieldDef.getQualifiedName());
+                                                    fieldNode.setFieldDef(fieldDef);
+                                                    fieldNode.getParameters().put("minlen", "3");
+                                                    associationEdges += "\n\t" + fieldNode.toString() + ";";
+                                                }
+                                            }
                                         }
                                     }
                                 }

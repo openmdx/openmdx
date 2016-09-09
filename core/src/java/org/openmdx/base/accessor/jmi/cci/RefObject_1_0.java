@@ -106,7 +106,7 @@ public interface RefObject_1_0 extends RefObject {
     RefObject source
   );
 
-  /**
+ /**
    * Initializes the object as follows:
    * <ul>
    *   <li>collections are cleared.</li>
@@ -114,17 +114,22 @@ public interface RefObject_1_0 extends RefObject {
    *       string = ""; number = 0; date = min date. They are set to null if setRequiredToNull==true.</li>
    *   <li>primitive optional attributes are set to null if initializeOptional == true
    *       and are left untouched if initializeOptional == false.</li>
+   *   <li>multivalued attributes are emptied if emptyMultivalued == true
+   *       and are left untouched if emptyMultivalued == false.</li>
    *   <li>required references can not be initialized and an exception is thrown.</li>
    * </ul>
    * 
    * @param setRequiredToNull if true, required attributes are set to null. Otherwise
    *         they are initialized with a default value.
-   * @param setOptionalToNull if true, optional features are set to true, otherwise
+   * @param setOptionalToNull if true, optional features are set to null, otherwise
+   *         they are left untouched.
+   * @param emptyMultivalued  if true, multi-valued features are emptied, otherwise
    *         they are left untouched.
    */
   public void refInitialize(
     boolean setRequiredToNull,
-    boolean setOptionalToNull
+    boolean setOptionalToNull, 
+    boolean emptyMultivalued
   );
 
   /**

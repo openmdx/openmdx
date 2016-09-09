@@ -372,7 +372,7 @@ public class CompositeObjectDataBinding extends DataBinding {
         if(queryParameters.keySet().contains("type")) {
             String typeName = queryParameters.get("type").replace('.', ':');
             composite = (RefObject_1_0)object.refOutermostPackage().refClass(typeName).refCreateInstance(null);
-            composite.refInitialize(false, false);
+            composite.refInitialize(false, false, false);
             this.initObject(
                 composite, 
                 ParameterMode.ALL

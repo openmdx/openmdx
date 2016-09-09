@@ -183,7 +183,7 @@ public class UiWizardControl extends WizardControl implements Serializable {
         if(frame == null) {
         	String id = this.getId();
         	List<UiWizardTabControl> children = this.getChildren(UiWizardTabControl.class);          
-            p.write("<li id=\"", id, "-dropdown\" class=\"", CssClass.dropdown.toString(), "\"><a href=\"#\" class=\"", CssClass.dropdownToggle.toString(), "\" data-toggle=\"dropdown\" onclick=\"javascript:this.parentNode.hide=function(){};\">", texts.getWizardsMenuTitle(), "</a>");
+            p.write("<li id=\"", id, "-dropdown\" class=\"", CssClass.dropdown.toString(), "\" onclick=\"javascript:toggleMenu(this);\"><a href=\"#\" class=\"", CssClass.dropdownToggle.toString(), "\">", texts.getWizardsMenuTitle(), "</a>");
             p.write("  <ul id=\"", id, "-menu\" class=\"", CssClass.dropdownMenu.toString(), "\" style=\"z-index:1010;\">");
             for(UiWizardTabControl tab: children) {
                 tab.paint(

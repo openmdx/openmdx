@@ -251,9 +251,17 @@ public class UiOperationTab extends Component implements Serializable {
                         app
                     );
                     if(Ui_1.EDIT_OBJECT_OPERATION_NAME.equals(control.getOperationName())) {
-                   		p.write("    <li><a href=\"javascript:void(0)\" onclick=\"javascript:jQuery.ajax({type: 'get', url: ", p.getEvalHRef(invokeOperationAction), ", dataType: 'html', success: function(data){$('aPanel').innerHTML=data;evalScripts(data);}});return false;\" id=\"opTab", operationId, "\" >", control.getName(), "</a></li>");
+                    	if(invokeOperationAction.isEnabled()) {
+                    		p.write("    <li><a href=\"javascript:void(0)\" onclick=\"javascript:jQuery.ajax({type: 'get', url: ", p.getEvalHRef(invokeOperationAction), ", dataType: 'html', success: function(data){$('aPanel').innerHTML=data;evalScripts(data);}});return false;\" id=\"opTab", operationId, "\" >", control.getName(), "</a></li>");
+                    	} else {
+                    		p.write("    <li class=\"" + CssClass.disabled.toString() + "\"", "><a href=\"javascript:void(0)\" id=\"opTab", operationId, "\" >", control.getName(), "</a></li>");
+                    	}
                     } else {
-                        p.write("    <li><a href=\"javascript:void(0)\" onmouseover=\"javascript:this.href=", p.getEvalHRef(invokeOperationAction), ";onmouseover=function(){};\" id=\"opTab", operationId, "\" >", control.getName(), "</a></li>");
+                    	if(invokeOperationAction.isEnabled()) {
+                    		p.write("    <li><a href=\"javascript:void(0)\" onmouseover=\"javascript:this.href=", p.getEvalHRef(invokeOperationAction), ";onmouseover=function(){};\" id=\"opTab", operationId, "\" >", control.getName(), "</a></li>");
+                    	} else {
+                    		p.write("    <li class=\"" + CssClass.disabled.toString() + "\"", "><a href=\"javascript:void(0)\" id=\"opTab", operationId, "\" >", control.getName(), "</a></li>");                    		
+                    	}
                     }
                 } else {                                         
                     // Standard operation with input parameters. Retrieve operation dialog with async request.
@@ -261,7 +269,11 @@ public class UiOperationTab extends Component implements Serializable {
                         view,
                         app
                     );
-                    p.write("    <li><a href=\"javascript:void(0)\" onclick=\"javascript:jQuery.ajax({type: 'get', url: ", p.getEvalHRef(getOperationDialogAction), ", dataType: 'html', success: function(data){$('OperationDialog').innerHTML=data;evalScripts(data);}});return false;\" id=\"op", operationId, "\" >", control.getName(), "...</a></li>");                        
+                    if(getOperationDialogAction.isEnabled()) {
+                    	p.write("    <li><a href=\"javascript:void(0)\" onclick=\"javascript:jQuery.ajax({type: 'get', url: ", p.getEvalHRef(getOperationDialogAction), ", dataType: 'html', success: function(data){$('OperationDialog').innerHTML=data;evalScripts(data);}});return false;\" id=\"op", operationId, "\" >", control.getName(), "...</a></li>");
+                    } else {
+                    	p.write("    <li class=\"" + CssClass.disabled.toString() + "\"", "><a href=\"javascript:void(0)\" id=\"op", operationId, "\" >", control.getName(), "...</a></li>");                    	
+                    }
                 }
             } else if(!isRevokeShow) {
                 // Operation can not be invoked. Do not generate onclick or href actions

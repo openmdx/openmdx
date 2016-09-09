@@ -67,6 +67,7 @@ import org.openmdx.base.mof.cci.Model_1_0;
 import org.openmdx.base.mof.cci.Multiplicity;
 import org.openmdx.base.mof.cci.PrimitiveTypes;
 import org.openmdx.kernel.exception.BasicException;
+import org.openmdx.kernel.loading.Classes;
 
 /**
  * Class FeatureMapper
@@ -229,7 +230,7 @@ public class FeatureMapper implements Serializable {
                     ModelHelper.getMultiplicity(featureDef).isSingleValued()
                 );
                 String mutatorName = Identifier.OPERATION_NAME.toIdentifier(beanSetterName);
-                for(Method method : targetIntf.getMethods()) {
+                for(Method method: Classes.getOrderedMethods(targetIntf)) {
                     if(
                             method.getName().equals(mutatorName) &&
                             (method.getParameterTypes().length == 1) &&
@@ -275,7 +276,7 @@ public class FeatureMapper implements Serializable {
                 null, // removableSuffix
                 null // appendableSuffix
             );
-            for(Method method : targetIntf.getMethods()) {
+            for(Method method: Classes.getOrderedMethods(targetIntf)) {
                 if(
                     method.getName().equals(operationName) &&
                     (method.getReturnType() != void.class)
@@ -301,7 +302,7 @@ public class FeatureMapper implements Serializable {
         if(oldMethod == null) {
             String methodName = source.getName();
             Class<?>[] methodArguments = source.getParameterTypes();
-            for(Method newMethod : targetIntf.getMethods()) {
+            for(Method newMethod: Classes.getOrderedMethods(targetIntf)) {
                 if(
                     (newMethod.getName().equals(methodName)) &&
                     (newMethod.getParameterTypes().length == methodArguments.length)

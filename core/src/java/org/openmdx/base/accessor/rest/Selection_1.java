@@ -86,7 +86,7 @@ final class Selection_1 extends AbstractContainer_1 {
      * 
      */
     private final Container_1 container;
-    
+
     /**
      * 
      */
@@ -287,7 +287,8 @@ final class Selection_1 extends AbstractContainer_1 {
     public DataObject_1_0 put(String key, DataObject_1_0 value) {
         if(this.objectFilter.accept(value)) {
             return this.superMap.put(key, value);
-        } else throw new IllegalArgumentException (
+        }
+        throw new IllegalArgumentException (
             "The object is not a member of this collection"
         );
     }

@@ -180,7 +180,6 @@ class RefObject_1
     private transient RefObject metaObject = null;
     private transient ModelElement_1_0 refClassDef = null;
 
-    private static final Object[] EMPTY_OBJECT_ARRAY = new Object[] {};
     private static final byte[] EMPTY_LARGE_OBJECT = new byte[] {};
     
     /**
@@ -1448,9 +1447,11 @@ class RefObject_1
     }
 
     // -------------------------------------------------------------------------
+    @Override
     final public void refInitialize(
         boolean setRequiredToNull,
-        boolean setOptionalToNull
+        boolean setOptionalToNull, 
+        boolean emptyMultivalued
     ) {
         try {
             ModelElement_1_0 elementDef = ((RefMetaObject_1)this.refMetaObject()).getElementDef();
@@ -1475,62 +1476,86 @@ class RefObject_1
                                 this.setValue(featureDef, null);
                             } else {
                                 String qualifiedTypeName = type.getQualifiedName();
-                                if (PrimitiveTypes.STRING.equals(qualifiedTypeName)) {
-                                    this.setValue(featureDef, "");
-                                } else if (PrimitiveTypes.BOOLEAN.equals(qualifiedTypeName)) {
-                                    this.setValue(featureDef, Boolean.FALSE);
-                                } else if (PrimitiveTypes.DATETIME.equals(qualifiedTypeName)) {
-                                    this.setValue(
-                                        featureDef, 
-                                        DateTimeMarshaller.NORMALIZE.marshal
-                                        (org.w3c.format.DateTimeFormat.BASIC_UTC_FORMAT.format(new Date()))
-                                    );
-                                } else if (PrimitiveTypes.DATE.equals(qualifiedTypeName)) {
-                                    this.setValue(
-                                        featureDef, 
-                                        DateMarshaller.NORMALIZE.marshal("20000101")
-                                    );
-                                } else if (PrimitiveTypes.ANYURI.equals(qualifiedTypeName)) {
-                                    this.setValue(featureDef, URI.create("xri://+null"));
-                                } else if (PrimitiveTypes.DURATION.equals(qualifiedTypeName)) {
-                                    this.setValue(
-                                        featureDef, 
-                                        DurationMarshaller.NORMALIZE.marshal("P0M")
-                                    );
-                                } else if (PrimitiveTypes.SHORT .equals(qualifiedTypeName)) {
-                                    this.setValue(featureDef, Short.valueOf((short) 0));
-                                } else if (PrimitiveTypes.INTEGER.equals(qualifiedTypeName)) {
-                                    this.setValue(featureDef, Integer.valueOf(0));
-                                } else if (PrimitiveTypes.LONG.equals(qualifiedTypeName)) {
-                                    this.setValue(featureDef, Long.valueOf(0L));
-                                } else if (PrimitiveTypes.DECIMAL.equals(qualifiedTypeName)) {
-                                    this.setValue(featureDef, BigDecimal.ZERO);
-                                } else if (PrimitiveTypes.BINARY.equals(qualifiedTypeName)) {
-                                    this.setValue(featureDef, EMPTY_LARGE_OBJECT);
-                                } else if (this.object.getModel().isStructureType(type)) {
-                                    throw new UnsupportedOperationException("Initialization of structs not supported");
-                                } else if (this.object.getModel().isClassType(type)) {
-                                    SysLog.detail("Initialization of object references not supported", featureDef);
-                                } else if (PrimitiveTypes.OBJECT_ID.equals(qualifiedTypeName)) {
-                                    this.setValue(featureDef, new Path(new String[0]));
-                                } else if(
-                                    "org:omg:model1:PrimitiveType".equals(qualifiedTypeName)
-                                ) {
-                                    SysLog.detail("Initialization of user defined primitive types not supported", featureDef);  
-                                } else {
-                                    throw new UnsupportedOperationException(
-                                        "unsupported type " + type
-                                    );
+                                // only initialize if null
+                                if(this.object.objGetValue(featureDef.getName()) == null) {
+                                    if(PrimitiveTypes.STRING.equals(qualifiedTypeName)) {
+                                        this.setValue(featureDef, "");
+                                    } else if (PrimitiveTypes.BOOLEAN.equals(qualifiedTypeName)) {
+                                        this.setValue(featureDef, Boolean.FALSE);
+                                    } else if (PrimitiveTypes.DATETIME.equals(qualifiedTypeName)) {
+                                        this.setValue(
+                                            featureDef, 
+                                            DateTimeMarshaller.NORMALIZE.marshal
+                                            (org.w3c.format.DateTimeFormat.BASIC_UTC_FORMAT.format(new Date()))
+                                        );
+                                    } else if (PrimitiveTypes.DATE.equals(qualifiedTypeName)) {
+                                        this.setValue(
+                                            featureDef, 
+                                            DateMarshaller.NORMALIZE.marshal("20000101")
+                                        );
+                                    } else if (PrimitiveTypes.ANYURI.equals(qualifiedTypeName)) {
+                                        this.setValue(featureDef, URI.create("xri://+null"));
+                                    } else if (PrimitiveTypes.DURATION.equals(qualifiedTypeName)) {
+                                        this.setValue(
+                                            featureDef, 
+                                            DurationMarshaller.NORMALIZE.marshal("P0M")
+                                        );
+                                    } else if (PrimitiveTypes.SHORT .equals(qualifiedTypeName)) {
+                                        this.setValue(featureDef, Short.valueOf((short) 0));
+                                    } else if (PrimitiveTypes.INTEGER.equals(qualifiedTypeName)) {
+                                        this.setValue(featureDef, Integer.valueOf(0));
+                                    } else if (PrimitiveTypes.LONG.equals(qualifiedTypeName)) {
+                                        this.setValue(featureDef, Long.valueOf(0L));
+                                    } else if (PrimitiveTypes.DECIMAL.equals(qualifiedTypeName)) {
+                                        this.setValue(featureDef, BigDecimal.ZERO);
+                                    } else if (PrimitiveTypes.BINARY.equals(qualifiedTypeName)) {
+                                        this.setValue(featureDef, EMPTY_LARGE_OBJECT);
+                                    } else if (this.object.getModel().isStructureType(type)) {
+                                        throw new UnsupportedOperationException("Initialization of structs not supported");
+                                    } else if (this.object.getModel().isClassType(type)) {
+                                        SysLog.detail("Initialization of object references not supported", featureDef);
+                                    } else if (PrimitiveTypes.OBJECT_ID.equals(qualifiedTypeName)) {
+                                        this.setValue(featureDef, new Path(new String[0]));
+                                    } else if(
+                                        "org:omg:model1:PrimitiveType".equals(qualifiedTypeName)
+                                    ) {
+                                        SysLog.detail("Initialization of user defined primitive types not supported", featureDef);  
+                                    } else {
+                                        throw new UnsupportedOperationException(
+                                            "unsupported type " + type
+                                        );
+                                    }
                                 }
                             }
                         } break;
-                        case SET: case LIST: case SPARSEARRAY: {
-                            this.setValue(featureDef, RefObject_1.EMPTY_OBJECT_ARRAY);
+                        case SET: {
+                            final Set<Object> values = this.object.objGetSet(featureDef.getName());
+                            if(emptyMultivalued) {
+                                values.clear();
+                            }
                         } break;
-                        case MAP: case STREAM:
+                        case LIST: {
+                            final List<Object> values = this.object.objGetList(featureDef.getName());
+                            if(emptyMultivalued) {
+                                values.clear();
+                            }
+                        } break;
+                        case SPARSEARRAY: { 
+                            final SortedMap<Integer, Object> values = this.object.objGetSparseArray(featureDef.getName());
+                            if(emptyMultivalued) {
+                                values.clear();
+                            }
+                        } break;
+                        case MAP: { 
+                            final Map values = this.object.objGetMap(featureDef.getName());
+                            if(emptyMultivalued) {
+                                values.clear();
+                            }
+                        } break;
+                        case STREAM:
                             // not initialized
                             break;
-                    } 
+                    }
                 }
             }
         } catch (ServiceException e) {

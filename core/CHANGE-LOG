@@ -1,5 +1,338 @@
 ==============================================================================
-Version 2.14.4                                                      2015-10-07
+Version 2.15.0                                                      2016-09-09
+==============================================================================
+
+0.    KNOWN ISSUES
+
+      CR20044758
+      State of transient object
+      
+      A state can't be added to a transient object
+      
+
+1.    NEW FEATURES
+
+      CR20045116
+      Java 8 support. Add Java 8 as standard platform.
+
+      
+2.    CHANGES  
+     
+2.0.  CHANGED FEATURES
+ 
+      NONE
+      
+            
+2.1.  FIXED BUGS
+
+      CR20051337
+      refInitialize() must not reset existing attribute values
+      
+      CR10013114
+      Database: Query-Extension supports more than 9 parameters.
+
+
+==============================================================================
+Version 2.14.13                                                     2016-07-01
+==============================================================================
+
+0.    KNOWN ISSUES
+
+      CR20044758
+      State of transient object
+      
+      A state can't be added to a transient object
+      
+
+1.    NEW FEATURES
+
+      NONE
+
+      
+2.    CHANGES  
+     
+2.0.  CHANGED FEATURES
+ 
+      CR20050423
+      Reduce the MOF repository's memory consumption
+      
+            
+2.1.  FIXED BUGS
+
+      NONE
+
+      
+==============================================================================
+Version 2.14.12                                                     2016-06-23
+==============================================================================
+
+0.    KNOWN ISSUES
+
+      CR20044758
+      State of transient object
+      
+      A state can't be added to a transient object
+      
+
+1.    NEW FEATURES
+
+      CR20049596
+      Column Name Mapping & Macro Configuration Preferences
+      
+      The column name mapping and the macro configurations shall be exposed
+      as preferences, too.
+
+      
+2.    CHANGES  
+     
+2.0.  CHANGED FEATURES
+ 
+      NONE
+      
+            
+2.1.  FIXED BUGS
+
+      NONE
+      
+
+==============================================================================
+Version 2.14.11                                                     2016-06-02
+==============================================================================
+
+0.    KNOWN ISSUES
+
+      CR20044758
+      State of transient object
+      
+      A state can't be added to a transient object
+      
+
+1.    NEW FEATURES
+
+      NONE
+
+      
+2.    CHANGES  
+     
+2.0.  CHANGED FEATURES
+ 
+      NONE
+      
+            
+2.1.  FIXED BUGS
+
+      CR20048443
+      XMLGregorianCalendarImpl is not Comparable
+      
+      Ordering by org::w3c::date feature fails in in memory provider
+      
+
+==============================================================================
+Version 2.14.10                                                     2016-05-30
+==============================================================================
+
+0.    KNOWN ISSUES
+
+      CR20044758
+      State of transient object
+      
+      A state can't be added to a transient object
+      
+
+1.    NEW FEATURES
+
+      NONE
+
+      
+2.    CHANGES  
+     
+2.0.  CHANGED FEATURES
+ 
+      NONE
+      
+            
+2.1.  FIXED BUGS
+
+      CR20048392
+      Mandatory State Attribute Validation
+      
+      A missing mandatory state feature must lead to a validation exception.
+      
+
+==============================================================================
+Version 2.14.9                                   5                   2016-05-17
+==============================================================================
+
+0.    KNOWN ISSUES
+5
+      CR20044758
+      State of transient object
+      
+      A state can't be added to a transient object
+
+
+1.    NEW FEATURES5
+
+      NONE
+
+      
+2.    CHANGES  
+     
+2.0.  CHANGED FEATURES
+ 
+      NONE      
+            
+2.1.  FIXED BUGS
+
+      CR20022111
+      Sub-Queries with In-Memory Provider
+      
+      Any FilterQueryRecord is now acceptable, not only F5ilter instances.
+
+2.2.  DEPRECATED FEATURES5
+
+      NONE
+      
+2.3.  REMOVED FEATURES
+
+      NONE
+      
+
+==============================================================================
+Version 2.14.8                                                      2016-04-15
+==============================================================================
+
+0.    KNOWN ISSUES
+
+      CR20021838
+      A lot of states in the same container
+      
+      Access to an object's states becomes slow if its container caches 
+      a lot of objects or states.
+
+      CR20044758
+      State of transient object
+      
+      A state can't be added to a transient object
+      
+
+1.    NEW FEATURES
+
+      NONE
+
+      
+2.    CHANGES  
+     
+2.0.  CHANGED FEATURES
+ 
+      CR20046911
+      NullPointerException in getDatabaseProductName()
+      
+      The runtime performance has been improved, i.e. no NullPointerException
+      is thrown due to a lacking catalog.
+      
+            
+2.1.  FIXED BUGS
+
+      NONE
+      
+2.2.  DEPRECATED FEATURES
+
+      NONE
+      
+2.3.  REMOVED FEATURES
+
+      NONE
+
+
+==============================================================================
+Version 2.14.7                                                      2016-04-14
+==============================================================================
+
+0.    KNOWN ISSUES
+
+      CR20021838
+      A lot of states in the same container
+      
+      The proposed solution does not pass the acceptance tests!
+
+      CR20044758
+      State of transient object
+      
+      A state can't be added to a transient object
+      
+
+1.    NEW FEATURES
+
+      NONE
+
+      
+2.    CHANGES  
+     
+2.0.  CHANGED FEATURES
+ 
+      NONE
+            
+2.1.  FIXED BUGS
+
+      NONE
+            
+2.2.  DEPRECATED FEATURES
+
+      NONE
+      
+2.3.  REMOVED FEATURES
+
+      NONE
+      
+
+==============================================================================
+Version 2.14.6                                                      2016-02-14
+==============================================================================
+
+0.    KNOWN ISSUES
+
+      CR20044758
+      State of transient object
+      
+      A state can't be added to a transient object
+      
+
+1.    NEW FEATURES
+
+      NONE
+
+      
+2.    CHANGES  
+     
+2.0.  CHANGED FEATURES
+ 
+      NONE
+            
+2.1.  FIXED BUGS
+
+      CR20044759
+      CascadeDelete Configuration Impossible
+      
+      Cascading deletes can't be disabled anymore.
+
+      CR20044760
+      Configuration Preferences Access Failure
+      
+      Configuration preference access leads to a NOT_SUPPORTED (This 
+      interaction is not supported) exception.
+      
+2.2.  DEPRECATED FEATURES
+
+      NONE
+      
+2.3.  REMOVED FEATURES
+
+      NONE
+      
+
+==============================================================================
+Version 2.14.5                                                      2016-01-10
 ==============================================================================
 
 0.    KNOWN ISSUES
@@ -14,7 +347,76 @@ Version 2.14.4                                                      2015-10-07
      
 2.0.  CHANGED FEATURES
  
-      20039314
+      CR20043712
+      Licenses
+      
+      License references for discontinued artefacts dropped
+      
+2.1.  FIXED BUGS
+
+      NONE
+      
+2.2.  DEPRECATED FEATURES
+
+      NONE
+      
+2.3.  REMOVED FEATURES
+
+      NONE
+
+      
+==============================================================================
+Version 2.14.4                                                      2015-11-30
+==============================================================================
+
+0.    KNOWN ISSUES
+
+      NONE
+
+1.    NEW FEATURES
+      
+      NONE
+        
+2.    CHANGES  
+     
+2.0.  CHANGED FEATURES
+ 
+      NONE
+      
+2.1.  FIXED BUGS
+
+      CR20042621
+      Internalization optimization of Path segments
+      
+      The path segment's unified representation internalization should be 
+      optimized.
+      
+2.2.  DEPRECATED FEATURES
+
+      NONE
+      
+2.3.  REMOVED FEATURES
+
+      NONE
+
+      
+==============================================================================
+Version 2.14.3                                                      2015-09-07
+==============================================================================
+
+0.    KNOWN ISSUES
+
+      NONE
+
+1.    NEW FEATURES
+      
+      NONE
+        
+2.    CHANGES  
+     
+2.0.  CHANGED FEATURES
+ 
+      CR20039314
       Optional openmdx-system.jar
       
       openmdx-system.jar is only required if one wants to use
@@ -22,7 +424,7 @@ Version 2.14.4                                                      2015-10-07
       
 2.1.  FIXED BUGS
 
-      20020817
+      CR20020817
       MOF Repository Access Failure
       
       The dereferenced type is now cached at the ModelElement_1 level.

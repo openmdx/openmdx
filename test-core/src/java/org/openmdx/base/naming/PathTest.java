@@ -632,6 +632,72 @@ public class PathTest {
     	Assert.assertSame(lastSegment, testee.getLastSegment());
     }
     
+    @Test
+    public void oneSegmentPathIsGreaterThanEmptyPath(){
+        // Arrange
+        final Path left = new Path(new String[]{"org:openmdx:base"}); 
+        final Path right = new Path("");
+        // Act
+        int value = left.compareTo(right);
+        // Assert
+        Assert.assertTrue(value > 0);
+    }
+    
+    @Test
+    public void emptyPathIsLessThanOneSegmentPath(){
+        // Arrange
+        final Path right = new Path(new String[]{"org:openmdx:base"}); 
+        final Path left = new Path("");
+        // Act
+        int value = left.compareTo(right);
+        // Assert
+        Assert.assertTrue(value < 0);
+    }
+
+    @Test
+    public void twoSegmentPathIsGreaterThanOneSegmentPath(){
+        // Arrange
+        final Path left = new Path("xri://@openmdx*A/provider"); 
+        final Path right = new Path("xri://@openmdx*A");
+        // Act
+        int value = left.compareTo(right);
+        // Assert
+        Assert.assertTrue(value > 0);
+    }
+    
+    @Test
+    public void twoSegmentPathIsLessThanThreeSegmentPath(){
+        // Arrange
+        final Path left = new Path("xri://@openmdx*A/provider"); 
+        final Path right = new Path("xri://@openmdx*A/provider/P");
+        // Act
+        int value = left.compareTo(right);
+        // Assert
+        Assert.assertTrue(value < 0);
+    }
+
+    @Test
+    public void leadingSegmentDeterminesOrder(){
+        // Arrange
+        final Path left = new Path("xri://@openmdx*B/provider"); 
+        final Path right = new Path("xri://@openmdx*A/provider/P");
+        // Act
+        int value = left.compareTo(right);
+        // Assert
+        Assert.assertTrue(value > 0);
+    }
+
+    @Test
+    public void samePathComparesTo0(){
+        // Arrange
+        final Path left = new Path(new String[]{"A","provider", "P"}); 
+        final Path right = new Path("xri://@openmdx*A/provider/P");
+        // Act
+        int value = left.compareTo(right);
+        // Assert
+        Assert.assertEquals(0, value);
+    }
+    
     private void arrangeActAndAssertAccordingToExpectation(){
         for(Format buildFormat : applicableFormats()) {
             arrangeActAndAssert(buildFormat);

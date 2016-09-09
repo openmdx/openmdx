@@ -370,34 +370,20 @@ public class RestParser {
          * The model accessor
          */
         private final Model_1_0 model = Model_1Factory.getModel();
-
-        /**
-         * The record factory
-         */
         private static final ExtendedRecordFactory recordFactory = Records.getRecordFactory();
-
         private final RestSource source;
-
         private final Record target;
-
         private final Deque<Record> values = new ArrayDeque<Record>();
-
         private String featureName = null;
-
+        private final Deque<String> featureNames = new ArrayDeque<String>();
+        private final Deque<String> featureTypes = new ArrayDeque<String>();
         private String previousEndElement = null;
-
         private String href = null;
-
         private String version = null;
-
         private String id = null;
-        
         private String index = null;
-
         private Record value = null;
-
         private Multiplicity multiplicity = null;
-
         private String featureType = null;
 
         /**
@@ -502,33 +488,54 @@ public class RestParser {
             "unchecked", "cast"
         })
         @Override
-        public void endElement(String uri, String localName, String name)
-        throws SAXException {
+        public void endElement(
+            String uri, 
+            String localName, 
+            String name
+        ) throws SAXException {
             try {
                 if ("org.openmdx.kernel.ResultSet".equals(name)) {
-                    //
                     // Nothing to do
-                    //
                 } else if (name.indexOf('.') > 0) {
-                    //
                     // Object or struct
-                    //
-                    if (target instanceof IndexedRecord) {
+                    if (this.target instanceof IndexedRecord) {
                         ((IndexedRecord)this.target).add((MappedRecord) this.getObject(null));
                         this.values.pop();
                     } else if (this.target instanceof MessageRecord) {
                         ((MessageRecord)this.target).setResourceIdentifier(this.source.getXRI(this.href));
                         ((MessageRecord)this.target).setBody((MappedRecord) this.values.peekLast());
                         this.values.pop();
-                    } else if(this.values.size() > 1 && isStructureType(this.values.peek().getRecordName())){
-                        this.values.pop(); // struct has been added by startElement()
+                    } else if(this.values.size() > 1 && isStructureType(this.values.peek().getRecordName())) {
+                        // pop struct
+                        this.values.pop(); 
                     }
-                } else if (ITEM_TAG.equals(name)) { 
+                } else if(ITEM_TAG.equals(name)) { 
                     propagateData();
-                } else if (this.peekMultivaluedMultiplicity() != null) {
-                    this.values.pop(); 
-                } else if (name.equals(this.featureName) && !ITEM_TAG.equals(this.previousEndElement)) {
-                    propagateData();
+                } else {
+                    if(this.peekMultivaluedMultiplicity() != null) {
+                        this.values.pop();
+                    } else if(name.equals(this.featureName) && !ITEM_TAG.equals(this.previousEndElement)) {
+                        if(this.isStructureType(this.featureType)) {
+                            this.values.pop();
+                            if(!this.values.isEmpty()) {
+                                MappedRecord holder = (MappedRecord)this.values.peek();
+                                if(
+                                    holder.get(this.featureName) instanceof MappedRecord &&
+                                    ((MappedRecord)holder.get(this.featureName)).isEmpty()
+                                ) {
+                                    holder.remove(this.featureName);
+                                }
+                            }
+                        } else {
+                            propagateData();
+                        }
+                    }
+                    if(!this.featureNames.isEmpty()) {
+                        this.featureName = this.featureNames.pop();
+                        this.featureType = this.featureTypes.pop();
+                    } else {
+                        this.featureName = null;
+                    }
                 }
                 this.previousEndElement = name;
             } catch (Exception e) {
@@ -631,6 +638,18 @@ public class RestParser {
         ) throws SAXException {
             super.startElement(uri, localName, qName, attributes);
             try {
+                String typeName = null;
+                ModelElement_1_0 featureDef = null;
+                if(qName.indexOf('.') > 0) {
+                    typeName = qName.replace('.', ':');
+                } else if(qName.indexOf('.') < 0 && !this.values.isEmpty()) {
+                    final String recordName = this.values.peek().getRecordName();
+                    featureDef = getFeatureDef(
+                        recordName,
+                        localName
+                    );
+                    typeName = getFeatureType(featureDef);
+                }
                 if ("org.openmdx.kernel.ResultSet".equals(qName)) {
                     if (this.target instanceof ResultRecord) {
                         ResultRecord target = (ResultRecord) this.target;
@@ -643,46 +662,34 @@ public class RestParser {
                             target.setTotal(Long.parseLong(total));
                         }
                     }
-                } else if (qName.indexOf('.') > 0) {
+                } else if(qName.indexOf('.') > 0) {
                     // Begin object or struct
-					String typeName = qName.replace('.', ':');
-					MappedRecord mappedRecord = newMappedRecord(typeName);
-					if(this.isStructureType(typeName)){
+					MappedRecord mappedRecord = this.newMappedRecord(typeName);
+					if(this.isStructureType(typeName)) {
+					    // nested struct
 					    if(!this.values.isEmpty()) {
-					        Multiplicity multiplicity = peekMultivaluedMultiplicity();
-					        if(multiplicity == null) {
-					            ((MappedRecord) this.values.peek()).put(featureName, mappedRecord);
+					        Object values = ((MappedRecord)this.values.peek()).get(this.featureName);
+					        if(values instanceof IndexedRecord) {
+					            IndexedRecord list = (IndexedRecord)values;
+                                if(attributes.getValue("index") != null) {
+                                    this.index = attributes.getValue("index");
+                                    int index = Integer.parseInt(this.index);
+                                    if(index != list.size()) {
+                                        throw new ServiceException(
+                                            BasicException.Code.DEFAULT_DOMAIN,
+                                            BasicException.Code.NOT_SUPPORTED,
+                                            "List indices must be ascending and without holes",
+                                            new BasicException.Parameter("multiplicity", this.multiplicity),
+                                            new BasicException.Parameter("index", this.index),
+                                            new BasicException.Parameter("item", mappedRecord)
+                                        );
+                                    }
+                                }
+					            list.add(mappedRecord);
 					        } else {
-					            switch(multiplicity) {
-					                case SET:
-					                    ((IndexedRecord)this.values.peek()).add(mappedRecord);
-					                    break;
-					                case LIST:
-					                    this.index = attributes.getValue("index");
-					                    IndexedRecord list = (IndexedRecord)this.values.peek();
-					                    int index = Integer.parseInt(this.index);
-					                    if(index != list.size()) throw new ServiceException(
-					                          BasicException.Code.DEFAULT_DOMAIN,
-					                          BasicException.Code.NOT_SUPPORTED,
-					                          "List indices must be ascending and without holes",
-					                          new BasicException.Parameter("multiplicity", this.multiplicity),
-					                          new BasicException.Parameter("index", this.index),
-					                          new BasicException.Parameter("item", mappedRecord)
-					                    );
-					                    list.add(mappedRecord);
-					                    break;
-					                case SPARSEARRAY: case MAP:
-					                    this.index = attributes.getValue("index");
-					                    ((MappedRecord)this.values.peek()).put(this.index, mappedRecord);
-					                    break;
-					                default:
-					                    throw new ServiceException(
-					                        BasicException.Code.DEFAULT_DOMAIN,
-					                        BasicException.Code.ASSERTION_FAILURE,
-					                        "Unexpected multiplicity",
-					                        new BasicException.Parameter("multiplicity", multiplicity)
-					                    );
-					            }
+                                MappedRecord map = (MappedRecord)values;
+                                this.index = attributes.getValue("index");
+                                map.put(this.index, mappedRecord);					            
 					        }
 					    }
 					}
@@ -699,72 +706,122 @@ public class RestParser {
 					     this.id = id;
 					}
 					this.values.push(mappedRecord);
-                } else if (ITEM_TAG.equals(qName)) {
+                } else if(ITEM_TAG.equals(qName)) {
                     this.index = attributes.getValue("index");
                     final String featureType = attributes.getValue("type");
                     if(featureType != null) {
-                    	this.featureType = featureType;
+                        this.featureType = featureType;
                     }
                 } else {
-                    this.featureName = localName;
-                    final String recordName = this.values.peek().getRecordName();
-                    final String type = attributes.getValue("type");
-                    ModelElement_1_0 featureDef = getFeatureDef(
-                		recordName,
-                		this.featureName
-            		);
-                    if(type == null) {
-                    	this.featureType = getFeatureType(featureDef);
-                    } else {
-                    	this.featureType = type;
+                    if(this.featureName != null) {
+                        this.featureNames.push(this.featureName);
+                        this.featureTypes.push(this.featureType);
                     }
+                    this.featureName = localName;
+                    this.featureType = typeName;
                     this.multiplicity = getMultiplicity(featureDef);
-                    switch(this.multiplicity) {
-	                    case LIST: case SET: {
-	                    	final MappedRecord holder = (MappedRecord) this.values.peek();
-	                    	this.value = (Record) holder.get(this.featureName);
-	                    	if(this.value == null) {
-								final Multiplicity multiplicity2 = this.multiplicity;
-								holder.put(
-								    this.featureName, 
-								    this.value = newIndexedRecord(multiplicity2)
-								);
-	                    	} else {
-	                    		((IndexedRecord)this.value).clear();
-	                    	}
-	                        this.values.push(this.value);
-	                        break;
-	                    }
-	                    case SPARSEARRAY: {
-	                    	final MappedRecord holder = (MappedRecord) this.values.peek();
-	                    	this.value = (Record) holder.get(this.featureName);
-	                    	if(this.value == null) {
-		                        holder.put(
-	                                this.featureName, 
-	                                this.value = newMappedRecord(this.multiplicity)
-	                            );
-	                    	} else {
-	                    		((MappedRecord)this.value).clear();
-	                    	}
-                            this.values.push(this.value);
-	                        break;
-	                    }
-	                    case OPTIONAL: {
-	                    	final MappedRecord holder = (MappedRecord) this.values.peek();
-	                    	this.value = (Record) holder.get(this.featureName);
-	                    	if(this.value == null && !holder.containsKey(this.featureName)) {
-		                        holder.put(
-		                        	this.featureName, 
-		                        	this.value
-		                        );
-	                    	}
-	                        break;
-	                    }
-	                    default:
-	                        this.value = null;
+                    if(this.isStructureType(typeName)) {
+                        this.value = this.newMappedRecord(typeName);
+                        switch(this.multiplicity) {
+                            case OPTIONAL:
+                            case SINGLE_VALUE: {                    
+                                ((MappedRecord)this.values.peek()).put(
+                                    this.featureName, 
+                                    this.value
+                                );
+                                break;
+                            }
+                            case SET: {
+                                IndexedRecord set = (IndexedRecord)((MappedRecord)this.values.peek()).get(this.featureName);
+                                if(set == null) {
+                                    ((MappedRecord)this.values.peek()).put(
+                                        this.featureName, 
+                                        set = newIndexedRecord(this.multiplicity) 
+                                    );
+                                }
+                                set.add(this.value);
+                                break;
+                            }
+                            case LIST: {
+                                IndexedRecord list = (IndexedRecord)((MappedRecord)this.values.peek()).get(this.featureName);
+                                if(list == null) {
+                                    ((MappedRecord)this.values.peek()).put(
+                                        this.featureName, 
+                                        list = newIndexedRecord(this.multiplicity)
+                                    );
+                                }
+                                list.add(this.value);
+                                break;
+                            }
+                            case SPARSEARRAY: case MAP: {
+                                MappedRecord map = (MappedRecord)((MappedRecord)this.values.peek()).get(this.featureName);
+                                if(map == null) {
+                                    ((MappedRecord)this.values.peek()).put(
+                                        this.featureName, 
+                                        map = newMappedRecord(this.featureType) 
+                                    );
+                                }
+                                this.index = attributes.getValue("index");
+                                map.put(this.index, this.value);                                                              
+                                break;
+                            }
+                            default:
+                                throw new ServiceException(
+                                    BasicException.Code.DEFAULT_DOMAIN,
+                                    BasicException.Code.ASSERTION_FAILURE,
+                                    "Unexpected multiplicity",
+                                    new BasicException.Parameter("multiplicity", multiplicity)
+                                );
+                        }
+                        this.values.push(this.value);
+                    } else {
+                        switch(this.multiplicity) {
+    	                    case LIST: case SET: {
+    	                    	final MappedRecord holder = (MappedRecord) this.values.peek();
+    	                    	this.value = (Record) holder.get(this.featureName);
+    	                    	if(this.value == null) {
+    								final Multiplicity multiplicity2 = this.multiplicity;
+    								holder.put(
+    								    this.featureName, 
+    								    this.value = newIndexedRecord(multiplicity2)
+    								);
+    	                    	} else {
+    	                    		((IndexedRecord)this.value).clear();
+    	                    	}
+    	                        this.values.push(this.value);
+    	                        break;
+    	                    }
+    	                    case SPARSEARRAY: {
+    	                    	final MappedRecord holder = (MappedRecord) this.values.peek();
+    	                    	this.value = (Record) holder.get(this.featureName);
+    	                    	if(this.value == null) {
+    		                        holder.put(
+    	                                this.featureName, 
+    	                                this.value = newMappedRecord(this.multiplicity)
+    	                            );
+    	                    	} else {
+    	                    		((MappedRecord)this.value).clear();
+    	                    	}
+                                this.values.push(this.value);
+    	                        break;
+    	                    }
+    	                    case OPTIONAL: {
+    	                    	final MappedRecord holder = (MappedRecord) this.values.peek();
+    	                    	this.value = (Record) holder.get(this.featureName);
+    	                    	if(this.value == null && !holder.containsKey(this.featureName)) {
+    		                        holder.put(
+    		                        	this.featureName, 
+    		                        	this.value
+    		                        );
+    	                    	}
+    	                        break;
+    	                    }
+    	                    default:
+    	                        this.value = null;
+                        }
                     }
                 }
-            } catch (ServiceException exception) {
+            } catch (Exception exception) {
                 throw new SAXException(exception);
             }
         }

@@ -1,0 +1,112 @@
+<!--
+@license
+Copyright (c) 2015 Abdón Rodríguez Davila (@abdonrd). All rights reserved.
+This code may only be used under the MIT license.
+-->
+
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="moment-import.html">
+
+<!--
+Polymer element wrapper for the [moment](https://github.com/moment/moment) library.
+
+Examples:
+
+    <moment-element></moment-element>
+    <moment-element datetime="1991-12-31" output-format="MMM DD[,] YYYY"></moment-element>
+
+@demo demo/index.html
+-->
+
+<dom-module id="moment-element">
+  <template>
+
+  </template>
+
+  <script>
+    Polymer({
+      is: 'moment-element',
+
+      properties: {
+        /**
+         * The input datetime. If don't set the datetime, the datetime will be now.
+         * For consistent results, parsing anything other than ISO 8601 strings
+         * with the `inputFormat` property. More information in [moment String](http://momentjs.com/docs/#/parsing/string/).
+         */
+        datetime: String,
+
+        /**
+         * The datetime input format. An string using the
+         * [moment String + Format](http://momentjs.com/docs/#/parsing/string-format/).
+         */
+        inputFormat: String,
+
+        /**
+         * The datetime output format. Options are 'now' or datetime using the
+         * [moment Format](http://momentjs.com/docs/#/displaying/format/).
+         */
+        outputFormat: String,
+
+        /**
+         * Calendar will format a date with different strings depending on how
+         * close to referenceTime's date (today by default) the date is. More
+         * information in [moment Calendar time](http://momentjs.com/docs/#/displaying/calendar-time/)
+         */
+        calendar: String,
+
+        /**
+         * Relative time using [momen time from now](http://momentjs.com/docs/#/displaying/fromnow/)
+         * or [momen Time from datetime](http://momentjs.com/docs/#/displaying/from/).
+         */
+        from: String,
+
+        /**
+         * Relative time using [momen Time to now](http://momentjs.com/docs/#/displaying/tonow/)
+         * or [momen Time to datetime](http://momentjs.com/docs/#/displaying/to/).
+         */
+        to: String,
+
+        /**
+         * The output datetime.
+         */
+        output: String
+      },
+
+      ready: function() {
+        if (this.datetime && this.inputFormat) {
+          this.output = moment(this.datetime, this.inputFormat);
+        } else if (this.datetime) {
+          this.output = moment(this.datetime);
+        } else {
+          this.output = moment();
+        }
+
+        if (this.outputFormat) {
+          this.output = this.output.format(this.outputFormat);
+        }
+
+        if (this.from) {
+          if (this.from === 'now') {
+            this.output = this.output.fromNow();
+          } else {
+            this.output = this.output.from(moment(this.from));
+          }
+        }
+
+        if (this.to) {
+          if (this.to === 'now') {
+            this.output = this.output.toNow();
+          } else {
+            this.output = this.output.to(moment(this.to));
+          }
+        }
+
+        if (this.calendar === '') {
+          this.output = moment().calendar();
+        }
+
+        Polymer.dom(this.root).innerHTML = this.output;
+      }
+    });
+  </script>
+</dom-module>

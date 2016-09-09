@@ -660,15 +660,10 @@ class Container_1
 				core = jdoGetPersistenceManager().getObjectById(objectId);
 			}
 			if(core instanceof DataObject_1) {
-				final Container_1_0 aspects = ((DataObject_1)core).getAspects(this);
-				if(aspects != null) {
-					new org.openmdx.base.rest.spi.QueryFilterRecord(
-						filter.getCondition().subList(0, 1),
-						filter.getOrderSpecifier(),
-						filter.getExtension()
-					);
-					return aspects.subMap(filter);
-				}
+				final DataObject_1 aspectCapable = (DataObject_1)core;
+				aspectCapable.getAspects(this); 
+				final String aspectType = Aspects.getAspectType((String)filter.getCondition().get(0).getValue(0));
+				return (Container_1_0)aspectCapable.getAspect(aspectType);
 			}
 		}
 		return super.subMap(filter);

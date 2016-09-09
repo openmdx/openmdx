@@ -229,7 +229,7 @@ public class Model_2 extends AbstractRestPort {
 	    	String feature,
 	    	Object element
 	    ) throws ResourceException{
-	    	final IndexedRecord set = (IndexedRecord) object.getValue().get(feature);
+	    	final List set = (List<?>) object.getValue().get(feature);
 	    	if(set == null) {
 	    		object.getValue().put(
 	    			feature,
@@ -365,7 +365,7 @@ public class Model_2 extends AbstractRestPort {
 	        Map<Path,ObjectRecord> elements
 	    ) throws ResourceException {
 	        Set<Path> allSupertype = new TreeSet<Path>();
-	        List<Path> supertypes = (IndexedRecord) classifier.getValue().get("supertype");
+	        List<Path> supertypes = (List<Path>) classifier.getValue().get("supertype");
 	        if(supertypes != null){
 	        	for(Path supertypeId : supertypes) {
 		        	ObjectRecord supertype = elements.get(supertypeId);
@@ -403,14 +403,14 @@ public class Model_2 extends AbstractRestPort {
 	    ) throws ResourceException {    
 	        // clear feature subtype
 	        for(ObjectRecord classifier : classifiers.values()) {
-	        	final IndexedRecord subtypeIds = (IndexedRecord) classifier.getValue().get("subtype");
+	        	final List<Path> subtypeIds = (List<Path>) classifier.getValue().get("subtype");
 	        	if(subtypeIds != null) {
 	        		subtypeIds.clear();
 	        	}
 	        }
 	        // recalc subtype
 	        for(ObjectRecord classifier : classifiers.values()) {
-	        	List<Path> supertypes = (IndexedRecord) classifier.getValue().get("supertype");
+	        	List<Path> supertypes = (List<Path>) classifier.getValue().get("supertype");
 	            if(supertypes != null){
 	            	for(Path supertypeId : supertypes){
 					    ObjectRecord supertype = classifiers.get(supertypeId);
@@ -435,7 +435,7 @@ public class Model_2 extends AbstractRestPort {
 	    ) throws ResourceException {    
 	        // clear feature subtype
 	        for(ObjectRecord element : elements.values()){
-	        	final IndexedRecord values = (IndexedRecord) element.getValue().get("content");
+	        	final List<?> values = (List<?>) element.getValue().get("content");
 	        	if(values != null) {
 	        		values.clear();
 	        	}
@@ -460,7 +460,7 @@ public class Model_2 extends AbstractRestPort {
 	        // sort content by path
 	        // TODO: sort content by order as defined in model
 	        for(ObjectRecord container : elements.values())  {
-	        	final IndexedRecord values = (IndexedRecord) container.getValue().get("content");
+	        	final List values = (List<?>) container.getValue().get("content");
 	            if(values != null) {
 	                Collections.sort(values);
 	            }
@@ -479,10 +479,10 @@ public class Model_2 extends AbstractRestPort {
 	        Map<Path,ObjectRecord> elements
 	    ) throws ResourceException {
 	        final Set<Path> features = new TreeSet<Path>(); 
-	        final IndexedRecord supertypeIds = (IndexedRecord) classifier.getValue().get("allSupertype");
+	        final List<?> supertypeIds = (List<?>) classifier.getValue().get("allSupertype");
 	        for(Object supertypeId : supertypeIds){
 	        	final ObjectRecord supertype = elements.get(supertypeId);
-	        	final IndexedRecord featureIds = (IndexedRecord) supertype.getValue().get("content");
+	        	final List<?> featureIds = (List<?>) supertype.getValue().get("content");
 	            if(featureIds != null) { // TODO necessary?
 		            for(Object featureId : featureIds) {
 		            	final Path featurePath = (Path) featureId;
@@ -505,7 +505,7 @@ public class Model_2 extends AbstractRestPort {
 	        Map<Path,ObjectRecord> elements
 	    ) throws ResourceException {
 	        Set<Path> allSubtypes = new TreeSet<Path>();
-	        IndexedRecord subytpeIds = (IndexedRecord) classifier.getValue().get("subtype");
+	        List<?> subytpeIds = (List<?>) classifier.getValue().get("subtype");
 	        for(Object subtypeId : subytpeIds){
 	        	ObjectRecord subtype = elements.get(subtypeId);
 	            // classifier is member of its subtypes
@@ -553,7 +553,7 @@ public class Model_2 extends AbstractRestPort {
 	                                reference.getResourceIdentifier()
 	                            );
 	                            // set 'compositeReference' for all subtypes of type
-	                            IndexedRecord subtypeIds = (IndexedRecord) type.getValue().get("allSubtype");
+	                            List<?> subtypeIds = (List<?>) type.getValue().get("allSubtype");
 	                            for(Object subtypeId : subtypeIds) {
 	                                ObjectRecord subtype = classifiers.get(subtypeId);
 									subtype.getValue().put("compositeReference",
@@ -857,7 +857,7 @@ public class Model_2 extends AbstractRestPort {
 			    ZipOutputStream zip = new ZipOutputStream(
 			        bs = new ByteArrayOutputStream()         
 			    );
-			    final IndexedRecord requestedFormat = (IndexedRecord) input.getBody().get("format");
+			    final List requestedFormat = (List) input.getBody().get("format");
 			    List<String> formats = requestedFormat.isEmpty() ? STANDARD_FORMAT : requestedFormat;
 			    for(String format : formats) {
 			        Mapper_1_0 mapper = MapperFactory_1.create(format);

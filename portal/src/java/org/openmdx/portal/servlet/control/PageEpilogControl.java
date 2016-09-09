@@ -63,9 +63,9 @@ import org.openmdx.kernel.log.SysLog;
 import org.openmdx.portal.servlet.Action;
 import org.openmdx.portal.servlet.ApplicationContext;
 import org.openmdx.portal.servlet.CssClass;
+import org.openmdx.portal.servlet.UserSettings;
 import org.openmdx.portal.servlet.ViewPort;
 import org.openmdx.portal.servlet.attribute.DateValue;
-import org.openmdx.portal.servlet.component.EditObjectView;
 import org.openmdx.portal.servlet.component.ShowObjectView;
 import org.openmdx.portal.servlet.component.View;
 
@@ -139,7 +139,6 @@ public class PageEpilogControl extends Control implements Serializable {
             true, 
             app
         );        
-        boolean editMode = view instanceof EditObjectView;        
         // Init scripts
         p.write("<script language=\"javascript\" type=\"text/javascript\">");
         // Popup's for multi-valued attributes
@@ -557,9 +556,11 @@ public class PageEpilogControl extends Control implements Serializable {
 	        p.write("        el_field.id = 'editcodeField_';");
 	        p.write("        templateRow.parentNode.appendChild(newRow);");
 	        p.write("        newRow.style.display = 'block';");
+	        p.write("        var options = []");
 	        p.write("        for(j = 0; j < POPUP_OPTIONS.length; j++) {");
-	        p.write("          $('editcodeField_' + i).options[j] = new Option(POPUP_OPTIONS[j], POPUP_OPTIONS[j]);");
+	        p.write("          options.push('<option value=\"' + POPUP_OPTIONS[j] + '\">' + POPUP_OPTIONS[j] + '</option>');");
 	        p.write("        }");
+	        p.write("        jQuery('#editcodeField_' + i).html(options.join(''));");
 	        p.write("        $('editcodeIdx_' + i).appendChild(document.createTextNode(i + ':'));");
 	        p.write("        $('editcodeIsSelected_' + i).checked =  (value.length > 0) && (value != \"#NULL\");");
 	        p.write("        $('editcodeField_' + i).value = value != \"#NULL\" ? value : \"\";");
@@ -604,36 +605,43 @@ public class PageEpilogControl extends Control implements Serializable {
 	            }
 	            view.setMacro(null);
 	        }
-	        p.write("      jQuery(window).scroll(function(){");
-	        p.write("        var windowHeight = jQuery(window).height();");
-	        p.write("        if (windowHeight >= 480) {");
-	        p.write("          var scrollTop = jQuery(window).scrollTop();");
-	        p.write("          if (scrollTop > 150) {");
-	        p.write("            jQuery('#nav').addClass('OperationMenuFloat');");
-	        p.write("            if(jQuery(window).height() > jQuery('#OperationDialog').height() + 100) {");
-	        p.write("              jQuery('#OperationDialogPlaceHolder').css({'display':'block'});");
-	        p.write("              jQuery('#OperationDialogPlaceHolder').css({'height': jQuery('#OperationDialog').height() + 20});");
-	        p.write("              jQuery('#OperationDialog').addClass('modal-content OperationDialogFloat');");	        
-	        p.write("              jQuery('#OperationDialog').css({'width':'80%'});");
-	        p.write("            }");
-	        p.write("            if(jQuery(window).height() > jQuery('#UserDialog').height() + 100) {");
-	        p.write("              jQuery('#UserDialogPlaceHolder').css({'display':'block'});");
-	        p.write("              jQuery('#UserDialogPlaceHolder').css({'height': jQuery('#UserDialog').height() + 20});");
-	        p.write("              jQuery('#UserDialog').addClass('modal-content OperationDialogFloat');");
-	        p.write("              jQuery('#UserDialog').css({'width':'80%'});");
-	        p.write("            }");
-	        p.write("          } else {");
-	        p.write("            jQuery('#nav').removeClass('OperationMenuFloat');");
-	        p.write("            jQuery('#OperationDialog').removeClass('modal-content OperationDialogFloat');");
-	        p.write("            jQuery('#OperationDialog').attr('style','');");
-	        p.write("            jQuery('#OperationDialogPlaceHolder').css({'display':'none'});");
-	        p.write("            jQuery('#UserDialog').removeClass('modal-content OperationDialogFloat');");
-	        p.write("            jQuery('#UserDialog').attr('style','');");
-	        p.write("            jQuery('#UserDialogPlaceHolder').css({'display':'none'});");
-	        p.write("          }");
-	        p.write("        }");
-	        p.write("      });");
-	        p.write("    }");
+	        {
+	        	Boolean userDialogAnchored = Boolean.valueOf(
+	        		app.getSettings().getProperty(UserSettings.ANCHOR_USER_DIALOG.getName())
+	        	);
+	        	if(!Boolean.TRUE.equals(userDialogAnchored)) {
+			        p.write("      jQuery(window).scroll(function(){");
+			        p.write("        var windowHeight = jQuery(window).height();");
+			        p.write("        if (windowHeight >= 480) {");
+			        p.write("          var scrollTop = jQuery(window).scrollTop();");
+			        p.write("          if (scrollTop > 150) {");
+			        p.write("            jQuery('#nav').addClass('OperationMenuFloat');");
+			        p.write("            if(jQuery(window).height() > jQuery('#OperationDialog').height() + 100) {");
+			        p.write("              jQuery('#OperationDialogPlaceHolder').css({'display':'block'});");
+			        p.write("              jQuery('#OperationDialogPlaceHolder').css({'height': jQuery('#OperationDialog').height() + 20});");
+			        p.write("              jQuery('#OperationDialog').addClass('modal-content OperationDialogFloat');");	        
+			        p.write("              jQuery('#OperationDialog').css({'width':'80%'});");
+			        p.write("            }");
+			        p.write("            if(jQuery(window).height() > jQuery('#UserDialog').height() + 100) {");
+			        p.write("              jQuery('#UserDialogPlaceHolder').css({'display':'block'});");
+			        p.write("              jQuery('#UserDialogPlaceHolder').css({'height': jQuery('#UserDialog').height() + 20});");
+			        p.write("              jQuery('#UserDialog').addClass('modal-content OperationDialogFloat');");
+			        p.write("              jQuery('#UserDialog').css({'width':'80%'});");
+			        p.write("            }");
+			        p.write("          } else {");
+			        p.write("            jQuery('#nav').removeClass('OperationMenuFloat');");
+			        p.write("            jQuery('#OperationDialog').removeClass('modal-content OperationDialogFloat');");
+			        p.write("            jQuery('#OperationDialog').attr('style','');");
+			        p.write("            jQuery('#OperationDialogPlaceHolder').css({'display':'none'});");
+			        p.write("            jQuery('#UserDialog').removeClass('modal-content OperationDialogFloat');");
+			        p.write("            jQuery('#UserDialog').attr('style','');");
+			        p.write("            jQuery('#UserDialogPlaceHolder').css({'display':'none'});");
+			        p.write("          }");
+			        p.write("        }");
+			        p.write("      });");
+	        	}
+		        p.write("    }");
+	        }
         }
         p.write("</script>");
         // Generate div for each popup image

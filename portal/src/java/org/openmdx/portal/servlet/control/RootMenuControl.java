@@ -174,7 +174,7 @@ public class RootMenuControl extends Control implements Serializable {
             i++;
         }
         if(i < selectRootObjectAction.length) {
-            p.write("<li class=\"", CssClass.dropdown.toString(), "\"><a href=\"#\" class=\"", CssClass.dropdownToggle.toString(), "\" style=\"margin-top:2px;\" data-toggle=\"dropdown\" onclick=\"javascript:this.parentNode.hide=function(){};\"><button class=\"", CssClass.navbarToggle.toString(), "\" style=\"display:block;margin:0px;padding:0px;\"><span class=\"sr-only\">Show menu</span><span class=\"icon-bar\"></span><span class=\"icon-bar\"></span><span class=\"icon-bar\"></span></button></a>");
+            p.write("<li class=\"", CssClass.dropdown.toString(), "\" onclick=\"javascript:toggleMenu(this);\"><a href=\"#\" class=\"", CssClass.dropdownToggle.toString(), "\" style=\"margin-top:2px;\"><button class=\"", CssClass.navbarToggle.toString(), "\" style=\"display:block;margin:0px;padding:0px;\"><span class=\"sr-only\">Show menu</span><span class=\"icon-bar\"></span><span class=\"icon-bar\"></span><span class=\"icon-bar\"></span></button></a>");
             p.write("  <ul class=\"", CssClass.dropdownMenu.toString(), "\" role=\"menu\">");
             while(i < selectRootObjectAction.length) {
                 Action action = selectRootObjectAction[i];

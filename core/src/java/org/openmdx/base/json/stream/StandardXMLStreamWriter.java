@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2014, OMEX AG, Switzerland
+ * Copyright (c) 2014-2016, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -68,14 +68,16 @@ import javax.xml.stream.XMLStreamException;
 public class StandardXMLStreamWriter extends AbstractXMLStreamWriter {
     
 	private static final String MIXED_CONTENT_VALUE_KEY = "$";
-	private StandardNamespaceConvention convention;
+    private static final String OBJECTS_KEY = "objects";
+	StandardNamespaceConvention convention;
 	protected Writer writer;
 	private NamespaceContext namespaceContext;
+
 	/**
 	 * What key is used for text content, when an element has both text and
 	 * other content?
 	 */
-	private String valueKey = MIXED_CONTENT_VALUE_KEY;
+	String valueKey = MIXED_CONTENT_VALUE_KEY;
 	/** Stack of open elements. */
 	private Stack<JSONProperty> stack = new Stack<JSONProperty>();
 	/** Element currently being processed. */
@@ -108,6 +110,7 @@ public class StandardXMLStreamWriter extends AbstractXMLStreamWriter {
 
 	/**
 	 * Property with a String value.
+	 * 
 	 */
 	private final class JSONPropertyString extends JSONProperty {
 		private StringBuilder object = null;
@@ -171,6 +174,7 @@ public class StandardXMLStreamWriter extends AbstractXMLStreamWriter {
 
 	/**
 	 * Property with a JSONObject value.
+	 * 
 	 */
 	private final class JSONPropertyObject extends JSONProperty {
 	    private JSONObject object;
@@ -251,7 +255,8 @@ public class StandardXMLStreamWriter extends AbstractXMLStreamWriter {
 	    Writer writer
 	) {
 		super();
-	    this.serializeAsArray("objects");
+	    this.serializeAsArray(OBJECTS_KEY);
+	    this.serializeAsArray("_item");
 		this.convention = convention;
 		this.writer = writer;
 		this.namespaceContext = convention;
@@ -297,7 +302,7 @@ public class StandardXMLStreamWriter extends AbstractXMLStreamWriter {
 		stack.push(current);
 		// Map object-elements to key "objects" and the type to the attribute "type"
 		if(local.indexOf(".") > 0) {
-	        current = new JSONPropertyString("objects");
+	        current = new JSONPropertyString(OBJECTS_KEY);
 	        JSONPropertyString prop = new JSONPropertyString(
 	            convention.createAttributeKey("", ns, "type")
 	        );
@@ -375,7 +380,48 @@ public class StandardXMLStreamWriter extends AbstractXMLStreamWriter {
 	}
 
 	/**
+	 * Normalize JSON object. Map p: { objects: [] } to p: [] for index properties
+	 * and to p: {} for non-indexed properties
+	 * 
+	 * @param root
+	 * @return
+	 * @throws JSONException
+	 */
+	private Object normalizeJSONObject(
+	    Object root
+	) throws JSONException {
+	    if(root instanceof JSONArray) {
+	        JSONArray arr = (JSONArray)root;
+	        for(int i = 0; i < arr.length(); i++) {
+	            arr.put(i, this.normalizeJSONObject(arr.get(i)));
+            }
+	    } else if(root instanceof JSONObject) {
+	        JSONObject object = (JSONObject)root;
+	        if(object.length() == 1 && object.has(OBJECTS_KEY)) {
+                String indexKey = convention.createAttributeKey("", null, "index");
+	            if(object.get(OBJECTS_KEY) instanceof JSONArray) {
+	                JSONArray arr = object.getJSONArray(OBJECTS_KEY);
+	                return this.normalizeJSONObject(
+	                    arr.length() == 1 && !arr.getJSONObject(0).has(indexKey) ? arr.getJSONObject(0) : arr
+	                );
+	            } else if(object.get(OBJECTS_KEY) instanceof JSONObject) {
+	                JSONObject obj = object.getJSONObject(OBJECTS_KEY);
+	                return this.normalizeJSONObject(
+	                    obj.has(indexKey) ? new JSONArray().put(obj) : obj
+	                );
+	            }
+	        } else {
+        	    for(String key: object.keySet()) {
+        	        object.put(key, this.normalizeJSONObject(object.opt(key)));
+        	    }
+    	    }
+	    }
+	    return root;
+	}
+
+	/**
 	 * For clients who want to modify the output object before writing to override.
+	 * 
 	 */
 	protected void writeJSONObject(
 	    JSONObject root
@@ -383,20 +429,13 @@ public class StandardXMLStreamWriter extends AbstractXMLStreamWriter {
 		try {
 			if(root == null) {
 			    writer.write("null");
-			} else if(root.length() == 1 && root.has("objects")) {
-			    if(root.get("objects") instanceof JSONArray) {
-                    JSONArray array = root.getJSONArray("objects");
-                    if(array.length() == 1) {
-                        array.getJSONObject(0).write(writer);
-                    } else {
-                        array.write(writer);
-                    }
-			    } else {
-	                 JSONObject object = root.getJSONObject("objects");
-	                 object.write(writer);			        
-			    }
 			} else {
-			    root.write(writer);
+			    Object obj = this.normalizeJSONObject(root);
+			    if(obj instanceof JSONArray) {
+			        ((JSONArray)obj).write(writer);
+			    } else if(obj instanceof JSONObject) {
+			        ((JSONObject)obj).write(writer);
+			    }
 			}
 		} catch (JSONException e) {
 			throw new XMLStreamException(e);

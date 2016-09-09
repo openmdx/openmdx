@@ -1,0 +1,52 @@
+.card-header {
+	background-color: #3f51b5;
+	color: white;
+}
+.face {
+	fill: var(--divider-color);
+	cursor: default;
+}
+.line {
+	stroke-width: 2;
+}
+.dot {
+	fill: var(--default-primary-color);
+}
+.line {
+	stroke: var(--default-primary-color);
+}
+.clock-hand {
+	z-index: 1;
+}
+.disc-large {
+	z-index: 2;
+	fill: var(--default-primary-color);
+}
+.clock-hand.no-dot .disc-small {
+	fill: none;
+	stroke: none;
+}
+.major0 {
+	fill: var(--primary-text-color);
+	pointer-events: none;
+	dominant-baseline: central;
+	text-align: center;
+	text-anchor: middle;
+	font-size: 16px;
+}
+.major1 {
+	fill: var(--primary-text-color);
+	pointer-events: none;
+	dominant-baseline: central;
+	text-align: center;
+	text-anchor: middle;
+	font-size: 11px;
+}
+.minor0 {
+	fill: var(--primary-text-color);
+	pointer-events: none;
+	dominant-baseline: central;
+	text-align: center;
+	text-anchor: middle;
+	font-size: 9px;
+}

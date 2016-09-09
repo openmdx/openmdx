@@ -108,27 +108,28 @@ org.openmdx.base.naming.*
 	<meta name="viewport" content="width=device-width, initial-scale=<%= app.getInitialScale() %>">
 	
 	<!-- Styles -->
-	<link rel="stylesheet" href="javascript/bootstrap/css/bootstrap.min.css">
+	<link rel="stylesheet" href="js/bootstrap/css/bootstrap.min.css">
 	<link rel="stylesheet" href="_style/ssf.css" >
 	<link rel="stylesheet" href="_style/n2default.css" >
 	<link rel="stylesheet" href="_style/colors.css">
 	<link rel="stylesheet" href="_style/calendar-small.css">
-	<link rel="stylesheet" href="javascript/wiky/wiky.css" >
-	<link rel="stylesheet" href="javascript/wiky/wiky.lang.css" >
-	<link rel="stylesheet" href="javascript/wiky/wiky.math.css" >
-	<link rel="stylesheet" href="javascript/yui/build/assets/skins/sam/container.css" >
+	<link rel="stylesheet" href="js/wiky/wiky.css" >
+	<link rel="stylesheet" href="js/wiky/wiky.lang.css" >
+	<link rel="stylesheet" href="js/wiky/wiky.math.css" >
+	<link rel="stylesheet" href="js/yui/build/assets/skins/sam/container.css" >
 	<link rel='shortcut icon' href='images/favicon.ico' />
 
 	<!-- Libraries -->
-    <script src="javascript/prototype.js"></script>
-    <script src="javascript/jquery/jquery.min.js"></script>
+    <script src="js/prototype.js"></script>
+    <script src="js/jquery/jquery.min.js"></script>
 	<script>
 	  $.noConflict();
 	</script>
-    <script src="javascript/bootstrap/js/bootstrap.min.js"></script>
-	<script src="javascript/portal-all.js"></script>
-	<script src="javascript/calendar/lang/calendar-<%= app.getCurrentLocaleAsString() %>.js"></script>
-	<!--[if lt IE 7]><script type="text/javascript" src="javascript/iehover-fix.js"></script><![endif]-->
+    <script src="js/bootstrap/js/bootstrap.min.js"></script>
+	<script src="js/polymer/components/webcomponentsjs/webcomponents-lite.min.js"></script>    
+	<script src="js/portal-all.js"></script>
+	<script src="js/calendar/lang/calendar-<%= app.getCurrentLocaleAsString() %>.js"></script>
+	<!--[if lt IE 7]><script type="text/javascript" src="js/iehover-fix.js"></script><![endif]-->
 	<script language="javascript" type="text/javascript">
 		var OF = null;
 		try {

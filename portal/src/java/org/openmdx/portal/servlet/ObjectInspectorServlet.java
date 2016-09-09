@@ -210,7 +210,25 @@ public class ObjectInspectorServlet extends HttpServlet {
     ) throws NamingException, ServiceException {
         return JDOHelper.getPersistenceManagerFactory("EntityManagerFactory");
     }
-      
+    
+    /**
+     * Get code segment.
+     * 
+     * @return
+     * @throws ServiceException
+     */
+    protected RefObject_1_0 getCodeSegment(
+    ) throws ServiceException {
+        this.codeSegmentIdentity = new Path(this.getInitParameter("codeSegment"));
+        PersistenceManager pm = this.createPersistenceManagerData(
+            Arrays.asList(this.portalExtension.getAdminPrincipal(this.codeSegmentIdentity.getSegment(4).toClassicRepresentation()))
+        );
+        RefObject_1_0 codeSegment = this.codeSegmentIdentity == null 
+        	? null 
+        	: (RefObject_1_0)pm.getObjectById(this.codeSegmentIdentity);
+        return codeSegment;
+    }
+
     /* (non-Javadoc)
      * @see javax.servlet.GenericServlet#init(javax.servlet.ServletConfig)
      */
@@ -340,14 +358,7 @@ public class ObjectInspectorServlet extends HttpServlet {
         // Codes
         this.codes = null;
         try {
-            this.codeSegmentIdentity = new Path(this.getInitParameter("codeSegment"));
-            PersistenceManager pm = this.createPersistenceManagerData(
-                Arrays.asList(
-                	this.portalExtension.getAdminPrincipal(this.codeSegmentIdentity.getSegment(4).toClassicRepresentation())
-                )
-            );
-            RefObject_1_0 codeSegment = this.codeSegmentIdentity == null ? null : 
-            	(RefObject_1_0)pm.getObjectById(this.codeSegmentIdentity);
+        	RefObject_1_0 codeSegment = this.getCodeSegment(); 
             if(codeSegment != null) {
                 this.codes = new Codes(codeSegment);
             }
@@ -1040,7 +1051,17 @@ public class ObjectInspectorServlet extends HttpServlet {
                         ).loadCodes(
                             this.locales
                         );
-                        this.codes.refresh();
+                        if(this.codes == null) {
+                        	try {
+	                        	RefObject_1_0 codeSegment = this.getCodeSegment();
+	                        	if(codeSegment != null) {
+	                                this.codes = new Codes(codeSegment);
+	                            }
+                        	} catch(Exception ignore) {}
+                        }
+                        if(this.codes != null) {
+                        	this.codes.refresh();
+                        }
                     } catch(ServiceException e) {
                     	this.log("Loading Codes failed", e);
                     }

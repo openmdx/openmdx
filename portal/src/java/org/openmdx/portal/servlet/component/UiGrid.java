@@ -57,6 +57,7 @@ import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
@@ -334,7 +335,10 @@ public abstract class UiGrid extends Grid implements Serializable {
         } else {
             String containerId = control.getContainerId();
             String baseFilterId = containerId.substring(containerId.indexOf("Ref:") + 4);
-            Filters filters = app.getFilters(
+            Filters filters0 = app.getFilters(
+            	control.getQualifiedReferenceTypeName()
+            );
+            Filters filters1 = app.getFilters(
                 control.getQualifiedReferenceName()
             );
             // Default filter
@@ -395,10 +399,14 @@ public abstract class UiGrid extends Grid implements Serializable {
 	                defaultFilter.setIconKey(WebKeys.ICON_FILTER_DEFAULT);
                 }
             }
-            this.filters = filters.getPreparedFilters(
-                baseFilterId,
-                defaultFilter
-            );
+            Map<String,Filter> filters = new LinkedHashMap<String,Filter>();
+            for(Filter filter: filters0.getPreparedFilters(baseFilterId, defaultFilter)) {
+            	filters.put(filter.getName(), filter);
+            }
+            for(Filter filter: filters1.getPreparedFilters(baseFilterId, defaultFilter)) {
+            	filters.put(filter.getName(), filter);
+            }
+            this.filters = filters.values().toArray(new Filter[filters.size()]);
         }
         // Grid actions
         Model_1_0 model = app.getModel();

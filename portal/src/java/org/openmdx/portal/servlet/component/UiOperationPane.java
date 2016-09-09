@@ -148,7 +148,7 @@ public class UiOperationPane extends OperationPane implements Serializable {
         if(frame == null) {
             String toolTip = this.getToolTip();
             String id = this.getControl().getId();
-            p.write("<li id=\"", id, "-dropdown\" class=\"", CssClass.dropdown.toString(), "\"><a href=\"#\" class=\"", CssClass.dropdownToggle.toString(), "\" data-toggle=\"dropdown\" onclick=\"javascript:this.parentNode.hide=function(){};\">", toolTip, "</a>");
+            p.write("<li id=\"", id, "-dropdown\" class=\"", CssClass.dropdown.toString(), "\" onclick=\"javascript:toggleMenu(this);\"><a href=\"#!\" class=\"", CssClass.dropdownToggle.toString(), "\">", toolTip, "</a>");
             p.write("  <ul id=\"", id, "-menu\" class=\"", CssClass.dropdownMenu.toString(), "\" role=\"menu\" style=\"z-index:1010;\">");
             for(UiOperationTab tab: this.getChildren(UiOperationTab.class)) {
                 tab.paint(

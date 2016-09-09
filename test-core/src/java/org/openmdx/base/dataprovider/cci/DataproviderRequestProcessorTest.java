@@ -50,8 +50,7 @@ package org.openmdx.base.dataprovider.cci;
 import javax.resource.ResourceException;
 import javax.resource.cci.MappedRecord;
 
-import junit.framework.Assert;
-
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.openmdx.base.accessor.cci.SystemAttributes;

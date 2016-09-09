@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>openMDX 2 ~ Client (jre-1.7)</name>
+	<name>openMDX 2 ~ Client (jre-1.8)</name>
 	<comment></comment>
 	<projects>
 	</projects>
@@ -10,15 +10,31 @@
 			<arguments>
 			</arguments>
 		</buildCommand>
+		<buildCommand>
+			<name>edu.umd.cs.findbugs.plugin.eclipse.findbugsBuilder</name>
+			<arguments>
+			</arguments>
+		</buildCommand>
 	</buildSpec>
 	<natures>
 		<nature>org.eclipse.jdt.core.javanature</nature>
+		<nature>edu.umd.cs.findbugs.plugin.eclipse.findbugsNature</nature>
 	</natures>
 	<linkedResources>
 		<link>
+			<name>build</name>
+			<type>2</type>
+			<locationURI>PARENT-1-PROJECT_LOC/client/build</locationURI>
+		</link>
+		<link>
 			<name>deliverables</name>
 			<type>2</type>
-			<locationURI>PARENT-1-PROJECT_LOC/jre-1.7/client</locationURI>
+			<locationURI>PARENT-1-PROJECT_LOC/jre-1.8/client</locationURI>
+		</link>
+		<link>
+			<name>src</name>
+			<type>2</type>
+			<locationURI>PARENT-1-PROJECT_LOC/client/src</locationURI>
 		</link>
 	</linkedResources>
 </projectDescription>

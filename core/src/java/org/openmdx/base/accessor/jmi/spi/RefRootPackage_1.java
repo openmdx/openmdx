@@ -147,6 +147,7 @@ import org.openmdx.base.resource.Records;
 import org.openmdx.base.rest.cci.QueryRecord;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.jdo.ReducedJDOHelper;
+import org.openmdx.kernel.loading.Classes;
 import org.openmdx.kernel.loading.Factory;
 import org.w3c.jpa3.AbstractObject;
 import org.w3c.spi.StateAccessor;
@@ -2236,7 +2237,7 @@ public class RefRootPackage_1
                             )
                         );
                         try {
-                            for(Method method : jpaClass.getMethods()) {
+                            for(Method method: Classes.getOrderedMethods(jpaClass)) {
                                 if(
                                     method.getName().equals(set) &&
                                     (method.getParameterTypes().length == 1) &&

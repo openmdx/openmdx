@@ -219,7 +219,7 @@ public class UiWizardTabControl extends UiOperationTabControl implements Seriali
             	WebKeys.PERMISSION_REVOKE_EDIT
             ); 
             if(!isRevokeShow && !isRevokeEdit) {
-                if(this.wizardDefinition.getOpenParameter().length() > 0) {
+                if(this.wizardDefinition.getOpenParameter() != null && !this.wizardDefinition.getOpenParameter().isEmpty()) {
                     p.write("    <li><a href=\"javascript:void(0)\" onclick=\"javascript:window.open('.", this.getOperationName(), "?", Action.PARAMETER_OBJECTXRI, "=", encodedObjectXri, "&", Action.PARAMETER_REQUEST_ID, "=", view.getRequestId(), "', '", this.getOperationName(), "', '", this.wizardDefinition.getOpenParameter(), "');\" id=\"op", Integer.toString(tabId), "\">", this.getName(), "...</a></li>");                    
                 } else {
                     String parameters = null;

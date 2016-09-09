@@ -103,26 +103,20 @@ public class CreateAction extends BoundAction {
 	        ApplicationContext app = editView.getApplicationContext();
 	        {
 	            Map<String,Attribute> attributeMap = new HashMap<String,Attribute>();    
-	            boolean hasErrors;
+	            boolean success = false;
 	            try {
-	                editView.storeObject(
+	                success = editView.storeObject(
 	                	requestParameters,
 	                    attributeMap,
 	                    true
 	                );
-	                List<String> errorMessages = app.getErrorMessages();
-	                hasErrors = !errorMessages.isEmpty();
-	                if(hasErrors) {
-	                    errorMessages.clear();                        
-	                }
 	            } catch(Exception e) {
 	                ServiceException e0 = new ServiceException(e);
 	                SysLog.warning(e0.getMessage(), e0.getMessage());
 	                SysLog.warning(e0.getMessage(), e0.getCause());
 	                editView.handleCanNotCommitException(e0.getCause());                    
-	                hasErrors = true;
 	            }
-	            if(hasErrors) {
+	            if(!success) {
 	                try {
 	                    RefObject_1_0 workObject = null;
 	                    try {
@@ -131,9 +125,10 @@ public class CreateAction extends BoundAction {
 	                    } catch(Exception e) {
 	                        // If cloning fails, create a new empty instance
 	                    	workObject = (RefObject_1_0)editView.getObject().refClass().refCreateInstance(null);                        	
-	                        workObject.refInitialize(false, false);
+	                        workObject.refInitialize(false, false, false);
 	                    }
 	                    // Initialize with received attribute values. This also updates the error messages
+		                app.getErrorMessages().clear();                        
 	                    app.getPortalExtension().updateObject(
 	                        workObject,
 	                        requestParameters,

@@ -1,0 +1,223 @@
+<!-- 
+====================================================================
+Project:     openMDX/Portal, http://www.openmdx.org/
+Description: portal-autocomplete-input.html
+Owner:       OMEX AG, Switzerland, http://www.omex.ch
+====================================================================
+
+This software is published under the BSD license
+as listed below.
+
+Copyright (c) 2004-2015, OMEX AG, Switzerland
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or
+without modification, are permitted provided that the following
+conditions are met:
+
+* Redistributions of source code must retain the above copyright
+notice, this list of conditions and the following disclaimer.
+
+* Redistributions in binary form must reproduce the above copyright
+notice, this list of conditions and the following disclaimer in
+the documentation and/or other materials provided with the
+distribution.
+
+* Neither the name of the openMDX team nor the names of its
+contributors may be used to endorse or promote products derived
+from this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
+CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
+INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS
+BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED
+TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+POSSIBILITY OF SUCH DAMAGE.
+
+------------------
+
+This product includes software developed by the Apache Software
+Foundation (http://www.apache.org/).
+
+-->
+<link rel="import" href="../../../../polymer/components/polymer/polymer.html">
+<link rel="import" href="../../../../polymer/components/iron-ajax/iron-ajax.html">
+<link rel="import" href="../../../../polymer/components/paper-item/paper-item.html">
+<link rel="import" href="../../../../polymer/components/paper-button/paper-button.html">
+<link rel="import" href="../../../../polymer/components/iron-input/iron-input.html">
+<link rel="import" href="../../../../polymer/components/iron-a11y-keys/iron-a11y-keys.html">
+<dom-module id="portal-autocomplete-input">
+	<link rel="import" type="css" href="portal-autocomplete-input.css">
+	<template>
+	    <iron-ajax
+	    	id="ajaxGetData" 
+	    	url="{{url}}"
+	    	contenttype="application/json"
+	    	withcredentials=""
+	    	handle-as="json"
+	    	method="put"
+	    	on-response="ajaxGetDataResponse">
+	    </iron-ajax>
+		<iron-a11y-keys id="a11yUp" target="[[keyEventTarget]]" keys="up" on-keys-pressed="onKeyUp"></iron-a11y-keys>    
+		<iron-a11y-keys id="a11yDown" target="[[keyEventTarget]]" keys="down" on-keys-pressed="onKeyDown"></iron-a11y-keys>    
+		<iron-a11y-keys id="a11ySpace" target="[[keyEventTarget]]" keys="enter" on-keys-pressed="onKeyEnter"></iron-a11y-keys>    
+		<iron-a11y-keys id="a11yEsc" target="[[keyEventTarget]]" keys="esc escape" on-keys-pressed="onKeyEsc"></iron-a11y-keys>    
+		<input is="iron-input" id="input" bind-value="{{inputValue::input}}"></input>
+		<template id="itemSelector" is="dom-if" if="{{itemSelectorActive}}">		  
+		    <paper-material>
+				<template is="dom-repeat" items="{{data}}">
+					<template is="dom-if" if="{{itemSelected(index,selectedItemIndex)}}">
+						<paper-item class="iron-selected">
+							<paper-button on-tap="selectItem" style="padding:0;text-align:left;text-transform:none;">{{item.title}}</paper-button>		          
+						</paper-item>
+					</template>
+					<template is="dom-if" if="{{!itemSelected(index,selectedItemIndex)}}">
+						<paper-item>
+							<paper-button on-tap="selectItem" style="padding:0;text-align:left;text-transform:none;">{{item.title}}</paper-button>		          
+						</paper-item>
+					</template>
+				</template>
+		    </paper-material>
+		 </template>
+	</template>
+</dom-module>
+<script>
+/*
+ * Example:
+ * <portal-autocomplete-input label="Currency" url="{{url}}/data.json" selected-item="{{selectedItem}}"></portal-autocomplete-input>
+ * 
+ * data is an array of JSON objects having at least the attribute "title", e.g.
+ * [{"title":"A"},{"title":"AA"},{"title":"AAA"},{"title":"AAAA"},{"title":"AAAAA"}] 
+ *
+ * The selected element is returned in selected-item.
+ *
+ */
+Polymer({
+    is: 'portal-autocomplete-input',
+    properties: {
+    	url: {
+    		type: String,
+    		value: null
+    	},
+		inputValue: {
+	        type: String,
+	        observer: 'inputValueChanged',
+	        notify: true
+	    },
+		data: {
+	        type: Array,
+	        value: []
+		},
+		selectedItem: {
+			type: Object,
+			value: null,
+			notify: true,
+			observer: "selectedItemChanged"
+		},
+		selectedItemIndex: {
+			type: Number,
+			value: -1
+		},
+		itemSelectorActive: {
+	        type: Boolean,
+	        value: false
+	    },
+	    preventShowItemSelector: {
+	    	type: Boolean,
+	    	value: false
+	    }
+    },
+	keyEventTarget: {
+        type: Object,
+        value: function() {
+			return this.$.input;
+        }
+	},
+	ready: function() {
+	},
+	selectedItemChanged: function() {
+		if(this.selectedItem != null && this.selectedItem.title != null) {
+			// do not show item selector if selected-item is changed from 'outside'
+			this.preventShowItemSelector = true;
+			this.inputValue = this.selectedItem.title;
+		}
+	},
+	itemSelected: function(index, selectedItemIndex) {
+		return index == selectedItemIndex;
+	},
+	ajaxGetDataResponse: function (event, response) {
+        if(response != null && response.response != null) {
+		    var objs = response.response;
+		    if(objs) {
+				var data = [];
+				for(var i = 0; i < objs.length; i++) {
+					data.push(objs[i]);
+				}
+				this.data = data;
+				this.set('data', this.data);
+		    }
+		}
+    },
+    showItemSelector: function() {
+    	query = {"query": this.inputValue, "position": 0, "size": 20};
+    	this.$.ajaxGetData.body = JSON.stringify(query);
+    	this.$.ajaxGetData.generateRequest();
+		this.set('selectedItemIndex', 0);
+		this.set('itemSelectorActive', true);
+    },
+    hideItemSelector: function() {
+		this.set('itemSelectorActive', false);    	
+    },
+    inputValueChanged: function() {
+		if(this.inputValue != '') {
+			if(!this.preventShowItemSelector) {
+				this.showItemSelector();
+			}
+		} else {
+			this.hideItemSelector();
+			this.updateSelectedItem(null);
+		}
+		this.preventShowItemSelector = false;
+    },
+    updateSelectedItem: function(item) {
+    	this.selectedItem = item;
+    	if(item != null) {
+			this.inputValue = item.title;
+    	}
+    },
+    selectItem: function(event) {
+		this.updateSelectedItem(event.model.item);
+		this.hideItemSelector();
+    }, 
+    onKeyEsc: function(event) {
+		this.hideItemSelector();
+		event.detail.keyboardEvent.preventDefault();
+    },
+    onKeyUp: function(event) {
+		if(this.itemSelectorActive && this.selectedItemIndex > 0) {
+			this.set('selectedItemIndex', this.selectedItemIndex - 1);
+		}
+		event.detail.keyboardEvent.preventDefault();
+    },
+    onKeyDown: function(event) {
+		if(!this.itemSelectorActive) {
+			this.showItemSelector();
+		} else if(this.selectedItemIndex < this.data.length - 1) {
+			this.set('selectedItemIndex', this.selectedItemIndex + 1);
+		}
+		event.detail.keyboardEvent.preventDefault();
+    },
+    onKeyEnter: function(event) {
+		this.updateSelectedItem(this.data[this.selectedItemIndex]);
+		this.hideItemSelector();
+		event.detail.keyboardEvent.preventDefault();
+    }
+});
+</script>

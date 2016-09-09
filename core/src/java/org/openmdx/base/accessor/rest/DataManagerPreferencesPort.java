@@ -339,50 +339,67 @@ class DataManagerPreferencesPort implements Port<RestConnection> {
                 Map<String,ObjectRecord> preferencesContainer = new LinkedHashMap<String,ObjectRecord>();
                 DataManagerPreferencesPort.this.containers.put(PREFERENCES_ID, preferencesContainer);
                 for(Map.Entry<String,Port<RestConnection>> portEntry : raw.entrySet()) {
-                    Port<RestConnection> port = portEntry.getValue();
-                    if(port != DataManagerPreferencesPort.this){
-                        String name = portEntry.getKey();
-                        Path nodesId = addPreferences(preferencesContainer, name);
-                        //
-                        // Nodes
-                        //
-                        for(Map.Entry<Path, Port<RestConnection>> destinationEntry : destinations.entrySet()){
-                            if(destinationEntry.getValue() == port) {
-                                Map<String,ObjectRecord> nodesContainer = new LinkedHashMap<String,ObjectRecord>();
-                                DataManagerPreferencesPort.this.containers.put(nodesId, nodesContainer);
-                                QueryRecord query = newQuery(nodesId);
-                                Record nodes = port.getInteraction(connection).execute(
-                                    InteractionSpecs.getRestInteractionSpecs(false).GET,
-                                    query
-                                );
-                                for(Object rawNode : (IndexedRecord)nodes){
-                                    ObjectRecord node = (ObjectRecord) rawNode;
-                                    Path nodeId = node.getResourceIdentifier();
-                                    nodesContainer.put(nodeId.getLastSegment().toClassicRepresentation(), node);
-                                    //
-                                    // Entries
-                                    //
-                                    Path entriesId = nodeId.getChild("entry");
-                                    Map<String,ObjectRecord> entriesContainer = new LinkedHashMap<String,ObjectRecord>();
-                                    DataManagerPreferencesPort.this.containers.put(entriesId, entriesContainer);
-                                    Record entries = port.getInteraction(connection).execute(
-                                        InteractionSpecs.getRestInteractionSpecs(false).GET,
-                                        newObject(entriesId)
-                                    );
-                                    for(Object rawEntry : (IndexedRecord)entries){
-                                        ObjectRecord entry = (ObjectRecord) rawEntry;
-                                        Path entryId = entry.getResourceIdentifier();
-                                        entriesContainer.put(entryId.getLastSegment().toClassicRepresentation(), entry);
-                                    }
-                                }
-                            }
-                        }
-                    }
+                    getNodes(connection, preferencesContainer, portEntry);
                 }
                 
             }
             return DataManagerPreferencesPort.this.containers;
         }
+
+		private void getNodes(
+			RestConnection connection, 
+			Map<String, ObjectRecord> preferencesContainer,
+			Map.Entry<String, Port<RestConnection>> portEntry
+		) throws ResourceException {
+			Port<RestConnection> port = portEntry.getValue();
+			if(port != DataManagerPreferencesPort.this){
+			    String name = portEntry.getKey();
+			    Path nodesId = addPreferences(preferencesContainer, name);
+			    //
+			    // Nodes
+			    //
+			    for(Map.Entry<Path, Port<RestConnection>> destinationEntry : destinations.entrySet()){
+			        if(destinationEntry.getValue() == port) {
+			            Map<String,ObjectRecord> nodesContainer = new LinkedHashMap<String,ObjectRecord>();
+			            DataManagerPreferencesPort.this.containers.put(nodesId, nodesContainer);
+			            QueryRecord query = newQuery(nodesId);
+			            Record nodes;
+			            try {
+			                nodes = port.getInteraction(connection).execute(
+			                    InteractionSpecs.getRestInteractionSpecs(false).GET,
+			                    query
+			                );
+			            } catch (RuntimeException exception) {
+			            	exception.printStackTrace();
+			            	throw exception;
+			            } catch (ResourceException exception) {
+			            	exception.printStackTrace();
+			            	throw exception;
+			            }
+			            for(Object rawNode : (IndexedRecord)nodes){
+			                ObjectRecord node = (ObjectRecord) rawNode;
+			                Path nodeId = node.getResourceIdentifier();
+			                nodesContainer.put(nodeId.getLastSegment().toClassicRepresentation(), node);
+			                //
+			                // Entries
+			                //
+			                Path entriesId = nodeId.getChild("entry");
+			                Map<String,ObjectRecord> entriesContainer = new LinkedHashMap<String,ObjectRecord>();
+			                DataManagerPreferencesPort.this.containers.put(entriesId, entriesContainer);
+			                Record entries = port.getInteraction(connection).execute(
+			                    InteractionSpecs.getRestInteractionSpecs(false).GET,
+			                    newQuery(entriesId)
+			                );
+			                for(Object rawEntry : (IndexedRecord)entries){
+			                    ObjectRecord entry = (ObjectRecord) rawEntry;
+			                    Path entryId = entry.getResourceIdentifier();
+			                    entriesContainer.put(entryId.getLastSegment().toClassicRepresentation(), entry);
+			                }
+			            }
+			        }
+			    }
+			}
+		}
         
     }
  

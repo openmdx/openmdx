@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2014, OMEX AG, Switzerland
+ * Copyright (c) 2004-2016, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -61,7 +61,6 @@ import java.io.Reader;
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.text.ParseException;
-import java.util.AbstractCollection;
 import java.util.AbstractList;
 import java.util.AbstractMap;
 import java.util.AbstractSet;
@@ -147,12 +146,10 @@ import org.openmdx.base.mof.cci.Persistency;
 import org.openmdx.base.mof.cci.PrimitiveTypes;
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.naming.PathComponent;
-import org.openmdx.base.naming.TransactionalSegment;
 import org.openmdx.base.persistence.spi.PersistenceCapableCollection;
 import org.openmdx.base.persistence.spi.SharedObjects;
 import org.openmdx.base.query.Filter;
 import org.openmdx.base.query.IsInCondition;
-import org.openmdx.base.query.IsInstanceOfCondition;
 import org.openmdx.base.query.OrderSpecifier;
 import org.openmdx.base.query.Quantifier;
 import org.openmdx.base.query.SortOrder;
@@ -379,7 +376,7 @@ public class DataObject_1
      * Map instance life cycle event types to the corresponding listener
      */
     @SuppressWarnings("unchecked")
-    final static Class<? extends InstanceLifecycleListener>[] lifecycleListenerClass = new Class[8];
+    final static Class<? extends InstanceLifecycleListener>[] LIFECYCLE_LISTENER_CLASS = new Class[8];
     
     /**
      * The object's identity
@@ -502,7 +499,7 @@ public class DataObject_1
     /**
      * Map a data types's qualified name to its marshaller
      */
-    static final Map<String,Marshaller> dataTypeMarshaller = new HashMap<String,Marshaller>();
+    static final Map<String,Marshaller> DATA_TYPE_MARSHALLER = new HashMap<String,Marshaller>();
 
     private static final String ANONYMOUS_XRI = "";
     
@@ -697,6 +694,7 @@ public class DataObject_1
      * @exception   ServiceException
      *              if the information is unavailable
      */
+    @Override
     public String objGetClass(
     ) throws ServiceException {
         if(this.transactionalValuesRecordName == null) {
@@ -727,6 +725,7 @@ public class DataObject_1
      * @return    the object's identity;
      *            or null for transient objects
      */
+    @Override
     public Path jdoGetObjectId(
     ){
         return this.identity;
@@ -735,6 +734,7 @@ public class DataObject_1
     /* (non-Javadoc)
      * @see javax.jdo.spi.PersistenceCapable#jdoGetTransactionalObjectId()
      */
+    @Override
     public UUID jdoGetTransactionalObjectId(
     ) {
         return this.transientObjectId;
@@ -751,6 +751,7 @@ public class DataObject_1
      * @throws ServiceException 
      */
     @SuppressWarnings("unchecked")
+    @Override
     public Set<String> objDefaultFetchGroup(
     ) throws ServiceException{
         Set<String> result = new HashSet<String>();
@@ -972,15 +973,15 @@ public class DataObject_1
      * @see org.openmdx.base.accessor.cci.DataObject_1_0#getContainer(boolean)
      */
     public Container_1 getContainer(
-        boolean lazily
+        final boolean lazily
     ){
         if(this.container == null && this.jdoIsPersistent()) {
-            Path identity = this.jdoGetObjectId();
-            int size = identity.size() - 2;
+            final Path identity = this.jdoGetObjectId();
+            final int size = identity.size() - 2;
             if(size > 0) {
-                Path parentId = identity.getPrefix(size);
+                final Path parentId = identity.getPrefix(size);
                 if(!lazily || this.dataObjectManager.containsKey(parentId)) {
-                    DataObject_1_0 parent = this.dataObjectManager.getObjectById(parentId, false); 
+                    final DataObject_1_0 parent = this.dataObjectManager.getObjectById(parentId, false); 
                     if(!parent.objIsInaccessible()) try {
                         this.container = (Container_1) parent.objGetContainer(
                             identity.getSegment(size).toClassicRepresentation()
@@ -1021,19 +1022,13 @@ public class DataObject_1
      * 
      * @throws ServiceException 
      */
-    Container_1_0 getAspects(
+    @Override
+    public Container_1_0 getAspects(
     ) throws ServiceException{
-    	if(isAspect()) {
-    		DataObject_1 core = (DataObject_1) this.objGetValue("core");
-    		if(core != null) {
-    			this.aspects = core.getAspects();
-    		}
-    	} else {
-	        Container_1 container = this.getContainer(false);
-	        if(container != null) {
-	        	getAspects(container);
-	        }
-    	}
+        Container_1 container = this.getContainer(false);
+        if(container != null) {
+        	getAspects(container);
+        }
         return this.aspects;
     }
 
@@ -1049,13 +1044,21 @@ public class DataObject_1
 		            )
 		        )
 		    );
-		    if(this.aspects instanceof Selection_1 && isTransientOrNew()) {
-		        ((Selection_1)this.aspects).markAsEmpty();
+		    if(this.aspects instanceof Selection_1) {
+		    	final Selection_1 selection = (Selection_1)this.aspects;
+		    	if(isTransientOrNew()) {
+					selection.markAsEmpty();
+		    	}
 		    }
+		    
 		}
 		return this.aspects;
 	}
 
+    Container_1_0 aspects(){
+    	return this.aspects;
+    }
+    
     boolean isQualified(){
         return this.jdoIsPersistent() || this.qualifier != null;
     }
@@ -1219,6 +1222,7 @@ public class DataObject_1
      *
      * @return the clone
      */
+    @Override
     public DataObject_1_0 openmdxjdoClone(
     	String... exclude
     ) {
@@ -1256,6 +1260,7 @@ public class DataObject_1
      * @exception ServiceException
      *            if the move operation fails.
      */
+    @Override
     public void objMove(
         Container_1_0 there,
         String criteria
@@ -2390,6 +2395,7 @@ public class DataObject_1
      *         of work.
      * @throws ServiceException 
      */
+    @Override
     public boolean jdoIsDirty(
     ) {
         if(this.jdoIsNew() || this.jdoIsDeleted()) {
@@ -2408,6 +2414,7 @@ public class DataObject_1
      *
      * @return true if this instance is persistent.
      */
+    @Override
     public boolean jdoIsPersistent(
     ){
         return this.identity != null;
@@ -2419,6 +2426,7 @@ public class DataObject_1
      * @return <code>true</code> if the object is either persistent or has 
      * already been moved to a container
      */
+    @Override
     public boolean objIsContained(){
         return this.jdoIsPersistent() || this.container != null;
     }
@@ -2432,6 +2440,7 @@ public class DataObject_1
      * @return  true if this instance was made persistent in the current unit
      *          of work.
      */
+    @Override
     public boolean jdoIsNew(
     ){
         return this.created;
@@ -2490,6 +2499,7 @@ public class DataObject_1
      *
      * @return  true if this instance was deleted in the current unit of work.
      */
+    @Override
     public boolean jdoIsDeleted(
     ){
         return this.deleted;
@@ -2500,6 +2510,7 @@ public class DataObject_1
      *
      * @return  true if this instance belongs to the current unit of work.
      */
+    @Override
     public boolean jdoIsTransactional(
     ) {
         try {
@@ -2518,6 +2529,7 @@ public class DataObject_1
      *
      * @return  true if this instance is inaccessible
      */
+    @Override
     public boolean objIsInaccessible(
     ){
         return this.notFound != null || this.inaccessabilityReason != null;
@@ -2526,6 +2538,7 @@ public class DataObject_1
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.cci.DataObject_1_0#objDoesNotExist()
      */
+    @Override
     public boolean objDoesNotExist() {
         if(this.jdoIsPersistent() && objIsHollow()) try {
             this.objRetrieve(
@@ -2546,6 +2559,7 @@ public class DataObject_1
      *
      * @return Returns the inaccessibility reason
      */
+    @Override
     public ServiceException getInaccessibilityReason() {
         if(this.notFound != null && this.inaccessabilityReason == null) {
             this.inaccessabilityReason = new ServiceException(
@@ -2896,6 +2910,7 @@ public class DataObject_1
      * @exception   ServiceException
      *              if the object is not accessible
      */
+    @Override
     public void objSetValue(
         String feature,
         Object to
@@ -3069,6 +3084,7 @@ public class DataObject_1
      * @exception   ServiceException
      *              if the object is not accessible
      */
+    @Override
     public Object objGetValue(
         final String feature
     ) throws ServiceException {
@@ -3217,6 +3233,7 @@ public class DataObject_1
      *              if the feature's value is not a list
      */
     @SuppressWarnings("unchecked")
+    @Override
     public List<Object> objGetList(
         String feature
     ) throws ServiceException {
@@ -3256,6 +3273,7 @@ public class DataObject_1
      *              if the feature's value is not a set
      */
     @SuppressWarnings("unchecked")
+    @Override
     public Set<Object> objGetSet(
         String feature
     ) throws ServiceException {
@@ -3294,6 +3312,7 @@ public class DataObject_1
      *              if the object has no such feature
      */
     @SuppressWarnings("unchecked")
+    @Override
     public SortedMap<Integer,Object> objGetSparseArray(
         String feature
     ) throws ServiceException {
@@ -3332,6 +3351,7 @@ public class DataObject_1
      *              if the feature's value is not a set
      */
     @SuppressWarnings("unchecked")
+    @Override
     public Map<String, Object> objGetMap(
         String feature
     ) throws ServiceException {
@@ -3369,6 +3389,7 @@ public class DataObject_1
      * @exception   ServiceException NOT_SUPPORTED
      *              if the object has no such feature
      */
+    @Override
     public Container_1_0 objGetContainer(
         String feature
     )  throws ServiceException {
@@ -3383,6 +3404,7 @@ public class DataObject_1
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.cci.DataObject_1_0#execute(javax.resource.cci.InteractionSpec, javax.resource.cci.Record, javax.resource.cci.Record)
      */
+    @Override
     public boolean execute(
         InteractionSpec ispec, 
         Record input, 
@@ -3442,9 +3464,6 @@ public class DataObject_1
         }
     }
 
-    /**
-     *
-     */
     @Override
     public String toString(
     ){
@@ -3600,7 +3619,7 @@ public class DataObject_1
     private final Marshaller getMarshaller(
         ModelElement_1_0 feature
     ) throws ServiceException{
-        Marshaller marshaller = feature == null ? null : DataObject_1.dataTypeMarshaller.get(
+        Marshaller marshaller = feature == null ? null : DataObject_1.DATA_TYPE_MARSHALLER.get(
             feature.getModel().getDereferencedType(feature.getType()).getQualifiedName()
         );
         return marshaller == null ? this.dataObjectManager : marshaller;
@@ -3661,10 +3680,17 @@ public class DataObject_1
         return this.getMarshaller(this.getFeature(feature));
     }
 
-    /* (non-Javadoc)
-     * @see org.openmdx.base.accessor.generic.spi.Object_1_5#getAspect(java.lang.String)
+    /**
+     * Retrieve a specific aspect
+     * 
+     * @param aspectType the aspect type such as 
+     * 
+     * @return the specific aspect
+     * 
+     * @throws ServiceException 
      */
     @SuppressWarnings("unchecked")
+    @Override
     public Map<String, DataObject_1_0> getAspect(
         String aspectType
     ){
@@ -3672,13 +3698,14 @@ public class DataObject_1
         return flushable == null ? (Map<String, DataObject_1_0>) Maps.putUnlessPresent(
             this.flushableValues,
             aspectType,
-            new ManagedAspect(aspectType)
+            new ManagedAspect(this, aspectType)
         ) : flushable;
     }
 
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.generic.spi.Object_1_5#getFactory()
      */
+    @Override
     public DataObjectManager_1 jdoGetPersistenceManager(
     ) {
         return this.dataObjectManager;
@@ -3687,6 +3714,7 @@ public class DataObject_1
     /* (non-Javadoc)
      * @see javax.jdo.spi.PersistenceCapable#jdoCopyFields(java.lang.Object, int[])
      */
+    @Override
     public void jdoCopyFields(Object other, int[] fieldNumbers) {
         throw new UnsupportedOperationException("Operation not supported by dataprovider connection");        
     }
@@ -3694,6 +3722,7 @@ public class DataObject_1
     /* (non-Javadoc)
      * @see javax.jdo.spi.PersistenceCapable#jdoCopyKeyFieldsFromObjectId(javax.jdo.spi.PersistenceCapable.ObjectIdFieldConsumer, java.lang.Object)
      */
+    @Override
     public void jdoCopyKeyFieldsFromObjectId(
         ObjectIdFieldConsumer fm,
         Object oid
@@ -3704,6 +3733,7 @@ public class DataObject_1
     /* (non-Javadoc)
      * @see javax.jdo.spi.PersistenceCapable#jdoCopyKeyFieldsToObjectId(java.lang.Object)
      */
+    @Override
     public void jdoCopyKeyFieldsToObjectId(Object oid) {
         throw new UnsupportedOperationException("Operation not supported by dataprovider connection");        
     }
@@ -3711,6 +3741,7 @@ public class DataObject_1
     /* (non-Javadoc)
      * @see javax.jdo.spi.PersistenceCapable#jdoCopyKeyFieldsToObjectId(javax.jdo.spi.PersistenceCapable.ObjectIdFieldSupplier, java.lang.Object)
      */
+    @Override
     public void jdoCopyKeyFieldsToObjectId(ObjectIdFieldSupplier fm, Object oid) {
         throw new UnsupportedOperationException("Operation not supported by dataprovider connection");        
     }
@@ -3718,6 +3749,7 @@ public class DataObject_1
     /* (non-Javadoc)
      * @see javax.jdo.spi.PersistenceCapable#jdoGetVersion()
      */
+    @Override
     public Object jdoGetVersion() {
         return this.version;
     }
@@ -3725,6 +3757,7 @@ public class DataObject_1
     /* (non-Javadoc)
      * @see javax.jdo.spi.PersistenceCapable#jdoIsDetached()
      */
+    @Override
     public boolean jdoIsDetached() {
         return this.detached;
     }
@@ -3732,6 +3765,7 @@ public class DataObject_1
     /* (non-Javadoc)
      * @see javax.jdo.spi.PersistenceCapable#jdoMakeDirty(java.lang.String)
      */
+    @Override
     public void jdoMakeDirty(String fieldName) {
         throw new UnsupportedOperationException("Operation not supported by dataprovider connection");        
     }
@@ -3739,6 +3773,7 @@ public class DataObject_1
     /* (non-Javadoc)
      * @see javax.jdo.spi.PersistenceCapable#jdoNewInstance(javax.jdo.spi.StateManager)
      */
+    @Override
     public PersistenceCapable jdoNewInstance(StateManager sm) {
         throw new UnsupportedOperationException("Operation not supported by dataprovider connection");        
     }
@@ -3746,6 +3781,7 @@ public class DataObject_1
     /* (non-Javadoc)
      * @see javax.jdo.spi.PersistenceCapable#jdoNewInstance(javax.jdo.spi.StateManager, java.lang.Object)
      */
+    @Override
     public PersistenceCapable jdoNewInstance(StateManager sm, Object oid) {
         throw new UnsupportedOperationException("Operation not supported by dataprovider connection");        
     }
@@ -3753,6 +3789,7 @@ public class DataObject_1
     /* (non-Javadoc)
      * @see javax.jdo.spi.PersistenceCapable#jdoNewObjectIdInstance()
      */
+    @Override
     public Object jdoNewObjectIdInstance() {
         throw new UnsupportedOperationException("Operation not supported by dataprovider connection");        
     }
@@ -3760,6 +3797,7 @@ public class DataObject_1
     /* (non-Javadoc)
      * @see javax.jdo.spi.PersistenceCapable#jdoNewObjectIdInstance(java.lang.Object)
      */
+    @Override
     public Object jdoNewObjectIdInstance(Object o) {
         throw new UnsupportedOperationException("Operation not supported by dataprovider connection");        
     }
@@ -3767,6 +3805,7 @@ public class DataObject_1
     /* (non-Javadoc)
      * @see javax.jdo.spi.PersistenceCapable#jdoProvideField(int)
      */
+    @Override
     public void jdoProvideField(int fieldNumber) {
         throw new UnsupportedOperationException("Operation not supported by dataprovider connection");        
     }
@@ -3774,6 +3813,7 @@ public class DataObject_1
     /* (non-Javadoc)
      * @see javax.jdo.spi.PersistenceCapable#jdoProvideFields(int[])
      */
+    @Override
     public void jdoProvideFields(int[] fieldNumbers) {
         throw new UnsupportedOperationException("Operation not supported by dataprovider connection");        
     }
@@ -3781,6 +3821,7 @@ public class DataObject_1
     /* (non-Javadoc)
      * @see javax.jdo.spi.PersistenceCapable#jdoReplaceField(int)
      */
+    @Override
     public void jdoReplaceField(int fieldNumber) {
         throw new UnsupportedOperationException("Operation not supported by dataprovider connection");        
     }
@@ -3788,6 +3829,7 @@ public class DataObject_1
     /* (non-Javadoc)
      * @see javax.jdo.spi.PersistenceCapable#jdoReplaceFields(int[])
      */
+    @Override
     public void jdoReplaceFields(int[] fieldNumbers) {
         throw new UnsupportedOperationException("Operation not supported by dataprovider connection");        
     }
@@ -3795,6 +3837,7 @@ public class DataObject_1
     /* (non-Javadoc)
      * @see javax.jdo.spi.PersistenceCapable#jdoReplaceFlags()
      */
+    @Override
     public void jdoReplaceFlags() {
         throw new UnsupportedOperationException("Operation not supported by dataprovider connection");        
     }
@@ -3802,6 +3845,7 @@ public class DataObject_1
     /* (non-Javadoc)
      * @see javax.jdo.spi.PersistenceCapable#jdoReplaceStateManager(javax.jdo.spi.StateManager)
      */
+    @Override
     public void jdoReplaceStateManager(StateManager sm)
         throws SecurityException {
         throw new UnsupportedOperationException("Operation not supported by dataprovider connection");        
@@ -3839,556 +3883,8 @@ public class DataObject_1
 	        );
     	}
     }
+
     
-    //--------------------------------------------------------------------------
-    // Class ManagedAspect
-    //--------------------------------------------------------------------------
-    
-    /**
-     * Managed Aspect
-     */
-    final class ManagedAspect
-        implements Map<String,DataObject_1_0>, Flushable
-    {
-
-        ManagedAspect(
-            String aspectClass
-        ){
-            this.aspectClass = aspectClass;
-            this.cachedAspect = isTransientOrNew() ? new HashMap<String, DataObject_1_0>() : null;
-        }
-
-        private final String aspectClass;        
-        private Map<String,DataObject_1_0> transientAspect;
-        
-        private transient Container_1_0 delegate;
-        private transient Map<String,DataObject_1_0> cachedAspect;
-        private transient Set<Map.Entry<String,DataObject_1_0>> entries;
-        private transient Collection<DataObject_1_0> values;
-        private transient Set<String> keys;
-        
-        int c = 0;
-        
-        protected boolean isCache(
-            Map<String,DataObject_1_0> aspect
-        ){
-            return this.cachedAspect == aspect;
-        }
-        /**
-         * Retrieve the transient or standard delegate.
-         * 
-         * @param toRead
-         * @param cacheRetrieved cache the values if the delegate has been retrieved
-         * 
-         * @return the transient or standard delegate
-         */
-        Map<String,DataObject_1_0> getDelegate(
-            boolean toRead, 
-            boolean cacheRetrieved            
-        ){
-            if(toRead && this.cachedAspect != null) {
-                return this.cachedAspect;
-            }
-        	try {
-				Container_1_0 aspects = DataObject_1.this.objIsContained() ? DataObject_1.this.getAspects() : null;
-				if(aspects != null) {
-					if(this.delegate != null && aspects.container() != this.delegate.container()) {
-						this.delegate = null;
-					}
-					if(this.delegate == null) {
-						this.delegate = aspects.subMap(
-					        new Filter(
-    				            new IsInstanceOfCondition(this.aspectClass)
-    				        )
-    				    );
-					}
-					if(cacheRetrieved && this.delegate.isRetrieved()) {
-					    return this.cachedAspect = new HashMap<String, DataObject_1_0>(this.delegate);
-					} else {
-            			return this.delegate;
-					}
-				} else {
-		        	if(this.transientAspect == null) {
-		    			this.transientAspect = new HashMap<String, DataObject_1_0>();
-		        	}				
-		        	return this.transientAspect;		        	
-				}
-			} catch (ServiceException e) {
-				throw new RuntimeServiceException(e);
-			}
-        }
-
-        void move(){
-            Map<String, DataObject_1_0> transientAspect = this.transientAspect;
-			if(transientAspect != null) {
-				this.transientAspect = null;
-				putAll(transientAspect);
-				if(this.cachedAspect == null) {
-				    this.cachedAspect = transientAspect;				    
-				}
-            }
-        }
-        
-        /* (non-Javadoc)
-         * @see java.util.AbstractMap#clear()
-         */
-        public void clear() {
-            this.getDelegate(false, false).clear();
-            if(this.cachedAspect == null){
-                this.cachedAspect = new HashMap<String, DataObject_1_0>();
-            } else {
-                this.cachedAspect.clear();
-            }
-        }
-
-        /* (non-Javadoc)
-         * @see java.util.AbstractMap#containsKey(java.lang.Object)
-         */
-        public boolean containsKey(
-            Object key
-        ) {
-            return this.getDelegate(true, false).containsKey(key);
-        }
-
-        /* (non-Javadoc)
-         * @see java.util.AbstractMap#containsValue(java.lang.Object)
-         */
-        public boolean containsValue(
-            Object value
-        ) {
-            return this.getDelegate(true, false).containsValue(value);
-        }
-
-        /* (non-Javadoc)
-         * @see java.util.AbstractMap#entrySet()
-         */
-        public Set<java.util.Map.Entry<String, DataObject_1_0>> entrySet(
-        ) {
-            if(this.entries == null) {
-                this.entries = new Entries();
-            }
-            return this.entries;
-        }
-
-        /* (non-Javadoc)
-         * @see java.util.AbstractMap#equals(java.lang.Object)
-         */
-        @Override
-        public boolean equals(
-            Object that
-        ) {
-            return this == that;
-        }
-
-        /* (non-Javadoc)
-         * @see java.util.AbstractMap#get(java.lang.Object)
-         */
-        public DataObject_1_0 get(
-            Object key
-        ) {
-            return this.getDelegate(true, false).get(key);
-        }
-
-        /* (non-Javadoc)
-         * @see java.util.AbstractMap#hashCode()
-         */
-        @Override
-        public int hashCode(
-        ) {
-            return System.identityHashCode(this);
-        }
-
-        /* (non-Javadoc)
-         * @see java.util.AbstractMap#isEmpty()
-         */
-        public boolean isEmpty(
-        ) {
-            return this.getDelegate(true, false).isEmpty();
-        }
-
-        /* (non-Javadoc)
-         * @see java.util.AbstractMap#keySet()
-         */
-        public Set<String> keySet(
-        ) {
-            if(this.keys == null) {
-                this.keys = new Keys();
-            }
-            return this.keys;
-        }
-
-        /* (non-Javadoc)
-         * @see java.util.AbstractMap#put(java.lang.Object, java.lang.Object)
-         */
-        public DataObject_1_0 put(
-            String key, 
-            DataObject_1_0 value
-        ) {
-            try {
-                if(DataObject_1.this.jdoIsPersistent()) {
-                    DataObject_1.this.objMakeTransactional();
-                }
-                //
-                // Move the aspect's containers to the core object
-                //
-                for(
-                    Iterator<Map.Entry<String,Flushable>> i = ((DataObject_1)value).flushableValues.entrySet().iterator();
-                    i.hasNext();
-                ){
-                    Map.Entry<String,Flushable> flushableEntry = i.next();
-                    Flushable flushable = flushableEntry.getValue();
-                    if(flushable instanceof Container_1_0) {
-                        Container_1_0 target = DataObject_1.this.objGetContainer(flushableEntry.getKey());
-                        Container_1_0 source = (Container_1_0) flushable;
-                        for(Map.Entry<String, DataObject_1_0> objectEntry : source.entrySet()) {
-                            objectEntry.getValue().objMove(target, objectEntry.getKey());
-                        }
-                        i.remove();
-                    }
-                }
-                //
-                // Save the aspect
-                //
-                String qualifier = DataObject_1.this.getAspects() == null || !DataObject_1.this.isQualified() ? key : this.toObjectId(DataObject_1.this.getQualifier(), key);
-                if(this.cachedAspect != null) {
-                    this.cachedAspect.put(qualifier, value);
-                }
-                return this.getDelegate(false, false).put(qualifier, value);
-            } catch (ServiceException exception) {
-                throw new RuntimeServiceException(exception);
-            } catch (RuntimeServiceException exception) {
-                throw exception;
-            }
-        }
-
-        /* (non-Javadoc)
-         * @see java.util.AbstractMap#remove(java.lang.Object)
-         */
-        public DataObject_1_0 remove(
-            Object key
-        ) {
-            if(this.cachedAspect != null) {
-                this.cachedAspect.remove(key);
-            }
-            return this.getDelegate(false, false).remove(key);
-        }
-
-        /* (non-Javadoc)
-         * @see java.util.AbstractMap#size()
-         */
-        public int size(
-        ) {
-            return this.getDelegate(true, true).size();
-        }
-
-        /* (non-Javadoc)
-         * @see java.util.AbstractMap#values()
-         */
-        public Collection<DataObject_1_0> values(
-        ) {
-            if(this.values == null) {
-                this.values = new Values();
-            }
-            return this.values;
-        }
-
-        /* (non-Javadoc)
-         * @see java.io.Flushable#flush()
-         */
-        public void flush(
-        ) throws IOException {
-            // Nothing to do at the moment
-        }
-        
-        private String toObjectId(
-            String coreId,
-            String aspectId
-        ){
-            return
-                aspectId.startsWith(":") ? (":" + coreId + aspectId) :
-                aspectId.startsWith("!") ? (coreId + aspectId) :
-                (coreId + '*' + aspectId);    
-        }
-        
-        /* (non-Javadoc)
-         * @see org.openmdx.compatibility.base.dataprovider.transport.delegation.Evictable#evict()
-         */
-        public void evict() {
-        	this.delegate = null;
-        	this.cachedAspect = null;
-        }
-
-        /* (non-Javadoc)
-		 * @see java.util.Map#putAll(java.util.Map)
-		 */
-		public void putAll(Map<? extends String, ? extends DataObject_1_0> t) {
-			for(java.util.Map.Entry<? extends String, ? extends DataObject_1_0> e : t.entrySet()) {
-				put(e.getKey(), e.getValue());
-			}
-		}
-
-		/**
-		 * Entry Iterator
-		 */
-		class EntryIterator implements Iterator<Map.Entry<String, DataObject_1_0>> {
-
-		    private final Map<String, DataObject_1_0> aspect = getDelegate(true, true);
-		    private final Iterator<Map.Entry<String, DataObject_1_0>> delegate = aspect.entrySet().iterator();
-		    private String current;
-		    
-            /* (non-Javadoc)
-             * @see java.util.Iterator#hasNext()
-             */
-            @Override
-            public boolean hasNext() {
-                return delegate.hasNext();
-            }
-
-            /* (non-Javadoc)
-             * @see java.util.Iterator#next()
-             */
-            @Override
-            public java.util.Map.Entry<String, DataObject_1_0> next() {
-                java.util.Map.Entry<String, DataObject_1_0> entry = delegate.next();
-                this.current = entry.getKey();
-                return entry;
-            }
-
-            /* (non-Javadoc)
-             * @see java.util.Iterator#remove()
-             */
-            @Override
-            public void remove() {
-                if(isCache(this.aspect)) {
-                    getDelegate(false, false).remove(this.current);
-                }
-                delegate.remove();
-            }
-		    
-		}
-
-		/**
-		 * Value Iterator
-		 */
-        class ValueIterator implements Iterator<DataObject_1_0> {
-
-            final Iterator<Map.Entry<String, DataObject_1_0>> delegate = new EntryIterator();
-            
-            /* (non-Javadoc)
-             * @see java.util.Iterator#hasNext()
-             */
-            @Override
-            public boolean hasNext() {
-                return delegate.hasNext();
-            }
-
-            /* (non-Javadoc)
-             * @see java.util.Iterator#next()
-             */
-            @Override
-            public DataObject_1_0 next() {
-                return delegate.next().getValue();
-            }
-
-            /* (non-Javadoc)
-             * @see java.util.Iterator#remove()
-             */
-            @Override
-            public void remove() {
-                delegate.remove();
-            }
-            
-        }
-		
-        /**
-         * Key Iterator
-         */
-        class KeyIterator implements Iterator<String> {
-
-            final Iterator<Map.Entry<String, DataObject_1_0>> delegate = new EntryIterator();
-            
-            /* (non-Javadoc)
-             * @see java.util.Iterator#hasNext()
-             */
-            @Override
-            public boolean hasNext() {
-                return delegate.hasNext();
-            }
-
-            /* (non-Javadoc)
-             * @see java.util.Iterator#next()
-             */
-            @Override
-            public String next() {
-                return delegate.next().getKey();
-            }
-
-            /* (non-Javadoc)
-             * @see java.util.Iterator#remove()
-             */
-            @Override
-            public void remove() {
-                delegate.remove();
-            }
-            
-        }
-        
-        /**
-         * Values
-         */
-        class Values extends AbstractCollection<DataObject_1_0> {
-
-            /**
-             * @param value
-             * 
-             * @return <code>true</code> if the collection had to be modified
-             * 
-             * @see java.util.Collection#add(java.lang.Object)
-             */
-            public boolean add(
-                DataObject_1_0 value
-            ) {
-                boolean modify = !ManagedAspect.this.containsValue(value);
-                if(modify) {
-                    String key = TransactionalSegment.getClassicRepresentationOfNewInstance();
-                    ManagedAspect.this.put(key, value);
-                }
-                return modify;
-            }
-
-            /**
-             * 
-             * @see java.util.Collection#clear()
-             */
-            public void clear() {
-                ManagedAspect.this.clear();
-            }
-
-            /**
-             * @param o
-             * @return
-             * @see java.util.Collection#contains(java.lang.Object)
-             */
-            public boolean contains(Object o) {
-                return ManagedAspect.this.containsValue(o);
-            }
-
-            /**
-             * @return
-             * @see java.util.Collection#isEmpty()
-             */
-            public boolean isEmpty() {
-                return ManagedAspect.this.isEmpty();
-            }
-
-            /**
-             * @return
-             * @see java.util.Collection#iterator()
-             */
-            public Iterator<DataObject_1_0> iterator() {
-                return new ValueIterator();
-            }
-
-            /**
-             * @return
-             * @see java.util.Collection#size()
-             */
-            public int size() {
-                return ManagedAspect.this.size();
-            }
-
-        }
-
-        /**
-         * Keys
-         */
-        class Keys extends AbstractSet<String> {
-
-            /**
-             * 
-             * @see java.util.Collection#clear()
-             */
-            public void clear() {
-                ManagedAspect.this.clear();
-            }
-
-            /**
-             * @param o
-             * @return
-             * @see java.util.Collection#contains(java.lang.Object)
-             */
-            public boolean contains(Object o) {
-                return ManagedAspect.this.containsKey(o);
-            }
-
-            /**
-             * @return
-             * @see java.util.Collection#isEmpty()
-             */
-            public boolean isEmpty() {
-                return ManagedAspect.this.isEmpty();
-            }
-
-            /**
-             * @return
-             * @see java.util.Collection#iterator()
-             */
-            public Iterator<String> iterator() {
-                return new KeyIterator();
-            }
-
-            /**
-             * @return
-             * @see java.util.Collection#size()
-             */
-            public int size() {
-                return ManagedAspect.this.size();
-            }
-
-        }
-
-        /**
-         * Entries
-         */
-        class Entries extends AbstractSet<Map.Entry<String,DataObject_1_0>> {
-
-            /**
-             * 
-             * @see java.util.Collection#clear()
-             */
-            public void clear() {
-                ManagedAspect.this.clear();
-            }
-
-            /**
-             * @return
-             * @see java.util.Collection#isEmpty()
-             */
-            public boolean isEmpty() {
-                return ManagedAspect.this.isEmpty();
-            }
-
-            /**
-             * @return
-             * @see java.util.Collection#iterator()
-             */
-            public Iterator<Map.Entry<String,DataObject_1_0>> iterator() {
-                return new EntryIterator();
-            }
-
-            /**
-             * @return
-             * @see java.util.Collection#size()
-             */
-            public int size() {
-                return ManagedAspect.this.size();
-            }
-
-        }
-                
-    }
-
-        
     //--------------------------------------------------------------------------
     // Class ManagedList
     //--------------------------------------------------------------------------
@@ -4533,6 +4029,7 @@ public class DataObject_1
         /* (non-Javadoc)
          * @see java.io.Flushable#flush()
          */
+        @Override
         public void flush() throws IOException {
             List<Object> source = this.getDelegate(false, false);
             if(source != this.nonTransactional) {
@@ -4743,6 +4240,7 @@ public class DataObject_1
         /* (non-Javadoc)
          * @see java.io.Flushable#flush()
          */
+        @Override
         public void flush() throws IOException {
             Set<Object> source = this.getDelegate(false, false);
             if(source != this.nonTransactional) {
@@ -4846,6 +4344,7 @@ public class DataObject_1
             /* (non-Javadoc)
              * @see java.util.Iterator#hasNext()
              */
+            @Override
             public boolean hasNext() {
                 return this.delegate.hasNext();
             }
@@ -4853,6 +4352,7 @@ public class DataObject_1
             /* (non-Javadoc)
              * @see java.util.Iterator#next()
              */
+            @Override
             public Object next() {
                 return this.current = this.delegate.next();
             }
@@ -4860,6 +4360,7 @@ public class DataObject_1
             /* (non-Javadoc)
              * @see java.util.Iterator#remove()
              */
+            @Override
             public void remove(
             ) {
                 if(this.transactional) {
@@ -4982,6 +4483,7 @@ public class DataObject_1
         /* (non-Javadoc)
          * @see java.io.Flushable#flush()
          */
+        @Override
         public void flush() throws IOException {
             Map<String,Object> source = ManagedMap.this.getDelegate(false, false);
             if(source != this.nonTransactional) {
@@ -4993,6 +4495,7 @@ public class DataObject_1
         /* (non-Javadoc)
          * @see java.util.AbstractMap#entrySet()
          */
+        @Override
         public Set<java.util.Map.Entry<String, Object>> entrySet() {
             return this.entries;
         }
@@ -5000,6 +4503,7 @@ public class DataObject_1
         /* (non-Javadoc)
          * @see java.util.AbstractMap#clear()
          */
+        @Override
         public void clear() {
             ManagedMap.this.getDelegate(true,true);
         }
@@ -5007,6 +4511,7 @@ public class DataObject_1
         /* (non-Javadoc)
          * @see java.util.AbstractMap#containsKey(java.lang.Object)
          */
+        @Override
         public boolean containsKey(Object key) {
             return ManagedMap.this.getDelegate(false,false).containsKey(key);
         }
@@ -5021,6 +4526,7 @@ public class DataObject_1
         /* (non-Javadoc)
          * @see java.util.AbstractMap#get(java.lang.Object)
          */
+        @Override
         public Object get(Object key) {
             return ManagedMap.this.getDelegate(false,false).get(key);
         }
@@ -5028,6 +4534,7 @@ public class DataObject_1
         /* (non-Javadoc)
          * @see java.util.AbstractMap#isEmpty()
          */
+        @Override
         public boolean isEmpty() {
             return ManagedMap.this.getDelegate(false,false).isEmpty();
         }
@@ -5035,6 +4542,7 @@ public class DataObject_1
         /* (non-Javadoc)
          * @see java.util.AbstractMap#keySet()
          */
+        @Override
         public Set<String> keySet() {
             return ManagedMap.this.getDelegate(false,false).keySet(); // TODO make it modifiable
         }
@@ -5042,6 +4550,7 @@ public class DataObject_1
         /* (non-Javadoc)
          * @see java.util.AbstractMap#put(java.lang.Object, java.lang.Object)
          */
+        @Override
         public Object put(String key, Object value) {
             return ManagedMap.this.getDelegate(true,false).put(key, value);
         }
@@ -5049,6 +4558,7 @@ public class DataObject_1
         /* (non-Javadoc)
          * @see java.util.AbstractMap#putAll(java.util.Map)
          */
+        @Override
         public void putAll(Map<? extends String, ? extends Object> t) {
             ManagedMap.this.getDelegate(true,false).putAll(t);
         }
@@ -5056,6 +4566,7 @@ public class DataObject_1
         /* (non-Javadoc)
          * @see java.util.AbstractMap#remove(java.lang.Object)
          */
+        @Override
         public Object remove(Object key) {
             return ManagedMap.this.getDelegate(true,false).remove(key);
         }
@@ -5063,6 +4574,7 @@ public class DataObject_1
         /* (non-Javadoc)
          * @see java.util.AbstractMap#size()
          */
+        @Override
         public int size() {
             return ManagedMap.this.getDelegate(false,false).size();
         }
@@ -5070,6 +4582,7 @@ public class DataObject_1
         /* (non-Javadoc)
          * @see java.util.AbstractMap#values()
          */
+        @Override
         public Collection<Object> values() {
             return ManagedMap.this.getDelegate(false,false).values();
         }
@@ -5133,6 +4646,7 @@ public class DataObject_1
             /* (non-Javadoc)
              * @see java.util.Iterator#hasNext()
              */
+            @Override
             public boolean hasNext() {
                 return this.delegate.hasNext();
             }
@@ -5140,6 +4654,7 @@ public class DataObject_1
             /* (non-Javadoc)
              * @see java.util.Iterator#next()
              */
+            @Override
             public Map.Entry<String, Object> next() {
                 this.current = this.delegate.next();
                 return new Map.Entry<String, Object>() {
@@ -5163,6 +4678,7 @@ public class DataObject_1
             /* (non-Javadoc)
              * @see java.util.Iterator#remove()
              */
+            @Override
             public void remove() {
                 EntryIterator.this.makeDirty();
                 this.delegate.remove();
@@ -5213,7 +4729,6 @@ public class DataObject_1
                     throw new RuntimeServiceException(e);
                 }
             }
-
 
             /* (non-Javadoc)
              * @see org.openmdx.base.collection.MarshallingList#clear()
@@ -5384,6 +4899,7 @@ public class DataObject_1
         /* (non-Javadoc)
          * @see java.io.Flushable#flush()
          */
+        @Override
         public void flush() throws IOException {
             SortedMap<Integer,Object> source = ManagedSortedMap.this.getDelegate(false, false);
             if(source != this.nonTransactional) {
@@ -5395,6 +4911,7 @@ public class DataObject_1
         /* (non-Javadoc)
          * @see java.util.AbstractMap#entrySet()
          */
+        @Override
         public Set<java.util.Map.Entry<Integer, Object>> entrySet() {
             return this.entries;
         }
@@ -5402,6 +4919,7 @@ public class DataObject_1
         /* (non-Javadoc)
          * @see java.util.SortedMap#comparator()
          */
+        @Override
         public Comparator<? super Integer> comparator() {
             return null;
         }
@@ -5409,6 +4927,7 @@ public class DataObject_1
         /* (non-Javadoc)
          * @see java.util.SortedMap#firstKey()
          */
+        @Override
         public Integer firstKey() {
             return ManagedSortedMap.this.getDelegate(false,false).firstKey();
         }
@@ -5416,6 +4935,7 @@ public class DataObject_1
         /* (non-Javadoc)
          * @see java.util.SortedMap#headMap(java.lang.Object)
          */
+        @Override
         public SortedMap<Integer, Object> headMap(Integer toKey) {
             return new SubMap(null, toKey);
         }
@@ -5423,6 +4943,7 @@ public class DataObject_1
         /* (non-Javadoc)
          * @see java.util.SortedMap#lastKey()
          */
+        @Override
         public Integer lastKey() {
             return ManagedSortedMap.this.getDelegate(false,false).lastKey();
         }
@@ -5430,6 +4951,7 @@ public class DataObject_1
         /* (non-Javadoc)
          * @see java.util.SortedMap#subMap(java.lang.Object, java.lang.Object)
          */
+        @Override
         public SortedMap<Integer, Object> subMap(Integer fromKey, Integer toKey) {
             return new SubMap(fromKey, toKey);
         }
@@ -5437,6 +4959,7 @@ public class DataObject_1
         /* (non-Javadoc)
          * @see java.util.SortedMap#tailMap(java.lang.Object)
          */
+        @Override
         public SortedMap<Integer, Object> tailMap(Integer fromKey) {
             return new SubMap(fromKey, null);
         }
@@ -5444,6 +4967,7 @@ public class DataObject_1
         /* (non-Javadoc)
          * @see java.util.AbstractMap#clear()
          */
+        @Override
         public void clear() {
             ManagedSortedMap.this.getDelegate(true,true);
         }
@@ -5451,6 +4975,7 @@ public class DataObject_1
         /* (non-Javadoc)
          * @see java.util.AbstractMap#containsKey(java.lang.Object)
          */
+        @Override
         public boolean containsKey(Object key) {
             return ManagedSortedMap.this.getDelegate(false,false).containsKey(key);
         }
@@ -5458,6 +4983,7 @@ public class DataObject_1
         /* (non-Javadoc)
          * @see java.util.AbstractMap#containsValue(java.lang.Object)
          */
+        @Override
         public boolean containsValue(Object value) {
             return ManagedSortedMap.this.getDelegate(false,false).containsValue(value);
         }
@@ -5465,6 +4991,7 @@ public class DataObject_1
         /* (non-Javadoc)
          * @see java.util.AbstractMap#get(java.lang.Object)
          */
+        @Override
         public Object get(Object key) {
             return ManagedSortedMap.this.getDelegate(false,false).get(key);
         }
@@ -5472,6 +4999,7 @@ public class DataObject_1
         /* (non-Javadoc)
          * @see java.util.AbstractMap#isEmpty()
          */
+        @Override
         public boolean isEmpty() {
             return ManagedSortedMap.this.getDelegate(false,false).isEmpty();
         }
@@ -5479,6 +5007,7 @@ public class DataObject_1
         /* (non-Javadoc)
          * @see java.util.AbstractMap#keySet()
          */
+        @Override
         public Set<Integer> keySet() {
             return ManagedSortedMap.this.getDelegate(false,false).keySet(); // TOD make it modifiable
         }
@@ -5486,6 +5015,7 @@ public class DataObject_1
         /* (non-Javadoc)
          * @see java.util.AbstractMap#put(java.lang.Object, java.lang.Object)
          */
+        @Override
         public Object put(Integer key, Object value) {
             return ManagedSortedMap.this.getDelegate(true,false).put(key, value);
         }
@@ -5493,6 +5023,7 @@ public class DataObject_1
         /* (non-Javadoc)
          * @see java.util.AbstractMap#putAll(java.util.Map)
          */
+        @Override
         public void putAll(Map<? extends Integer, ? extends Object> t) {
             ManagedSortedMap.this.getDelegate(true,false).putAll(t);
         }
@@ -5500,6 +5031,7 @@ public class DataObject_1
         /* (non-Javadoc)
          * @see java.util.AbstractMap#remove(java.lang.Object)
          */
+        @Override
         public Object remove(Object key) {
             return ManagedSortedMap.this.getDelegate(true,false).remove(key);
         }
@@ -5507,6 +5039,7 @@ public class DataObject_1
         /* (non-Javadoc)
          * @see java.util.AbstractMap#size()
          */
+        @Override
         public int size() {
             return ManagedSortedMap.this.getDelegate(false,false).size();
         }
@@ -5514,6 +5047,7 @@ public class DataObject_1
         /* (non-Javadoc)
          * @see java.util.AbstractMap#values()
          */
+        @Override
         public Collection<Object> values() {
             return ManagedSortedMap.this.getDelegate(false,false).values();
         }
@@ -5644,6 +5178,7 @@ public class DataObject_1
             /* (non-Javadoc)
              * @see java.util.SortedMap#comparator()
              */
+            @Override
             public Comparator<? super Integer> comparator() {
                 return null;
             }
@@ -5651,6 +5186,7 @@ public class DataObject_1
             /* (non-Javadoc)
              * @see java.util.SortedMap#firstKey()
              */
+            @Override
             public Integer firstKey() {
                 return this.getSubMap().firstKey();
             }
@@ -5658,6 +5194,7 @@ public class DataObject_1
             /* (non-Javadoc)
              * @see java.util.SortedMap#headMap(java.lang.Object)
              */
+            @Override
             public SortedMap<Integer, Object> headMap(Integer toKey) {
                 this.validateKey(toKey.intValue());
                 return new SubMap(this.from, toKey);
@@ -5666,6 +5203,7 @@ public class DataObject_1
             /* (non-Javadoc)
              * @see java.util.SortedMap#lastKey()
              */
+            @Override
             public Integer lastKey() {
                 return this.getSubMap().lastKey();
             }
@@ -5673,6 +5211,7 @@ public class DataObject_1
             /* (non-Javadoc)
              * @see java.util.SortedMap#subMap(java.lang.Object, java.lang.Object)
              */
+            @Override
             public SortedMap<Integer, Object> subMap(
                 Integer fromKey,
                 Integer toKey
@@ -5685,6 +5224,7 @@ public class DataObject_1
             /* (non-Javadoc)
              * @see java.util.SortedMap#tailMap(java.lang.Object)
              */
+            @Override
             public SortedMap<Integer, Object> tailMap(Integer fromKey) {
                 this.validateKey(fromKey.intValue());
                 return new SubMap(fromKey, null);
@@ -5727,6 +5267,7 @@ public class DataObject_1
             /* (non-Javadoc)
              * @see java.util.Iterator#hasNext()
              */
+            @Override
             public boolean hasNext() {
                 return this.delegate.hasNext();
             }
@@ -5734,6 +5275,7 @@ public class DataObject_1
             /* (non-Javadoc)
              * @see java.util.Iterator#next()
              */
+            @Override
             public Map.Entry<Integer, Object> next() {
                 this.current = this.delegate.next();
                 return new Map.Entry<Integer, Object>() {
@@ -5757,6 +5299,7 @@ public class DataObject_1
             /* (non-Javadoc)
              * @see java.util.Iterator#remove()
              */
+            @Override
             public void remove() {
                 EntryIterator.this.makeDirty();
                 this.delegate.remove();
@@ -5836,25 +5379,25 @@ public class DataObject_1
 
     static {
         //
-        // dataTypeMarshaller initalization
+        // DATA_TYPE_MARSHALLER initalization
         //
-        DataObject_1.dataTypeMarshaller.put(DATE, DateMarshaller.NORMALIZE);
-        DataObject_1.dataTypeMarshaller.put(DATETIME, DateTimeMarshaller.NORMALIZE);
-        DataObject_1.dataTypeMarshaller.put(DURATION, DurationMarshaller.NORMALIZE);
-        DataObject_1.dataTypeMarshaller.put(SHORT, ShortMarshaller.NORMALIZE);
-        DataObject_1.dataTypeMarshaller.put(INTEGER, IntegerMarshaller.NORMALIZE);
-        DataObject_1.dataTypeMarshaller.put(LONG, LongMarshaller.NORMALIZE);
+        DATA_TYPE_MARSHALLER.put(DATE, DateMarshaller.NORMALIZE);
+        DATA_TYPE_MARSHALLER.put(DATETIME, DateTimeMarshaller.NORMALIZE);
+        DATA_TYPE_MARSHALLER.put(DURATION, DurationMarshaller.NORMALIZE);
+        DATA_TYPE_MARSHALLER.put(SHORT, ShortMarshaller.NORMALIZE);
+        DATA_TYPE_MARSHALLER.put(INTEGER, IntegerMarshaller.NORMALIZE);
+        DATA_TYPE_MARSHALLER.put(LONG, LongMarshaller.NORMALIZE);
         //
         // lifecycleListenerClass initalization
         //
-        DataObject_1.lifecycleListenerClass[InstanceLifecycleEvent.CREATE] = CreateLifecycleListener.class;
-        DataObject_1.lifecycleListenerClass[InstanceLifecycleEvent.LOAD] = LoadLifecycleListener.class;
-        DataObject_1.lifecycleListenerClass[InstanceLifecycleEvent.STORE] = StoreLifecycleListener.class;
-        DataObject_1.lifecycleListenerClass[InstanceLifecycleEvent.CLEAR] = ClearLifecycleListener.class;
-        DataObject_1.lifecycleListenerClass[InstanceLifecycleEvent.DELETE] = DeleteLifecycleListener.class;
-        DataObject_1.lifecycleListenerClass[InstanceLifecycleEvent.DIRTY] = DirtyLifecycleListener.class;
-        DataObject_1.lifecycleListenerClass[InstanceLifecycleEvent.DETACH] = DetachLifecycleListener.class;
-        DataObject_1.lifecycleListenerClass[InstanceLifecycleEvent.ATTACH] = AttachLifecycleListener.class;
+        LIFECYCLE_LISTENER_CLASS[InstanceLifecycleEvent.CREATE] = CreateLifecycleListener.class;
+        LIFECYCLE_LISTENER_CLASS[InstanceLifecycleEvent.LOAD] = LoadLifecycleListener.class;
+        LIFECYCLE_LISTENER_CLASS[InstanceLifecycleEvent.STORE] = StoreLifecycleListener.class;
+        LIFECYCLE_LISTENER_CLASS[InstanceLifecycleEvent.CLEAR] = ClearLifecycleListener.class;
+        LIFECYCLE_LISTENER_CLASS[InstanceLifecycleEvent.DELETE] = DeleteLifecycleListener.class;
+        LIFECYCLE_LISTENER_CLASS[InstanceLifecycleEvent.DIRTY] = DirtyLifecycleListener.class;
+        LIFECYCLE_LISTENER_CLASS[InstanceLifecycleEvent.DETACH] = DetachLifecycleListener.class;
+        LIFECYCLE_LISTENER_CLASS[InstanceLifecycleEvent.ATTACH] = AttachLifecycleListener.class;
 
     }
 

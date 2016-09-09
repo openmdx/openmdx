@@ -372,14 +372,29 @@ public abstract class DelegatingObject_1
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.cci.DataObject_1_0#getContainer(boolean)
      */
-//  @Override
     public Container_1_0 getContainer(
-        boolean forEviction
+        boolean lazily
     ) {
-        return this.getStateDelegate().getContainer(forEviction);
+        return this.getStateDelegate().getContainer(lazily);
     }
 
     /* (non-Javadoc)
+	 * @see org.openmdx.base.accessor.cci.DataObject_1_0#getAspects()
+	 */
+	@Override
+	public Container_1_0 getAspects() throws ServiceException {
+        return this.getStateDelegate().getAspects();
+	}
+
+	/* (non-Javadoc)
+	 * @see org.openmdx.base.accessor.cci.DataObject_1_0#getAspect(java.lang.String)
+	 */
+	@Override
+	public Map<String, DataObject_1_0> getAspect(String aspectType) {
+        return this.getStateDelegate().getAspect(aspectType);
+	}
+
+	/* (non-Javadoc)
      * @see javax.jdo.spi.PersistenceCapable#jdoCopyFields(java.lang.Object, int[])
      */
     public void jdoCopyFields(

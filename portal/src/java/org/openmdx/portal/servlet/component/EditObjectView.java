@@ -60,19 +60,16 @@ import java.util.Map;
 import javax.jdo.JDOHelper;
 import javax.jdo.PersistenceManager;
 
-import org.oasisopen.jmi1.RefContainer;
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.Model_1_0;
 import org.openmdx.base.naming.Path;
-import org.openmdx.base.text.conversion.UUIDConversion;
 import org.openmdx.kernel.id.UUIDs;
 import org.openmdx.kernel.log.SysLog;
 import org.openmdx.portal.servlet.Action;
 import org.openmdx.portal.servlet.ApplicationContext;
 import org.openmdx.portal.servlet.Autocompleter_1_0;
 import org.openmdx.portal.servlet.CssClass;
-import org.openmdx.portal.servlet.DataBinding;
 import org.openmdx.portal.servlet.HtmlEncoder_1_0;
 import org.openmdx.portal.servlet.Texts_1_0;
 import org.openmdx.portal.servlet.ViewPort;
@@ -86,7 +83,6 @@ import org.openmdx.portal.servlet.control.AttributePaneControl;
 import org.openmdx.portal.servlet.control.EditInspectorControl;
 import org.openmdx.portal.servlet.control.EditObjectTitleControl;
 import org.openmdx.portal.servlet.control.ShowErrorsControl;
-import org.openmdx.ui1.jmi1.ElementDefinition;
 
 /**
  * EditObjectView
@@ -374,7 +370,7 @@ public class EditObjectView extends ObjectView implements Serializable {
 	 * @param attributeMap
 	 * @throws ServiceException
 	 */
-	public void storeObject(
+	public boolean storeObject(
 	    Map<String,String[]> parameterMap,
 	    Map<String, Attribute> attributeMap,
 	    boolean doCreate
@@ -391,95 +387,40 @@ public class EditObjectView extends ObjectView implements Serializable {
 			}
 		}
 		if(doCreate) {
-			PersistenceManager pm = JDOHelper.getPersistenceManager(this.parent);
-			// Create a new instance if existing object is persistent
-			if(JDOHelper.isPersistent(this.object)) {
-				this.object = (RefObject_1_0)this.getObject().refClass().refCreateInstance(null);
-				((RefObject_1_0)this.object).refInitialize(false, false);				
+			RefObject_1_0 object = this.getObject();
+			if(JDOHelper.isPersistent(object)) {
+				object = (RefObject_1_0)this.getObject().refClass().refCreateInstance(null);
+				object.refInitialize(false, false, false);				
 			}
-			Object target = this.getObject();
-			try {
-				pm.currentTransaction().begin();
-				this.app.getPortalExtension().updateObject(
-					target,
-				    parameterMap,
-				    attributeMap,
-				    this.app
-				);
-				if(this.app.getErrorMessages().isEmpty()) {
-					Object[] qualifiers = (Object[])parameterMap.get("qualifier");
-					if(qualifiers == null) {
-						qualifiers = new String[] {
-							UUIDConversion.toUID(UUIDs.newUUID())
-						};
-					}
-					// Prevent CONCURRENT_MODIFICATION in case the parent was updated by some other user
-					pm.refresh(this.parent);
-					DataBinding dataBinding = null;
-					try {
-						ElementDefinition elementDefinition = this.app.getUiElementDefinition(
-							this.parent.refClass().refMofId() + ":" + this.forReference
-						);
-						dataBinding = elementDefinition == null 
-							? null 
-							: elementDefinition.getDataBindingName() == null 
-								? null
-								: this.app.getPortalExtension().getDataBinding(elementDefinition.getDataBindingName());
-					} catch(Exception ignore) {}
-					if(dataBinding != null) {
-						dataBinding.setValue(
-							this.parent, 
-							this.forReference, 
-							target,
-							this.app
-						);
-					} else {
-						Object container = this.parent.refGetValue(this.forReference);
-						((RefContainer<?>)container).refAdd(
-						    org.oasisopen.cci2.QualifierType.REASSIGNABLE,
-						    qualifiers.length > 0 ? (String) qualifiers[0] : "",
-						    target
-						);
-					}
-					pm.currentTransaction().commit();
-					this.editObjectIdentity = ((RefObject_1_0)target).refGetPath();
-				} else {
-					try {
-						pm.currentTransaction().rollback();
-					} catch(Exception e1) {}
+			boolean success = this.app.getPortalExtension().storeObject(
+				this.parent, 
+				object,
+				parameterMap, 
+				attributeMap, 
+				doCreate, 
+				this.forReference, 
+				this.app
+			);
+			if(success) {
+				if(JDOHelper.isPersistent(object)) {
+					this.object = object;
+					this.editObjectIdentity = this.getObject().refGetPath();
 				}
-			} catch(Exception e) {
-				try {
-					pm.currentTransaction().rollback();				
-				} catch(Exception e1) {}
-				throw new ServiceException(e);
-			}			
+			}
+			return success;
 		} else {
 			PersistenceManager pm = JDOHelper.getPersistenceManager(this.getObject());
-			try {
-				pm.currentTransaction().begin();
-				this.app.getPortalExtension().updateObject(
-					// Update persistent object
-					this.editObjectIdentity == null
-						? this.getObject()
-						: pm.getObjectById(this.editObjectIdentity),
-				    parameterMap,
-				    attributeMap,
-				    this.app
-				);
-				if(this.app.getErrorMessages().isEmpty()) {
-					pm.currentTransaction().commit();
-				} else {
-					try {
-						pm.currentTransaction().rollback();
-					} catch(Exception ignore) {}
-				}
-			} catch(Exception e) {
-				try {
-					pm.currentTransaction().rollback();
-				} catch(Exception e1) {}
-				throw new ServiceException(e);
-			}
+			return this.app.getPortalExtension().storeObject(
+				this.parent, 
+				this.editObjectIdentity == null
+					? this.getObject()
+					: (RefObject_1_0)pm.getObjectById(this.editObjectIdentity),
+				parameterMap, 
+				attributeMap, 
+				doCreate, 
+				this.forReference, 
+				this.app
+			);
 		}
 	}
 

@@ -1,0 +1,16 @@
+.date-formatted {
+}
+.time-formatted {
+}
+.show-date-picker-button {
+	padding: 0px;
+	min-width:2em;
+}
+.show-time-picker-button {
+	padding: 0px;
+	min-width:2em;
+}
+.clear-value-button {
+	padding: 0px;
+	min-width:2em;
+}

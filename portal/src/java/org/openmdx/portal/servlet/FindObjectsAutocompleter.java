@@ -240,7 +240,7 @@ public class FindObjectsAutocompleter implements Autocompleter_1_0, Serializable
         p.write("    {");
         p.write("      ", "paramName: '", WebKeys.REQUEST_PARAMETER_FILTER_VALUES, "', ");
         p.write("      ", "minChars: 0,");
-        p.write("      ", "afterUpdateElement: function(titleField, selectedItem){updateXriField(titleField,selectedItem);$('", id, "').onchange();}");
+        p.write("      ", "afterUpdateElement: function(titleField, selectedItem){updateXriField(titleField,selectedItem);try{jQuery('", id, "').change();}catch(e){};}");
         p.write("    }");
         p.write("  );");
         p.write("</script>");

@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2014, OMEX AG, Switzerland
+ * Copyright (c) 2004-2016, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -282,46 +282,46 @@ public class Database_2 extends AbstractRestPort implements Database_1_0, DataTy
     }
 
     /**
-	 * @return the getSIZE_SUFFIX
-	 */
+     * @return the getSIZE_SUFFIX
+     */
     @Override
-	public String getSizeSuffix(
-	) {
-		return SIZE_SUFFIX;
-	}
+    public String getSizeSuffix(
+    ) {
+        return SIZE_SUFFIX;
+    }
 
-	/**
-	 * @return the OBJECT_OID
-	 */
-	@Override
-	public String getObjectOidColumnName(
-	) {
-		return this.OBJECT_OID;
-	}
+    /**
+     * @return the OBJECT_OID
+     */
+    @Override
+    public String getObjectOidColumnName(
+    ) {
+        return this.OBJECT_OID;
+    }
 
-	/**
-	 * @return the OBJECT_IDX
-	 */
-	@Override
-	public String getObjectIdxColumnName(
-	) {
-		return this.OBJECT_IDX;
-	}
+    /**
+     * @return the OBJECT_IDX
+     */
+    @Override
+    public String getObjectIdxColumnName(
+    ) {
+        return this.OBJECT_IDX;
+    }
 
-	/**
-	 * @return the OBJECT_RID
-	 */
-	@Override
-	public String getObjectRidColumnName(
-	) {
-		return this.OBJECT_RID;
-	}
+    /**
+     * @return the OBJECT_RID
+     */
+    @Override
+    public String getObjectRidColumnName(
+    ) {
+        return this.OBJECT_RID;
+    }
 
-	//-----------------------------------------------------------------------
-	// Configuration
+    //-----------------------------------------------------------------------
+    // Configuration
     //-----------------------------------------------------------------------
 
-	/**
+    /**
      * Retrieve booleanType.
      *
      * @return Returns the booleanType.
@@ -1005,7 +1005,7 @@ public class Database_2 extends AbstractRestPort implements Database_1_0, DataTy
     protected Map<String,String> getPathMacros(
     ) {
         if(this.pathMacros == null) {
-        	this.pathMacros = new HashMap<String,String>();
+            this.pathMacros = new HashMap<String,String>();
             for(
                 ListIterator<String> pathMacroNameIterator = this.pathMacroName.populationIterator();
                 pathMacroNameIterator.hasNext();
@@ -1811,7 +1811,7 @@ public class Database_2 extends AbstractRestPort implements Database_1_0, DataTy
         return this.largeObjectMarshaller;
     }
     
-	//-----------------------------------------------------------------------    
+    //-----------------------------------------------------------------------    
 
     /**
      * Close a connection
@@ -1865,21 +1865,21 @@ public class Database_2 extends AbstractRestPort implements Database_1_0, DataTy
      * @return
      */
     @Override
-	public String toRid(
+    public String toRid(
         String name
     ) {
         return name + this.referenceIdAttributesSuffix;
     }
 
     @Override
-	public String toRsx(
+    public String toRsx(
         String name
     ){
         return name + this.referenceIdSuffixAttributesSuffix;
     }
 
-	@Override
-	public String toOid(
+    @Override
+    public String toOid(
         String name
     ) {
         return name + this.objectIdAttributesSuffix;
@@ -1919,11 +1919,11 @@ public class Database_2 extends AbstractRestPort implements Database_1_0, DataTy
         return this.embeddedFeatures.get(attributeName);
     }
 
-	/* (non-Javadoc)
-	 * @see org.openmdx.base.dataprovider.layer.persistence.jdbc.spi.Database_1_0#externalizeStringValue(java.lang.String, java.lang.Object)
-	 */
+    /* (non-Javadoc)
+     * @see org.openmdx.base.dataprovider.layer.persistence.jdbc.spi.Database_1_0#externalizeStringValue(java.lang.String, java.lang.Object)
+     */
     @Override
-	public Object externalizeStringValue(
+    public Object externalizeStringValue(
         String _columnName,
         Object value
     ) {
@@ -1950,11 +1950,11 @@ public class Database_2 extends AbstractRestPort implements Database_1_0, DataTy
         return value;
     }
 
-	/* (non-Javadoc)
-	 * @see org.openmdx.base.dataprovider.layer.persistence.jdbc.spi.Database_1_0#internalizeStringValue(java.lang.String, java.lang.String)
-	 */
+    /* (non-Javadoc)
+     * @see org.openmdx.base.dataprovider.layer.persistence.jdbc.spi.Database_1_0#internalizeStringValue(java.lang.String, java.lang.String)
+     */
     @Override
-	public String internalizeStringValue(
+    public String internalizeStringValue(
         String _columnName,
         String value
     ) {
@@ -2086,7 +2086,7 @@ public class Database_2 extends AbstractRestPort implements Database_1_0, DataTy
      * @see org.openmdx.base.dataprovider.layer.persistence.jdbc.spi.Database_1_0#executeUpdate(java.sql.PreparedStatement, java.lang.String, java.util.List)
      */
     @Override
-	public int executeUpdate(
+    public int executeUpdate(
         PreparedStatement ps,
         String statement,
         List<?> statementParameters
@@ -2134,6 +2134,18 @@ public class Database_2 extends AbstractRestPort implements Database_1_0, DataTy
     }
 
     /**
+     * Retrieve the catalog id
+     * 
+     * @param the actual catalog, or <code>null</code> if none is defined
+     * 
+     * @return the catalog id, i.e. either the catalog itself or "" if
+     * the catalog is <code>null</code> 
+     */
+    private static String toCatalogId(String catalog) {
+        return catalog == null ? "" : catalog;
+    }
+    
+    /**
      * Determine the database product name
      * 
      * @param connection
@@ -2144,23 +2156,15 @@ public class Database_2 extends AbstractRestPort implements Database_1_0, DataTy
         Connection connection
     ){
         try {
-        	String key = connection.getCatalog();
-        	String databaseProductName = null;
-        	try {
-        		databaseProductName = this.databaseProductNames.get(key);
-        	} catch(Exception ignore) {
-        	    SysLog.trace("Database product name determination", ignore);
-        	}
-        	if(databaseProductName == null) {
-        		databaseProductName = connection.getMetaData().getDatabaseProductName();
-        		try {
-	                this.databaseProductNames.put(key, databaseProductName);
-        		} catch(Exception ignore) {
-                    SysLog.trace("Database product name determination", ignore);
-        		}
-        	}
+            final String catalogId = toCatalogId(connection.getCatalog());
+            String databaseProductName = this.databaseProductNames.get(catalogId);
+            if(databaseProductName == null) {
+                databaseProductName = connection.getMetaData().getDatabaseProductName();
+                this.databaseProductNames.put(catalogId, databaseProductName);
+            }
             return databaseProductName;
         } catch (SQLException exception) {
+            SysLog.detail("Database product name determination failure", exception);
             return "n/a";
         }
     }
@@ -2890,7 +2894,7 @@ public class Database_2 extends AbstractRestPort implements Database_1_0, DataTy
     }
     
     @Override
-	public String getSelectReferenceIdsClause(
+    public String getSelectReferenceIdsClause(
         Connection conn,
         Path pattern,
         List<Object> statementParameters
@@ -3065,7 +3069,7 @@ public class Database_2 extends AbstractRestPort implements Database_1_0, DataTy
     }
 
     @Override
-	public Object getReferenceId(
+    public Object getReferenceId(
         Connection conn,
         Path referencePattern,
         boolean forceCreate
@@ -3082,7 +3086,7 @@ public class Database_2 extends AbstractRestPort implements Database_1_0, DataTy
         );
     }
 
-	public String getObjectId(
+    public String getObjectId(
         String oid
     ) throws ServiceException{
         return this.getDatabaseConfiguration().normalizeObjectIds() ? this.getDatabaseConfiguration().buildObjectId(
@@ -3090,7 +3094,7 @@ public class Database_2 extends AbstractRestPort implements Database_1_0, DataTy
         ) : oid; 
     }
 
-	public String getObjectId(
+    public String getObjectId(
         Connection conn,
         Path resourceIdentifier
     ) throws ServiceException{
@@ -3149,7 +3153,7 @@ public class Database_2 extends AbstractRestPort implements Database_1_0, DataTy
      * @throws ServiceException
      */
     @Override
-	public String getPlaceHolder(
+    public String getPlaceHolder(
         Connection connection,
         Object value
     ) throws ServiceException {
@@ -3179,7 +3183,7 @@ public class Database_2 extends AbstractRestPort implements Database_1_0, DataTy
         );
     }
 
-	public String getAutonumValue(
+    public String getAutonumValue(
         Connection conn,
         String sequenceName,
         String asFormat
@@ -3335,7 +3339,7 @@ public class Database_2 extends AbstractRestPort implements Database_1_0, DataTy
         }
     }
 
-	public Path getReference(
+    public Path getReference(
         Connection conn,
         Object referenceId
         ) throws ServiceException {
@@ -3476,7 +3480,7 @@ public class Database_2 extends AbstractRestPort implements Database_1_0, DataTy
      * @return
      * @throws ServiceException
      */
-	public String getDatabaseSpecificColumnName(
+    public String getDatabaseSpecificColumnName(
         Connection conn,
         String columnName,
         boolean ignoreReservedWords
@@ -3499,11 +3503,11 @@ public class Database_2 extends AbstractRestPort implements Database_1_0, DataTy
         }
     }
 
-	/* (non-Javadoc)
-	 * @see org.openmdx.base.dataprovider.layer.persistence.jdbc.spi.Database_1_0#getColumnName(java.sql.Connection, java.lang.String, int, boolean, boolean, boolean)
-	 */
-	@Override
-	public String getColumnName(
+    /* (non-Javadoc)
+     * @see org.openmdx.base.dataprovider.layer.persistence.jdbc.spi.Database_1_0#getColumnName(java.sql.Connection, java.lang.String, int, boolean, boolean, boolean)
+     */
+    @Override
+    public String getColumnName(
         Connection conn,
         String attributeName,
         int index,
@@ -3580,11 +3584,11 @@ public class Database_2 extends AbstractRestPort implements Database_1_0, DataTy
         return columnName;
     }
 
-	/* (non-Javadoc)
-	 * @see org.openmdx.base.dataprovider.layer.persistence.jdbc.spi.Database_1_0#getFeatureName(java.lang.String)
-	 */
-	@Override
-	public String getFeatureName(
+    /* (non-Javadoc)
+     * @see org.openmdx.base.dataprovider.layer.persistence.jdbc.spi.Database_1_0#getFeatureName(java.lang.String)
+     */
+    @Override
+    public String getFeatureName(
         String columnName
     ) throws ServiceException {
         String mappedColumnName = columnName;
@@ -3652,11 +3656,11 @@ public class Database_2 extends AbstractRestPort implements Database_1_0, DataTy
         return featureName;
     }
 
-	/* (non-Javadoc)
-	 * @see org.openmdx.base.dataprovider.layer.persistence.jdbc.spi.Database_1_0#setPreparedStatementValue(java.sql.Connection, java.sql.PreparedStatement, int, java.lang.Object)
-	 */
-	@Override
-	public void setPreparedStatementValue(
+    /* (non-Javadoc)
+     * @see org.openmdx.base.dataprovider.layer.persistence.jdbc.spi.Database_1_0#setPreparedStatementValue(java.sql.Connection, java.sql.PreparedStatement, int, java.lang.Object)
+     */
+    @Override
+    public void setPreparedStatementValue(
         Connection conn,
         PreparedStatement ps,
         int position,
@@ -3887,7 +3891,7 @@ public class Database_2 extends AbstractRestPort implements Database_1_0, DataTy
      * 
      * @return <code>true</code> if the given feature is persistent
      */
-	public boolean isPersistent(
+    public boolean isPersistent(
         ModelElement_1_0 featureDef
     ) throws ServiceException{
         return 
@@ -3895,10 +3899,10 @@ public class Database_2 extends AbstractRestPort implements Database_1_0, DataTy
             Persistency.getInstance().isPersistentAttribute(featureDef);
     }
 
-	protected Model_1_0 getModel(
-	) {
-	    return Model_1Factory.getModel();
-	}
+    protected Model_1_0 getModel(
+    ) {
+        return Model_1Factory.getModel();
+    }
 
     protected Set<String> getAllSubtypes(
         String qualifiedTypeName
@@ -3915,7 +3919,7 @@ public class Database_2 extends AbstractRestPort implements Database_1_0, DataTy
             return allSubtypes;
         }
     }
-    	
+        
     /**
      * Lookup a feature's meta-data
      * 
@@ -4073,10 +4077,10 @@ public class Database_2 extends AbstractRestPort implements Database_1_0, DataTy
             // Duplicate indices are allowed. However, they are skipped
             if(!processedIdxs.contains(Integer.valueOf(idx))) {
                 Object_2Facade currentFacade = Facades.asObject(current);
-        		boolean multivaluedAttributesRequested = areMultivaluedAttributesRequested(
-        			attributeSpecifiers,
-					featureDefs
-				);
+                boolean multivaluedAttributesRequested = areMultivaluedAttributesRequested(
+                    attributeSpecifiers,
+                    featureDefs
+                );
                 // Iterate through object attributes and add values
                 for(String columnName: frs.getColumnNames()) {
                     String featureName = this.getFeatureName(columnName);  
@@ -4389,33 +4393,33 @@ public class Database_2 extends AbstractRestPort implements Database_1_0, DataTy
         return hasMore;
     }
 
-	/**
-	 * Determine whether multi-valued attributes requested
-	 * 
-	 * @param attributeSpecifiers
-	 * @param featureDefs
-	 * 
-	 * @throws ServiceException
-	 */
-	private boolean areMultivaluedAttributesRequested(
-		Map<String, AttributeSpecifier> attributeSpecifiers,
-		Map<String, ModelElement_1_0> featureDefs
-	) throws ServiceException {
-		if(featureDefs != null){
-			for(String featureName : attributeSpecifiers.keySet()) {
-		        ModelElement_1_0 featureDef = featureDefs.get(featureName);
-		        if(featureDef != null){
-		            if(
-		                ModelHelper.getMultiplicity(featureDef).isMultiValued() &&
-		                this.getEmbeddedFeature(featureName) == null
-		            ) {
-		            	return true;
-		            }
-		        }
-		    }
-		}
-		return false;
-	}
+    /**
+     * Determine whether multi-valued attributes requested
+     * 
+     * @param attributeSpecifiers
+     * @param featureDefs
+     * 
+     * @throws ServiceException
+     */
+    private boolean areMultivaluedAttributesRequested(
+        Map<String, AttributeSpecifier> attributeSpecifiers,
+        Map<String, ModelElement_1_0> featureDefs
+    ) throws ServiceException {
+        if(featureDefs != null){
+            for(String featureName : attributeSpecifiers.keySet()) {
+                ModelElement_1_0 featureDef = featureDefs.get(featureName);
+                if(featureDef != null){
+                    if(
+                        ModelHelper.getMultiplicity(featureDef).isMultiValued() &&
+                        this.getEmbeddedFeature(featureName) == null
+                    ) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
 
     private boolean isReferenceFeature(
         Connection conn,
@@ -4700,13 +4704,13 @@ public class Database_2 extends AbstractRestPort implements Database_1_0, DataTy
         }
     }
 
-	/**
-	 * @param singleValueView
-	 * @return
-	 */
-	protected String toMultiValueView(String singleValueView) {
-		return singleValueView + "v";
-	}
+    /**
+     * @param singleValueView
+     * @return
+     */
+    protected String toMultiValueView(String singleValueView) {
+        return singleValueView + "v";
+    }
 
     /**
      * Generate a SQL clause corresponding to filter properties for the generic
@@ -4846,10 +4850,10 @@ public class Database_2 extends AbstractRestPort implements Database_1_0, DataTy
                                 " WHERE (" + clause + "))";
                         case SPECIFIED_COLUMN_WITH_OBJECT_ID:
                             return
-                        		"(" + (negate ? "NOT " : "") +  
+                                "(" + (negate ? "NOT " : "") +  
                                 "EXISTS (SELECT 1 FROM " + (view.startsWith("SELECT") ? "(" + view + ") " + viewAliasName : view + " " + viewAliasName + " ") +
                                 " WHERE " + viewAliasName + "." + dbObject.getObjectIdColumn().get(0) + " = " + joinColumn + " AND " + 
-                                " (" + clause + ")))";                            		
+                                " (" + clause + ")))";                                  
                         case OBJECT_RID_AND_OID:
                             return 
                                 (negate ? "(NOT " : "(") +  
@@ -4974,7 +4978,7 @@ public class Database_2 extends AbstractRestPort implements Database_1_0, DataTy
                     String[] pattern = new String[type.size()]; 
                     int i = 0;
                     for(XRISegment p : type.getSegments()){
-                    	String c = p.toString();
+                        String c = p.toString();
                         pattern[i++] = ":*".equals(c) ? "%" : c;
                     }
                     matchingPatterns.add(new Path(pattern));
@@ -5052,7 +5056,7 @@ public class Database_2 extends AbstractRestPort implements Database_1_0, DataTy
                 }
             } else if(externalized.startsWith("spice:")) {
                 for(XRISegment p : value.getSegments()) {
-                	String c = p.toString();
+                    String c = p.toString();
                     if(c.startsWith(":") && c.endsWith("*")) {
                         throw new ServiceException(
                             BasicException.Code.DEFAULT_DOMAIN,
@@ -5361,7 +5365,7 @@ public class Database_2 extends AbstractRestPort implements Database_1_0, DataTy
                                 }
                             } else if(externalized.startsWith("spice:")) {
                                 for(XRISegment p : ((Path)v).getSegments()){
-                                	String c = p.toString();
+                                    String c = p.toString();
                                     if(c.startsWith(":") && c.endsWith("*")) {
                                         throw new ServiceException(
                                             BasicException.Code.DEFAULT_DOMAIN,
@@ -5426,47 +5430,47 @@ public class Database_2 extends AbstractRestPort implements Database_1_0, DataTy
         return clause.toString();
     }
 
-	private void isLikeToSqlClause(
-		Connection conn, 
-		String columnName,
-		List<Object> clauseValues, 
-		StringBuilder clause, 
-		Object v
-	) throws ServiceException {
-		String externalized = (String)this.externalizeStringValue(columnName, v);
-		EmbeddedFlags.FlagsAndValue flagsAndValue = this.embeddedFlags.parse(externalized);
-		externalized = this.sqlWildcards.fromJDO(flagsAndValue.getValue());
-		final EnumSet<RegularExpressionFlag> flagSet = flagsAndValue.getFlagSet();
-		if(flagSet.contains(RegularExpressionFlag.ACCENT_INSENSITIVE)){
-		    isLikeToSqlClause(conn, columnName, clauseValues, clause, externalized, "ACCENT.INSENSITIVITY", LikeFlavour.NOT_SUPPORTED);
-		} else if(flagSet.contains(RegularExpressionFlag.POSIX_EXPRESSION)){
-		    isLikeToSqlClause(conn, columnName, clauseValues, clause, externalized, "POSIX.EXPRESSION", LikeFlavour.NOT_SUPPORTED);
-		} else if(flagSet.contains(RegularExpressionFlag.CASE_INSENSITIVE)){
-		    isLikeToSqlClause(conn, columnName, clauseValues, clause, externalized, "CASE.INSENSITIVITY", LikeFlavour.LOWER_SQL);
-		} else {
-		    clause.append("(").append(columnName).append(" LIKE ? ").append(getEscapeClause(conn)).append(")");
-		    clauseValues.add(externalized);                  
-		}
-	}
+    private void isLikeToSqlClause(
+        Connection conn, 
+        String columnName,
+        List<Object> clauseValues, 
+        StringBuilder clause, 
+        Object v
+    ) throws ServiceException {
+        String externalized = (String)this.externalizeStringValue(columnName, v);
+        EmbeddedFlags.FlagsAndValue flagsAndValue = this.embeddedFlags.parse(externalized);
+        externalized = this.sqlWildcards.fromJDO(flagsAndValue.getValue());
+        final EnumSet<RegularExpressionFlag> flagSet = flagsAndValue.getFlagSet();
+        if(flagSet.contains(RegularExpressionFlag.ACCENT_INSENSITIVE)){
+            isLikeToSqlClause(conn, columnName, clauseValues, clause, externalized, "ACCENT.INSENSITIVITY", LikeFlavour.NOT_SUPPORTED);
+        } else if(flagSet.contains(RegularExpressionFlag.POSIX_EXPRESSION)){
+            isLikeToSqlClause(conn, columnName, clauseValues, clause, externalized, "POSIX.EXPRESSION", LikeFlavour.NOT_SUPPORTED);
+        } else if(flagSet.contains(RegularExpressionFlag.CASE_INSENSITIVE)){
+            isLikeToSqlClause(conn, columnName, clauseValues, clause, externalized, "CASE.INSENSITIVITY", LikeFlavour.LOWER_SQL);
+        } else {
+            clause.append("(").append(columnName).append(" LIKE ? ").append(getEscapeClause(conn)).append(")");
+            clauseValues.add(externalized);                  
+        }
+    }
 
-	private void isLikeToSqlClause(
-		Connection conn, 
-		String columnName,
-		List<Object> clauseValues, 
-		StringBuilder clause,
-		String externalized, 
-		String propertyName, 
-		LikeFlavour defaultFlavour
-	) throws ServiceException {
-		List<LikeFlavour> likeFlavours = LikeFlavour.parse(
-			getDriverProperty(
-		        conn,
-		        propertyName,
-		        defaultFlavour.name()
-		    )
-		);
-		LikeFlavour.applyAll(likeFlavours, clause, clauseValues, columnName, externalized);
-	}
+    private void isLikeToSqlClause(
+        Connection conn, 
+        String columnName,
+        List<Object> clauseValues, 
+        StringBuilder clause,
+        String externalized, 
+        String propertyName, 
+        LikeFlavour defaultFlavour
+    ) throws ServiceException {
+        List<LikeFlavour> likeFlavours = LikeFlavour.parse(
+            getDriverProperty(
+                conn,
+                propertyName,
+                defaultFlavour.name()
+            )
+        );
+        LikeFlavour.applyAll(likeFlavours, clause, clauseValues, columnName, externalized);
+    }
 
     /**
      * @param filterPropertyDef
@@ -6009,7 +6013,7 @@ public class Database_2 extends AbstractRestPort implements Database_1_0, DataTy
         String objectClass = facade.getObjectClass();
         Model_1_0 model = getModel();
         if(
-        	isStated(model, objectClass) &&
+            isStated(model, objectClass) &&
             isNotExcludedFromPersistency("org:openmdx:base:Removable:removedAt")
         ){
             setLockAssertion(facade, SystemAttributes.REMOVED_AT);
@@ -6286,7 +6290,7 @@ public class Database_2 extends AbstractRestPort implements Database_1_0, DataTy
      * @see org.openmdx.base.dataprovider.layer.persistence.jdbc.spi.Database_1_0#prepareStatement(java.sql.Connection, java.lang.String)
      */
     @Override
-	public PreparedStatement prepareStatement(
+    public PreparedStatement prepareStatement(
         Connection conn,
         String statement
     ) throws SQLException {
@@ -6752,14 +6756,17 @@ public class Database_2 extends AbstractRestPort implements Database_1_0, DataTy
             QueryRecord request, 
             ResultRecord reply
         ) throws ResourceException {
-            Model_1_0 model = Model_1Factory.getModel();
-            Path xri = request.getResourceIdentifier();
+            final Model_1_0 model = Model_1Factory.getModel();
+            final Path xri = request.getResourceIdentifier();
             if(DatabasePreferences.isConfigurationRequest(xri)) {
                 try {
-                    DatabasePreferences.discloseConfiguration(
+                    final DatabaseConfiguration dbConfiguration = Database_2.this.getDatabaseConfiguration();
+					DatabasePreferences.discloseConfiguration(
                         xri, 
                         reply, 
-                        Database_2.this.getDatabaseConfiguration().getDbObjectConfigurations()
+                        dbConfiguration.getDbObjectConfigurations(),
+                        dbConfiguration.getFromToColumnNameMapping(),
+                        Database_2.this.getStringMacros()
                     );
                 } catch(ServiceException e) {
                     throw new ResourceException(e);
@@ -6838,7 +6845,6 @@ public class Database_2 extends AbstractRestPort implements Database_1_0, DataTy
                     }
                     // Get attribute and query filter. The query filter is passed as
                     // FilterProperty with context prefix QUERY_FILTER_CONTEXT
-                    List<String> orderBy = new ArrayList<String>();
                     List<FilterProperty> filterProperties = new ArrayList<FilterProperty>();
                     String columnSelector = DEFAULT_COLUMN_SELECTOR;
                     boolean stated = false;
@@ -6891,7 +6897,22 @@ public class Database_2 extends AbstractRestPort implements Database_1_0, DataTy
                                         );
                                         StringTokenizer tokenizer = new StringTokenizer(orderByClause, ",", false);
                                         while(tokenizer.hasMoreTokens()) {
-                                            orderBy.add(tokenizer.nextToken());
+                                            String orderByAttribute = tokenizer.nextToken().trim();
+                                            SortOrder sortOrder = SortOrder.UNSORTED;
+                                            if(orderByAttribute.endsWith("ASC") || orderByAttribute.endsWith("asc")) {
+                                                sortOrder = SortOrder.ASCENDING;
+                                                orderByAttribute = orderByAttribute.substring(0, orderByAttribute.length() - 3).trim();
+                                            } else if(orderByAttribute.endsWith("DESC") || orderByAttribute.endsWith("desc")) {
+                                                sortOrder = SortOrder.DESCENDING;
+                                                orderByAttribute = orderByAttribute.substring(0, orderByAttribute.length() - 4).trim();                                                
+                                            }
+                                            attributeSpecifiers.add(
+                                                new AttributeSpecifier(
+                                                    orderByAttribute,
+                                                    0,
+                                                    sortOrder.code()
+                                                )
+                                            );
                                         }
                                         clause =
                                             clause.substring(0, start) + 
@@ -6943,10 +6964,12 @@ public class Database_2 extends AbstractRestPort implements Database_1_0, DataTy
                     Set<String> mixins = new HashSet<String>();
                     // ORDER BY attributes
                     for(AttributeSpecifier attributeSpecifier: attributeSpecifiers) {
-                        // Add to orderBy set unless the order is UNSORTED
-                        if(attributeSpecifier.order() != SortOrder.UNSORTED.code()) {
+                        // Add to orderBy set unless the order is UNSORTED or is an expression
+                        if(
+                            attributeSpecifier.order() != SortOrder.UNSORTED.code() && 
+                            !attributeSpecifier.name().startsWith("(")
+                        ) {
                             String attributeName = attributeSpecifier.name();
-                            orderBy.add(attributeName);
                             mixins.add(attributeName);
                         }
                     }
@@ -7054,10 +7077,10 @@ public class Database_2 extends AbstractRestPort implements Database_1_0, DataTy
                                 (pos < clause.length()) && 
                                 ((pos = clause.indexOf("?", pos)) >= 0)
                             ) {
-                            	int placeHolderEndPos = pos + 2;
-                            	while(Character.isDigit(clause.charAt(placeHolderEndPos)) && placeHolderEndPos < clause.length()) {
-                            		placeHolderEndPos++;
-                            	}
+                                int placeHolderEndPos = pos + 2;
+                                while(Character.isDigit(clause.charAt(placeHolderEndPos)) && placeHolderEndPos < clause.length()) {
+                                    placeHolderEndPos++;
+                                }
                                 int index = Integer.valueOf(clause.substring(pos + 2, placeHolderEndPos)).intValue();
                                 if(clause.startsWith("?s", pos)) {
                                     statementParameters.add(
@@ -7088,7 +7111,7 @@ public class Database_2 extends AbstractRestPort implements Database_1_0, DataTy
                                 pos++;
                             }
                             statement += " AND (";
-                            statement += clause.replaceAll("(\\?[sinbdt]\\d)", "?");
+                            statement += clause.replaceAll("(\\?[sinbdt]\\d+)", "?");
                             statement += ")";
                             String databaseProductName = conn.getMetaData().getDatabaseProductName();             
                             if(databaseProductName.startsWith("DB2")) {
@@ -7138,12 +7161,16 @@ public class Database_2 extends AbstractRestPort implements Database_1_0, DataTy
                                 if(!hasOrderBy) statement += " ORDER BY"; 
                                 boolean viewIsIndexed = dbObject.getIndexColumn() != null;              
                                 statement += hasOrderBy ? ", " : " ";
-                                // order on mixin view (vm.) in case of indexed slices, otherwise on primary view (v.)
-                                statement += (viewIsIndexed ? "vm." : "v.") + getColumnName(conn, specifier.name(), 0, false, true, false) + (specifier.order() == SortOrder.DESCENDING.code() ? " DESC" : " ASC");
+                                if(specifier.name().startsWith("(")) {
+                                    statement += specifier.name() + (specifier.order() == SortOrder.DESCENDING.code() ? " DESC" : " ASC");
+                                } else {
+                                    // order on mixin view (vm.) in case of indexed slices, otherwise on primary view (v.)
+                                    statement += (viewIsIndexed ? "vm." : "v.") + getColumnName(conn, specifier.name(), 0, false, true, false) + (specifier.order() == SortOrder.DESCENDING.code() ? " DESC" : " ASC");
+                                }
                                 hasOrderBy = true;
                             }
                         }
-                        switch(getOrderAmendment(conn, dbObject)){
+                        switch(getOrderAmendment(conn, dbObject)) {
                             case BY_OBJECT_ID:
                                 // ORDER BY object identity is required. Otherwise, iteration
                                 // may not be deterministic. 
@@ -7326,12 +7353,12 @@ public class Database_2 extends AbstractRestPort implements Database_1_0, DataTy
                                 Map<Path,ObjectRecord> objects2AsMap = new HashMap<Path,ObjectRecord>();
                                 for(ObjectRecord object2: objects2) {
                                     objects2AsMap.put(
-                                    	object2.getResourceIdentifier(), 
+                                        object2.getResourceIdentifier(), 
                                         object2
                                     );
                                 }
                                 for(ObjectRecord object: objects) {
-                                	ObjectRecord object2 = objects2AsMap.get(object.getResourceIdentifier());
+                                    ObjectRecord object2 = objects2AsMap.get(object.getResourceIdentifier());
                                     if(object2 != null) {
                                         Object_2Facade.getValue(object2).keySet().removeAll(
                                             object.keySet()
@@ -7950,7 +7977,7 @@ public class Database_2 extends AbstractRestPort implements Database_1_0, DataTy
      * @throws ServiceException
      */
     @Override
-	public String getEscapeClause(
+    public String getEscapeClause(
         Connection connection
     ) throws ServiceException{      
         return getDriverProperty(
@@ -8179,19 +8206,19 @@ public class Database_2 extends AbstractRestPort implements Database_1_0, DataTy
         return BASE_CLASSES.contains(qualifiedClassName);
     }
         
-	/* (non-Javadoc)
-	 * @see org.openmdx.base.dataprovider.layer.persistence.jdbc.spi.Database_1_0#isEmbeddedFeature(java.lang.String)
-	 */
-	@Override
-	public boolean isEmbeddedFeature(String featureName) {
-		return embeddedFeatures.containsKey(featureName);
-	}
+    /* (non-Javadoc)
+     * @see org.openmdx.base.dataprovider.layer.persistence.jdbc.spi.Database_1_0#isEmbeddedFeature(java.lang.String)
+     */
+    @Override
+    public boolean isEmbeddedFeature(String featureName) {
+        return embeddedFeatures.containsKey(featureName);
+    }
 
     //---------------------------------------------------------------------------
     // Variables
     //---------------------------------------------------------------------------
 
-	protected static final String T_REF = "REF";
+    protected static final String T_REF = "REF";
     protected static final String UNDEF_OBJECT_CLASS = "#undef";
     protected static final String SIZE_SUFFIX = "_";
     protected static final int ROUND_UP_TO_MAX_SCALE = 15;

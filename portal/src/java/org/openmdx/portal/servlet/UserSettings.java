@@ -68,7 +68,8 @@ public enum UserSettings {
 	ROOT_OBJECT_STATE("RootObject"),
 	WORKSPACE_ID("Workspace.ID"),	
 	HIDE_WORKSPACE_DASHBOARD("WorkspaceDashboard.Hide"),
-	AUTOSTART_URL("Autostart.URL");
+	AUTOSTART_URL("Autostart.URL"),
+	ANCHOR_USER_DIALOG("UserDialog.Anchor");
 
 	private final String name;
 	

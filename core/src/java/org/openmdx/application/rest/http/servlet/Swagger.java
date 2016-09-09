@@ -8,7 +8,7 @@
  * This software is published under the BSD license
  * as listed below.
  * 
- * Copyright (c) 2014, OMEX AG, Switzerland
+ * Copyright (c) 2014-2016, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -109,7 +109,7 @@ public class Swagger {
         Multiplicity multiplicity,
         boolean complexTypeAsPath,
         String prefix
-        ) throws ServiceException, JSONException {
+   ) throws ServiceException, JSONException {
         ModelElement_1_0 dereferencedType = typeDef.getModel().getDereferencedType(typeDef);
         if(dereferencedType.isPrimitiveType()) {
             if(
@@ -431,8 +431,8 @@ public class Swagger {
                         elementTypeDef,
                         ModelHelper.getMultiplicity(elementDef),
                         true,
-                        null
-                        );
+                        "#/definitions/"
+                    );
                     boolean isReadOnly = 
                         !elementDef.isStructureFieldType() && 
                         !ModelHelper.isChangeable(elementDef);
@@ -496,7 +496,7 @@ public class Swagger {
                 }
             }
         }
-        if(subTypes != null) {
+        if(SWAGGER_SUPPORTS_POLYMORPHISM && subTypes != null) {
             typeDefinition.put("subTypes", subTypes);
         }
         typeDefinition.put("properties", properties);
@@ -611,7 +611,7 @@ public class Swagger {
                         "get",
                         this.newOperation(
                             // operationId
-                            Identifier.OPERATION_NAME.toIdentifier(referenceDef.getName(), null, "get", null, null) + "s",
+                            Identifier.OPERATION_NAME.toIdentifier(referenceDef.getName(), null, "get", null, "s"),
                             // description
                             " Retrieves the value for the reference &laquo;" + referenceDef.getName() + "&raquo; for the specified query.",
                             // tags
@@ -666,7 +666,7 @@ public class Swagger {
                         "get",
                         this.newOperation(
                             // operationId
-                            "get",
+                            Identifier.OPERATION_NAME.toIdentifier(referenceDef.getName(), null, "get", null, null),
                             // description
                             "Retrieves the value for the reference &laquo;" + referenceDef.getName() + "&raquo; for the specified qualifier &laquo;id&raquo;. The returned value is of type:" + subtypesDescription,
                             // tags
@@ -694,7 +694,7 @@ public class Swagger {
                             "delete", 
                             this.newOperation(
                                 // operationId
-                                "delete",
+                                Identifier.OPERATION_NAME.toIdentifier(referenceDef.getName(), null, "delete", null, null),
                                 // description
                                 "Deletes the value for the reference &laquo;" + referenceDef.getName() + "&raquo; with the specified qualifier &laquo;id&raquo;.",
                                 // tags
@@ -705,15 +705,15 @@ public class Swagger {
                                 ),
                                 // responses
                                 this.newResponse().put(
-                                    "default", 
-                                    new JSONObject()
+                                    Integer.toString(HttpServletResponse.SC_OK),
+                                    this.newErrorResponse("Object deleted")
                                 )
                             )
                         ).put(
                             "put", 
                             this.newOperation(
                                 // operationId
-                                "update",
+                                Identifier.OPERATION_NAME.toIdentifier(referenceDef.getName(), null, "update", null, null),
                                 // description
                                 "Updates the value for the reference &laquo;" + referenceDef.getName() + "&raquo; with the specified qualifier &laquo;id&raquo;.",
                                 // tags
@@ -744,7 +744,7 @@ public class Swagger {
                             "post", 
                             this.newOperation(
                                 // operationId
-                                Identifier.OPERATION_NAME.toIdentifier(referenceDef.getName(), null, "add", null, null),
+                                Identifier.OPERATION_NAME.toIdentifier(referenceDef.getName(), null, "addQualified", null, null),
                                 // description
                                 "Adds the specified element to the set of the values for the reference &laquo;" + referenceDef.getName() + "&raquo; using the specified, reassignable qualifier &laquo;id&raquo;. The element must be of type:" + subtypesDescription,
                                 // tags
@@ -934,7 +934,7 @@ public class Swagger {
                     JSONObject property = new JSONObject();
                     JSONObject items = new JSONObject();
                     property.put("type", "array");
-                    items.put("$ref", "PathElement");
+                    items.put("$ref", "#/definitions/PathElement");
                     property.put("items", items);
                     properties.put("_item", property);
                 }
@@ -970,7 +970,7 @@ public class Swagger {
                     JSONObject property = new JSONObject();
                     JSONObject items = new JSONObject();
                     property.put("type", "array");
-                    items.put("$ref", "StringElement");
+                    items.put("$ref", "#/definitions/StringElement");
                     property.put("items", items);
                     properties.put("_item", property);
                 }
@@ -1007,7 +1007,7 @@ public class Swagger {
                     JSONObject property = new JSONObject();
                     JSONObject items = new JSONObject();
                     property.put("type", "array");
-                    items.put("$ref", "IntegerElement");
+                    items.put("$ref", "#/definitions/IntegerElement");
                     property.put("items", items);
                     properties.put("_item", property);
                 }
@@ -1044,7 +1044,7 @@ public class Swagger {
                     JSONObject property = new JSONObject();
                     JSONObject items = new JSONObject();
                     property.put("type", "array");
-                    items.put("$ref", "LongElement");
+                    items.put("$ref", "#/definitions/LongElement");
                     property.put("items", items);
                     properties.put("_item", property);
                 }
@@ -1081,7 +1081,7 @@ public class Swagger {
                     JSONObject property = new JSONObject();
                     JSONObject items = new JSONObject();
                     property.put("type", "array");
-                    items.put("$ref", "DateElement");
+                    items.put("$ref", "#/definitions/DateElement");
                     property.put("items", items);
                     properties.put("_item", property);
                 }
@@ -1118,7 +1118,7 @@ public class Swagger {
                     JSONObject property = new JSONObject();
                     JSONObject items = new JSONObject();
                     property.put("type", "array");
-                    items.put("$ref", "DateTimeElement");
+                    items.put("$ref", "#/definitions/DateTimeElement");
                     property.put("items", items);
                     properties.put("_item", property);
                 }
@@ -1154,7 +1154,7 @@ public class Swagger {
                     JSONObject property = new JSONObject();
                     JSONObject items = new JSONObject();
                     property.put("type", "array");
-                    items.put("$ref", "BooleanElement");
+                    items.put("$ref", "#/definitions/BooleanElement");
                     property.put("items", items);
                     properties.put("_item", property);
                 }
@@ -1190,7 +1190,7 @@ public class Swagger {
                     JSONObject property = new JSONObject();
                     JSONObject items = new JSONObject();
                     property.put("type", "array");
-                    items.put("$ref", "DecimalElement");
+                    items.put("$ref", "#/definitions/DecimalElement");
                     property.put("items", items);
                     properties.put("_item", property);
                 }
@@ -1244,7 +1244,7 @@ public class Swagger {
                             typeDef,
                             Multiplicity.SINGLE_VALUE,
                             false, 
-                            null
+                            "#/definitions/"
                         );
                         property.put("items", items);
                         properties.put("objects", property);
@@ -1262,7 +1262,7 @@ public class Swagger {
                     // qualifiedTypeName
                     {
                         JSONObject property = new JSONObject();
-                        property.put("$ref", typeDef.getQualifiedName());
+                        property.put("$ref", "#/definitions/" + typeDef.getQualifiedName());
                         properties.put(typeDef.getQualifiedName().replace(":", "."), property);
                     }
                     type.put("properties", properties);

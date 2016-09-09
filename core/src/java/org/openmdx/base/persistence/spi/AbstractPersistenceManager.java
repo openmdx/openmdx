@@ -176,9 +176,11 @@ public abstract class AbstractPersistenceManager implements PersistenceManager {
     @Override
     public synchronized void close() {
     	if(!closed) {
-	        if(!this.isTransactionContainerManaged() && this.currentUnitOfWork().isActive()) throw new JDOUserException(
-	            "Persistence manager with an active unit of work can't be closed unless they are container managed"
-	        );
+	        if(!this.isTransactionContainerManaged() && this.currentUnitOfWork().isActive()) {
+	        	throw new JDOUserException(
+		            "Persistence manager with an active unit of work can't be closed unless they are container managed"
+		        );
+	        }
 	        this.instanceLifecycleListener.close();
 	        this.instanceLifecycleListener = null;
 	        this.userObjects.clear();

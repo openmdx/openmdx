@@ -1,0 +1,321 @@
+<!-- 
+====================================================================
+Project:     openMDX/Portal, http://www.openmdx.org/
+Description: portal-time-picker
+Owner:       OMEX AG, Switzerland, http://www.omex.ch
+====================================================================
+
+This software is published under the BSD license
+as listed below.
+
+Copyright (c) 2015, OMEX AG, Switzerland
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or
+without modification, are permitted provided that the following
+conditions are met:
+
+* Redistributions of source code must retain the above copyright
+notice, this list of conditions and the following disclaimer.
+
+* Redistributions in binary form must reproduce the above copyright
+notice, this list of condition and the following disclaimer in
+the documentation and/or other materials provided with the
+distribution.
+
+* Neither the name of the openMDX team nor the names of its
+contributors may be used to endorse or promote products derived
+from this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
+CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
+INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS
+BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED
+TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+POSSIBILITY OF SUCH DAMAGE.
+
+------------------
+
+This product includes software developed by the Apache Software
+Foundation (http://www.apache.org/).
+
+-->
+<link rel="import" href="../../../../polymer/components/polymer/polymer.html">
+<link rel="import" href="../../../../polymer/components/paper-card/paper-card.html"/>
+<link rel="import" href="../../../../polymer/components/iron-flex-layout/classes/iron-flex-layout.html">
+<script src="../../../../polymer/components/moment/min/moment-with-locales.min.js"></script>
+<script src="../../../../polymer/components/moment-timezone/builds/moment-timezone-with-data.js"></script>
+<dom-module id="portal-time-picker">
+	<link rel="import" type="css" href="portal-time-picker.css">
+	<template>
+		<paper-card elevation="0">
+			<div class="card-header horizontal justified layout">
+				<paper-button>{{formatNumber(hour,0)}}:{{formatNumber(minute,1)}} {{timezone}}</paper-button>				
+			</div>
+			<div class="card-content horizontal justified layout">
+				<div id="hourClock" style="padding:10px;" on-tap="selectHour" on-track="selectHour">
+					<svg width$="{{getDim()}}" height$="{{getDim()}}">
+						<circle class="face" r$="{{getRadius()}}" cx$="{{getRadius()}}" cy$="{{getRadius()}}"></circle>
+						<g class="clock-hand">
+							<circle class="dot" r="2" cx$="{{getRadius()}}" cy$="{{getRadius()}}"></circle>
+							<line class="line" x1$="{{getRadius()}}" y1$="{{getRadius()}}" x2$="{{getHandX(hours, hour, 24)}}" y2$="{{getHandY(hours, hour, 24)}}"></line>
+							<circle class="disc-large" r$="{{selectorSize}}" cx$="{{getHandX(hours, hour, 24)}}" cy$="{{getHandY(hours, hour, 24)}}"></circle>
+						</g>
+						<!-- dom-repeat does not work in svg! -->
+						<text class$="{{_style(hours, 0)}}" x$="{{_x(hours, 0)}}" y$="{{_y(hours, 0)}}">{{_label(hours, 0)}}</text>
+						<text class$="{{_style(hours, 1)}}" x$="{{_x(hours, 1)}}" y$="{{_y(hours, 1)}}">{{_label(hours, 1)}}</text>
+						<text class$="{{_style(hours, 2)}}" x$="{{_x(hours, 2)}}" y$="{{_y(hours, 2)}}">{{_label(hours, 2)}}</text>
+						<text class$="{{_style(hours, 3)}}" x$="{{_x(hours, 3)}}" y$="{{_y(hours, 3)}}">{{_label(hours, 3)}}</text>
+						<text class$="{{_style(hours, 4)}}" x$="{{_x(hours, 4)}}" y$="{{_y(hours, 4)}}">{{_label(hours, 4)}}</text>
+						<text class$="{{_style(hours, 5)}}" x$="{{_x(hours, 5)}}" y$="{{_y(hours, 5)}}">{{_label(hours, 5)}}</text>
+						<text class$="{{_style(hours, 6)}}" x$="{{_x(hours, 6)}}" y$="{{_y(hours, 6)}}">{{_label(hours, 6)}}</text>
+						<text class$="{{_style(hours, 7)}}" x$="{{_x(hours, 7)}}" y$="{{_y(hours, 7)}}">{{_label(hours, 7)}}</text>
+						<text class$="{{_style(hours, 8)}}" x$="{{_x(hours, 8)}}" y$="{{_y(hours, 8)}}">{{_label(hours, 8)}}</text>
+						<text class$="{{_style(hours, 9)}}" x$="{{_x(hours, 9)}}" y$="{{_y(hours, 9)}}">{{_label(hours, 9)}}</text>
+						<text class$="{{_style(hours, 10)}}" x$="{{_x(hours, 10)}}" y$="{{_y(hours, 10)}}">{{_label(hours, 10)}}</text>
+						<text class$="{{_style(hours, 11)}}" x$="{{_x(hours, 11)}}" y$="{{_y(hours, 11)}}">{{_label(hours, 11)}}</text>
+						<text class$="{{_style(hours, 12)}}" x$="{{_x(hours, 12)}}" y$="{{_y(hours, 12)}}">{{_label(hours, 12)}}</text>
+						<text class$="{{_style(hours, 13)}}" x$="{{_x(hours, 13)}}" y$="{{_y(hours, 13)}}">{{_label(hours, 13)}}</text>
+						<text class$="{{_style(hours, 14)}}" x$="{{_x(hours, 14)}}" y$="{{_y(hours, 14)}}">{{_label(hours, 14)}}</text>
+						<text class$="{{_style(hours, 15)}}" x$="{{_x(hours, 15)}}" y$="{{_y(hours, 15)}}">{{_label(hours, 15)}}</text>
+						<text class$="{{_style(hours, 16)}}" x$="{{_x(hours, 16)}}" y$="{{_y(hours, 16)}}">{{_label(hours, 16)}}</text>
+						<text class$="{{_style(hours, 17)}}" x$="{{_x(hours, 17)}}" y$="{{_y(hours, 17)}}">{{_label(hours, 17)}}</text>
+						<text class$="{{_style(hours, 18)}}" x$="{{_x(hours, 18)}}" y$="{{_y(hours, 18)}}">{{_label(hours, 18)}}</text>
+						<text class$="{{_style(hours, 19)}}" x$="{{_x(hours, 19)}}" y$="{{_y(hours, 19)}}">{{_label(hours, 19)}}</text>
+						<text class$="{{_style(hours, 20)}}" x$="{{_x(hours, 20)}}" y$="{{_y(hours, 20)}}">{{_label(hours, 20)}}</text>
+						<text class$="{{_style(hours, 21)}}" x$="{{_x(hours, 21)}}" y$="{{_y(hours, 21)}}">{{_label(hours, 21)}}</text>
+						<text class$="{{_style(hours, 22)}}" x$="{{_x(hours, 22)}}" y$="{{_y(hours, 22)}}">{{_label(hours, 22)}}</text>
+						<text class$="{{_style(hours, 23)}}" x$="{{_x(hours, 23)}}" y$="{{_y(hours, 23)}}">{{_label(hours, 23)}}</text>
+						<!-- hand text -->
+						<text class$="{{_style(hours, hour)}}" style="fill:white;" x$="{{_x(hours, hour)}}" y$="{{_y(hours, hour)}}">{{_value(hours, hour, 0)}}</text>
+				    </svg>
+				</div>
+				<div id="minuteClock" style="padding:10px;" on-tap="selectMinute" on-track="selectMinute">
+					<svg width$="{{getDim()}}" height$="{{getDim()}}">
+						<circle class="face" r$="{{getRadius()}}" cx$="{{getRadius()}}" cy$="{{getRadius()}}"></circle>
+						<g class="clock-hand">
+							<circle class="dot" r="2" cx$="{{getRadius()}}" cy$="{{getRadius()}}"></circle>
+							<line class="line" x1$="{{getRadius()}}" y1$="{{getRadius()}}" x2$="{{getHandX(minutes, minute, 60)}}" y2$="{{getHandY(minutes, minute, 60)}}"></line>
+							<circle class="disc-large" r$="{{selectorSize}}" cx$="{{getHandX(minutes, minute, 60)}}" cy$="{{getHandY(minutes, minute, 60)}}"></circle>
+						</g>
+						<!-- dom-repeat does not work in svg! -->
+						<text class$="{{_style(minutes, 0)}}" x$="{{_x(minutes, 0)}}" y$="{{_y(minutes, 0)}}">{{_label(minutes, 0)}}</text>
+						<text class$="{{_style(minutes, 1)}}" x$="{{_x(minutes, 1)}}" y$="{{_y(minutes, 1)}}">{{_label(minutes, 1)}}</text>
+						<text class$="{{_style(minutes, 2)}}" x$="{{_x(minutes, 2)}}" y$="{{_y(minutes, 2)}}">{{_label(minutes, 2)}}</text>
+						<text class$="{{_style(minutes, 3)}}" x$="{{_x(minutes, 3)}}" y$="{{_y(minutes, 3)}}">{{_label(minutes, 3)}}</text>
+						<text class$="{{_style(minutes, 4)}}" x$="{{_x(minutes, 4)}}" y$="{{_y(minutes, 4)}}">{{_label(minutes, 4)}}</text>
+						<text class$="{{_style(minutes, 5)}}" x$="{{_x(minutes, 5)}}" y$="{{_y(minutes, 5)}}">{{_label(minutes, 5)}}</text>
+						<text class$="{{_style(minutes, 6)}}" x$="{{_x(minutes, 6)}}" y$="{{_y(minutes, 6)}}">{{_label(minutes, 6)}}</text>
+						<text class$="{{_style(minutes, 7)}}" x$="{{_x(minutes, 7)}}" y$="{{_y(minutes, 7)}}">{{_label(minutes, 7)}}</text>
+						<text class$="{{_style(minutes, 8)}}" x$="{{_x(minutes, 8)}}" y$="{{_y(minutes, 8)}}">{{_label(minutes, 8)}}</text>
+						<text class$="{{_style(minutes, 9)}}" x$="{{_x(minutes, 9)}}" y$="{{_y(minutes, 9)}}">{{_label(minutes, 9)}}</text>
+						<text class$="{{_style(minutes, 10)}}" x$="{{_x(minutes, 10)}}" y$="{{_y(minutes, 10)}}">{{_label(minutes, 10)}}</text>
+						<text class$="{{_style(minutes, 11)}}" x$="{{_x(minutes, 11)}}" y$="{{_y(minutes, 11)}}">{{_label(minutes, 11)}}</text>
+						<text class$="{{_style(minutes, 12)}}" x$="{{_x(minutes, 12)}}" y$="{{_y(minutes, 12)}}">{{_label(minutes, 12)}}</text>
+						<text class$="{{_style(minutes, 13)}}" x$="{{_x(minutes, 13)}}" y$="{{_y(minutes, 13)}}">{{_label(minutes, 13)}}</text>
+						<text class$="{{_style(minutes, 14)}}" x$="{{_x(minutes, 14)}}" y$="{{_y(minutes, 14)}}">{{_label(minutes, 14)}}</text>
+						<text class$="{{_style(minutes, 15)}}" x$="{{_x(minutes, 15)}}" y$="{{_y(minutes, 15)}}">{{_label(minutes, 15)}}</text>
+						<text class$="{{_style(minutes, 16)}}" x$="{{_x(minutes, 16)}}" y$="{{_y(minutes, 16)}}">{{_label(minutes, 16)}}</text>
+						<text class$="{{_style(minutes, 17)}}" x$="{{_x(minutes, 17)}}" y$="{{_y(minutes, 17)}}">{{_label(minutes, 17)}}</text>
+						<text class$="{{_style(minutes, 18)}}" x$="{{_x(minutes, 18)}}" y$="{{_y(minutes, 18)}}">{{_label(minutes, 18)}}</text>
+						<text class$="{{_style(minutes, 19)}}" x$="{{_x(minutes, 19)}}" y$="{{_y(minutes, 19)}}">{{_label(minutes, 19)}}</text>
+						<text class$="{{_style(minutes, 20)}}" x$="{{_x(minutes, 20)}}" y$="{{_y(minutes, 20)}}">{{_label(minutes, 20)}}</text>
+						<text class$="{{_style(minutes, 21)}}" x$="{{_x(minutes, 21)}}" y$="{{_y(minutes, 21)}}">{{_label(minutes, 21)}}</text>
+						<text class$="{{_style(minutes, 22)}}" x$="{{_x(minutes, 22)}}" y$="{{_y(minutes, 22)}}">{{_label(minutes, 22)}}</text>
+						<text class$="{{_style(minutes, 23)}}" x$="{{_x(minutes, 23)}}" y$="{{_y(minutes, 23)}}">{{_label(minutes, 23)}}</text>
+						<text class$="{{_style(minutes, 24)}}" x$="{{_x(minutes, 24)}}" y$="{{_y(minutes, 24)}}">{{_label(minutes, 24)}}</text>
+						<text class$="{{_style(minutes, 25)}}" x$="{{_x(minutes, 25)}}" y$="{{_y(minutes, 25)}}">{{_label(minutes, 25)}}</text>
+						<text class$="{{_style(minutes, 26)}}" x$="{{_x(minutes, 26)}}" y$="{{_y(minutes, 26)}}">{{_label(minutes, 26)}}</text>
+						<text class$="{{_style(minutes, 27)}}" x$="{{_x(minutes, 27)}}" y$="{{_y(minutes, 27)}}">{{_label(minutes, 27)}}</text>
+						<text class$="{{_style(minutes, 28)}}" x$="{{_x(minutes, 28)}}" y$="{{_y(minutes, 28)}}">{{_label(minutes, 28)}}</text>
+						<text class$="{{_style(minutes, 29)}}" x$="{{_x(minutes, 29)}}" y$="{{_y(minutes, 29)}}">{{_label(minutes, 29)}}</text>
+						<text class$="{{_style(minutes, 30)}}" x$="{{_x(minutes, 30)}}" y$="{{_y(minutes, 30)}}">{{_label(minutes, 30)}}</text>
+						<text class$="{{_style(minutes, 31)}}" x$="{{_x(minutes, 31)}}" y$="{{_y(minutes, 31)}}">{{_label(minutes, 31)}}</text>
+						<text class$="{{_style(minutes, 32)}}" x$="{{_x(minutes, 32)}}" y$="{{_y(minutes, 32)}}">{{_label(minutes, 32)}}</text>
+						<text class$="{{_style(minutes, 33)}}" x$="{{_x(minutes, 33)}}" y$="{{_y(minutes, 33)}}">{{_label(minutes, 33)}}</text>
+						<text class$="{{_style(minutes, 34)}}" x$="{{_x(minutes, 34)}}" y$="{{_y(minutes, 34)}}">{{_label(minutes, 34)}}</text>
+						<text class$="{{_style(minutes, 35)}}" x$="{{_x(minutes, 35)}}" y$="{{_y(minutes, 35)}}">{{_label(minutes, 35)}}</text>
+						<text class$="{{_style(minutes, 36)}}" x$="{{_x(minutes, 36)}}" y$="{{_y(minutes, 36)}}">{{_label(minutes, 36)}}</text>
+						<text class$="{{_style(minutes, 37)}}" x$="{{_x(minutes, 37)}}" y$="{{_y(minutes, 37)}}">{{_label(minutes, 37)}}</text>
+						<text class$="{{_style(minutes, 38)}}" x$="{{_x(minutes, 38)}}" y$="{{_y(minutes, 38)}}">{{_label(minutes, 38)}}</text>
+						<text class$="{{_style(minutes, 39)}}" x$="{{_x(minutes, 39)}}" y$="{{_y(minutes, 39)}}">{{_label(minutes, 39)}}</text>
+						<text class$="{{_style(minutes, 40)}}" x$="{{_x(minutes, 40)}}" y$="{{_y(minutes, 40)}}">{{_label(minutes, 40)}}</text>
+						<text class$="{{_style(minutes, 41)}}" x$="{{_x(minutes, 41)}}" y$="{{_y(minutes, 41)}}">{{_label(minutes, 41)}}</text>
+						<text class$="{{_style(minutes, 42)}}" x$="{{_x(minutes, 42)}}" y$="{{_y(minutes, 42)}}">{{_label(minutes, 42)}}</text>
+						<text class$="{{_style(minutes, 43)}}" x$="{{_x(minutes, 43)}}" y$="{{_y(minutes, 43)}}">{{_label(minutes, 43)}}</text>
+						<text class$="{{_style(minutes, 44)}}" x$="{{_x(minutes, 44)}}" y$="{{_y(minutes, 44)}}">{{_label(minutes, 44)}}</text>
+						<text class$="{{_style(minutes, 45)}}" x$="{{_x(minutes, 45)}}" y$="{{_y(minutes, 45)}}">{{_label(minutes, 45)}}</text>
+						<text class$="{{_style(minutes, 46)}}" x$="{{_x(minutes, 46)}}" y$="{{_y(minutes, 46)}}">{{_label(minutes, 46)}}</text>
+						<text class$="{{_style(minutes, 47)}}" x$="{{_x(minutes, 47)}}" y$="{{_y(minutes, 47)}}">{{_label(minutes, 47)}}</text>
+						<text class$="{{_style(minutes, 48)}}" x$="{{_x(minutes, 48)}}" y$="{{_y(minutes, 48)}}">{{_label(minutes, 48)}}</text>
+						<text class$="{{_style(minutes, 49)}}" x$="{{_x(minutes, 49)}}" y$="{{_y(minutes, 49)}}">{{_label(minutes, 49)}}</text>
+						<text class$="{{_style(minutes, 50)}}" x$="{{_x(minutes, 50)}}" y$="{{_y(minutes, 50)}}">{{_label(minutes, 50)}}</text>
+						<text class$="{{_style(minutes, 51)}}" x$="{{_x(minutes, 51)}}" y$="{{_y(minutes, 51)}}">{{_label(minutes, 51)}}</text>
+						<text class$="{{_style(minutes, 52)}}" x$="{{_x(minutes, 52)}}" y$="{{_y(minutes, 52)}}">{{_label(minutes, 52)}}</text>
+						<text class$="{{_style(minutes, 53)}}" x$="{{_x(minutes, 53)}}" y$="{{_y(minutes, 53)}}">{{_label(minutes, 53)}}</text>
+						<text class$="{{_style(minutes, 54)}}" x$="{{_x(minutes, 54)}}" y$="{{_y(minutes, 54)}}">{{_label(minutes, 54)}}</text>
+						<text class$="{{_style(minutes, 55)}}" x$="{{_x(minutes, 55)}}" y$="{{_y(minutes, 55)}}">{{_label(minutes, 55)}}</text>
+						<text class$="{{_style(minutes, 56)}}" x$="{{_x(minutes, 56)}}" y$="{{_y(minutes, 56)}}">{{_label(minutes, 56)}}</text>
+						<text class$="{{_style(minutes, 57)}}" x$="{{_x(minutes, 57)}}" y$="{{_y(minutes, 57)}}">{{_label(minutes, 57)}}</text>
+						<text class$="{{_style(minutes, 58)}}" x$="{{_x(minutes, 58)}}" y$="{{_y(minutes, 58)}}">{{_label(minutes, 58)}}</text>
+						<text class$="{{_style(minutes, 59)}}" x$="{{_x(minutes, 59)}}" y$="{{_y(minutes, 59)}}">{{_label(minutes, 59)}}</text>
+						<!-- hand text -->
+						<text class$="{{_style(minutes, minute)}}" style="fill:white;" x$="{{_x(minutes, minute)}}" y$="{{_y(minutes, minute)}}">{{_value(minutes, minute, 1)}}</text>						
+				    </svg>
+				 </div>
+			</div>
+		</paper-card>
+	</template>
+</dom-module>
+<script>
+Polymer({
+	is: 'portal-time-picker',
+	properties: {
+		hour: {
+			type: Number,
+			notify: true,
+			value: 0
+		},
+		minute: {
+			type: Number,
+			notify: true,
+			value: 0
+		},
+		timezone: {
+			type: String,
+			value: null,
+			observer: "valueChanged"
+		},
+		value: {
+			type: Date,
+			notify: true,
+			observer: "valueChanged"
+		},
+		hours: {
+			type: Array,
+			value: function() {
+				return this.computeClockFace([12,12], 1, false);
+			}
+		},
+		minutes: {
+			type: Array,
+			value: function() {
+				return this.computeClockFace([60], 5, true);
+			}
+		},
+		selectorSize: {
+			type: Number,
+			value: 20
+		}
+	},
+  	ready: function() {
+  	},
+  	valueChanged: function(event) {
+  		var m = moment.tz(this.value, this.timezone);
+  		this.hour = m.hour();
+  		this.minute = m.minute();
+  	},
+   	getRadius: function() {
+  		return 120;
+  	},
+  	getDim: function() {
+  		return 2 * this.getRadius();
+  	},
+  	_style: function(numbers, index) {
+  		return numbers[index].style;
+  	},
+  	_x: function(numbers, index) {
+  		return numbers[index].x;
+  	},
+  	_y: function(numbers, index) {
+  		return numbers[index].y;
+  	},
+  	_label: function(numbers, index) {
+  		return numbers[index].label;
+  	},
+  	_value: function(numbers, index, zeroPad) {
+  		return this.formatNumber(numbers[index].value, zeroPad);
+  	},
+  	selectHour: function(event) {
+  		var bounds = this.$.hourClock.getBoundingClientRect();  		
+  		var x = event.detail.x - bounds.left;
+        var y = event.detail.y - bounds.top;
+        var selectedHour = this.getSelectedNumber(this.hours, x, y);
+        if(selectedHour != null) {
+        	var newValue = moment.tz(this.value, this.timezone);
+        	newValue.hours(selectedHour.value);
+        	this.set("value", newValue.toDate());
+        }
+  	},
+  	selectMinute: function(event) {
+  		var bounds = this.$.minuteClock.getBoundingClientRect();  		
+  		var x = event.detail.x - bounds.left;
+        var y = event.detail.y - bounds.top;
+        var selectedMinute = this.getSelectedNumber(this.minutes, x, y);
+        if(selectedMinute != null) {
+        	var newValue = moment.tz(this.value, this.timezone);
+        	newValue.minutes(selectedMinute.value);
+        	this.set("value", newValue.toDate());
+        }
+  	},
+  	getSelectedNumber: function(numbers, x, y) {
+        var dMin = null;
+        var selectedNumber = null;
+        for(var i = 0; i < numbers.length; i++) {
+        	var number = numbers[i];
+        	var dx = number.x - x;
+        	var dy = number.y - y;
+        	var d = Math.sqrt(dx * dx + dy * dy);
+        	if(dMin == null || d < dMin) {
+        		dMin = d;
+        		selectedNumber = number;
+        	}
+        }
+        return selectedNumber;
+  	},
+	formatNumber: function(value, zeroPad) {
+	   	if (zeroPad) {
+			return ('0' + value).substr(-2);
+	    }
+	    return value.toString();
+	},
+	getHandX: function(numbers, index, mod) {
+		return numbers[index % mod].x;
+	},
+	getHandY: function(numbers, index, mod) {
+		return numbers[index % mod].y;
+	},
+	computeClockFace: function(counts, step, zeroPad) {
+		var numbers = [];
+		var radius = this.getRadius();
+		var radiusFactor = 0.8;
+		var value = 0;
+		for(var i = 0; i < counts.length; i++) {
+			var count = counts[i];
+		    var angle = 2 * Math.PI / count;
+			for(var j = 0; j < count; j++) {
+				var x = radius + radiusFactor * radius * Math.sin(Math.PI - j * angle);
+				var y = radius + radiusFactor * radius * Math.cos(Math.PI - j * angle);
+				var item = {
+					"value": value,
+					"style": value % step == 0 ? "major" + i : "minor" + i,
+					"x": x,
+					"y": y,
+					"label": value % step == 0 ? this.formatNumber(value, zeroPad) : "."
+				};
+				numbers.push(item);
+				value++;
+			}
+			radiusFactor = radiusFactor - 0.3;
+		}
+		return numbers;
+  	}
+});
+</script>

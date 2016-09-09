@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>openMDX 2 ~ Portal (jre-1.7)</name>
+	<name>openMDX 2 ~ Portal (jre-1.8)</name>
 	<comment></comment>
 	<projects>
 	</projects>
@@ -26,4 +26,16 @@
 		<nature>com.atlassw.tools.eclipse.checkstyle.CheckstyleNature</nature>
 		<nature>org.eclipse.xtext.ui.shared.xtextNature</nature>
 	</natures>
+	<linkedResources>
+		<link>
+			<name>build</name>
+			<type>2</type>
+			<locationURI>PARENT-1-PROJECT_LOC/portal/build</locationURI>
+		</link>
+		<link>
+			<name>src</name>
+			<type>2</type>
+			<locationURI>PARENT-1-PROJECT_LOC/portal/src</locationURI>
+		</link>
+	</linkedResources>
 </projectDescription>

@@ -76,7 +76,7 @@ public enum DataproviderMode {
     		Collection<?> values
     	) throws ResourceException{
     		final MappedRecord mappedRecord = target.getValue();
-    		IndexedRecord indexedRecord = (IndexedRecord) mappedRecord.get(feature);
+    		List indexedRecord = (List) mappedRecord.get(feature);
     		if(indexedRecord == null) {
     			mappedRecord.put(
     				feature,
@@ -109,7 +109,10 @@ public enum DataproviderMode {
         	ObjectRecord source,
         	String feature
         ) throws ResourceException {
-			return source.getValue().get(feature) != null;
+		    Object value = source.getValue().get(feature);
+		    return value instanceof List
+		        ? !((List)value).isEmpty()
+		        : value != null;
         }
 
 		@Override
@@ -137,7 +140,7 @@ public enum DataproviderMode {
         	Collection<?> values
         ) throws ResourceException {
     		final MappedRecord mappedRecord = target.getValue();
-    		IndexedRecord indexedRecord = (IndexedRecord) mappedRecord.get(feature);
+    		List indexedRecord = (List) mappedRecord.get(feature);
     		if(indexedRecord == null) {
     			mappedRecord.put(
     				feature,
@@ -152,7 +155,7 @@ public enum DataproviderMode {
         	String feature,
         	Object value
         ) throws ResourceException{
-    		final IndexedRecord values = (IndexedRecord) source.getValue().get(feature);
+    		final List values = (List) source.getValue().get(feature);
     		return values != null && values.contains(value);
         }
         
@@ -160,7 +163,7 @@ public enum DataproviderMode {
         	ObjectRecord source,
         	String feature
         ) throws ResourceException{
-    		final IndexedRecord values = (IndexedRecord) source.getValue().get(feature);
+    		final List values = (List) source.getValue().get(feature);
     		if(values != null) {
     			values.clear();
     		}
@@ -179,7 +182,7 @@ public enum DataproviderMode {
         	ObjectRecord source,
         	String feature
         ) throws ResourceException {
-    		final IndexedRecord indexedRecord = (IndexedRecord) source.getValue().get(feature);
+    		final List indexedRecord = (List) source.getValue().get(feature);
     		return indexedRecord;
         }
 

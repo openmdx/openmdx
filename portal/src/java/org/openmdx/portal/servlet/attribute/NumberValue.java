@@ -353,7 +353,7 @@ public class NumberValue extends AttributeValue implements Serializable {
                 p.write("</td>");
                 p.write("<td class=\"", CssClass.addon.toString(), "\" ", rowSpanModifier, ">");
                 if(readonlyModifier.isEmpty()) {
-    				p.write("<a role=\"button\" data-toggle=\"modal\" href=\"#popup_", EditInspectorControl.EDIT_NUMBERS, "\" noclick=\"javascript:multiValuedHigh=", this.getUpperBound("1..10"), "; ", EditInspectorControl.EDIT_NUMBERS, "_showPopup(event, this.id, popup_", EditInspectorControl.EDIT_NUMBERS, ", 'popup_", EditInspectorControl.EDIT_NUMBERS, "', $('", id, "'), new Array());\">");
+    				p.write("<a role=\"button\" data-toggle=\"modal\" href=\"#popup_", EditInspectorControl.EDIT_NUMBERS, "\" onclick=\"javascript:multiValuedHigh=", this.getUpperBound("1..10"), "; ", EditInspectorControl.EDIT_NUMBERS, "_showPopup(event, this.id, popup_", EditInspectorControl.EDIT_NUMBERS, ", 'popup_", EditInspectorControl.EDIT_NUMBERS, "', $('", id, "'), new Array());\">");
     				p.write("    ", p.getImg("class=\"", CssClass.popUpButton.toString(), "\" id=\"", id, ".popup\" border=\"0\" alt=\"Click to edit\" src=\"", p.getResourcePath("images/edit"), p.getImgType(), "\" "));
     				p.write("</a>");
                 }

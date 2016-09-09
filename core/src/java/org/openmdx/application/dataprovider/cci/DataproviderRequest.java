@@ -483,7 +483,8 @@ public class DataproviderRequest {
      */
     public int size(
     ) throws ServiceException {
-        return Facades.asQuery(this.object).getSize().intValue();
+        final Long size = Facades.asQuery(this.object).getSize();
+		return size == null ? Integer.MAX_VALUE : size.intValue();
     }
 
     //-----------------------------------------------------------------------

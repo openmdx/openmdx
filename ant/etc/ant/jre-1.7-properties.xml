@@ -8,7 +8,7 @@
 =
 = This software is published under the BSD license as listed below.
 = 
-= Copyright (c) 2011-2012, OMEX AG, Switzerland
+= Copyright (c) 2011-2016, OMEX AG, Switzerland
 = All rights reserved.
 = 
 = Redistribution and use in source and binary forms, with or without 
@@ -99,6 +99,7 @@
 		<pathelement location="${openmdx.home}/osgi/${build.java.platform}/extension/lib/jcache.jar"/>
 		<pathelement location="${openmdx.home}/osgi/${build.java.platform}/extension/lib/jdo2-api.jar"/>
 		<pathelement location="${openmdx.home}/osgi/${build.java.platform}/extension/lib/junit.jar"/>
+		<pathelement location="${openmdx.home}/osgi/${build.java.platform}/extension/lib/hamcrest-core.jar"/>
 		<pathelement location="${openmdx.home}/osgi/${build.java.platform}/extension/lib/mail.jar"/>
 		<pathelement location="${openmdx.home}/osgi/${build.java.platform}/extension/lib/openjpa.jar"/>
 		<pathelement location="${openmdx.home}/osgi/${build.java.platform}/extension/lib/resource.jar"/>

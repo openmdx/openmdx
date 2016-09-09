@@ -1728,17 +1728,19 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
         /* (non-Javadoc)
          * @see org.openmdx.base.accessor.jmi.cci.RefObject_1_0#refInitialize(boolean, boolean)
          */
+        @Override
         public void refInitialize(
             boolean setRequiredToNull,
-            boolean setOptionalToNull
+            boolean setOptionalToNull, 
+            boolean emptyMultivalued
         ) {
             if(this.cciDelegate instanceof RefObject_1_0) {
                 ((RefObject_1_0)this.cciDelegate).refInitialize(
                     setRequiredToNull,
-                    setOptionalToNull
+                    setOptionalToNull, 
+                    emptyMultivalued
                 );
-            } 
-            else {
+            } else {
                 throw newUnsupportedOperationException(
                     DelegatingRefObject_1.STANDARD,
                     "refInitialize"

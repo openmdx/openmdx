@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2014, OMEX AG, Switzerland
+ * Copyright (c) 2004-2016, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -70,6 +70,8 @@ import javax.resource.ResourceException;
 import javax.resource.cci.IndexedRecord;
 import javax.resource.cci.Interaction;
 import javax.resource.cci.MappedRecord;
+import javax.xml.datatype.DatatypeConstants;
+import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.openmdx.application.configuration.Configuration;
 import org.openmdx.application.dataprovider.cci.AttributeSelectors;
@@ -411,73 +413,87 @@ public class InMemory_1 extends AbstractPersistence_1 {
     /**
      * Compare the value of an attribute of two objects.
      * <p>
-     * If a value is not present or null, it is treated as larger than any 
-     * existing and equal to null
+     * If a value is not present or null, it is treated as larger than any existing and equal to null
      * 
-     * @param a  first object to compare
-     * @param b  second object to compare
-     * @param attribute  attribute by which the compare takes place
-     * @param index      index of the value to compare 
-     * 
-     * @return -1 if a.attribute < b.attribute; 
-     *           0 if a.attribute == b.attribute;
-     *           1 if a.attribute > b.attribute
+     * @param a
+     *           first object to compare
+     * @param b
+     *           second object to compare
+     * @param attribute
+     *           attribute by which the compare takes place
+     * @param index
+     *           index of the value to compare
+     * @return -1 if a.attribute < b.attribute; 0 if a.attribute == b.attribute; 1 if a.attribute > b.attribute
+     * @throws ServiceException BAD_PARAMETER in case of incompatible types or indeterminable order
      */
-    protected int compare(
-        MappedRecord a,
-        MappedRecord b,
-        String attribute,
-        int index
-    ) throws ServiceException {
-        int aLarger = 1;
-        int bLarger = -1;
-        int equal = 0;
-        int result = 0;
-        if(SystemAttributes.OBJECT_IDENTITY.equals(attribute)) {
-            return Object_2Facade.getPath(a).compareTo(Object_2Facade.getPath(b));
-        }
-        else if(SystemAttributes.OBJECT_CLASS.equals(attribute)) {
-            return Object_2Facade.getObjectClass(a).compareTo(Object_2Facade.getObjectClass(b));
-        }
-        Object_2Facade aFacade = Facades.asObject(a);
-        Object_2Facade bFacade = Facades.asObject(b);
-        Object aValues = aFacade.getAttributeValues(attribute);
-        int aSize = aValues instanceof SparseArray ?
-            ((SparseArray)aValues).size() :
-                ((List)aValues).size();
-        Object bValues = bFacade.getAttributeValues(attribute);                
-        int bSize = bValues instanceof SparseArray ?
-            ((SparseArray)bValues).size() :
-                ((List)bValues).size();
-        // a
-        if(
-            (aValues == null) || 
-            (aSize <= index)
-        ) {
-            result = aLarger;
-        }
-        // b
-        if(
-            (bValues == null) || 
-            (bSize <= index)
-        ) {
-            if(result == aLarger) {
-                return equal;
-            }
-            return bLarger;
-        }
-        if(result == aLarger) {
-            return aLarger;
-        }
-        Object aValue = aValues instanceof SparseArray ?
-            ((SparseArray)aValues).get(Integer.valueOf(index)) :
-                ((List)aValues).get(index);
-        Object bValue = bValues instanceof SparseArray ?
-            ((SparseArray)bValues).get(Integer.valueOf(index)) :
-                ((List)bValues).get(index);
-        return ((Comparable)aValue).compareTo(bValue);
+    protected int compare(MappedRecord a, MappedRecord b, String attribute, int index) throws ServiceException {
+       int result = DatatypeConstants.EQUAL;
+       if (SystemAttributes.OBJECT_IDENTITY.equals(attribute)) {
+          return Object_2Facade.getPath(a).compareTo(Object_2Facade.getPath(b));
+       } else if (SystemAttributes.OBJECT_CLASS.equals(attribute)) {
+          return Object_2Facade.getObjectClass(a).compareTo(Object_2Facade.getObjectClass(b));
+       }
+       Object_2Facade aFacade = Facades.asObject(a);
+       Object_2Facade bFacade = Facades.asObject(b);
+       Object aValues = aFacade.getAttributeValues(attribute);
+       int aSize = aValues instanceof SparseArray ? ((SparseArray) aValues).size() : ((List) aValues).size();
+       Object bValues = bFacade.getAttributeValues(attribute);
+       int bSize = bValues instanceof SparseArray ? ((SparseArray) bValues).size() : ((List) bValues).size();
+       // a
+       if (aSize <= index) {
+          result = DatatypeConstants.GREATER;
+       }
+       // b
+       if (bSize <= index) {
+          if (result == DatatypeConstants.GREATER) {
+             return DatatypeConstants.EQUAL;
+          }
+          return DatatypeConstants.LESSER;
+       }
+       if (result == DatatypeConstants.GREATER) {
+          return DatatypeConstants.GREATER;
+       }
+       Object aValue = aValues instanceof SparseArray ? ((SparseArray) aValues).get(Integer.valueOf(index)) : ((List) aValues).get(index);
+       Object bValue = bValues instanceof SparseArray ? ((SparseArray) bValues).get(Integer.valueOf(index)) : ((List) bValues).get(index);
+       return compare(aValue, bValue);
     }
 
+    /**
+     * Compare two single values
+     *
+     * @return {@link DatatypeConstants#LESSER}, {@link DatatypeConstants#EQUAL} or {@link DatatypeConstants#GREATER}
+     * @throws ServiceException BAD_PARAMETER in case of incompatible types or indeterminable order
+     */
+    protected int compare(Object left, Object right) throws ServiceException {
+       if (left instanceof Comparable && right instanceof Comparable) {
+          final int result = ((Comparable) left).compareTo(right);
+		  return result < 0 ? DatatypeConstants.LESSER : result > 0 ? DatatypeConstants.GREATER : result;
+       }
+       if (left instanceof XMLGregorianCalendar && right instanceof XMLGregorianCalendar) {
+          final int result = ((XMLGregorianCalendar) left).compare((XMLGregorianCalendar) right);
+          if (result == DatatypeConstants.INDETERMINATE) {
+             throw new ServiceException( //
+                   BasicException.Code.DEFAULT_DOMAIN, BasicException.Code.BAD_PARAMETER, //
+                   "The order of the valueas is indeterminate", //
+                   new BasicException.Parameter("classes", getClassName(left), getClassName(right)), //
+                   new BasicException.Parameter("values", left, right));
+          }
+          return result;
+       }
+       throw new ServiceException( //
+             BasicException.Code.DEFAULT_DOMAIN, BasicException.Code.BAD_PARAMETER, //
+             "The valueas are not comparable", //
+             new BasicException.Parameter("classes", getClassName(left), getClassName(right)), //
+             new BasicException.Parameter("values", left, right));
+    }
+    
+    private static String getClassName(
+    	Object value
+    ){
+    	return value == null ? "null" : value.getClass().getName();
+    	
+    }
+    
     /**
      * InMemoryLayerInteraction
      *

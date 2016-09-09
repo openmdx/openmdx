@@ -102,7 +102,7 @@ public class ShowErrorsControl extends Control implements Serializable {
     	SysLog.detail("> paint");        
         ApplicationContext app = p.getApplicationContext();
         if(!app.getErrorMessages().isEmpty()) {
-           p.write("<table class=\"", CssClass.tableError.toString(), "\">");
+           p.write("<table style=\"width:100%;\">");
            SimpleDateFormat dateTimeFormat = DateValue.getLocalizedDateTimeFormatter(
                null, 
                true, 
@@ -111,21 +111,32 @@ public class ShowErrorsControl extends Control implements Serializable {
            String formattedDateTime = dateTimeFormat.format(new Date());
            String separator = " | ";
            p.write("  <tr>");
-           p.write("    <td class=\"", CssClass.cellErrorLeft.toString(), "\">Error</td>");
-           p.write("    <td class=\"", CssClass.cellErrorRight.toString(), "\">");
+           p.write("    <td>");
+           p.write("      <div class=\"", CssClass.alert.toString(), " ", CssClass.alertInfo.toString(), "\" style=\"margin-bottom:0px;\">");
            p.write(formattedDateTime.replace(" ", separator), separator, dateTimeFormat.getTimeZone().getID());
+           p.write("      </div>");
            p.write("    </td>");
            p.write("  </tr>");
            p.write("  <tr>");
-           p.write("    <td class=\"", CssClass.cellErrorLeft.toString(), "\"></td>");
-           p.write("    <td class=\"", CssClass.cellErrorRight.toString(), "\">");
+           p.write("    <td>");
            for(int i = 0; i < app.getErrorMessages().size(); i++) {
-             p.write("      " + app.getErrorMessages().get(i), "<br />");
+        	   String message = app.getErrorMessages().get(i);
+        	   String alertClass = CssClass.alert.toString() + " ";
+        	   if(message.startsWith(CssClass.alert.toString() + "-") && message.indexOf(" ") > 0) {
+        		   int pos = message.indexOf(" ");
+        		   alertClass += message.substring(0, pos).trim();
+        		   message = message.substring(pos + 1);
+        	   } else {
+        		   alertClass += CssClass.alertDanger.toString();
+        	   }
+        	   p.write("      <div class=\"", alertClass, "\" style=\"margin-bottom:0px;\">");
+        	   p.write("      " + message);
+        	   p.write("      </div>");
            }
            p.write("    </td>");
            p.write("  </tr>");
            p.write("</table>");
-        }        
+        }
         SysLog.detail("< paint");
     }
 

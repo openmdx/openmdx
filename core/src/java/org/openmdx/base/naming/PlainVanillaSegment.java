@@ -56,7 +56,7 @@ public class PlainVanillaSegment extends XRISegment {
 		int index, 
 		String xriSegment
 	) {
-		this.unifiedRepresentation = stringShouldBeInternalized(index) ? xriSegment : xriSegment.intern();
+		this.unifiedRepresentation = stringShouldBeInternalized(index) ? xriSegment.intern() : xriSegment;
 	}
 
 	private final String unifiedRepresentation;
@@ -70,7 +70,7 @@ public class PlainVanillaSegment extends XRISegment {
 	 * Let's try to optimize String usage
 	 */
 	private static boolean stringShouldBeInternalized(int index) {
-		return index < 5 || index % 2 == 0;
+		return index < 5 || index % 2 == 1;
 	}
 	
 	/* (non-Javadoc)

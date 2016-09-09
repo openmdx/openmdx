@@ -9,7 +9,7 @@
  * This software is published under the BSD license
  * as listed below.
  *
- * Copyright (c) 2004-2014, OMEX AG, Switzerland
+ * Copyright (c) 2004-2015, OMEX AG, Switzerland
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or
@@ -157,27 +157,28 @@ org.openmdx.portal.servlet.component.*
 	<meta name="viewport" content="width=device-width, initial-scale=<%= app.getInitialScale() %>, maximum-scale=1.0">
 	
 	<!-- Styles -->
-	<link rel="stylesheet" href="javascript/bootstrap/css/bootstrap.min.css">
+	<link rel="stylesheet" href="js/bootstrap/css/bootstrap.min.css">
 	<link rel="stylesheet" href="_style/ssf.css" >
 	<link rel="stylesheet" href="_style/n2default.css" >
 	<link rel="stylesheet" href="_style/colors.css">
 	<link rel="stylesheet" href="_style/calendar-small.css">
-	<link rel="stylesheet" href="javascript/wiky/wiky.css" >
-	<link rel="stylesheet" href="javascript/wiky/wiky.lang.css" >
-	<link rel="stylesheet" href="javascript/wiky/wiky.math.css" >
-	<link rel="stylesheet" href="javascript/yui/build/assets/skins/sam/container.css" >
+	<link rel="stylesheet" href="js/wiky/wiky.css" >
+	<link rel="stylesheet" href="js/wiky/wiky.lang.css" >
+	<link rel="stylesheet" href="js/wiky/wiky.math.css" >
+	<link rel="stylesheet" href="js/yui/build/assets/skins/sam/container.css" >
 	<link rel='shortcut icon' href='images/favicon.ico' >
 
 	<!-- Libraries -->
-    <script src="javascript/prototype.js"></script>
-    <script src="javascript/jquery/jquery.min.js"></script>
+    <script src="js/prototype.js"></script>
+    <script src="js/jquery/jquery.min.js"></script>
 	<script>
 	  $.noConflict();
 	</script>
-	<script src="javascript/bootstrap/js/bootstrap.min.js"></script>
-	<script src="javascript/portal-all.js"></script>
-	<script src="javascript/calendar/lang/calendar-<%= app.getCurrentLocaleAsString() %>.js"></script>
-	<!--[if lt IE 7]><script type="text/javascript" src="javascript/iehover-fix.js"></script><![endif]-->
+	<script src="js/bootstrap/js/bootstrap.min.js"></script>
+	<script src="js/polymer/components/webcomponentsjs/webcomponents-lite.min.js"></script>
+	<script src="js/portal-all.js"></script>
+	<script src="js/calendar/lang/calendar-<%= app.getCurrentLocaleAsString() %>.js"></script>
+	<!--[if lt IE 7]><script type="text/javascript" src="js/iehover-fix.js"></script><![endif]-->
 	<script language="javascript" type="text/javascript">
 		var OF = null;
 		try {
@@ -224,8 +225,8 @@ org.openmdx.portal.servlet.component.*
 %>
 			</ul>
 			<ul class="<%= CssClass.nav + " " + CssClass.navbarNav + " " + CssClass.navbarRight %>">
-				<li class="<%= CssClass.dropdown %>">
-					<a href="#" class="<%= CssClass.dropdownToggle %>" data-toggle="dropdown" onclick="javascript:this.parentNode.hide=function(){};"><span><%= app.getLoginPrincipal() %> <b class="<%= CssClass.caret %>"></b></span></a>
+				<li class="<%= CssClass.dropdown %>"  onclick="javascript:toggleMenu(this);">
+					<a href="#" class="<%= CssClass.dropdownToggle %>"><span><%= app.getLoginPrincipal() %> <b class="<%= CssClass.caret %>"></b></span></a>
 					<ul class="<%= CssClass.dropdownMenu %>" role="menu">
 						<li><% SessionInfoControl.paintLogoffButton(p, false, ""); p.flush(); %></li>
 						<li><% SessionInfoControl.paintSaveSettingsButton(p, false, ""); p.flush(); %></li>
@@ -355,6 +356,8 @@ org.openmdx.portal.servlet.component.*
 	
 	// ViewPort.Type.EMBEDDED
 	else if(p.getViewPortType() == ViewPort.Type.EMBEDDED) {
+	  Control errors = view.createControl(null, ShowErrorsControl.class);
+	  errors.paint(p, false);
 	  for(AttributePane attributePane: view.getChildren(AttributePane.class)) {
 		  attributePane.paint(
 			  p,

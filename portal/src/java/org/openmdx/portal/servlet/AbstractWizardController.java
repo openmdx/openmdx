@@ -886,12 +886,13 @@ public abstract class AbstractWizardController {
 	public String getToolTip(
 	) {
 		if(this.getCurrentView() != null) {
-			String pattern = this.getWizardName().toLowerCase().replace("_", "") + ".";
+			String pattern1 = this.getWizardName().toLowerCase().replace("_", "") + ".";
+			String pattern2 = this.getWizardName().toLowerCase().replace("_", "") + "/index.jsp";
 			ShowObjectView currentView = (ShowObjectView)this.getCurrentView();
 			for(OperationPane operationPane: currentView.getChildren(OperationPane.class)) {
 				for(UiOperationTab operationTab: operationPane.getChildren(UiOperationTab.class)) {
 					String name = operationTab.getOperationName().toLowerCase().replace("_", "");
-					if(name.indexOf(pattern) > 0) {
+					if(name.indexOf(pattern1) > 0 || name.indexOf(pattern2) > 0) {
 						return operationTab.getToolTip();
 					}
 				}
@@ -899,7 +900,7 @@ public abstract class AbstractWizardController {
 			for(WizardControl wizardControl: currentView.getControl().getChildren(WizardControl.class)) {
 				for(UiWizardTabControl wizardTabControl: wizardControl.getChildren(UiWizardTabControl.class)) {
 					String qualifiedOperationName = wizardTabControl.getQualifiedOperationName().toLowerCase().replace("_", "");
-					if(qualifiedOperationName.indexOf(pattern) > 0) {
+					if(qualifiedOperationName.indexOf(pattern1) > 0 || qualifiedOperationName.indexOf(pattern2) > 0) {
 						return wizardTabControl.getToolTip();
 					}
 				}

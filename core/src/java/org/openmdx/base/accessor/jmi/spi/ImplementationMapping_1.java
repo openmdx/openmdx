@@ -645,7 +645,7 @@ class ImplementationMapping_1 implements Mapping_1_0 {
                         declaringClass.isAssignableFrom(descriptor.implementationClass) ||
                         declaringClass.isAssignableFrom(descriptor.declaringClass)
                     ) {
-                        ImplementedMethod: for(Method implementedMethod : descriptor.implementationClass.getMethods()) {
+                        ImplementedMethod: for(Method implementedMethod : Classes.getOrderedMethods(descriptor.implementationClass)) {
                             if(declaredName.equals(implementedMethod.getName())){
                                 Class<?>[] implementedParameterTypes = implementedMethod.getParameterTypes();
                                 if(declaredParameterCount == implementedParameterTypes.length) {

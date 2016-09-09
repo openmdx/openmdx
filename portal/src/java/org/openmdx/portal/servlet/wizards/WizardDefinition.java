@@ -139,7 +139,7 @@ public class WizardDefinition implements Serializable {
      * 
      * @return
      */
-    public List getForClass(
+    public List<String> getForClass(
     ) {
         return this.forClass;
     }
@@ -179,7 +179,7 @@ public class WizardDefinition implements Serializable {
      * 
      * @return
      */
-    public List getOrder(
+    public List<String> getOrder(
     ) {
         return this.order;
     }

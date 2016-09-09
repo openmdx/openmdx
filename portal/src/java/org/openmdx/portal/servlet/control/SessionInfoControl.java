@@ -126,7 +126,7 @@ public class SessionInfoControl extends Control implements Serializable {
                 p.write("<span>", app.getCurrentLocaleAsString(), "</span>");            
             } else {
                 p.write("<ul class=\"", CssClass.nav.toString(), " ", CssClass.navPills.toString(), "\">");
-                p.write("  <li class=\"", CssClass.dropdown.toString(), "\"><a href=\"#\" class=\"", CssClass.dropdownToggle.toString(), "\" data-toggle=\"dropdown\" onclick=\"javascript:this.parentNode.hide=function(){};\">", app.getCurrentLocaleAsString(), "  <b class=\"caret\"></b></a>");
+                p.write("  <li class=\"", CssClass.dropdown.toString(), "\" onclick=\"javascript:toggleMenu(this);\"><a href=\"#\" class=\"", CssClass.dropdownToggle.toString(), "\">", app.getCurrentLocaleAsString(), "  <b class=\"caret\"></b></a>");
                 p.write("    <ul class=\"", CssClass.dropdownMenu.toString(), "\" style=\"z-index:1010;\">");
                 Action[] selectLocaleAction = ((ShowObjectView)view).getSelectLocaleAction();
                 for(int i = 0; i < selectLocaleAction.length; i++) {
@@ -214,7 +214,7 @@ public class SessionInfoControl extends Control implements Serializable {
             } else {
             	boolean hasRoles = setRoleAction.length > 2;
                 p.write("<ul class=\"", CssClass.nav.toString(), " ", CssClass.navPills.toString(), "\">");
-                p.write("  <li class=\"", CssClass.dropdown.toString(), (hasRoles ? "" : " " + CssClass.disabled), "\"><a href=\"#\" class=\"", CssClass.dropdownToggle.toString(), "\" data-toggle=\"dropdown\" onclick=\"javascript:this.parentNode.hide=function(){};\">", htmlEncoder.encode(currentRoleTitle, false), " <b class=\"caret\"></b></a>");
+                p.write("  <li class=\"", CssClass.dropdown.toString(), (hasRoles ? "" : " " + CssClass.disabled), "\" onclick=\"javascript:toggleMenu(this);\"><a href=\"#\" class=\"", CssClass.dropdownToggle.toString(), "\">", htmlEncoder.encode(currentRoleTitle, false), " <b class=\"caret\"></b></a>");
                 if(hasRoles) {
                 	p.write("    <ul class=\"", CssClass.dropdownMenu.toString(), "\" style=\"z-index:1010;\">");
 	                for(int i = 0; i < setRoleAction.length; i++) {

@@ -420,6 +420,29 @@ public interface DataObject_1_0
     Container_1_0 getContainer(
         boolean lazily
     );
+
+    /**
+     * Retrieve this object's persistent aspects
+     * 
+     * @return the persistent aspects
+     * 
+     * @throws ServiceException 
+     */
+    Container_1_0 getAspects(
+    ) throws ServiceException;
+    
+    /**
+     * Retrieve a specific aspect
+     * 
+     * @param aspectType the aspect type such as 
+     * 
+     * @return the specific aspect
+     * 
+     * @throws ServiceException 
+     */
+    Map<String, DataObject_1_0> getAspect(
+        String aspectType
+    );
     
     /**
      * Tests whether object is member of a container.

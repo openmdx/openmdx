@@ -229,7 +229,7 @@ public class ShowObjectView extends ObjectView implements Serializable {
                     cause.toString() 
                 }
            );
-        } else if (app.getTexts().getUserDefinedText(e0.getExceptionCode() + "") != null) {
+        } else if(this.app.getTexts().getUserDefinedText(Integer.toString(e0.getExceptionCode())) != null) {
             List<String> parameters = new ArrayList<String>();
             int i = 0;
             while (e0.getParameter("param" + i) != null) {

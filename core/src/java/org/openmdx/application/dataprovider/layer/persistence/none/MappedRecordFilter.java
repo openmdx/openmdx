@@ -58,6 +58,7 @@ import org.openmdx.application.dataprovider.spi.AbstractFilter;
 import org.openmdx.base.accessor.cci.SystemAttributes;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.query.Filter;
+import org.openmdx.base.rest.cci.QueryFilterRecord;
 import org.openmdx.base.rest.spi.Facades;
 import org.openmdx.base.rest.spi.Object_2Facade;
 import org.w3c.cci2.SparseArray;
@@ -112,8 +113,8 @@ public abstract class MappedRecordFilter extends AbstractFilter {
     @Override
     @SuppressWarnings("synthetic-access")
     protected boolean equal(Object candidate, Object filterValue) {
-        if(filterValue instanceof Filter){
-            List<FilterProperty> filterProperties = FilterProperty.getFilterProperties((Filter)filterValue);
+        if(filterValue instanceof QueryFilterRecord){
+            List<FilterProperty> filterProperties = FilterProperty.getFilterProperties((QueryFilterRecord)filterValue);
             MappedRecordFilter mappedRecordFilter = new MappedRecordFilter(
                 filterProperties.toArray(new FilterProperty[filterProperties.size()])
             ){

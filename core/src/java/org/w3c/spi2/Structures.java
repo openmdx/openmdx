@@ -52,6 +52,7 @@ import java.lang.reflect.Array;
 import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Proxy;
 import java.lang.reflect.Type;
@@ -1329,7 +1330,7 @@ public class Structures {
             this.memberTypes = new Class<?>[names.length];
             this.elementTypes = new Class<?>[names.length];
             this.keys = new String[names.length];
-            Method[] methods = structureClass.getMethods();
+            List<Method> methods = Classes.getOrderedMethods(structureClass);
             Names: for (Enum<?> name : names) {
                 int slot = name.ordinal();
                 String memberName = this.keys[slot] = name.toString();

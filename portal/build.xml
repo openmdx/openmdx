@@ -54,7 +54,7 @@
 	<description>Builds the openMDX/Portal component</description>
 	<property name="project.specification.title" value="openMDX/Portal"/>
 	<!-- Slash separated platform list, the last entry being the default -->
-	<property name="project.platform.list" value="jre-1.7"/>
+	<property name="project.platform.list" value="jre-1.8"/>
 	<!-- Included Ant Projects -->
 	<import file="../ant/etc/ant/build-properties.xml"/>
 	<import file="../ant/etc/ant/build-library.xml"/>
@@ -143,7 +143,7 @@
 			<param name="in.dir.name" value="${basedir}/src/js/net/wiky"/>
 			<param name="file.name" value="wiky.math.js"/>
 		</antcall>
-		<copy file="${build.dir}/src/js/portal-all.js" todir="src/war/openmdx-inspector.war/javascript"/>
+		<copy file="${build.dir}/src/js/portal-all.js" todir="src/war/openmdx-inspector.war/js"/>
 	</target>
 	
 	<!-- ******************************************************************* -->
@@ -165,21 +165,28 @@
 				<attribute name="Implementation-Title" value="openmdx-inspector for ${build.target.platform}"/>
 			</manifest>
 			<zipfileset dir="src/war/openmdx-inspector.war" />
-			<zipfileset dir="src/js/org/wymeditor" prefix="javascript/wymeditor" />
-			<zipfileset dir="src/js/net/wiky" prefix="javascript/wiky" />
-			<zipfileset dir="src/js/org/jit" prefix="javascript/jit" />
-			<zipfileset dir="src/js/com/dynarch/calendar/lang" prefix="javascript/calendar/lang" />
-			<zipfileset dir="src/js/org/prototypejs" prefix="javascript" />
-			<zipfileset dir="src/js/com/yahoo/yui/assets" prefix="javascript/yui/build/assets" />
-			<zipfileset dir="src/js/com/bootstrap" prefix="javascript/bootstrap" />
-			<zipfileset dir="src/js/com/jquery" prefix="javascript/jquery" />
-			<zipfileset dir="src/js/org/openmdx/portal" prefix="javascript">
+			<zipfileset dir="src/js/org/openmdx" prefix="js/openmdx" />
+			<zipfileset dir="src/js/org/wymeditor" prefix="js/wymeditor" />
+			<zipfileset dir="src/js/net/wiky" prefix="js/wiky" />
+			<zipfileset dir="src/js/org/jit" prefix="js/jit" />
+			<zipfileset dir="src/js/com/dynarch/calendar/lang" prefix="js/calendar/lang" />
+			<zipfileset dir="src/js/org/prototypejs" prefix="js" />
+			<zipfileset dir="src/js/com/yahoo/yui/assets" prefix="js/yui/build/assets" />
+			<zipfileset dir="src/js/com/bootstrap" prefix="js/bootstrap" />
+			<zipfileset dir="src/js/com/jquery" prefix="js/jquery" />
+			<zipfileset dir="src/js/org/polymer" prefix="js/polymer">
+				<exclude name="**/bower.json" />
+				<exclude name="**/.*" />
+				<exclude name="**/demo/**" />
+				<exclude name="**/test/**" />
+			</zipfileset>
+			<zipfileset dir="src/js/org/openmdx/portal" prefix="js">
 				<include name="ssf.js"/>
 				<include name="guicontrol.js"/>
 			</zipfileset>
 		</openmdx:archive>
 	</target>
-	
+
 	<!-- ******************************************************************* -->
 	<!-- * Deliverables -->
 	<!-- ******************************************************************* -->

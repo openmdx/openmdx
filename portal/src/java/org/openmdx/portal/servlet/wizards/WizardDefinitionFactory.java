@@ -60,7 +60,6 @@ import java.io.InputStream;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -92,7 +91,14 @@ public class WizardDefinitionFactory implements Serializable {
         short localeIndex,
         InputStream is
     ) throws ServiceException {
-        if(path.endsWith(".jsp")) {
+    	if(path.endsWith("/index.jsp")) {
+    		return new AppWizardDefinition(
+	    		path,
+	    		locale,
+	    		localeIndex,
+	    		is
+	    	);
+    	} else if(path.endsWith(".jsp")) {
             return new JspWizardDefinition(
                 path,
                 locale,
@@ -122,7 +128,7 @@ public class WizardDefinitionFactory implements Serializable {
      * @param model
      */
     public WizardDefinitionFactory(
-        Map wizardDefinitions,
+        Map<String,List<WizardDefinition>> wizardDefinitions,
         Model_1_0 model
     ) {
         this.wizardDefinitions = wizardDefinitions;
@@ -137,10 +143,10 @@ public class WizardDefinitionFactory implements Serializable {
      * @param locale
      * @return
      */
-    public List getWizardDefinitions(
+    public List<WizardDefinition> getWizardDefinitions(
         String locale
     ) {
-        return (List)this.wizardDefinitions.get(
+        return this.wizardDefinitions.get(
             locale
         );
     }
@@ -158,7 +164,7 @@ public class WizardDefinitionFactory implements Serializable {
         String locale,
         String orderPattern
     ) {
-        List wizardDefinitions = this.getWizardDefinitions(locale);
+        List<WizardDefinition> wizardDefinitions = this.getWizardDefinitions(locale);
         Map<String,WizardDefinition> matchingWizardDefinitions = new TreeMap<String,WizardDefinition>();
         // Get set of already matched definitions
         String id = forClass + ":" + locale;
@@ -171,18 +177,9 @@ public class WizardDefinitionFactory implements Serializable {
         }
         int ii = 0;
         if(wizardDefinitions != null) {
-	        for(
-	            Iterator i = wizardDefinitions.iterator();
-	            i.hasNext();
-	            ii++
-	        ) {
-	            WizardDefinition wizardDefinition = (WizardDefinition)i.next();
+	        for(WizardDefinition wizardDefinition: wizardDefinitions) {
 	            try {
-	                for(
-	                    Iterator j = wizardDefinition.getForClass().iterator(); 
-	                    j.hasNext(); 
-	                ) {
-	                    String wizardClass = (String)j.next();
+	                for(String wizardClass: wizardDefinition.getForClass()) {
 	                    /**
 	                     * A wizard definition matches if:
 	                     * <ul>
@@ -190,7 +187,7 @@ public class WizardDefinitionFactory implements Serializable {
 	                     *   <li>orderKey != null and is equal to order
 	                     * </ul>  
 	                     */                  
-	                    List order = wizardDefinition.getOrder();
+	                    List<String> order = wizardDefinition.getOrder();
 	                    if(
 	                        model.isSubtypeOf(forClass, wizardClass) &&
 	                        ((orderPattern == null) && !customizedDefinitions.contains(wizardDefinition.getName()) || 
@@ -212,8 +209,8 @@ public class WizardDefinitionFactory implements Serializable {
 	                        );
 	                    }
 	                }
-	            }
-	            catch(ServiceException e) {}
+	            } catch(ServiceException ignore) {}
+	            ii++;
 	        }
         }
         return (WizardDefinition[])matchingWizardDefinitions.values().toArray(new WizardDefinition[matchingWizardDefinitions.size()]);
@@ -224,7 +221,7 @@ public class WizardDefinitionFactory implements Serializable {
     //-------------------------------------------------------------------------
     private static final long serialVersionUID = 53793339941479036L;
 
-    private final Map wizardDefinitions;
+    private final Map<String,List<WizardDefinition>> wizardDefinitions;
     /**
      * The factory manages a set of customized definitions for each 
      * forClass and locale. This allows to put all non or wrong customized 

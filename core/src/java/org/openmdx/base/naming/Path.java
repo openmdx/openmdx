@@ -756,7 +756,31 @@ public final class Path implements Comparable<Path>, Cloneable, Serializable {
     public int compareTo(
         Path that
     ) {
-    	return this.toXRI().compareTo(that.toXRI()); // TODO optimize
+        final Path left;
+        final Path right;
+        final int toCompare;
+        if(this.size == that.size) {
+            toCompare = this.size;
+            left = this;
+            right = that;
+        } else if (this.size > that.size) {
+            toCompare = that.size;
+            left = this.getPrefix(toCompare);
+            right = that;
+        } else { // this.size < that.size
+            toCompare = this.size;
+            left = this;
+            right = that.getPrefix(toCompare);
+        }
+        if(toCompare > 1) {
+            int value = left.parent.compareTo(right.parent);
+            if(value != 0) return value;
+        } 
+        if(toCompare > 0) {
+            int value = left.base.compareTo(right.base);
+            if(value != 0) return value;
+        }
+        return this.size - that.size;
     }
 
     //--------------------------------------------------------------------------
@@ -1118,7 +1142,9 @@ public final class Path implements Comparable<Path>, Cloneable, Serializable {
     				return true;
     			}
     			if(this.base.equals(that.base)) {
-    				return this.parent.equals(that.parent);
+    			    return 
+    			        this.parent == that.parent ||
+    			        this.parent.equals(that.parent);
     			}
     		}
     	}

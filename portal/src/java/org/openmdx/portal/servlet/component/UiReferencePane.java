@@ -321,7 +321,7 @@ public class UiReferencePane extends ReferencePane implements Serializable {
     		if(
     			(filterGroupName != null) &&
     			!filterGroupName.equals(filter.getGroupName())
-    			) {
+    		) {
     			// Filter group 0 does not have sub-levels
     			if(!"0".equals(filterGroupName)) {
     				p.write("          </ul>");
@@ -342,11 +342,11 @@ public class UiReferencePane extends ReferencePane implements Serializable {
     			boolean hilite = groupHasSelectedFilter;
     			// Class filter group
     			if("1".equals(filterGroupName)) {
-    				p.write("      <li class=\"", CssClass.dropdown.toString(), (hilite ? " " + CssClass.active : ""), "\"><a href=\"#\" class=\"", CssClass.dropdownToggle.toString(), "\" style=\"", STYLE_GRID_MENU_SMALL, "\" onclick=\"javascript:this.parentNode.hide=function(){};\" data-toggle=\"dropdown\">", p.getImg("src=\"", p.getResourcePath("images/"), WebKeys.ICON_FILTER_CLASS, "\" border=\"0\" align=\"absmiddle\" alt=\"o\" title=\"", htmlEncoder.encode(texts.getClassFilterTitle(), false), "\""), "</a>");
+    				p.write("      <li class=\"", CssClass.dropdown.toString(), (hilite ? " " + CssClass.active : ""), "\" onclick=\"javascript:toggleMenu(this);\"><a href=\"#!\" class=\"", CssClass.dropdownToggle.toString(), "\" style=\"", STYLE_GRID_MENU_SMALL, "\">", p.getImg("src=\"", p.getResourcePath("images/"), WebKeys.ICON_FILTER_CLASS, "\" border=\"0\" align=\"absmiddle\" alt=\"o\" title=\"", htmlEncoder.encode(texts.getClassFilterTitle(), false), "\""), "</a>");
     			} 
     			// All other filter groups
     			else {
-    				p.write("      <li class=\"", CssClass.dropdown.toString(), (hilite ? " " + CssClass.active : ""), "\"><a href=\"#\" class=\"", CssClass.dropdownToggle.toString(), "\" style=\"", STYLE_GRID_MENU_SMALL, "\" onclick=\"javascript:this.parentNode.hide=function(){};\" data-toggle=\"dropdown\">", p.getImg("src=\"", p.getResourcePath("images/"), "filter_", htmlEncoder.encode(filterGroupName, false), p.getImgType(), "\" border=\"0\" align=\"absmiddle\" style=\"margin-right: 2px;\" alt=\"o\" title=\"", htmlEncoder.encode(filterGroupName, false), "\""), "</a>");
+    				p.write("      <li class=\"", CssClass.dropdown.toString(), (hilite ? " " + CssClass.active : ""), "\" onclick=\"javascript:toggleMenu(this);\"><a href=\"#!\" class=\"", CssClass.dropdownToggle.toString(), "\" style=\"", STYLE_GRID_MENU_SMALL, "\">", p.getImg("src=\"", p.getResourcePath("images/"), "filter_", htmlEncoder.encode(filterGroupName, false), p.getImgType(), "\" border=\"0\" align=\"absmiddle\" style=\"margin-right: 2px;\" alt=\"o\" title=\"", htmlEncoder.encode(filterGroupName, false), "\""), "</a>");
     			}
     			p.write("        <ul class=\"", CssClass.dropdownMenu.toString(), "\" role=\"menu\">");
     		} 
@@ -886,7 +886,7 @@ public class UiReferencePane extends ReferencePane implements Serializable {
 						//
 						// Menu New
 						//
-						p.write("              <li><a href=\"#\" class=\"", CssClass.dropdownToggle.toString(), "\" style=\"", STYLE_GRID_MENU_SMALL, "\" data-toggle=\"dropdown\" onclick=\"javascript:this.parentNode.hide=function(){};\">", htmlEncoder.encode(texts.getNewText(), false), "</a>");
+						p.write("              <li onclick=\"javascript:toggleMenu(this);\"><a href=\"#!\" class=\"", CssClass.dropdownToggle.toString(), "\" style=\"", STYLE_GRID_MENU_SMALL, "\">", htmlEncoder.encode(texts.getNewText(), false), "</a>");
 						p.write("                <ul class=\"", CssClass.dropdownMenu.toString(), "\" role=\"menu\">");
 						for(int j = 0; j < grid.getObjectCreator().length; j++) {
 							Action action = grid.getObjectCreator()[j];
@@ -897,7 +897,7 @@ public class UiReferencePane extends ReferencePane implements Serializable {
 						//
 						// Menu Edit
 						//
-						p.write("              <li class=\"", CssClass.hiddenSm.toString(), "\"><a href=\"#\" class=\"", CssClass.dropdownToggle.toString(), "\" style=\"", STYLE_GRID_MENU_SMALL, "\" data-toggle=\"dropdown\" onclick=\"javascript:this.parentNode.hide=function(){};\">", htmlEncoder.encode(texts.getEditTitle(), false), "</a>");
+						p.write("              <li class=\"", CssClass.hiddenSm.toString(), "\" onclick=\"javascript:toggleMenu(this);\"><a href=\"#!\" class=\"", CssClass.dropdownToggle.toString(), "\" style=\"", STYLE_GRID_MENU_SMALL, "\">", htmlEncoder.encode(texts.getEditTitle(), false), "</a>");
 						p.write("                <ul class=\"", CssClass.dropdownMenu.toString(), "\" role=\"menu\">");
 						// Multi-delete
 						if(this.getIsMultiDeleteEnabled() && (multiDeleteAction != null)) {
@@ -912,7 +912,7 @@ public class UiReferencePane extends ReferencePane implements Serializable {
 					{
 						List<Action> gridActions = app.getPortalExtension().getGridActions(view, grid);
 						if(gridActions != null && !gridActions.isEmpty()) {
-							p.write("              <li class=\"", CssClass.hiddenSm.toString(), "\"><a href=\"#\" class=\"", CssClass.dropdownToggle.toString(), "\" style=\"", STYLE_GRID_MENU_SMALL, "\" data-toggle=\"dropdown\" onclick=\"javascript:this.parentNode.hide=function(){};\">", htmlEncoder.encode(texts.getActionsTitle(), false), "</a>");
+							p.write("              <li class=\"", CssClass.hiddenSm.toString(), "\" onclick=\"javascript:toggleMenu(this);\"><a href=\"#!\" class=\"", CssClass.dropdownToggle.toString(), "\" style=\"", STYLE_GRID_MENU_SMALL, "\">", htmlEncoder.encode(texts.getActionsTitle(), false), "</a>");
 							p.write("                <ul class=\"", CssClass.dropdownMenu.toString(), "\" role=\"menu\">");
 							for(Action action: gridActions) {
 								p.write("                  <li><a href=\"#\" onclick=\"javascript:var para=getSelectedGridRows('", tabId, "_gridTable',1);if(para.length>1){$('parameter.list", tabId, "').value=para;};$('event.submit", tabId, "').value='", Integer.toString(action.getEvent()), "';$('parameter.size", tabId, "').value='", action.getParameter(Action.PARAMETER_SIZE), "';document.showForm", tabId, ".submit();\">", htmlEncoder.encode(action.getTitle(), false), "</a></li>");		                        	
@@ -924,7 +924,7 @@ public class UiReferencePane extends ReferencePane implements Serializable {
 					//
 					// Menu View
 					//                        
-					p.write("              <li><a href=\"#\" class=\"", CssClass.dropdownToggle.toString(), "\" style=\"", STYLE_GRID_MENU_SMALL, "\" data-toggle=\"dropdown\" onclick=\"javascript:this.parentNode.hide=function(){};\">", htmlEncoder.encode(texts.getViewTitle(), false), "</a>");
+					p.write("              <li onclick=\"javascript:toggleMenu(this);\"><a href=\"#!\" class=\"", CssClass.dropdownToggle.toString(), "\" style=\"", STYLE_GRID_MENU_SMALL, "\">", htmlEncoder.encode(texts.getViewTitle(), false), "</a>");
 					p.write("                <ul class=\"", CssClass.dropdownMenu.toString(), "\" role=\"menu\">");
 					for(int i = 0; i < DEFAULT_PAGE_SIZES.length; i++) {
 						String pageSize = Integer.toString(DEFAULT_PAGE_SIZES[i]);
@@ -1223,7 +1223,7 @@ public class UiReferencePane extends ReferencePane implements Serializable {
 								if(k == 0) {      
 									// Expand rows modifier
 									p.write("<!-- ObjectReferenceValue -->"); // used as tag for multi-delete. Do not write as debug!
-									p.write("<td><table id=\"gm\"<tr><td><a href=\"#\"" + (navigationTarget != null && !"_none".equals(navigationTarget) ? "target=\"" + navigationTarget + "\"" : "") + " onmouseover=\"javascript:this.href=", p.getEvalHRef(action), ";onmouseover=function(){};\"" + ("_none".equals(navigationTarget) ? " onclick=\"javascript:return false;\"" : "") + ">", p.getImg("src=\"", p.getResourcePath("images/"), action.getIconKey(), "\" border=\"0\" align=\"bottom\" alt=\"o\" title=\"\""), "</a></td><td><div id=\"", rowId, "_menu\" class=\"gridMenu\" onclick=\"try{this.parentNode.parentNode.onclick();}catch(e){};\"><div class=\"gridMenuIndicator\" onclick=\"javascript:jQuery.ajax({type: 'get', url: ", p.getEvalHRef(this.getRowMenuAction(objRef.getXRI(), rowId)), ", dataType: 'html', success: function(data){$('", rowId, "_menu').innerHTML=data;evalScripts(data);}});\">", p.getImg("border=\"0\" height=\"16\" width=\"16\" alt=\"\" src=\"", p.getResourcePath("images/"), "spacer.gif\""), "</div>", p.getImg("border=\"0\" align=\"bottom\" alt=\"\" src=\"", p.getResourcePath("images/"), WebKeys.ICON_MENU_DOWN, "\" style=\"display:none;\""), "</div></td></tr></table></td>");
+									p.write("<td><table id=\"gm\"><tr><td><a href=\"#\"" + (navigationTarget != null && !"_none".equals(navigationTarget) ? "target=\"" + navigationTarget + "\"" : "") + " onmouseover=\"javascript:this.href=", p.getEvalHRef(action), ";onmouseover=function(){};\"" + ("_none".equals(navigationTarget) ? " onclick=\"javascript:return false;\"" : "") + ">", p.getImg("src=\"", p.getResourcePath("images/"), action.getIconKey(), "\" border=\"0\" align=\"bottom\" alt=\"o\" title=\"\""), "</a></td><td><div id=\"", rowId, "_menu\" class=\"gridMenu\" onclick=\"try{this.parentNode.parentNode.onclick();}catch(e){};\"><div class=\"gridMenuIndicator\" onclick=\"javascript:jQuery.ajax({type: 'get', url: ", p.getEvalHRef(this.getRowMenuAction(objRef.getXRI(), rowId)), ", dataType: 'html', success: function(data){$('", rowId, "_menu').innerHTML=data;evalScripts(data);}});\">", p.getImg("border=\"0\" height=\"16\" width=\"16\" alt=\"\" src=\"", p.getResourcePath("images/"), "spacer.gif\""), "</div>", p.getImg("border=\"0\" align=\"bottom\" alt=\"\" src=\"", p.getResourcePath("images/"), WebKeys.ICON_MENU_DOWN, "\" style=\"display:none;\""), "</div></td></tr></table></td>");
 								} else {									
 									// only text in columns > 0
 									p.write("<!-- ObjectReferenceValue -->");

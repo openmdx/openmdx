@@ -47,15 +47,25 @@
  */
 package org.openmdx.base.naming;
 
-import junit.framework.Assert;
+import java.util.Random;
 
+import org.junit.Before;
 import org.junit.Test;
+
+import junit.framework.Assert;
 
 /**
  * Plain Vanilla Path Component Test
  */
 public class PlainVanillaSegmentTest {
 
+    private Random random;
+    
+    @Before
+    public void setup(){
+        this.random = new Random();
+    }
+    
 	@Test
 	public void discriminantIsClassicRepresentation(){
 		// Arrange
@@ -89,4 +99,90 @@ public class PlainVanillaSegmentTest {
 		Assert.assertFalse(pattern);
 	}
 	
+    @Test
+	public void authorityIsInternalized(){
+        // Arrange
+	    final String classicRepresentation = newObjectId();
+        final XRISegment testee = XRISegment.valueOf(0, classicRepresentation);
+        // Act
+        final String unifiedRepresentation = testee.toClassicRepresentation();
+        // Assert
+        Assert.assertTrue(testee instanceof AuthoritySegment);
+        Assert.assertTrue(isInternalized(unifiedRepresentation));
+	}
+
+    @Test
+    public void providerIsInternalized(){
+        final String classicRepresentation = newObjectId();
+        final XRISegment testee = XRISegment.valueOf(2, classicRepresentation);
+        // Act
+        final String unifiedRepresentation = testee.toClassicRepresentation();
+        // Assert
+        Assert.assertTrue(isInternalized(unifiedRepresentation));
+    }
+
+    @Test
+    public void segmentIsInternalized(){
+        final String classicRepresentation = newObjectId();
+        final XRISegment testee = XRISegment.valueOf(4, classicRepresentation);
+        // Act
+        final String unifiedRepresentation = testee.toClassicRepresentation();
+        // Assert
+        Assert.assertTrue(isInternalized(unifiedRepresentation));
+    }
+
+    @Test
+    public void lowerReferenceIsInternalized(){
+        final String classicRepresentation = newReferenceId("reference");
+        final XRISegment testee = XRISegment.valueOf(1, classicRepresentation);
+        // Act
+        final String unifiedRepresentation = testee.toClassicRepresentation();
+        // Assert
+        Assert.assertTrue(isInternalized(unifiedRepresentation));
+    }
+
+    @Test
+    public void higherReferenceIsInternalized(){
+        final String classicRepresentation = newReferenceId("reference");
+        final XRISegment testee = XRISegment.valueOf(11, classicRepresentation);
+        // Act
+        final String unifiedRepresentation = testee.toClassicRepresentation();
+        // Assert
+        Assert.assertTrue(isInternalized(unifiedRepresentation));
+    }
+    
+    @Test
+    public void objectIsNotInternalized(){
+        final String classicRepresentation = newObjectId();
+        final XRISegment testee = XRISegment.valueOf(6, classicRepresentation);
+        // Act
+        final String unifiedRepresentation = testee.toClassicRepresentation();
+        // Assert
+        Assert.assertFalse(isInternalized(unifiedRepresentation));
+    }
+
+    private String newObjectId() {
+        return deInternalize(newId());
+    }
+
+    private String newReferenceId(String prefix) {
+        return deInternalize(prefix + newId());
+    }
+    
+    private String newId() {
+        final String classicRepresentation = String.valueOf(random.nextInt(1000000000));
+        return classicRepresentation;
+    }
+
+    private static String deInternalize(final String classicRepresentation) {
+        final String alternativeRepesentation = new String(classicRepresentation);
+        return classicRepresentation == classicRepresentation.intern() ? alternativeRepesentation : classicRepresentation;
+    }
+
+    private static boolean isInternalized(
+        String string
+    ){
+        return string == string.intern();
+    }
+    
 }

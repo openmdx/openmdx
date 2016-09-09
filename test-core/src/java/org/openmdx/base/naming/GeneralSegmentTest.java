@@ -49,6 +49,7 @@ package org.openmdx.base.naming;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.openmdx.kernel.id.UUIDs;
 
 /**
  * Extensible Cross Reference Path Component Test
@@ -180,6 +181,49 @@ public class GeneralSegmentTest {
 		Assert.assertTrue(match);
 	}
 
+	@Test
+	public void wildcardIsComparableToPlainVanilla(){
+        final XRISegment left = XRISegment.valueOf(4, "Test*($.*ba)");
+        final XRISegment right = XRISegment.valueOf(4, "Test*ba");
+        // Act
+        final int value = left.compareTo(right);
+        // Assert
+        Assert.assertTrue(value != 0);
+	}
+
+    @Test
+    public void plainVanillaIsComparableToWildcard(){
+        // Arrange
+        final XRISegment left = XRISegment.valueOf(4, "Test*ba");
+        final XRISegment right = XRISegment.valueOf(4, "Test*($.*ba)");
+        // Act
+        final int value = left.compareTo(right);
+        // Assert
+        Assert.assertTrue(value != 0);
+    }
+
+    @Test 
+    public void authoritySegmentIsComparableToTransactionalSegment(){
+        // Arrange
+        final XRISegment left = new Path(UUIDs.newUUID()).getLastSegment();
+        final XRISegment right = new Path("xri://@openmdx*org.openmdx.base").getLastSegment();
+        // Act
+        final int value = left.compareTo(right);
+        // Assert
+        Assert.assertTrue(value != 0);
+    }
+    
+    @Test 
+    public void transactionalSegmentIsComparableToAuthoritySegment(){
+        // Arrange
+        final XRISegment left = new Path("xri://@openmdx*org.openmdx.base").getLastSegment();
+        final XRISegment right = new Path(UUIDs.newUUID()).getLastSegment();
+        // Act
+        final int value = left.compareTo(right);
+        // Assert
+        Assert.assertTrue(value != 0);
+    }
+    
 	@Test
 	public void whenPrefixWildcardThenAcceptLongerValue(){
 		final XRISegment testee = XRISegment.valueOf(4, "Test*($.*ba)");

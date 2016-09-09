@@ -159,7 +159,9 @@ public class UiAttributePane extends AttributePane implements Serializable {
 			p.write("<div id=\"inspector\">");
 			p.write("  <ul class=\"", CssClass.nav.toString(), " ", CssClass.navTabs.toString(), " ", CssClass.navCondensed.toString(), "\" style=\"z-index:201;\">");
 			int index = 0;
-			List<String> inspPanelIds = new ArrayList<String>();
+			String inspPanelIdPrefix = view.getContainerElementId() == null 
+				? "inspPanel"
+				: "inspPanel" + view.getContainerElementId() + "-";
 			for(UiAttributeTab tab: attributeTabs) {
 				boolean isRevokeShow = tab.hasPermission(
 					view.getObject(), 
@@ -167,19 +169,12 @@ public class UiAttributePane extends AttributePane implements Serializable {
 					WebKeys.PERMISSION_REVOKE_SHOW
 				);
 				if(!isRevokeShow) {
-					String inspPanelId = view.getContainerElementId() == null 
-						? Integer.toString(index) 
-						: view.getContainerElementId() + "-" + Integer.toString(index);                            
-					inspPanelIds.add(inspPanelId);
-					p.write("    <li class=\"", (index == 0 ? CssClass.active.toString() : ""), "\"><a href=\"#inspPanel", inspPanelId, "\" data-toggle=\"tab\">", htmlEncoder.encode(tab.getName(), false), "</a></li>");
+					String inspPanelId = inspPanelIdPrefix + Integer.toString(index);                            
+					p.write("    <li class=\"", (index == 0 ? CssClass.active.toString() : ""), "\" onclick=\"javascript:activateTab(this, '#", inspPanelId, "');\"><a href=\"#!\">", htmlEncoder.encode(tab.getName(), false), "</a></li>");
 					index++;
 				}
 			}
-			String activateAllTabsScript = "";
-			for(String inspPanelId: inspPanelIds) {
-				activateAllTabsScript += "$('inspPanel" + inspPanelId + "').className += ' " + CssClass.active + "';"; 
-			}
-			p.write("    <li><a href=\"#\" data-toggle=\"tab\" onclick=\"javascript:", activateAllTabsScript, "\">*</a></li>");
+			p.write("    <li onclick=\"javascript:activateTabs(this, '#", inspPanelIdPrefix, "')\"><a href=\"#!\">*</a></li>");
 			p.write("  </ul>");
 			p.write("  <div id=\"inspContent\" class=\"", CssClass.inspContent.toString(), " ", CssClass.tabContent.toString(), "\" style=\"display:block;z-index:200;\">");
 			index = 0;
@@ -190,10 +185,8 @@ public class UiAttributePane extends AttributePane implements Serializable {
 					WebKeys.PERMISSION_REVOKE_SHOW
 				);
 				if(!isRevokeShow) {
-					String inspPanelId = view.getContainerElementId() == null 
-						? Integer.toString(index) 
-						: view.getContainerElementId() + "-" + Integer.toString(index);                                            
-					p.write("    <div id=\"inspPanel", inspPanelId, "\" class=\"", CssClass.tabPane.toString(), (index == 0 ? " " + CssClass.active : ""), "\">");
+					String inspPanelId = inspPanelIdPrefix + Integer.toString(index);                                            
+					p.write("    <div id=\"", inspPanelId, "\" class=\"", CssClass.tabPane.toString(), (index == 0 ? " " + CssClass.active : ""), "\">");
 					tab.paint(
 						p,
 						frame,

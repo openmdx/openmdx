@@ -106,7 +106,7 @@ public class NewObjectAction extends BoundAction {
             PersistenceManager pm = app.getNewPmData();
             RefObject_1_0 parent = (RefObject_1_0)pm.getObjectById(currentView.getObject().refGetPath()); 
             RefObject_1_0 newObject = (RefObject_1_0)parent.refOutermostPackage().refClass(forClass).refCreateInstance(null);
-            newObject.refInitialize(false, false);
+            newObject.refInitialize(false, false, false);
             nextView = new EditObjectView(
                 currentView.getId(),
                 currentView.getContainerElementId(),

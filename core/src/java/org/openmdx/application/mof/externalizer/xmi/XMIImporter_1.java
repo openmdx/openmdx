@@ -985,7 +985,7 @@ public class XMIImporter_1 extends ModelImporter_1 implements UML1Consumer {
                     }
                     parameterType = this.channel.newObjectRecord(
                         (Path)DataproviderMode.DATAPROVIDER_2.attributeValue(parameterDef, "type"),
-                        null
+                        "org:omg:model1:Parameter"
                     );
                     createParameterType = false;
                 }

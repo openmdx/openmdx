@@ -48,6 +48,7 @@
 package org.openmdx.application.mof.mapping.cci;
 
 import java.util.HashSet;
+import java.util.List;
 
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
@@ -79,7 +80,8 @@ public class AssociationEndDef extends ElementDef {
         this.multiplicity = associationEndDef.getMultiplicity();
         this.type = this.getQualifiedTypeName(associationEndDef.getType());
         this.qualifierType = this.getQualifiedTypeName(associationEndDef.getQualifierType());
-        this.qualifierName = (String)associationEndDef.objGetValue("qualifierName");
+        List<Object> qualifierNames = associationEndDef.objGetList("qualifierName");
+        this.qualifierName = qualifierNames.isEmpty() ? null : (String)qualifierNames.get(0);
     }
 
     private String getQualifiedTypeName(

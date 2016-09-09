@@ -51,12 +51,16 @@ import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.lang.reflect.Proxy;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -377,7 +381,37 @@ public class Classes {
         return interfaces;
     }
     
-    
+    /**
+     * Get methods ordered by their declaration. As of Javadoc Class.getMethods() returns
+     * the methods in any particular order. This method returns declared, non-abstract
+     * methods first.
+     * 
+     * @param clazz
+     * @return
+     */
+    public static List<Method> getOrderedMethods(
+        Class<?> clazz
+    ) {
+        // Assert that declared methods are processed first. As of Javadoc getMethods() returns
+        // the methods in any particular order.
+        List<Method> methods = new ArrayList<Method>(Arrays.asList(clazz.getDeclaredMethods()));
+        // As of Javadoc: if clazz represents a type that has multiple declared methods with 
+        // the same name and parameter types, but different return types, then the returned array 
+        // has a Method object for each such method. Remove these inherited methods
+        for(Iterator<Method> i = methods.iterator(); i.hasNext(); ) {
+            Method method = i.next();
+            if(!Modifier.isAbstract(method.getModifiers())) {
+                i.remove();
+            }
+        }
+        for(Method method: clazz.getMethods()) {
+            if(!methods.contains(method)) {
+                methods.add(method);
+            }
+        }
+        return methods;
+    }
+
     //------------------------------------------------------------------------
     // Instance Factory
     //------------------------------------------------------------------------

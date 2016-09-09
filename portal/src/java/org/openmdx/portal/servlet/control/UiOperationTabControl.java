@@ -290,17 +290,17 @@ public class UiOperationTabControl extends UiTabControl implements Serializable 
         ShowObjectView view,
         ApplicationContext app
     ) throws ServiceException {
+    	Action invokeOperationAction = this.getInvokeOperationAction(view, app);
         return new Action(
             UiGetOperationDialogAction.EVENT_ID,
             new Action.Parameter[]{
                 new Action.Parameter(Action.PARAMETER_OBJECTXRI, view.getObjectReference().getXRI()),
                 new Action.Parameter(Action.PARAMETER_ID, Integer.toString(this.getTabId()))
             },
-            "OK",
-            true
+            invokeOperationAction.getTitle(),
+            invokeOperationAction.isEnabled()
         );
     }
-
 
     /**
      * Test permission for operation and action.

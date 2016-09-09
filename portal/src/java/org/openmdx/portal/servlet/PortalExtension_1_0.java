@@ -263,6 +263,29 @@ public interface PortalExtension_1_0 {
         ApplicationContext app
     );
     
+	/**
+	 * Store object. Edit object in case of doCreate=false. Create new object if
+	 * doCreate=true and add to container parent.refGetValue(forReference).
+	 * 
+	 * @param parent
+	 * @param object
+	 * @param parameterMap
+	 * @param attributeMap
+	 * @param doCreate
+	 * @param forReference
+	 * @param app
+	 * @return true if success
+	 */
+	boolean storeObject(
+		RefObject_1_0 parent,
+		RefObject_1_0 object,
+	    Map<String,String[]> parameterMap,
+	    Map<String, Attribute> attributeMap,
+	    boolean doCreate,
+	    String forReference,
+	    ApplicationContext app
+	) throws ServiceException;
+
     /**
      * Get object which allows to lookup objects of referenced type
      */

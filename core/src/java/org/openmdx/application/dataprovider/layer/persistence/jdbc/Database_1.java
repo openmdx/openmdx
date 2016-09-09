@@ -277,6 +277,7 @@ public class Database_1 extends OperationAwareLayer_1 {
         this.database.setDataSource(getDatasources(configuration));
         this.database.setDisableStateFilterSubstitution(configuration.isEnabled(LayerConfigurationEntries.DISABLE_STATE_FILTER_SUBSTITUATION, false));
         this.database.setGetLargeObjectByValue(configuration.isEnabled(LayerConfigurationEntries.GET_LARGE_OBJECT_BY_VALUE, true));
+        this.database.setCascadeDeletes(configuration.isEnabled(LayerConfigurationEntries.CASCADE_DELETES, true));
         this.database.setColumnNameFrom(configuration.<String>values(LayerConfigurationEntries.COLUMN_NAME_FROM));
         this.database.setColumnNameTo(configuration.<String>values(LayerConfigurationEntries.COLUMN_NAME_TO));
         SparseArray<Path> types = new TreeSparseArray<Path>();

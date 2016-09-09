@@ -56,6 +56,7 @@ import javax.resource.cci.MappedRecord;
 import javax.resource.cci.Record;
 
 import org.openmdx.base.resource.cci.ExtendedRecordFactory;
+import org.openmdx.base.rest.spi.ModelElementRecord;
 import org.openmdx.kernel.exception.BasicException;
 
 /**
@@ -124,7 +125,8 @@ public class StandardRecordFactory implements ExtendedRecordFactory {
         	org.openmdx.base.rest.cci.QueryFilterRecord.NAME.equals(recordName) ? new org.openmdx.base.rest.spi.QueryFilterRecord() : 
     		org.openmdx.base.rest.cci.QueryExtensionRecord.NAME.equals(recordName) ? new org.openmdx.base.rest.spi.QueryExtensionRecord() : 
             org.openmdx.base.rest.cci.QueryRecord.NAME.equals(recordName) ? new org.openmdx.base.rest.spi.QueryRecord() : 
-            org.openmdx.base.rest.cci.VoidRecord.NAME.equals(recordName) ? org.openmdx.base.rest.spi.VoidRecord.getInstance() : 
+            org.openmdx.base.rest.cci.VoidRecord.NAME.equals(recordName) ? org.openmdx.base.rest.spi.VoidRecord.getInstance() :
+            recordName.startsWith("org:omg:model1:") ? ModelElementRecord.getInstance(recordName) : 
             new VariableSizeMappedRecord(recordName);
     }
 

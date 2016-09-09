@@ -604,7 +604,6 @@ public class ModelElement_1 implements ModelElement_1_0, Delegating_1_0<ObjectRe
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.cci.DataObject_1_0#getContainer(boolean)
      */
-//  @Override
     public Container_1_0 getContainer(
         boolean forEviction
     ) {
@@ -612,6 +611,22 @@ public class ModelElement_1 implements ModelElement_1_0, Delegating_1_0<ObjectRe
     }
 
     /* (non-Javadoc)
+	 * @see org.openmdx.base.accessor.cci.DataObject_1_0#getAspects()
+	 */
+	@Override
+	public Container_1_0 getAspects() throws ServiceException {
+        throw new UnsupportedOperationException("Operation not supported by ModelElement_1");
+	}
+
+	/* (non-Javadoc)
+	 * @see org.openmdx.base.accessor.cci.DataObject_1_0#getAspect(java.lang.String)
+	 */
+	@Override
+	public Map<String, DataObject_1_0> getAspect(String aspectType) {
+        throw new UnsupportedOperationException("Operation not supported by ModelElement_1");
+	}
+
+	/* (non-Javadoc)
      * @see org.openmdx.base.accessor.cci.DataObject_1_0#objIsInaccessible()
      */
     public boolean objIsInaccessible(
@@ -953,7 +968,8 @@ public class ModelElement_1 implements ModelElement_1_0, Delegating_1_0<ObjectRe
 	public Path getQualifierType(
 	) throws ServiceException {	
 		if(this.qualifierType == null) {
-			this.qualifierType = (Path)objGetValue("qualifierType");
+		    List<Object> values = objGetList("qualifierType");
+			this.qualifierType = values.isEmpty() ? null : (Path)values.get(0);
 		}
 		return this.qualifierType;
 	}

@@ -53,7 +53,6 @@ import java.util.List;
 import org.openmdx.application.dataprovider.cci.FilterProperty;
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.query.ConditionType;
-import org.openmdx.base.query.Filter;
 import org.openmdx.base.query.LenientPathComparator;
 import org.openmdx.base.query.Quantifier;
 import org.openmdx.base.query.Selector;
@@ -61,6 +60,7 @@ import org.openmdx.base.query.spi.AbstractPattern;
 import org.openmdx.base.query.spi.PathPattern;
 import org.openmdx.base.query.spi.Soundex;
 import org.openmdx.base.resource.Records;
+import org.openmdx.base.rest.cci.QueryFilterRecord;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.exception.Throwables;
 
@@ -204,7 +204,7 @@ public abstract class AbstractFilter implements Selector {
         FilterProperty predicate
     ){
         List<?> values = predicate.values();
-        return !values.isEmpty() && values.get(0) instanceof Filter;
+        return !values.isEmpty() && values.get(0) instanceof QueryFilterRecord;
     }
     
     /* (non-Javadoc)

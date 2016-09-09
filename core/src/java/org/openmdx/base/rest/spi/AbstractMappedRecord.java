@@ -520,7 +520,7 @@ public abstract class AbstractMappedRecord<M extends Enum<M>>
      * @see javax.resource.cci.Record#setRecordName(java.lang.String)
      */
     @Override
-    final public void setRecordName(String recordName) {
+    public void setRecordName(String recordName) {
         if(!recordName.equals(getRecordName())) throw BasicException.initHolder(
             new IllegalArgumentException(
                 "Unmodifiable Record Name",

@@ -166,7 +166,7 @@ org.openmdx.portal.servlet.*
 	<meta name="apple-touch-fullscreen" content="YES" />
 
 	<!-- Styles -->
-	<link rel="stylesheet" href="javascript/bootstrap/css/bootstrap.min.css">
+	<link rel="stylesheet" href="js/bootstrap/css/bootstrap.min.css">
 	<link rel="stylesheet" href="<%= request.getContextPath() %>/_style/ssf.css" >
 	<link rel="stylesheet" href="<%= request.getContextPath() %>/_style/n2default.css" >
 	<link rel="stylesheet" href="<%= request.getContextPath() %>/_style/colors.css">
@@ -174,7 +174,7 @@ org.openmdx.portal.servlet.*
 	<link rel='shortcut icon' href='<%= request.getContextPath() %>/images/favicon.ico' />
 
 	<!-- Libraries -->
-	<script language="javascript" type="text/javascript" src="<%= request.getContextPath() %>/javascript/prototype.js"></script>
+	<script language="javascript" type="text/javascript" src="<%= request.getContextPath() %>/js/prototype.js"></script>
 
 </head>
 <body style="border:0px solid white;">

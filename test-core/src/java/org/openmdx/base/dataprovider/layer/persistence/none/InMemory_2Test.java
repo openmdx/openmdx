@@ -52,8 +52,7 @@ import javax.resource.cci.Interaction;
 import javax.resource.cci.MappedRecord;
 import javax.resource.cci.Record;
 
-import junit.framework.Assert;
-
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.openmdx.base.accessor.cci.SystemAttributes;

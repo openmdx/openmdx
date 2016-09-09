@@ -463,7 +463,7 @@ public final class Codes implements Serializable {
     						Authority.class,
     						"xri://@openmdx*" + packageName.replace(":", ".")
     					).refImmediatePackage().refClass(qualifiedClassName).refCreateInstance(null);
-    					newEntry.refInitialize(false, false);
+    					newEntry.refInitialize(false, false, false);
     					JmiHelper.toRefObject(
     						entry,
     						newEntry,

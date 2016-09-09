@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2003-2015, OMEX AG, Switzerland
+ * Copyright (c) 2003-2016, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without 
@@ -50,7 +50,7 @@
 	<property name="project.specification.title" value="openMDX/Security" />
 
 	<!-- Slash separated platform list, the last entry being the default -->
-	<property name="project.platform.list" value="jre-1.7" />
+	<property name="project.platform.list" value="jre-1.8" />
 
 	<!-- Slash separated app server list, may be overridden by build properties -->
 	<property name="project.app-server.list" value="jboss-3" />

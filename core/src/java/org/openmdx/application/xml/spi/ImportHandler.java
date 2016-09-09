@@ -193,6 +193,8 @@ public class ImportHandler extends DefaultHandler {
     // qualifier names of a complex schema type.
     private static final Map<String,String> qualifierNames = new HashMap<String,String>();
 
+    private static final List<Path> cachedParentPaths = new ArrayList<Path>();
+
     /**
      * Suffix marking date/time values as UTC based
      */
@@ -854,9 +856,16 @@ public class ImportHandler extends DefaultHandler {
                         } else if ("org.openmdx.base.anyURI".equals(attributeType)) {
                             value = Datatypes.create(URI.class, this.currentAttributeValue.toString().trim());
                         } else if ("org.openmdx.base.ObjectId".equals(attributeType)) {
-                            value = new Path(
+                            Path pathValue = new Path(
                                 this.currentAttributeValue.toString().trim()
                             );
+                            int index = cachedParentPaths.indexOf(pathValue.getParent());
+                            if(index >= 0) {
+                                value = cachedParentPaths.get(index).getChild(pathValue.getLastSegment());
+                            } else {
+                                cachedParentPaths.add(pathValue.getParent());
+                                value = pathValue;
+                            }
                         } else if ("org.w3c.binary".equals(attributeType)) {
                             value = Base64.decode(
                                 this.currentAttributeValue.toString()

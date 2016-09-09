@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>openMDX 2 Platform ~ Apache Tomcat 7 (jre-1.7)</name>
+	<name>openMDX 2 Platform ~ Apache Tomcat 7 (jre-1.8)</name>
 	<comment></comment>
 	<projects>
-		<project>openMDX 2 ~ Core (jre-1.7)</project>
-		<project>openMDX Thirdparty ~ Apache Tomcat 7 (jre-1.7)</project>
+		<project>openMDX 2 ~ Core (jre-1.8)</project>
+		<project>openMDX Thirdparty ~ Apache Tomcat 7 (jre-1.8)</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>
@@ -16,4 +16,16 @@
 	<natures>
 		<nature>org.eclipse.jdt.core.javanature</nature>
 	</natures>
+	<linkedResources>
+		<link>
+			<name>build</name>
+			<type>2</type>
+			<locationURI>PARENT-1-PROJECT_LOC/tomcat/build</locationURI>
+		</link>
+		<link>
+			<name>src</name>
+			<type>2</type>
+			<locationURI>PARENT-1-PROJECT_LOC/tomcat/src</locationURI>
+		</link>
+	</linkedResources>
 </projectDescription>

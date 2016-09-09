@@ -161,7 +161,8 @@ public class BasicImportPlugIn implements ImportPlugIn {
         if(refObject instanceof RefObject_1_0) try {
             ((RefObject_1_0)refObject).refInitialize(
                 true, // setRequiredToNull
-                true // setOptionalToNull
+                true, // setOptionalToNull
+                true // emptyMultivalued
              );
         } catch (JmiException exception) {
             throw new ServiceException(exception);

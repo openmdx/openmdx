@@ -513,7 +513,7 @@ var HTMLeditTextAreaId = "";
 function loadHTMLedit(textareaID, urlPrefix) {
   HTMLeditTextAreaId = textareaID;
   if(urlPrefix == null) urlPrefix = "";
-  win = window.open(urlPrefix + 'javascript/wymeditor/htmledit.htm', '_blank', "titlebar=no,menubar=no,help=yes,status=yes,scrollbars=yes,resizable=yes,dependent=yes,alwaysRaised=yes", true);
+  win = window.open(urlPrefix + 'js/wymeditor/htmledit.htm', '_blank', "titlebar=no,menubar=no,help=yes,status=yes,scrollbars=yes,resizable=yes,dependent=yes,alwaysRaised=yes", true);
   win.focus();
 }
 
@@ -522,7 +522,7 @@ var WIKYeditTextAreaId = "";
 function loadWIKYedit(textareaID, urlPrefix) {
   WIKYeditTextAreaId = textareaID;
   if(urlPrefix == null) urlPrefix = "";
-  win = window.open(urlPrefix + 'javascript/wiky/wikyedit.htm', '_blank', "titlebar=no,menubar=no,help=yes,status=yes,scrollbars=yes,resizable=yes,dependent=yes,alwaysRaised=yes", true);
+  win = window.open(urlPrefix + 'js/wiky/wikyedit.htm', '_blank', "titlebar=no,menubar=no,help=yes,status=yes,scrollbars=yes,resizable=yes,dependent=yes,alwaysRaised=yes", true);
   win.focus();
 }
 
@@ -538,6 +538,49 @@ function evalScripts(html) {
 	} catch(e) {
 		console.log(e);
 	};
+}
+
+//---------------------------------------------------------------------------
+function toggleMenu(e) {
+	try {
+		jQuery(e).siblings().removeClass("open");
+		if(jQuery(e).hasClass('open')) {
+			jQuery(e).removeClass('open');
+		} else{
+			jQuery(e).addClass('open');
+		}
+	} catch(e) {
+		console.log(e);
+	}
+}
+
+//---------------------------------------------------------------------------
+function activateTab(e, tabId) {
+	try {
+		jQuery(e).siblings().removeClass("active");
+		jQuery(e).addClass('active');
+		tab = jQuery(tabId);
+		tab.siblings().removeClass("active");
+		tab.addClass("active");
+	} catch(e) {
+		console.log(e);
+	}
+}
+
+//---------------------------------------------------------------------------
+function activateTabs(e, tabIdPrefix) {
+	try {
+		jQuery(e).siblings().removeClass("active");
+		jQuery(e).addClass('active');
+		for(var i = 0; i < 10; i++) {
+			try {
+				tab = jQuery(tabIdPrefix.concat(i.toString()));
+				tab.addClass("active");
+			} catch(e) {}
+		}
+	} catch(e) {
+		console.log(e);
+	}
 }
 
 //---------------------------------------------------------------------------

@@ -11,6 +11,7 @@ public enum CssClass {
 	alertSuccess,
 	alertInfo,
 	alertWarning,
+	alertDanger,
 	autocomplete,
 	autocompleterInput,
 	autocompleterMenu,
@@ -172,6 +173,7 @@ public enum CssClass {
 			case alertSuccess: return "alert-success";
 			case alertInfo: return "alert-info";
 			case alertWarning: return "alert-warning";
+			case alertDanger: return "alert-danger";
 			case btnDefault: return "btn-default";
 			case btnSm: return "btn-sm";
 			case colLg2: return "col-lg-2";

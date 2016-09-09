@@ -151,7 +151,7 @@ public abstract class MarshallingObject_1<M extends Marshaller>
         String feature,
         Object to
     ) throws ServiceException {
-        this.getDelegate().objSetValue(
+    	super.objSetValue(
             feature, 
             getMarshaller().unmarshal(to)
         );
@@ -176,7 +176,7 @@ public abstract class MarshallingObject_1<M extends Marshaller>
         String feature
     ) throws ServiceException {
         return this.getMarshaller().marshal(
-            getDelegate().objGetValue(feature)
+    		super.objGetValue(feature)
         );
     }
 
@@ -204,7 +204,7 @@ public abstract class MarshallingObject_1<M extends Marshaller>
     ) throws ServiceException {
         return new MarshallingList<Object>(
             this.getMarshaller(),
-            this.getDelegate().objGetList(feature)
+            super.objGetList(feature)
         );
     }
 
@@ -232,7 +232,7 @@ public abstract class MarshallingObject_1<M extends Marshaller>
     ) throws ServiceException {
         return new MarshallingSet<Object>(
             this.getMarshaller(),
-            this.getDelegate().objGetSet(feature)
+            super.objGetSet(feature)
         );
     }
 
@@ -260,7 +260,7 @@ public abstract class MarshallingObject_1<M extends Marshaller>
     ) throws ServiceException {
         return new MarshallingSortedMap(
             this.getMarshaller(),
-            this.getDelegate().objGetSparseArray(feature)
+            super.objGetSparseArray(feature)
         );
     }
 
@@ -291,7 +291,7 @@ public abstract class MarshallingObject_1<M extends Marshaller>
     ) throws ServiceException {
         return new MarshallingMap<String,Object>(
             this.getMarshaller(),
-            this.getDelegate().objGetMap(feature)
+            super.objGetMap(feature)
         );
     }
 
@@ -320,29 +320,39 @@ public abstract class MarshallingObject_1<M extends Marshaller>
         return new MarshallingContainer(
             this.jdoGetPersistenceManager(),
             this.getMarshaller(),
-            this.getContainer(feature)
+            super.objGetContainer(feature)
         );
     }
 
-    /**
-     * 
-     * @param feature
-     * 
-     * @return the container to be marshalled
-     * 
-     * @throws ServiceException
-     */
-    protected Container_1_0 getContainer(
-        String feature
-    ) throws ServiceException {
-        return this.getDelegate().objGetContainer(feature);
-    }
+    /* (non-Javadoc)
+	 * @see org.openmdx.base.accessor.spi.DelegatingObject_1#getAspects()
+	 */
+	@Override
+	public Container_1_0 getAspects() throws ServiceException {
+        return new MarshallingContainer(
+            this.jdoGetPersistenceManager(),
+            this.getMarshaller(),
+            super.getAspects()
+        );
+	}
+
+	/* (non-Javadoc)
+	 * @see org.openmdx.base.accessor.cci.DataObject_1_0#getAspect(java.lang.String)
+	 */
+	@Override
+	public Map<String, DataObject_1_0> getAspect(String aspectType) {
+        return new MarshallingMap<String,DataObject_1_0>(
+            this.getMarshaller(),
+            super.getAspect(aspectType)
+        );
+	}
+
     
     //--------------------------------------------------------------------------
     // Life Cycle Operations
     //--------------------------------------------------------------------------
 
-    /**
+	/**
      * Create an instance's clone
      * @param identity the identity of the new object if a persistent-new 
      * instance should be returned, <code>null</code> if a transient instance 
@@ -359,8 +369,7 @@ public abstract class MarshallingObject_1<M extends Marshaller>
             return (DataObject_1_0)this.getMarshaller().marshal(
                 this.getDelegate().openmdxjdoClone()
             );
-        }
-        catch(Exception e) {
+        } catch(Exception e) {
             throw new JDOUserException(
                 "Unable to clone object",
                 e,
@@ -393,10 +402,10 @@ public abstract class MarshallingObject_1<M extends Marshaller>
         Container_1_0 there,
         String criteria
     ) throws ServiceException {
-        Container_1_0 to = there == null ? 
+        final Container_1_0 to = there == null ? 
             null : 
             ((MarshallingContainer)there).getDelegate(this.getMarshaller()); 
-        this.getDelegate().objMove(
+        super.objMove(
             to,
             criteria
         );

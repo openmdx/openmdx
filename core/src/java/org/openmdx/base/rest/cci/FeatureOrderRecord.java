@@ -52,12 +52,12 @@ import javax.resource.cci.MappedRecord;
 import org.openmdx.base.query.SortOrder;
 
 /**
- * <code>org::openmdx::kernel::OrderSpecifier</code>
+ * <code>org::openmdx::kernel::FeatureOrder</code>
  */
 public interface FeatureOrderRecord extends MappedRecord {
     
     /**
-     * An order specifier record's name
+     * A feature order record's name
      */
     String NAME = "org:openmdx:kernel:FeatureOrder";
     
