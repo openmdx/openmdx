@@ -50,6 +50,8 @@ package org.openmdx.base.rest.spi;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInput;
+import java.io.Reader;
+import java.io.StringReader;
 import java.math.BigDecimal;
 import java.net.URI;
 import java.util.ArrayDeque;
@@ -241,6 +243,16 @@ public class RestParser {
             StandardHandler handler = new StandardHandler(source);
             XMLReader reader = RestParser.getReader(source);
             reader.setContentHandler(handler);
+            Reader is = source.getBody().getCharacterStream();
+//            if(is != null) {
+//                int c;
+//                StringBuilder s = new StringBuilder();
+//                while((c = is.read()) != -1) {
+//                    s.append((char)c);
+//                }
+//                System.out.println(s);
+//                source.getBody().setCharacterStream(new StringReader(s.toString()));
+//            }
             reader.parse(source.getBody());
             source.close();
             return handler.getValue(xri);
@@ -385,6 +397,8 @@ public class RestParser {
         private Record value = null;
         private Multiplicity multiplicity = null;
         private String featureType = null;
+        private boolean nestedStructFieldStart = false;
+        private boolean nestedStructEnd = false;
 
         /**
          * Retrieve the interaction's value record
@@ -493,6 +507,7 @@ public class RestParser {
             String localName, 
             String name
         ) throws SAXException {
+            boolean nestedStructEnd = false;
             try {
                 if ("org.openmdx.kernel.ResultSet".equals(name)) {
                     // Nothing to do
@@ -507,7 +522,8 @@ public class RestParser {
                         this.values.pop();
                     } else if(this.values.size() > 1 && isStructureType(this.values.peek().getRecordName())) {
                         // pop struct
-                        this.values.pop(); 
+                        this.values.pop();
+                        nestedStructEnd = true;
                     }
                 } else if(ITEM_TAG.equals(name)) { 
                     propagateData();
@@ -516,14 +532,17 @@ public class RestParser {
                         this.values.pop();
                     } else if(name.equals(this.featureName) && !ITEM_TAG.equals(this.previousEndElement)) {
                         if(this.isStructureType(this.featureType)) {
-                            this.values.pop();
-                            if(!this.values.isEmpty()) {
-                                MappedRecord holder = (MappedRecord)this.values.peek();
-                                if(
-                                    holder.get(this.featureName) instanceof MappedRecord &&
-                                    ((MappedRecord)holder.get(this.featureName)).isEmpty()
-                                ) {
-                                    holder.remove(this.featureName);
+                            if(!this.nestedStructEnd) {
+                                this.values.pop();
+                                // Reset struct in case of null-tag
+                                if(this.nestedStructFieldStart && !this.values.isEmpty()) {
+                                    MappedRecord holder = (MappedRecord)this.values.peek();
+                                    Object featureValue = holder.get(this.featureName);
+                                    if(featureValue instanceof IndexedRecord) {
+                                        ((IndexedRecord)featureValue).clear();
+                                    } else {
+                                        holder.put(this.featureName, null);
+                                    }
                                 }
                             }
                         } else {
@@ -541,6 +560,8 @@ public class RestParser {
             } catch (Exception e) {
                 throw new SAXException(e);
             }
+            this.nestedStructEnd = nestedStructEnd;
+            this.nestedStructFieldStart = false;
         }
 
         /**
@@ -637,12 +658,13 @@ public class RestParser {
             Attributes attributes
         ) throws SAXException {
             super.startElement(uri, localName, qName, attributes);
+            boolean nestedStructFieldStart = false;
             try {
                 String typeName = null;
                 ModelElement_1_0 featureDef = null;
                 if(qName.indexOf('.') > 0) {
                     typeName = qName.replace('.', ':');
-                } else if(qName.indexOf('.') < 0 && !this.values.isEmpty()) {
+                } else if(!ITEM_TAG.equals(qName) && qName.indexOf('.') < 0 && !this.values.isEmpty()) {
                     final String recordName = this.values.peek().getRecordName();
                     featureDef = getFeatureDef(
                         recordName,
@@ -664,48 +686,56 @@ public class RestParser {
                     }
                 } else if(qName.indexOf('.') > 0) {
                     // Begin object or struct
-					MappedRecord mappedRecord = this.newMappedRecord(typeName);
-					if(this.isStructureType(typeName)) {
-					    // nested struct
-					    if(!this.values.isEmpty()) {
-					        Object values = ((MappedRecord)this.values.peek()).get(this.featureName);
-					        if(values instanceof IndexedRecord) {
-					            IndexedRecord list = (IndexedRecord)values;
-                                if(attributes.getValue("index") != null) {
-                                    this.index = attributes.getValue("index");
-                                    int index = Integer.parseInt(this.index);
-                                    if(index != list.size()) {
-                                        throw new ServiceException(
-                                            BasicException.Code.DEFAULT_DOMAIN,
-                                            BasicException.Code.NOT_SUPPORTED,
-                                            "List indices must be ascending and without holes",
-                                            new BasicException.Parameter("multiplicity", this.multiplicity),
-                                            new BasicException.Parameter("index", this.index),
-                                            new BasicException.Parameter("item", mappedRecord)
-                                        );
+                    MappedRecord mappedRecord = this.newMappedRecord(typeName);
+                    if(!this.nestedStructFieldStart) {
+    					if(this.isStructureType(typeName)) {
+    					    // nested struct
+    					    if(!this.values.isEmpty()) {
+    					        // multi-valued org:w3c:anyType
+    					        if(this.values.peek() instanceof IndexedRecord) {
+    					            this.values.pop();
+    					            this.featureType = typeName;
+    					            this.value = mappedRecord;
+    					        }
+    					        Object values = ((MappedRecord)this.values.peek()).get(this.featureName);
+    					        if(values instanceof IndexedRecord) {
+    					            IndexedRecord list = (IndexedRecord)values;
+                                    if(attributes.getValue("index") != null) {
+                                        this.index = attributes.getValue("index");
+                                        int index = Integer.parseInt(this.index);
+                                        if(index != list.size()) {
+                                            throw new ServiceException(
+                                                BasicException.Code.DEFAULT_DOMAIN,
+                                                BasicException.Code.NOT_SUPPORTED,
+                                                "List indices must be ascending and without holes",
+                                                new BasicException.Parameter("multiplicity", this.multiplicity),
+                                                new BasicException.Parameter("index", this.index),
+                                                new BasicException.Parameter("item", mappedRecord)
+                                            );
+                                        }
                                     }
-                                }
-					            list.add(mappedRecord);
-					        } else {
-                                MappedRecord map = (MappedRecord)values;
-                                this.index = attributes.getValue("index");
-                                map.put(this.index, mappedRecord);					            
-					        }
-					    }
-					}
-					String href = attributes.getValue("href");
-					if(href != null) {
-					     this.href = href;
-					}
-					String version = attributes.getValue("version");
-					if(version != null){
-					    this.version = version;
-					}
-					String id = attributes.getValue("id");
-					if(id != null) {
-					     this.id = id;
-					}
-					this.values.push(mappedRecord);
+    					            list.add(mappedRecord);
+    					        } else {
+                                    MappedRecord map = (MappedRecord)values;
+                                    this.index = attributes.getValue("index");
+                                    map.put(this.index, mappedRecord);					            
+    					        }
+    					    }
+    					}
+    					String href = attributes.getValue("href");
+    					if(href != null) {
+    					     this.href = href;
+    					}
+    					String version = attributes.getValue("version");
+    					if(version != null){
+    					    this.version = version;
+    					}
+    					String id = attributes.getValue("id");
+    					if(id != null) {
+    					     this.id = id;
+    					}
+    					this.values.push(mappedRecord);
+                    }
                 } else if(ITEM_TAG.equals(qName)) {
                     this.index = attributes.getValue("index");
                     final String featureType = attributes.getValue("type");
@@ -722,6 +752,7 @@ public class RestParser {
                     this.multiplicity = getMultiplicity(featureDef);
                     if(this.isStructureType(typeName)) {
                         this.value = this.newMappedRecord(typeName);
+                        nestedStructFieldStart = true;
                         switch(this.multiplicity) {
                             case OPTIONAL:
                             case SINGLE_VALUE: {                    
@@ -824,6 +855,7 @@ public class RestParser {
             } catch (Exception exception) {
                 throw new SAXException(exception);
             }
+            this.nestedStructFieldStart = nestedStructFieldStart;
         }
 
         /**

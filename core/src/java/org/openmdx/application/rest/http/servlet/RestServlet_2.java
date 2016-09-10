@@ -850,7 +850,7 @@ public class RestServlet_2 extends HttpServlet {
                     } else if(":api-ui".equals(xri.getLastSegment().toClassicRepresentation())) {
                         response.sendRedirect(
                             request.getContextPath() +
-                            "/api-ui?url=" + request.getRequestURL().toString().replace(":api-ui", ":api")
+                            "/api-ui/index.html?url=" + request.getRequestURL().toString().replace(":api-ui", ":api")
                         );
                     } else {
                         // Object query
