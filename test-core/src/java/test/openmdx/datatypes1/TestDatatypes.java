@@ -52,6 +52,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertNotNull;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -81,6 +82,7 @@ import javax.jdo.Query;
 import javax.jdo.Transaction;
 import javax.naming.NamingException;
 import javax.naming.spi.NamingManager;
+import javax.resource.cci.MappedRecord;
 import javax.xml.datatype.DatatypeConstants;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.Duration;
@@ -90,13 +92,14 @@ import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.openmdx.application.xml.Exporter;
 import org.openmdx.application.xml.Importer;
 import org.openmdx.base.jmi1.Authority;
 import org.openmdx.base.jmi1.Provider;
 import org.openmdx.base.mof.cci.PrimitiveTypes;
+import org.openmdx.base.rest.spi.RestParser;
+import org.openmdx.base.rest.spi.RestSource;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.exception.Throwables;
 import org.openmdx.kernel.lightweight.naming.NonManagedInitialContextFactoryBuilder;
@@ -106,6 +109,8 @@ import org.w3c.cci2.ImmutableDatatype;
 import org.w3c.format.DateTimeFormat;
 import org.w3c.spi.DatatypeFactories;
 import org.w3c.spi2.Datatypes;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 
 import test.openmdx.datatypes1.cci2.NonStatedQuery;
 import test.openmdx.datatypes1.dto.CountryCode;
@@ -889,6 +894,22 @@ public class TestDatatypes  {
             0 // seconds
         );
         assertEquals("70 min", "P0Y0M0DT0H70M0S", t.toString());
+    }
+
+    @Test
+    public void testStruct(
+    ) throws SAXException {
+        RestSource restSource = new RestSource(
+            "./",           
+            new InputSource("xri://+resource/test/openmdx/datatypes1/GetConfigResultT.xml"),
+            "application/xml",
+            null
+        );
+        MappedRecord getConfigResultT = RestParser.parseRequest(
+            restSource,
+            null // no XRI struct
+        );
+        assertNotNull("GetConfigResultT", getConfigResultT);
     }
 
     @SuppressWarnings("unchecked")

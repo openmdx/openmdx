@@ -34,6 +34,10 @@
         <styles xmi:type="notation:FilteringStyle" xmi:id="_UJLTw7PSEeKHbKe7r26usQ"/>
         <layoutConstraint xmi:type="notation:Bounds" xmi:id="_UJLTxLPSEeKHbKe7r26usQ"/>
       </children>
+      <children xmi:type="notation:BasicCompartment" xmi:id="_atGr0I7LEeaHFs9Jzx8gMg" visible="false" type="compartment_shape_display">
+        <styles xmi:type="notation:TitleStyle" xmi:id="_atGr0Y7LEeaHFs9Jzx8gMg"/>
+        <layoutConstraint xmi:type="notation:Bounds" xmi:id="_atGr0o7LEeaHFs9Jzx8gMg"/>
+      </children>
       <element xmi:type="uml:Class" href="platform:/resource/openMDX 2 ~ Test Core (EMF)/test.openmdx.base.uml#_5p9nAIPSEd2nyID2xZmdGQ"/>
       <layoutConstraint xmi:type="notation:Bounds" xmi:id="_UJJekbPSEeKHbKe7r26usQ" x="72" y="288" width="270"/>
     </children>
@@ -66,6 +70,10 @@
         <styles xmi:type="notation:FilteringStyle" xmi:id="_V0IZuLPSEeKHbKe7r26usQ"/>
         <layoutConstraint xmi:type="notation:Bounds" xmi:id="_V0IZubPSEeKHbKe7r26usQ"/>
       </children>
+      <children xmi:type="notation:BasicCompartment" xmi:id="_atJvII7LEeaHFs9Jzx8gMg" visible="false" type="compartment_shape_display">
+        <styles xmi:type="notation:TitleStyle" xmi:id="_atJvIY7LEeaHFs9Jzx8gMg"/>
+        <layoutConstraint xmi:type="notation:Bounds" xmi:id="_atJvIo7LEeaHFs9Jzx8gMg"/>
+      </children>
       <element xmi:type="uml:Class" href="platform:/resource/openMDX 2 ~ Test Core (EMF)/test.openmdx.base.uml#_ME7lIIPhEd2nyID2xZmdGQ"/>
       <layoutConstraint xmi:type="notation:Bounds" xmi:id="_V0HyobPSEeKHbKe7r26usQ" x="72" y="486" width="277"/>
     </children>
@@ -97,6 +105,10 @@
         <styles xmi:type="notation:SortingStyle" xmi:id="_Wva9QrPSEeKHbKe7r26usQ"/>
         <styles xmi:type="notation:FilteringStyle" xmi:id="_Wva9Q7PSEeKHbKe7r26usQ"/>
         <layoutConstraint xmi:type="notation:Bounds" xmi:id="_Wva9RLPSEeKHbKe7r26usQ"/>
+      </children>
+      <children xmi:type="notation:BasicCompartment" xmi:id="_atK9QI7LEeaHFs9Jzx8gMg" visible="false" type="compartment_shape_display">
+        <styles xmi:type="notation:TitleStyle" xmi:id="_atK9QY7LEeaHFs9Jzx8gMg"/>
+        <layoutConstraint xmi:type="notation:Bounds" xmi:id="_atK9Qo7LEeaHFs9Jzx8gMg"/>
       </children>
       <element xmi:type="uml:Class" href="platform:/resource/openMDX 2 ~ Test Core (EMF)/test.openmdx.base.uml#_0ZWB8IPSEd2nyID2xZmdGQ"/>
       <layoutConstraint xmi:type="notation:Bounds" xmi:id="_WvZvIbPSEeKHbKe7r26usQ" x="72" y="36" width="270"/>
@@ -165,6 +177,10 @@
         <styles xmi:type="notation:FilteringStyle" xmi:id="_26bsPLPSEeKHbKe7r26usQ"/>
         <layoutConstraint xmi:type="notation:Bounds" xmi:id="_26bsPbPSEeKHbKe7r26usQ"/>
       </children>
+      <children xmi:type="notation:BasicCompartment" xmi:id="_ayNOQI7LEeaHFs9Jzx8gMg" visible="false" type="compartment_shape_display">
+        <styles xmi:type="notation:TitleStyle" xmi:id="_ayNOQY7LEeaHFs9Jzx8gMg"/>
+        <layoutConstraint xmi:type="notation:Bounds" xmi:id="_ayNOQo7LEeaHFs9Jzx8gMg"/>
+      </children>
       <element xmi:type="uml:Class" href="platform:/resource/openMDX 2 ~ Test Core (EMF)/test.openmdx.app1.uml#_3C7B8A60016D3DA87B25025E"/>
       <layoutConstraint xmi:type="notation:Bounds" xmi:id="_26bFIbPSEeKHbKe7r26usQ" x="108" y="54" width="1296"/>
     </children>
@@ -201,6 +217,10 @@
         <styles xmi:type="notation:FilteringStyle" xmi:id="_5LPROLPSEeKHbKe7r26usQ"/>
         <layoutConstraint xmi:type="notation:Bounds" xmi:id="_5LPRObPSEeKHbKe7r26usQ"/>
       </children>
+      <children xmi:type="notation:BasicCompartment" xmi:id="_ayOcYI7LEeaHFs9Jzx8gMg" visible="false" type="compartment_shape_display">
+        <styles xmi:type="notation:TitleStyle" xmi:id="_ayOcYY7LEeaHFs9Jzx8gMg"/>
+        <layoutConstraint xmi:type="notation:Bounds" xmi:id="_ayOcYo7LEeaHFs9Jzx8gMg"/>
+      </children>
       <element xmi:type="uml:Class" href="platform:/resource/openMDX 2 ~ Test Core (EMF)/test.openmdx.app1.uml#_3C7B8A60016D3ECC0E3A010F"/>
       <layoutConstraint xmi:type="notation:Bounds" xmi:id="_5LOqIbPSEeKHbKe7r26usQ" x="108" y="396" width="307" height="126"/>
     </children>
@@ -236,6 +256,10 @@
         <styles xmi:type="notation:SortingStyle" xmi:id="_5kLVp7PSEeKHbKe7r26usQ"/>
         <styles xmi:type="notation:FilteringStyle" xmi:id="_5kLVqLPSEeKHbKe7r26usQ"/>
         <layoutConstraint xmi:type="notation:Bounds" xmi:id="_5kLVqbPSEeKHbKe7r26usQ"/>
+      </children>
+      <children xmi:type="notation:BasicCompartment" xmi:id="_ayPqgI7LEeaHFs9Jzx8gMg" visible="false" type="compartment_shape_display">
+        <styles xmi:type="notation:TitleStyle" xmi:id="_ayPqgY7LEeaHFs9Jzx8gMg"/>
+        <layoutConstraint xmi:type="notation:Bounds" xmi:id="_ayPqgo7LEeaHFs9Jzx8gMg"/>
       </children>
       <element xmi:type="uml:Class" href="platform:/resource/openMDX 2 ~ Test Core (EMF)/test.openmdx.app1.uml#_3C7B8A60016D3ECC0E410119"/>
       <layoutConstraint xmi:type="notation:Bounds" xmi:id="_5kKukbPSEeKHbKe7r26usQ" x="1134" y="396" width="271" height="144"/>
@@ -365,6 +389,10 @@
         <styles xmi:type="notation:FilteringStyle" xmi:id="_U2URLrPTEeKHbKe7r26usQ"/>
         <layoutConstraint xmi:type="notation:Bounds" xmi:id="_U2URL7PTEeKHbKe7r26usQ"/>
       </children>
+      <children xmi:type="notation:BasicCompartment" xmi:id="_a3JYoI7LEeaHFs9Jzx8gMg" visible="false" type="compartment_shape_display">
+        <styles xmi:type="notation:TitleStyle" xmi:id="_a3JYoY7LEeaHFs9Jzx8gMg"/>
+        <layoutConstraint xmi:type="notation:Bounds" xmi:id="_a3JYoo7LEeaHFs9Jzx8gMg"/>
+      </children>
       <element xmi:type="uml:Class" href="platform:/resource/openMDX 2 ~ Test Core (EMF)/test.openmdx.app1.uml#_3C7B8A60016D3DA87B25025E"/>
       <layoutConstraint xmi:type="notation:Bounds" xmi:id="_U2TqEbPTEeKHbKe7r26usQ" x="54" y="36" width="490"/>
     </children>
@@ -405,6 +433,10 @@
         <styles xmi:type="notation:FilteringStyle" xmi:id="_bcFEM7PTEeKHbKe7r26usQ"/>
         <layoutConstraint xmi:type="notation:Bounds" xmi:id="_bcFENLPTEeKHbKe7r26usQ"/>
       </children>
+      <children xmi:type="notation:BasicCompartment" xmi:id="_a3KmwI7LEeaHFs9Jzx8gMg" visible="false" type="compartment_shape_display">
+        <styles xmi:type="notation:TitleStyle" xmi:id="_a3KmwY7LEeaHFs9Jzx8gMg"/>
+        <layoutConstraint xmi:type="notation:Bounds" xmi:id="_a3Kmwo7LEeaHFs9Jzx8gMg"/>
+      </children>
       <element xmi:type="uml:Class" href="platform:/resource/openMDX 2 ~ Test Core (EMF)/test.openmdx.app1.uml#_3C7B8A60016D3F1E678C025D"/>
       <layoutConstraint xmi:type="notation:Bounds" xmi:id="_bcD2EbPTEeKHbKe7r26usQ" x="75" y="337" width="468"/>
     </children>
@@ -437,6 +469,10 @@
         <styles xmi:type="notation:FilteringStyle" xmi:id="_nCpes7PTEeKHbKe7r26usQ"/>
         <layoutConstraint xmi:type="notation:Bounds" xmi:id="_nCpetLPTEeKHbKe7r26usQ"/>
       </children>
+      <children xmi:type="notation:BasicCompartment" xmi:id="_a3Mb8I7LEeaHFs9Jzx8gMg" visible="false" type="compartment_shape_display">
+        <styles xmi:type="notation:TitleStyle" xmi:id="_a3Mb8Y7LEeaHFs9Jzx8gMg"/>
+        <layoutConstraint xmi:type="notation:Bounds" xmi:id="_a3Mb8o7LEeaHFs9Jzx8gMg"/>
+      </children>
       <element xmi:type="uml:Class" href="platform:/resource/openMDX 2 ~ Test Core (EMF)/test.openmdx.app1.uml#_SB2DgCIJEeKwev0EnESdDQ"/>
       <layoutConstraint xmi:type="notation:Bounds" xmi:id="_nCoQkbPTEeKHbKe7r26usQ" x="75" y="517" width="199"/>
     </children>
@@ -468,6 +504,10 @@
         <styles xmi:type="notation:SortingStyle" xmi:id="_nZJTLbPTEeKHbKe7r26usQ"/>
         <styles xmi:type="notation:FilteringStyle" xmi:id="_nZJTLrPTEeKHbKe7r26usQ"/>
         <layoutConstraint xmi:type="notation:Bounds" xmi:id="_nZJTL7PTEeKHbKe7r26usQ"/>
+      </children>
+      <children xmi:type="notation:BasicCompartment" xmi:id="_a3NqEI7LEeaHFs9Jzx8gMg" visible="false" type="compartment_shape_display">
+        <styles xmi:type="notation:TitleStyle" xmi:id="_a3NqEY7LEeaHFs9Jzx8gMg"/>
+        <layoutConstraint xmi:type="notation:Bounds" xmi:id="_a3NqEo7LEeaHFs9Jzx8gMg"/>
       </children>
       <element xmi:type="uml:Class" href="platform:/resource/openMDX 2 ~ Test Core (EMF)/test.openmdx.app1.uml#_aKygkCIJEeKwev0EnESdDQ"/>
       <layoutConstraint xmi:type="notation:Bounds" xmi:id="_nZIsEbPTEeKHbKe7r26usQ" x="327" y="517" width="216"/>
@@ -544,6 +584,10 @@
         <styles xmi:type="notation:FilteringStyle" xmi:id="_0Ls_rrPTEeKHbKe7r26usQ"/>
         <layoutConstraint xmi:type="notation:Bounds" xmi:id="_0Ls_r7PTEeKHbKe7r26usQ"/>
       </children>
+      <children xmi:type="notation:BasicCompartment" xmi:id="_a8FjAI7LEeaHFs9Jzx8gMg" visible="false" type="compartment_shape_display">
+        <styles xmi:type="notation:TitleStyle" xmi:id="_a8FjAY7LEeaHFs9Jzx8gMg"/>
+        <layoutConstraint xmi:type="notation:Bounds" xmi:id="_a8FjAo7LEeaHFs9Jzx8gMg"/>
+      </children>
       <element xmi:type="uml:Class" href="platform:/resource/openMDX 2 ~ Test Core (EMF)/test.openmdx.app1.uml#_3C7B8A60016D3DA87B25025E"/>
       <layoutConstraint xmi:type="notation:Bounds" xmi:id="_0LsYkbPTEeKHbKe7r26usQ" x="90" y="54" width="853"/>
     </children>
@@ -580,6 +624,10 @@
         <styles xmi:type="notation:FilteringStyle" xmi:id="_4cdDLbPTEeKHbKe7r26usQ"/>
         <layoutConstraint xmi:type="notation:Bounds" xmi:id="_4cdDLrPTEeKHbKe7r26usQ"/>
       </children>
+      <children xmi:type="notation:BasicCompartment" xmi:id="_a8GxII7LEeaHFs9Jzx8gMg" visible="false" type="compartment_shape_display">
+        <styles xmi:type="notation:TitleStyle" xmi:id="_a8GxIY7LEeaHFs9Jzx8gMg"/>
+        <layoutConstraint xmi:type="notation:Bounds" xmi:id="_a8GxIo7LEeaHFs9Jzx8gMg"/>
+      </children>
       <element xmi:type="uml:Class" href="platform:/resource/openMDX 2 ~ Test Core (EMF)/test.openmdx.app1.uml#_3C7B8A60016D3DA8971502EE"/>
       <layoutConstraint xmi:type="notation:Bounds" xmi:id="_4cccEbPTEeKHbKe7r26usQ" x="115" y="383" width="325"/>
     </children>
@@ -615,6 +663,10 @@
         <styles xmi:type="notation:SortingStyle" xmi:id="_5CcsLbPTEeKHbKe7r26usQ"/>
         <styles xmi:type="notation:FilteringStyle" xmi:id="_5CcsLrPTEeKHbKe7r26usQ"/>
         <layoutConstraint xmi:type="notation:Bounds" xmi:id="_5CcsL7PTEeKHbKe7r26usQ"/>
+      </children>
+      <children xmi:type="notation:BasicCompartment" xmi:id="_a8ImUI7LEeaHFs9Jzx8gMg" visible="false" type="compartment_shape_display">
+        <styles xmi:type="notation:TitleStyle" xmi:id="_a8ImUY7LEeaHFs9Jzx8gMg"/>
+        <layoutConstraint xmi:type="notation:Bounds" xmi:id="_a8ImUo7LEeaHFs9Jzx8gMg"/>
       </children>
       <element xmi:type="uml:Class" href="platform:/resource/openMDX 2 ~ Test Core (EMF)/test.openmdx.app1.uml#_3C7B8A60016D3DA897E900B8"/>
       <layoutConstraint xmi:type="notation:Bounds" xmi:id="_5CcFEbPTEeKHbKe7r26usQ" x="599" y="380" width="345"/>
@@ -698,6 +750,10 @@
         <styles xmi:type="notation:FilteringStyle" xmi:id="_Z9oIPrPeEeKHbKe7r26usQ"/>
         <layoutConstraint xmi:type="notation:Bounds" xmi:id="_Z9oIP7PeEeKHbKe7r26usQ"/>
       </children>
+      <children xmi:type="notation:BasicCompartment" xmi:id="_bBiqwI7LEeaHFs9Jzx8gMg" visible="false" type="compartment_shape_display">
+        <styles xmi:type="notation:TitleStyle" xmi:id="_bBiqwY7LEeaHFs9Jzx8gMg"/>
+        <layoutConstraint xmi:type="notation:Bounds" xmi:id="_bBiqwo7LEeaHFs9Jzx8gMg"/>
+      </children>
       <element xmi:type="uml:Class" href="platform:/resource/openMDX 2 ~ Test Core (EMF)/test.openmdx.app1.uml#_3C7B8A60016D3DA87B25025E"/>
       <layoutConstraint xmi:type="notation:Bounds" xmi:id="_Z9nhIbPeEeKHbKe7r26usQ" x="108" y="54" width="1441"/>
     </children>
@@ -746,6 +802,10 @@
         <styles xmi:type="notation:FilteringStyle" xmi:id="_c_932LPeEeKHbKe7r26usQ"/>
         <layoutConstraint xmi:type="notation:Bounds" xmi:id="_c_932bPeEeKHbKe7r26usQ"/>
       </children>
+      <children xmi:type="notation:BasicCompartment" xmi:id="_bBjR0I7LEeaHFs9Jzx8gMg" visible="false" type="compartment_shape_display">
+        <styles xmi:type="notation:TitleStyle" xmi:id="_bBjR0Y7LEeaHFs9Jzx8gMg"/>
+        <layoutConstraint xmi:type="notation:Bounds" xmi:id="_bBjR0o7LEeaHFs9Jzx8gMg"/>
+      </children>
       <element xmi:type="uml:Class" href="platform:/resource/openMDX 2 ~ Test Core (EMF)/test.openmdx.app1.uml#_3C7B8A60016D3F6EA81B01F1"/>
       <layoutConstraint xmi:type="notation:Bounds" xmi:id="_c_9QwLPeEeKHbKe7r26usQ" x="126" y="396" width="523"/>
     </children>
@@ -781,6 +841,10 @@
         <styles xmi:type="notation:SortingStyle" xmi:id="_kbDJXLPeEeKHbKe7r26usQ"/>
         <styles xmi:type="notation:FilteringStyle" xmi:id="_kbDJXbPeEeKHbKe7r26usQ"/>
         <layoutConstraint xmi:type="notation:Bounds" xmi:id="_kbDJXrPeEeKHbKe7r26usQ"/>
+      </children>
+      <children xmi:type="notation:BasicCompartment" xmi:id="_bBlHAI7LEeaHFs9Jzx8gMg" visible="false" type="compartment_shape_display">
+        <styles xmi:type="notation:TitleStyle" xmi:id="_bBlHAY7LEeaHFs9Jzx8gMg"/>
+        <layoutConstraint xmi:type="notation:Bounds" xmi:id="_bBlHAo7LEeaHFs9Jzx8gMg"/>
       </children>
       <element xmi:type="uml:Class" href="platform:/resource/openMDX 2 ~ Test Core (EMF)/test.openmdx.app1.uml#_3C7B8A60016D3F6EA889033A"/>
       <layoutConstraint xmi:type="notation:Bounds" xmi:id="_kbCiQbPeEeKHbKe7r26usQ" x="1134" y="396" width="415"/>
@@ -822,6 +886,10 @@
         <styles xmi:type="notation:FilteringStyle" xmi:id="_rP6vaLPeEeKHbKe7r26usQ"/>
         <layoutConstraint xmi:type="notation:Bounds" xmi:id="_rP6vabPeEeKHbKe7r26usQ"/>
       </children>
+      <children xmi:type="notation:BasicCompartment" xmi:id="_bBm8MI7LEeaHFs9Jzx8gMg" visible="false" type="compartment_shape_display">
+        <styles xmi:type="notation:TitleStyle" xmi:id="_bBm8MY7LEeaHFs9Jzx8gMg"/>
+        <layoutConstraint xmi:type="notation:Bounds" xmi:id="_bBm8Mo7LEeaHFs9Jzx8gMg"/>
+      </children>
       <element xmi:type="uml:Class" href="platform:/resource/openMDX 2 ~ Test Core (EMF)/test.openmdx.app1.uml#_3C7B8A60016D3F6EA80C01F9"/>
       <layoutConstraint xmi:type="notation:Bounds" xmi:id="_rP6IULPeEeKHbKe7r26usQ" x="1134" y="810" width="415"/>
     </children>
@@ -862,6 +930,10 @@
         <styles xmi:type="notation:FilteringStyle" xmi:id="_wtRI47PeEeKHbKe7r26usQ"/>
         <layoutConstraint xmi:type="notation:Bounds" xmi:id="_wtRI5LPeEeKHbKe7r26usQ"/>
       </children>
+      <children xmi:type="notation:BasicCompartment" xmi:id="_bBoKUI7LEeaHFs9Jzx8gMg" visible="false" type="compartment_shape_display">
+        <styles xmi:type="notation:TitleStyle" xmi:id="_bBoKUY7LEeaHFs9Jzx8gMg"/>
+        <layoutConstraint xmi:type="notation:Bounds" xmi:id="_bBoKUo7LEeaHFs9Jzx8gMg"/>
+      </children>
       <element xmi:type="uml:Class" href="platform:/resource/openMDX 2 ~ Test Core (EMF)/test.openmdx.app1.uml#_3C7B8A60016D3F6EA82402E4"/>
       <layoutConstraint xmi:type="notation:Bounds" xmi:id="_wtP6wbPeEeKHbKe7r26usQ" x="126" y="805" width="523"/>
     </children>
@@ -893,6 +965,10 @@
         <styles xmi:type="notation:SortingStyle" xmi:id="_bXmWZ7PfEeKHbKe7r26usQ"/>
         <styles xmi:type="notation:FilteringStyle" xmi:id="_bXmWaLPfEeKHbKe7r26usQ"/>
         <layoutConstraint xmi:type="notation:Bounds" xmi:id="_bXmWabPfEeKHbKe7r26usQ"/>
+      </children>
+      <children xmi:type="notation:BasicCompartment" xmi:id="_bBp_gI7LEeaHFs9Jzx8gMg" visible="false" type="compartment_shape_display">
+        <styles xmi:type="notation:TitleStyle" xmi:id="_bBp_gY7LEeaHFs9Jzx8gMg"/>
+        <layoutConstraint xmi:type="notation:Bounds" xmi:id="_bBp_go7LEeaHFs9Jzx8gMg"/>
       </children>
       <element xmi:type="uml:Class" href="platform:/resource/openMDX%202%20~%20Core%20(EMF)/org.openmdx.generic1.uml#_3C7B8A60016D3DC93385006B"/>
       <layoutConstraint xmi:type="notation:Bounds" xmi:id="_bXlvUbPfEeKHbKe7r26usQ" x="738" y="396"/>
@@ -1061,6 +1137,10 @@
         <styles xmi:type="notation:FilteringStyle" xmi:id="_vUNOzbPfEeKHbKe7r26usQ"/>
         <layoutConstraint xmi:type="notation:Bounds" xmi:id="_vUNOzrPfEeKHbKe7r26usQ"/>
       </children>
+      <children xmi:type="notation:BasicCompartment" xmi:id="_bHIVYI7LEeaHFs9Jzx8gMg" visible="false" type="compartment_shape_display">
+        <styles xmi:type="notation:TitleStyle" xmi:id="_bHIVYY7LEeaHFs9Jzx8gMg"/>
+        <layoutConstraint xmi:type="notation:Bounds" xmi:id="_bHIVYo7LEeaHFs9Jzx8gMg"/>
+      </children>
       <element xmi:type="uml:Class" href="platform:/resource/openMDX 2 ~ Test Core (EMF)/test.openmdx.app1.uml#_3C7B8A60016D3DA87B25025E"/>
       <layoutConstraint xmi:type="notation:Bounds" xmi:id="_vUMnsbPfEeKHbKe7r26usQ" x="56" y="45" width="2087"/>
     </children>
@@ -1157,6 +1237,10 @@
         <styles xmi:type="notation:FilteringStyle" xmi:id="_ycoYTrPfEeKHbKe7r26usQ"/>
         <layoutConstraint xmi:type="notation:Bounds" xmi:id="_ycoYT7PfEeKHbKe7r26usQ"/>
       </children>
+      <children xmi:type="notation:BasicCompartment" xmi:id="_bHKKkI7LEeaHFs9Jzx8gMg" visible="false" type="compartment_shape_display">
+        <styles xmi:type="notation:TitleStyle" xmi:id="_bHKKkY7LEeaHFs9Jzx8gMg"/>
+        <layoutConstraint xmi:type="notation:Bounds" xmi:id="_bHKKko7LEeaHFs9Jzx8gMg"/>
+      </children>
       <element xmi:type="uml:Class" href="platform:/resource/openMDX 2 ~ Test Core (EMF)/test.openmdx.app1.uml#_3C7B8A60016D3DA87BA90087"/>
       <layoutConstraint xmi:type="notation:Bounds" xmi:id="_ycnxMbPfEeKHbKe7r26usQ" x="72" y="882" width="991"/>
     </children>
@@ -1213,6 +1297,10 @@
         <styles xmi:type="notation:FilteringStyle" xmi:id="_BEYr2LPgEeKHbKe7r26usQ"/>
         <layoutConstraint xmi:type="notation:Bounds" xmi:id="_BEYr2bPgEeKHbKe7r26usQ"/>
       </children>
+      <children xmi:type="notation:BasicCompartment" xmi:id="_bHNN4I7LEeaHFs9Jzx8gMg" visible="false" type="compartment_shape_display">
+        <styles xmi:type="notation:TitleStyle" xmi:id="_bHNN4Y7LEeaHFs9Jzx8gMg"/>
+        <layoutConstraint xmi:type="notation:Bounds" xmi:id="_bHNN4o7LEeaHFs9Jzx8gMg"/>
+      </children>
       <element xmi:type="uml:Class" href="platform:/resource/openMDX 2 ~ Test Core (EMF)/test.openmdx.app1.uml#_3C7B8A60016D3DCC461700FA"/>
       <layoutConstraint xmi:type="notation:Bounds" xmi:id="_BEYEwbPgEeKHbKe7r26usQ" x="720" y="414" width="288"/>
     </children>
@@ -1252,6 +1340,10 @@
         <styles xmi:type="notation:SortingStyle" xmi:id="_bbY0zbPgEeKHbKe7r26usQ"/>
         <styles xmi:type="notation:FilteringStyle" xmi:id="_bbY0zrPgEeKHbKe7r26usQ"/>
         <layoutConstraint xmi:type="notation:Bounds" xmi:id="_bbY0z7PgEeKHbKe7r26usQ"/>
+      </children>
+      <children xmi:type="notation:BasicCompartment" xmi:id="_bHPDEI7LEeaHFs9Jzx8gMg" visible="false" type="compartment_shape_display">
+        <styles xmi:type="notation:TitleStyle" xmi:id="_bHPDEY7LEeaHFs9Jzx8gMg"/>
+        <layoutConstraint xmi:type="notation:Bounds" xmi:id="_bHPDEo7LEeaHFs9Jzx8gMg"/>
       </children>
       <element xmi:type="uml:Class" href="platform:/resource/openMDX 2 ~ Test Core (EMF)/test.openmdx.app1.uml#_3C7B8A60016D3DA87BB60220"/>
       <layoutConstraint xmi:type="notation:Bounds" xmi:id="_bbYNsbPgEeKHbKe7r26usQ" x="1386" y="414" width="756"/>
@@ -1450,6 +1542,10 @@
         <styles xmi:type="notation:FilteringStyle" xmi:id="_BLe84LPhEeKHbKe7r26usQ"/>
         <layoutConstraint xmi:type="notation:Bounds" xmi:id="_BLe84bPhEeKHbKe7r26usQ"/>
       </children>
+      <children xmi:type="notation:BasicCompartment" xmi:id="_bNO9YI7LEeaHFs9Jzx8gMg" visible="false" type="compartment_shape_display">
+        <styles xmi:type="notation:TitleStyle" xmi:id="_bNO9YY7LEeaHFs9Jzx8gMg"/>
+        <layoutConstraint xmi:type="notation:Bounds" xmi:id="_bNO9Yo7LEeaHFs9Jzx8gMg"/>
+      </children>
       <element xmi:type="uml:Class" href="platform:/resource/openMDX 2 ~ Test Core (EMF)/test.openmdx.app1.uml#_3C7B8A60016D3DA87B25025E"/>
       <layoutConstraint xmi:type="notation:Bounds" xmi:id="_BLduwbPhEeKHbKe7r26usQ" x="108" y="54" width="1728"/>
     </children>
@@ -1485,6 +1581,10 @@
         <styles xmi:type="notation:SortingStyle" xmi:id="_ERiH1rPhEeKHbKe7r26usQ"/>
         <styles xmi:type="notation:FilteringStyle" xmi:id="_ERiH17PhEeKHbKe7r26usQ"/>
         <layoutConstraint xmi:type="notation:Bounds" xmi:id="_ERiH2LPhEeKHbKe7r26usQ"/>
+      </children>
+      <children xmi:type="notation:BasicCompartment" xmi:id="_bNPkcI7LEeaHFs9Jzx8gMg" visible="false" type="compartment_shape_display">
+        <styles xmi:type="notation:TitleStyle" xmi:id="_bNPkcY7LEeaHFs9Jzx8gMg"/>
+        <layoutConstraint xmi:type="notation:Bounds" xmi:id="_bNPkco7LEeaHFs9Jzx8gMg"/>
       </children>
       <element xmi:type="uml:Class" href="platform:/resource/openMDX 2 ~ Test Core (EMF)/test.openmdx.app1.uml#_3C7B8A60016D3FB2C0CC015B"/>
       <layoutConstraint xmi:type="notation:Bounds" xmi:id="_ERhgwLPhEeKHbKe7r26usQ" x="134" y="453" width="316"/>
@@ -1582,6 +1682,10 @@
         <styles xmi:type="notation:FilteringStyle" xmi:id="_Lw9t07PhEeKHbKe7r26usQ"/>
         <layoutConstraint xmi:type="notation:Bounds" xmi:id="_Lw9t1LPhEeKHbKe7r26usQ"/>
       </children>
+      <children xmi:type="notation:BasicCompartment" xmi:id="_bNRZoI7LEeaHFs9Jzx8gMg" visible="false" type="compartment_shape_display">
+        <styles xmi:type="notation:TitleStyle" xmi:id="_bNRZoY7LEeaHFs9Jzx8gMg"/>
+        <layoutConstraint xmi:type="notation:Bounds" xmi:id="_bNRZoo7LEeaHFs9Jzx8gMg"/>
+      </children>
       <element xmi:type="uml:Class" href="platform:/resource/openMDX 2 ~ Test Core (EMF)/test.openmdx.app1.uml#_3C7B8A60016D3DA87BA90087"/>
       <layoutConstraint xmi:type="notation:Bounds" xmi:id="_Lw8fsbPhEeKHbKe7r26usQ" x="558" y="450" width="828"/>
     </children>
@@ -1621,6 +1725,10 @@
         <styles xmi:type="notation:SortingStyle" xmi:id="_VIQ0bbPhEeKHbKe7r26usQ"/>
         <styles xmi:type="notation:FilteringStyle" xmi:id="_VIQ0brPhEeKHbKe7r26usQ"/>
         <layoutConstraint xmi:type="notation:Bounds" xmi:id="_VIQ0b7PhEeKHbKe7r26usQ"/>
+      </children>
+      <children xmi:type="notation:BasicCompartment" xmi:id="_bNUc8I7LEeaHFs9Jzx8gMg" visible="false" type="compartment_shape_display">
+        <styles xmi:type="notation:TitleStyle" xmi:id="_bNUc8Y7LEeaHFs9Jzx8gMg"/>
+        <layoutConstraint xmi:type="notation:Bounds" xmi:id="_bNUc8o7LEeaHFs9Jzx8gMg"/>
       </children>
       <element xmi:type="uml:Class" href="platform:/resource/openMDX 2 ~ Test Core (EMF)/test.openmdx.app1.uml#_3C7B8A60016D3FDA5DBA0291"/>
       <layoutConstraint xmi:type="notation:Bounds" xmi:id="_VIQNUbPhEeKHbKe7r26usQ" x="1530" y="450" width="307"/>
@@ -1662,6 +1770,10 @@
         <styles xmi:type="notation:FilteringStyle" xmi:id="_qJFi2bPhEeKHbKe7r26usQ"/>
         <layoutConstraint xmi:type="notation:Bounds" xmi:id="_qJFi2rPhEeKHbKe7r26usQ"/>
       </children>
+      <children xmi:type="notation:BasicCompartment" xmi:id="_bNWSII7LEeaHFs9Jzx8gMg" visible="false" type="compartment_shape_display">
+        <styles xmi:type="notation:TitleStyle" xmi:id="_bNWSIY7LEeaHFs9Jzx8gMg"/>
+        <layoutConstraint xmi:type="notation:Bounds" xmi:id="_bNWSIo7LEeaHFs9Jzx8gMg"/>
+      </children>
       <element xmi:type="uml:Class" href="platform:/resource/openMDX 2 ~ Test Core (EMF)/test.openmdx.app1.uml#_3C7B8A60016D3DA87BB60220"/>
       <layoutConstraint xmi:type="notation:Bounds" xmi:id="_qJE7wbPhEeKHbKe7r26usQ" x="558" y="1152" width="828"/>
     </children>
@@ -1697,6 +1809,10 @@
         <styles xmi:type="notation:SortingStyle" xmi:id="_yghH0rPhEeKHbKe7r26usQ"/>
         <styles xmi:type="notation:FilteringStyle" xmi:id="_yghH07PhEeKHbKe7r26usQ"/>
         <layoutConstraint xmi:type="notation:Bounds" xmi:id="_yghH1LPhEeKHbKe7r26usQ"/>
+      </children>
+      <children xmi:type="notation:BasicCompartment" xmi:id="_bNXgQI7LEeaHFs9Jzx8gMg" visible="false" type="compartment_shape_display">
+        <styles xmi:type="notation:TitleStyle" xmi:id="_bNXgQY7LEeaHFs9Jzx8gMg"/>
+        <layoutConstraint xmi:type="notation:Bounds" xmi:id="_bNXgQo7LEeaHFs9Jzx8gMg"/>
       </children>
       <element xmi:type="uml:Class" href="platform:/resource/openMDX 2 ~ Test Core (EMF)/test.openmdx.app1.uml#_3C7B8A60016D3DA87CC201AE"/>
       <layoutConstraint xmi:type="notation:Bounds" xmi:id="_ygf5sbPhEeKHbKe7r26usQ" x="558" y="1314" width="451"/>
@@ -1754,6 +1870,10 @@
         <styles xmi:type="notation:FilteringStyle" xmi:id="_z6sm2LPhEeKHbKe7r26usQ"/>
         <layoutConstraint xmi:type="notation:Bounds" xmi:id="_z6sm2bPhEeKHbKe7r26usQ"/>
       </children>
+      <children xmi:type="notation:BasicCompartment" xmi:id="_bNYuYI7LEeaHFs9Jzx8gMg" visible="false" type="compartment_shape_display">
+        <styles xmi:type="notation:TitleStyle" xmi:id="_bNYuYY7LEeaHFs9Jzx8gMg"/>
+        <layoutConstraint xmi:type="notation:Bounds" xmi:id="_bNYuYo7LEeaHFs9Jzx8gMg"/>
+      </children>
       <element xmi:type="uml:Class" href="platform:/resource/openMDX 2 ~ Test Core (EMF)/test.openmdx.app1.uml#_3C7B8A60016D3DA87CCE02D7"/>
       <layoutConstraint xmi:type="notation:Bounds" xmi:id="_z6r_wbPhEeKHbKe7r26usQ" x="1044" y="1314" width="343"/>
     </children>
@@ -1785,6 +1905,10 @@
         <styles xmi:type="notation:SortingStyle" xmi:id="_0hPCYrPhEeKHbKe7r26usQ"/>
         <styles xmi:type="notation:FilteringStyle" xmi:id="_0hPCY7PhEeKHbKe7r26usQ"/>
         <layoutConstraint xmi:type="notation:Bounds" xmi:id="_0hPCZLPhEeKHbKe7r26usQ"/>
+      </children>
+      <children xmi:type="notation:BasicCompartment" xmi:id="_bNajkI7LEeaHFs9Jzx8gMg" visible="false" type="compartment_shape_display">
+        <styles xmi:type="notation:TitleStyle" xmi:id="_bNajkY7LEeaHFs9Jzx8gMg"/>
+        <layoutConstraint xmi:type="notation:Bounds" xmi:id="_bNajko7LEeaHFs9Jzx8gMg"/>
       </children>
       <element xmi:type="uml:Class" href="platform:/resource/openMDX 2 ~ Test Core (EMF)/test.openmdx.app1.uml#_3C7B8A60016D3EB848D902B0"/>
       <layoutConstraint xmi:type="notation:Bounds" xmi:id="_0hN0QbPhEeKHbKe7r26usQ" x="1044" y="1566" width="343"/>
@@ -1834,6 +1958,10 @@
         <styles xmi:type="notation:FilteringStyle" xmi:id="_EVe-TrPiEeKHbKe7r26usQ"/>
         <layoutConstraint xmi:type="notation:Bounds" xmi:id="_EVe-T7PiEeKHbKe7r26usQ"/>
       </children>
+      <children xmi:type="notation:BasicCompartment" xmi:id="_bNbxsI7LEeaHFs9Jzx8gMg" visible="false" type="compartment_shape_display">
+        <styles xmi:type="notation:TitleStyle" xmi:id="_bNbxsY7LEeaHFs9Jzx8gMg"/>
+        <layoutConstraint xmi:type="notation:Bounds" xmi:id="_bNbxso7LEeaHFs9Jzx8gMg"/>
+      </children>
       <element xmi:type="uml:Class" href="platform:/resource/openMDX 2 ~ Test Core (EMF)/test.openmdx.app1.uml#_3C7B8A60016D3DA89273031B"/>
       <layoutConstraint xmi:type="notation:Bounds" xmi:id="_EVeXMbPiEeKHbKe7r26usQ" x="54" y="666"/>
     </children>
@@ -1869,6 +1997,10 @@
         <styles xmi:type="notation:SortingStyle" xmi:id="_HZN1ArPiEeKHbKe7r26usQ"/>
         <styles xmi:type="notation:FilteringStyle" xmi:id="_HZN1A7PiEeKHbKe7r26usQ"/>
         <layoutConstraint xmi:type="notation:Bounds" xmi:id="_HZN1BLPiEeKHbKe7r26usQ"/>
+      </children>
+      <children xmi:type="notation:BasicCompartment" xmi:id="_bNc_0I7LEeaHFs9Jzx8gMg" visible="false" type="compartment_shape_display">
+        <styles xmi:type="notation:TitleStyle" xmi:id="_bNc_0Y7LEeaHFs9Jzx8gMg"/>
+        <layoutConstraint xmi:type="notation:Bounds" xmi:id="_bNc_0o7LEeaHFs9Jzx8gMg"/>
       </children>
       <element xmi:type="uml:Class" href="platform:/resource/openMDX 2 ~ Test Core (EMF)/test.openmdx.app1.uml#_3C7B8A60016D3DA893F80099"/>
       <layoutConstraint xmi:type="notation:Bounds" xmi:id="_HZMm4bPiEeKHbKe7r26usQ" x="54" y="864" width="414"/>
@@ -1910,6 +2042,10 @@
         <styles xmi:type="notation:FilteringStyle" xmi:id="_JkRXXbPiEeKHbKe7r26usQ"/>
         <layoutConstraint xmi:type="notation:Bounds" xmi:id="_JkRXXrPiEeKHbKe7r26usQ"/>
       </children>
+      <children xmi:type="notation:BasicCompartment" xmi:id="_bNeN8I7LEeaHFs9Jzx8gMg" visible="false" type="compartment_shape_display">
+        <styles xmi:type="notation:TitleStyle" xmi:id="_bNeN8Y7LEeaHFs9Jzx8gMg"/>
+        <layoutConstraint xmi:type="notation:Bounds" xmi:id="_bNeN8o7LEeaHFs9Jzx8gMg"/>
+      </children>
       <element xmi:type="uml:Class" href="platform:/resource/openMDX 2 ~ Test Core (EMF)/test.openmdx.app1.uml#_3C7B8A60016D40D366970327"/>
       <layoutConstraint xmi:type="notation:Bounds" xmi:id="_JkQwQbPiEeKHbKe7r26usQ" x="54" y="1152" width="415"/>
     </children>
@@ -1945,6 +2081,10 @@
         <styles xmi:type="notation:SortingStyle" xmi:id="_KsSvXLPiEeKHbKe7r26usQ"/>
         <styles xmi:type="notation:FilteringStyle" xmi:id="_KsSvXbPiEeKHbKe7r26usQ"/>
         <layoutConstraint xmi:type="notation:Bounds" xmi:id="_KsSvXrPiEeKHbKe7r26usQ"/>
+      </children>
+      <children xmi:type="notation:BasicCompartment" xmi:id="_bNe1AI7LEeaHFs9Jzx8gMg" visible="false" type="compartment_shape_display">
+        <styles xmi:type="notation:TitleStyle" xmi:id="_bNe1AY7LEeaHFs9Jzx8gMg"/>
+        <layoutConstraint xmi:type="notation:Bounds" xmi:id="_bNe1Ao7LEeaHFs9Jzx8gMg"/>
       </children>
       <element xmi:type="uml:Class" href="platform:/resource/openMDX 2 ~ Test Core (EMF)/test.openmdx.app1.uml#_3C7B8A60016D3FB2C1B30348"/>
       <layoutConstraint xmi:type="notation:Bounds" xmi:id="_KsSIQbPiEeKHbKe7r26usQ" x="54" y="1008" width="415"/>
@@ -2148,6 +2288,10 @@
         <styles xmi:type="notation:FilteringStyle" xmi:id="_mv8nWLPiEeKHbKe7r26usQ"/>
         <layoutConstraint xmi:type="notation:Bounds" xmi:id="_mv8nWbPiEeKHbKe7r26usQ"/>
       </children>
+      <children xmi:type="notation:BasicCompartment" xmi:id="_bSScgI7LEeaHFs9Jzx8gMg" visible="false" type="compartment_shape_display">
+        <styles xmi:type="notation:TitleStyle" xmi:id="_bSScgY7LEeaHFs9Jzx8gMg"/>
+        <layoutConstraint xmi:type="notation:Bounds" xmi:id="_bSScgo7LEeaHFs9Jzx8gMg"/>
+      </children>
       <element xmi:type="uml:Class" href="platform:/resource/openMDX 2 ~ Test Core (EMF)/test.openmdx.app1.uml#_3C7B8A60016D3DA893E103AD"/>
       <layoutConstraint xmi:type="notation:Bounds" xmi:id="_mv8AQbPiEeKHbKe7r26usQ" x="72" y="63" width="378"/>
     </children>
@@ -2183,6 +2327,10 @@
         <styles xmi:type="notation:SortingStyle" xmi:id="_n6txV7PiEeKHbKe7r26usQ"/>
         <styles xmi:type="notation:FilteringStyle" xmi:id="_n6txWLPiEeKHbKe7r26usQ"/>
         <layoutConstraint xmi:type="notation:Bounds" xmi:id="_n6txWbPiEeKHbKe7r26usQ"/>
+      </children>
+      <children xmi:type="notation:BasicCompartment" xmi:id="_bSTqoI7LEeaHFs9Jzx8gMg" visible="false" type="compartment_shape_display">
+        <styles xmi:type="notation:TitleStyle" xmi:id="_bSTqoY7LEeaHFs9Jzx8gMg"/>
+        <layoutConstraint xmi:type="notation:Bounds" xmi:id="_bSTqoo7LEeaHFs9Jzx8gMg"/>
       </children>
       <element xmi:type="uml:Class" href="platform:/resource/openMDX 2 ~ Test Core (EMF)/test.openmdx.app1.uml#_3C7B8A60016D3DA894DD0283"/>
       <layoutConstraint xmi:type="notation:Bounds" xmi:id="_n6tKQbPiEeKHbKe7r26usQ" x="72" y="198" width="378"/>
@@ -2220,6 +2368,10 @@
         <styles xmi:type="notation:FilteringStyle" xmi:id="_ovDYXbPiEeKHbKe7r26usQ"/>
         <layoutConstraint xmi:type="notation:Bounds" xmi:id="_ovDYXrPiEeKHbKe7r26usQ"/>
       </children>
+      <children xmi:type="notation:BasicCompartment" xmi:id="_bSU4wI7LEeaHFs9Jzx8gMg" visible="false" type="compartment_shape_display">
+        <styles xmi:type="notation:TitleStyle" xmi:id="_bSU4wY7LEeaHFs9Jzx8gMg"/>
+        <layoutConstraint xmi:type="notation:Bounds" xmi:id="_bSU4wo7LEeaHFs9Jzx8gMg"/>
+      </children>
       <element xmi:type="uml:Class" href="platform:/resource/openMDX 2 ~ Test Core (EMF)/test.openmdx.app1.uml#_3C7B8A60016D3DA88CF602B6"/>
       <layoutConstraint xmi:type="notation:Bounds" xmi:id="_ovCxQbPiEeKHbKe7r26usQ" x="72" y="342" width="378"/>
     </children>
@@ -2245,6 +2397,10 @@
         <styles xmi:type="notation:SortingStyle" xmi:id="_0mNsqffHEeKilr8bOUbg7w"/>
         <styles xmi:type="notation:FilteringStyle" xmi:id="_0mNsqvfHEeKilr8bOUbg7w"/>
         <layoutConstraint xmi:type="notation:Bounds" xmi:id="_0mNsq_fHEeKilr8bOUbg7w"/>
+      </children>
+      <children xmi:type="notation:BasicCompartment" xmi:id="_bSWG4I7LEeaHFs9Jzx8gMg" visible="false" type="compartment_shape_display">
+        <styles xmi:type="notation:TitleStyle" xmi:id="_bSWG4Y7LEeaHFs9Jzx8gMg"/>
+        <layoutConstraint xmi:type="notation:Bounds" xmi:id="_bSWG4o7LEeaHFs9Jzx8gMg"/>
       </children>
       <element xmi:type="uml:PrimitiveType" href="platform:/resource/openMDX%202%20~%20Test%20Core%20(EMF)/test.openmdx.datatypes1.uml#_VgZXEPe6EeKilr8bOUbg7w"/>
       <layoutConstraint xmi:type="notation:Bounds" xmi:id="_0mL3cffHEeKilr8bOUbg7w" x="72" y="504" width="373"/>
@@ -2281,6 +2437,10 @@
         <styles xmi:type="notation:SortingStyle" xmi:id="_1NUP17PiEeKHbKe7r26usQ"/>
         <styles xmi:type="notation:FilteringStyle" xmi:id="_1NUP2LPiEeKHbKe7r26usQ"/>
         <layoutConstraint xmi:type="notation:Bounds" xmi:id="_1NUP2bPiEeKHbKe7r26usQ"/>
+      </children>
+      <children xmi:type="notation:BasicCompartment" xmi:id="_bXJHUI7LEeaHFs9Jzx8gMg" visible="false" type="compartment_shape_display">
+        <styles xmi:type="notation:TitleStyle" xmi:id="_bXJHUY7LEeaHFs9Jzx8gMg"/>
+        <layoutConstraint xmi:type="notation:Bounds" xmi:id="_bXJHUo7LEeaHFs9Jzx8gMg"/>
       </children>
       <element xmi:type="uml:Class" href="platform:/resource/openMDX 2 ~ Test Core (EMF)/test.openmdx.app1.uml#_3C7B8A60016D3DA87B25025E"/>
       <layoutConstraint xmi:type="notation:Bounds" xmi:id="_1NTowbPiEeKHbKe7r26usQ" x="54" y="36" width="696"/>
@@ -2326,6 +2486,10 @@
         <styles xmi:type="notation:FilteringStyle" xmi:id="_3Goh7rPiEeKHbKe7r26usQ"/>
         <layoutConstraint xmi:type="notation:Bounds" xmi:id="_3Goh77PiEeKHbKe7r26usQ"/>
       </children>
+      <children xmi:type="notation:BasicCompartment" xmi:id="_bXK8gI7LEeaHFs9Jzx8gMg" visible="false" type="compartment_shape_display">
+        <styles xmi:type="notation:TitleStyle" xmi:id="_bXK8gY7LEeaHFs9Jzx8gMg"/>
+        <layoutConstraint xmi:type="notation:Bounds" xmi:id="_bXK8go7LEeaHFs9Jzx8gMg"/>
+      </children>
       <element xmi:type="uml:Class" href="platform:/resource/openMDX 2 ~ Test Core (EMF)/test.openmdx.app1.uml#_3C7B8A60016D3FC47CFE0334"/>
       <layoutConstraint xmi:type="notation:Bounds" xmi:id="_3Gn60bPiEeKHbKe7r26usQ" x="65" y="451" width="684"/>
     </children>
@@ -2369,6 +2533,10 @@
         <styles xmi:type="notation:SortingStyle" xmi:id="_7DFJUrPiEeKHbKe7r26usQ"/>
         <styles xmi:type="notation:FilteringStyle" xmi:id="_7DFJU7PiEeKHbKe7r26usQ"/>
         <layoutConstraint xmi:type="notation:Bounds" xmi:id="_7DFJVLPiEeKHbKe7r26usQ"/>
+      </children>
+      <children xmi:type="notation:BasicCompartment" xmi:id="_bXMxsI7LEeaHFs9Jzx8gMg" visible="false" type="compartment_shape_display">
+        <styles xmi:type="notation:TitleStyle" xmi:id="_bXMxsY7LEeaHFs9Jzx8gMg"/>
+        <layoutConstraint xmi:type="notation:Bounds" xmi:id="_bXMxso7LEeaHFs9Jzx8gMg"/>
       </children>
       <element xmi:type="uml:Class" href="platform:/resource/openMDX 2 ~ Test Core (EMF)/test.openmdx.app1.uml#_3C7B8A60016D3FC47C930222"/>
       <layoutConstraint xmi:type="notation:Bounds" xmi:id="_7DEiQbPiEeKHbKe7r26usQ" x="605" y="253"/>
@@ -2441,6 +2609,10 @@
         <styles xmi:type="notation:FilteringStyle" xmi:id="_K1NlXrPjEeKHbKe7r26usQ"/>
         <layoutConstraint xmi:type="notation:Bounds" xmi:id="_K1NlX7PjEeKHbKe7r26usQ"/>
       </children>
+      <children xmi:type="notation:BasicCompartment" xmi:id="_bb0L8I7LEeaHFs9Jzx8gMg" visible="false" type="compartment_shape_display">
+        <styles xmi:type="notation:TitleStyle" xmi:id="_bb0L8Y7LEeaHFs9Jzx8gMg"/>
+        <layoutConstraint xmi:type="notation:Bounds" xmi:id="_bb0L8o7LEeaHFs9Jzx8gMg"/>
+      </children>
       <element xmi:type="uml:Class" href="platform:/resource/openMDX 2 ~ Test Core (EMF)/test.openmdx.clock1.uml#_3C7B8A60016D40F55F15031D"/>
       <layoutConstraint xmi:type="notation:Bounds" xmi:id="_K1M-QbPjEeKHbKe7r26usQ" x="54" y="36" width="485"/>
     </children>
@@ -2476,6 +2648,10 @@
         <styles xmi:type="notation:SortingStyle" xmi:id="_LuvOXbPjEeKHbKe7r26usQ"/>
         <styles xmi:type="notation:FilteringStyle" xmi:id="_LuvOXrPjEeKHbKe7r26usQ"/>
         <layoutConstraint xmi:type="notation:Bounds" xmi:id="_LuvOX7PjEeKHbKe7r26usQ"/>
+      </children>
+      <children xmi:type="notation:BasicCompartment" xmi:id="_bb1aEI7LEeaHFs9Jzx8gMg" visible="false" type="compartment_shape_display">
+        <styles xmi:type="notation:TitleStyle" xmi:id="_bb1aEY7LEeaHFs9Jzx8gMg"/>
+        <layoutConstraint xmi:type="notation:Bounds" xmi:id="_bb1aEo7LEeaHFs9Jzx8gMg"/>
       </children>
       <element xmi:type="uml:Class" href="platform:/resource/openMDX 2 ~ Test Core (EMF)/test.openmdx.clock1.uml#_3C7B8A60016D40F560B70043"/>
       <layoutConstraint xmi:type="notation:Bounds" xmi:id="_LuunQbPjEeKHbKe7r26usQ" x="53" y="178" width="487"/>
@@ -2513,6 +2689,10 @@
         <styles xmi:type="notation:FilteringStyle" xmi:id="_XHf2XrPjEeKHbKe7r26usQ"/>
         <layoutConstraint xmi:type="notation:Bounds" xmi:id="_XHf2X7PjEeKHbKe7r26usQ"/>
       </children>
+      <children xmi:type="notation:BasicCompartment" xmi:id="_bgvvQI7LEeaHFs9Jzx8gMg" visible="false" type="compartment_shape_display">
+        <styles xmi:type="notation:TitleStyle" xmi:id="_bgvvQY7LEeaHFs9Jzx8gMg"/>
+        <layoutConstraint xmi:type="notation:Bounds" xmi:id="_bgvvQo7LEeaHFs9Jzx8gMg"/>
+      </children>
       <element xmi:type="uml:Class" href="platform:/resource/openMDX 2 ~ Test Core (EMF)/test.openmdx.datatypes1.uml#_EMhJ4PrkEdqSzvBIstmlVg"/>
       <layoutConstraint xmi:type="notation:Bounds" xmi:id="_XHfPQbPjEeKHbKe7r26usQ" x="136" y="43" width="1196"/>
     </children>
@@ -2544,6 +2724,10 @@
         <styles xmi:type="notation:SortingStyle" xmi:id="_YDZd7bPjEeKHbKe7r26usQ"/>
         <styles xmi:type="notation:FilteringStyle" xmi:id="_YDZd7rPjEeKHbKe7r26usQ"/>
         <layoutConstraint xmi:type="notation:Bounds" xmi:id="_YDZd77PjEeKHbKe7r26usQ"/>
+      </children>
+      <children xmi:type="notation:BasicCompartment" xmi:id="_bgw9YI7LEeaHFs9Jzx8gMg" visible="false" type="compartment_shape_display">
+        <styles xmi:type="notation:TitleStyle" xmi:id="_bgw9YY7LEeaHFs9Jzx8gMg"/>
+        <layoutConstraint xmi:type="notation:Bounds" xmi:id="_bgw9Yo7LEeaHFs9Jzx8gMg"/>
       </children>
       <element xmi:type="uml:Class" href="platform:/resource/openMDX 2 ~ Test Core (EMF)/test.openmdx.datatypes1.uml#_7C5JkPr8EdqSzvBIstmlVg"/>
       <layoutConstraint xmi:type="notation:Bounds" xmi:id="_YDY20bPjEeKHbKe7r26usQ" x="144" y="396" width="288"/>
@@ -2625,8 +2809,428 @@
         <styles xmi:type="notation:FilteringStyle" xmi:id="_YbVczbPjEeKHbKe7r26usQ"/>
         <layoutConstraint xmi:type="notation:Bounds" xmi:id="_YbVczrPjEeKHbKe7r26usQ"/>
       </children>
+      <children xmi:type="notation:BasicCompartment" xmi:id="_bgyLgI7LEeaHFs9Jzx8gMg" visible="false" type="compartment_shape_display">
+        <styles xmi:type="notation:TitleStyle" xmi:id="_bgyLgY7LEeaHFs9Jzx8gMg"/>
+        <layoutConstraint xmi:type="notation:Bounds" xmi:id="_bgyLgo7LEeaHFs9Jzx8gMg"/>
+      </children>
       <element xmi:type="uml:Class" href="platform:/resource/openMDX 2 ~ Test Core (EMF)/test.openmdx.datatypes1.uml#_iB8hgPrkEdqSzvBIstmlVg"/>
       <layoutConstraint xmi:type="notation:Bounds" xmi:id="_YbU1sbPjEeKHbKe7r26usQ" x="882" y="396" width="450"/>
+    </children>
+    <children xmi:type="notation:Shape" xmi:id="_HB0XgI7MEeaHFs9Jzx8gMg" type="2008" fontName="Noto Sans" fontHeight="7" lineColor="0">
+      <eAnnotations xmi:type="ecore:EAnnotation" xmi:id="_HB0-kI7MEeaHFs9Jzx8gMg" source="ShadowFigure">
+        <details xmi:type="ecore:EStringToStringMapEntry" xmi:id="_HB0-kY7MEeaHFs9Jzx8gMg" key="ShadowFigure_Value" value="false"/>
+      </eAnnotations>
+      <eAnnotations xmi:type="ecore:EAnnotation" xmi:id="_HB0-ko7MEeaHFs9Jzx8gMg" source="displayNameLabelIcon">
+        <details xmi:type="ecore:EStringToStringMapEntry" xmi:id="_HB0-k47MEeaHFs9Jzx8gMg" key="displayNameLabelIcon_value" value="false"/>
+      </eAnnotations>
+      <eAnnotations xmi:type="ecore:EAnnotation" xmi:id="_HB0-lI7MEeaHFs9Jzx8gMg" source="QualifiedName">
+        <details xmi:type="ecore:EStringToStringMapEntry" xmi:id="_HB0-lY7MEeaHFs9Jzx8gMg" key="QualifiedNameDepth" value="1000"/>
+      </eAnnotations>
+      <children xmi:type="notation:DecorationNode" xmi:id="_HB0-lo7MEeaHFs9Jzx8gMg" type="5029"/>
+      <children xmi:type="notation:BasicCompartment" xmi:id="_HB1loI7MEeaHFs9Jzx8gMg" type="7017">
+        <children xmi:type="notation:Shape" xmi:id="_hWdI8I7MEeaHFs9Jzx8gMg" type="3012" fontName="Noto Sans" fontHeight="7" lineColor="0">
+          <element xmi:type="uml:Property" href="platform:/resource/openMDX 2 ~ Test Core (EMF)/test.openmdx.datatypes1.uml#_hWb60I7MEeaHFs9Jzx8gMg"/>
+          <layoutConstraint xmi:type="notation:Location" xmi:id="_hWdI8Y7MEeaHFs9Jzx8gMg"/>
+        </children>
+        <children xmi:type="notation:Shape" xmi:id="_npemMI7MEeaHFs9Jzx8gMg" type="3012" fontName="Noto Sans" fontHeight="7" lineColor="0">
+          <element xmi:type="uml:Property" href="platform:/resource/openMDX 2 ~ Test Core (EMF)/test.openmdx.datatypes1.uml#_npd_II7MEeaHFs9Jzx8gMg"/>
+          <layoutConstraint xmi:type="notation:Location" xmi:id="_npemMY7MEeaHFs9Jzx8gMg"/>
+        </children>
+        <children xmi:type="notation:Shape" xmi:id="_uca5oI7MEeaHFs9Jzx8gMg" type="3012" fontName="Noto Sans" fontHeight="7" lineColor="0">
+          <element xmi:type="uml:Property" href="platform:/resource/openMDX 2 ~ Test Core (EMF)/test.openmdx.datatypes1.uml#_ucaSkI7MEeaHFs9Jzx8gMg"/>
+          <layoutConstraint xmi:type="notation:Location" xmi:id="_uca5oY7MEeaHFs9Jzx8gMg"/>
+        </children>
+        <children xmi:type="notation:Shape" xmi:id="_xvJOoI7MEeaHFs9Jzx8gMg" type="3012" fontName="Noto Sans" fontHeight="7" lineColor="0">
+          <element xmi:type="uml:Property" href="platform:/resource/openMDX 2 ~ Test Core (EMF)/test.openmdx.datatypes1.uml#_xvInkI7MEeaHFs9Jzx8gMg"/>
+          <layoutConstraint xmi:type="notation:Location" xmi:id="_xvJOoY7MEeaHFs9Jzx8gMg"/>
+        </children>
+        <styles xmi:type="notation:TitleStyle" xmi:id="_HB1loY7MEeaHFs9Jzx8gMg"/>
+        <styles xmi:type="notation:SortingStyle" xmi:id="_HB1loo7MEeaHFs9Jzx8gMg"/>
+        <styles xmi:type="notation:FilteringStyle" xmi:id="_HB1lo47MEeaHFs9Jzx8gMg"/>
+        <layoutConstraint xmi:type="notation:Bounds" xmi:id="_HB1lpI7MEeaHFs9Jzx8gMg"/>
+      </children>
+      <children xmi:type="notation:BasicCompartment" xmi:id="_HB1lpY7MEeaHFs9Jzx8gMg" type="7018">
+        <styles xmi:type="notation:TitleStyle" xmi:id="_HB1lpo7MEeaHFs9Jzx8gMg"/>
+        <styles xmi:type="notation:SortingStyle" xmi:id="_HB1lp47MEeaHFs9Jzx8gMg"/>
+        <styles xmi:type="notation:FilteringStyle" xmi:id="_HB1lqI7MEeaHFs9Jzx8gMg"/>
+        <layoutConstraint xmi:type="notation:Bounds" xmi:id="_HB1lqY7MEeaHFs9Jzx8gMg"/>
+      </children>
+      <children xmi:type="notation:BasicCompartment" xmi:id="_HB1lqo7MEeaHFs9Jzx8gMg" type="7019">
+        <styles xmi:type="notation:TitleStyle" xmi:id="_HB1lq47MEeaHFs9Jzx8gMg"/>
+        <styles xmi:type="notation:SortingStyle" xmi:id="_HB1lrI7MEeaHFs9Jzx8gMg"/>
+        <styles xmi:type="notation:FilteringStyle" xmi:id="_HB1lrY7MEeaHFs9Jzx8gMg"/>
+        <layoutConstraint xmi:type="notation:Bounds" xmi:id="_HB1lro7MEeaHFs9Jzx8gMg"/>
+      </children>
+      <children xmi:type="notation:BasicCompartment" xmi:id="_HB53EI7MEeaHFs9Jzx8gMg" visible="false" type="compartment_shape_display">
+        <styles xmi:type="notation:TitleStyle" xmi:id="_HB53EY7MEeaHFs9Jzx8gMg"/>
+        <layoutConstraint xmi:type="notation:Bounds" xmi:id="_HB53Eo7MEeaHFs9Jzx8gMg"/>
+      </children>
+      <element xmi:type="uml:Class" href="platform:/resource/openMDX 2 ~ Test Core (EMF)/test.openmdx.datatypes1.uml#_FotPgI7MEeaHFs9Jzx8gMg"/>
+      <layoutConstraint xmi:type="notation:Bounds" xmi:id="_HB0XgY7MEeaHFs9Jzx8gMg" x="1568" y="28" width="645"/>
+    </children>
+    <children xmi:type="notation:Shape" xmi:id="_LstZUI7MEeaHFs9Jzx8gMg" type="2008" fontName="Noto Sans" fontHeight="7" lineColor="0">
+      <eAnnotations xmi:type="ecore:EAnnotation" xmi:id="_LstZUo7MEeaHFs9Jzx8gMg" source="ShadowFigure">
+        <details xmi:type="ecore:EStringToStringMapEntry" xmi:id="_LstZU47MEeaHFs9Jzx8gMg" key="ShadowFigure_Value" value="false"/>
+      </eAnnotations>
+      <eAnnotations xmi:type="ecore:EAnnotation" xmi:id="_LsuAYI7MEeaHFs9Jzx8gMg" source="displayNameLabelIcon">
+        <details xmi:type="ecore:EStringToStringMapEntry" xmi:id="_LsuAYY7MEeaHFs9Jzx8gMg" key="displayNameLabelIcon_value" value="false"/>
+      </eAnnotations>
+      <eAnnotations xmi:type="ecore:EAnnotation" xmi:id="_LsuAYo7MEeaHFs9Jzx8gMg" source="QualifiedName">
+        <details xmi:type="ecore:EStringToStringMapEntry" xmi:id="_LsuAY47MEeaHFs9Jzx8gMg" key="QualifiedNameDepth" value="1000"/>
+      </eAnnotations>
+      <children xmi:type="notation:DecorationNode" xmi:id="_LsuAZI7MEeaHFs9Jzx8gMg" type="5029"/>
+      <children xmi:type="notation:BasicCompartment" xmi:id="_LsuAZY7MEeaHFs9Jzx8gMg" type="7017">
+        <children xmi:type="notation:Shape" xmi:id="_6xHlcI7MEeaHFs9Jzx8gMg" type="3012" fontName="Noto Sans" fontHeight="7" lineColor="0">
+          <element xmi:type="uml:Property" href="platform:/resource/openMDX 2 ~ Test Core (EMF)/test.openmdx.datatypes1.uml#_6xG-YI7MEeaHFs9Jzx8gMg"/>
+          <layoutConstraint xmi:type="notation:Location" xmi:id="_6xHlcY7MEeaHFs9Jzx8gMg"/>
+        </children>
+        <children xmi:type="notation:Shape" xmi:id="__DnVYI7MEeaHFs9Jzx8gMg" type="3012" fontName="Noto Sans" fontHeight="7" lineColor="0">
+          <element xmi:type="uml:Property" href="platform:/resource/openMDX 2 ~ Test Core (EMF)/test.openmdx.datatypes1.uml#__DmuUI7MEeaHFs9Jzx8gMg"/>
+          <layoutConstraint xmi:type="notation:Location" xmi:id="__DnVYY7MEeaHFs9Jzx8gMg"/>
+        </children>
+        <children xmi:type="notation:Shape" xmi:id="_Bth98I7NEeaHFs9Jzx8gMg" type="3012" fontName="Noto Sans" fontHeight="7" lineColor="0">
+          <element xmi:type="uml:Property" href="platform:/resource/openMDX 2 ~ Test Core (EMF)/test.openmdx.datatypes1.uml#_Btgv0I7NEeaHFs9Jzx8gMg"/>
+          <layoutConstraint xmi:type="notation:Location" xmi:id="_Bth98Y7NEeaHFs9Jzx8gMg"/>
+        </children>
+        <children xmi:type="notation:Shape" xmi:id="_FdYT0I7NEeaHFs9Jzx8gMg" type="3012" fontName="Noto Sans" fontHeight="7" lineColor="0">
+          <element xmi:type="uml:Property" href="platform:/resource/openMDX 2 ~ Test Core (EMF)/test.openmdx.datatypes1.uml#_FdXswI7NEeaHFs9Jzx8gMg"/>
+          <layoutConstraint xmi:type="notation:Location" xmi:id="_FdYT0Y7NEeaHFs9Jzx8gMg"/>
+        </children>
+        <children xmi:type="notation:Shape" xmi:id="_ILzo8I7NEeaHFs9Jzx8gMg" type="3012" fontName="Noto Sans" fontHeight="7" lineColor="0">
+          <element xmi:type="uml:Property" href="platform:/resource/openMDX 2 ~ Test Core (EMF)/test.openmdx.datatypes1.uml#_ILya0I7NEeaHFs9Jzx8gMg"/>
+          <layoutConstraint xmi:type="notation:Location" xmi:id="_ILzo8Y7NEeaHFs9Jzx8gMg"/>
+        </children>
+        <children xmi:type="notation:Shape" xmi:id="_KinIQI7NEeaHFs9Jzx8gMg" type="3012" fontName="Noto Sans" fontHeight="7" lineColor="0">
+          <element xmi:type="uml:Property" href="platform:/resource/openMDX 2 ~ Test Core (EMF)/test.openmdx.datatypes1.uml#_Kil6II7NEeaHFs9Jzx8gMg"/>
+          <layoutConstraint xmi:type="notation:Location" xmi:id="_KinIQY7NEeaHFs9Jzx8gMg"/>
+        </children>
+        <children xmi:type="notation:Shape" xmi:id="_bkMZ8I7NEeaHFs9Jzx8gMg" type="3012" fontName="Noto Sans" fontHeight="7" lineColor="0">
+          <element xmi:type="uml:Property" href="platform:/resource/openMDX 2 ~ Test Core (EMF)/test.openmdx.datatypes1.uml#_bkLy4I7NEeaHFs9Jzx8gMg"/>
+          <layoutConstraint xmi:type="notation:Location" xmi:id="_bkMZ8Y7NEeaHFs9Jzx8gMg"/>
+        </children>
+        <children xmi:type="notation:Shape" xmi:id="_eLDHcI7NEeaHFs9Jzx8gMg" type="3012" fontName="Noto Sans" fontHeight="7" lineColor="0">
+          <element xmi:type="uml:Property" href="platform:/resource/openMDX 2 ~ Test Core (EMF)/test.openmdx.datatypes1.uml#_eLCgYI7NEeaHFs9Jzx8gMg"/>
+          <layoutConstraint xmi:type="notation:Location" xmi:id="_eLDHcY7NEeaHFs9Jzx8gMg"/>
+        </children>
+        <children xmi:type="notation:Shape" xmi:id="_h4GA8I7NEeaHFs9Jzx8gMg" type="3012" fontName="Noto Sans" fontHeight="7" lineColor="0">
+          <element xmi:type="uml:Property" href="platform:/resource/openMDX 2 ~ Test Core (EMF)/test.openmdx.datatypes1.uml#_h4Ey0I7NEeaHFs9Jzx8gMg"/>
+          <layoutConstraint xmi:type="notation:Location" xmi:id="_h4GA8Y7NEeaHFs9Jzx8gMg"/>
+        </children>
+        <styles xmi:type="notation:TitleStyle" xmi:id="_LsuAZo7MEeaHFs9Jzx8gMg"/>
+        <styles xmi:type="notation:SortingStyle" xmi:id="_LsuAZ47MEeaHFs9Jzx8gMg"/>
+        <styles xmi:type="notation:FilteringStyle" xmi:id="_LsuAaI7MEeaHFs9Jzx8gMg"/>
+        <layoutConstraint xmi:type="notation:Bounds" xmi:id="_LsuAaY7MEeaHFs9Jzx8gMg"/>
+      </children>
+      <children xmi:type="notation:BasicCompartment" xmi:id="_LsuAao7MEeaHFs9Jzx8gMg" type="7018">
+        <styles xmi:type="notation:TitleStyle" xmi:id="_LsuAa47MEeaHFs9Jzx8gMg"/>
+        <styles xmi:type="notation:SortingStyle" xmi:id="_LsuAbI7MEeaHFs9Jzx8gMg"/>
+        <styles xmi:type="notation:FilteringStyle" xmi:id="_LsuAbY7MEeaHFs9Jzx8gMg"/>
+        <layoutConstraint xmi:type="notation:Bounds" xmi:id="_LsuAbo7MEeaHFs9Jzx8gMg"/>
+      </children>
+      <children xmi:type="notation:BasicCompartment" xmi:id="_LsuAb47MEeaHFs9Jzx8gMg" type="7019">
+        <styles xmi:type="notation:TitleStyle" xmi:id="_LsuAcI7MEeaHFs9Jzx8gMg"/>
+        <styles xmi:type="notation:SortingStyle" xmi:id="_LsuAcY7MEeaHFs9Jzx8gMg"/>
+        <styles xmi:type="notation:FilteringStyle" xmi:id="_LsuAco7MEeaHFs9Jzx8gMg"/>
+        <layoutConstraint xmi:type="notation:Bounds" xmi:id="_LsuAc47MEeaHFs9Jzx8gMg"/>
+      </children>
+      <children xmi:type="notation:BasicCompartment" xmi:id="_Lszf8I7MEeaHFs9Jzx8gMg" visible="false" type="compartment_shape_display">
+        <styles xmi:type="notation:TitleStyle" xmi:id="_Lszf8Y7MEeaHFs9Jzx8gMg"/>
+        <layoutConstraint xmi:type="notation:Bounds" xmi:id="_Lszf8o7MEeaHFs9Jzx8gMg"/>
+      </children>
+      <element xmi:type="uml:Class" href="platform:/resource/openMDX 2 ~ Test Core (EMF)/test.openmdx.datatypes1.uml#_KYWOcI7MEeaHFs9Jzx8gMg"/>
+      <layoutConstraint xmi:type="notation:Bounds" xmi:id="_LstZUY7MEeaHFs9Jzx8gMg" x="1573" y="264" width="640"/>
+    </children>
+    <children xmi:type="notation:Shape" xmi:id="_QMohQI7MEeaHFs9Jzx8gMg" type="2008" fontName="Noto Sans" fontHeight="7" lineColor="0">
+      <eAnnotations xmi:type="ecore:EAnnotation" xmi:id="_QMpIUI7MEeaHFs9Jzx8gMg" source="ShadowFigure">
+        <details xmi:type="ecore:EStringToStringMapEntry" xmi:id="_QMpIUY7MEeaHFs9Jzx8gMg" key="ShadowFigure_Value" value="false"/>
+      </eAnnotations>
+      <eAnnotations xmi:type="ecore:EAnnotation" xmi:id="_QMpIUo7MEeaHFs9Jzx8gMg" source="displayNameLabelIcon">
+        <details xmi:type="ecore:EStringToStringMapEntry" xmi:id="_QMpIU47MEeaHFs9Jzx8gMg" key="displayNameLabelIcon_value" value="false"/>
+      </eAnnotations>
+      <eAnnotations xmi:type="ecore:EAnnotation" xmi:id="_QMpIVI7MEeaHFs9Jzx8gMg" source="QualifiedName">
+        <details xmi:type="ecore:EStringToStringMapEntry" xmi:id="_QMpvYI7MEeaHFs9Jzx8gMg" key="QualifiedNameDepth" value="1000"/>
+      </eAnnotations>
+      <children xmi:type="notation:DecorationNode" xmi:id="_QMpvYY7MEeaHFs9Jzx8gMg" type="5029"/>
+      <children xmi:type="notation:BasicCompartment" xmi:id="_QMpvYo7MEeaHFs9Jzx8gMg" type="7017">
+        <children xmi:type="notation:Shape" xmi:id="_RLeSoI7NEeaHFs9Jzx8gMg" type="3012" fontName="Noto Sans" fontHeight="7" lineColor="0">
+          <element xmi:type="uml:Property" href="platform:/resource/openMDX 2 ~ Test Core (EMF)/test.openmdx.datatypes1.uml#_RLdrkI7NEeaHFs9Jzx8gMg"/>
+          <layoutConstraint xmi:type="notation:Location" xmi:id="_RLeSoY7NEeaHFs9Jzx8gMg"/>
+        </children>
+        <children xmi:type="notation:Shape" xmi:id="_UwzakI7NEeaHFs9Jzx8gMg" type="3012" fontName="Noto Sans" fontHeight="7" lineColor="0">
+          <element xmi:type="uml:Property" href="platform:/resource/openMDX 2 ~ Test Core (EMF)/test.openmdx.datatypes1.uml#_UwyzgI7NEeaHFs9Jzx8gMg"/>
+          <layoutConstraint xmi:type="notation:Location" xmi:id="_UwzakY7NEeaHFs9Jzx8gMg"/>
+        </children>
+        <styles xmi:type="notation:TitleStyle" xmi:id="_QMpvY47MEeaHFs9Jzx8gMg"/>
+        <styles xmi:type="notation:SortingStyle" xmi:id="_QMpvZI7MEeaHFs9Jzx8gMg"/>
+        <styles xmi:type="notation:FilteringStyle" xmi:id="_QMpvZY7MEeaHFs9Jzx8gMg"/>
+        <layoutConstraint xmi:type="notation:Bounds" xmi:id="_QMpvZo7MEeaHFs9Jzx8gMg"/>
+      </children>
+      <children xmi:type="notation:BasicCompartment" xmi:id="_QMpvZ47MEeaHFs9Jzx8gMg" type="7018">
+        <styles xmi:type="notation:TitleStyle" xmi:id="_QMpvaI7MEeaHFs9Jzx8gMg"/>
+        <styles xmi:type="notation:SortingStyle" xmi:id="_QMpvaY7MEeaHFs9Jzx8gMg"/>
+        <styles xmi:type="notation:FilteringStyle" xmi:id="_QMpvao7MEeaHFs9Jzx8gMg"/>
+        <layoutConstraint xmi:type="notation:Bounds" xmi:id="_QMpva47MEeaHFs9Jzx8gMg"/>
+      </children>
+      <children xmi:type="notation:BasicCompartment" xmi:id="_QMpvbI7MEeaHFs9Jzx8gMg" type="7019">
+        <styles xmi:type="notation:TitleStyle" xmi:id="_QMpvbY7MEeaHFs9Jzx8gMg"/>
+        <styles xmi:type="notation:SortingStyle" xmi:id="_QMpvbo7MEeaHFs9Jzx8gMg"/>
+        <styles xmi:type="notation:FilteringStyle" xmi:id="_QMpvb47MEeaHFs9Jzx8gMg"/>
+        <layoutConstraint xmi:type="notation:Bounds" xmi:id="_QMpvcI7MEeaHFs9Jzx8gMg"/>
+      </children>
+      <children xmi:type="notation:BasicCompartment" xmi:id="_QMun4I7MEeaHFs9Jzx8gMg" visible="false" type="compartment_shape_display">
+        <styles xmi:type="notation:TitleStyle" xmi:id="_QMun4Y7MEeaHFs9Jzx8gMg"/>
+        <layoutConstraint xmi:type="notation:Bounds" xmi:id="_QMun4o7MEeaHFs9Jzx8gMg"/>
+      </children>
+      <element xmi:type="uml:Class" href="platform:/resource/openMDX 2 ~ Test Core (EMF)/test.openmdx.datatypes1.uml#_O4f_4I7MEeaHFs9Jzx8gMg"/>
+      <layoutConstraint xmi:type="notation:Bounds" xmi:id="_QMohQY7MEeaHFs9Jzx8gMg" x="1568" y="644" width="644"/>
+    </children>
+    <children xmi:type="notation:Shape" xmi:id="_U17noI7MEeaHFs9Jzx8gMg" type="2008" fontName="Noto Sans" fontHeight="7" lineColor="0">
+      <eAnnotations xmi:type="ecore:EAnnotation" xmi:id="_U18OsI7MEeaHFs9Jzx8gMg" source="ShadowFigure">
+        <details xmi:type="ecore:EStringToStringMapEntry" xmi:id="_U18OsY7MEeaHFs9Jzx8gMg" key="ShadowFigure_Value" value="false"/>
+      </eAnnotations>
+      <eAnnotations xmi:type="ecore:EAnnotation" xmi:id="_U18Oso7MEeaHFs9Jzx8gMg" source="displayNameLabelIcon">
+        <details xmi:type="ecore:EStringToStringMapEntry" xmi:id="_U18Os47MEeaHFs9Jzx8gMg" key="displayNameLabelIcon_value" value="false"/>
+      </eAnnotations>
+      <eAnnotations xmi:type="ecore:EAnnotation" xmi:id="_U18OtI7MEeaHFs9Jzx8gMg" source="QualifiedName">
+        <details xmi:type="ecore:EStringToStringMapEntry" xmi:id="_U18OtY7MEeaHFs9Jzx8gMg" key="QualifiedNameDepth" value="1000"/>
+      </eAnnotations>
+      <children xmi:type="notation:DecorationNode" xmi:id="_U18Oto7MEeaHFs9Jzx8gMg" type="5029"/>
+      <children xmi:type="notation:BasicCompartment" xmi:id="_U18Ot47MEeaHFs9Jzx8gMg" type="7017">
+        <children xmi:type="notation:Shape" xmi:id="_oxIVUI7NEeaHFs9Jzx8gMg" type="3012" fontName="Noto Sans" fontHeight="7" lineColor="0">
+          <element xmi:type="uml:Property" href="platform:/resource/openMDX 2 ~ Test Core (EMF)/test.openmdx.datatypes1.uml#_oxHuQI7NEeaHFs9Jzx8gMg"/>
+          <layoutConstraint xmi:type="notation:Location" xmi:id="_oxIVUY7NEeaHFs9Jzx8gMg"/>
+        </children>
+        <children xmi:type="notation:Shape" xmi:id="_qL64UI7NEeaHFs9Jzx8gMg" type="3012" fontName="Noto Sans" fontHeight="7" lineColor="0">
+          <element xmi:type="uml:Property" href="platform:/resource/openMDX 2 ~ Test Core (EMF)/test.openmdx.datatypes1.uml#_qL6RQI7NEeaHFs9Jzx8gMg"/>
+          <layoutConstraint xmi:type="notation:Location" xmi:id="_qL64UY7NEeaHFs9Jzx8gMg"/>
+        </children>
+        <children xmi:type="notation:Shape" xmi:id="_r3j6wI7NEeaHFs9Jzx8gMg" type="3012" fontName="Noto Sans" fontHeight="7" lineColor="0">
+          <element xmi:type="uml:Property" href="platform:/resource/openMDX 2 ~ Test Core (EMF)/test.openmdx.datatypes1.uml#_r3jTsI7NEeaHFs9Jzx8gMg"/>
+          <layoutConstraint xmi:type="notation:Location" xmi:id="_r3j6wY7NEeaHFs9Jzx8gMg"/>
+        </children>
+        <children xmi:type="notation:Shape" xmi:id="_tZhcwI7NEeaHFs9Jzx8gMg" type="3012" fontName="Noto Sans" fontHeight="7" lineColor="0">
+          <element xmi:type="uml:Property" href="platform:/resource/openMDX 2 ~ Test Core (EMF)/test.openmdx.datatypes1.uml#_tZg1sI7NEeaHFs9Jzx8gMg"/>
+          <layoutConstraint xmi:type="notation:Location" xmi:id="_tZhcwY7NEeaHFs9Jzx8gMg"/>
+        </children>
+        <children xmi:type="notation:Shape" xmi:id="_uamfQI7NEeaHFs9Jzx8gMg" type="3012" fontName="Noto Sans" fontHeight="7" lineColor="0">
+          <element xmi:type="uml:Property" href="platform:/resource/openMDX 2 ~ Test Core (EMF)/test.openmdx.datatypes1.uml#_ual4MI7NEeaHFs9Jzx8gMg"/>
+          <layoutConstraint xmi:type="notation:Location" xmi:id="_uamfQY7NEeaHFs9Jzx8gMg"/>
+        </children>
+        <children xmi:type="notation:Shape" xmi:id="_xQyCMI7NEeaHFs9Jzx8gMg" type="3012" fontName="Noto Sans" fontHeight="7" lineColor="0">
+          <element xmi:type="uml:Property" href="platform:/resource/openMDX 2 ~ Test Core (EMF)/test.openmdx.datatypes1.uml#_xQxbII7NEeaHFs9Jzx8gMg"/>
+          <layoutConstraint xmi:type="notation:Location" xmi:id="_xQyCMY7NEeaHFs9Jzx8gMg"/>
+        </children>
+        <children xmi:type="notation:Shape" xmi:id="_zt3vsI7NEeaHFs9Jzx8gMg" type="3012" fontName="Noto Sans" fontHeight="7" lineColor="0">
+          <element xmi:type="uml:Property" href="platform:/resource/openMDX 2 ~ Test Core (EMF)/test.openmdx.datatypes1.uml#_zt3IoI7NEeaHFs9Jzx8gMg"/>
+          <layoutConstraint xmi:type="notation:Location" xmi:id="_zt3vsY7NEeaHFs9Jzx8gMg"/>
+        </children>
+        <children xmi:type="notation:Shape" xmi:id="_nSKAcI7OEeaHFs9Jzx8gMg" type="3012" fontName="Noto Sans" fontHeight="7" lineColor="0">
+          <element xmi:type="uml:Property" href="platform:/resource/openMDX 2 ~ Test Core (EMF)/test.openmdx.datatypes1.uml#_nSJZYI7OEeaHFs9Jzx8gMg"/>
+          <layoutConstraint xmi:type="notation:Location" xmi:id="_nSKAcY7OEeaHFs9Jzx8gMg"/>
+        </children>
+        <children xmi:type="notation:Shape" xmi:id="_qdn24I7OEeaHFs9Jzx8gMg" type="3012" fontName="Noto Sans" fontHeight="7" lineColor="0">
+          <element xmi:type="uml:Property" href="platform:/resource/openMDX 2 ~ Test Core (EMF)/test.openmdx.datatypes1.uml#_qdnP0I7OEeaHFs9Jzx8gMg"/>
+          <layoutConstraint xmi:type="notation:Location" xmi:id="_qdn24Y7OEeaHFs9Jzx8gMg"/>
+        </children>
+        <children xmi:type="notation:Shape" xmi:id="_rcfS4I7OEeaHFs9Jzx8gMg" type="3012" fontName="Noto Sans" fontHeight="7" lineColor="0">
+          <element xmi:type="uml:Property" href="platform:/resource/openMDX 2 ~ Test Core (EMF)/test.openmdx.datatypes1.uml#_rcer0I7OEeaHFs9Jzx8gMg"/>
+          <layoutConstraint xmi:type="notation:Location" xmi:id="_rcfS4Y7OEeaHFs9Jzx8gMg"/>
+        </children>
+        <children xmi:type="notation:Shape" xmi:id="_uPoI4I7OEeaHFs9Jzx8gMg" type="3012" fontName="Noto Sans" fontHeight="7" lineColor="0">
+          <element xmi:type="uml:Property" href="platform:/resource/openMDX 2 ~ Test Core (EMF)/test.openmdx.datatypes1.uml#_uPnh0I7OEeaHFs9Jzx8gMg"/>
+          <layoutConstraint xmi:type="notation:Location" xmi:id="_uPoI4Y7OEeaHFs9Jzx8gMg"/>
+        </children>
+        <children xmi:type="notation:Shape" xmi:id="_vfQkwI7OEeaHFs9Jzx8gMg" type="3012" fontName="Noto Sans" fontHeight="7" lineColor="0">
+          <element xmi:type="uml:Property" href="platform:/resource/openMDX 2 ~ Test Core (EMF)/test.openmdx.datatypes1.uml#_vfP9sI7OEeaHFs9Jzx8gMg"/>
+          <layoutConstraint xmi:type="notation:Location" xmi:id="_vfQkwY7OEeaHFs9Jzx8gMg"/>
+        </children>
+        <children xmi:type="notation:Shape" xmi:id="_ycMP8I7OEeaHFs9Jzx8gMg" type="3012" fontName="Noto Sans" fontHeight="7" lineColor="0">
+          <element xmi:type="uml:Property" href="platform:/resource/openMDX 2 ~ Test Core (EMF)/test.openmdx.datatypes1.uml#_ycLB0I7OEeaHFs9Jzx8gMg"/>
+          <layoutConstraint xmi:type="notation:Location" xmi:id="_ycMP8Y7OEeaHFs9Jzx8gMg"/>
+        </children>
+        <children xmi:type="notation:Shape" xmi:id="_1cBeII7OEeaHFs9Jzx8gMg" type="3012" fontName="Noto Sans" fontHeight="7" lineColor="0">
+          <element xmi:type="uml:Property" href="platform:/resource/openMDX 2 ~ Test Core (EMF)/test.openmdx.datatypes1.uml#_1b_B4I7OEeaHFs9Jzx8gMg"/>
+          <layoutConstraint xmi:type="notation:Location" xmi:id="_1cBeIY7OEeaHFs9Jzx8gMg"/>
+        </children>
+        <children xmi:type="notation:Shape" xmi:id="_2f8ZQI7OEeaHFs9Jzx8gMg" type="3012" fontName="Noto Sans" fontHeight="7" lineColor="0">
+          <element xmi:type="uml:Property" href="platform:/resource/openMDX 2 ~ Test Core (EMF)/test.openmdx.datatypes1.uml#_2f7yMI7OEeaHFs9Jzx8gMg"/>
+          <layoutConstraint xmi:type="notation:Location" xmi:id="_2f8ZQY7OEeaHFs9Jzx8gMg"/>
+        </children>
+        <children xmi:type="notation:Shape" xmi:id="_3_KJQI7OEeaHFs9Jzx8gMg" type="3012" fontName="Noto Sans" fontHeight="7" lineColor="0">
+          <element xmi:type="uml:Property" href="platform:/resource/openMDX 2 ~ Test Core (EMF)/test.openmdx.datatypes1.uml#_3_I7II7OEeaHFs9Jzx8gMg"/>
+          <layoutConstraint xmi:type="notation:Location" xmi:id="_3_KJQY7OEeaHFs9Jzx8gMg"/>
+        </children>
+        <children xmi:type="notation:Shape" xmi:id="_8Q0LsI7OEeaHFs9Jzx8gMg" type="3012" fontName="Noto Sans" fontHeight="7" lineColor="0">
+          <element xmi:type="uml:Property" href="platform:/resource/openMDX 2 ~ Test Core (EMF)/test.openmdx.datatypes1.uml#_8QzkoI7OEeaHFs9Jzx8gMg"/>
+          <layoutConstraint xmi:type="notation:Location" xmi:id="_8Q0LsY7OEeaHFs9Jzx8gMg"/>
+        </children>
+        <children xmi:type="notation:Shape" xmi:id="_-cDUMI7OEeaHFs9Jzx8gMg" type="3012" fontName="Noto Sans" fontHeight="7" lineColor="0">
+          <element xmi:type="uml:Property" href="platform:/resource/openMDX 2 ~ Test Core (EMF)/test.openmdx.datatypes1.uml#_-cCGEI7OEeaHFs9Jzx8gMg"/>
+          <layoutConstraint xmi:type="notation:Location" xmi:id="_-cDUMY7OEeaHFs9Jzx8gMg"/>
+        </children>
+        <children xmi:type="notation:Shape" xmi:id="_AyMFII7PEeaHFs9Jzx8gMg" type="3012" fontName="Noto Sans" fontHeight="7" lineColor="0">
+          <element xmi:type="uml:Property" href="platform:/resource/openMDX 2 ~ Test Core (EMF)/test.openmdx.datatypes1.uml#_AyLeEI7PEeaHFs9Jzx8gMg"/>
+          <layoutConstraint xmi:type="notation:Location" xmi:id="_AyMFIY7PEeaHFs9Jzx8gMg"/>
+        </children>
+        <children xmi:type="notation:Shape" xmi:id="_DXM_kI7PEeaHFs9Jzx8gMg" type="3012" fontName="Noto Sans" fontHeight="7" lineColor="0">
+          <element xmi:type="uml:Property" href="platform:/resource/openMDX 2 ~ Test Core (EMF)/test.openmdx.datatypes1.uml#_DXMYgI7PEeaHFs9Jzx8gMg"/>
+          <layoutConstraint xmi:type="notation:Location" xmi:id="_DXM_kY7PEeaHFs9Jzx8gMg"/>
+        </children>
+        <children xmi:type="notation:Shape" xmi:id="_FwLCEI7PEeaHFs9Jzx8gMg" type="3012" fontName="Noto Sans" fontHeight="7" lineColor="0">
+          <element xmi:type="uml:Property" href="platform:/resource/openMDX 2 ~ Test Core (EMF)/test.openmdx.datatypes1.uml#_FwJz8I7PEeaHFs9Jzx8gMg"/>
+          <layoutConstraint xmi:type="notation:Location" xmi:id="_FwLCEY7PEeaHFs9Jzx8gMg"/>
+        </children>
+        <children xmi:type="notation:Shape" xmi:id="_JmOtoI7PEeaHFs9Jzx8gMg" type="3012" fontName="Noto Sans" fontHeight="7" lineColor="0">
+          <element xmi:type="uml:Property" href="platform:/resource/openMDX 2 ~ Test Core (EMF)/test.openmdx.datatypes1.uml#_JmM4cI7PEeaHFs9Jzx8gMg"/>
+          <layoutConstraint xmi:type="notation:Location" xmi:id="_JmOtoY7PEeaHFs9Jzx8gMg"/>
+        </children>
+        <children xmi:type="notation:Shape" xmi:id="_MFSKAI7PEeaHFs9Jzx8gMg" type="3012" fontName="Noto Sans" fontHeight="7" lineColor="0">
+          <element xmi:type="uml:Property" href="platform:/resource/openMDX 2 ~ Test Core (EMF)/test.openmdx.datatypes1.uml#_MFQ74I7PEeaHFs9Jzx8gMg"/>
+          <layoutConstraint xmi:type="notation:Location" xmi:id="_MFSKAY7PEeaHFs9Jzx8gMg"/>
+        </children>
+        <children xmi:type="notation:Shape" xmi:id="_NGFfsI7PEeaHFs9Jzx8gMg" type="3012" fontName="Noto Sans" fontHeight="7" lineColor="0">
+          <element xmi:type="uml:Property" href="platform:/resource/openMDX 2 ~ Test Core (EMF)/test.openmdx.datatypes1.uml#_NGDqgI7PEeaHFs9Jzx8gMg"/>
+          <layoutConstraint xmi:type="notation:Location" xmi:id="_NGFfsY7PEeaHFs9Jzx8gMg"/>
+        </children>
+        <children xmi:type="notation:Shape" xmi:id="_PJ9b8I7PEeaHFs9Jzx8gMg" type="3012" fontName="Noto Sans" fontHeight="7" lineColor="0">
+          <element xmi:type="uml:Property" href="platform:/resource/openMDX 2 ~ Test Core (EMF)/test.openmdx.datatypes1.uml#_PJ804I7PEeaHFs9Jzx8gMg"/>
+          <layoutConstraint xmi:type="notation:Location" xmi:id="_PJ9b8Y7PEeaHFs9Jzx8gMg"/>
+        </children>
+        <children xmi:type="notation:Shape" xmi:id="_TdS5YI7PEeaHFs9Jzx8gMg" type="3012" fontName="Noto Sans" fontHeight="7" lineColor="0">
+          <element xmi:type="uml:Property" href="platform:/resource/openMDX 2 ~ Test Core (EMF)/test.openmdx.datatypes1.uml#_TdSSUI7PEeaHFs9Jzx8gMg"/>
+          <layoutConstraint xmi:type="notation:Location" xmi:id="_TdS5YY7PEeaHFs9Jzx8gMg"/>
+        </children>
+        <children xmi:type="notation:Shape" xmi:id="_Uk724I7PEeaHFs9Jzx8gMg" type="3012" fontName="Noto Sans" fontHeight="7" lineColor="0">
+          <element xmi:type="uml:Property" href="platform:/resource/openMDX 2 ~ Test Core (EMF)/test.openmdx.datatypes1.uml#_Uk7P0I7PEeaHFs9Jzx8gMg"/>
+          <layoutConstraint xmi:type="notation:Location" xmi:id="_Uk724Y7PEeaHFs9Jzx8gMg"/>
+        </children>
+        <children xmi:type="notation:Shape" xmi:id="_VYgo4I7PEeaHFs9Jzx8gMg" type="3012" fontName="Noto Sans" fontHeight="7" lineColor="0">
+          <element xmi:type="uml:Property" href="platform:/resource/openMDX 2 ~ Test Core (EMF)/test.openmdx.datatypes1.uml#_VYfawI7PEeaHFs9Jzx8gMg"/>
+          <layoutConstraint xmi:type="notation:Location" xmi:id="_VYgo4Y7PEeaHFs9Jzx8gMg"/>
+        </children>
+        <styles xmi:type="notation:TitleStyle" xmi:id="_U18OuI7MEeaHFs9Jzx8gMg"/>
+        <styles xmi:type="notation:SortingStyle" xmi:id="_U18OuY7MEeaHFs9Jzx8gMg"/>
+        <styles xmi:type="notation:FilteringStyle" xmi:id="_U18Ouo7MEeaHFs9Jzx8gMg"/>
+        <layoutConstraint xmi:type="notation:Bounds" xmi:id="_U18Ou47MEeaHFs9Jzx8gMg"/>
+      </children>
+      <children xmi:type="notation:BasicCompartment" xmi:id="_U18OvI7MEeaHFs9Jzx8gMg" type="7018">
+        <styles xmi:type="notation:TitleStyle" xmi:id="_U18OvY7MEeaHFs9Jzx8gMg"/>
+        <styles xmi:type="notation:SortingStyle" xmi:id="_U18Ovo7MEeaHFs9Jzx8gMg"/>
+        <styles xmi:type="notation:FilteringStyle" xmi:id="_U18Ov47MEeaHFs9Jzx8gMg"/>
+        <layoutConstraint xmi:type="notation:Bounds" xmi:id="_U18OwI7MEeaHFs9Jzx8gMg"/>
+      </children>
+      <children xmi:type="notation:BasicCompartment" xmi:id="_U18OwY7MEeaHFs9Jzx8gMg" type="7019">
+        <styles xmi:type="notation:TitleStyle" xmi:id="_U18Owo7MEeaHFs9Jzx8gMg"/>
+        <styles xmi:type="notation:SortingStyle" xmi:id="_U18Ow47MEeaHFs9Jzx8gMg"/>
+        <styles xmi:type="notation:FilteringStyle" xmi:id="_U18OxI7MEeaHFs9Jzx8gMg"/>
+        <layoutConstraint xmi:type="notation:Bounds" xmi:id="_U18OxY7MEeaHFs9Jzx8gMg"/>
+      </children>
+      <children xmi:type="notation:BasicCompartment" xmi:id="_U2AgII7MEeaHFs9Jzx8gMg" visible="false" type="compartment_shape_display">
+        <styles xmi:type="notation:TitleStyle" xmi:id="_U2AgIY7MEeaHFs9Jzx8gMg"/>
+        <layoutConstraint xmi:type="notation:Bounds" xmi:id="_U2AgIo7MEeaHFs9Jzx8gMg"/>
+      </children>
+      <element xmi:type="uml:Class" href="platform:/resource/openMDX 2 ~ Test Core (EMF)/test.openmdx.datatypes1.uml#_TxJw4I7MEeaHFs9Jzx8gMg"/>
+      <layoutConstraint xmi:type="notation:Bounds" xmi:id="_U17noY7MEeaHFs9Jzx8gMg" x="1568" y="840" width="644" height="868"/>
+    </children>
+    <children xmi:type="notation:Shape" xmi:id="_YIQ7EI7MEeaHFs9Jzx8gMg" type="2008" fontName="Noto Sans" fontHeight="7" lineColor="0">
+      <eAnnotations xmi:type="ecore:EAnnotation" xmi:id="_YIQ7Eo7MEeaHFs9Jzx8gMg" source="ShadowFigure">
+        <details xmi:type="ecore:EStringToStringMapEntry" xmi:id="_YIQ7E47MEeaHFs9Jzx8gMg" key="ShadowFigure_Value" value="false"/>
+      </eAnnotations>
+      <eAnnotations xmi:type="ecore:EAnnotation" xmi:id="_YIQ7FI7MEeaHFs9Jzx8gMg" source="displayNameLabelIcon">
+        <details xmi:type="ecore:EStringToStringMapEntry" xmi:id="_YIRiII7MEeaHFs9Jzx8gMg" key="displayNameLabelIcon_value" value="false"/>
+      </eAnnotations>
+      <eAnnotations xmi:type="ecore:EAnnotation" xmi:id="_YIRiIY7MEeaHFs9Jzx8gMg" source="QualifiedName">
+        <details xmi:type="ecore:EStringToStringMapEntry" xmi:id="_YIRiIo7MEeaHFs9Jzx8gMg" key="QualifiedNameDepth" value="1000"/>
+      </eAnnotations>
+      <children xmi:type="notation:DecorationNode" xmi:id="_YIRiI47MEeaHFs9Jzx8gMg" type="5029"/>
+      <children xmi:type="notation:BasicCompartment" xmi:id="_YIRiJI7MEeaHFs9Jzx8gMg" type="7017">
+        <children xmi:type="notation:Shape" xmi:id="_5CIeoI7NEeaHFs9Jzx8gMg" type="3012" fontName="Noto Sans" fontHeight="7" lineColor="0">
+          <element xmi:type="uml:Property" href="platform:/resource/openMDX 2 ~ Test Core (EMF)/test.openmdx.datatypes1.uml#_5CHQgI7NEeaHFs9Jzx8gMg"/>
+          <layoutConstraint xmi:type="notation:Location" xmi:id="_5CIeoY7NEeaHFs9Jzx8gMg"/>
+        </children>
+        <children xmi:type="notation:Shape" xmi:id="_8Bi2EI7NEeaHFs9Jzx8gMg" type="3012" fontName="Noto Sans" fontHeight="7" lineColor="0">
+          <element xmi:type="uml:Property" href="platform:/resource/openMDX 2 ~ Test Core (EMF)/test.openmdx.datatypes1.uml#_8BiPAI7NEeaHFs9Jzx8gMg"/>
+          <layoutConstraint xmi:type="notation:Location" xmi:id="_8Bi2EY7NEeaHFs9Jzx8gMg"/>
+        </children>
+        <children xmi:type="notation:Shape" xmi:id="_-_IBgI7NEeaHFs9Jzx8gMg" type="3012" fontName="Noto Sans" fontHeight="7" lineColor="0">
+          <element xmi:type="uml:Property" href="platform:/resource/openMDX 2 ~ Test Core (EMF)/test.openmdx.datatypes1.uml#_-_HacI7NEeaHFs9Jzx8gMg"/>
+          <layoutConstraint xmi:type="notation:Location" xmi:id="_-_IBgY7NEeaHFs9Jzx8gMg"/>
+        </children>
+        <children xmi:type="notation:Shape" xmi:id="_Dp-AAI7OEeaHFs9Jzx8gMg" type="3012" fontName="Noto Sans" fontHeight="7" lineColor="0">
+          <element xmi:type="uml:Property" href="platform:/resource/openMDX 2 ~ Test Core (EMF)/test.openmdx.datatypes1.uml#_Dp8x4I7OEeaHFs9Jzx8gMg"/>
+          <layoutConstraint xmi:type="notation:Location" xmi:id="_Dp-AAY7OEeaHFs9Jzx8gMg"/>
+        </children>
+        <children xmi:type="notation:Shape" xmi:id="_HVZI4I7OEeaHFs9Jzx8gMg" type="3012" fontName="Noto Sans" fontHeight="7" lineColor="0">
+          <element xmi:type="uml:Property" href="platform:/resource/openMDX 2 ~ Test Core (EMF)/test.openmdx.datatypes1.uml#_HVWFkI7OEeaHFs9Jzx8gMg"/>
+          <layoutConstraint xmi:type="notation:Location" xmi:id="_HVZI4Y7OEeaHFs9Jzx8gMg"/>
+        </children>
+        <children xmi:type="notation:Shape" xmi:id="_LoqU4I7OEeaHFs9Jzx8gMg" type="3012" fontName="Noto Sans" fontHeight="7" lineColor="0">
+          <element xmi:type="uml:Property" href="platform:/resource/openMDX 2 ~ Test Core (EMF)/test.openmdx.datatypes1.uml#_LopGwI7OEeaHFs9Jzx8gMg"/>
+          <layoutConstraint xmi:type="notation:Location" xmi:id="_LoqU4Y7OEeaHFs9Jzx8gMg"/>
+        </children>
+        <children xmi:type="notation:Shape" xmi:id="_OVV9kI7OEeaHFs9Jzx8gMg" type="3012" fontName="Noto Sans" fontHeight="7" lineColor="0">
+          <element xmi:type="uml:Property" href="platform:/resource/openMDX 2 ~ Test Core (EMF)/test.openmdx.datatypes1.uml#_OVThUI7OEeaHFs9Jzx8gMg"/>
+          <layoutConstraint xmi:type="notation:Location" xmi:id="_OVV9kY7OEeaHFs9Jzx8gMg"/>
+        </children>
+        <children xmi:type="notation:Shape" xmi:id="_R_psII7OEeaHFs9Jzx8gMg" type="3012" fontName="Noto Sans" fontHeight="7" lineColor="0">
+          <element xmi:type="uml:Property" href="platform:/resource/openMDX 2 ~ Test Core (EMF)/test.openmdx.datatypes1.uml#_R_mo0I7OEeaHFs9Jzx8gMg"/>
+          <layoutConstraint xmi:type="notation:Location" xmi:id="_R_psIY7OEeaHFs9Jzx8gMg"/>
+        </children>
+        <children xmi:type="notation:Shape" xmi:id="_U2sxwI7OEeaHFs9Jzx8gMg" type="3012" fontName="Noto Sans" fontHeight="7" lineColor="0">
+          <element xmi:type="uml:Property" href="platform:/resource/openMDX 2 ~ Test Core (EMF)/test.openmdx.datatypes1.uml#_U2rjoI7OEeaHFs9Jzx8gMg"/>
+          <layoutConstraint xmi:type="notation:Location" xmi:id="_U2sxwY7OEeaHFs9Jzx8gMg"/>
+        </children>
+        <children xmi:type="notation:Shape" xmi:id="_WPrW4I7OEeaHFs9Jzx8gMg" type="3012" fontName="Noto Sans" fontHeight="7" lineColor="0">
+          <element xmi:type="uml:Property" href="platform:/resource/openMDX 2 ~ Test Core (EMF)/test.openmdx.datatypes1.uml#_WPphsI7OEeaHFs9Jzx8gMg"/>
+          <layoutConstraint xmi:type="notation:Location" xmi:id="_WPrW4Y7OEeaHFs9Jzx8gMg"/>
+        </children>
+        <children xmi:type="notation:Shape" xmi:id="_YTawQI7OEeaHFs9Jzx8gMg" type="3012" fontName="Noto Sans" fontHeight="7" lineColor="0">
+          <element xmi:type="uml:Property" href="platform:/resource/openMDX 2 ~ Test Core (EMF)/test.openmdx.datatypes1.uml#_YTY7EI7OEeaHFs9Jzx8gMg"/>
+          <layoutConstraint xmi:type="notation:Location" xmi:id="_YTawQY7OEeaHFs9Jzx8gMg"/>
+        </children>
+        <children xmi:type="notation:Shape" xmi:id="_cgfNoI7OEeaHFs9Jzx8gMg" type="3012" fontName="Noto Sans" fontHeight="7" lineColor="0">
+          <element xmi:type="uml:Property" href="platform:/resource/openMDX 2 ~ Test Core (EMF)/test.openmdx.datatypes1.uml#_cgd_gI7OEeaHFs9Jzx8gMg"/>
+          <layoutConstraint xmi:type="notation:Location" xmi:id="_cgfNoY7OEeaHFs9Jzx8gMg"/>
+        </children>
+        <children xmi:type="notation:Shape" xmi:id="_fOivUI7OEeaHFs9Jzx8gMg" type="3012" fontName="Noto Sans" fontHeight="7" lineColor="0">
+          <element xmi:type="uml:Property" href="platform:/resource/openMDX 2 ~ Test Core (EMF)/test.openmdx.datatypes1.uml#_fOgTEI7OEeaHFs9Jzx8gMg"/>
+          <layoutConstraint xmi:type="notation:Location" xmi:id="_fOivUY7OEeaHFs9Jzx8gMg"/>
+        </children>
+        <children xmi:type="notation:Shape" xmi:id="_he4aQI7OEeaHFs9Jzx8gMg" type="3012" fontName="Noto Sans" fontHeight="7" lineColor="0">
+          <element xmi:type="uml:Property" href="platform:/resource/openMDX 2 ~ Test Core (EMF)/test.openmdx.datatypes1.uml#_he1-AI7OEeaHFs9Jzx8gMg"/>
+          <layoutConstraint xmi:type="notation:Location" xmi:id="_he4aQY7OEeaHFs9Jzx8gMg"/>
+        </children>
+        <children xmi:type="notation:Shape" xmi:id="_jrFzII7OEeaHFs9Jzx8gMg" type="3012" fontName="Noto Sans" fontHeight="7" lineColor="0">
+          <element xmi:type="uml:Property" href="platform:/resource/openMDX 2 ~ Test Core (EMF)/test.openmdx.datatypes1.uml#_jrD98I7OEeaHFs9Jzx8gMg"/>
+          <layoutConstraint xmi:type="notation:Location" xmi:id="_jrFzIY7OEeaHFs9Jzx8gMg"/>
+        </children>
+        <children xmi:type="notation:Shape" xmi:id="_lKODkI7OEeaHFs9Jzx8gMg" type="3012" fontName="Noto Sans" fontHeight="7" lineColor="0">
+          <element xmi:type="uml:Property" href="platform:/resource/openMDX 2 ~ Test Core (EMF)/test.openmdx.datatypes1.uml#_lKM1cI7OEeaHFs9Jzx8gMg"/>
+          <layoutConstraint xmi:type="notation:Location" xmi:id="_lKODkY7OEeaHFs9Jzx8gMg"/>
+        </children>
+        <styles xmi:type="notation:TitleStyle" xmi:id="_YIRiJY7MEeaHFs9Jzx8gMg"/>
+        <styles xmi:type="notation:SortingStyle" xmi:id="_YIRiJo7MEeaHFs9Jzx8gMg"/>
+        <styles xmi:type="notation:FilteringStyle" xmi:id="_YIRiJ47MEeaHFs9Jzx8gMg"/>
+        <layoutConstraint xmi:type="notation:Bounds" xmi:id="_YIRiKI7MEeaHFs9Jzx8gMg"/>
+      </children>
+      <children xmi:type="notation:BasicCompartment" xmi:id="_YIRiKY7MEeaHFs9Jzx8gMg" type="7018">
+        <styles xmi:type="notation:TitleStyle" xmi:id="_YIRiKo7MEeaHFs9Jzx8gMg"/>
+        <styles xmi:type="notation:SortingStyle" xmi:id="_YIRiK47MEeaHFs9Jzx8gMg"/>
+        <styles xmi:type="notation:FilteringStyle" xmi:id="_YIRiLI7MEeaHFs9Jzx8gMg"/>
+        <layoutConstraint xmi:type="notation:Bounds" xmi:id="_YIRiLY7MEeaHFs9Jzx8gMg"/>
+      </children>
+      <children xmi:type="notation:BasicCompartment" xmi:id="_YIRiLo7MEeaHFs9Jzx8gMg" type="7019">
+        <styles xmi:type="notation:TitleStyle" xmi:id="_YIRiL47MEeaHFs9Jzx8gMg"/>
+        <styles xmi:type="notation:SortingStyle" xmi:id="_YIRiMI7MEeaHFs9Jzx8gMg"/>
+        <styles xmi:type="notation:FilteringStyle" xmi:id="_YIRiMY7MEeaHFs9Jzx8gMg"/>
+        <layoutConstraint xmi:type="notation:Bounds" xmi:id="_YIRiMo7MEeaHFs9Jzx8gMg"/>
+      </children>
+      <children xmi:type="notation:BasicCompartment" xmi:id="_YIVzkI7MEeaHFs9Jzx8gMg" visible="false" type="compartment_shape_display">
+        <styles xmi:type="notation:TitleStyle" xmi:id="_YIVzkY7MEeaHFs9Jzx8gMg"/>
+        <layoutConstraint xmi:type="notation:Bounds" xmi:id="_YIVzko7MEeaHFs9Jzx8gMg"/>
+      </children>
+      <element xmi:type="uml:Class" href="platform:/resource/openMDX 2 ~ Test Core (EMF)/test.openmdx.datatypes1.uml#_W5_xII7MEeaHFs9Jzx8gMg"/>
+      <layoutConstraint xmi:type="notation:Bounds" xmi:id="_YIQ7EY7MEeaHFs9Jzx8gMg" x="1568" y="1736" width="644"/>
     </children>
     <styles xmi:type="notation:DiagramStyle" xmi:id="_VqRDUbPjEeKHbKe7r26usQ"/>
     <element xmi:type="uml:Model" href="models.uml#_Y2KewUdEEd-nAY5dDg-0aQ"/>
@@ -2715,6 +3319,10 @@
         <styles xmi:type="notation:FilteringStyle" xmi:id="_o-25eLPjEeKHbKe7r26usQ"/>
         <layoutConstraint xmi:type="notation:Bounds" xmi:id="_o-25ebPjEeKHbKe7r26usQ"/>
       </children>
+      <children xmi:type="notation:BasicCompartment" xmi:id="_bm2XQI7LEeaHFs9Jzx8gMg" visible="false" type="compartment_shape_display">
+        <styles xmi:type="notation:TitleStyle" xmi:id="_bm2XQY7LEeaHFs9Jzx8gMg"/>
+        <layoutConstraint xmi:type="notation:Bounds" xmi:id="_bm2XQo7LEeaHFs9Jzx8gMg"/>
+      </children>
       <element xmi:type="uml:Class" href="platform:/resource/openMDX 2 ~ Test Core (EMF)/test.openmdx.state2.uml#_BPJ6kBAREdub7fmBwxfZCg"/>
       <layoutConstraint xmi:type="notation:Bounds" xmi:id="_o-2SYbPjEeKHbKe7r26usQ" x="36" y="1170" width="1387"/>
     </children>
@@ -2746,6 +3354,10 @@
         <styles xmi:type="notation:SortingStyle" xmi:id="_qGqPArPjEeKHbKe7r26usQ"/>
         <styles xmi:type="notation:FilteringStyle" xmi:id="_qGqPA7PjEeKHbKe7r26usQ"/>
         <layoutConstraint xmi:type="notation:Bounds" xmi:id="_qGqPBLPjEeKHbKe7r26usQ"/>
+      </children>
+      <children xmi:type="notation:BasicCompartment" xmi:id="_bm3lYI7LEeaHFs9Jzx8gMg" visible="false" type="compartment_shape_display">
+        <styles xmi:type="notation:TitleStyle" xmi:id="_bm3lYY7LEeaHFs9Jzx8gMg"/>
+        <layoutConstraint xmi:type="notation:Bounds" xmi:id="_bm3lYo7LEeaHFs9Jzx8gMg"/>
       </children>
       <element xmi:type="uml:Class" href="platform:/resource/openMDX 2 ~ Test Core (EMF)/test.openmdx.state2.uml#_iIeEgBASEdub7fmBwxfZCg"/>
       <layoutConstraint xmi:type="notation:Bounds" xmi:id="_qGpn8bPjEeKHbKe7r26usQ" x="108" y="594" width="612"/>
@@ -2779,6 +3391,10 @@
         <styles xmi:type="notation:FilteringStyle" xmi:id="_qHLMbrPjEeKHbKe7r26usQ"/>
         <layoutConstraint xmi:type="notation:Bounds" xmi:id="_qHLMb7PjEeKHbKe7r26usQ"/>
       </children>
+      <children xmi:type="notation:BasicCompartment" xmi:id="_bm4zgI7LEeaHFs9Jzx8gMg" visible="false" type="compartment_shape_display">
+        <styles xmi:type="notation:TitleStyle" xmi:id="_bm4zgY7LEeaHFs9Jzx8gMg"/>
+        <layoutConstraint xmi:type="notation:Bounds" xmi:id="_bm4zgo7LEeaHFs9Jzx8gMg"/>
+      </children>
       <element xmi:type="uml:Class" href="platform:/resource/openMDX 2 ~ Test Core (EMF)/test.openmdx.state2.uml#_3LFYIBAREdub7fmBwxfZCg"/>
       <layoutConstraint xmi:type="notation:Bounds" xmi:id="_qHKlUbPjEeKHbKe7r26usQ" x="126" y="864" width="352"/>
     </children>
@@ -2810,6 +3426,10 @@
         <styles xmi:type="notation:SortingStyle" xmi:id="_q7SJ57PjEeKHbKe7r26usQ"/>
         <styles xmi:type="notation:FilteringStyle" xmi:id="_q7SJ6LPjEeKHbKe7r26usQ"/>
         <layoutConstraint xmi:type="notation:Bounds" xmi:id="_q7SJ6bPjEeKHbKe7r26usQ"/>
+      </children>
+      <children xmi:type="notation:BasicCompartment" xmi:id="_bm6BoI7LEeaHFs9Jzx8gMg" visible="false" type="compartment_shape_display">
+        <styles xmi:type="notation:TitleStyle" xmi:id="_bm6BoY7LEeaHFs9Jzx8gMg"/>
+        <layoutConstraint xmi:type="notation:Bounds" xmi:id="_bm6Boo7LEeaHFs9Jzx8gMg"/>
       </children>
       <element xmi:type="uml:Class" href="platform:/resource/openMDX 2 ~ Test Core (EMF)/test.openmdx.state2.uml#_AWcpkBAUEdub7fmBwxfZCg"/>
       <layoutConstraint xmi:type="notation:Bounds" xmi:id="_q7Ri0bPjEeKHbKe7r26usQ" x="108" y="324" width="307"/>
@@ -2843,6 +3463,10 @@
         <styles xmi:type="notation:FilteringStyle" xmi:id="_r8XMbrPjEeKHbKe7r26usQ"/>
         <layoutConstraint xmi:type="notation:Bounds" xmi:id="_r8XMb7PjEeKHbKe7r26usQ"/>
       </children>
+      <children xmi:type="notation:BasicCompartment" xmi:id="_bm7PwI7LEeaHFs9Jzx8gMg" visible="false" type="compartment_shape_display">
+        <styles xmi:type="notation:TitleStyle" xmi:id="_bm7PwY7LEeaHFs9Jzx8gMg"/>
+        <layoutConstraint xmi:type="notation:Bounds" xmi:id="_bm7Pwo7LEeaHFs9Jzx8gMg"/>
+      </children>
       <element xmi:type="uml:Class" href="platform:/resource/openMDX 2 ~ Test Core (EMF)/test.openmdx.state2.uml#_y7aYMKQ7Ed2M_NU-u2UATw"/>
       <layoutConstraint xmi:type="notation:Bounds" xmi:id="_r8WlUbPjEeKHbKe7r26usQ" x="792" y="594" width="216"/>
     </children>
@@ -2874,6 +3498,10 @@
         <styles xmi:type="notation:SortingStyle" xmi:id="_tE6v7bPjEeKHbKe7r26usQ"/>
         <styles xmi:type="notation:FilteringStyle" xmi:id="_tE6v7rPjEeKHbKe7r26usQ"/>
         <layoutConstraint xmi:type="notation:Bounds" xmi:id="_tE6v77PjEeKHbKe7r26usQ"/>
+      </children>
+      <children xmi:type="notation:BasicCompartment" xmi:id="_bm8d4I7LEeaHFs9Jzx8gMg" visible="false" type="compartment_shape_display">
+        <styles xmi:type="notation:TitleStyle" xmi:id="_bm8d4Y7LEeaHFs9Jzx8gMg"/>
+        <layoutConstraint xmi:type="notation:Bounds" xmi:id="_bm8d4o7LEeaHFs9Jzx8gMg"/>
       </children>
       <element xmi:type="uml:Class" href="platform:/resource/openMDX 2 ~ Test Core (EMF)/test.openmdx.state2.uml#_dsobYKQ9Ed2M_NU-u2UATw"/>
       <layoutConstraint xmi:type="notation:Bounds" xmi:id="_tE6I0bPjEeKHbKe7r26usQ" x="450" y="324" width="252"/>
@@ -2907,6 +3535,10 @@
         <styles xmi:type="notation:FilteringStyle" xmi:id="_tefGfrPjEeKHbKe7r26usQ"/>
         <layoutConstraint xmi:type="notation:Bounds" xmi:id="_tefGf7PjEeKHbKe7r26usQ"/>
       </children>
+      <children xmi:type="notation:BasicCompartment" xmi:id="_bm9sAI7LEeaHFs9Jzx8gMg" visible="false" type="compartment_shape_display">
+        <styles xmi:type="notation:TitleStyle" xmi:id="_bm9sAY7LEeaHFs9Jzx8gMg"/>
+        <layoutConstraint xmi:type="notation:Bounds" xmi:id="_bm9sAo7LEeaHFs9Jzx8gMg"/>
+      </children>
       <element xmi:type="uml:Class" href="platform:/resource/openMDX 2 ~ Test Core (EMF)/test.openmdx.state2.uml#_-dpfcBAUEdub7fmBwxfZCg"/>
       <layoutConstraint xmi:type="notation:Bounds" xmi:id="_teefYbPjEeKHbKe7r26usQ" x="504" y="864" width="181"/>
     </children>
@@ -2938,6 +3570,10 @@
         <styles xmi:type="notation:SortingStyle" xmi:id="_ueB37bPjEeKHbKe7r26usQ"/>
         <styles xmi:type="notation:FilteringStyle" xmi:id="_ueB37rPjEeKHbKe7r26usQ"/>
         <layoutConstraint xmi:type="notation:Bounds" xmi:id="_ueB377PjEeKHbKe7r26usQ"/>
+      </children>
+      <children xmi:type="notation:BasicCompartment" xmi:id="_bm-6II7LEeaHFs9Jzx8gMg" visible="false" type="compartment_shape_display">
+        <styles xmi:type="notation:TitleStyle" xmi:id="_bm-6IY7LEeaHFs9Jzx8gMg"/>
+        <layoutConstraint xmi:type="notation:Bounds" xmi:id="_bm-6Io7LEeaHFs9Jzx8gMg"/>
       </children>
       <element xmi:type="uml:Class" href="platform:/resource/openMDX 2 ~ Test Core (EMF)/test.openmdx.state2.uml#_N235EKQ8Ed2M_NU-u2UATw"/>
       <layoutConstraint xmi:type="notation:Bounds" xmi:id="_ueBQ0bPjEeKHbKe7r26usQ" x="720" y="864" width="181"/>
@@ -2971,6 +3607,10 @@
         <styles xmi:type="notation:FilteringStyle" xmi:id="_u3SFbbPjEeKHbKe7r26usQ"/>
         <layoutConstraint xmi:type="notation:Bounds" xmi:id="_u3SFbrPjEeKHbKe7r26usQ"/>
       </children>
+      <children xmi:type="notation:BasicCompartment" xmi:id="_bm_hMI7LEeaHFs9Jzx8gMg" visible="false" type="compartment_shape_display">
+        <styles xmi:type="notation:TitleStyle" xmi:id="_bm_hMY7LEeaHFs9Jzx8gMg"/>
+        <layoutConstraint xmi:type="notation:Bounds" xmi:id="_bm_hMo7LEeaHFs9Jzx8gMg"/>
+      </children>
       <element xmi:type="uml:Class" href="platform:/resource/openMDX 2 ~ Test Core (EMF)/test.openmdx.state2.uml#_uBniQKQ8Ed2M_NU-u2UATw"/>
       <layoutConstraint xmi:type="notation:Bounds" xmi:id="_u3ReUbPjEeKHbKe7r26usQ" x="918" y="864" width="270"/>
     </children>
@@ -3002,6 +3642,10 @@
         <styles xmi:type="notation:SortingStyle" xmi:id="_vYVkDbPjEeKHbKe7r26usQ"/>
         <styles xmi:type="notation:FilteringStyle" xmi:id="_vYVkDrPjEeKHbKe7r26usQ"/>
         <layoutConstraint xmi:type="notation:Bounds" xmi:id="_vYWLELPjEeKHbKe7r26usQ"/>
+      </children>
+      <children xmi:type="notation:BasicCompartment" xmi:id="_bnAvUI7LEeaHFs9Jzx8gMg" visible="false" type="compartment_shape_display">
+        <styles xmi:type="notation:TitleStyle" xmi:id="_bnAvUY7LEeaHFs9Jzx8gMg"/>
+        <layoutConstraint xmi:type="notation:Bounds" xmi:id="_bnAvUo7LEeaHFs9Jzx8gMg"/>
       </children>
       <element xmi:type="uml:Class" href="platform:/resource/openMDX 2 ~ Test Core (EMF)/test.openmdx.state2.uml#_KJiPMKQ9Ed2M_NU-u2UATw"/>
       <layoutConstraint xmi:type="notation:Bounds" xmi:id="_vYU88bPjEeKHbKe7r26usQ" x="108" y="36" width="305"/>
@@ -3035,6 +3679,10 @@
         <styles xmi:type="notation:FilteringStyle" xmi:id="_VFHSbbPkEeKHbKe7r26usQ"/>
         <layoutConstraint xmi:type="notation:Bounds" xmi:id="_VFHSbrPkEeKHbKe7r26usQ"/>
       </children>
+      <children xmi:type="notation:BasicCompartment" xmi:id="_bnB9cI7LEeaHFs9Jzx8gMg" visible="false" type="compartment_shape_display">
+        <styles xmi:type="notation:TitleStyle" xmi:id="_bnB9cY7LEeaHFs9Jzx8gMg"/>
+        <layoutConstraint xmi:type="notation:Bounds" xmi:id="_bnB9co7LEeaHFs9Jzx8gMg"/>
+      </children>
       <element xmi:type="uml:Class" href="platform:/resource/openMDX 2 ~ Test Core (EMF)/test.openmdx.state2.uml#_lLyPEBATEdub7fmBwxfZCg"/>
       <layoutConstraint xmi:type="notation:Bounds" xmi:id="_VFGrUbPkEeKHbKe7r26usQ" x="738" y="324" width="252"/>
     </children>
@@ -3066,6 +3714,10 @@
         <styles xmi:type="notation:SortingStyle" xmi:id="_Zwaj7LPkEeKHbKe7r26usQ"/>
         <styles xmi:type="notation:FilteringStyle" xmi:id="_Zwaj7bPkEeKHbKe7r26usQ"/>
         <layoutConstraint xmi:type="notation:Bounds" xmi:id="_Zwaj7rPkEeKHbKe7r26usQ"/>
+      </children>
+      <children xmi:type="notation:BasicCompartment" xmi:id="_bnDLkI7LEeaHFs9Jzx8gMg" visible="false" type="compartment_shape_display">
+        <styles xmi:type="notation:TitleStyle" xmi:id="_bnDLkY7LEeaHFs9Jzx8gMg"/>
+        <layoutConstraint xmi:type="notation:Bounds" xmi:id="_bnDLko7LEeaHFs9Jzx8gMg"/>
       </children>
       <element xmi:type="uml:Class" href="platform:/resource/openMDX 2 ~ Test Core (EMF)/test.openmdx.state2.uml#_fiy7YBAVEdub7fmBwxfZCg"/>
       <layoutConstraint xmi:type="notation:Bounds" xmi:id="_ZwZ80bPkEeKHbKe7r26usQ" x="1206" y="324" width="270"/>
@@ -3099,6 +3751,10 @@
         <styles xmi:type="notation:FilteringStyle" xmi:id="_bLbwY7PkEeKHbKe7r26usQ"/>
         <layoutConstraint xmi:type="notation:Bounds" xmi:id="_bLbwZLPkEeKHbKe7r26usQ"/>
       </children>
+      <children xmi:type="notation:BasicCompartment" xmi:id="_bnDyoI7LEeaHFs9Jzx8gMg" visible="false" type="compartment_shape_display">
+        <styles xmi:type="notation:TitleStyle" xmi:id="_bnDyoY7LEeaHFs9Jzx8gMg"/>
+        <layoutConstraint xmi:type="notation:Bounds" xmi:id="_bnDyoo7LEeaHFs9Jzx8gMg"/>
+      </children>
       <element xmi:type="uml:Class" href="platform:/resource/openMDX 2 ~ Test Core (EMF)/test.openmdx.state2.uml#_LwDu0KRCEd2M_NU-u2UATw"/>
       <layoutConstraint xmi:type="notation:Bounds" xmi:id="_bLbJUbPkEeKHbKe7r26usQ" x="1206" y="864" width="216"/>
     </children>
@@ -3130,6 +3786,10 @@
         <styles xmi:type="notation:SortingStyle" xmi:id="_t-SyfLPkEeKHbKe7r26usQ"/>
         <styles xmi:type="notation:FilteringStyle" xmi:id="_t-SyfbPkEeKHbKe7r26usQ"/>
         <layoutConstraint xmi:type="notation:Bounds" xmi:id="_t-SyfrPkEeKHbKe7r26usQ"/>
+      </children>
+      <children xmi:type="notation:BasicCompartment" xmi:id="_bnFAwI7LEeaHFs9Jzx8gMg" visible="false" type="compartment_shape_display">
+        <styles xmi:type="notation:TitleStyle" xmi:id="_bnFAwY7LEeaHFs9Jzx8gMg"/>
+        <layoutConstraint xmi:type="notation:Bounds" xmi:id="_bnFAwo7LEeaHFs9Jzx8gMg"/>
       </children>
       <element xmi:type="uml:Class" href="platform:/resource/openMDX 2 ~ Test Core (EMF)/test.openmdx.state2.uml#_NU8yQBASEdub7fmBwxfZCg"/>
       <layoutConstraint xmi:type="notation:Bounds" xmi:id="_t-SLYbPkEeKHbKe7r26usQ" x="1026" y="324" width="162"/>
