@@ -1,361 +1,138 @@
 <test.openmdx.datatypes1.GetConfigResultT id="result">
 	<business>
 		<test.openmdx.datatypes1.BusinessConfigT>
-			<businessAddress>
-				<![CDATA[Talacher 201
-				CH-5073 Gipf-Oberfrick]]>
-			</businessAddress>
-			<businessId>
-				<![CDATA[internal:207074]]>
-			</businessId>
-			<businessName>
-				<![CDATA[MDR-Demo AG]]>
-			</businessName>
-			<clientEmployeeGroupId>
-				<![CDATA[internal:210792]]>
-			</clientEmployeeGroupId>
-			<equipmentClassificationId>
-				<![CDATA[xri://@openmdx*org.opencrx.kernel.account1/provider/MASOFT/segment/Lifestock/account/90GYU4ECQCUZNI3ZIYY9T2CCI]]>
-			</equipmentClassificationId>
+			<businessAddress><![CDATA[Talacher 201CH-5073 Gipf-Oberfrick]]></businessAddress>
+			<businessId><![CDATA[internal:207074]]></businessId>
+			<businessName><![CDATA[MDR-Demo AG]]></businessName>
+			<clientEmployeeGroupId><![CDATA[internal:210792]]></clientEmployeeGroupId>
+			<equipmentClassificationId><![CDATA[xri://@openmdx*org.opencrx.kernel.account1/provider/MASOFT/segment/Lifestock/account/90GYU4ECQCUZNI3ZIYY9T2CCI]]></equipmentClassificationId>
 			<keywordList>
 				<test.openmdx.datatypes1.KeywordListT index="0">
 					<keywords>
-						<_item index="0">
-							<![CDATA[-------- Stockwerke --------]]>
-						</_item>
-						<_item index="1">
-							<![CDATA[UG]]>
-						</_item>
-						<_item index="2">
-							<![CDATA[EG]]>
-						</_item>
-						<_item index="3">
-							<![CDATA[1.OG]]>
-						</_item>
-						<_item index="4">
-							<![CDATA[2.OG]]>
-						</_item>
-						<_item index="5">
-							<![CDATA[3.OG]]>
-						</_item>
-						<_item index="6">
-							<![CDATA[4.OG]]>
-						</_item>
-						<_item index="7">
-							<![CDATA[-------- Gipserarbeiten --------]]>
-						</_item>
-						<_item index="8">
-							<![CDATA[Baustelle einrichten]]>
-						</_item>
-						<_item index="9">
-							<![CDATA[Abdeckarbeiten]]>
-						</_item>
-						<_item index="10">
-							<![CDATA[Grundputz innen]]>
-						</_item>
-						<_item index="11">
-							<![CDATA[Zuputzarbeiten Wände]]>
-						</_item>
-						<_item index="12">
-							<![CDATA[Zuputzarbeiten Decke]]>
-						</_item>
-						<_item index="13">
-							<![CDATA[diverse Zuputzarbeiten]]>
-						</_item>
-						<_item index="14">
-							<![CDATA[Deckenverputz]]>
-						</_item>
-						<_item index="15">
-							<![CDATA[Abrieb auf Innenwände]]>
-						</_item>
-						<_item index="16">
-							<![CDATA[diverse Zuputzarbeiten]]>
-						</_item>
-						<_item index="17">
-							<![CDATA[Spritzarbeiten]]>
-						</_item>
-						<_item index="18">
-							<![CDATA[Kanteneisen versetzen]]>
-						</_item>
-						<_item index="19">
-							<![CDATA[Voranstrich und Reinigung]]>
-						</_item>
-						<_item index="20">
-							<![CDATA[Abriebarbeiten]]>
-						</_item>
-						<_item index="21">
-							<![CDATA[Netzeinbettung]]>
-						</_item>
-						<_item index="22">
-							<![CDATA[Spritzarbeiten]]>
-						</_item>
-						<_item index="23">
-							<![CDATA[Reinigung Untergrund]]>
-						</_item>
-						<_item index="24">
-							<![CDATA[Voranstrich mit Tiefgrund]]>
-						</_item>
-						<_item index="25">
-							<![CDATA[Loser Verputz abklopfen und Reinigung]]>
-						</_item>
-						<_item index="26">
-							<![CDATA[Dämmplatten kleben]]>
-						</_item>
-						<_item index="27">
-							<![CDATA[Platten schleifen und Kontrolle Untergrund]]>
-						</_item>
-						<_item index="28">
-							<![CDATA[Gewebewinkel versetzen]]>
-						</_item>
-						<_item index="29">
-							<![CDATA[Kittfugen]]>
-						</_item>
-						<_item index="30">
-							<![CDATA[Fensterbänke &amp; Vorhangbretter zuputzen]]>
-						</_item>
+						<_item index="0"><![CDATA[-------- Stockwerke --------]]></_item>
+						<_item index="1"><![CDATA[UG]]></_item>
+						<_item index="2"><![CDATA[EG]]></_item>
+						<_item index="3"><![CDATA[1.OG]]></_item>
+						<_item index="4"><![CDATA[2.OG]]></_item>
+						<_item index="5"><![CDATA[3.OG]]></_item>
+						<_item index="6"><![CDATA[4.OG]]></_item>
+						<_item index="7"><![CDATA[-------- Gipserarbeiten --------]]></_item>
+						<_item index="8"><![CDATA[Baustelle einrichten]]></_item>
+						<_item index="9"><![CDATA[Abdeckarbeiten]]></_item>
+						<_item index="10"><![CDATA[Grundputz innen]]></_item>
+						<_item index="11"><![CDATA[Zuputzarbeiten Wände]]></_item>
+						<_item index="12"><![CDATA[Zuputzarbeiten Decke]]></_item>
+						<_item index="13"><![CDATA[diverse Zuputzarbeiten]]></_item>
+						<_item index="14"><![CDATA[Deckenverputz]]></_item>
+						<_item index="15"><![CDATA[Abrieb auf Innenwände]]></_item>
+						<_item index="16"><![CDATA[diverse Zuputzarbeiten]]></_item>
+						<_item index="17"><![CDATA[Spritzarbeiten]]></_item>
+						<_item index="18"><![CDATA[Kanteneisen versetzen]]></_item>
+						<_item index="19"><![CDATA[Voranstrich und Reinigung]]></_item>
+						<_item index="20"><![CDATA[Abriebarbeiten]]></_item>
+						<_item index="21"><![CDATA[Netzeinbettung]]></_item>
+						<_item index="22"><![CDATA[Spritzarbeiten]]></_item>
+						<_item index="23"><![CDATA[Reinigung Untergrund]]></_item>
+						<_item index="24"><![CDATA[Voranstrich mit Tiefgrund]]></_item>
+						<_item index="25"><![CDATA[Loser Verputz abklopfen und Reinigung]]></_item>
+						<_item index="26"><![CDATA[Dämmplatten kleben]]></_item>
+						<_item index="27"><![CDATA[Platten schleifen und Kontrolle Untergrund]]></_item>
+						<_item index="28"><![CDATA[Gewebewinkel versetzen]]></_item>
+						<_item index="29"><![CDATA[Kittfugen]]></_item>
+						<_item index="30"><![CDATA[Fensterbänke &amp; Vorhangbretter zuputzen]]></_item>
 					</keywords>
-					<name>
-						<![CDATA[Auftrags Rapporte Gipserei]]>
-					</name>
+					<name><![CDATA[Auftrags Rapporte Gipserei]]></name>
 				</test.openmdx.datatypes1.KeywordListT>
 				<test.openmdx.datatypes1.KeywordListT index="1">
 					<keywords>
-						<_item index="0">
-							<![CDATA[Aussenreinigung]]>
-						</_item>
-						<_item index="1">
-							<![CDATA[Innenreinigung]]>
-						</_item>
-						<_item index="2">
-							<![CDATA[Problemanalyse]]>
-						</_item>
-						<_item index="3">
-							<![CDATA[Fixiereinheit ersetzt]]>
-						</_item>
-						<_item index="4">
-							<![CDATA[Fixierwalze gereinigt und geschliffen]]>
-						</_item>
-						<_item index="5">
-							<![CDATA[Farben kalibriert]]>
-						</_item>
-						<_item index="6">
-							<![CDATA[Druck-Makros justiert]]>
-						</_item>
-						<_item index="7">
-							<![CDATA[einfacher Gerätetest]]>
-						</_item>
-						<_item index="8">
-							<![CDATA[ausführlicher Gerätetest]]>
-						</_item>
-						<_item index="9">
-							<![CDATA[Funktionskontrolle]]>
-						</_item>
+						<_item index="0"><![CDATA[Aussenreinigung]]></_item>
+						<_item index="1"><![CDATA[Innenreinigung]]></_item>
+						<_item index="2"><![CDATA[Problemanalyse]]></_item>
+						<_item index="3"><![CDATA[Fixiereinheit ersetzt]]></_item>
+						<_item index="4"><![CDATA[Fixierwalze gereinigt und geschliffen]]></_item>
+						<_item index="5"><![CDATA[Farben kalibriert]]></_item>
+						<_item index="6"><![CDATA[Druck-Makros justiert]]></_item>
+						<_item index="7"><![CDATA[einfacher Gerätetest]]></_item>
+						<_item index="8"><![CDATA[ausführlicher Gerätetest]]></_item>
+						<_item index="9"><![CDATA[Funktionskontrolle]]></_item>
 					</keywords>
-					<name>
-						<![CDATA[Computer Service]]>
-					</name>
+					<name><![CDATA[Computer Service]]></name>
 				</test.openmdx.datatypes1.KeywordListT>
 				<test.openmdx.datatypes1.KeywordListT index="2">
 					<keywords>
-						<_item index="0">
-							<![CDATA[-----Fahrzeug-----]]>
-						</_item>
-						<_item index="1">
-							<![CDATA[Maschinenart:]]>
-						</_item>
-						<_item index="2">
-							<![CDATA[Fabrikat:]]>
-						</_item>
-						<_item index="3">
-							<![CDATA[Typ:]]>
-						</_item>
-						<_item index="4">
-							<![CDATA[Geräte-Nr.:]]>
-						</_item>
-						<_item index="5">
-							<![CDATA[Seriennr:]]>
-						</_item>
-						<_item index="6">
-							<![CDATA[Code:]]>
-						</_item>
-						<_item index="7">
-							<![CDATA[Baujahr:]]>
-						</_item>
-						<_item index="8">
-							<![CDATA[Gewicht:]]>
-						</_item>
-						<_item index="9">
-							<![CDATA[Fahrzeugbreite:]]>
-						</_item>
-						<_item index="10">
-							<![CDATA[Bauhöhe:]]>
-						</_item>
-						<_item index="11">
-							<![CDATA[Hubkraft:]]>
-						</_item>
-						<_item index="12">
-							<![CDATA[Lastschwerpunkt:]]>
-						</_item>
-						<_item index="13">
-							<![CDATA[Chassis-Nr.:]]>
-						</_item>
-						<_item index="14">
-							<![CDATA[Preis:]]>
-						</_item>
-						<_item index="15">
-							<![CDATA[Lieferdatum:]]>
-						</_item>
-						<_item index="16">
-							<![CDATA[nächster Service:]]>
-						</_item>
-						<_item index="17">
-							<![CDATA[Betriebsstunden:]]>
-						</_item>
-						<_item index="18">
-							<![CDATA[Bemerkung:]]>
-						</_item>
-						<_item index="19">
-							<![CDATA[-----Motor-----]]>
-						</_item>
-						<_item index="20">
-							<![CDATA[Marke:]]>
-						</_item>
-						<_item index="21">
-							<![CDATA[Modell:]]>
-						</_item>
-						<_item index="22">
-							<![CDATA[Code:]]>
-						</_item>
-						<_item index="23">
-							<![CDATA[Serien-Nr.:]]>
-						</_item>
-						<_item index="24">
-							<![CDATA[Leistung:]]>
-						</_item>
-						<_item index="25">
-							<![CDATA[Abgasnorm:]]>
-						</_item>
-						<_item index="26">
-							<![CDATA[Ventilspiel:]]>
-						</_item>
-						<_item index="27">
-							<![CDATA[Typ:]]>
-						</_item>
-						<_item index="28">
-							<![CDATA[Baujahr:]]>
-						</_item>
-						<_item index="29">
-							<![CDATA[Zubehehör:]]>
-						</_item>
-						<_item index="30">
-							<![CDATA[-----Elektrische anlage-----]]>
-						</_item>
-						<_item index="31">
-							<![CDATA[Batterie:]]>
-						</_item>
-						<_item index="32">
-							<![CDATA[Alternator:]]>
-						</_item>
-						<_item index="33">
-							<![CDATA[Anlasser:]]>
-						</_item>
-						<_item index="34">
-							<![CDATA[-----Bereifung-----]]>
-						</_item>
-						<_item index="35">
-							<![CDATA[Bereifung vorne Luft:]]>
-						</_item>
-						<_item index="36">
-							<![CDATA[Bereifung hinten Luft:]]>
-						</_item>
-						<_item index="37">
-							<![CDATA[Bereifung vorne Vollgummi:]]>
-						</_item>
-						<_item index="38">
-							<![CDATA[Bereifung hinten Vollgummi:]]>
-						</_item>
-						<_item index="39">
-							<![CDATA[Reifenbefestigung:]]>
-						</_item>
-						<_item index="40">
-							<![CDATA[-----Partikelfilter-----]]>
-						</_item>
-						<_item index="41">
-							<![CDATA[Hersteller:]]>
-						</_item>
-						<_item index="42">
-							<![CDATA[Typ:]]>
-						</_item>
-						<_item index="43">
-							<![CDATA[Identifikations-Nr.:]]>
-						</_item>
-						<_item index="44">
-							<![CDATA[Konformitäts-Nr.:]]>
-						</_item>
+						<_item index="0"><![CDATA[-----Fahrzeug-----]]></_item>
+						<_item index="1"><![CDATA[Maschinenart:]]></_item>
+						<_item index="2"><![CDATA[Fabrikat:]]></_item>
+						<_item index="3"><![CDATA[Typ:]]></_item>
+						<_item index="4"><![CDATA[Geräte-Nr.:]]></_item>
+						<_item index="5"><![CDATA[Seriennr:]]></_item>
+						<_item index="6"><![CDATA[Code:]]></_item>
+						<_item index="7"><![CDATA[Baujahr:]]></_item>
+						<_item index="8"><![CDATA[Gewicht:]]></_item>
+						<_item index="9"><![CDATA[Fahrzeugbreite:]]></_item>
+						<_item index="10"><![CDATA[Bauhöhe:]]></_item>
+						<_item index="11"><![CDATA[Hubkraft:]]></_item>
+						<_item index="12"><![CDATA[Lastschwerpunkt:]]></_item>
+						<_item index="13"><![CDATA[Chassis-Nr.:]]></_item>
+						<_item index="14"><![CDATA[Preis:]]></_item>
+						<_item index="15"><![CDATA[Lieferdatum:]]></_item>
+						<_item index="16"><![CDATA[nächster Service:]]></_item>
+						<_item index="17"><![CDATA[Betriebsstunden:]]></_item>
+						<_item index="18"><![CDATA[Bemerkung:]]></_item>
+						<_item index="19"><![CDATA[-----Motor-----]]></_item>
+						<_item index="20"><![CDATA[Marke:]]></_item>
+						<_item index="21"><![CDATA[Modell:]]></_item>
+						<_item index="22"><![CDATA[Code:]]></_item>
+						<_item index="23"><![CDATA[Serien-Nr.:]]></_item>
+						<_item index="24"><![CDATA[Leistung:]]></_item>
+						<_item index="25"><![CDATA[Abgasnorm:]]></_item>
+						<_item index="26"><![CDATA[Ventilspiel:]]></_item>
+						<_item index="27"><![CDATA[Typ:]]></_item>
+						<_item index="28"><![CDATA[Baujahr:]]></_item>
+						<_item index="29"><![CDATA[Zubehehör:]]></_item>
+						<_item index="30"><![CDATA[-----Elektrische anlage-----]]></_item>
+						<_item index="31"><![CDATA[Batterie:]]></_item>
+						<_item index="32"><![CDATA[Alternator:]]></_item>
+						<_item index="33"><![CDATA[Anlasser:]]></_item>
+						<_item index="34"><![CDATA[-----Bereifung-----]]></_item>
+						<_item index="35"><![CDATA[Bereifung vorne Luft:]]></_item>
+						<_item index="36"><![CDATA[Bereifung hinten Luft:]]></_item>
+						<_item index="37"><![CDATA[Bereifung vorne Vollgummi:]]></_item>
+						<_item index="38"><![CDATA[Bereifung hinten Vollgummi:]]></_item>
+						<_item index="39"><![CDATA[Reifenbefestigung:]]></_item>
+						<_item index="40"><![CDATA[-----Partikelfilter-----]]></_item>
+						<_item index="41"><![CDATA[Hersteller:]]></_item>
+						<_item index="42"><![CDATA[Typ:]]></_item>
+						<_item index="43"><![CDATA[Identifikations-Nr.:]]></_item>
+						<_item index="44"><![CDATA[Konformitäts-Nr.:]]></_item>
 					</keywords>
-					<name>
-						<![CDATA[Objektaufnahme]]>
-					</name>
+					<name><![CDATA[Objektaufnahme]]></name>
 				</test.openmdx.datatypes1.KeywordListT>
 				<test.openmdx.datatypes1.KeywordListT index="3">
 					<keywords>
-						<_item index="0">
-							<![CDATA[----- Zusatzausrüstungen -----]]>
-						</_item>
-						<_item index="1">
-							<![CDATA[Kippvorrichtung]]>
-						</_item>
-						<_item index="2">
-							<![CDATA[Sicherungsnetz]]>
-						</_item>
-						<_item index="3">
-							<![CDATA[ein Span-Set]]>
-						</_item>
-						<_item index="4">
-							<![CDATA[zwei Span-Set]]>
-						</_item>
-						<_item index="5">
-							<![CDATA[----- Rückgabe-Kontrolle -----]]>
-						</_item>
-						<_item index="6">
-							<![CDATA[alles Ok keine Schäden]]>
-						</_item>
-						<_item index="7">
-							<![CDATA[Anhängevorrichtung beschädigt]]>
-						</_item>
-						<_item index="8">
-							<![CDATA[Elektrische Anlage beschädigt]]>
-						</_item>
-						<_item index="9">
-							<![CDATA[Fahrgestell verbogen]]>
-						</_item>
-						<_item index="10">
-							<![CDATA[Seitenladen verbogen]]>
-						</_item>
-						<_item index="11">
-							<![CDATA[Rückleuchte defekt]]>
-						</_item>
-						<_item index="12">
-							<![CDATA[Blache beschädigt]]>
-						</_item>
-						<_item index="13">
-							<![CDATA[Ladebrücke beschädigt]]>
-						</_item>
-						<_item index="14">
-							<![CDATA[siehe Foto]]>
-						</_item>
+						<_item index="0"><![CDATA[----- Zusatzausrüstungen -----]]></_item>
+						<_item index="1"><![CDATA[Kippvorrichtung]]></_item>
+						<_item index="2"><![CDATA[Sicherungsnetz]]></_item>
+						<_item index="3"><![CDATA[ein Span-Set]]></_item>
+						<_item index="4"><![CDATA[zwei Span-Set]]></_item>
+						<_item index="5"><![CDATA[----- Rückgabe-Kontrolle -----]]></_item>
+						<_item index="6"><![CDATA[alles Ok keine Schäden]]></_item>
+						<_item index="7"><![CDATA[Anhängevorrichtung beschädigt]]></_item>
+						<_item index="8"><![CDATA[Elektrische Anlage beschädigt]]></_item>
+						<_item index="9"><![CDATA[Fahrgestell verbogen]]></_item>
+						<_item index="10"><![CDATA[Seitenladen verbogen]]></_item>
+						<_item index="11"><![CDATA[Rückleuchte defekt]]></_item>
+						<_item index="12"><![CDATA[Blache beschädigt]]></_item>
+						<_item index="13"><![CDATA[Ladebrücke beschädigt]]></_item>
+						<_item index="14"><![CDATA[siehe Foto]]></_item>
 					</keywords>
-					<name>
-						<![CDATA[FahrzeugVermietung]]>
-					</name>
+					<name><![CDATA[FahrzeugVermietung]]></name>
 				</test.openmdx.datatypes1.KeywordListT>
 			</keywordList>
 			<logo>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
 			</logo>
 			<settingsProtection />
-			<vatNumber>
-				<![CDATA[CHE-108.395.292.1 MWST]]>
-			</vatNumber>
+			<vatNumber><![CDATA[CHE-108.395.292.1 MWST]]></vatNumber>
 		</test.openmdx.datatypes1.BusinessConfigT>
 	</business>
 	<contractTypes>
@@ -364,26 +141,18 @@
 			<calculationRuleName />
 			<canCreateOrder />
 			<canCreateRelatedProduct />
-			<clientGroupId>
-				<![CDATA[internal:207081]]>
-			</clientGroupId>
-			<clientGroupName>
-				<![CDATA[Alle Kunden]]>
-			</clientGroupName>
+			<clientGroupId><![CDATA[internal:207081]]></clientGroupId>
+			<clientGroupName><![CDATA[Alle Kunden]]></clientGroupName>
 			<configuration>
 				<test.openmdx.datatypes1.ConfigItemT index="0">
 					<booleanValue />
-					<configurationType>
-						<![CDATA[customerReference]]>
-					</configurationType>
+					<configurationType><![CDATA[customerReference]]></configurationType>
 					<dataType>0</dataType>
 					<dateTimeValue />
 					<decimalValue />
 					<editor>0</editor>
 					<integerValue />
-					<label>
-						<![CDATA[Kundenreferenz]]>
-					</label>
+					<label><![CDATA[Kundenreferenz]]></label>
 					<lastEnteredAsDefault />
 					<need>1</need>
 					<needLoad />
@@ -394,31 +163,19 @@
 					<valueMap />
 				</test.openmdx.datatypes1.ConfigItemT>
 			</configuration>
-			<contractTypeId>
-				<![CDATA[30K6ASN7IRUN7CWD1JSJ0NQLD]]>
-			</contractTypeId>
+			<contractTypeId><![CDATA[30K6ASN7IRUN7CWD1JSJ0NQLD]]></contractTypeId>
 			<copyOrderPositions />
 			<createDispoPositionsWithQuantity />
 			<extendedProductClassificationId />
 			<inventoryBookings>0</inventoryBookings>
-			<name>
-				<![CDATA[Regie-ComputerService]]>
-			</name>
+			<name><![CDATA[Regie-ComputerService]]></name>
 			<orderGroupId />
 			<orderGroupName />
 			<priority>4990</priority>
-			<productClassificationAutoId>
-				<![CDATA[xri://@openmdx*org.opencrx.kernel.product1/provider/MASOFT/segment/Lifestock/productFilter/9903DOYSG8CMC44871OWGPKBN]]>
-			</productClassificationAutoId>
-			<productClassificationAutoName>
-				<![CDATA[Service Drucker-Repartur]]>
-			</productClassificationAutoName>
-			<productClassificationId>
-				<![CDATA[xri://@openmdx*org.opencrx.kernel.product1/provider/MASOFT/segment/Lifestock/productFilter/R58CVUFEK8JQCHH7VZF3EYVAI]]>
-			</productClassificationId>
-			<productClassificationName>
-				<![CDATA[Computer-Service]]>
-			</productClassificationName>
+			<productClassificationAutoId><![CDATA[xri://@openmdx*org.opencrx.kernel.product1/provider/MASOFT/segment/Lifestock/productFilter/9903DOYSG8CMC44871OWGPKBN]]></productClassificationAutoId>
+			<productClassificationAutoName><![CDATA[Service Drucker-Repartur]]></productClassificationAutoName>
+			<productClassificationId><![CDATA[xri://@openmdx*org.opencrx.kernel.product1/provider/MASOFT/segment/Lifestock/productFilter/R58CVUFEK8JQCHH7VZF3EYVAI]]></productClassificationId>
+			<productClassificationName><![CDATA[Computer-Service]]></productClassificationName>
 			<relatedProductClassificationId />
 			<relatedProductClassificationName />
 			<relatedProductIsCustomerSpecific />
@@ -430,39 +187,25 @@
 		</test.openmdx.datatypes1.ContractTypeT>
 		<test.openmdx.datatypes1.ContractTypeT index="1">
 			<allowedBackdatingDays />
-			<calculationRuleName>
-				<![CDATA[Default]]>
-			</calculationRuleName>
+			<calculationRuleName><![CDATA[Default]]></calculationRuleName>
 			<canCreateOrder />
 			<canCreateRelatedProduct />
-			<clientGroupId>
-				<![CDATA[internal:207081]]>
-			</clientGroupId>
-			<clientGroupName>
-				<![CDATA[Alle Kunden]]>
-			</clientGroupName>
+			<clientGroupId><![CDATA[internal:207081]]></clientGroupId>
+			<clientGroupName><![CDATA[Alle Kunden]]></clientGroupName>
 			<configuration />
-			<contractTypeId>
-				<![CDATA[35II8QGAOGYCK44871OWGPKBN]]>
-			</contractTypeId>
+			<contractTypeId><![CDATA[35II8QGAOGYCK44871OWGPKBN]]></contractTypeId>
 			<copyOrderPositions />
 			<createDispoPositionsWithQuantity />
 			<extendedProductClassificationId />
 			<inventoryBookings>2</inventoryBookings>
-			<name>
-				<![CDATA[SofortRechnung mobiler BonDruck]]>
-			</name>
+			<name><![CDATA[SofortRechnung mobiler BonDruck]]></name>
 			<orderGroupId />
 			<orderGroupName />
 			<priority>4965</priority>
 			<productClassificationAutoId />
 			<productClassificationAutoName />
-			<productClassificationId>
-				<![CDATA[xri://@openmdx*org.opencrx.kernel.product1/provider/MASOFT/segment/Lifestock/productFilter/3UH0C5ZKGRR3844871OWGPKBN]]>
-			</productClassificationId>
-			<productClassificationName>
-				<![CDATA[- Fahrzeugbau]]>
-			</productClassificationName>
+			<productClassificationId><![CDATA[xri://@openmdx*org.opencrx.kernel.product1/provider/MASOFT/segment/Lifestock/productFilter/3UH0C5ZKGRR3844871OWGPKBN]]></productClassificationId>
+			<productClassificationName><![CDATA[- Fahrzeugbau]]></productClassificationName>
 			<relatedProductClassificationId />
 			<relatedProductClassificationName />
 			<relatedProductIsCustomerSpecific />
@@ -477,26 +220,18 @@
 			<calculationRuleName />
 			<canCreateOrder />
 			<canCreateRelatedProduct />
-			<clientGroupId>
-				<![CDATA[internal:219316]]>
-			</clientGroupId>
-			<clientGroupName>
-				<![CDATA[Kunden Biomasse]]>
-			</clientGroupName>
+			<clientGroupId><![CDATA[internal:219316]]></clientGroupId>
+			<clientGroupName><![CDATA[Kunden Biomasse]]></clientGroupName>
 			<configuration>
 				<test.openmdx.datatypes1.ConfigItemT index="0">
 					<booleanValue />
-					<configurationType>
-						<![CDATA[equipment]]>
-					</configurationType>
+					<configurationType><![CDATA[equipment]]></configurationType>
 					<dataType>5</dataType>
 					<dateTimeValue />
 					<decimalValue />
 					<editor>0</editor>
 					<integerValue />
-					<label>
-						<![CDATA[Ausrüstung]]>
-					</label>
+					<label><![CDATA[Ausrüstung]]></label>
 					<lastEnteredAsDefault />
 					<need>0</need>
 					<needLoad />
@@ -507,27 +242,19 @@
 					<valueMap />
 				</test.openmdx.datatypes1.ConfigItemT>
 			</configuration>
-			<contractTypeId>
-				<![CDATA[3D53VWF6WQX2C44871OWGPKBN]]>
-			</contractTypeId>
+			<contractTypeId><![CDATA[3D53VWF6WQX2C44871OWGPKBN]]></contractTypeId>
 			<copyOrderPositions />
 			<createDispoPositionsWithQuantity />
 			<extendedProductClassificationId />
 			<inventoryBookings />
-			<name>
-				<![CDATA[Transport Biomasse]]>
-			</name>
+			<name><![CDATA[Transport Biomasse]]></name>
 			<orderGroupId />
 			<orderGroupName />
 			<priority>40</priority>
 			<productClassificationAutoId />
 			<productClassificationAutoName />
-			<productClassificationId>
-				<![CDATA[xri://@openmdx*org.opencrx.kernel.product1/provider/MASOFT/segment/Lifestock/productFilter/L4NV42AOM3U9044871OWGPKBN]]>
-			</productClassificationId>
-			<productClassificationName>
-				<![CDATA[Biomasse]]>
-			</productClassificationName>
+			<productClassificationId><![CDATA[xri://@openmdx*org.opencrx.kernel.product1/provider/MASOFT/segment/Lifestock/productFilter/L4NV42AOM3U9044871OWGPKBN]]></productClassificationId>
+			<productClassificationName><![CDATA[Biomasse]]></productClassificationName>
 			<relatedProductClassificationId />
 			<relatedProductClassificationName />
 			<relatedProductIsCustomerSpecific />
@@ -542,26 +269,18 @@
 			<calculationRuleName />
 			<canCreateOrder />
 			<canCreateRelatedProduct />
-			<clientGroupId>
-				<![CDATA[internal:207081]]>
-			</clientGroupId>
-			<clientGroupName>
-				<![CDATA[Alle Kunden]]>
-			</clientGroupName>
+			<clientGroupId><![CDATA[internal:207081]]></clientGroupId>
+			<clientGroupName><![CDATA[Alle Kunden]]></clientGroupName>
 			<configuration>
 				<test.openmdx.datatypes1.ConfigItemT index="0">
 					<booleanValue />
-					<configurationType>
-						<![CDATA[latitude]]>
-					</configurationType>
+					<configurationType><![CDATA[latitude]]></configurationType>
 					<dataType>4</dataType>
 					<dateTimeValue />
 					<decimalValue />
 					<editor>29</editor>
 					<integerValue />
-					<label>
-						<![CDATA[Breitengrad]]>
-					</label>
+					<label><![CDATA[Breitengrad]]></label>
 					<lastEnteredAsDefault />
 					<need>0</need>
 					<needLoad />
@@ -573,17 +292,13 @@
 				</test.openmdx.datatypes1.ConfigItemT>
 				<test.openmdx.datatypes1.ConfigItemT index="1">
 					<booleanValue />
-					<configurationType>
-						<![CDATA[signingTime]]>
-					</configurationType>
+					<configurationType><![CDATA[signingTime]]></configurationType>
 					<dataType>3</dataType>
 					<dateTimeValue />
 					<decimalValue />
 					<editor>31</editor>
 					<integerValue />
-					<label>
-						<![CDATA[Zeit]]>
-					</label>
+					<label><![CDATA[Zeit]]></label>
 					<lastEnteredAsDefault />
 					<need>0</need>
 					<needLoad />
@@ -595,17 +310,13 @@
 				</test.openmdx.datatypes1.ConfigItemT>
 				<test.openmdx.datatypes1.ConfigItemT index="2">
 					<booleanValue />
-					<configurationType>
-						<![CDATA[signature]]>
-					</configurationType>
+					<configurationType><![CDATA[signature]]></configurationType>
 					<dataType>0</dataType>
 					<dateTimeValue />
 					<decimalValue />
 					<editor>32</editor>
 					<integerValue />
-					<label>
-						<![CDATA[Unterschrift]]>
-					</label>
+					<label><![CDATA[Unterschrift]]></label>
 					<lastEnteredAsDefault />
 					<need>0</need>
 					<needLoad />
@@ -617,17 +328,13 @@
 				</test.openmdx.datatypes1.ConfigItemT>
 				<test.openmdx.datatypes1.ConfigItemT index="3">
 					<booleanValue />
-					<configurationType>
-						<![CDATA[longitude]]>
-					</configurationType>
+					<configurationType><![CDATA[longitude]]></configurationType>
 					<dataType>4</dataType>
 					<dateTimeValue />
 					<decimalValue />
 					<editor>28</editor>
 					<integerValue />
-					<label>
-						<![CDATA[Längengrad]]>
-					</label>
+					<label><![CDATA[Längengrad]]></label>
 					<lastEnteredAsDefault />
 					<need>0</need>
 					<needLoad />
@@ -639,17 +346,13 @@
 				</test.openmdx.datatypes1.ConfigItemT>
 				<test.openmdx.datatypes1.ConfigItemT index="4">
 					<booleanValue />
-					<configurationType>
-						<![CDATA[signer]]>
-					</configurationType>
+					<configurationType><![CDATA[signer]]></configurationType>
 					<dataType>0</dataType>
 					<dateTimeValue />
 					<decimalValue />
 					<editor>30</editor>
 					<integerValue />
-					<label>
-						<![CDATA[Unterschr. von]]>
-					</label>
+					<label><![CDATA[Unterschr. von]]></label>
 					<lastEnteredAsDefault />
 					<need>0</need>
 					<needLoad />
@@ -660,31 +363,19 @@
 					<valueMap />
 				</test.openmdx.datatypes1.ConfigItemT>
 			</configuration>
-			<contractTypeId>
-				<![CDATA[3DFAXHFR2Y677LOMEK4SGPYZL]]>
-			</contractTypeId>
+			<contractTypeId><![CDATA[3DFAXHFR2Y677LOMEK4SGPYZL]]></contractTypeId>
 			<copyOrderPositions />
 			<createDispoPositionsWithQuantity />
 			<extendedProductClassificationId />
 			<inventoryBookings>0</inventoryBookings>
-			<name>
-				<![CDATA[Regie-ElektrikerArbeiten]]>
-			</name>
+			<name><![CDATA[Regie-ElektrikerArbeiten]]></name>
 			<orderGroupId />
 			<orderGroupName />
 			<priority>4985</priority>
-			<productClassificationAutoId>
-				<![CDATA[xri://@openmdx*org.opencrx.kernel.product1/provider/MASOFT/segment/Lifestock/productFilter/9LZO82PLIEDIC44871OWGPKBN]]>
-			</productClassificationAutoId>
-			<productClassificationAutoName>
-				<![CDATA[Arbeit]]>
-			</productClassificationAutoName>
-			<productClassificationId>
-				<![CDATA[xri://@openmdx*org.opencrx.kernel.product1/provider/MASOFT/segment/Lifestock/productFilter/R58CVV900XDD0HH7VZF3EYVAI]]>
-			</productClassificationId>
-			<productClassificationName>
-				<![CDATA[ElektrikerArbeiten]]>
-			</productClassificationName>
+			<productClassificationAutoId><![CDATA[xri://@openmdx*org.opencrx.kernel.product1/provider/MASOFT/segment/Lifestock/productFilter/9LZO82PLIEDIC44871OWGPKBN]]></productClassificationAutoId>
+			<productClassificationAutoName><![CDATA[Arbeit]]></productClassificationAutoName>
+			<productClassificationId><![CDATA[xri://@openmdx*org.opencrx.kernel.product1/provider/MASOFT/segment/Lifestock/productFilter/R58CVV900XDD0HH7VZF3EYVAI]]></productClassificationId>
+			<productClassificationName><![CDATA[ElektrikerArbeiten]]></productClassificationName>
 			<relatedProductClassificationId />
 			<relatedProductClassificationName />
 			<relatedProductIsCustomerSpecific />
@@ -699,26 +390,18 @@
 			<calculationRuleName />
 			<canCreateOrder>true</canCreateOrder>
 			<canCreateRelatedProduct />
-			<clientGroupId>
-				<![CDATA[internal:207081]]>
-			</clientGroupId>
-			<clientGroupName>
-				<![CDATA[Alle Kunden]]>
-			</clientGroupName>
+			<clientGroupId><![CDATA[internal:207081]]></clientGroupId>
+			<clientGroupName><![CDATA[Alle Kunden]]></clientGroupName>
 			<configuration>
 				<test.openmdx.datatypes1.ConfigItemT index="0">
 					<booleanValue>false</booleanValue>
-					<configurationType>
-						<![CDATA[closeOrder]]>
-					</configurationType>
+					<configurationType><![CDATA[closeOrder]]></configurationType>
 					<dataType>2</dataType>
 					<dateTimeValue />
 					<decimalValue />
 					<editor>0</editor>
 					<integerValue />
-					<label>
-						<![CDATA[Arbeit fertig]]>
-					</label>
+					<label><![CDATA[Arbeit fertig]]></label>
 					<lastEnteredAsDefault />
 					<need>0</need>
 					<needLoad />
@@ -729,29 +412,19 @@
 					<valueMap />
 				</test.openmdx.datatypes1.ConfigItemT>
 			</configuration>
-			<contractTypeId>
-				<![CDATA[3RZUYTSAN8PGKJHX13D6GN9PR]]>
-			</contractTypeId>
+			<contractTypeId><![CDATA[3RZUYTSAN8PGKJHX13D6GN9PR]]></contractTypeId>
 			<copyOrderPositions>false</copyOrderPositions>
 			<createDispoPositionsWithQuantity />
 			<extendedProductClassificationId />
 			<inventoryBookings>0</inventoryBookings>
-			<name>
-				<![CDATA[Auftragsrapporte Gipserei]]>
-			</name>
-			<orderGroupId>
-				<![CDATA[xri://@openmdx*org.opencrx.kernel.contract1/provider/MASOFT/segment/Lifestock/contractGroup/90GYUNIYIO0DFI3ZIYY9T2CCI/contractFilter/L5BHAFY8V98F8JHX13D6GN9PR]]>
-			</orderGroupId>
+			<name><![CDATA[Auftragsrapporte Gipserei]]></name>
+			<orderGroupId><![CDATA[xri://@openmdx*org.opencrx.kernel.contract1/provider/MASOFT/segment/Lifestock/contractGroup/90GYUNIYIO0DFI3ZIYY9T2CCI/contractFilter/L5BHAFY8V98F8JHX13D6GN9PR]]></orderGroupId>
 			<orderGroupName />
 			<priority>4975</priority>
 			<productClassificationAutoId />
 			<productClassificationAutoName />
-			<productClassificationId>
-				<![CDATA[xri://@openmdx*org.opencrx.kernel.product1/provider/MASOFT/segment/Lifestock/productFilter/R58CVVIV6HN8KHH7VZF3EYVAI]]>
-			</productClassificationId>
-			<productClassificationName>
-				<![CDATA[Auftragsrapportierung Gipser]]>
-			</productClassificationName>
+			<productClassificationId><![CDATA[xri://@openmdx*org.opencrx.kernel.product1/provider/MASOFT/segment/Lifestock/productFilter/R58CVVIV6HN8KHH7VZF3EYVAI]]></productClassificationId>
+			<productClassificationName><![CDATA[Auftragsrapportierung Gipser]]></productClassificationName>
 			<relatedProductClassificationId />
 			<relatedProductClassificationName />
 			<relatedProductIsCustomerSpecific>false</relatedProductIsCustomerSpecific>
@@ -766,34 +439,22 @@
 			<calculationRuleName />
 			<canCreateOrder />
 			<canCreateRelatedProduct />
-			<clientGroupId>
-				<![CDATA[internal:207081]]>
-			</clientGroupId>
-			<clientGroupName>
-				<![CDATA[Alle Kunden]]>
-			</clientGroupName>
+			<clientGroupId><![CDATA[internal:207081]]></clientGroupId>
+			<clientGroupName><![CDATA[Alle Kunden]]></clientGroupName>
 			<configuration />
-			<contractTypeId>
-				<![CDATA[3WCE69FJ9TKH044871OWGPKBN]]>
-			</contractTypeId>
+			<contractTypeId><![CDATA[3WCE69FJ9TKH044871OWGPKBN]]></contractTypeId>
 			<copyOrderPositions />
 			<createDispoPositionsWithQuantity />
 			<extendedProductClassificationId />
 			<inventoryBookings />
-			<name>
-				<![CDATA[Transport Gülle]]>
-			</name>
+			<name><![CDATA[Transport Gülle]]></name>
 			<orderGroupId />
 			<orderGroupName />
 			<priority>20</priority>
 			<productClassificationAutoId />
 			<productClassificationAutoName />
-			<productClassificationId>
-				<![CDATA[xri://@openmdx*org.opencrx.kernel.product1/provider/MASOFT/segment/Lifestock/productFilter/9R60LBA4IP0PW44871OWGPKBN]]>
-			</productClassificationId>
-			<productClassificationName>
-				<![CDATA[Gülle]]>
-			</productClassificationName>
+			<productClassificationId><![CDATA[xri://@openmdx*org.opencrx.kernel.product1/provider/MASOFT/segment/Lifestock/productFilter/9R60LBA4IP0PW44871OWGPKBN]]></productClassificationId>
+			<productClassificationName><![CDATA[Gülle]]></productClassificationName>
 			<relatedProductClassificationId />
 			<relatedProductClassificationName />
 			<relatedProductIsCustomerSpecific />
@@ -808,34 +469,22 @@
 			<calculationRuleName />
 			<canCreateOrder />
 			<canCreateRelatedProduct />
-			<clientGroupId>
-				<![CDATA[internal:215832]]>
-			</clientGroupId>
-			<clientGroupName>
-				<![CDATA[eigener Betrieb]]>
-			</clientGroupName>
+			<clientGroupId><![CDATA[internal:215832]]></clientGroupId>
+			<clientGroupName><![CDATA[eigener Betrieb]]></clientGroupName>
 			<configuration />
-			<contractTypeId>
-				<![CDATA[3ZHVV9WMPS3JADQ4D1AVTM430]]>
-			</contractTypeId>
+			<contractTypeId><![CDATA[3ZHVV9WMPS3JADQ4D1AVTM430]]></contractTypeId>
 			<copyOrderPositions />
 			<createDispoPositionsWithQuantity />
 			<extendedProductClassificationId />
 			<inventoryBookings>0</inventoryBookings>
-			<name>
-				<![CDATA[Interne Arbeiten]]>
-			</name>
+			<name><![CDATA[Interne Arbeiten]]></name>
 			<orderGroupId />
 			<orderGroupName />
 			<priority>4930</priority>
 			<productClassificationAutoId />
 			<productClassificationAutoName />
-			<productClassificationId>
-				<![CDATA[xri://@openmdx*org.opencrx.kernel.product1/provider/MASOFT/segment/Lifestock/productFilter/32A9SL3SH8FL2DQ4D1AVTM430]]>
-			</productClassificationId>
-			<productClassificationName>
-				<![CDATA[Interne Arbeiten - sp]]>
-			</productClassificationName>
+			<productClassificationId><![CDATA[xri://@openmdx*org.opencrx.kernel.product1/provider/MASOFT/segment/Lifestock/productFilter/32A9SL3SH8FL2DQ4D1AVTM430]]></productClassificationId>
+			<productClassificationName><![CDATA[Interne Arbeiten - sp]]></productClassificationName>
 			<relatedProductClassificationId />
 			<relatedProductClassificationName />
 			<relatedProductIsCustomerSpecific>false</relatedProductIsCustomerSpecific>
@@ -850,32 +499,20 @@
 			<calculationRuleName />
 			<canCreateOrder />
 			<canCreateRelatedProduct />
-			<clientGroupId>
-				<![CDATA[internal:207081]]>
-			</clientGroupId>
-			<clientGroupName>
-				<![CDATA[Alle Kunden]]>
-			</clientGroupName>
+			<clientGroupId><![CDATA[internal:207081]]></clientGroupId>
+			<clientGroupName><![CDATA[Alle Kunden]]></clientGroupName>
 			<configuration />
-			<contractTypeId>
-				<![CDATA[96TWLE57FMY9044871OWGPKBN]]>
-			</contractTypeId>
+			<contractTypeId><![CDATA[96TWLE57FMY9044871OWGPKBN]]></contractTypeId>
 			<copyOrderPositions />
 			<createDispoPositionsWithQuantity />
 			<extendedProductClassificationId />
 			<inventoryBookings />
-			<name>
-				<![CDATA[Transport Ablad]]>
-			</name>
+			<name><![CDATA[Transport Ablad]]></name>
 			<orderGroupId />
 			<orderGroupName />
 			<priority>10</priority>
-			<productClassificationAutoId>
-				<![CDATA[xri://@openmdx*org.opencrx.kernel.product1/provider/MASOFT/segment/Lifestock/productFilter/R9UYGN4J48YQS44871OWGPKBN]]>
-			</productClassificationAutoId>
-			<productClassificationAutoName>
-				<![CDATA[Transportprodukte Ablad (Auto)]]>
-			</productClassificationAutoName>
+			<productClassificationAutoId><![CDATA[xri://@openmdx*org.opencrx.kernel.product1/provider/MASOFT/segment/Lifestock/productFilter/R9UYGN4J48YQS44871OWGPKBN]]></productClassificationAutoId>
+			<productClassificationAutoName><![CDATA[Transportprodukte Ablad (Auto)]]></productClassificationAutoName>
 			<productClassificationId />
 			<productClassificationName />
 			<relatedProductClassificationId />
@@ -892,34 +529,22 @@
 			<calculationRuleName />
 			<canCreateOrder />
 			<canCreateRelatedProduct />
-			<clientGroupId>
-				<![CDATA[internal:207081]]>
-			</clientGroupId>
-			<clientGroupName>
-				<![CDATA[Alle Kunden]]>
-			</clientGroupName>
+			<clientGroupId><![CDATA[internal:207081]]></clientGroupId>
+			<clientGroupName><![CDATA[Alle Kunden]]></clientGroupName>
 			<configuration />
-			<contractTypeId>
-				<![CDATA[97ZIPVSNCEG9W44871OWGPKBN]]>
-			</contractTypeId>
+			<contractTypeId><![CDATA[97ZIPVSNCEG9W44871OWGPKBN]]></contractTypeId>
 			<copyOrderPositions />
 			<createDispoPositionsWithQuantity />
 			<extendedProductClassificationId />
 			<inventoryBookings />
-			<name>
-				<![CDATA[Transport Schottenkonzentrat]]>
-			</name>
+			<name><![CDATA[Transport Schottenkonzentrat]]></name>
 			<orderGroupId />
 			<orderGroupName />
 			<priority>30</priority>
 			<productClassificationAutoId />
 			<productClassificationAutoName />
-			<productClassificationId>
-				<![CDATA[xri://@openmdx*org.opencrx.kernel.product1/provider/MASOFT/segment/Lifestock/productFilter/9R60LCZAH6PYC44871OWGPKBN]]>
-			</productClassificationId>
-			<productClassificationName>
-				<![CDATA[Schottenkonzentrat]]>
-			</productClassificationName>
+			<productClassificationId><![CDATA[xri://@openmdx*org.opencrx.kernel.product1/provider/MASOFT/segment/Lifestock/productFilter/9R60LCZAH6PYC44871OWGPKBN]]></productClassificationId>
+			<productClassificationName><![CDATA[Schottenkonzentrat]]></productClassificationName>
 			<relatedProductClassificationId />
 			<relatedProductClassificationName />
 			<relatedProductIsCustomerSpecific />
@@ -934,26 +559,18 @@
 			<calculationRuleName />
 			<canCreateOrder />
 			<canCreateRelatedProduct />
-			<clientGroupId>
-				<![CDATA[internal:207081]]>
-			</clientGroupId>
-			<clientGroupName>
-				<![CDATA[Alle Kunden]]>
-			</clientGroupName>
+			<clientGroupId><![CDATA[internal:207081]]></clientGroupId>
+			<clientGroupName><![CDATA[Alle Kunden]]></clientGroupName>
 			<configuration>
 				<test.openmdx.datatypes1.ConfigItemT index="0">
 					<booleanValue />
-					<configurationType>
-						<![CDATA[priceSale]]>
-					</configurationType>
+					<configurationType><![CDATA[priceSale]]></configurationType>
 					<dataType>4</dataType>
 					<dateTimeValue />
 					<decimalValue />
 					<editor>0</editor>
 					<integerValue />
-					<label>
-						<![CDATA[Verkauf]]>
-					</label>
+					<label><![CDATA[Verkauf]]></label>
 					<lastEnteredAsDefault />
 					<need>1</need>
 					<needLoad />
@@ -965,17 +582,13 @@
 				</test.openmdx.datatypes1.ConfigItemT>
 				<test.openmdx.datatypes1.ConfigItemT index="1">
 					<booleanValue />
-					<configurationType>
-						<![CDATA[pricePurchase]]>
-					</configurationType>
+					<configurationType><![CDATA[pricePurchase]]></configurationType>
 					<dataType>4</dataType>
 					<dateTimeValue />
 					<decimalValue />
 					<editor>5</editor>
 					<integerValue />
-					<label>
-						<![CDATA[Ankauf]]>
-					</label>
+					<label><![CDATA[Ankauf]]></label>
 					<lastEnteredAsDefault />
 					<need>1</need>
 					<needLoad />
@@ -987,17 +600,13 @@
 				</test.openmdx.datatypes1.ConfigItemT>
 				<test.openmdx.datatypes1.ConfigItemT index="2">
 					<booleanValue />
-					<configurationType>
-						<![CDATA[initialOperation]]>
-					</configurationType>
+					<configurationType><![CDATA[initialOperation]]></configurationType>
 					<dataType>5</dataType>
 					<dateTimeValue />
 					<decimalValue />
 					<editor>0</editor>
 					<integerValue />
-					<label>
-						<![CDATA[Inbetriebnahme]]>
-					</label>
+					<label><![CDATA[Inbetriebnahme]]></label>
 					<lastEnteredAsDefault />
 					<need>1</need>
 					<needLoad />
@@ -1009,17 +618,13 @@
 				</test.openmdx.datatypes1.ConfigItemT>
 				<test.openmdx.datatypes1.ConfigItemT index="3">
 					<booleanValue />
-					<configurationType>
-						<![CDATA[yearBuilt]]>
-					</configurationType>
+					<configurationType><![CDATA[yearBuilt]]></configurationType>
 					<dataType>1</dataType>
 					<dateTimeValue />
 					<decimalValue />
 					<editor>0</editor>
 					<integerValue />
-					<label>
-						<![CDATA[Baujahr]]>
-					</label>
+					<label><![CDATA[Baujahr]]></label>
 					<lastEnteredAsDefault />
 					<need>1</need>
 					<needLoad />
@@ -1030,27 +635,19 @@
 					<valueMap />
 				</test.openmdx.datatypes1.ConfigItemT>
 			</configuration>
-			<contractTypeId>
-				<![CDATA[9WT7SW6T1OKBO44871OWGPKBN]]>
-			</contractTypeId>
+			<contractTypeId><![CDATA[9WT7SW6T1OKBO44871OWGPKBN]]></contractTypeId>
 			<copyOrderPositions />
 			<createDispoPositionsWithQuantity />
 			<extendedProductClassificationId />
 			<inventoryBookings>0</inventoryBookings>
-			<name>
-				<![CDATA[Vermietung]]>
-			</name>
+			<name><![CDATA[Vermietung]]></name>
 			<orderGroupId />
 			<orderGroupName />
 			<priority>4935</priority>
 			<productClassificationAutoId />
 			<productClassificationAutoName />
-			<productClassificationId>
-				<![CDATA[xri://@openmdx*org.opencrx.kernel.product1/provider/MASOFT/segment/Lifestock/productFilter/RD87UO0QSXFQC44871OWGPKBN]]>
-			</productClassificationId>
-			<productClassificationName>
-				<![CDATA[Mietprodukte]]>
-			</productClassificationName>
+			<productClassificationId><![CDATA[xri://@openmdx*org.opencrx.kernel.product1/provider/MASOFT/segment/Lifestock/productFilter/RD87UO0QSXFQC44871OWGPKBN]]></productClassificationId>
+			<productClassificationName><![CDATA[Mietprodukte]]></productClassificationName>
 			<relatedProductClassificationId />
 			<relatedProductClassificationName />
 			<relatedProductIsCustomerSpecific />
@@ -1065,26 +662,18 @@
 			<calculationRuleName />
 			<canCreateOrder />
 			<canCreateRelatedProduct>false</canCreateRelatedProduct>
-			<clientGroupId>
-				<![CDATA[internal:207081]]>
-			</clientGroupId>
-			<clientGroupName>
-				<![CDATA[Alle Kunden]]>
-			</clientGroupName>
+			<clientGroupId><![CDATA[internal:207081]]></clientGroupId>
+			<clientGroupName><![CDATA[Alle Kunden]]></clientGroupName>
 			<configuration>
 				<test.openmdx.datatypes1.ConfigItemT index="0">
 					<booleanValue />
-					<configurationType>
-						<![CDATA[counter]]>
-					</configurationType>
+					<configurationType><![CDATA[counter]]></configurationType>
 					<dataType>4</dataType>
 					<dateTimeValue />
 					<decimalValue />
 					<editor>0</editor>
 					<integerValue />
-					<label>
-						<![CDATA[Zählerstand]]>
-					</label>
+					<label><![CDATA[Zählerstand]]></label>
 					<lastEnteredAsDefault />
 					<need>1</need>
 					<needLoad />
@@ -1096,17 +685,13 @@
 				</test.openmdx.datatypes1.ConfigItemT>
 				<test.openmdx.datatypes1.ConfigItemT index="1">
 					<booleanValue />
-					<configurationType>
-						<![CDATA[rating]]>
-					</configurationType>
+					<configurationType><![CDATA[rating]]></configurationType>
 					<dataType>0</dataType>
 					<dateTimeValue />
 					<decimalValue />
 					<editor>0</editor>
 					<integerValue />
-					<label>
-						<![CDATA[Beurteilung]]>
-					</label>
+					<label><![CDATA[Beurteilung]]></label>
 					<lastEnteredAsDefault />
 					<need>0</need>
 					<needLoad />
@@ -1114,23 +699,17 @@
 					<priority>2011</priority>
 					<stringValue />
 					<uom />
-					<valueMap>
-						<![CDATA[["gut","mittel","schlecht"]]]>
-					</valueMap>
+					<valueMap><![CDATA[["gut","mittel","schlecht"]]]></valueMap>
 				</test.openmdx.datatypes1.ConfigItemT>
 				<test.openmdx.datatypes1.ConfigItemT index="2">
 					<booleanValue />
-					<configurationType>
-						<![CDATA[location]]>
-					</configurationType>
+					<configurationType><![CDATA[location]]></configurationType>
 					<dataType>0</dataType>
 					<dateTimeValue />
 					<decimalValue />
 					<editor>2</editor>
 					<integerValue />
-					<label>
-						<![CDATA[Lagerplatz]]>
-					</label>
+					<label><![CDATA[Lagerplatz]]></label>
 					<lastEnteredAsDefault />
 					<need>1</need>
 					<needLoad />
@@ -1142,17 +721,13 @@
 				</test.openmdx.datatypes1.ConfigItemT>
 				<test.openmdx.datatypes1.ConfigItemT index="3">
 					<booleanValue />
-					<configurationType>
-						<![CDATA[referenceDate]]>
-					</configurationType>
+					<configurationType><![CDATA[referenceDate]]></configurationType>
 					<dataType>3</dataType>
 					<dateTimeValue />
 					<decimalValue />
 					<editor>0</editor>
 					<integerValue />
-					<label>
-						<![CDATA[Stichtag]]>
-					</label>
+					<label><![CDATA[Stichtag]]></label>
 					<lastEnteredAsDefault />
 					<need>1</need>
 					<needLoad />
@@ -1164,17 +739,13 @@
 				</test.openmdx.datatypes1.ConfigItemT>
 				<test.openmdx.datatypes1.ConfigItemT index="4">
 					<booleanValue />
-					<configurationType>
-						<![CDATA[realm]]>
-					</configurationType>
+					<configurationType><![CDATA[realm]]></configurationType>
 					<dataType>0</dataType>
 					<dateTimeValue />
 					<decimalValue />
 					<editor>0</editor>
 					<integerValue />
-					<label>
-						<![CDATA[Bereich]]>
-					</label>
+					<label><![CDATA[Bereich]]></label>
 					<lastEnteredAsDefault />
 					<need>1</need>
 					<needLoad />
@@ -1182,38 +753,24 @@
 					<priority>2012</priority>
 					<stringValue />
 					<uom />
-					<valueMap>
-						<![CDATA[["Garage Feldmatt", "Garage Hohenbühl"]]]>
-					</valueMap>
+					<valueMap><![CDATA[["Garage Feldmatt", "Garage Hohenbühl"]]]></valueMap>
 				</test.openmdx.datatypes1.ConfigItemT>
 			</configuration>
-			<contractTypeId>
-				<![CDATA[LJ62S1ZLAQJ8JP4I8ZW19BEF7]]>
-			</contractTypeId>
+			<contractTypeId><![CDATA[LJ62S1ZLAQJ8JP4I8ZW19BEF7]]></contractTypeId>
 			<copyOrderPositions>false</copyOrderPositions>
 			<createDispoPositionsWithQuantity />
 			<extendedProductClassificationId />
 			<inventoryBookings>2</inventoryBookings>
-			<name>
-				<![CDATA[Fahrzeugbau mit Lager-Regiearbeiten]]>
-			</name>
+			<name><![CDATA[Fahrzeugbau mit Lager-Regiearbeiten]]></name>
 			<orderGroupId />
 			<orderGroupName />
 			<priority>4955</priority>
 			<productClassificationAutoId />
 			<productClassificationAutoName />
-			<productClassificationId>
-				<![CDATA[xri://@openmdx*org.opencrx.kernel.product1/provider/MASOFT/segment/Lifestock/productFilter/R58CVVSQC1X44HH7VZF3EYVAI]]>
-			</productClassificationId>
-			<productClassificationName>
-				<![CDATA[Fahrzeugbau]]>
-			</productClassificationName>
-			<relatedProductClassificationId>
-				<![CDATA[xri://@openmdx*org.opencrx.kernel.product1/provider/MASOFT/segment/Lifestock/productFilter/R58CVW2LHM6ZOHH7VZF3EYVAI]]>
-			</relatedProductClassificationId>
-			<relatedProductClassificationName>
-				<![CDATA[Kundenobjekte]]>
-			</relatedProductClassificationName>
+			<productClassificationId><![CDATA[xri://@openmdx*org.opencrx.kernel.product1/provider/MASOFT/segment/Lifestock/productFilter/R58CVVSQC1X44HH7VZF3EYVAI]]></productClassificationId>
+			<productClassificationName><![CDATA[Fahrzeugbau]]></productClassificationName>
+			<relatedProductClassificationId><![CDATA[xri://@openmdx*org.opencrx.kernel.product1/provider/MASOFT/segment/Lifestock/productFilter/R58CVW2LHM6ZOHH7VZF3EYVAI]]></relatedProductClassificationId>
+			<relatedProductClassificationName><![CDATA[Kundenobjekte]]></relatedProductClassificationName>
 			<relatedProductIsCustomerSpecific>false</relatedProductIsCustomerSpecific>
 			<reportType>0</reportType>
 			<sticky>false</sticky>
@@ -1226,26 +783,18 @@
 			<calculationRuleName />
 			<canCreateOrder />
 			<canCreateRelatedProduct />
-			<clientGroupId>
-				<![CDATA[internal:207081]]>
-			</clientGroupId>
-			<clientGroupName>
-				<![CDATA[Alle Kunden]]>
-			</clientGroupName>
+			<clientGroupId><![CDATA[internal:207081]]></clientGroupId>
+			<clientGroupName><![CDATA[Alle Kunden]]></clientGroupName>
 			<configuration>
 				<test.openmdx.datatypes1.ConfigItemT index="0">
 					<booleanValue />
-					<configurationType>
-						<![CDATA[address]]>
-					</configurationType>
+					<configurationType><![CDATA[address]]></configurationType>
 					<dataType>0</dataType>
 					<dateTimeValue />
 					<decimalValue />
 					<editor>3</editor>
 					<integerValue />
-					<label>
-						<![CDATA[Rechnungsadresse]]>
-					</label>
+					<label><![CDATA[Rechnungsadresse]]></label>
 					<lastEnteredAsDefault />
 					<need>1</need>
 					<needLoad />
@@ -1256,27 +805,19 @@
 					<valueMap />
 				</test.openmdx.datatypes1.ConfigItemT>
 			</configuration>
-			<contractTypeId>
-				<![CDATA[LRROBTEH4AL7O44871OWGPKBN]]>
-			</contractTypeId>
+			<contractTypeId><![CDATA[LRROBTEH4AL7O44871OWGPKBN]]></contractTypeId>
 			<copyOrderPositions />
 			<createDispoPositionsWithQuantity />
 			<extendedProductClassificationId />
 			<inventoryBookings>2</inventoryBookings>
-			<name>
-				<![CDATA[SofortRechnung AmacosWeb]]>
-			</name>
+			<name><![CDATA[SofortRechnung AmacosWeb]]></name>
 			<orderGroupId />
 			<orderGroupName />
 			<priority>4970</priority>
 			<productClassificationAutoId />
 			<productClassificationAutoName />
-			<productClassificationId>
-				<![CDATA[xri://@openmdx*org.opencrx.kernel.product1/provider/MASOFT/segment/Lifestock/productFilter/3UH0C5ZKGRR3844871OWGPKBN]]>
-			</productClassificationId>
-			<productClassificationName>
-				<![CDATA[- Fahrzeugbau]]>
-			</productClassificationName>
+			<productClassificationId><![CDATA[xri://@openmdx*org.opencrx.kernel.product1/provider/MASOFT/segment/Lifestock/productFilter/3UH0C5ZKGRR3844871OWGPKBN]]></productClassificationId>
+			<productClassificationName><![CDATA[- Fahrzeugbau]]></productClassificationName>
 			<relatedProductClassificationId />
 			<relatedProductClassificationName />
 			<relatedProductIsCustomerSpecific />
@@ -1291,34 +832,22 @@
 			<calculationRuleName />
 			<canCreateOrder />
 			<canCreateRelatedProduct />
-			<clientGroupId>
-				<![CDATA[internal:215832]]>
-			</clientGroupId>
-			<clientGroupName>
-				<![CDATA[eigener Betrieb]]>
-			</clientGroupName>
+			<clientGroupId><![CDATA[internal:215832]]></clientGroupId>
+			<clientGroupName><![CDATA[eigener Betrieb]]></clientGroupName>
 			<configuration />
-			<contractTypeId>
-				<![CDATA[R3QRS2XFXL9T223YRMMIYUVJO]]>
-			</contractTypeId>
+			<contractTypeId><![CDATA[R3QRS2XFXL9T223YRMMIYUVJO]]></contractTypeId>
 			<copyOrderPositions>false</copyOrderPositions>
 			<createDispoPositionsWithQuantity />
 			<extendedProductClassificationId />
 			<inventoryBookings>3</inventoryBookings>
-			<name>
-				<![CDATA[Fahrzeugbau mit Lager-Lagerbestandeserfassung]]>
-			</name>
+			<name><![CDATA[Fahrzeugbau mit Lager-Lagerbestandeserfassung]]></name>
 			<orderGroupId />
 			<orderGroupName />
 			<priority>4945</priority>
 			<productClassificationAutoId />
 			<productClassificationAutoName />
-			<productClassificationId>
-				<![CDATA[xri://@openmdx*org.opencrx.kernel.product1/provider/MASOFT/segment/Lifestock/productFilter/R58CVVSQC1X44HH7VZF3EYVAI]]>
-			</productClassificationId>
-			<productClassificationName>
-				<![CDATA[Fahrzeugbau]]>
-			</productClassificationName>
+			<productClassificationId><![CDATA[xri://@openmdx*org.opencrx.kernel.product1/provider/MASOFT/segment/Lifestock/productFilter/R58CVVSQC1X44HH7VZF3EYVAI]]></productClassificationId>
+			<productClassificationName><![CDATA[Fahrzeugbau]]></productClassificationName>
 			<relatedProductClassificationId />
 			<relatedProductClassificationName />
 			<relatedProductIsCustomerSpecific>false</relatedProductIsCustomerSpecific>
@@ -1333,34 +862,22 @@
 			<calculationRuleName />
 			<canCreateOrder />
 			<canCreateRelatedProduct />
-			<clientGroupId>
-				<![CDATA[internal:207081]]>
-			</clientGroupId>
-			<clientGroupName>
-				<![CDATA[Alle Kunden]]>
-			</clientGroupName>
+			<clientGroupId><![CDATA[internal:207081]]></clientGroupId>
+			<clientGroupName><![CDATA[Alle Kunden]]></clientGroupName>
 			<configuration />
-			<contractTypeId>
-				<![CDATA[RAQX8TRPTFA3NULNYNAXPZZIW]]>
-			</contractTypeId>
+			<contractTypeId><![CDATA[RAQX8TRPTFA3NULNYNAXPZZIW]]></contractTypeId>
 			<copyOrderPositions />
 			<createDispoPositionsWithQuantity />
 			<extendedProductClassificationId />
 			<inventoryBookings>0</inventoryBookings>
-			<name>
-				<![CDATA[Regie-Lohnarbeiten]]>
-			</name>
+			<name><![CDATA[Regie-Lohnarbeiten]]></name>
 			<orderGroupId />
 			<orderGroupName />
 			<priority>4980</priority>
 			<productClassificationAutoId />
 			<productClassificationAutoName />
-			<productClassificationId>
-				<![CDATA[xri://@openmdx*org.opencrx.kernel.product1/provider/MASOFT/segment/Lifestock/productFilter/R58CVWCGN6GV8HH7VZF3EYVAI]]>
-			</productClassificationId>
-			<productClassificationName>
-				<![CDATA[Lohnarbeiten]]>
-			</productClassificationName>
+			<productClassificationId><![CDATA[xri://@openmdx*org.opencrx.kernel.product1/provider/MASOFT/segment/Lifestock/productFilter/R58CVWCGN6GV8HH7VZF3EYVAI]]></productClassificationId>
+			<productClassificationName><![CDATA[Lohnarbeiten]]></productClassificationName>
 			<relatedProductClassificationId />
 			<relatedProductClassificationName />
 			<relatedProductIsCustomerSpecific />
@@ -1380,17 +897,13 @@
 			<configuration>
 				<test.openmdx.datatypes1.ConfigItemT index="0">
 					<booleanValue>false</booleanValue>
-					<configurationType>
-						<![CDATA[closeOrder]]>
-					</configurationType>
+					<configurationType><![CDATA[closeOrder]]></configurationType>
 					<dataType>2</dataType>
 					<dateTimeValue />
 					<decimalValue />
 					<editor>0</editor>
 					<integerValue />
-					<label>
-						<![CDATA[Auftrag abschliessen]]>
-					</label>
+					<label><![CDATA[Auftrag abschliessen]]></label>
 					<lastEnteredAsDefault />
 					<need>0</need>
 					<needLoad />
@@ -1401,29 +914,19 @@
 					<valueMap />
 				</test.openmdx.datatypes1.ConfigItemT>
 			</configuration>
-			<contractTypeId>
-				<![CDATA[RBOB6IUHYYAXWU5C6O0T5S0TC]]>
-			</contractTypeId>
+			<contractTypeId><![CDATA[RBOB6IUHYYAXWU5C6O0T5S0TC]]></contractTypeId>
 			<copyOrderPositions />
 			<createDispoPositionsWithQuantity>false</createDispoPositionsWithQuantity>
 			<extendedProductClassificationId />
 			<inventoryBookings />
-			<name>
-				<![CDATA[Disponiert]]>
-			</name>
-			<orderGroupId>
-				<![CDATA[xri://@openmdx*org.opencrx.kernel.contract1/provider/MASOFT/segment/Lifestock/contractGroup/3YA4FKV14L1B8U5C6O0T5S0TC/contractFilter/L5MXF9UU6MEP0U5C6O0T5S0TC]]>
-			</orderGroupId>
+			<name><![CDATA[Disponiert]]></name>
+			<orderGroupId><![CDATA[xri://@openmdx*org.opencrx.kernel.contract1/provider/MASOFT/segment/Lifestock/contractGroup/3YA4FKV14L1B8U5C6O0T5S0TC/contractFilter/L5MXF9UU6MEP0U5C6O0T5S0TC]]></orderGroupId>
 			<orderGroupName />
 			<priority />
 			<productClassificationAutoId />
 			<productClassificationAutoName />
-			<productClassificationId>
-				<![CDATA[xri://@openmdx*org.opencrx.kernel.product1/provider/MASOFT/segment/Lifestock/productFilter/9903DOYSG8CMC44871OWGPKBN]]>
-			</productClassificationId>
-			<productClassificationName>
-				<![CDATA[Service Drucker-Repartur]]>
-			</productClassificationName>
+			<productClassificationId><![CDATA[xri://@openmdx*org.opencrx.kernel.product1/provider/MASOFT/segment/Lifestock/productFilter/9903DOYSG8CMC44871OWGPKBN]]></productClassificationId>
+			<productClassificationName><![CDATA[Service Drucker-Repartur]]></productClassificationName>
 			<relatedProductClassificationId />
 			<relatedProductClassificationName />
 			<relatedProductIsCustomerSpecific />
@@ -1443,17 +946,13 @@
 			<configuration>
 				<test.openmdx.datatypes1.ConfigItemT index="0">
 					<booleanValue>false</booleanValue>
-					<configurationType>
-						<![CDATA[closeOrder]]>
-					</configurationType>
+					<configurationType><![CDATA[closeOrder]]></configurationType>
 					<dataType>2</dataType>
 					<dateTimeValue />
 					<decimalValue />
 					<editor>0</editor>
 					<integerValue />
-					<label>
-						<![CDATA[Auftrag abschliessen]]>
-					</label>
+					<label><![CDATA[Auftrag abschliessen]]></label>
 					<lastEnteredAsDefault />
 					<need>0</need>
 					<needLoad />
@@ -1464,19 +963,13 @@
 					<valueMap />
 				</test.openmdx.datatypes1.ConfigItemT>
 			</configuration>
-			<contractTypeId>
-				<![CDATA[RNK1IN819AK8623YRMMIYUVJO]]>
-			</contractTypeId>
+			<contractTypeId><![CDATA[RNK1IN819AK8623YRMMIYUVJO]]></contractTypeId>
 			<copyOrderPositions>true</copyOrderPositions>
 			<createDispoPositionsWithQuantity />
 			<extendedProductClassificationId />
 			<inventoryBookings>0</inventoryBookings>
-			<name>
-				<![CDATA[Fahrzeugbau mit Lager-Bestellung einlagern]]>
-			</name>
-			<orderGroupId>
-				<![CDATA[xri://@openmdx*org.opencrx.kernel.contract1/provider/MASOFT/segment/Lifestock/contractGroup/3YN2ZSL5JRJDY23YRMMIYUVJO/contractFilter/RTQVQ3WW4Y50M23YRMMIYUVJO]]>
-			</orderGroupId>
+			<name><![CDATA[Fahrzeugbau mit Lager-Bestellung einlagern]]></name>
+			<orderGroupId><![CDATA[xri://@openmdx*org.opencrx.kernel.contract1/provider/MASOFT/segment/Lifestock/contractGroup/3YN2ZSL5JRJDY23YRMMIYUVJO/contractFilter/RTQVQ3WW4Y50M23YRMMIYUVJO]]></orderGroupId>
 			<orderGroupName />
 			<priority>4940</priority>
 			<productClassificationAutoId />
@@ -1497,34 +990,22 @@
 			<calculationRuleName />
 			<canCreateOrder />
 			<canCreateRelatedProduct />
-			<clientGroupId>
-				<![CDATA[internal:215832]]>
-			</clientGroupId>
-			<clientGroupName>
-				<![CDATA[eigener Betrieb]]>
-			</clientGroupName>
+			<clientGroupId><![CDATA[internal:215832]]></clientGroupId>
+			<clientGroupName><![CDATA[eigener Betrieb]]></clientGroupName>
 			<configuration />
-			<contractTypeId>
-				<![CDATA[RQS3E7JUGGNACJHX13D6GN9PR]]>
-			</contractTypeId>
+			<contractTypeId><![CDATA[RQS3E7JUGGNACJHX13D6GN9PR]]></contractTypeId>
 			<copyOrderPositions>false</copyOrderPositions>
 			<createDispoPositionsWithQuantity />
 			<extendedProductClassificationId />
 			<inventoryBookings>1</inventoryBookings>
-			<name>
-				<![CDATA[Fahrzeugbau mit Lager-Einlagerung]]>
-			</name>
+			<name><![CDATA[Fahrzeugbau mit Lager-Einlagerung]]></name>
 			<orderGroupId />
 			<orderGroupName />
 			<priority>4950</priority>
 			<productClassificationAutoId />
 			<productClassificationAutoName />
-			<productClassificationId>
-				<![CDATA[xri://@openmdx*org.opencrx.kernel.product1/provider/MASOFT/segment/Lifestock/productFilter/3UH0C5ZKGRR3844871OWGPKBN]]>
-			</productClassificationId>
-			<productClassificationName>
-				<![CDATA[- Fahrzeugbau]]>
-			</productClassificationName>
+			<productClassificationId><![CDATA[xri://@openmdx*org.opencrx.kernel.product1/provider/MASOFT/segment/Lifestock/productFilter/3UH0C5ZKGRR3844871OWGPKBN]]></productClassificationId>
+			<productClassificationName><![CDATA[- Fahrzeugbau]]></productClassificationName>
 			<relatedProductClassificationId />
 			<relatedProductClassificationName />
 			<relatedProductIsCustomerSpecific>false</relatedProductIsCustomerSpecific>
