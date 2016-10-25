@@ -235,6 +235,7 @@ public class RestParser {
      * 
      * @throws ServiceException
      */
+    @SuppressWarnings("unused")
     public static MappedRecord parseRequest(
         RestSource source, 
         Path xri
@@ -243,16 +244,18 @@ public class RestParser {
             StandardHandler handler = new StandardHandler(source);
             XMLReader reader = RestParser.getReader(source);
             reader.setContentHandler(handler);
-            Reader is = source.getBody().getCharacterStream();
-//            if(is != null) {
-//                int c;
-//                StringBuilder s = new StringBuilder();
-//                while((c = is.read()) != -1) {
-//                    s.append((char)c);
-//                }
-//                System.out.println(s);
-//                source.getBody().setCharacterStream(new StringReader(s.toString()));
-//            }
+            if(false) {
+                Reader is = source.getBody().getCharacterStream();
+                if(is != null) {
+                    int c;
+                    StringBuilder s = new StringBuilder();
+                    while((c = is.read()) != -1) {
+                        s.append((char)c);
+                    }
+                    System.out.println(s);
+                    source.getBody().setCharacterStream(new StringReader(s.toString()));
+                }
+            }
             reader.parse(source.getBody());
             source.close();
             return handler.getValue(xri);
@@ -271,6 +274,7 @@ public class RestParser {
      * 
      * @throws ServiceException
      */
+    @SuppressWarnings("unused")
     public static void parseResponse(
         Record target, 
         RestSource source
@@ -279,6 +283,18 @@ public class RestParser {
             StandardHandler handler = new StandardHandler(target, source);
             XMLReader reader = RestParser.getReader(source);
             reader.setContentHandler(handler);
+            if(false) {
+                InputStream is = source.getBody().getByteStream();
+                if(is != null) {
+                    int c;
+                    StringBuilder s = new StringBuilder();
+                    while((c = is.read()) != -1) {
+                        s.append((char)c);
+                    }
+                    System.out.println(s);
+                    source.getBody().setCharacterStream(new StringReader(s.toString()));
+                }
+            }
             reader.parse(source.getBody());
             source.close();
         } catch (IOException exception) {
@@ -519,11 +535,12 @@ public class RestParser {
                     } else if (this.target instanceof MessageRecord) {
                         ((MessageRecord)this.target).setResourceIdentifier(this.source.getXRI(this.href));
                         ((MessageRecord)this.target).setBody((MappedRecord) this.values.peekLast());
+                        nestedStructEnd = isStructEnding();
                         this.values.pop();
-                    } else if(this.values.size() > 1 && isStructureType(this.values.peek().getRecordName())) {
+                    } else if(isStructEnding()) {
                         // pop struct
-                        this.values.pop();
                         nestedStructEnd = true;
+                        this.values.pop();
                     }
                 } else if(ITEM_TAG.equals(name)) { 
                     propagateData();
@@ -562,6 +579,17 @@ public class RestParser {
             }
             this.nestedStructEnd = nestedStructEnd;
             this.nestedStructFieldStart = false;
+        }
+        
+        /**
+         * Tells whether struct has been added by startElement()
+         * 
+         * @return <code>true</code> if struct has been added by startElement()
+         * @throws SAXException
+         */
+        private boolean isStructEnding(
+        ) throws SAXException {
+            return this.values.size() > 1 && isStructureType(this.values.peek().getRecordName());
         }
 
         /**
