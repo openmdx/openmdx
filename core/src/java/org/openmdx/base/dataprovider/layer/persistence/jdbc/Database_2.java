@@ -199,6 +199,7 @@ import org.w3c.spi.DatatypeFactories;
  * Insert the following line at the location in your code where you want to
  * start logging JDBC calls: DriverManager.setLogStream(System.out);
  */
+@SuppressWarnings({"rawtypes", "unchecked"})
 public class Database_2 extends AbstractRestPort implements Database_1_0, DataTypes {
 
     /**
@@ -1191,7 +1192,7 @@ public class Database_2 extends AbstractRestPort implements Database_1_0, DataTy
                 "can not get connection manager"
             );
         }
-        return this.dataSource.get(0);
+        return this.dataSource.get(Integer.valueOf(0));
     }
     
     /**
@@ -5329,10 +5330,10 @@ public class Database_2 extends AbstractRestPort implements Database_1_0, DataTy
                         // NOT LIKE clause for each path pattern
                         int ii = 0;
                         for(
-                            Iterator i = matchingTypes.iterator();
+                            Iterator<?> i = matchingTypes.iterator();
                             i.hasNext();
                             ii++
-                            ) {
+                        ) {
                             Path type = (Path)i.next();
                             if(ii > 0) {
                                 clause.append(" AND ");
@@ -6683,6 +6684,7 @@ public class Database_2 extends AbstractRestPort implements Database_1_0, DataTy
      */
     public class RestInteraction extends AbstractRestInteraction {
 
+        @SuppressWarnings("synthetic-access")
         public RestInteraction(
             RestConnection connection
         ) throws ResourceException {
@@ -7078,7 +7080,7 @@ public class Database_2 extends AbstractRestPort implements Database_1_0, DataTy
                                 ((pos = clause.indexOf("?", pos)) >= 0)
                             ) {
                                 int placeHolderEndPos = pos + 2;
-                                while(Character.isDigit(clause.charAt(placeHolderEndPos)) && placeHolderEndPos < clause.length()) {
+                                while(placeHolderEndPos < clause.length() && Character.isDigit(clause.charAt(placeHolderEndPos))) {
                                     placeHolderEndPos++;
                                 }
                                 int index = Integer.valueOf(clause.substring(pos + 2, placeHolderEndPos)).intValue();
@@ -7244,7 +7246,7 @@ public class Database_2 extends AbstractRestPort implements Database_1_0, DataTy
                         // get selected objects
                         List<ObjectRecord> objects = new ArrayList<ObjectRecord>();
                         int replyPosition = request.getPosition() == null ? 0 : request.getPosition().intValue();
-                        if(request.getPosition() != null && request.getPosition() < 0) {
+                        if(request.getPosition() != null && request.getPosition().longValue() < 0) {
                             if(requestedSize > replyPosition) requestedSize = replyPosition + 1;
                             replyPosition = replyPosition + 1 - requestedSize;
                         }
@@ -7386,7 +7388,7 @@ public class Database_2 extends AbstractRestPort implements Database_1_0, DataTy
                         // Calculate context.TOTAL only when iterating
                         if(request.getResourceIdentifier().isContainerPath()) {      
                             // if !hasMore context.TOTAL = request.position() + objects.size()
-                            long position = request.getPosition() == null ? 0L : request.getPosition();
+                            long position = request.getPosition() == null ? 0L : request.getPosition().longValue();
                             if(!hasMore && ((position == 0) || !objects.isEmpty())) {
                                 reply.setTotal(position + objects.size());
                             }
