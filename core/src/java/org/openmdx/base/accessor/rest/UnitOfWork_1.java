@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2013, OMEX AG, Switzerland
+ * Copyright (c) 2004-2017, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -54,6 +54,7 @@ import java.util.Date;
 import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.jdo.Constants;
 import javax.jdo.JDODataStoreException;
@@ -76,10 +77,10 @@ import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.persistence.cci.Synchronization;
-import org.openmdx.base.persistence.spi.UnitOfWork;
 import org.openmdx.base.persistence.cci.UserObjects;
 import org.openmdx.base.persistence.spi.AbstractPersistenceManagerFactory;
 import org.openmdx.base.persistence.spi.SharedObjects;
+import org.openmdx.base.persistence.spi.UnitOfWork;
 import org.openmdx.base.text.conversion.UUIDConversion;
 import org.openmdx.base.transaction.LocalUserTransaction;
 import org.openmdx.base.transaction.Status;
@@ -100,13 +101,16 @@ public class UnitOfWork_1 implements Serializable, UnitOfWork {
      * @param persistenceManager
      * @param connection
      * @param aspectSpecificContexts
+     * @param threadSafe tells, whether the unit of work instance shall be thread safe
+     * (e.g. when not providing a separate unit of work per thread)
      * 
      * @throws JDODataStoreException  
      */
     UnitOfWork_1(
         DataObjectManager_1 persistenceManager,
         Connection connection,
-        DataObjectManager_1.AspectObjectDispatcher aspectSpecificContexts
+        DataObjectManager_1.AspectObjectDispatcher aspectSpecificContexts, 
+        boolean threadSafe
     ){
         this.dataObjectManager = persistenceManager;
         this.connection = connection;
@@ -122,6 +126,13 @@ public class UnitOfWork_1 implements Serializable, UnitOfWork {
         this.setIsolationLevel(
             persistenceManagerFactory.getTransactionIsolationLevel()
         );
+        if(threadSafe) {
+            this.members = Collections.synchronizedList(new ArrayList<DataObject_1>());
+            this.states = new ConcurrentHashMap<DataObject_1,TransactionalState_1>();
+        } else {
+            this.members = new ArrayList<DataObject_1>();
+            this.states = new IdentityHashMap<DataObject_1,TransactionalState_1>();
+        }
     }
 
     /**
@@ -152,13 +163,12 @@ public class UnitOfWork_1 implements Serializable, UnitOfWork {
     /**
      * The members of this unit of work
      */
-    protected final List<DataObject_1> members = new ArrayList<DataObject_1>();
+    protected final List<DataObject_1> members ;
 
     /**
      * The thread local information of an object
      */
-    protected final Map<DataObject_1,TransactionalState_1> states = 
-        new IdentityHashMap<DataObject_1,TransactionalState_1>();
+    protected final Map<DataObject_1,TransactionalState_1> states;
         
     /**
      * The transactional interaction

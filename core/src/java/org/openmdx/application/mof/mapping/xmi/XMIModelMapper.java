@@ -201,12 +201,24 @@ public class XMIModelMapper implements StringTable {
         Object elementValue
     ) throws XMLStreamException{
         if(elementValue instanceof Path) {
-            this.pw.writeCharacters(((Path)elementValue).toXRI());
+            writeValue((Path)elementValue);
         } else if (elementValue instanceof DataObject_1_0) {
-            this.pw.writeCharacters(((DataObject_1_0)elementValue).jdoGetObjectId().toXRI());
+            writeValue(((DataObject_1_0)elementValue).jdoGetObjectId());
+        } else if (elementValue instanceof ModelElement_1_0) {
+            writeValue(((ModelElement_1_0)elementValue).jdoGetObjectId());
         } else {
             this.pw.writeCharacters(elementValue.toString());
         }
+    }
+
+    /**
+     * @param xri
+     * @throws XMLStreamException
+     */
+    private void writeValue(
+        final Path xri
+    ) throws XMLStreamException {
+        this.pw.writeCharacters(xri.toXRI());
     }
     
    /**
@@ -394,7 +406,6 @@ public class XMIModelMapper implements StringTable {
             this.writeElement("maxLength", attributeDef.objGetValue("maxLength"));
             this.writeElement("container", attributeDef.getContainer());
             if(this.derivedFeatures) {
-                this.writeElement("content", attributeDef.objGetList("content"));
                 this.writeElement("name", attributeDef.getName());
                 this.writeElement("qualifiedName", attributeDef.getQualifiedName());
             }
@@ -436,7 +447,6 @@ public class XMIModelMapper implements StringTable {
             this.writeElement("multiplicity", structureFieldDef.getMultiplicity());
             this.writeElement("container", structureFieldDef.getContainer());
             if(this.derivedFeatures) {
-                this.writeElement("content", structureFieldDef.objGetList("content"));
                 this.writeElement("name", structureFieldDef.getName());
                 this.writeElement("qualifiedName", structureFieldDef.getQualifiedName());
             }
@@ -482,10 +492,9 @@ public class XMIModelMapper implements StringTable {
             this.writeElement("scope", operationDef.objGetValue("scope"));
             this.writeElement("visibility", operationDef.objGetValue("visibility"));
             this.writeElement("exception", operationDef.objGetList("exception"));
-            this.writeElementEncoded("semantics", operationDef.objGetList("semantics"));
+            this.writeElement("semantics", operationDef.objGetValue("semantics"));
             this.writeElement("isQuery", operationDef.objGetValue("isQuery"));
             if(this.derivedFeatures) {
-                this.writeElement("feature", operationDef.objGetList("feature"));
                 this.writeElement("content", operationDef.objGetList("content"));
             }
             this.pw.writeEndElement();
@@ -528,7 +537,6 @@ public class XMIModelMapper implements StringTable {
             this.writeElement("scope", exceptionDef.objGetValue("scope"));
             this.writeElement("visibility", exceptionDef.objGetValue("visibility"));
             if(this.derivedFeatures) {
-                this.writeElement("feature", exceptionDef.objGetList("feature"));
                 this.writeElement("content", exceptionDef.objGetList("content"));
             }
             this.pw.writeEndElement();
@@ -561,7 +569,6 @@ public class XMIModelMapper implements StringTable {
             }
             this.writeElement("container", parameterDef.getContainer());
             if(this.derivedFeatures) {
-                this.writeElement("content", parameterDef.objGetList("content"));
                 this.writeElement("name", parameterDef.getName());
                 this.writeElement("qualifiedName", parameterDef.getQualifiedName());
             }
@@ -650,7 +657,6 @@ public class XMIModelMapper implements StringTable {
             this.writeElement("qualifierType", associationEndDef.objGetList("qualifierType"));
             this.writeElement("container", associationEndDef.getContainer());
             if(this.derivedFeatures) {
-                this.writeElement("content", associationEndDef.objGetList("content"));
                 this.writeElement("name", associationEndDef.getName());
                 this.writeElement("qualifiedName", associationEndDef.getQualifiedName());
             }
@@ -686,7 +692,6 @@ public class XMIModelMapper implements StringTable {
             }
             this.writeElement("container", referenceDef.getContainer());
             if(this.derivedFeatures) {
-                this.writeElement("content", referenceDef.objGetList("content"));
                 this.writeElement("name", referenceDef.getName());
                 this.writeElement("qualifiedName", referenceDef.getQualifiedName());
             }
@@ -809,8 +814,6 @@ public class XMIModelMapper implements StringTable {
                 writeElement("reference", structDef.objGetMap("reference"));
                 writeElement("operation", structDef.objGetMap("operation"));
                 writeElement("field", structDef.objGetMap("field"));
-                writeElement("allFeature", structDef.objGetMap("allFeature"));
-                writeElement("allFeatureWithSubtype", structDef.objGetMap("allFeatureWithSubtype"));
             }
             this.pw.writeEndElement();
             this.pw.writeEmptyElement("_content");

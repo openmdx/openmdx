@@ -1,89 +1,57 @@
 /*
- * $Header: /cvsroot/openmdx/core/src/java/org/openmdx/uses/org/apache/commons/fileupload/FileUploadException.java,v 1.5 2007/10/10 16:06:13 hburger Exp $
- * $Revision: 1.5 $
- * $Date: 2007/10/10 16:06:13 $
- *
+ * ====================================================================
+ * Project:     openMDX/Core, http://www.openmdx.org/
  * ====================================================================
  *
- * The Apache Software License, Version 1.1
+ * This software has been copied from its original 
+ * org.apache.commons.fileupload namespace to the 
+ * org.openmdx.uses.org.apache.commons.fileupload namespace in order 
+ * to be used by openMDX based applications. 
+ * 
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
  *
- * Copyright (c) 2001-2003 The Apache Software Foundation.  All rights
- * reserved.
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- *
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- *
- * 3. The end-user documentation included with the redistribution, if
- *    any, must include the following acknowlegement:
- *       "This product includes software developed by the
- *        Apache Software Foundation (http://www.apache.org/)."
- *    Alternately, this acknowlegement may appear in the software itself,
- *    if and wherever such third-party acknowlegements normally appear.
- *
- * 4. The names "The Jakarta Project", "Commons", and "Apache Software
- *    Foundation" must not be used to endorse or promote products derived
- *    from this software without prior written permission. For written
- *    permission, please contact apache@apache.org.
- *
- * 5. Products derived from this software may not be called "Apache"
- *    nor may "Apache" appear in their names without prior written
- *    permission of the Apache Group.
- *
- * THIS SOFTWARE IS PROVIDED ``AS IS'' AND ANY EXPRESSED OR IMPLIED
- * WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
- * OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED.  IN NO EVENT SHALL THE APACHE SOFTWARE FOUNDATION OR
- * ITS CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
- * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
- * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF
- * USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
- * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
- * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
- * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
- * SUCH DAMAGE.
- * ====================================================================
- *
- * This software consists of voluntary contributions made by many
- * individuals on behalf of the Apache Software Foundation.  For more
- * information on the Apache Software Foundation, please see
- * <http://www.apache.org/>.
- *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
-
-
 package org.openmdx.uses.org.apache.commons.fileupload;
 
+import java.io.PrintStream;
+import java.io.PrintWriter;
 
 /**
  * Exception for errors encountered while processing the request.
  *
- * @author <a href="mailto:jmcnally@collab.net">John McNally</a>
- * @version $Id: FileUploadException.java,v 1.5 2007/10/10 16:06:13 hburger Exp $
+ * @version $Id: FileUploadException.java 1454690 2013-03-09 12:08:48Z simonetripodi $
  */
-public class FileUploadException
-    extends Exception
-{
+public class FileUploadException extends Exception {
 
     /**
-     * 
+     * Serial version UID, being used, if the exception
+     * is serialized.
      */
-    private static final long serialVersionUID = 3617576007067316275L;
+    private static final long serialVersionUID = 8881893724388807504L;
+
+    /**
+     * The exceptions cause. We overwrite the cause of
+     * the super class, which isn't available in Java 1.3.
+     */
+    private final Throwable cause;
 
     /**
      * Constructs a new <code>FileUploadException</code> without message.
      */
-    public FileUploadException()
-    {
-        super();
+    public FileUploadException() {
+        this(null, null);
     }
 
     /**
@@ -92,8 +60,57 @@ public class FileUploadException
      *
      * @param msg the error message.
      */
-    public FileUploadException(String msg)
-    {
-        super(msg);
+    public FileUploadException(final String msg) {
+        this(msg, null);
     }
+
+    /**
+     * Creates a new <code>FileUploadException</code> with the given
+     * detail message and cause.
+     *
+     * @param msg The exceptions detail message.
+     * @param cause The exceptions cause.
+     */
+    public FileUploadException(String msg, Throwable cause) {
+        super(msg);
+        this.cause = cause;
+    }
+
+    /**
+     * Prints this throwable and its backtrace to the specified print stream.
+     *
+     * @param stream <code>PrintStream</code> to use for output
+     */
+    @Override
+    public void printStackTrace(PrintStream stream) {
+        super.printStackTrace(stream);
+        if (cause != null) {
+            stream.println("Caused by:");
+            cause.printStackTrace(stream);
+        }
+    }
+
+    /**
+     * Prints this throwable and its backtrace to the specified
+     * print writer.
+     *
+     * @param writer <code>PrintWriter</code> to use for output
+     */
+    @Override
+    public void printStackTrace(PrintWriter writer) {
+        super.printStackTrace(writer);
+        if (cause != null) {
+            writer.println("Caused by:");
+            cause.printStackTrace(writer);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Throwable getCause() {
+        return cause;
+    }
+
 }

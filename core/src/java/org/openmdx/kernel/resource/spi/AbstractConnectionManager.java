@@ -47,17 +47,15 @@
  */
 package org.openmdx.kernel.resource.spi;
 
+import java.util.Collections;
 import java.util.Set;
 
-import javax.resource.NotSupportedException;
 import javax.resource.ResourceException;
 import javax.resource.spi.ConnectionManager;
 import javax.resource.spi.ConnectionRequestInfo;
 import javax.resource.spi.ManagedConnection;
 import javax.resource.spi.ManagedConnectionFactory;
 import javax.security.auth.Subject;
-
-import org.openmdx.kernel.loading.Classes;
 
 /**
  * Abstract Connection Manager
@@ -66,7 +64,7 @@ public abstract class AbstractConnectionManager
     implements ConnectionManager 
 {
 
-    /**
+	/**
      * Constructor
      * 
      * @param credentials
@@ -79,46 +77,21 @@ public abstract class AbstractConnectionManager
         this.credentials = credentials;
         this.connectionClass = null;
     }
-
     
     /**
      * Constructor
-     * 
-     * @param credentials
-     * @param connectionClass
-     * 
-     * @throws ResourceException
      */
     protected AbstractConnectionManager(
-        Set<?> credentials,
         Class<?> connectionClass
     ){
-        this.credentials = credentials;
+        this.credentials = Collections.emptySet();
         this.connectionClass = connectionClass;
-    }
-
-    /**
-     * Constructor
-     * 
-     * @param credentials
-     * @param connectionClass
-     * 
-     * @throws ResourceException
-     */
-    protected AbstractConnectionManager(
-        Set<?> credentials,
-        String connectionClass
-    ) throws ResourceException{
-        this(
-           credentials,
-           getConnectionClass(connectionClass)
-        );
     }
 
     /**
      * Implements <code>Serializable</code>
      */
-    private static final long serialVersionUID = 5591933870762949430L;
+	private static final long serialVersionUID = -4734689743247760003L;
 
     /**
      * @serial the Subject's private credentials
@@ -130,34 +103,6 @@ public abstract class AbstractConnectionManager
      */
     private final Class<?> connectionClass;
 
-    /**
-     * A subjects credentials go lost during a serialization/deserialization 
-     * sequence.
-     */
-    private transient Subject subject = null;
-    
-    /**
-     * Return the class with the given name
-     * 
-     * @param name the name of the class to be retrieved
-     * 
-     * @return the corrsponding class
-     * 
-     * @throws ResourceException 
-     */
-    private static Class<?> getConnectionClass(
-        String name
-    ) throws ResourceException{
-        try {
-            return Classes.getApplicationClass(name);
-        } catch (Exception exception) {
-            throw toResourceException(
-                exception, 
-                "Connection manager could not load connection class"
-            );
-        }
-    }
-    
     /**
      * Convert an exception to a resource exception
      * 
@@ -199,26 +144,11 @@ public abstract class AbstractConnectionManager
      */
     protected Subject getSubject(
     ){
-        if(this.subject == null) {
-            this.subject = new Subject();
-            this.subject.getPrivateCredentials().addAll(this.credentials);
-        }
-        return this.subject;
+    	final Subject subject = new Subject();
+        subject.getPrivateCredentials().addAll(this.credentials);
+        return subject;
     }
     
-    /**
-     * This method must be overriden by a sub-class unless its own 
-     * allocateConnection implementation does not need it. 
-     *  
-     * @return the set of managed connections.
-     */
-    protected Set<ManagedConnection> getManagedConnections(
-    ) throws ResourceException {
-        throw new NotSupportedException(
-           "The getManagedConnections method must be overriden by a sub-class"
-        );
-    }
-
     /**
      * Allocate a managed connection
      * 
@@ -243,9 +173,6 @@ public abstract class AbstractConnectionManager
 
     /**
      * Allocate a managed connection
-     * 
-     * @param managedConnections set of managed conections
-     * @param subject
      * @param managedConnectionFactory
      * @param connectionRequestInfo
      * 
@@ -254,9 +181,7 @@ public abstract class AbstractConnectionManager
      * @throws ResourceException
      */
     protected abstract ManagedConnection allocateMangedConnection(
-        Set<ManagedConnection> managedConnections,
-        Subject subject,
-        ManagedConnectionFactory managedConnectionFactory, 
+        ManagedConnectionFactory managedConnectionFactory,
         ConnectionRequestInfo connectionRequestInfo
     ) throws ResourceException;
 
@@ -267,20 +192,19 @@ public abstract class AbstractConnectionManager
         ManagedConnectionFactory managedConnectionFactory,
         ConnectionRequestInfo connectionRequestInfo
     ) throws ResourceException {
-        Subject subject = getSubject();
-        ManagedConnection managedConnection = allocateMangedConnection(
-            getManagedConnections(),
-            subject,
-            managedConnectionFactory, 
+        final ManagedConnection managedConnection = allocateMangedConnection(
+            managedConnectionFactory,
             connectionRequestInfo
         );
-        if(this.connectionClass == null) {
-            return managedConnection.getConnection(subject, connectionRequestInfo);
-        } else {
-            Object connection = createConnection();
-            managedConnection.associateConnection(connection);
-            return connection;
-        }
+        return this.connectionClass == null ?
+            managedConnection.getConnection(getSubject(), connectionRequestInfo) :
+            createAndAssociateConnection(managedConnection);
     }
+
+	private Object createAndAssociateConnection(final ManagedConnection managedConnection) throws ResourceException {
+		final Object connection = createConnection();
+        managedConnection.associateConnection(connection);
+		return connection;
+	}
     
 }

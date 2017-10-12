@@ -107,7 +107,6 @@ public class Jmi1StructInvocationHandler implements InvocationHandler, Marshalle
     }
 
     //-----------------------------------------------------------------------
-    @SuppressWarnings("unchecked")
     protected ModelElement_1_0 getFieldDef(
         String methodName
     ) throws ServiceException {
@@ -123,7 +122,7 @@ public class Jmi1StructInvocationHandler implements InvocationHandler, Marshalle
         ModelElement_1_0 fieldDef = fields.get(methodName);
         if(fieldDef == null) {
             ModelElement_1_0 structDef = Model_1Factory.getModel().getElement(structName);
-            for(Map.Entry<String,ModelElement_1_0> field: ((Map<String,ModelElement_1_0>)structDef.objGetMap("field")).entrySet()) {
+            for(Map.Entry<String,ModelElement_1_0> field: structDef.objGetMap("field").entrySet()) {
                 fields.putIfAbsent(
                     Identifier.OPERATION_NAME.toIdentifier(
                         AbstractNames.openmdx2AccessorName(
@@ -183,7 +182,7 @@ public class Jmi1StructInvocationHandler implements InvocationHandler, Marshalle
                 return getValue(                    
                     fieldName.indexOf(":") > 0 ?
                         model.getElement(fieldName) :
-                        ((Map<String,ModelElement_1_0>)model.getElement(this.delegate.getRecordName()).objGetMap("field")).get(fieldName)
+                        model.getElement(this.delegate.getRecordName()).objGetMap("field").get(fieldName)
                 );
             } 
             else if ("refTypeName".equals(methodName)) {

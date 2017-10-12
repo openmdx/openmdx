@@ -144,7 +144,8 @@ public abstract class AbstractXMLInputFactory extends XMLInputFactory {
         return createXMLStreamReader(is, null);
     }
 
-    public XMLStreamReader createXMLStreamReader(InputStream is, String charset) throws XMLStreamException {
+    public XMLStreamReader createXMLStreamReader(final InputStream is, final String characterSet) throws XMLStreamException {
+        String charset = characterSet;
         /* !!! This is not really correct: should (try to) auto-detect
          * encoding, since JSON only allows 3 Unicode-based variants.
          * For now it's ok to default to UTF-8 though.

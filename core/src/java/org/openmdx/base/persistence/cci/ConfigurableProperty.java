@@ -116,7 +116,8 @@ public enum ConfigurableProperty {
 
     ConnectionFactory("org.openmdx.jdo.ConnectionFactory"),
     ConnectionFactory2("org.openmdx.jdo.ConnectionFactory2"),
-    ContainerManaged("org.openmdx.jdo.option.ContainerManaged");
+    ContainerManaged("org.openmdx.jdo.option.ContainerManaged"),
+    IsolateThreads("org.openmdx.jdo.option.IsolateThreads");
 
     /**
      * Constructor

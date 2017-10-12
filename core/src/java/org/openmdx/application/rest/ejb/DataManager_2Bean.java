@@ -93,7 +93,7 @@ public class DataManager_2Bean implements SessionBean {
     private ConnectionFactory connectionFactory;
     
     /**
-     * The connection factory is shared among the bean the instances
+     * The connection factory is shared among the bean instances
      */
     private static final ConcurrentMap<String,ConnectionFactory> connectionFactories = new ConcurrentHashMap<String, ConnectionFactory>();
     

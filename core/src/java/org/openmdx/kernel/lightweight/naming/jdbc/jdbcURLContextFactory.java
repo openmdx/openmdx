@@ -57,6 +57,7 @@ import javax.naming.spi.ObjectFactory;
 import javax.transaction.TransactionManager;
 
 import org.openmdx.kernel.exception.BasicException;
+import org.openmdx.kernel.exception.Throwables;
 import org.openmdx.kernel.lightweight.transaction.LightweightTransactionManager;
 import org.openmdx.kernel.naming.ComponentEnvironment;
 
@@ -68,18 +69,11 @@ import org.openmdx.kernel.naming.ComponentEnvironment;
  */
 public class jdbcURLContextFactory implements ObjectFactory {
 
-    /**
-     * Constructor 
-     *
-     * @throws NamingException
+	/**
+     * The context is lazily initialized
      */
-    public jdbcURLContextFactory(
-    ) throws BasicException{
-        if(dataSourceContext == null) {
-            initialize();
-        }
-    }
-    
+    private static Context dataSourceContext;
+	
     /**
      * Return a database connection factory
      */
@@ -96,11 +90,11 @@ public class jdbcURLContextFactory implements ObjectFactory {
             object = urls[0]; // Just take the first of the equivalent URLs
         }
         if(object == null){
-            return dataSourceContext;
+            return getDataSourceContext();
         } else if(object instanceof String){
             String url = (String) object;
             if(url.startsWith("jdbc:")) {
-                return dataSourceContext.lookup(url);
+                return getDataSourceContext().lookup(url);
             } else throw new NoInitialContextException(
                 "jdbc URL scheme expected: " + url
             );            
@@ -109,22 +103,38 @@ public class jdbcURLContextFactory implements ObjectFactory {
         );
     }
 
-    private synchronized void initialize(
-    ) throws BasicException {
+    private static synchronized Context getDataSourceContext(
+    ) throws NamingException {
         if(dataSourceContext == null) {
-            TransactionManager transactionManager = ComponentEnvironment.lookup(TransactionManager.class);
-            if(transactionManager instanceof LightweightTransactionManager) {
-                dataSourceContext = new LightweightDataSourceContext(transactionManager);
-            } else {
-                dataSourceContext = new XADataSourceContext();
+            final TransactionManager transactionManager = getTransactionManager();
+            try {
+            	dataSourceContext = transactionManager instanceof LightweightTransactionManager ?
+	                new LightweightDataSourceContext(transactionManager) :
+	                new XADataSourceContext();
+            } catch (RuntimeException exception) {
+    			throw Throwables.initCause(
+					new NoInitialContextException("DataSource context acquisition failure"),
+					exception,
+					BasicException.Code.DEFAULT_DOMAIN,
+					BasicException.Code.INITIALIZATION_FAILURE
+				);
             }
-        }
+        } 
+        return dataSourceContext;
     }
-    
-    /**
-     * The context is lazily initialized
-     */
-    private static Context dataSourceContext = null;
-    
+
+	private static TransactionManager getTransactionManager() throws NamingException {
+		try {
+			return ComponentEnvironment.lookup(TransactionManager.class);
+		} catch (BasicException exception) {
+			throw Throwables.initCause(
+				new NoInitialContextException("TransactionManager acquisition failure"),
+				exception,
+				BasicException.Code.DEFAULT_DOMAIN,
+				BasicException.Code.INITIALIZATION_FAILURE
+			);
+		}
+	}
+
 }
 

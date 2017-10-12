@@ -378,6 +378,14 @@ class ObjectView_1
         return this.dataObject.objDoesNotExist();
     }
 
+    /* (non-Javadoc)
+     * @see org.openmdx.base.accessor.cci.DataObject_1_0#isSingleThreaded()
+     */
+    @Override
+    public boolean objThreadSafetyRequired() {
+        return this.dataObject.objThreadSafetyRequired();
+    }
+
     /**
      * Returns the object's identity.
      *

@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2009-2014, OMEX AG, Switzerland
+ * Copyright (c) 2009-2017, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -58,6 +58,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -67,7 +68,6 @@ import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 import java.util.logging.Level;
 
 import javax.jdo.FetchPlan;
@@ -117,7 +117,7 @@ import org.w3c.spi.ImmutableDatatypeFactory;
 /**
  * Container
  */
-abstract class AbstractContainer_1 extends AbstractPersistenceCapableCollection implements Container_1_0 {
+abstract class AbstractContainer_1 extends AbstractConsumerAwareCollection {
 
     /**
      * Constructor for a persistent or transient container
@@ -175,8 +175,7 @@ abstract class AbstractContainer_1 extends AbstractPersistenceCapableCollection 
     /**
      * Do not build a new cache if the container is already retrieved
      */
-    static final ConcurrentMap<String, DataObject_1_0> NO_CACHE = new ConcurrentHashMap<String, DataObject_1_0>(1);
-
+    static final Map<String, DataObject_1_0> NO_CACHE = Collections.emptyMap();
     
     /**
      * The conditions in case of a sub-map
@@ -276,7 +275,7 @@ abstract class AbstractContainer_1 extends AbstractPersistenceCapableCollection 
      */
     @Override
     public boolean isEmpty() {
-        ConcurrentMap<String, DataObject_1_0> cache = container().getCache();
+        final Map<String, DataObject_1_0> cache = container().getCache();
         if(cache == null) { 
             return this.getPersistent().isEmpty(); 
         } else if (cache.isEmpty()) {
@@ -335,7 +334,7 @@ abstract class AbstractContainer_1 extends AbstractPersistenceCapableCollection 
      */
     @Override
     public int size() {
-        ConcurrentMap<String, DataObject_1_0> cache = container().getCache();
+        final Map<String, DataObject_1_0> cache = container().getCache();
         if(cache == null) { 
             return this.getPersistent().size(); 
         } else if (cache.isEmpty()) {
@@ -558,22 +557,35 @@ abstract class AbstractContainer_1 extends AbstractPersistenceCapableCollection 
     }
 
     /**
+     * Creates a data object cache 
+     * 
+     * @param owner the owner determines whether thread safety is required
+     * 
+     * @return a newly created cache
+     */
+    protected static Map<String, DataObject_1_0> newObjectCache(
+        DataObject_1_0 owner
+    ) {
+        return owner.objThreadSafetyRequired() ? new ConcurrentHashMap<String,DataObject_1_0>() : new HashMap<String,DataObject_1_0>();
+    }
+    
+    /**
      * Create and populate cache for persistent objects
      * 
      * @param caches
      * @param object
      */
     static void addToCache(
-        Map<Container_1_0,ConcurrentMap<String, DataObject_1_0>> caches,
+        Map<Container_1_0,Map<String, DataObject_1_0>> caches,
         DataObject_1_0 object
     ){
         Container_1_0 container = object.getContainer(false);
         if(container != null) {
-            ConcurrentMap<String, DataObject_1_0> cache = caches.get(container);
+            Map<String, DataObject_1_0> cache = caches.get(container);
             if(cache == null) {
                 caches.put(
                     container,
-                    cache = container.isRetrieved() || !container.jdoIsPersistent() ? NO_CACHE : new ConcurrentHashMap<String,DataObject_1_0>()
+                    cache = container.isRetrieved() || !container.jdoIsPersistent() ? NO_CACHE : newObjectCache(object)
                 );
             }
             if(cache != NO_CACHE) {
@@ -602,17 +614,17 @@ abstract class AbstractContainer_1 extends AbstractPersistenceCapableCollection 
     }
     
     static void addEmptyCache(
-        Map<Container_1_0,ConcurrentMap<String, DataObject_1_0>> caches,
+        Map<Container_1_0,Map<String, DataObject_1_0>> caches,
         DataObject_1_0 parent,
         String feature
     ) throws ServiceException {
-        Container_1_0 container = parent.objGetContainer(feature);
+        final Container_1_0 container = parent.objGetContainer(feature);
         if(!container.isRetrieved()) {
-            ConcurrentMap<String, DataObject_1_0> cache = caches.get(container);
+            final Map<String, DataObject_1_0> cache = caches.get(container);
             if(cache == null) {
                 caches.put(
                     container,
-                    new ConcurrentHashMap<String,DataObject_1_0>()
+                    newObjectCache(parent)
                 );
             }
         }
@@ -677,7 +689,7 @@ abstract class AbstractContainer_1 extends AbstractPersistenceCapableCollection 
 
         @Override
         public ListIterator<DataObject_1_0> listIterator(int index) {
-            final ConcurrentMap<String, DataObject_1_0> cache = container().getCache();
+            final Map<String, DataObject_1_0> cache = container().getCache();
             if(cache != null && !AbstractContainer_1.this.isIgnoreCache()) {
                 List<DataObject_1_0> values = new ArrayList<DataObject_1_0>();
                 for(DataObject_1_0 candidate : cache.values()) {
@@ -716,7 +728,7 @@ abstract class AbstractContainer_1 extends AbstractPersistenceCapableCollection 
 
         @Override
         public int size() {
-            final ConcurrentMap<String, DataObject_1_0> cache = container().getCache();
+            final Map<String, DataObject_1_0> cache = container().getCache();
             if(cache == null || AbstractContainer_1.this.isIgnoreCache()) {
                 return this.getPersistent().size(fetchPlan);
             } else {
@@ -732,7 +744,7 @@ abstract class AbstractContainer_1 extends AbstractPersistenceCapableCollection 
 
         @Override
         public boolean isEmpty() {
-            final ConcurrentMap<String, DataObject_1_0> cache = container().getCache();
+            final Map<String, DataObject_1_0> cache = container().getCache();
             return cache == null ? this.getPersistent().isEmpty() : (cache.isEmpty() || super.isEmpty());
         } 
 
@@ -1556,7 +1568,7 @@ abstract class AbstractContainer_1 extends AbstractPersistenceCapableCollection 
         @Override
         public Iterator<java.util.Map.Entry<String, DataObject_1_0>> iterator(
         ) {
-            ConcurrentMap<String, DataObject_1_0> cache = container().getCache();
+            final Map<String, DataObject_1_0> cache = container().getCache();
             return cache == null ? new DatastoreIterator(
                 AbstractContainer_1.this.getPersistent().listIterator(0)
             ) : new CacheIterator(
@@ -1852,7 +1864,7 @@ abstract class AbstractContainer_1 extends AbstractPersistenceCapableCollection 
         private void populateCaches(
             FetchPlan fetchPlan
         ) throws ServiceException {
-            Map<Container_1_0,ConcurrentMap<String, DataObject_1_0>> caches = new IdentityHashMap<Container_1_0, ConcurrentMap<String, DataObject_1_0>>();
+            final Map<Container_1_0,Map<String, DataObject_1_0>> caches = new IdentityHashMap<Container_1_0, Map<String, DataObject_1_0>>();
             buildCachesForNonEmptyContainers(caches, fetchPlan);
             buildCachesForEmptyContainers(caches);
             deployCaches(caches);            
@@ -1864,10 +1876,10 @@ abstract class AbstractContainer_1 extends AbstractPersistenceCapableCollection 
          * @param caches
          */
         private void deployCaches(
-            Map<Container_1_0, ConcurrentMap<String, DataObject_1_0>> caches
+            Map<Container_1_0, Map<String, DataObject_1_0>> caches
         ) {
-            for(Map.Entry<Container_1_0,ConcurrentMap<String, DataObject_1_0>> entry : caches.entrySet()) {
-                ConcurrentMap<String, DataObject_1_0> cache = entry.getValue();
+            for(Map.Entry<Container_1_0,Map<String, DataObject_1_0>> entry : caches.entrySet()) {
+                final Map<String, DataObject_1_0> cache = entry.getValue();
                 if(cache != NO_CACHE){
                     Container_1_0 container = entry.getKey();
                     if(!container.isRetrieved() && container instanceof Container_1){
@@ -1884,7 +1896,7 @@ abstract class AbstractContainer_1 extends AbstractPersistenceCapableCollection 
          * @param fetchPlan
          */
         private void buildCachesForNonEmptyContainers(
-            Map<Container_1_0, ConcurrentMap<String, DataObject_1_0>> caches,
+            Map<Container_1_0, Map<String, DataObject_1_0>> caches,
             FetchPlan fetchPlan
         ) {
             for(
@@ -1906,7 +1918,7 @@ abstract class AbstractContainer_1 extends AbstractPersistenceCapableCollection 
          * @throws ServiceException 
          */
         private void buildCachesForEmptyContainers(
-            Map<Container_1_0, ConcurrentMap<String, DataObject_1_0>> caches
+            Map<Container_1_0, Map<String, DataObject_1_0>> caches
         ) throws ServiceException {
             Path memberPattern = getFilter().getIdentityPattern();
             Path parentPattern = memberPattern.getPrefix(memberPattern.size() - 2);

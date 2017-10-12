@@ -104,6 +104,9 @@
 		<condition property="include.test-core">
 			<available file="build.xml" filepath="test-core"/>
 		</condition>
+		<condition property="include.test-security">
+			<available file="build.xml" filepath="test-security"/>
+		</condition>
 	</target>
 	
 	<!-- ******************************************************************* -->
@@ -129,5 +132,8 @@
 	</target>
 	<target name="-test-core" depends="-init" if="include.test-core">
 		<ant inheritAll="false" dir="test-core"  target="${ant.target}"/>
+	</target>    
+	<target name="-test-security" depends="-init" if="include.test-security">
+		<ant inheritAll="false" dir="test-security" target="${ant.target}"/>
 	</target>    
 </project>

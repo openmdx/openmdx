@@ -56,7 +56,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.omg.mof.cci.VisibilityKind;
-import org.openmdx.application.mof.cci.ModelAttributes;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.AggregationKind;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
@@ -107,11 +106,12 @@ public class Uml1ModelMapper {
     pw.write(indent, 0, nTabs); pw.write("\tisAbstract = 'false'>\n");
 
     // annotation
-    if(!exceptionDef.objGetList("annotation").isEmpty()) {
+    String annotation = (String)exceptionDef.objGetValue("annotation");
+    if(annotation != null) {
       this.writeTaggedValue(
         "documentation",
         this.toHTMLString(
-          (String)exceptionDef.objGetValue("annotation")
+          annotation
         )
       );
     }   
@@ -147,11 +147,12 @@ public class Uml1ModelMapper {
     pw.write(indent, 0, nTabs); pw.write("\tisAbstract = 'false'>\n");
 
     // annotation
-    if (!operationDef.objGetList("annotation").isEmpty()) {
-      this.writeTaggedValue(
+    String annotation = (String)operationDef.objGetValue("annotation");
+    if (annotation != null) {
+    this.writeTaggedValue(
         "documentation",
         this.toHTMLString(
-          (String)operationDef.objGetValue("annotation")
+          annotation
         )
       );
     }
@@ -209,12 +210,12 @@ public class Uml1ModelMapper {
     pw.write(indent, 0, nTabs); pw.write("\tisSpecification = 'false' kind = '"); pw.write(direction); pw.write("'>\n");
 
     // annotation
-    if (!parameterDef.objGetList("annotation").isEmpty())
-    {
-      this.writeTaggedValue(
+    String annotation = (String)parameterDef.objGetValue("annotation");
+    if (annotation != null){
+    this.writeTaggedValue(
         "documentation",
         this.toHTMLString(
-          (String)parameterDef.objGetValue("annotation")
+          annotation
         )
       );
     }    
@@ -252,12 +253,12 @@ public class Uml1ModelMapper {
     pw.write(indent, 0, nTabs); pw.write("\tisSpecification = 'false' isRoot = 'false' isLeaf = 'false' isAbstract = '"); pw.print(isAbstract); pw.write("'>\n");
 
     // annotation
-    if (!associationDef.objGetList("annotation").isEmpty())
-    {
-      this.writeTaggedValue(
+    String annotation = (String)associationDef.objGetValue("annotation");
+    if (annotation != null){
+    this.writeTaggedValue(
         "documentation",
         this.toHTMLString(
-          (String)associationDef.objGetValue("annotation")
+          annotation
         )
       );
     }
@@ -322,15 +323,17 @@ public class Uml1ModelMapper {
     pw.write(indent, 0, nTabs); pw.write("\tvisibility = 'public' isSpecification = 'false' isNavigable = '"); pw.print(assEnd1IsNavigable); pw.write("' ordering = 'unordered'\n");
     pw.write(indent, 0, nTabs); pw.write("\taggregation = '"); pw.write(this.toXMIAggregation(assEnd2Aggregation)); pw.write("' targetScope = 'instance' changeability = '"); pw.write(this.toXMIChangeability(assEnd1IsChangeable)); pw.write("'>\n");
 
-    // annotation
-    if (!associationEnd1Def.objGetList("annotation").isEmpty())
     {
-      this.writeTaggedValue(
-        "documentation",
-        this.toHTMLString(
-          (String)associationEnd1Def.objGetValue("annotation")
-        )
-      );
+        // annotation
+        String annotation = (String)associationEnd1Def.objGetValue("annotation");
+        if (annotation != null) {
+        this.writeTaggedValue(
+            "documentation",
+            this.toHTMLString(
+              annotation
+            )
+          );
+        }
     }
     
     pw.write(indent, 0, nTabs); pw.write("\t<UML:AssociationEnd.multiplicity>\n");
@@ -354,7 +357,7 @@ public class Uml1ModelMapper {
         pw.write(indent, 0, nTabs); pw.write("\t\t\tvisibility = 'public' isSpecification = 'false' ownerScope = 'instance'\n");
         pw.write(indent, 0, nTabs); pw.write("\t\t\tchangeability = 'changeable'>\n");
         pw.write(indent, 0, nTabs); pw.write("\t\t\t<UML:StructuralFeature.type>\n");
-        if (((ModelElement_1_0)associationEnd1QualifierTypes.get(index)).objGetClass().equals(ModelAttributes.PRIMITIVE_TYPE))
+        if (((ModelElement_1_0)associationEnd1QualifierTypes.get(index)).isPrimitiveType())
         {
           // type is DataType
           pw.write(indent, 0, nTabs); pw.write("\t\t\t\t<UML:DataType xmi.idref = '"); pw.write(this.getDataTypeId(qualifierTypeName)); pw.write("'/>\n");
@@ -395,15 +398,17 @@ public class Uml1ModelMapper {
     pw.write(indent, 0, nTabs); pw.write("\tvisibility = 'public' isSpecification = 'false' isNavigable = '"); pw.print(assEnd2IsNavigable); pw.write("' ordering = 'unordered'\n");
     pw.write(indent, 0, nTabs); pw.write("\taggregation = '"); pw.write(this.toXMIAggregation(assEnd1Aggregation)); pw.write("' targetScope = 'instance' changeability = '"); pw.write(this.toXMIChangeability(assEnd2IsChangeable)); pw.write("'>\n");
 
-    // annotation
-    if (!associationEnd2Def.objGetList("annotation").isEmpty())
     {
-      this.writeTaggedValue(
-        "documentation",
-        this.toHTMLString(
-          (String)associationEnd2Def.objGetValue("annotation")
-        )
-      );
+        // annotation
+        String annotation = (String)associationEnd2Def.objGetValue("annotation");
+        if (annotation != null) {
+        this.writeTaggedValue(
+            "documentation",
+            this.toHTMLString(
+              annotation
+            )
+          );
+        }
     }
     
     pw.write(indent, 0, nTabs); pw.write("\t<UML:AssociationEnd.multiplicity>\n");
@@ -427,7 +432,7 @@ public class Uml1ModelMapper {
         pw.write(indent, 0, nTabs); pw.write("\t\t\tvisibility = 'public' isSpecification = 'false' ownerScope = 'instance'\n");
         pw.write(indent, 0, nTabs); pw.write("\t\t\tchangeability = 'changeable'>\n");
         pw.write(indent, 0, nTabs); pw.write("\t\t\t<UML:StructuralFeature.type>\n");
-        if (((ModelElement_1_0)associationEnd2QualifierTypes.get(index)).objGetClass().equals(ModelAttributes.PRIMITIVE_TYPE))
+        if (((ModelElement_1_0)associationEnd2QualifierTypes.get(index)).isPrimitiveType())
         {
           // type is DataType
           pw.write(indent, 0, nTabs); pw.write("\t\t\t\t<UML:DataType xmi.idref = '"); pw.write(this.getDataTypeId(qualifierTypeName)); pw.write("'/>\n");
@@ -464,12 +469,12 @@ public class Uml1ModelMapper {
     pw.write(indent, 0, nTabs); pw.write("\tisAbstract = '"); pw.print(isAbstract); pw.write("'>\n");
 
     // annotation
-    if (!primitiveTypeDef.objGetList("annotation").isEmpty())
-    {
-      this.writeTaggedValue(
+    String annotation = (String)primitiveTypeDef.objGetValue("annotation");
+    if (annotation != null){
+    this.writeTaggedValue(
         "documentation",
         this.toHTMLString(
-          (String)primitiveTypeDef.objGetValue("annotation")
+          annotation
         )
       );
     }
@@ -501,12 +506,12 @@ public class Uml1ModelMapper {
     pw.write(indent, 0, nTabs); pw.write("\tchangeability = '"); pw.write(changeability); pw.write("'>\n");
     
     // annotation
-    if (!attributeDef.objGetList("annotation").isEmpty())
-    {
-      this.writeTaggedValue(
+    String annotation = (String)attributeDef.objGetValue("annotation");
+    if (annotation != null){
+    this.writeTaggedValue(
         "documentation",
         this.toHTMLString(
-          (String)attributeDef.objGetValue("annotation")
+          annotation
         )
       );
     }
@@ -564,12 +569,12 @@ public class Uml1ModelMapper {
     pw.write(indent, 0, nTabs); pw.write("\t</UML:ModelElement.stereotype>\n");
 
     // annotation
-    if (!aliasTypeDef.objGetList("annotation").isEmpty())
-    {
-      this.writeTaggedValue(
+    String annotation = (String)aliasTypeDef.objGetValue("annotation");
+    if (annotation != null) {
+    this.writeTaggedValue(
         "documentation",
         this.toHTMLString(
-          (String)aliasTypeDef.objGetValue("annotation")
+          annotation
         )
       );
     }
@@ -605,12 +610,12 @@ public class Uml1ModelMapper {
     pw.write(indent, 0, nTabs); pw.write("\t<UML:Namespace.ownedElement>\n");
 
     // annotation
-    if (!packageDef.objGetList("annotation").isEmpty())
-    {
-      this.writeTaggedValue(
+    final String annotation = (String)packageDef.objGetValue("annotation");
+    if (annotation != null) {
+    this.writeTaggedValue(
         "documentation",
         this.toHTMLString(
-          (String)packageDef.objGetValue("annotation")
+          annotation
         )
       );
     }
@@ -670,12 +675,12 @@ public class Uml1ModelMapper {
     pw.write(indent, 0, nTabs); pw.write("\tisAbstract = '"); pw.print(isAbstract); pw.write("' isActive = 'false'>\n");
 
     // annotation
-    if (!structureTypeDef.objGetList("annotation").isEmpty())
-    {
+    String annotation = (String)structureTypeDef.objGetValue("annotation");
+    if (annotation != null) {
       this.writeTaggedValue(
         "documentation",
         this.toHTMLString(
-          (String)structureTypeDef.objGetValue("annotation")
+          annotation
         )
       );
     }
@@ -739,12 +744,12 @@ public class Uml1ModelMapper {
     pw.write(indent, 0, nTabs); pw.write("\tisAbstract = '"); pw.print(isAbstract); pw.write("' isActive = 'false'>\n");
 
     // annotation
-    if (!classDef.objGetList("annotation").isEmpty())
-    {
-      this.writeTaggedValue(
+    String annotation = (String)classDef.objGetValue("annotation");
+    if (annotation != null){
+    this.writeTaggedValue(
         "documentation",
         this.toHTMLString(
-          (String)classDef.objGetValue("annotation")
+          annotation
         )
       );
     }

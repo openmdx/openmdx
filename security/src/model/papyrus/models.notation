@@ -34,6 +34,10 @@
         <styles xmi:type="notation:FilteringStyle" xmi:id="_fnCjm7PlEeKkwYVGxCi-sw"/>
         <layoutConstraint xmi:type="notation:Bounds" xmi:id="_fnCjnLPlEeKkwYVGxCi-sw"/>
       </children>
+      <children xmi:type="notation:BasicCompartment" xmi:id="_MqU0IJHCEee9tMxNAGAAvw" visible="false" type="compartment_shape_display">
+        <styles xmi:type="notation:TitleStyle" xmi:id="_MqU0IZHCEee9tMxNAGAAvw"/>
+        <layoutConstraint xmi:type="notation:Bounds" xmi:id="_MqU0IpHCEee9tMxNAGAAvw"/>
+      </children>
       <element xmi:type="uml:Class" href="platform:/resource/openMDX 2 ~ Security (EMF)/org.openmdx.security.authentication1.uml#_3C7B8A60016D417D0F29038C"/>
       <layoutConstraint xmi:type="notation:Bounds" xmi:id="_fm6AsbPlEeKkwYVGxCi-sw" x="36" y="36" width="1139"/>
     </children>
@@ -82,6 +86,10 @@
         <styles xmi:type="notation:FilteringStyle" xmi:id="_gk_ZmLPlEeKkwYVGxCi-sw"/>
         <layoutConstraint xmi:type="notation:Bounds" xmi:id="_gk_ZmbPlEeKkwYVGxCi-sw"/>
       </children>
+      <children xmi:type="notation:BasicCompartment" xmi:id="_MqWCQJHCEee9tMxNAGAAvw" visible="false" type="compartment_shape_display">
+        <styles xmi:type="notation:TitleStyle" xmi:id="_MqWCQZHCEee9tMxNAGAAvw"/>
+        <layoutConstraint xmi:type="notation:Bounds" xmi:id="_MqWCQpHCEee9tMxNAGAAvw"/>
+      </children>
       <element xmi:type="uml:Class" href="platform:/resource/openMDX 2 ~ Security (EMF)/org.openmdx.security.authentication1.uml#_3C7B8A60016D417D211400A3"/>
       <layoutConstraint xmi:type="notation:Bounds" xmi:id="_gk-LcbPlEeKkwYVGxCi-sw" x="40" y="390" width="1152"/>
     </children>
@@ -113,6 +121,10 @@
         <styles xmi:type="notation:SortingStyle" xmi:id="_vK9kd7PlEeKkwYVGxCi-sw"/>
         <styles xmi:type="notation:FilteringStyle" xmi:id="_vK9keLPlEeKkwYVGxCi-sw"/>
         <layoutConstraint xmi:type="notation:Bounds" xmi:id="_vK9kebPlEeKkwYVGxCi-sw"/>
+      </children>
+      <children xmi:type="notation:BasicCompartment" xmi:id="_MqYegJHCEee9tMxNAGAAvw" visible="false" type="compartment_shape_display">
+        <styles xmi:type="notation:TitleStyle" xmi:id="_MqYegZHCEee9tMxNAGAAvw"/>
+        <layoutConstraint xmi:type="notation:Bounds" xmi:id="_MqYegpHCEee9tMxNAGAAvw"/>
       </children>
       <element xmi:type="uml:Class" href="platform:/resource/openMDX 2 ~ Security (EMF)/org.openmdx.security.authentication1.uml#_3C7B8A60016D417D2CFB022B"/>
       <layoutConstraint xmi:type="notation:Bounds" xmi:id="_vK8WUbPlEeKkwYVGxCi-sw" x="35" y="620"/>
@@ -146,6 +158,10 @@
         <styles xmi:type="notation:FilteringStyle" xmi:id="_wJvg7bPlEeKkwYVGxCi-sw"/>
         <layoutConstraint xmi:type="notation:Bounds" xmi:id="_wJvg7rPlEeKkwYVGxCi-sw"/>
       </children>
+      <children xmi:type="notation:BasicCompartment" xmi:id="_MqZsoJHCEee9tMxNAGAAvw" visible="false" type="compartment_shape_display">
+        <styles xmi:type="notation:TitleStyle" xmi:id="_MqZsoZHCEee9tMxNAGAAvw"/>
+        <layoutConstraint xmi:type="notation:Bounds" xmi:id="_MqZsopHCEee9tMxNAGAAvw"/>
+      </children>
       <element xmi:type="uml:Class" href="platform:/resource/openMDX 2 ~ Security (EMF)/org.openmdx.security.authentication1.uml#_3C7B8A60016D417D157300F2"/>
       <layoutConstraint xmi:type="notation:Bounds" xmi:id="_wJu50bPlEeKkwYVGxCi-sw" x="256" y="617" width="253"/>
     </children>
@@ -177,6 +193,10 @@
         <styles xmi:type="notation:SortingStyle" xmi:id="_xAYN97PlEeKkwYVGxCi-sw"/>
         <styles xmi:type="notation:FilteringStyle" xmi:id="_xAYN-LPlEeKkwYVGxCi-sw"/>
         <layoutConstraint xmi:type="notation:Bounds" xmi:id="_xAYN-bPlEeKkwYVGxCi-sw"/>
+      </children>
+      <children xmi:type="notation:BasicCompartment" xmi:id="_Mqa6wJHCEee9tMxNAGAAvw" visible="false" type="compartment_shape_display">
+        <styles xmi:type="notation:TitleStyle" xmi:id="_Mqa6wZHCEee9tMxNAGAAvw"/>
+        <layoutConstraint xmi:type="notation:Bounds" xmi:id="_Mqa6wpHCEee9tMxNAGAAvw"/>
       </children>
       <element xmi:type="uml:Class" href="platform:/resource/openMDX 2 ~ Security (EMF)/org.openmdx.security.authentication1.uml#_3C7B8A60016D417D423F0157"/>
       <layoutConstraint xmi:type="notation:Bounds" xmi:id="_xAXm4bPlEeKkwYVGxCi-sw" x="256" y="761" width="253"/>
@@ -233,6 +253,10 @@
         <styles xmi:type="notation:SortingStyle" xmi:id="_3ida57PlEeKkwYVGxCi-sw"/>
         <styles xmi:type="notation:FilteringStyle" xmi:id="_3ida6LPlEeKkwYVGxCi-sw"/>
         <layoutConstraint xmi:type="notation:Bounds" xmi:id="_3ida6bPlEeKkwYVGxCi-sw"/>
+      </children>
+      <children xmi:type="notation:BasicCompartment" xmi:id="_Mqbh0JHCEee9tMxNAGAAvw" visible="false" type="compartment_shape_display">
+        <styles xmi:type="notation:TitleStyle" xmi:id="_Mqbh0ZHCEee9tMxNAGAAvw"/>
+        <layoutConstraint xmi:type="notation:Bounds" xmi:id="_Mqbh0pHCEee9tMxNAGAAvw"/>
       </children>
       <element xmi:type="uml:Class" href="platform:/resource/openMDX 2 ~ Security (EMF)/org.openmdx.security.authentication1.uml#_3C7B8A60016D3FC68A7D01CF"/>
       <layoutConstraint xmi:type="notation:Bounds" xmi:id="_3icz0bPlEeKkwYVGxCi-sw" x="544" y="617" width="648"/>
@@ -348,6 +372,10 @@
         <styles xmi:type="notation:FilteringStyle" xmi:id="_E-N1aLPmEeKkwYVGxCi-sw"/>
         <layoutConstraint xmi:type="notation:Bounds" xmi:id="_E-N1abPmEeKkwYVGxCi-sw"/>
       </children>
+      <children xmi:type="notation:BasicCompartment" xmi:id="_MwMLkJHCEee9tMxNAGAAvw" visible="false" type="compartment_shape_display">
+        <styles xmi:type="notation:TitleStyle" xmi:id="_MwMLkZHCEee9tMxNAGAAvw"/>
+        <layoutConstraint xmi:type="notation:Bounds" xmi:id="_MwMLkpHCEee9tMxNAGAAvw"/>
+      </children>
       <element xmi:type="uml:Class" href="platform:/resource/openMDX 2 ~ Security (EMF)/org.openmdx.security.realm1.uml#_3C7B8A60016D41823DBD00CD"/>
       <layoutConstraint xmi:type="notation:Bounds" xmi:id="_E-NOUbPmEeKkwYVGxCi-sw" x="90" y="54" width="648"/>
     </children>
@@ -368,6 +396,14 @@
         <children xmi:type="notation:Shape" xmi:id="_USepoLPmEeKkwYVGxCi-sw" type="3012">
           <element xmi:type="uml:Property" href="platform:/resource/openMDX 2 ~ Security (EMF)/org.openmdx.security.realm1.uml#_3C7B8A60016D414BC40B0013"/>
           <layoutConstraint xmi:type="notation:Location" xmi:id="_USepobPmEeKkwYVGxCi-sw"/>
+        </children>
+        <children xmi:type="notation:Shape" xmi:id="_Rw9WwJHCEee9tMxNAGAAvw" type="3012" fontName="Noto Sans" fontHeight="7" lineColor="0">
+          <element xmi:type="uml:Property" href="platform:/resource/openMDX 2 ~ Security (EMF)/org.openmdx.security.realm1.uml#_Rw66gJHCEee9tMxNAGAAvw"/>
+          <layoutConstraint xmi:type="notation:Location" xmi:id="_Rw9WwZHCEee9tMxNAGAAvw"/>
+        </children>
+        <children xmi:type="notation:Shape" xmi:id="_B6oh0JHDEee9tMxNAGAAvw" type="3012" fontName="Noto Sans" fontHeight="7" lineColor="0">
+          <element xmi:type="uml:Property" href="platform:/resource/openMDX 2 ~ Security (EMF)/org.openmdx.security.realm1.uml#_B6nTsJHDEee9tMxNAGAAvw"/>
+          <layoutConstraint xmi:type="notation:Location" xmi:id="_B6oh0ZHDEee9tMxNAGAAvw"/>
         </children>
         <styles xmi:type="notation:TitleStyle" xmi:id="_G251UrPmEeKkwYVGxCi-sw"/>
         <styles xmi:type="notation:SortingStyle" xmi:id="_G251U7PmEeKkwYVGxCi-sw"/>
@@ -391,6 +427,10 @@
         <styles xmi:type="notation:SortingStyle" xmi:id="_G251XbPmEeKkwYVGxCi-sw"/>
         <styles xmi:type="notation:FilteringStyle" xmi:id="_G251XrPmEeKkwYVGxCi-sw"/>
         <layoutConstraint xmi:type="notation:Bounds" xmi:id="_G251X7PmEeKkwYVGxCi-sw"/>
+      </children>
+      <children xmi:type="notation:BasicCompartment" xmi:id="_MwNZsJHCEee9tMxNAGAAvw" visible="false" type="compartment_shape_display">
+        <styles xmi:type="notation:TitleStyle" xmi:id="_MwNZsZHCEee9tMxNAGAAvw"/>
+        <layoutConstraint xmi:type="notation:Bounds" xmi:id="_MwNZspHCEee9tMxNAGAAvw"/>
       </children>
       <element xmi:type="uml:Class" href="platform:/resource/openMDX 2 ~ Security (EMF)/org.openmdx.security.realm1.uml#_3C7B8A60016D3FC602E60397"/>
       <layoutConstraint xmi:type="notation:Bounds" xmi:id="_G25OQbPmEeKkwYVGxCi-sw" x="90" y="666" width="1567"/>
@@ -432,6 +472,10 @@
         <styles xmi:type="notation:FilteringStyle" xmi:id="_JjzgeLPmEeKkwYVGxCi-sw"/>
         <layoutConstraint xmi:type="notation:Bounds" xmi:id="_JjzgebPmEeKkwYVGxCi-sw"/>
       </children>
+      <children xmi:type="notation:BasicCompartment" xmi:id="_MwOn0JHCEee9tMxNAGAAvw" visible="false" type="compartment_shape_display">
+        <styles xmi:type="notation:TitleStyle" xmi:id="_MwOn0ZHCEee9tMxNAGAAvw"/>
+        <layoutConstraint xmi:type="notation:Bounds" xmi:id="_MwOn0pHCEee9tMxNAGAAvw"/>
+      </children>
       <element xmi:type="uml:Class" href="platform:/resource/openMDX 2 ~ Security (EMF)/org.openmdx.security.realm1.uml#_3C7B8A60016D3FC633810047"/>
       <layoutConstraint xmi:type="notation:Bounds" xmi:id="_JjySUbPmEeKkwYVGxCi-sw" x="90" y="360" width="648"/>
     </children>
@@ -463,6 +507,10 @@
         <styles xmi:type="notation:SortingStyle" xmi:id="_Vh8GZ7PmEeKkwYVGxCi-sw"/>
         <styles xmi:type="notation:FilteringStyle" xmi:id="_Vh8GaLPmEeKkwYVGxCi-sw"/>
         <layoutConstraint xmi:type="notation:Bounds" xmi:id="_Vh8GabPmEeKkwYVGxCi-sw"/>
+      </children>
+      <children xmi:type="notation:BasicCompartment" xmi:id="_MwP18JHCEee9tMxNAGAAvw" visible="false" type="compartment_shape_display">
+        <styles xmi:type="notation:TitleStyle" xmi:id="_MwP18ZHCEee9tMxNAGAAvw"/>
+        <layoutConstraint xmi:type="notation:Bounds" xmi:id="_MwP18pHCEee9tMxNAGAAvw"/>
       </children>
       <element xmi:type="uml:Class" href="platform:/resource/openMDX 2 ~ Security (EMF)/org.openmdx.security.realm1.uml#_3C7B8A60016D3FC606E402DA"/>
       <layoutConstraint xmi:type="notation:Bounds" xmi:id="_Vh7fUbPmEeKkwYVGxCi-sw" x="90" y="1044" width="396"/>
@@ -508,6 +556,10 @@
         <styles xmi:type="notation:FilteringStyle" xmi:id="_gRDUd7PmEeKkwYVGxCi-sw"/>
         <layoutConstraint xmi:type="notation:Bounds" xmi:id="_gRDUeLPmEeKkwYVGxCi-sw"/>
       </children>
+      <children xmi:type="notation:BasicCompartment" xmi:id="_MwREEJHCEee9tMxNAGAAvw" visible="false" type="compartment_shape_display">
+        <styles xmi:type="notation:TitleStyle" xmi:id="_MwREEZHCEee9tMxNAGAAvw"/>
+        <layoutConstraint xmi:type="notation:Bounds" xmi:id="_MwREEpHCEee9tMxNAGAAvw"/>
+      </children>
       <element xmi:type="uml:Class" href="platform:/resource/openMDX 2 ~ Security (EMF)/org.openmdx.security.realm1.uml#_3C7B8A60016D3FC6886601D0"/>
       <layoutConstraint xmi:type="notation:Bounds" xmi:id="_gRCGUbPmEeKkwYVGxCi-sw" x="558" y="1044" width="1098"/>
     </children>
@@ -543,6 +595,10 @@
         <styles xmi:type="notation:SortingStyle" xmi:id="_pc9qbLPmEeKkwYVGxCi-sw"/>
         <styles xmi:type="notation:FilteringStyle" xmi:id="_pc9qbbPmEeKkwYVGxCi-sw"/>
         <layoutConstraint xmi:type="notation:Bounds" xmi:id="_pc9qbrPmEeKkwYVGxCi-sw"/>
+      </children>
+      <children xmi:type="notation:BasicCompartment" xmi:id="_MwS5QJHCEee9tMxNAGAAvw" visible="false" type="compartment_shape_display">
+        <styles xmi:type="notation:TitleStyle" xmi:id="_MwS5QZHCEee9tMxNAGAAvw"/>
+        <layoutConstraint xmi:type="notation:Bounds" xmi:id="_MwS5QpHCEee9tMxNAGAAvw"/>
       </children>
       <element xmi:type="uml:Class" href="platform:/resource/openMDX 2 ~ Security (EMF)/org.openmdx.security.realm1.uml#_3C7B8A60016D3FC602C4017B"/>
       <layoutConstraint xmi:type="notation:Bounds" xmi:id="_pc9DUbPmEeKkwYVGxCi-sw" x="2052" y="666" width="360"/>
@@ -749,6 +805,10 @@
         <styles xmi:type="notation:FilteringStyle" xmi:id="_DX5iY7PnEeKkwYVGxCi-sw"/>
         <layoutConstraint xmi:type="notation:Bounds" xmi:id="_DX5iZLPnEeKkwYVGxCi-sw"/>
       </children>
+      <children xmi:type="notation:BasicCompartment" xmi:id="_M1p6YJHCEee9tMxNAGAAvw" visible="false" type="compartment_shape_display">
+        <styles xmi:type="notation:TitleStyle" xmi:id="_M1p6YZHCEee9tMxNAGAAvw"/>
+        <layoutConstraint xmi:type="notation:Bounds" xmi:id="_M1p6YpHCEee9tMxNAGAAvw"/>
+      </children>
       <element xmi:type="uml:Class" href="platform:/resource/openMDX 2 ~ Security (EMF)/org.openmdx.security.realm1.uml#_3C7B8A60016D417CF570029D"/>
       <layoutConstraint xmi:type="notation:Bounds" xmi:id="_DX4UQbPnEeKkwYVGxCi-sw" x="108" y="36" width="1259"/>
     </children>
@@ -769,6 +829,14 @@
         <children xmi:type="notation:Shape" xmi:id="_JDmg8LPnEeKkwYVGxCi-sw" type="3012">
           <element xmi:type="uml:Property" href="platform:/resource/openMDX 2 ~ Security (EMF)/org.openmdx.security.realm1.uml#_3C7B8A60016D414BC420004F"/>
           <layoutConstraint xmi:type="notation:Location" xmi:id="_JDmg8bPnEeKkwYVGxCi-sw"/>
+        </children>
+        <children xmi:type="notation:Shape" xmi:id="_hpPeEJHCEee9tMxNAGAAvw" type="3012" fontName="Noto Sans" fontHeight="7" lineColor="0">
+          <element xmi:type="uml:Property" href="platform:/resource/openMDX 2 ~ Security (EMF)/org.openmdx.security.realm1.uml#_hpMawJHCEee9tMxNAGAAvw"/>
+          <layoutConstraint xmi:type="notation:Location" xmi:id="_hpPeEZHCEee9tMxNAGAAvw"/>
+        </children>
+        <children xmi:type="notation:Shape" xmi:id="_ylF7MJHCEee9tMxNAGAAvw" type="3012" fontName="Noto Sans" fontHeight="7" lineColor="0">
+          <element xmi:type="uml:Property" href="platform:/resource/openMDX 2 ~ Security (EMF)/org.openmdx.security.realm1.uml#_ylDe8JHCEee9tMxNAGAAvw"/>
+          <layoutConstraint xmi:type="notation:Location" xmi:id="_ylF7MZHCEee9tMxNAGAAvw"/>
         </children>
         <styles xmi:type="notation:TitleStyle" xmi:id="_EmFz0rPnEeKkwYVGxCi-sw"/>
         <styles xmi:type="notation:SortingStyle" xmi:id="_EmFz07PnEeKkwYVGxCi-sw"/>
@@ -793,6 +861,10 @@
         <styles xmi:type="notation:FilteringStyle" xmi:id="_EmGa57PnEeKkwYVGxCi-sw"/>
         <layoutConstraint xmi:type="notation:Bounds" xmi:id="_EmGa6LPnEeKkwYVGxCi-sw"/>
       </children>
+      <children xmi:type="notation:BasicCompartment" xmi:id="_M1qhcJHCEee9tMxNAGAAvw" visible="false" type="compartment_shape_display">
+        <styles xmi:type="notation:TitleStyle" xmi:id="_M1rIgJHCEee9tMxNAGAAvw"/>
+        <layoutConstraint xmi:type="notation:Bounds" xmi:id="_M1rIgZHCEee9tMxNAGAAvw"/>
+      </children>
       <element xmi:type="uml:Class" href="platform:/resource/openMDX 2 ~ Security (EMF)/org.openmdx.security.realm1.uml#_3C7B8A60016D3FC602CD0106"/>
       <layoutConstraint xmi:type="notation:Bounds" xmi:id="_EmFMwbPnEeKkwYVGxCi-sw" x="124" y="375" width="432"/>
     </children>
@@ -813,6 +885,14 @@
         <children xmi:type="notation:Shape" xmi:id="_O3qKQLPnEeKkwYVGxCi-sw" type="3012">
           <element xmi:type="uml:Property" href="platform:/resource/openMDX 2 ~ Security (EMF)/org.openmdx.security.realm1.uml#_3C7B8A60016D7F78BC6D0151"/>
           <layoutConstraint xmi:type="notation:Location" xmi:id="_O3qKQbPnEeKkwYVGxCi-sw"/>
+        </children>
+        <children xmi:type="notation:Shape" xmi:id="_knxrwJHCEee9tMxNAGAAvw" type="3012" fontName="Noto Sans" fontHeight="7" lineColor="0">
+          <element xmi:type="uml:Property" href="platform:/resource/openMDX 2 ~ Security (EMF)/org.openmdx.security.realm1.uml#_knwdoJHCEee9tMxNAGAAvw"/>
+          <layoutConstraint xmi:type="notation:Location" xmi:id="_knxrwZHCEee9tMxNAGAAvw"/>
+        </children>
+        <children xmi:type="notation:Shape" xmi:id="_1_OfwJHCEee9tMxNAGAAvw" type="3012" fontName="Noto Sans" fontHeight="7" lineColor="0">
+          <element xmi:type="uml:Property" href="platform:/resource/openMDX 2 ~ Security (EMF)/org.openmdx.security.realm1.uml#_1_MDgJHCEee9tMxNAGAAvw"/>
+          <layoutConstraint xmi:type="notation:Location" xmi:id="_1_OfwZHCEee9tMxNAGAAvw"/>
         </children>
         <styles xmi:type="notation:TitleStyle" xmi:id="_LVdO1LPnEeKkwYVGxCi-sw"/>
         <styles xmi:type="notation:SortingStyle" xmi:id="_LVdO1bPnEeKkwYVGxCi-sw"/>
@@ -837,6 +917,10 @@
         <styles xmi:type="notation:FilteringStyle" xmi:id="_LVd16LPnEeKkwYVGxCi-sw"/>
         <layoutConstraint xmi:type="notation:Bounds" xmi:id="_LVd16bPnEeKkwYVGxCi-sw"/>
       </children>
+      <children xmi:type="notation:BasicCompartment" xmi:id="_M1sWoJHCEee9tMxNAGAAvw" visible="false" type="compartment_shape_display">
+        <styles xmi:type="notation:TitleStyle" xmi:id="_M1sWoZHCEee9tMxNAGAAvw"/>
+        <layoutConstraint xmi:type="notation:Bounds" xmi:id="_M1sWopHCEee9tMxNAGAAvw"/>
+      </children>
       <element xmi:type="uml:Class" href="platform:/resource/openMDX 2 ~ Security (EMF)/org.openmdx.security.realm1.uml#_3C7B8A60016D3F3EBE700025"/>
       <layoutConstraint xmi:type="notation:Bounds" xmi:id="_LVdO0bPnEeKkwYVGxCi-sw" x="142" y="753" width="415"/>
     </children>
@@ -857,6 +941,14 @@
         <children xmi:type="notation:Shape" xmi:id="_U6vHArPnEeKkwYVGxCi-sw" type="3012">
           <element xmi:type="uml:Property" href="platform:/resource/openMDX 2 ~ Security (EMF)/org.openmdx.security.realm1.uml#_3C7B8A60016D417E24110351"/>
           <layoutConstraint xmi:type="notation:Location" xmi:id="_U6vHA7PnEeKkwYVGxCi-sw"/>
+        </children>
+        <children xmi:type="notation:Shape" xmi:id="_mhUAQJHCEee9tMxNAGAAvw" type="3012" fontName="Noto Sans" fontHeight="7" lineColor="0">
+          <element xmi:type="uml:Property" href="platform:/resource/openMDX 2 ~ Security (EMF)/org.openmdx.security.realm1.uml#_mhSyIJHCEee9tMxNAGAAvw"/>
+          <layoutConstraint xmi:type="notation:Location" xmi:id="_mhUAQZHCEee9tMxNAGAAvw"/>
+        </children>
+        <children xmi:type="notation:Shape" xmi:id="_0F18QJHCEee9tMxNAGAAvw" type="3012" fontName="Noto Sans" fontHeight="7" lineColor="0">
+          <element xmi:type="uml:Property" href="platform:/resource/openMDX 2 ~ Security (EMF)/org.openmdx.security.realm1.uml#_0FzgAJHCEee9tMxNAGAAvw"/>
+          <layoutConstraint xmi:type="notation:Location" xmi:id="_0F2jUJHCEee9tMxNAGAAvw"/>
         </children>
         <styles xmi:type="notation:TitleStyle" xmi:id="_QoEX9LPnEeKkwYVGxCi-sw"/>
         <styles xmi:type="notation:SortingStyle" xmi:id="_QoEX9bPnEeKkwYVGxCi-sw"/>
@@ -880,6 +972,10 @@
         <styles xmi:type="notation:SortingStyle" xmi:id="_QoEX_7PnEeKkwYVGxCi-sw"/>
         <styles xmi:type="notation:FilteringStyle" xmi:id="_QoEYALPnEeKkwYVGxCi-sw"/>
         <layoutConstraint xmi:type="notation:Bounds" xmi:id="_QoEYAbPnEeKkwYVGxCi-sw"/>
+      </children>
+      <children xmi:type="notation:BasicCompartment" xmi:id="_M1uL0JHCEee9tMxNAGAAvw" visible="false" type="compartment_shape_display">
+        <styles xmi:type="notation:TitleStyle" xmi:id="_M1uL0ZHCEee9tMxNAGAAvw"/>
+        <layoutConstraint xmi:type="notation:Bounds" xmi:id="_M1uL0pHCEee9tMxNAGAAvw"/>
       </children>
       <element xmi:type="uml:Class" href="platform:/resource/openMDX 2 ~ Security (EMF)/org.openmdx.security.realm1.uml#_3C7B8A60016D417E21D70063"/>
       <layoutConstraint xmi:type="notation:Bounds" xmi:id="_QoEX8bPnEeKkwYVGxCi-sw" x="1006" y="753" width="378"/>
@@ -1009,6 +1105,10 @@
         <styles xmi:type="notation:FilteringStyle" xmi:id="_d6kv3rPnEeKkwYVGxCi-sw"/>
         <layoutConstraint xmi:type="notation:Bounds" xmi:id="_d6kv37PnEeKkwYVGxCi-sw"/>
       </children>
+      <children xmi:type="notation:BasicCompartment" xmi:id="_M6tZgJHCEee9tMxNAGAAvw" visible="false" type="compartment_shape_display">
+        <styles xmi:type="notation:TitleStyle" xmi:id="_M6tZgZHCEee9tMxNAGAAvw"/>
+        <layoutConstraint xmi:type="notation:Bounds" xmi:id="_M6tZgpHCEee9tMxNAGAAvw"/>
+      </children>
       <element xmi:type="uml:Class" href="platform:/resource/openMDX 2 ~ Security (EMF)/org.openmdx.security.authorization1.uml#_3C7B8A60016D417E3886017B"/>
       <layoutConstraint xmi:type="notation:Bounds" xmi:id="_d6kIwbPnEeKkwYVGxCi-sw" x="180" y="72" width="468"/>
     </children>
@@ -1048,6 +1148,10 @@
         <styles xmi:type="notation:SortingStyle" xmi:id="_hv8e4rPnEeKkwYVGxCi-sw"/>
         <styles xmi:type="notation:FilteringStyle" xmi:id="_hv8e47PnEeKkwYVGxCi-sw"/>
         <layoutConstraint xmi:type="notation:Bounds" xmi:id="_hv8e5LPnEeKkwYVGxCi-sw"/>
+      </children>
+      <children xmi:type="notation:BasicCompartment" xmi:id="_M6unoJHCEee9tMxNAGAAvw" visible="false" type="compartment_shape_display">
+        <styles xmi:type="notation:TitleStyle" xmi:id="_M6unoZHCEee9tMxNAGAAvw"/>
+        <layoutConstraint xmi:type="notation:Bounds" xmi:id="_M6unopHCEee9tMxNAGAAvw"/>
       </children>
       <element xmi:type="uml:Class" href="platform:/resource/openMDX 2 ~ Security (EMF)/org.openmdx.security.authorization1.uml#_3C7B8A60016D4183BAA70268"/>
       <layoutConstraint xmi:type="notation:Bounds" xmi:id="_hv7QwbPnEeKkwYVGxCi-sw" x="198" y="482" width="433"/>

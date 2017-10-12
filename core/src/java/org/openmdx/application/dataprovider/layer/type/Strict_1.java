@@ -70,7 +70,6 @@ import org.openmdx.kernel.exception.BasicException;
  */
 public class Strict_1 extends Standard_1 {
 
-    @SuppressWarnings("unchecked")
     private void validateMultiplicity(
         Object_2Facade objectFacade,
         ModelElement_1_0 classDef, 
@@ -79,7 +78,7 @@ public class Strict_1 extends Standard_1 {
         if(classDef != null) {
             final MappedRecord valueMap = objectFacade.getValue();
             final Persistency persistency = Persistency.getInstance();
-            for(Map.Entry<String,ModelElement_1_0> feature : ((Map<String,ModelElement_1_0>)classDef.objGetMap("allFeature")).entrySet()) {
+            for(Map.Entry<String,ModelElement_1_0> feature : classDef.objGetMap("allFeature").entrySet()) {
                 final ModelElement_1_0 featureDef = feature.getValue();
                 if(
                     persistency.isPersistentAttribute(featureDef) &&

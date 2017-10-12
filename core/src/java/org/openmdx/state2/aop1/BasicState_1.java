@@ -111,6 +111,8 @@ public abstract class BasicState_1<C extends StateContext<?>>
     ) throws ServiceException{
         super(self, next);
         DataObject_1_0 delegate = self.objGetDelegate();
+        final boolean multithreaded = delegate.jdoGetPersistenceManager().getMultithreaded();
+        this.views = multithreaded ? new ConcurrentHashMap<String,Object>() : new HashMap<String,Object>();
         this.enabled = !getModel().isInstanceof(delegate, "org:openmdx:state2:BasicState");
         if (!this.enabled && !delegate.jdoIsPersistent() && !delegate.jdoIsTransactional()) {
             initialize(delegate);
@@ -120,7 +122,7 @@ public abstract class BasicState_1<C extends StateContext<?>>
     /**
      * View Cache
      */
-    private ConcurrentMap<String,Object> views = new ConcurrentHashMap<String,Object>();
+    private final Map<String,Object> views;
 
     /**
      * <code>true</code> for state views.
@@ -367,17 +369,22 @@ public abstract class BasicState_1<C extends StateContext<?>>
         String feature
     ) throws ServiceException {
         if(isViewFeature(feature)) {
-            List<Object> reply = (List<Object>) this.views.get(feature);
-            if(reply == null) {
-                List<Object> concurrent = (List<Object>) this.views.putIfAbsent(
-                    feature,
-                    reply = ListView.newObjectList(this, feature)
-                );
-                if(concurrent != null) {
-                    reply = concurrent;
-                }
+            final List<Object> existingCollection = (List<Object>) this.views.get(feature);
+            if(existingCollection == null) {
+                final List<Object> newCollection = ListView.newObjectList(this, feature);
+            	if(isMultithreaded()) {
+                    final List<Object> concurrentlyCreatedCollection = (List<Object>) ((ConcurrentMap<String,Object>)this.views).putIfAbsent(
+            	        feature,
+            	        newCollection
+            	    );
+                    return concurrentlyCreatedCollection == null ? newCollection : concurrentlyCreatedCollection;
+            	} else {
+            		this.views.put(feature, newCollection);
+            		return newCollection;
+            	}
+            } else {
+                return existingCollection;
             }
-            return reply;
         } else {
             return super.objGetList(feature);
         }
@@ -392,17 +399,22 @@ public abstract class BasicState_1<C extends StateContext<?>>
         String feature
     ) throws ServiceException {
         if(isViewFeature(feature)) {
-            Set<Object> reply = (Set<Object>) this.views.get(feature);
-            if(reply == null) {
-                Set<Object> concurrent = (Set<Object>) this.views.putIfAbsent(
-                    feature,
-                    reply = SetView.newObjectSet(this, feature)
-                );
-                if(concurrent != null) {
-                    reply = concurrent;
+            final Set<Object> existingCollection = (Set<Object>) this.views.get(feature);
+            if(existingCollection == null) {
+                final Set<Object> newCollection = SetView.newObjectSet(this, feature);
+                if(isMultithreaded()) {
+                    final Set<Object> concurrentlyCreatedCollection = (Set<Object>) ((ConcurrentMap<String,Object>)this.views).putIfAbsent(
+                        feature,
+                        newCollection
+                    );
+                    return concurrentlyCreatedCollection == null ? newCollection : concurrentlyCreatedCollection;
+                } else {
+                    this.views.put(feature, newCollection);
+                    return newCollection;
                 }
+            } else {
+                return existingCollection;
             }
-            return reply;
         } else {
             return super.objGetSet(feature);
         }
@@ -417,20 +429,32 @@ public abstract class BasicState_1<C extends StateContext<?>>
         String feature
     ) throws ServiceException {
         if(isViewFeature(feature)){
-            SortedMap<Integer, Object> reply = (SortedMap<Integer, Object>) this.views.get(feature);
-            if(reply == null) {
-                SortedMap<Integer, Object> concurrent = (SortedMap<Integer, Object>) this.views.putIfAbsent(
-                    feature,
-                    reply = MapView.newObjectMap(this, feature)
-                );
-                if(concurrent != null) {
-                    reply = concurrent;
+            final SortedMap<Integer, Object> existingCollection = (SortedMap<Integer, Object>) this.views.get(feature);
+            if(existingCollection == null) {
+                final SortedMap<Integer, Object> newCollection = MapView.newObjectMap(this, feature);
+                if(isMultithreaded()) {
+                    final SortedMap<Integer, Object> concurrentlyCreatedCollection = (SortedMap<Integer, Object>) ((ConcurrentMap<String,Object>)this.views).putIfAbsent(
+                        feature,
+                        newCollection
+                    );
+                    return concurrentlyCreatedCollection == null ? newCollection : concurrentlyCreatedCollection;
+                } else {
+                    this.views.put(feature, newCollection);
+                    return newCollection;
                 }
+            } else {
+            	return existingCollection;
             }
-            return reply;
         } else {
             return super.objGetSparseArray(feature);
         }
+    }
+
+    /**
+     * We use a concurrent map to support multi-threading
+     */
+    private boolean isMultithreaded() {
+        return this.views instanceof ConcurrentMap<?,?>;
     }
 
     protected Boolean transactionTimeUniqueDefaultValue(){

@@ -1,72 +1,33 @@
 /*
- * $Header: /cvsroot/openmdx/core/src/java/org/openmdx/uses/org/apache/commons/fileupload/DiskFileUpload.java,v 1.6 2011/04/12 15:30:22 hburger Exp $
- * $Revision: 1.6 $
- * $Date: 2011/04/12 15:30:22 $
- *
+ * ====================================================================
+ * Project:     openMDX/Core, http://www.openmdx.org/
  * ====================================================================
  *
- * The Apache Software License, Version 1.1
+ * This software has been copied from its original 
+ * org.apache.commons.fileupload namespace to the 
+ * org.openmdx.uses.org.apache.commons.fileupload namespace in order 
+ * to be used by openMDX based applications. 
+ * 
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
  *
- * Copyright (c) 2001-2003 The Apache Software Foundation.  All rights
- * reserved.
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- *
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- *
- * 3. The end-user documentation included with the redistribution, if
- *    any, must include the following acknowlegement:
- *       "This product includes software developed by the
- *        Apache Software Foundation (http://www.apache.org/)."
- *    Alternately, this acknowlegement may appear in the software itself,
- *    if and wherever such third-party acknowlegements normally appear.
- *
- * 4. The names "The Jakarta Project", "Commons", and "Apache Software
- *    Foundation" must not be used to endorse or promote products derived
- *    from this software without prior written permission. For written
- *    permission, please contact apache@apache.org.
- *
- * 5. Products derived from this software may not be called "Apache"
- *    nor may "Apache" appear in their names without prior written
- *    permission of the Apache Group.
- *
- * THIS SOFTWARE IS PROVIDED ``AS IS'' AND ANY EXPRESSED OR IMPLIED
- * WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
- * OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED.  IN NO EVENT SHALL THE APACHE SOFTWARE FOUNDATION OR
- * ITS CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
- * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
- * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF
- * USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
- * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
- * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
- * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
- * SUCH DAMAGE.
- * ====================================================================
- *
- * This software consists of voluntary contributions made by many
- * individuals on behalf of the Apache Software Foundation.  For more
- * information on the Apache Software Foundation, please see
- * <http://www.apache.org/>.
- *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
-
-
 package org.openmdx.uses.org.apache.commons.fileupload;
-
 
 import java.io.File;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
-
 
 /**
  * <p>High level API for processing file uploads.</p>
@@ -75,79 +36,74 @@ import javax.servlet.http.HttpServletRequest;
  * <code>multipart/mixed</code> encoding type, as specified by
  * <a href="http://www.ietf.org/rfc/rfc1867.txt">RFC 1867</a>.  Use {@link
  * #parseRequest(HttpServletRequest)} to acquire a list of {@link
- * org.apache.commons.fileupload.FileItem}s associated with a given HTML
+ * org.openmdx.uses.org.apache.commons.fileupload.FileItem}s associated with a given HTML
  * widget.</p>
  *
  * <p>Individual parts will be stored in temporary disk storage or in memory,
  * depending on their size, and will be available as {@link
- * org.apache.commons.fileupload.FileItem}s.</p>
+ * org.openmdx.uses.org.apache.commons.fileupload.FileItem}s.</p>
  *
- * @author <a href="mailto:Rafal.Krzewski@e-point.pl">Rafal Krzewski</a>
- * @author <a href="mailto:dlr@collab.net">Daniel Rall</a>
- * @author <a href="mailto:jvanzyl@apache.org">Jason van Zyl</a>
- * @author <a href="mailto:jmcnally@collab.net">John McNally</a>
- * @author <a href="mailto:martinc@apache.org">Martin Cooper</a>
- * @author Sean C. Sullivan
+ * @version $Id: DiskFileUpload.java 1454690 2013-03-09 12:08:48Z simonetripodi $
  *
- * @version $Id: DiskFileUpload.java,v 1.6 2011/04/12 15:30:22 hburger Exp $
+ * @deprecated 1.1 Use <code>ServletFileUpload</code> together with
+ *             <code>DiskFileItemFactory</code> instead.
  */
-@SuppressWarnings({"rawtypes"})
+@Deprecated
 public class DiskFileUpload
-    extends FileUploadBase
- {
+    extends FileUploadBase {
 
     // ----------------------------------------------------------- Data members
-
 
     /**
      * The factory to use to create new form items.
      */
     private DefaultFileItemFactory fileItemFactory;
 
-
     // ----------------------------------------------------------- Constructors
-
 
     /**
      * Constructs an instance of this class which uses the default factory to
      * create <code>FileItem</code> instances.
      *
      * @see #DiskFileUpload(DefaultFileItemFactory fileItemFactory)
+     *
+     * @deprecated 1.1 Use <code>FileUpload</code> instead.
      */
-    public DiskFileUpload()
-    {
+    @Deprecated
+    public DiskFileUpload() {
         super();
         this.fileItemFactory = new DefaultFileItemFactory();
     }
-
 
     /**
      * Constructs an instance of this class which uses the supplied factory to
      * create <code>FileItem</code> instances.
      *
      * @see #DiskFileUpload()
+     * @param fileItemFactory The file item factory to use.
+     *
+     * @deprecated 1.1 Use <code>FileUpload</code> instead.
      */
-    public DiskFileUpload(DefaultFileItemFactory fileItemFactory)
-    {
+    @Deprecated
+    public DiskFileUpload(DefaultFileItemFactory fileItemFactory) {
         super();
         this.fileItemFactory = fileItemFactory;
     }
 
-
     // ----------------------------------------------------- Property accessors
-
 
     /**
      * Returns the factory class used when creating file items.
      *
      * @return The factory class for new file items.
+     *
+     * @deprecated 1.1 Use <code>FileUpload</code> instead.
      */
     @Override
-    public FileItemFactory getFileItemFactory()
-    {
+    @Deprecated
+    public FileItemFactory getFileItemFactory() {
         return fileItemFactory;
     }
-
 
     /**
      * Sets the factory class to use when creating file items. The factory must
@@ -155,13 +111,14 @@ public class DiskFileUpload
      * thereof, or else a <code>ClassCastException</code> will be thrown.
      *
      * @param factory The factory class for new file items.
+     *
+     * @deprecated 1.1 Use <code>FileUpload</code> instead.
      */
     @Override
-    public void setFileItemFactory(FileItemFactory factory)
-    {
+    @Deprecated
+    public void setFileItemFactory(FileItemFactory factory) {
         this.fileItemFactory = (DefaultFileItemFactory) factory;
     }
-
 
     /**
      * Returns the size threshold beyond which files are written directly to
@@ -170,12 +127,13 @@ public class DiskFileUpload
      * @return The size threshold, in bytes.
      *
      * @see #setSizeThreshold(int)
+     *
+     * @deprecated 1.1 Use <code>DiskFileItemFactory</code> instead.
      */
-    public int getSizeThreshold()
-    {
+    @Deprecated
+    public int getSizeThreshold() {
         return fileItemFactory.getSizeThreshold();
     }
-
 
     /**
      * Sets the size threshold beyond which files are written directly to disk.
@@ -183,12 +141,13 @@ public class DiskFileUpload
      * @param sizeThreshold The size threshold, in bytes.
      *
      * @see #getSizeThreshold()
+     *
+     * @deprecated 1.1 Use <code>DiskFileItemFactory</code> instead.
      */
-    public void setSizeThreshold(int sizeThreshold)
-    {
+    @Deprecated
+    public void setSizeThreshold(int sizeThreshold) {
         fileItemFactory.setSizeThreshold(sizeThreshold);
     }
-
 
     /**
      * Returns the location used to temporarily store files that are larger
@@ -197,12 +156,13 @@ public class DiskFileUpload
      * @return The path to the temporary file location.
      *
      * @see #setRepositoryPath(String)
+     *
+     * @deprecated 1.1 Use <code>DiskFileItemFactory</code> instead.
      */
-    public String getRepositoryPath()
-    {
+    @Deprecated
+    public String getRepositoryPath() {
         return fileItemFactory.getRepository().getPath();
     }
-
 
     /**
      * Sets the location used to temporarily store files that are larger
@@ -211,15 +171,15 @@ public class DiskFileUpload
      * @param repositoryPath The path to the temporary file location.
      *
      * @see #getRepositoryPath()
+     *
+     * @deprecated 1.1 Use <code>DiskFileItemFactory</code> instead.
      */
-    public void setRepositoryPath(String repositoryPath)
-    {
+    @Deprecated
+    public void setRepositoryPath(String repositoryPath) {
         fileItemFactory.setRepository(new File(repositoryPath));
     }
 
-
     // --------------------------------------------------------- Public methods
-
 
     /**
      * Processes an <a href="http://www.ietf.org/rfc/rfc1867.txt">RFC 1867</a>
@@ -234,14 +194,16 @@ public class DiskFileUpload
      * @return A list of <code>FileItem</code> instances parsed from the
      *         request, in the order that they were transmitted.
      *
-     * @exception FileUploadException if there are problems reading/parsing
-     *                                the request or storing files.
+     * @throws FileUploadException if there are problems reading/parsing
+     *                             the request or storing files.
+     *
+     * @deprecated 1.1 Use <code>ServletFileUpload</code> instead.
      */
-    public List /* FileItem */ parseRequest(HttpServletRequest req,
+    @Deprecated
+    public List<FileItem> parseRequest(HttpServletRequest req,
                                             int sizeThreshold,
                                             long sizeMax, String path)
-        throws FileUploadException
-    {
+        throws FileUploadException {
         setSizeThreshold(sizeThreshold);
         setSizeMax(sizeMax);
         setRepositoryPath(path);

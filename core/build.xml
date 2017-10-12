@@ -8,7 +8,7 @@
 =
 = This software is published under the BSD license as listed below.
 = 
-= Copyright (c) 2004-2016, OMEX AG, Switzerland
+= Copyright (c) 2004-2015, OMEX AG, Switzerland
 = All rights reserved.
 = 
 = Redistribution and use in source and binary forms, with or without 
@@ -121,7 +121,9 @@
 		<include name="org/openmdx/uses/java/**"/>
 		<include name="org/openmdx/uses/org/apache/commons/collections/**"/>
 		<include name="org/openmdx/uses/org/apache/commons/fileupload/**"/>
+		<include name="org/openmdx/uses/org/apache/commons/io/**"/>
 		<include name="org/openmdx/uses/org/apache/commons/pool/**"/>
+		<include name="org/openmdx/uses/org/apache/commons/pool2/**"/>
 		<include name="org/un/*/UnPackage*"/>
 		<include name="org/w3c/**"/>
 		<include name="org/xmi/*"/>
@@ -222,35 +224,18 @@
 				</javac>
 			</antcontrib:else>
 		</antcontrib:if>
-		<available 
-			file="${openmdx.home}/ant/build.xml" 
-			type="file" 
-			property="generate-ant.required"
-		/>
 	</target>
 
 	<target 
 		name="generate" 
 		description="Bootstrap and generate model dependend files" 
-		depends="bootstrap,generate-ant"
+		depends="bootstrap"
 	>
 		<antcall target="-preprocess-model-files-"/>
 		<jar
 			destfile="${build.dir}/lib/${ant.project.name}.rmi.jar"
 			update="true"
 		/>
-	</target>
-
-	<target 
-		name="generate-ant" 
-		depends="bootstrap"
-		if="generate-ant.required"
-		description="Prepare ant if it is a source or binary distribution"
-	>
-		<!-- ant
-			dir="${openmdx.home}/ant"
-			target="deliverables"
-		/-->
 	</target>
 
 	<!-- ******************************************************************* -->

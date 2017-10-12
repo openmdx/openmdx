@@ -233,7 +233,7 @@ public class DatabasePreferences {
 						final String columnName = nodeName.substring(9, end);
 	                    final List<String[]> macros = valueMapping.get(columnName);
 	                    if(macros != null) {
-	                    	int macroIndex = Integer.valueOf(nodeName.substring(end + 13));
+	                    	int macroIndex = Integer.parseInt(nodeName.substring(end + 13));
 	                    	final String[] mapping = macros.get(macroIndex);
 							output.add(createEntry(xri, "macroName", mapping[0]));
 							output.add(createEntry(xri, "macroValue", mapping[1]));

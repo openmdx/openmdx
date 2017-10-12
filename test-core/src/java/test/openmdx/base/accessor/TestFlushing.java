@@ -237,7 +237,7 @@ public class TestFlushing {
         /* (non-Javadoc)
          * @see javax.jdo.spi.PersistenceCapable#jdoGetPersistenceManager()
          */
-//      @Override
+        @Override
         public PersistenceManager jdoGetPersistenceManager(
         ) {
             return null;
@@ -305,6 +305,14 @@ public class TestFlushing {
         @Override
         public String toString() {
             return this.jdoObjectId + " (" + JDOHelper.getObjectState(this)+")";
+        }
+
+        /* (non-Javadoc)
+         * @see org.openmdx.base.accessor.cci.DataObject_1_0#objThreadSafetyRequired()
+         */
+        @Override
+        public boolean objThreadSafetyRequired() {
+            return false;
         }
 
     }

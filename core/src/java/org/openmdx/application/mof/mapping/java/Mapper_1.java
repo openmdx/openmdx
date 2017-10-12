@@ -86,6 +86,7 @@ import org.openmdx.base.mof.cci.ModelHelper;
 import org.openmdx.base.mof.cci.Model_1_0;
 import org.openmdx.base.mof.cci.Multiplicity;
 import org.openmdx.base.mof.cci.PrimitiveTypes;
+import org.openmdx.base.mof.repository.cci.ReferenceRecord;
 import org.openmdx.base.naming.Path;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.loading.Resources;
@@ -342,6 +343,7 @@ public class Mapper_1 extends AbstractMapper_1 implements Mapper_1_1 {
     }
 
     // ---------------------------------------------------------------------------
+    @SuppressWarnings("unchecked")
     void mapReference(
         ModelElement_1_0 classDef,
         ModelElement_1_0 referenceDef,
@@ -392,9 +394,11 @@ public class Mapper_1 extends AbstractMapper_1 implements Mapper_1_1 {
                     + ModelHelper.UNBOUND, newMultiplicity);
                 // 0..n association set multiplicity to 0..n, 
                 // this ensures that the instance creator uses a multivalued parameter for this reference attribute
-                referenceAsAttribute.objSetValue("multiplicity", newMultiplicity);
+                ReferenceRecord referenceAsAttributeRecord = (ReferenceRecord) referenceAsAttribute.getDelegate();
+                referenceAsAttributeRecord.put(ReferenceRecord.Member.multiplicity, newMultiplicity);
             }
-            referenceAsAttribute.objSetValue("isDerived", association.isDerived());
+// Wait a moment
+//            referenceAsAttribute.objSetValue("isDerived", association.isDerived());
         }
         try {
             if (VisibilityKind.PUBLIC_VIS.equals(visibility)) {
@@ -716,8 +720,7 @@ public class Mapper_1 extends AbstractMapper_1 implements Mapper_1_1 {
             if (((supertypeDef == null) || !supertypeDef
                 .objGetList("feature")
                 .contains(attributeDef.jdoGetObjectId()))
-                && !attributeDef.isDerived()
-                    .booleanValue()
+                && !Boolean.TRUE.equals(attributeDef.isDerived())
                 && VisibilityKind.PUBLIC_VIS.equals(attributeDef
                     .objGetValue("visibility"))) {
                 AttributeDef att = new AttributeDef(attributeDef, this.model);

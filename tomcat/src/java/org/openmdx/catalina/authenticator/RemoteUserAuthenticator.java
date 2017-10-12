@@ -51,6 +51,8 @@ import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.security.Principal;
+import java.util.Arrays;
+import java.util.Base64;
 import java.util.List;
 
 import javax.servlet.ServletException;
@@ -72,7 +74,16 @@ import org.apache.juli.logging.LogFactory;
  * An <b>Authenticator</b> and <b>Valve</b> implementation of authentication
  * that utilizes the pre-authenticated REMOTE_USER to identify client users.
  * The REMOTE_USER is mapped to an authenticated principal and registered with
- * the request. The authenticator is tested in combination with the Apache mod_jk 
+ * the request.
+ * 
+ * In addition, the Authorization header is checked if the option jwtSubjectField
+ * is set. If it contains a Bearer token and the payload of the token contains the 
+ * jwtSubjectField (e.g. "sub"), then the value of the "sub" field is used as remote
+ * user. It is is mapped to an authenticated principal and registered with the 
+ * request. WARNING: use this option only if Tomcat is fronted with a web server
+ * validating the JWT token. 
+ *
+ * The authenticator is tested in combination with the Apache mod_jk 
  * and the AJP connector with option tomcatAuthentication=false but should also
  * work when fronted with Microsoft IIS.
  * <p>
@@ -109,8 +120,9 @@ public class RemoteUserAuthenticator extends ValveBase {
     private static Log LOG = LogFactory.getLog(RemoteUserAuthenticator.class);
     private final Method realmBaseGetPrincipalMethod;
     private final Field combinedRealmRealmsField;
+    private String jwtSubjectField = null;
     
-    /**
+	/**
      * Constructor.
      * 
      */
@@ -135,6 +147,20 @@ public class RemoteUserAuthenticator extends ValveBase {
         }        
     }
 
+	/**
+	 * @return the jwtSubjectField
+	 */
+	public String getJwtSubjectField() {
+		return jwtSubjectField;
+	}
+
+	/**
+	 * @param jwtSubjectField the jwtSubjectField to set
+	 */
+	public void setJwtSubjectField(String jwtSubjectField) {
+		this.jwtSubjectField = jwtSubjectField;
+	}
+
     /* (non-Javadoc)
      * @see org.apache.catalina.valves.ValveBase#invoke(org.apache.catalina.connector.Request, org.apache.catalina.connector.Response)
      */
@@ -143,14 +169,55 @@ public class RemoteUserAuthenticator extends ValveBase {
     	Request request, 
     	Response response
     ) throws IOException, ServletException {
-        if(request.getUserPrincipal() != null) {
-            String remoteUser = request.getUserPrincipal().getName();
+    	String remoteUser = null;
+		String authorization = request.getHeader("Authorization");
+    	// JWT authentication
+    	if(
+    		this.getJwtSubjectField() != null && 
+    		authorization != null &&
+    		authorization.startsWith("Bearer ")
+    	) {
+    		String[] jwtToken = null;
+			try {
+    			jwtToken = authorization.substring(7).split("\\.");
+    			String payload = new String(Base64.getDecoder().decode(jwtToken[1]), "UTF-8");
+    			int subStart = payload.indexOf("\"" + this.getJwtSubjectField() + "\":");
+    			if(subStart < 0) {
+    				subStart = payload.indexOf(this.getJwtSubjectField() + ":");
+    			}
+    			if(subStart > 0) {
+    				int subEnd = payload.indexOf(",", subStart);
+    				String[] sub = payload.substring(subStart, subEnd).split(":");
+    				remoteUser = sub[1];
+    				if(remoteUser.startsWith("\"")) {
+    					remoteUser = remoteUser.substring(1);
+    				}
+    				if(remoteUser.endsWith("\"")) {
+    					remoteUser = remoteUser.substring(0, remoteUser.length() - 1);
+    				}
+    			}
+			} catch(Exception ignore) {}
+            if(LOG.isDebugEnabled()) {
+            	LOG.debug("Authorization: " + authorization);
+            	if(jwtToken != null) {
+                	LOG.debug("JWT token: " + Arrays.asList(jwtToken));            		
+            	}
+    			if(remoteUser != null) {
+                	LOG.debug("Remote user: " + remoteUser + " [authType:" + request.getAuthType() + "]");
+    			}
+            }
+    	}
+    	// Remote user authentication (by AJP)
+    	if(request.getUserPrincipal() != null) {
+            remoteUser = request.getUserPrincipal().getName();
+        }
+        if(remoteUser != null) {
             // Remove Windows domain information
             if(remoteUser.contains("\\")) {
                 remoteUser = remoteUser.substring( remoteUser.lastIndexOf("\\") + 1);
             }
             if(LOG.isDebugEnabled()) {
-            	LOG.debug("Found remote user: " + remoteUser + " [authType:" + request.getAuthType() + "]");
+            	LOG.debug("Remote user: " + remoteUser + " [authType:" + request.getAuthType() + "]");
             }
             Principal principal = null;
             Session session = request.getSessionInternal(false);

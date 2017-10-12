@@ -1,67 +1,31 @@
 /*
- * $Header: /cvsroot/openmdx/core/src/java/org/openmdx/uses/org/apache/commons/fileupload/MultipartStream.java,v 1.6 2010/06/02 13:46:30 hburger Exp $
- * $Revision: 1.6 $
- * $Date: 2010/06/02 13:46:30 $
- *
+ * ====================================================================
+ * Project:     openMDX/Core, http://www.openmdx.org/
  * ====================================================================
  *
- * The Apache Software License, Version 1.1
+ * This software has been copied from its original 
+ * org.apache.commons.fileupload namespace to the 
+ * org.openmdx.uses.org.apache.commons.fileupload namespace in order 
+ * to be used by openMDX based applications. 
+ * 
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
  *
- * Copyright (c) 2001-2003 The Apache Software Foundation.  All rights
- * reserved.
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- *
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- *
- * 3. The end-user documentation included with the redistribution, if
- *    any, must include the following acknowlegement:
- *       "This product includes software developed by the
- *        Apache Software Foundation (http://www.apache.org/)."
- *    Alternately, this acknowlegement may appear in the software itself,
- *    if and wherever such third-party acknowlegements normally appear.
- *
- * 4. The names "The Jakarta Project", "Commons", and "Apache Software
- *    Foundation" must not be used to endorse or promote products derived
- *    from this software without prior written permission. For written
- *    permission, please contact apache@apache.org.
- *
- * 5. Products derived from this software may not be called "Apache"
- *    nor may "Apache" appear in their names without prior written
- *    permission of the Apache Group.
- *
- * THIS SOFTWARE IS PROVIDED ``AS IS'' AND ANY EXPRESSED OR IMPLIED
- * WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
- * OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED.  IN NO EVENT SHALL THE APACHE SOFTWARE FOUNDATION OR
- * ITS CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
- * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
- * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF
- * USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
- * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
- * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
- * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
- * SUCH DAMAGE.
- * ====================================================================
- *
- * This software consists of voluntary contributions made by many
- * individuals on behalf of the Apache Software Foundation.  For more
- * information on the Apache Software Foundation, please see
- * <http://www.apache.org/>.
- *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
-
-
 package org.openmdx.uses.org.apache.commons.fileupload;
 
+import static java.lang.String.format;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -69,6 +33,9 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 
+import org.openmdx.uses.org.apache.commons.fileupload.FileUploadBase.FileUploadIOException;
+import org.openmdx.uses.org.apache.commons.fileupload.util.Closeable;
+import org.openmdx.uses.org.apache.commons.fileupload.util.Streams;
 
 /**
  * <p> Low level API for processing file uploads.
@@ -85,14 +52,14 @@ import java.io.UnsupportedEncodingException;
  *   multipart-body := preamble 1*encapsulation close-delimiter epilogue<br>
  *   encapsulation := delimiter body CRLF<br>
  *   delimiter := "--" boundary CRLF<br>
- *   close-delimiter := "--" boudary "--"<br>
+ *   close-delimiter := "--" boundary "--"<br>
  *   preamble := &lt;ignore&gt;<br>
  *   epilogue := &lt;ignore&gt;<br>
  *   body := header-part CRLF body-part<br>
  *   header-part := 1*header CRLF<br>
  *   header := header-name ":" header-value<br>
  *   header-name := &lt;printable ascii characters except ":"&gt;<br>
- *   header-value := &lt;any ascii characters except CR & LF&gt;<br>
+ *   header-value := &lt;any ascii characters except CR &amp; LF&gt;<br>
  *   body-data := &lt;arbitrary data&gt;<br>
  * </code>
  *
@@ -102,40 +69,117 @@ import java.io.UnsupportedEncodingException;
  * boundary token of the same length as the parent stream (see {@link
  * #setBoundary(byte[])}).
  *
- * <p>Here is an exaple of usage of this class.<br>
+ * <p>Here is an example of usage of this class.<br>
  *
  * <pre>
- *    try {
- *        MultipartStream multipartStream = new MultipartStream(input,
- *                                                              boundary);
- *        boolean nextPart = malitPartStream.skipPreamble();
- *        OutputStream output;
- *        while(nextPart) {
- *            header = chunks.readHeader();
- *            // process headers
- *            // create some output stream
- *            multipartStream.readBodyPart(output);
- *            nextPart = multipartStream.readBoundary();
- *        }
- *    } catch(MultipartStream.MalformedStreamException e) {
- *          // the stream failed to follow required syntax
- *    } catch(IOException) {
- *          // a read or write error occurred
- *    }
- *
+ *   try {
+ *     MultipartStream multipartStream = new MultipartStream(input, boundary);
+ *     boolean nextPart = multipartStream.skipPreamble();
+ *     OutputStream output;
+ *     while(nextPart) {
+ *       String header = multipartStream.readHeaders();
+ *       // process headers
+ *       // create some output stream
+ *       multipartStream.readBodyData(output);
+ *       nextPart = multipartStream.readBoundary();
+ *     }
+ *   } catch(MultipartStream.MalformedStreamException e) {
+ *     // the stream failed to follow required syntax
+ *   } catch(IOException e) {
+ *     // a read or write error occurred
+ *   }
  * </pre>
  *
- * @author <a href="mailto:Rafal.Krzewski@e-point.pl">Rafal Krzewski</a>
- * @author <a href="mailto:martinc@apache.org">Martin Cooper</a>
- * @author Sean C. Sullivan
- *
- * @version $Id: MultipartStream.java,v 1.6 2010/06/02 13:46:30 hburger Exp $
+ * @version $Id: MultipartStream.java 1745065 2016-05-22 14:56:37Z britter $
  */
-public class MultipartStream
-{
+public class MultipartStream {
+
+    /**
+     * Internal class, which is used to invoke the
+     * {@link ProgressListener}.
+     */
+    public static class ProgressNotifier {
+
+        /**
+         * The listener to invoke.
+         */
+        private final ProgressListener listener;
+
+        /**
+         * Number of expected bytes, if known, or -1.
+         */
+        private final long contentLength;
+
+        /**
+         * Number of bytes, which have been read so far.
+         */
+        private long bytesRead;
+
+        /**
+         * Number of items, which have been read so far.
+         */
+        private int items;
+
+        /**
+         * Creates a new instance with the given listener
+         * and content length.
+         *
+         * @param pListener The listener to invoke.
+         * @param pContentLength The expected content length.
+         */
+        ProgressNotifier(ProgressListener pListener, long pContentLength) {
+            listener = pListener;
+            contentLength = pContentLength;
+        }
+
+        /**
+         * Called to indicate that bytes have been read.
+         *
+         * @param pBytes Number of bytes, which have been read.
+         */
+        void noteBytesRead(int pBytes) {
+            /* Indicates, that the given number of bytes have been read from
+             * the input stream.
+             */
+            bytesRead += pBytes;
+            notifyListener();
+        }
+
+        /**
+         * Called to indicate, that a new file item has been detected.
+         */
+        void noteItem() {
+            ++items;
+            notifyListener();
+        }
+
+        /**
+         * Called for notifying the listener.
+         */
+        private void notifyListener() {
+            if (listener != null) {
+                listener.update(bytesRead, contentLength, items);
+            }
+        }
+
+    }
 
     // ----------------------------------------------------- Manifest constants
 
+    /**
+     * The Carriage Return ASCII character value.
+     */
+    public static final byte CR = 0x0D;
+
+    /**
+     * The Line Feed ASCII character value.
+     */
+    public static final byte LF = 0x0A;
+
+    /**
+     * The dash (-) ASCII character value.
+     */
+    public static final byte DASH = 0x2D;
 
     /**
      * The maximum length of <code>header-part</code> that will be
@@ -143,48 +187,45 @@ public class MultipartStream
      */
     public static final int HEADER_PART_SIZE_MAX = 10240;
 
-
     /**
      * The default length of the buffer used for processing a request.
      */
     protected static final int DEFAULT_BUFSIZE = 4096;
 
-
     /**
      * A byte sequence that marks the end of <code>header-part</code>
      * (<code>CRLFCRLF</code>).
      */
-    protected static final byte[] HEADER_SEPARATOR = {0x0D, 0x0A, 0x0D, 0x0A};
-
+    protected static final byte[] HEADER_SEPARATOR = {CR, LF, CR, LF};
 
     /**
      * A byte sequence that that follows a delimiter that will be
      * followed by an encapsulation (<code>CRLF</code>).
      */
-    protected static final byte[] FIELD_SEPARATOR = { 0x0D, 0x0A };
-
+    protected static final byte[] FIELD_SEPARATOR = {CR, LF};
 
     /**
      * A byte sequence that that follows a delimiter of the last
      * encapsulation in the stream (<code>--</code>).
      */
-    protected static final byte[] STREAM_TERMINATOR = { 0x2D, 0x2D };
+    protected static final byte[] STREAM_TERMINATOR = {DASH, DASH};
 
+    /**
+     * A byte sequence that precedes a boundary (<code>CRLF--</code>).
+     */
+    protected static final byte[] BOUNDARY_PREFIX = {CR, LF, DASH, DASH};
 
     // ----------------------------------------------------------- Data members
-
 
     /**
      * The input stream from which data is read.
      */
-    private InputStream input;
-
+    private final InputStream input;
 
     /**
      * The length of the boundary token plus the leading <code>CRLF--</code>.
      */
     private int boundaryLength;
-
 
     /**
      * The amount of data, in bytes, that must be kept in the buffer in order
@@ -192,24 +233,20 @@ public class MultipartStream
      */
     private int keepRegion;
 
-
     /**
      * The byte sequence that partitions the stream.
      */
     private byte[] boundary;
 
-
     /**
      * The length of the buffer used for processing the request.
      */
-    private int bufSize;
-
+    private final int bufSize;
 
     /**
      * The buffer used for processing the request.
      */
-    private byte[] buffer;
-
+    private final byte[] buffer;
 
     /**
      * The index of first valid character in the buffer.
@@ -218,36 +255,57 @@ public class MultipartStream
      */
     private int head;
 
-
     /**
-     * The index of last valid characer in the buffer + 1.
+     * The index of last valid character in the buffer + 1.
      * <br>
      * 0 <= tail <= bufSize
      */
     private int tail;
-
 
     /**
      * The content encoding to use when reading headers.
      */
     private String headerEncoding;
 
+    /**
+     * The progress notifier, if any, or null.
+     */
+    private final ProgressNotifier notifier;
 
     // ----------------------------------------------------------- Constructors
 
-
     /**
-     * Default constructor.
+     * Creates a new instance.
      *
-     * @see #MultipartStream(InputStream, byte[], int)
-     * @see #MultipartStream(InputStream, byte[])
-     *
+     * @deprecated 1.2.1 Use {@link #MultipartStream(InputStream, byte[], int,
+     * ProgressNotifier)}
      */
-    public MultipartStream()
-    {
-        super();
+    @Deprecated
+    public MultipartStream() {
+        this(null, null, null);
     }
 
+    /**
+     * <p> Constructs a <code>MultipartStream</code> with a custom size buffer
+     * and no progress notifier.
+     *
+     * <p> Note that the buffer must be at least big enough to contain the
+     * boundary string, plus 4 characters for CR/LF and double dash, plus at
+     * least one byte of data.  Too small a buffer size setting will degrade
+     * performance.
+     *
+     * @param input    The <code>InputStream</code> to serve as a data source.
+     * @param boundary The token used for dividing the stream into
+     *                 <code>encapsulations</code>.
+     * @param bufSize  The size of the buffer to be used, in bytes.
+     *
+     * @deprecated 1.2.1 Use {@link #MultipartStream(InputStream, byte[], int,
+     * ProgressNotifier)}.
+     */
+    @Deprecated
+    public MultipartStream(InputStream input, byte[] boundary, int bufSize) {
+        this(input, boundary, bufSize, null);
+    }
 
     /**
      * <p> Constructs a <code>MultipartStream</code> with a custom size buffer.
@@ -261,35 +319,62 @@ public class MultipartStream
      * @param boundary The token used for dividing the stream into
      *                 <code>encapsulations</code>.
      * @param bufSize  The size of the buffer to be used, in bytes.
+     * @param pNotifier The notifier, which is used for calling the
+     *                  progress listener, if any.
      *
+     * @throws IllegalArgumentException If the buffer size is too small
      *
-     * @see #MultipartStream()
-     * @see #MultipartStream(InputStream, byte[])
-     *
+     * @since 1.3.1
      */
     public MultipartStream(InputStream input,
-                           byte[] boundary,
-                           int bufSize)
-    {
-        this.input = input;
-        this.bufSize = bufSize;
-        this.buffer = new byte[bufSize];
+            byte[] boundary,
+            int bufSize,
+            ProgressNotifier pNotifier) {
 
-        // We prepend CR/LF to the boundary to chop trailng CR/LF from
+        if (boundary == null) {
+            throw new IllegalArgumentException("boundary may not be null");
+        }
+        // We prepend CR/LF to the boundary to chop trailing CR/LF from
         // body-data tokens.
-        this.boundary = new byte[boundary.length + 4];
-        this.boundaryLength = boundary.length + 4;
-        this.keepRegion = boundary.length + 3;
-        this.boundary[0] = 0x0D;
-        this.boundary[1] = 0x0A;
-        this.boundary[2] = 0x2D;
-        this.boundary[3] = 0x2D;
-        System.arraycopy(boundary, 0, this.boundary, 4, boundary.length);
+        this.boundaryLength = boundary.length + BOUNDARY_PREFIX.length;
+        if (bufSize < this.boundaryLength + 1) {
+            throw new IllegalArgumentException(
+                    "The buffer size specified for the MultipartStream is too small");
+        }
+
+        this.input = input;
+        this.bufSize = Math.max(bufSize, boundaryLength * 2);
+        this.buffer = new byte[this.bufSize];
+        this.notifier = pNotifier;
+
+        this.boundary = new byte[this.boundaryLength];
+        this.keepRegion = this.boundary.length;
+
+        System.arraycopy(BOUNDARY_PREFIX, 0, this.boundary, 0,
+                BOUNDARY_PREFIX.length);
+        System.arraycopy(boundary, 0, this.boundary, BOUNDARY_PREFIX.length,
+                boundary.length);
 
         head = 0;
         tail = 0;
     }
 
+    /**
+     * <p> Constructs a <code>MultipartStream</code> with a default size buffer.
+     *
+     * @param input    The <code>InputStream</code> to serve as a data source.
+     * @param boundary The token used for dividing the stream into
+     *                 <code>encapsulations</code>.
+     * @param pNotifier An object for calling the progress listener, if any.
+     *
+     *
+     * @see #MultipartStream(InputStream, byte[], int, ProgressNotifier)
+     */
+    MultipartStream(InputStream input,
+            byte[] boundary,
+            ProgressNotifier pNotifier) {
+        this(input, boundary, DEFAULT_BUFSIZE, pNotifier);
+    }
 
     /**
      * <p> Constructs a <code>MultipartStream</code> with a default size buffer.
@@ -298,36 +383,27 @@ public class MultipartStream
      * @param boundary The token used for dividing the stream into
      *                 <code>encapsulations</code>.
      *
-     * @exception IOException when an error occurs.
-     *
-     * @see #MultipartStream()
-     * @see #MultipartStream(InputStream, byte[], int)
-     *
+     * @deprecated 1.2.1 Use {@link #MultipartStream(InputStream, byte[], int,
+     *  ProgressNotifier)}.
      */
+    @Deprecated
     public MultipartStream(InputStream input,
-                           byte[] boundary)
-        throws IOException
-    {
-        this(input, boundary, DEFAULT_BUFSIZE);
+            byte[] boundary) {
+        this(input, boundary, DEFAULT_BUFSIZE, null);
     }
 
-
     // --------------------------------------------------------- Public methods
-
 
     /**
      * Retrieves the character encoding used when reading the headers of an
      * individual part. When not specified, or <code>null</code>, the platform
      * default encoding is used.
-
      *
      * @return The encoding used to read part headers.
      */
-    public String getHeaderEncoding()
-    {
+    public String getHeaderEncoding() {
         return headerEncoding;
     }
-
 
     /**
      * Specifies the character encoding to be used when reading the headers of
@@ -336,11 +412,9 @@ public class MultipartStream
      *
      * @param encoding The encoding used to read part headers.
      */
-    public void setHeaderEncoding(String encoding)
-    {
+    public void setHeaderEncoding(String encoding) {
         headerEncoding = encoding;
     }
-
 
     /**
      * Reads a byte from the <code>buffer</code>, and refills it as
@@ -348,26 +422,24 @@ public class MultipartStream
      *
      * @return The next byte from the input stream.
      *
-     * @exception IOException if there is no more data available.
+     * @throws IOException if there is no more data available.
      */
-    public byte readByte()
-        throws IOException
-    {
+    public byte readByte() throws IOException {
         // Buffer depleted ?
-        if (head == tail)
-        {
+        if (head == tail) {
             head = 0;
             // Refill.
             tail = input.read(buffer, head, bufSize);
-            if (tail == -1)
-            {
+            if (tail == -1) {
                 // No more data available.
                 throw new IOException("No more data is available");
+            }
+            if (notifier != null) {
+                notifier.noteBytesRead(tail);
             }
         }
         return buffer[head++];
     }
-
 
     /**
      * Skips a <code>boundary</code> token, and checks whether more
@@ -376,41 +448,45 @@ public class MultipartStream
      * @return <code>true</code> if there are more encapsulations in
      *         this stream; <code>false</code> otherwise.
      *
-     * @exception MalformedStreamException if the stream ends unexpecetedly or
-     *                                     fails to follow required syntax.
+     * @throws FileUploadIOException if the bytes read from the stream exceeded the size limits
+     * @throws MalformedStreamException if the stream ends unexpectedly or
+     *                                  fails to follow required syntax.
      */
     public boolean readBoundary()
-        throws MalformedStreamException
-    {
+            throws FileUploadIOException, MalformedStreamException {
         byte[] marker = new byte[2];
         boolean nextChunk = false;
 
         head += boundaryLength;
-        try
-        {
+        try {
             marker[0] = readByte();
+            if (marker[0] == LF) {
+                // Work around IE5 Mac bug with input type=image.
+                // Because the boundary delimiter, not including the trailing
+                // CRLF, must not appear within any file (RFC 2046, section
+                // 5.1.1), we know the missing CR is due to a buggy browser
+                // rather than a file containing something similar to a
+                // boundary.
+                return true;
+            }
+
             marker[1] = readByte();
-            if (arrayequals(marker, STREAM_TERMINATOR, 2))
-            {
+            if (arrayequals(marker, STREAM_TERMINATOR, 2)) {
                 nextChunk = false;
-            }
-            else if (arrayequals(marker, FIELD_SEPARATOR, 2))
-            {
+            } else if (arrayequals(marker, FIELD_SEPARATOR, 2)) {
                 nextChunk = true;
-            }
-            else
-            {
+            } else {
                 throw new MalformedStreamException(
-                        "Unexpected characters follow a boundary");
+                "Unexpected characters follow a boundary");
             }
-        }
-        catch (IOException e)
-        {
+        } catch (FileUploadIOException e) {
+            // wraps a SizeException, re-throw as it will be unwrapped later
+            throw e;
+        } catch (IOException e) {
             throw new MalformedStreamException("Stream ended unexpectedly");
         }
         return nextChunk;
     }
-
 
     /**
      * <p>Changes the boundary token used for partitioning the stream.
@@ -427,21 +503,19 @@ public class MultipartStream
      * @param boundary The boundary to be used for parsing of the nested
      *                 stream.
      *
-     * @exception IllegalBoundaryException if the <code>boundary</code>
-     *                                     has a different length than the one
-     *                                     being currently parsed.
+     * @throws IllegalBoundaryException if the <code>boundary</code>
+     *                                  has a different length than the one
+     *                                  being currently parsed.
      */
     public void setBoundary(byte[] boundary)
-        throws IllegalBoundaryException
-    {
-        if (boundary.length != boundaryLength - 4)
-        {
+            throws IllegalBoundaryException {
+        if (boundary.length != boundaryLength - BOUNDARY_PREFIX.length) {
             throw new IllegalBoundaryException(
-                    "The length of a boundary token can not be changed");
+            "The length of a boundary token can not be changed");
         }
-        System.arraycopy(boundary, 0, this.boundary, 4, boundary.length);
+        System.arraycopy(boundary, 0, this.boundary, BOUNDARY_PREFIX.length,
+                boundary.length);
     }
-
 
     /**
      * <p>Reads the <code>header-part</code> of the current
@@ -456,64 +530,52 @@ public class MultipartStream
      *
      * @return The <code>header-part</code> of the current encapsulation.
      *
-     * @exception MalformedStreamException if the stream ends unexpecetedly.
+     * @throws FileUploadIOException if the bytes read from the stream exceeded the size limits.
+     * @throws MalformedStreamException if the stream ends unexpectedly.
      */
-    public String readHeaders()
-        throws MalformedStreamException
-    {
+    public String readHeaders() throws FileUploadIOException, MalformedStreamException {
         int i = 0;
-        byte b[] = new byte[1];
+        byte b;
         // to support multi-byte characters
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        int sizeMax = HEADER_PART_SIZE_MAX;
         int size = 0;
-        while (i < 4)
-        {
-            try
-            {
-                b[0] = readByte();
-            }
-            catch (IOException e)
-            {
+        while (i < HEADER_SEPARATOR.length) {
+            try {
+                b = readByte();
+            } catch (FileUploadIOException e) {
+                // wraps a SizeException, re-throw as it will be unwrapped later
+                throw e;
+            } catch (IOException e) {
                 throw new MalformedStreamException("Stream ended unexpectedly");
             }
-            size++;
-            if (b[0] == HEADER_SEPARATOR[i])
-            {
-                i++;
+            if (++size > HEADER_PART_SIZE_MAX) {
+                throw new MalformedStreamException(
+                        format("Header section has more than %s bytes (maybe it is not properly terminated)",
+                               Integer.valueOf(HEADER_PART_SIZE_MAX)));
             }
-            else
-            {
+            if (b == HEADER_SEPARATOR[i]) {
+                i++;
+            } else {
                 i = 0;
             }
-            if (size <= sizeMax)
-            {
-                baos.write(b[0]);
-            }
+            baos.write(b);
         }
 
         String headers = null;
-        if (headerEncoding != null)
-        {
-            try
-            {
+        if (headerEncoding != null) {
+            try {
                 headers = baos.toString(headerEncoding);
-            }
-            catch (UnsupportedEncodingException e)
-            {
+            } catch (UnsupportedEncodingException e) {
                 // Fall back to platform default if specified encoding is not
                 // supported.
                 headers = baos.toString();
             }
-        }
-        else
-        {
+        } else {
             headers = baos.toString();
         }
 
         return headers;
     }
-
 
     /**
      * <p>Reads <code>body-data</code> from the current
@@ -522,81 +584,31 @@ public class MultipartStream
      *
      * <p>Arbitrary large amounts of data can be processed by this
      * method using a constant size buffer. (see {@link
-     * #MultipartStream(InputStream,byte[],int) constructor}).
+     * #MultipartStream(InputStream,byte[],int,
+     *   MultipartStream.ProgressNotifier) constructor}).
      *
-     * @param output The <code>Stream</code> to write data into.
+     * @param output The <code>Stream</code> to write data into. May
+     *               be null, in which case this method is equivalent
+     *               to {@link #discardBodyData()}.
      *
      * @return the amount of data written.
      *
-     * @exception MalformedStreamException if the stream ends unexpectedly.
-     * @exception IOException              if an i/o error occurs.
+     * @throws MalformedStreamException if the stream ends unexpectedly.
+     * @throws IOException              if an i/o error occurs.
      */
     public int readBodyData(OutputStream output)
-        throws MalformedStreamException,
-               IOException
-    {
-        boolean done = false;
-        int pad;
-        int pos;
-        int bytesRead;
-        int total = 0;
-        while (!done)
-        {
-            // Is boundary token present somewere in the buffer?
-            pos = findSeparator();
-            if (pos != -1)
-            {
-                // Write the rest of the data before the boundary.
-                output.write(buffer, head, pos - head);
-                total += pos - head;
-                head = pos;
-                done = true;
-            }
-            else
-            {
-                // Determine how much data should be kept in the
-                // buffer.
-                if (tail - head > keepRegion)
-                {
-                    pad = keepRegion;
-                }
-                else
-                {
-                    pad = tail - head;
-                }
-                // Write out the data belonging to the body-data.
-                output.write(buffer, head, tail - head - pad);
-
-                // Move the data to the beging of the buffer.
-                total += tail - head - pad;
-                System.arraycopy(buffer, tail - pad, buffer, 0, pad);
-
-                // Refill buffer with new data.
-                head = 0;
-                bytesRead = input.read(buffer, pad, bufSize - pad);
-
-                // [pprrrrrrr]
-                if (bytesRead != -1)
-                {
-                    tail = pad + bytesRead;
-                }
-                else
-                {
-                    // The last pad amount is left in the buffer.
-                    // Boundary can't be in there so write out the
-                    // data you have and signal an error condition.
-                    output.write(buffer, 0, pad);
-                    output.flush();
-                    total += pad;
-                    throw new MalformedStreamException(
-                            "Stream ended unexpectedly");
-                }
-            }
-        }
-        output.flush();
-        return total;
+            throws MalformedStreamException, IOException {
+        final InputStream istream = newInputStream();
+        return (int) Streams.copy(istream, output, false);
     }
 
+    /**
+     * Creates a new {@link ItemInputStream}.
+     * @return A new instance of {@link ItemInputStream}.
+     */
+    ItemInputStream newInputStream() {
+        return new ItemInputStream();
+    }
 
     /**
      * <p> Reads <code>body-data</code> from the current
@@ -607,69 +619,12 @@ public class MultipartStream
      *
      * @return The amount of data discarded.
      *
-     * @exception MalformedStreamException if the stream ends unexpectedly.
-     * @exception IOException              if an i/o error occurs.
+     * @throws MalformedStreamException if the stream ends unexpectedly.
+     * @throws IOException              if an i/o error occurs.
      */
-    public int discardBodyData()
-        throws MalformedStreamException,
-               IOException
-    {
-        boolean done = false;
-        int pad;
-        int pos;
-        int bytesRead;
-        int total = 0;
-        while (!done)
-        {
-            // Is boundary token present somewere in the buffer?
-            pos = findSeparator();
-            if (pos != -1)
-            {
-                // Write the rest of the data before the boundary.
-                total += pos - head;
-                head = pos;
-                done = true;
-            }
-            else
-            {
-                // Determine how much data should be kept in the
-                // buffer.
-                if (tail - head > keepRegion)
-                {
-                    pad = keepRegion;
-                }
-                else
-                {
-                    pad = tail - head;
-                }
-                total += tail - head - pad;
-
-                // Move the data to the beging of the buffer.
-                System.arraycopy(buffer, tail - pad, buffer, 0, pad);
-
-                // Refill buffer with new data.
-                head = 0;
-                bytesRead = input.read(buffer, pad, bufSize - pad);
-
-                // [pprrrrrrr]
-                if (bytesRead != -1)
-                {
-                    tail = pad + bytesRead;
-                }
-                else
-                {
-                    // The last pad amount is left in the buffer.
-                    // Boundary can't be in there so signal an error
-                    // condition.
-                    total += pad;
-                    throw new MalformedStreamException(
-                            "Stream ended unexpectedly");
-                }
-            }
-        }
-        return total;
+    public int discardBodyData() throws MalformedStreamException, IOException {
+        return readBodyData(null);
     }
-
 
     /**
      * Finds the beginning of the first <code>encapsulation</code>.
@@ -677,37 +632,29 @@ public class MultipartStream
      * @return <code>true</code> if an <code>encapsulation</code> was found in
      *         the stream.
      *
-     * @exception IOException if an i/o error occurs.
+     * @throws IOException if an i/o error occurs.
      */
-    public boolean skipPreamble()
-        throws IOException
-    {
+    public boolean skipPreamble() throws IOException {
         // First delimiter may be not preceeded with a CRLF.
         System.arraycopy(boundary, 2, boundary, 0, boundary.length - 2);
         boundaryLength = boundary.length - 2;
-        try
-        {
+        try {
             // Discard all data up to the delimiter.
             discardBodyData();
 
-            // Read boundary - if succeded, the stream contains an
+            // Read boundary - if succeeded, the stream contains an
             // encapsulation.
             return readBoundary();
-        }
-        catch (MalformedStreamException e)
-        {
+        } catch (MalformedStreamException e) {
             return false;
-        }
-        finally
-        {
+        } finally {
             // Restore delimiter.
             System.arraycopy(boundary, 0, boundary, 2, boundary.length - 2);
             boundaryLength = boundary.length;
-            boundary[0] = 0x0D;
-            boundary[1] = 0x0A;
+            boundary[0] = CR;
+            boundary[1] = LF;
         }
     }
-
 
     /**
      * Compares <code>count</code> first bytes in the arrays
@@ -721,19 +668,15 @@ public class MultipartStream
      *         <code>a</code> and <code>b</code> are equal.
      */
     public static boolean arrayequals(byte[] a,
-                                      byte[] b,
-                                      int count)
-    {
-        for (int i = 0; i < count; i++)
-        {
-            if (a[i] != b[i])
-            {
+            byte[] b,
+            int count) {
+        for (int i = 0; i < count; i++) {
+            if (a[i] != b[i]) {
                 return false;
             }
         }
         return true;
     }
-
 
     /**
      * Searches for a byte of specified value in the <code>buffer</code>,
@@ -746,19 +689,15 @@ public class MultipartStream
      *         <code>buffer</code>, or <code>-1</code> if not found.
      */
     protected int findByte(byte value,
-                           int pos)
-    {
-        for (int i = pos; i < tail; i++)
-        {
-            if (buffer[i] == value)
-            {
+            int pos) {
+        for (int i = pos; i < tail; i++) {
+            if (buffer[i] == value) {
                 return i;
             }
         }
 
         return -1;
     }
-
 
     /**
      * Searches for the <code>boundary</code> in the <code>buffer</code>
@@ -768,69 +707,43 @@ public class MultipartStream
      *         beginning of the <code>buffer</code>, or <code>-1</code> if
      *         not found.
      */
-    protected int findSeparator()
-    {
+    protected int findSeparator() {
         int first;
         int match = 0;
         int maxpos = tail - boundaryLength;
-        for (first = head;
-             (first <= maxpos) && (match != boundaryLength);
-             first++)
-        {
+        for (first = head; first <= maxpos && match != boundaryLength; first++) {
             first = findByte(boundary[0], first);
-            if (first == -1 || (first > maxpos))
-            {
+            if (first == -1 || first > maxpos) {
                 return -1;
             }
-            for (match = 1; match < boundaryLength; match++)
-            {
-                if (buffer[first + match] != boundary[match])
-                {
+            for (match = 1; match < boundaryLength; match++) {
+                if (buffer[first + match] != boundary[match]) {
                     break;
                 }
             }
         }
-        if (match == boundaryLength)
-        {
+        if (match == boundaryLength) {
             return first - 1;
         }
         return -1;
     }
 
     /**
-     * Returns a string representation of this object.
-     *
-     * @return The string representation of this object.
-     */
-    @Override
-    public String toString()
-    {
-        StringBuffer sbTemp = new StringBuffer();
-        sbTemp.append("boundary='");
-        sbTemp.append(String.valueOf(boundary));
-        sbTemp.append("'\nbufSize=");
-        sbTemp.append(bufSize);
-        return sbTemp.toString();
-    }
-
-    /**
      * Thrown to indicate that the input stream fails to follow the
      * required syntax.
      */
-    public class MalformedStreamException
-        extends IOException
-    {
+    public static class MalformedStreamException extends IOException {
+
         /**
-         * 
+         * The UID to use when serializing this instance.
          */
-        private static final long serialVersionUID = 3904955339760941107L;
+        private static final long serialVersionUID = 6466926458059796677L;
 
         /**
          * Constructs a <code>MalformedStreamException</code> with no
          * detail message.
          */
-        public MalformedStreamException()
-        {
+        public MalformedStreamException() {
             super();
         }
 
@@ -840,30 +753,27 @@ public class MultipartStream
          *
          * @param message The detail message.
          */
-        public MalformedStreamException(String message)
-        {
+        public MalformedStreamException(String message) {
             super(message);
         }
-    }
 
+    }
 
     /**
      * Thrown upon attempt of setting an invalid boundary token.
      */
-    public class IllegalBoundaryException
-        extends IOException
-    {
+    public static class IllegalBoundaryException extends IOException {
+
         /**
-         * 
+         * The UID to use when serializing this instance.
          */
-        private static final long serialVersionUID = 3616451202477273655L;
+        private static final long serialVersionUID = -161533165102632918L;
 
         /**
          * Constructs an <code>IllegalBoundaryException</code> with no
          * detail message.
          */
-        public IllegalBoundaryException()
-        {
+        public IllegalBoundaryException() {
             super();
         }
 
@@ -873,76 +783,259 @@ public class MultipartStream
          *
          * @param message The detail message.
          */
-        public IllegalBoundaryException(String message)
-        {
+        public IllegalBoundaryException(String message) {
             super(message);
         }
+
     }
 
+    /**
+     * An {@link InputStream} for reading an items contents.
+     */
+    public class ItemInputStream extends InputStream implements Closeable {
 
-    // ------------------------------------------------------ Debugging methods
+        /**
+         * The number of bytes, which have been read so far.
+         */
+        private long total;
 
+        /**
+         * The number of bytes, which must be hold, because
+         * they might be a part of the boundary.
+         */
+        private int pad;
 
-    // These are the methods that were used to debug this stuff.
-    /*
+        /**
+         * The current offset in the buffer.
+         */
+        private int pos;
 
-    // Dump data.
-    protected void dump()
-    {
-        System.out.println("01234567890");
-        byte[] temp = new byte[buffer.length];
-        for(int i=0; i<buffer.length; i++)
-        {
-            if (buffer[i] == 0x0D || buffer[i] == 0x0A)
-            {
-                temp[i] = 0x21;
-            }
-            else
-            {
-                temp[i] = buffer[i];
+        /**
+         * Whether the stream is already closed.
+         */
+        private boolean closed;
+
+        /**
+         * Creates a new instance.
+         */
+        ItemInputStream() {
+            findSeparator();
+        }
+
+        /**
+         * Called for finding the separator.
+         */
+        private void findSeparator() {
+            pos = MultipartStream.this.findSeparator();
+            if (pos == -1) {
+                if (tail - head > keepRegion) {
+                    pad = keepRegion;
+                } else {
+                    pad = tail - head;
+                }
             }
         }
-        System.out.println(new String(temp));
-        int i;
-        for (i=0; i<head; i++)
-            System.out.print(" ");
-        System.out.println("h");
-        for (i=0; i<tail; i++)
-            System.out.print(" ");
-        System.out.println("t");
-        System.out.flush();
-    }
 
-    // Main routine, for testing purposes only.
-    //
-    // @param args A String[] with the command line arguments.
-    // @exception Exception, a generic exception.
-    public static void main( String[] args )
-        throws Exception
-    {
-        File boundaryFile = new File("boundary.dat");
-        int boundarySize = (int)boundaryFile.length();
-        byte[] boundary = new byte[boundarySize];
-        FileInputStream input = new FileInputStream(boundaryFile);
-        input.read(boundary,0,boundarySize);
-
-        input = new FileInputStream("multipart.dat");
-        MultipartStream chunks = new MultipartStream(input, boundary);
-
-        int i = 0;
-        String header;
-        OutputStream output;
-        boolean nextChunk = chunks.skipPreamble();
-        while (nextChunk)
-        {
-            header = chunks.readHeaders();
-            System.out.println("!"+header+"!");
-            System.out.println("wrote part"+i+".dat");
-            output = new FileOutputStream("part"+(i++)+".dat");
-            chunks.readBodyData(output);
-            nextChunk = chunks.readBoundary();
+        /**
+         * Returns the number of bytes, which have been read
+         * by the stream.
+         *
+         * @return Number of bytes, which have been read so far.
+         */
+        public long getBytesRead() {
+            return total;
         }
+
+        /**
+         * Returns the number of bytes, which are currently
+         * available, without blocking.
+         *
+         * @throws IOException An I/O error occurs.
+         * @return Number of bytes in the buffer.
+         */
+        @Override
+        public int available() throws IOException {
+            if (pos == -1) {
+                return tail - head - pad;
+            }
+            return pos - head;
+        }
+
+        /**
+         * Offset when converting negative bytes to integers.
+         */
+        private static final int BYTE_POSITIVE_OFFSET = 256;
+
+        /**
+         * Returns the next byte in the stream.
+         *
+         * @return The next byte in the stream, as a non-negative
+         *   integer, or -1 for EOF.
+         * @throws IOException An I/O error occurred.
+         */
+        @Override
+        public int read() throws IOException {
+            if (closed) {
+                throw new FileItemStream.ItemSkippedException();
+            }
+            if (available() == 0 && makeAvailable() == 0) {
+                return -1;
+            }
+            ++total;
+            int b = buffer[head++];
+            if (b >= 0) {
+                return b;
+            }
+            return b + BYTE_POSITIVE_OFFSET;
+        }
+
+        /**
+         * Reads bytes into the given buffer.
+         *
+         * @param b The destination buffer, where to write to.
+         * @param off Offset of the first byte in the buffer.
+         * @param len Maximum number of bytes to read.
+         * @return Number of bytes, which have been actually read,
+         *   or -1 for EOF.
+         * @throws IOException An I/O error occurred.
+         */
+        @Override
+        public int read(byte[] b, int off, int len) throws IOException {
+            if (closed) {
+                throw new FileItemStream.ItemSkippedException();
+            }
+            if (len == 0) {
+                return 0;
+            }
+            int res = available();
+            if (res == 0) {
+                res = makeAvailable();
+                if (res == 0) {
+                    return -1;
+                }
+            }
+            res = Math.min(res, len);
+            System.arraycopy(buffer, head, b, off, res);
+            head += res;
+            total += res;
+            return res;
+        }
+
+        /**
+         * Closes the input stream.
+         *
+         * @throws IOException An I/O error occurred.
+         */
+        @Override
+        public void close() throws IOException {
+            close(false);
+        }
+
+        /**
+         * Closes the input stream.
+         *
+         * @param pCloseUnderlying Whether to close the underlying stream
+         *   (hard close)
+         * @throws IOException An I/O error occurred.
+         */
+        public void close(boolean pCloseUnderlying) throws IOException {
+            if (closed) {
+                return;
+            }
+            if (pCloseUnderlying) {
+                closed = true;
+                input.close();
+            } else {
+                for (;;) {
+                    int av = available();
+                    if (av == 0) {
+                        av = makeAvailable();
+                        if (av == 0) {
+                            break;
+                        }
+                    }
+                    skip(av);
+                }
+            }
+            closed = true;
+        }
+
+        /**
+         * Skips the given number of bytes.
+         *
+         * @param bytes Number of bytes to skip.
+         * @return The number of bytes, which have actually been
+         *   skipped.
+         * @throws IOException An I/O error occurred.
+         */
+        @Override
+        public long skip(long bytes) throws IOException {
+            if (closed) {
+                throw new FileItemStream.ItemSkippedException();
+            }
+            int av = available();
+            if (av == 0) {
+                av = makeAvailable();
+                if (av == 0) {
+                    return 0;
+                }
+            }
+            long res = Math.min(av, bytes);
+            head += res;
+            return res;
+        }
+
+        /**
+         * Attempts to read more data.
+         *
+         * @return Number of available bytes
+         * @throws IOException An I/O error occurred.
+         */
+        private int makeAvailable() throws IOException {
+            if (pos != -1) {
+                return 0;
+            }
+
+            // Move the data to the beginning of the buffer.
+            total += tail - head - pad;
+            System.arraycopy(buffer, tail - pad, buffer, 0, pad);
+
+            // Refill buffer with new data.
+            head = 0;
+            tail = pad;
+
+            for (;;) {
+                int bytesRead = input.read(buffer, tail, bufSize - tail);
+                if (bytesRead == -1) {
+                    // The last pad amount is left in the buffer.
+                    // Boundary can't be in there so signal an error
+                    // condition.
+                    final String msg = "Stream ended unexpectedly";
+                    throw new MalformedStreamException(msg);
+                }
+                if (notifier != null) {
+                    notifier.noteBytesRead(bytesRead);
+                }
+                tail += bytesRead;
+
+                findSeparator();
+                int av = available();
+
+                if (av > 0 || pos != -1) {
+                    return av;
+                }
+            }
+        }
+
+        /**
+         * Returns, whether the stream is closed.
+         *
+         * @return True, if the stream is closed, otherwise false.
+         */
+        public boolean isClosed() {
+            return closed;
+        }
+
     }
 
-    */
 }

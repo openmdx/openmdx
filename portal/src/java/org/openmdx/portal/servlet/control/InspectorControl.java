@@ -65,6 +65,7 @@ import javax.jmi.reflect.RefStruct;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
 import org.openmdx.base.mof.cci.Model_1_0;
+import org.openmdx.base.naming.Path;
 import org.openmdx.kernel.log.SysLog;
 import org.openmdx.portal.servlet.Action;
 import org.openmdx.portal.servlet.PortalExtension_1_0;
@@ -229,7 +230,7 @@ public abstract class InspectorControl extends Control implements Serializable {
     		}
     	}
     	for(ModelElement_1_0 type: typesToCheck) {
-    		ModelElement_1_0 compositeReference = model.getElement(type.objGetValue("compositeReference"));
+    		ModelElement_1_0 compositeReference = model.getElement((Path)type.objGetValue("compositeReference"));
     		ModelElement_1_0 exposingType = model.getElement(compositeReference.getContainer());
     		this.createCompositionHierarchy(
 				exposingType,
@@ -256,7 +257,6 @@ public abstract class InspectorControl extends Control implements Serializable {
 		Map<String,Object> to,
 		ModelElement_1_0 structDef
 	) throws ServiceException {
-    	@SuppressWarnings("unchecked")
     	List<ModelElement_1_0> fields = (List<ModelElement_1_0>)structDef.objGetMap("field").values();
     	for(ModelElement_1_0 field: fields) {
     		String fieldName = (String)field.getQualifiedName();

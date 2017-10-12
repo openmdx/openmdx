@@ -221,10 +221,13 @@ public class Model_1Validator {
                         break;
                     }
                     case SPARSEARRAY:
-                        for(Object value : element.objGetSparseArray(e.getKey()).values()) {
-                            validateValue(attribute, value);
-                        }
-                        break;
+                        throw new ServiceException(
+                            BasicException.Code.DEFAULT_DOMAIN,
+                            BasicException.Code.VALIDATION_FAILURE,
+                            "Multiplicity not supported by model repository",
+                            new BasicException.Parameter("key", e.getKey()),
+                            new BasicException.Parameter("multiplicity", "SPARSEARRAY")
+                        );
                     default:
                         // No specific check
                 }

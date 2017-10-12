@@ -67,10 +67,11 @@ import org.openmdx.base.collection.Sets;
 import org.openmdx.base.mof.cci.Multiplicity;
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.query.Code;
+import org.openmdx.base.resource.Records;
 import org.openmdx.base.resource.cci.Freezable;
-import org.openmdx.base.resource.spi.Isolation;
 import org.openmdx.base.resource.spi.StandardRecordFactory;
 import org.openmdx.kernel.exception.BasicException;
+import org.openmdx.kernel.exception.Throwables;
 import org.openmdx.kernel.text.MultiLineStringRepresentation;
 import org.openmdx.kernel.text.format.IndentingFormatter;
 
@@ -78,6 +79,7 @@ import org.openmdx.kernel.text.format.IndentingFormatter;
 /**
  * Abstract Mapped Record
  */
+@SuppressWarnings("synthetic-access")
 public abstract class AbstractMappedRecord<M extends Enum<M>> 
 	implements MultiLineStringRepresentation, MappedRecord, Freezable 
 {
@@ -101,13 +103,29 @@ public abstract class AbstractMappedRecord<M extends Enum<M>>
     ){
     	for(M member : members()) {
     		final Object value = that.get(member);
-    		if(value instanceof IndexedRecord) {
-    			final IndexedRecord target = (IndexedRecord) this.get(member);
-    			for(Object element : (IndexedRecord)value) {
-    				target.add(getValueForClone(element));
-    			}
-    		} else {
-    			this.put(member, getValueForClone(value));
+    		try {
+        		if(value instanceof IndexedRecord) {
+        			final IndexedRecord target = (IndexedRecord) this.get(member);
+        			for(Object element : (IndexedRecord)value) {
+        				target.add(getValueForClone(element));
+        			}
+        		} else {
+        			this.put(member, getValueForClone(value));
+        		}
+    		} catch (CloneNotSupportedException exception) {
+                throw BasicException.initHolder(
+                    new IllegalArgumentException(
+                        "Deep clone failure",
+                        BasicException.newEmbeddedExceptionStack(
+                            exception,
+                            BasicException.Code.DEFAULT_DOMAIN,
+                            BasicException.Code.NOT_SUPPORTED,
+                            new BasicException.Parameter("member", member),
+                            new BasicException.Parameter("value", value),
+                            new BasicException.Parameter("value class", value.getClass())
+                        )
+                    )
+                );
     		}
     	}
     }
@@ -160,8 +178,8 @@ public abstract class AbstractMappedRecord<M extends Enum<M>>
 	
     private static Object getValueForClone(
     	Object source
-    ){
-		return source instanceof MappedRecord ? Isolation.isolate((MappedRecord)source) : source;
+    ) throws CloneNotSupportedException{
+		return source instanceof MappedRecord ? ((MappedRecord)source).clone() : source;
     }
     
     /* (non-Javadoc)
@@ -197,16 +215,20 @@ public abstract class AbstractMappedRecord<M extends Enum<M>>
         Object value
     ){
     	assertMutability();
-        throw new IllegalArgumentException(
-            "Unsupported member",
-            BasicException.newEmbeddedExceptionStack(
-                BasicException.Code.DEFAULT_DOMAIN,
-                BasicException.Code.BAD_PARAMETER,
-                new BasicException.Parameter("class", getClass().getName()),
-                new BasicException.Parameter("name", getRecordName()),
-                new BasicException.Parameter("member", member),
-                new BasicException.Parameter("value", value),
-                new BasicException.Parameter("keys", keySet())
+        throw Throwables.log(
+            BasicException.initHolder(
+                new IllegalArgumentException(
+                    "Unsupported member",
+                    BasicException.newEmbeddedExceptionStack(
+                        BasicException.Code.DEFAULT_DOMAIN,
+                        BasicException.Code.BAD_PARAMETER,
+                        new BasicException.Parameter("class", getClass().getName()),
+                        new BasicException.Parameter("name", getRecordName()),
+                        new BasicException.Parameter("member", member),
+                        new BasicException.Parameter("value", value),
+                        new BasicException.Parameter("keys", keySet())
+                    )
+                )
             )
         );
     }
@@ -215,7 +237,7 @@ public abstract class AbstractMappedRecord<M extends Enum<M>>
      * @see java.util.Map#get(java.lang.Object)
      */
     @Override
-    public final Object get(Object key) {
+    public Object get(Object key) {
     	final M member = members().valueOf(key);
         return member == null ? null : get(member);
     }
@@ -225,22 +247,28 @@ public abstract class AbstractMappedRecord<M extends Enum<M>>
      */
     @Override
     public final Object put(
-        Object key, 
-        Object value
+        final Object key, 
+        final Object value
     ) {
     	final M member = members().valueOf(key);
-    	if(member == null) throw new IllegalArgumentException(
-            "Unsupported key",
-            BasicException.newEmbeddedExceptionStack(
-                BasicException.Code.DEFAULT_DOMAIN,
-                BasicException.Code.BAD_PARAMETER,
-                new BasicException.Parameter("class", getClass().getName()),
-                new BasicException.Parameter("name", getRecordName()),
-                new BasicException.Parameter("keys", keySet()),
-                new BasicException.Parameter("key", key),
-                new BasicException.Parameter("value", value)
-            )
-        );
+        if (member == null) {
+            throw Throwables.log(
+                BasicException.initHolder(
+                    new IllegalArgumentException(
+                        "Unsupported key",
+                        BasicException.newEmbeddedExceptionStack(
+                            BasicException.Code.DEFAULT_DOMAIN,
+                            BasicException.Code.BAD_PARAMETER,
+                            new BasicException.Parameter("class", getClass().getName()),
+                            new BasicException.Parameter("name", getRecordName()),
+                            new BasicException.Parameter("keys", keySet()),
+                            new BasicException.Parameter("key", key),
+                            new BasicException.Parameter("value", value)
+                        )
+                    )
+                )
+            );
+        }
         Object old = get(member);
         put(member, value);
         return old;
@@ -521,17 +549,21 @@ public abstract class AbstractMappedRecord<M extends Enum<M>>
      */
     @Override
     public void setRecordName(String recordName) {
-        if(!recordName.equals(getRecordName())) throw BasicException.initHolder(
-            new IllegalArgumentException(
-                "Unmodifiable Record Name",
-                BasicException.newEmbeddedExceptionStack(
-                    BasicException.Code.DEFAULT_DOMAIN,
-                    BasicException.Code.BAD_PARAMETER,
-                    new BasicException.Parameter("fixed", getRecordName()),
-                    new BasicException.Parameter("requested", recordName)
+        if(!recordName.equals(getRecordName())) {
+            throw Throwables.log(
+                BasicException.initHolder(
+                    new IllegalArgumentException(
+                        "Unmodifiable Record Name",
+                        BasicException.newEmbeddedExceptionStack(
+                            BasicException.Code.DEFAULT_DOMAIN,
+                            BasicException.Code.BAD_PARAMETER,
+                            new BasicException.Parameter("fixed", getRecordName()),
+                            new BasicException.Parameter("requested", recordName)
+                        )
+                    )
                 )
-            )
-        );
+            );
+        }
     }
 
     /**
@@ -569,9 +601,6 @@ public abstract class AbstractMappedRecord<M extends Enum<M>>
 		return record;
     }
 
-	/**
-	 * @return
-	 */
 	private static IndexedRecord createSet() {
 		try {
 			return StandardRecordFactory.getInstance().createIndexedRecord(Multiplicity.SET.code());
@@ -580,6 +609,41 @@ public abstract class AbstractMappedRecord<M extends Enum<M>>
 		}
 	}
 
+    /**
+     * Creates a set with the given content
+     * 
+     * @param elements the set's elements
+     * 
+     * @return an immutable <code>IndexedRecord</code>
+     */
+    protected static IndexedRecord createImmutableSet(
+        String... elements
+    ){
+        final IndexedRecord record = StandardRecordFactory.getInstance().asIndexedRecord(
+            Multiplicity.SET.code(), //
+            null, //
+            elements //
+        );
+        ((Freezable)record).makeImmutable();
+        return record;
+    }    
+	
+    protected MappedRecord newMap(){
+        final MappedRecord record = createMap();
+        if(this.immutable) {
+            freeze(record);
+        }
+        return record;
+    }
+
+    private static MappedRecord createMap() {
+        try {
+            return StandardRecordFactory.getInstance().createMappedRecord(Multiplicity.MAP.code());
+        } catch (ResourceException e) {
+            throw new RuntimeException(e);
+        }
+    }
+	
     @SuppressWarnings("unchecked")
 	protected IndexedRecord newSet(
     	IndexedRecord source
@@ -592,6 +656,26 @@ public abstract class AbstractMappedRecord<M extends Enum<M>>
     	return target;
     }
 
+    protected IndexedRecord toIndexedRecord(Multiplicity multiplicity, Object element) {
+        return Records.getRecordFactory().tinyIndexedRecord(
+            multiplicity.code(), // recordName
+            null, // recordShortDescription
+            element
+         );
+    }
+    
+    /**
+     * Extract the first element from a set
+     * 
+     * @param set the JCA set
+     * 
+     * @return the set's first element; or <code>null</code> if the
+     * set is <code>null</code> or empty
+     */
+    protected String firstOfSet(Collection<?> set) {
+        return set == null || set.isEmpty() ? null : set.iterator().next().toString();
+    }
+    
     protected IndexedRecord newList(){
     	final IndexedRecord record = createList();
     	if(this.immutable) {
@@ -624,7 +708,8 @@ public abstract class AbstractMappedRecord<M extends Enum<M>>
     }
     
     /**
-     * Convert the value to a <code>Path</code> if necessary
+     * Convert the value to a <code>Path</code> if necessaryThrowables.log(
+                
      * 
      * @param value
      * 
@@ -809,7 +894,18 @@ public abstract class AbstractMappedRecord<M extends Enum<M>>
     		((Freezable) record).makeImmutable();
     	}
     }
-    
+
+    /**
+     * Internalize the value unless ot is null
+     * 
+     * @param value the value to be internalized
+     * 
+     * @return the internalized value; or <code>null</code> in case of <code>null</code>
+     */
+    protected static String internalize(String value) {
+        return value == null ? null : value.intern();
+    }
+        
     /**
      * The instance is provided by the subclasses
      * 
@@ -817,6 +913,7 @@ public abstract class AbstractMappedRecord<M extends Enum<M>>
      */
     protected abstract Members<M> members();
 
+    
     //------------------------------------------------------------------------
     // Class Members
     //------------------------------------------------------------------------
@@ -830,7 +927,7 @@ public abstract class AbstractMappedRecord<M extends Enum<M>>
     		this.members = EnumSet.allOf(memberClass);
     		this.keys = new AbstractSet<String>(){
 
-    			@Override
+                @Override
     			public Iterator<String> iterator() {
     				
     				final Iterator<M> delegate = members.iterator();

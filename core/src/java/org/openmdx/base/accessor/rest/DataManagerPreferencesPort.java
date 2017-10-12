@@ -306,11 +306,9 @@ class DataManagerPreferencesPort implements Port<RestConnection> {
                         output.add(object);
                     }
                 }
-                if(output instanceof ResultRecord) {
-                    ResultRecord resultRecord = (ResultRecord) output;
-                    resultRecord.setHasMore(false);
-                    resultRecord.setTotal(container.size());
-                }
+                ResultRecord resultRecord = output;
+                resultRecord.setHasMore(false);
+                resultRecord.setTotal(container.size());
             } 
             return true;
         }
@@ -322,6 +320,7 @@ class DataManagerPreferencesPort implements Port<RestConnection> {
          * 
          * @throws ResourceException
          */
+        @SuppressWarnings("synthetic-access")
         Map<Path,Map<String,ObjectRecord>> getContainers(
         	RestConnection connection
         ) throws ResourceException {
@@ -346,7 +345,8 @@ class DataManagerPreferencesPort implements Port<RestConnection> {
             return DataManagerPreferencesPort.this.containers;
         }
 
-		private void getNodes(
+		@SuppressWarnings("synthetic-access")
+        private void getNodes(
 			RestConnection connection, 
 			Map<String, ObjectRecord> preferencesContainer,
 			Map.Entry<String, Port<RestConnection>> portEntry

@@ -20,7 +20,7 @@ import org.openmdx.base.text.conversion.JavaBeans;
 import org.w3c.spi.DatatypeFactories;
 
 /**
- *TestsanEXMLgregorianCalendar'sJavaBeanXMLEncoding
+ * TestXMLGregorianCalendar's JavaBean XMLEncoding
  */
 public class TestXMLGregorianCalendar {
 

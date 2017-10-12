@@ -129,7 +129,7 @@ private ClassDef(
 
   //-------------------------------------------------------------------------
   @SuppressWarnings("unchecked")
-private static List getSuperTypes(
+  private static List getSuperTypes(
     ModelElement_1_0 classDef,
     Model_1_0 model, 
     MetaData_1_0 metaData
@@ -152,22 +152,6 @@ private static List getSuperTypes(
     return supertypes;
   }
   
-  //-------------------------------------------------------------------------
-  /**
-   * @deprecated Use {@link #ClassDef(String,String,String,Set,boolean,boolean,List,ModelElement_1_0, Model_1_0, MetaData_1_0)} instead
-   */
-  @Deprecated
-  public ClassDef(
-    String name,
-    String qualifiedName,
-    String annotation,
-    Set stereotype,
-    boolean isAbstract,
-    List supertypes
-  ) {
-    this(name, qualifiedName, annotation, stereotype, isAbstract, supertypes, null, null, null, null);
-  }
-
 //-------------------------------------------------------------------------
   private ClassDef(
     String name,

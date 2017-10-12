@@ -63,7 +63,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 
 import javax.jdo.Constants;
 import javax.jdo.Extent;
@@ -110,6 +109,7 @@ import org.openmdx.base.mof.cci.Model_1_0;
 import org.openmdx.base.mof.spi.Model_1Factory;
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.naming.TransactionalSegment;
+import org.openmdx.base.persistence.cci.ConfigurableProperty;
 import org.openmdx.base.persistence.cci.UserObjects;
 import org.openmdx.base.persistence.spi.InstanceLifecycleListenerRegistry;
 import org.openmdx.base.persistence.spi.PersistenceCapableCollection;
@@ -137,6 +137,8 @@ public class DataObjectManager_1 implements Marshaller, DataObjectManager_1_0 {
 
     /**
      * Constructor 
+     * 
+     * @param isolateThreads tells, whether each thread has its own unit of work
      */
     public DataObjectManager_1(
         PersistenceManagerFactory factory,
@@ -147,6 +149,7 @@ public class DataObjectManager_1 implements Marshaller, DataObjectManager_1_0 {
         PlugIn_1_0[] plugIns, 
         Integer optimalFetchSize, 
         Integer cacheThreshold, 
+        boolean isolateThreads, 
         RestConnectionSpec connectionSpec
     ) throws ResourceException {
         super();
@@ -162,12 +165,47 @@ public class DataObjectManager_1 implements Marshaller, DataObjectManager_1_0 {
         this.cacheThreshold = cacheThreshold == null ? CACHE_THRESHOLD_DEFAULT : cacheThreshold.intValue();
         this.workContext = new HashMap<Object,Object>();
         this.plugIns = getRegisteredPlugIns(plugIns);
-        setMultithreaded(factory.getMultithreaded());
         setCopyOnAttach(factory.getCopyOnAttach());
         setDetachAllOnCommit(factory.getDetachAllOnCommit());
         setIgnoreCache(factory.getIgnoreCache());
         this.connectionSpec = connectionSpec;
+        if(isolateThreads) {
+            this.threadSafetyRequired = true;
+            this.aspectSpecificContexts = new AspectObjectDispatcher(this.threadSafetyRequired);
+            this.unitsOfWork = new ThreadLocal<UnitOfWork_1>(){
+                
+                /* (non-Javadoc)
+                 * @see java.lang.ThreadLocal#initialValue()
+                 */
+                @Override
+                protected UnitOfWork_1 initialValue() {
+                    return new UnitOfWork_1 (
+                        DataObjectManager_1.this,
+                        DataObjectManager_1.this.connection,
+                        DataObjectManager_1.this.aspectSpecificContexts, 
+                        false // there is no need for the unit of work to be thread safe
+                    );
+                }
+                
+            };
+            this.unitOfWork = null;
+        } else {
+            this.threadSafetyRequired = factory.getMultithreaded();
+            this.aspectSpecificContexts = new AspectObjectDispatcher(this.threadSafetyRequired);
+            this.unitsOfWork = null;
+            this.unitOfWork = new UnitOfWork_1 (
+                this,
+                this.connection,
+                this.aspectSpecificContexts, 
+                this.threadSafetyRequired
+            );
+        }
     }
+
+    /**
+     * Tells whether the data objects their manager must be thread safe
+     */
+    private final boolean threadSafetyRequired;
 
     /**
      * The REST Connection Spec
@@ -267,19 +305,19 @@ public class DataObjectManager_1 implements Marshaller, DataObjectManager_1_0 {
     };
 
     /**
+     * Units of work for a thread isolated data object managers
+     */ 
+    private final ThreadLocal<UnitOfWork_1> unitsOfWork;
+    
+    /**
      * Unit of work for a single-threaded data object manager
      */ 
-    private UnitOfWork_1 unitOfWork;
+    private final UnitOfWork_1 unitOfWork;
 
     /**
      * The transaction adapter belonging to the unit of work
      */
     private transient Transaction transaction;
-    
-    /**
-     * Units of work for a multi-threaded data object managers
-     */ 
-    private ConcurrentMap<Thread,UnitOfWork_1> unitsOfWork;
     
     /**
      * This connection has transaction policy <code>Mandatory</code>
@@ -309,7 +347,7 @@ public class DataObjectManager_1 implements Marshaller, DataObjectManager_1_0 {
     /**
      * The Aspect Specific Context instance 
      */
-    protected final AspectObjectDispatcher aspectSpecificContexts = new AspectObjectDispatcher();
+    protected final AspectObjectDispatcher aspectSpecificContexts;
     
     /**
      * The task identifier may be set by an application
@@ -515,9 +553,29 @@ public class DataObjectManager_1 implements Marshaller, DataObjectManager_1_0 {
      * @see org.openmdx.compatibility.base.dataprovider.transport.spi.Connection_1_5#isMultithreaded()
      */
     public boolean getMultithreaded() {
-        return this.unitOfWork == null;
+        return this.factory.getMultithreaded();
+    }
+    
+    /**
+     * Tells whether the data objects and their manager must be thread safe
+     *
+     * @return Returns threadSafetyRequired.
+     */
+    boolean isThreadSafetyRequired() {
+        return this.threadSafetyRequired;
     }
 
+    /* (non-Javadoc)
+     * @see javax.jdo.PersistenceManager#setMultithreaded(boolean)
+     */
+    @Override
+    public void setMultithreaded(boolean flag) {
+        if(flag != getMultithreaded()) throw new javax.jdo.JDOUnsupportedOptionException(
+            "The " + ConfigurableProperty.Multithreaded.qualifiedName() + 
+            " property can be set at factory level only"
+        );
+    }
+    
     /**
      * Retrieve model.
      *
@@ -679,23 +737,7 @@ public class DataObjectManager_1 implements Marshaller, DataObjectManager_1_0 {
 
 	@Override
     public UnitOfWork_1 currentUnitOfWork() {
-        if(this.unitOfWork == null) {
-            Thread thread = Thread.currentThread();
-            UnitOfWork_1 unitOfWork = this.unitsOfWork.get(thread);
-            if(unitOfWork == null) {
-                this.unitsOfWork.put(
-                    thread, 
-                    unitOfWork = new UnitOfWork_1 (
-                        this,
-                        this.connection,
-                        this.aspectSpecificContexts
-                    )
-                );
-            }
-            return unitOfWork;
-        } else {
-            return this.unitOfWork;
-        }
+        return this.unitOfWork == null ? this.unitsOfWork.get() : this.unitOfWork;
     }
 
     /* (non-Javadoc)
@@ -851,7 +893,8 @@ public class DataObjectManager_1 implements Marshaller, DataObjectManager_1_0 {
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#detachCopyAll(T[])
      */
-	@Override
+	@SuppressWarnings("unchecked")
+    @Override
     public <T> T[] detachCopyAll(T... arg0) {
         throw new UnsupportedOperationException("Operation not supported by dataprovider connection");
     }
@@ -1055,7 +1098,8 @@ public class DataObjectManager_1 implements Marshaller, DataObjectManager_1_0 {
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#makePersistentAll(T[])
      */
-	@Override
+	@SuppressWarnings("unchecked")
+    @Override
     public <T> T[] makePersistentAll(T... arg0) {
         throw new UnsupportedOperationException("Operation not supported by dataprovider connection");
     }
@@ -1510,7 +1554,7 @@ public class DataObjectManager_1 implements Marshaller, DataObjectManager_1_0 {
     public Object putUserObject(Object key, Object val) {
         throw new UnsupportedOperationException("Operation not supported by dataprovider connection");
     }
-
+	
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#refresh(java.lang.Object)
      */
@@ -1668,28 +1712,6 @@ public class DataObjectManager_1 implements Marshaller, DataObjectManager_1_0 {
         if(flag != IGNORE_CACHE) throw new JDOUnsupportedOptionException(
             "The current implementation restricts ignoreCache to " + IGNORE_CACHE
         );
-    }
-
-    /* (non-Javadoc)
-     * @see javax.jdo.PersistenceManager#setMultithreaded(boolean)
-     */
-	@Override
-    public void setMultithreaded(boolean flag) {
-        if(flag) {
-            this.unitOfWork = null;
-            if(this.unitsOfWork == null) {
-                this.unitsOfWork = new ConcurrentHashMap<Thread, UnitOfWork_1>();
-            }
-        } else {
-            this.unitsOfWork = null;
-            if(this.unitOfWork == null) {
-                this.unitOfWork = new UnitOfWork_1 (
-                    this,
-                    this.connection,
-                    this.aspectSpecificContexts
-                );
-            }
-        }
     }
 
     /* (non-Javadoc)
@@ -2105,6 +2127,14 @@ public class DataObjectManager_1 implements Marshaller, DataObjectManager_1_0 {
      */
     class AspectObjectDispatcher implements SharedObjects.Aspects {
 
+        AspectObjectDispatcher(
+            boolean threadSafetyRequired
+        ){
+            this.sharedContexts = threadSafetyRequired ? new ConcurrentHashMap<UUID,Map<Class<?>,Object>>() : new HashMap<UUID,Map<Class<?>,Object>>();
+        }
+        
+        private final Map<UUID,Map<Class<?>,Object>> sharedContexts;
+        
         /**
          * Retrieve the object's state
          * 
@@ -2222,11 +2252,6 @@ public class DataObjectManager_1 implements Marshaller, DataObjectManager_1_0 {
         ) {
             this.sharedContexts.clear();
         }
-        
-        //-------------------------------------------------------------------
-        // Members
-        //-------------------------------------------------------------------
-        private ConcurrentMap<UUID,Map<Class<?>,Object>> sharedContexts = new ConcurrentHashMap<UUID,Map<Class<?>,Object>>();
         
     }
 

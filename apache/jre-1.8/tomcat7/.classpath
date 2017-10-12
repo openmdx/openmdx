@@ -13,7 +13,7 @@
 	<classpathentry exported="true" kind="lib" path="lib/jsp-api.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/servlet-api.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/tomcat-api.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/tomcat-coyote.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/tomcat-coyote.jar" sourcepath="src/catalina.zip"/>
 	<classpathentry exported="true" kind="lib" path="lib/tomcat-dbcp.jar" sourcepath="src/tomcat-dbcp.zip"/>
 	<classpathentry exported="true" kind="lib" path="lib/tomcat-i18n-es.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/tomcat-i18n-fr.jar"/>

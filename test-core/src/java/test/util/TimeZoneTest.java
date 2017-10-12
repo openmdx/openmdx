@@ -55,6 +55,8 @@ import java.util.TimeZone;
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
 
+import org.w3c.cci2.MutableDatatypeFactory;
+
 /**
  * TestTimeZone
  *
@@ -70,9 +72,9 @@ public class TimeZoneTest
     }
 
     private static void displayTimestamp(){
-        try {
-            DatatypeFactory datatypeFactory = DatatypeFactory.newInstance();
-            GregorianCalendar calendar = datatypeFactory.newXMLGregorianCalendar(
+        try {DatatypeFactory.newInstance();
+            final DatatypeFactory datatypeFactory = MutableDatatypeFactory.xmlDatatypeFactory();
+            final GregorianCalendar calendar = datatypeFactory.newXMLGregorianCalendar(
                 new GregorianCalendar()
             ).toGregorianCalendar(
                 null, // zone 

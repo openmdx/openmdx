@@ -413,6 +413,7 @@ public class DataManagerFactory_1
                 this.plugIns, 
                 this.optimalFetchSize, 
                 this.cacheThreshold, 
+                getIsolateThreads(), 
                 connectionSpec  
             );
         } catch (ResourceException exception) {

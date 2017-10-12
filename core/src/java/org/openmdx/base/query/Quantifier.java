@@ -92,6 +92,20 @@ public enum Quantifier implements Code {
      * The <code>Quantifier</code>'s UNICODE symbol
      */
     private final char symbol;
+
+    /**
+     * Converts FOR_ALL to THERE_EXISTS and vice versa by leaving null
+     */
+    public static short invert(short code) {
+        switch(code) {
+            case 0: return 0;
+            case 1: return 2;
+            case 2: return 1;
+            default: throw new IllegalArgumentException(
+                "Invalid quantifier code: " + code
+            );
+        }
+    }
     
     /**
      * Retrieve the <code>Quantifier</code>'s code

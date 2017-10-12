@@ -51,13 +51,12 @@ import static org.openmdx.base.naming.SpecialResourceIdentifiers.EXTENT_REFERENC
 
 import java.io.Flushable;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 
 import javax.jdo.FetchPlan;
 import javax.jdo.JDOException;
@@ -70,7 +69,6 @@ import org.openmdx.base.accessor.cci.Container_1_0;
 import org.openmdx.base.accessor.cci.DataObject_1_0;
 import org.openmdx.base.accessor.cci.SystemAttributes;
 import org.openmdx.base.aop1.Aspects;
-import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.AggregationKind;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
@@ -110,8 +108,8 @@ class Container_1
         );
         this.ignoreCache = !this.isComposite();
         this.validate = this.openmdxjdoGetDataObjectManager().isProxy() ? null : Boolean.FALSE;
-        this.cache = this.ignoreCache || this.isStored() ? null : new ConcurrentHashMap<String,DataObject_1_0>();
-        this.queries = new ConcurrentHashMap<QueryFilterRecord,BatchingList>();        
+        this.cache = this.ignoreCache || this.isStored() ? null : newObjectCache(owner);
+        this.queries = newQueryCache(owner);        
     }
 
     /**
@@ -150,7 +148,7 @@ class Container_1
      * <li>does include <em>TRANSIENT</code> instances
      * </ul>
      */
-    private ConcurrentMap<String, DataObject_1_0> cache = null;
+    private Map<String, DataObject_1_0> cache;
 
     /**
      * The container's query type
@@ -160,7 +158,7 @@ class Container_1
     /**
      * Query to list mapping
      */
-    protected final ConcurrentMap<QueryFilterRecord,BatchingList> queries;
+    protected final Map<QueryFilterRecord,BatchingList> queries;
 
     /**
      * 
@@ -172,6 +170,19 @@ class Container_1
      */
     protected static final int INITIAL_SLICE_CACHE_SIZE = 8;
 
+    /**
+     * Creates a querycache 
+     * 
+     * @param owner the owner determines whether thread safety is required
+     * 
+     * @return a newly created cache
+     */
+    protected static Map<QueryFilterRecord,BatchingList> newQueryCache(
+        DataObject_1_0 owner
+    ) {
+        return owner.objThreadSafetyRequired() ? new ConcurrentHashMap<QueryFilterRecord,BatchingList>() : new HashMap<QueryFilterRecord,BatchingList>();
+    }
+    
     /**
      * Determine whether the container is composite or not
      * 
@@ -490,7 +501,7 @@ class Container_1
      * Add the included objects to the cache
      */
     void amendAndDeployCache(
-        ConcurrentMap<String,DataObject_1_0> cache
+        Map<String,DataObject_1_0> cache
     ){
         for(DataObject_1_0 object : this.getIncluded()) {
             cache.put(
@@ -503,7 +514,7 @@ class Container_1
     
     private void populateCache(
     ) {
-        ConcurrentMap<String,DataObject_1_0> cache = new ConcurrentHashMap<String,DataObject_1_0>();
+        final Map<String,DataObject_1_0> cache = newObjectCache(this.owner);
         for(DataObject_1_0 object : this.getStored()){
             if(!object.jdoIsDeleted()) {
                 cache.put(
@@ -621,7 +632,7 @@ class Container_1
         ).toXRI();
     }
 
-    ConcurrentMap<String, DataObject_1_0> getCache(){
+    Map<String, DataObject_1_0> getCache(){
         if(this.cache == null && !this.isIgnoreCache()) {
             BatchingList stored = this.queries.get(PLAIN);
             if(stored != null && stored.isSmallerThanCacheThreshold()){

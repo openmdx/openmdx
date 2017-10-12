@@ -2,12 +2,12 @@
 <!--
 =======================================================================
 = Description: openMDX/Test Core
-= Copyright:   (c) 2003-2016 OMEX AG
+= Copyright:   (c) 2003-2013 OMEX AG
 =======================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2016, OMEX AG, Switzerland
+ * Copyright (c) 2004-2014, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without 
@@ -175,11 +175,9 @@
 		<ant dir="${openmdx.home}/core" inheritAll="false" target="deliverables">
 			<property name="build.target.platform" value="${build.java.platform}"/>
 		</ant> 
-		<!-- There are no JT files at the moment
-			<antcall target="-preprocess-jt-files-">
-				<param name="preprocess-jt.target" value="java"/>
-			</antcall>
-		-->
+		<antcall target="-preprocess-jt-files-">
+			<param name="preprocess-jt.target" value="java"/>
+		</antcall>
 		<antcall target="-preprocess-model-files-"/>
 	</target>
 

@@ -1,67 +1,29 @@
 /*
- * $Header: /cvsroot/openmdx/core/src/java/org/openmdx/uses/org/apache/commons/fileupload/FileItem.java,v 1.3 2004/06/29 07:40:54 wfro Exp $
- * $Revision: 1.3 $
- * $Date: 2004/06/29 07:40:54 $
- *
+ * ====================================================================
+ * Project:     openMDX/Core, http://www.openmdx.org/
  * ====================================================================
  *
- * The Apache Software License, Version 1.1
+ * This software has been copied from its original 
+ * org.apache.commons.fileupload namespace to the 
+ * org.openmdx.uses.org.apache.commons.fileupload namespace in order 
+ * to be used by openMDX based applications. 
+ * 
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
  *
- * Copyright (c) 2001-2003 The Apache Software Foundation.  All rights
- * reserved.
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- *
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- *
- * 3. The end-user documentation included with the redistribution, if
- *    any, must include the following acknowlegement:
- *       "This product includes software developed by the
- *        Apache Software Foundation (http://www.apache.org/)."
- *    Alternately, this acknowlegement may appear in the software itself,
- *    if and wherever such third-party acknowlegements normally appear.
- *
- * 4. The names "The Jakarta Project", "Commons", and "Apache Software
- *    Foundation" must not be used to endorse or promote products derived
- *    from this software without prior written permission. For written
- *    permission, please contact apache@apache.org.
- *
- * 5. Products derived from this software may not be called "Apache"
- *    nor may "Apache" appear in their names without prior written
- *    permission of the Apache Group.
- *
- * THIS SOFTWARE IS PROVIDED ``AS IS'' AND ANY EXPRESSED OR IMPLIED
- * WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
- * OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED.  IN NO EVENT SHALL THE APACHE SOFTWARE FOUNDATION OR
- * ITS CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
- * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
- * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF
- * USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
- * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
- * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
- * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
- * SUCH DAMAGE.
- * ====================================================================
- *
- * This software consists of voluntary contributions made by many
- * individuals on behalf of the Apache Software Foundation.  For more
- * information on the Apache Software Foundation, please see
- * <http://www.apache.org/>.
- *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
-
-
 package org.openmdx.uses.org.apache.commons.fileupload;
-
 
 import java.io.File;
 import java.io.IOException;
@@ -70,14 +32,13 @@ import java.io.OutputStream;
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 
-
 /**
  * <p> This class represents a file or form item that was received within a
  * <code>multipart/form-data</code> POST request.
  *
  * <p> After retrieving an instance of this class from a {@link
- * org.apache.commons.fileupload.FileUpload FileUpload} instance (see
- * {@link org.apache.commons.fileupload.FileUpload
+ * org.openmdx.uses.org.apache.commons.fileupload.FileUpload FileUpload} instance (see
+ * {@link org.openmdx.uses.org.apache.commons.fileupload.servlet.ServletFileUpload
  * #parseRequest(javax.servlet.http.HttpServletRequest)}), you may
  * either request all contents of the file at once using {@link #get()} or
  * request an {@link java.io.InputStream InputStream} with
@@ -91,20 +52,12 @@ import java.io.UnsupportedEncodingException;
  * implementation of this interface to also implement
  * <code>javax.activation.DataSource</code> with minimal additional work.
  *
- * @author <a href="mailto:Rafal.Krzewski@e-point.pl">Rafal Krzewski</a>
- * @author <a href="mailto:sean@informage.net">Sean Legassick</a>
- * @author <a href="mailto:jvanzyl@apache.org">Jason van Zyl</a>
- * @author <a href="mailto:martinc@apache.org">Martin Cooper</a>
- *
- * @version $Id: FileItem.java,v 1.3 2004/06/29 07:40:54 wfro Exp $
+ * @version $Id: FileItem.java 1454690 2013-03-09 12:08:48Z simonetripodi $
+ * @since 1.3 additionally implements FileItemHeadersSupport
  */
-public interface FileItem
-    extends Serializable
-{
-
+public interface FileItem extends Serializable, FileItemHeadersSupport {
 
     // ------------------------------- Methods from javax.activation.DataSource
-
 
     /**
      * Returns an {@link java.io.InputStream InputStream} that can be
@@ -113,11 +66,9 @@ public interface FileItem
      * @return An {@link java.io.InputStream InputStream} that can be
      *         used to retrieve the contents of the file.
      *
-     * @exception IOException if an error occurs.
+     * @throws IOException if an error occurs.
      */
-    InputStream getInputStream()
-        throws IOException;
-
+    InputStream getInputStream() throws IOException;
 
     /**
      * Returns the content type passed by the browser or <code>null</code> if
@@ -128,7 +79,6 @@ public interface FileItem
      */
     String getContentType();
 
-
     /**
      * Returns the original filename in the client's filesystem, as provided by
      * the browser (or other client software). In most cases, this will be the
@@ -136,12 +86,14 @@ public interface FileItem
      * the Opera browser, do include path information.
      *
      * @return The original filename in the client's filesystem.
+     * @throws InvalidFileNameException The file name contains a NUL character,
+     *   which might be an indicator of a security attack. If you intend to
+     *   use the file name anyways, catch the exception and use
+     *   InvalidFileNameException#getName().
      */
     String getName();
 
-
     // ------------------------------------------------------- FileItem methods
-
 
     /**
      * Provides a hint as to whether or not the file contents will be read
@@ -152,7 +104,6 @@ public interface FileItem
      */
     boolean isInMemory();
 
-
     /**
      * Returns the size of the file item.
      *
@@ -160,14 +111,12 @@ public interface FileItem
      */
     long getSize();
 
-
     /**
      * Returns the contents of the file item as an array of bytes.
      *
      * @return The contents of the file item as an array of bytes.
      */
     byte[] get();
-
 
     /**
      * Returns the contents of the file item as a String, using the specified
@@ -178,12 +127,10 @@ public interface FileItem
      *
      * @return The contents of the item, as a string.
      *
-     * @exception UnsupportedEncodingException if the requested character
-     *                                         encoding is not available.
+     * @throws UnsupportedEncodingException if the requested character
+     *                                      encoding is not available.
      */
-    String getString(String encoding)
-        throws UnsupportedEncodingException;
-
+    String getString(String encoding) throws UnsupportedEncodingException;
 
     /**
      * Returns the contents of the file item as a String, using the default
@@ -193,7 +140,6 @@ public interface FileItem
      * @return The contents of the item, as a string.
      */
     String getString();
-
 
     /**
      * A convenience method to write an uploaded item to disk. The client code
@@ -209,10 +155,9 @@ public interface FileItem
      * @param file The <code>File</code> into which the uploaded item should
      *             be stored.
      *
-     * @exception Exception if an error occurs.
+     * @throws Exception if an error occurs.
      */
     void write(File file) throws Exception;
-
 
     /**
      * Deletes the underlying storage for a file item, including deleting any
@@ -223,7 +168,6 @@ public interface FileItem
      */
     void delete();
 
-
     /**
      * Returns the name of the field in the multipart form corresponding to
      * this file item.
@@ -232,14 +176,12 @@ public interface FileItem
      */
     String getFieldName();
 
-
     /**
      * Sets the field name used to reference this file item.
      *
      * @param name The name of the form field.
      */
     void setFieldName(String name);
-
 
     /**
      * Determines whether or not a <code>FileItem</code> instance represents
@@ -250,7 +192,6 @@ public interface FileItem
      */
     boolean isFormField();
 
-
     /**
      * Specifies whether or not a <code>FileItem</code> instance represents
      * a simple form field.
@@ -260,7 +201,6 @@ public interface FileItem
      */
     void setFormField(boolean state);
 
-
     /**
      * Returns an {@link java.io.OutputStream OutputStream} that can
      * be used for storing the contents of the file.
@@ -268,7 +208,7 @@ public interface FileItem
      * @return An {@link java.io.OutputStream OutputStream} that can be used
      *         for storing the contensts of the file.
      *
-     * @exception IOException if an error occurs.
+     * @throws IOException if an error occurs.
      */
     OutputStream getOutputStream() throws IOException;
 

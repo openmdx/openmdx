@@ -71,6 +71,7 @@ import javax.jdo.listener.DeleteCallback;
 import javax.jdo.listener.LoadCallback;
 import javax.jdo.listener.StoreCallback;
 import javax.jdo.spi.PersistenceCapable;
+import javax.jmi.reflect.JmiException;
 import javax.jmi.reflect.RefBaseObject;
 import javax.jmi.reflect.RefClass;
 import javax.jmi.reflect.RefException;
@@ -80,7 +81,6 @@ import javax.jmi.reflect.RefPackage;
 
 import org.oasisopen.jmi1.RefContainer;
 import org.omg.mof.spi.Identifier;
-import org.openmdx.application.mof.cci.ModelAttributes;
 import org.openmdx.base.accessor.cci.DataObject_1_0;
 import org.openmdx.base.accessor.jmi.cci.JmiServiceException;
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
@@ -474,7 +474,7 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
                                 FeatureMapper.MethodSignature.RETURN_IS_VOID : 
                                 FeatureMapper.MethodSignature.DEFAULT
                         );
-                        boolean operation = feature.objGetClass().equals(ModelAttributes.OPERATION);
+                        boolean operation = feature.isOperationType();
                         String featureName = feature.getName();
                         // Getters
                         if(!operation && methodName.startsWith("get")) {
@@ -774,7 +774,7 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
                                     FeatureMapper.MethodSignature.RETURN_IS_VOID : 
                                     FeatureMapper.MethodSignature.DEFAULT
                             );
-                            boolean operation = feature.objGetClass().equals(ModelAttributes.OPERATION);
+                            boolean operation = feature.isOperationType();
                             if(
                                 !operation &&
                                 methodName.length() > 3 &&

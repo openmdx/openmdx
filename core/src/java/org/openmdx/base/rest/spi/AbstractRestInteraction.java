@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2009-2014, OMEX AG, Switzerland
+ * Copyright (c) 2009-2017, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -67,6 +67,7 @@ import org.openmdx.base.resource.Records;
 import org.openmdx.base.resource.spi.AbstractInteraction;
 import org.openmdx.base.resource.spi.ResourceExceptions;
 import org.openmdx.base.resource.spi.RestInteractionSpec;
+import org.openmdx.base.rest.cci.ConsumerRecord;
 import org.openmdx.base.rest.cci.MessageRecord;
 import org.openmdx.base.rest.cci.ObjectRecord;
 import org.openmdx.base.rest.cci.QueryRecord;
@@ -172,6 +173,26 @@ public class AbstractRestInteraction extends AbstractInteraction<RestConnection>
         );
     }
 
+    /**
+     * GET and consume Collection
+     * 
+     * @param ispec
+     * @param input
+     * @param output
+     */
+    protected boolean consume(
+        RestInteractionSpec ispec, 
+        QueryRecord input, 
+        ConsumerRecord output
+    ) throws ResourceException {
+        return pass(
+            ispec, 
+            input,
+            output
+        );
+    }
+
+    
     /**
      * GET Object
      * 
@@ -373,48 +394,44 @@ public class AbstractRestInteraction extends AbstractInteraction<RestConnection>
             false // optional
         );            
         if(input instanceof MessageRecord) {
-            return handleOperation(interactionSpec, input, output);
-        } else {
-            final ResultRecord outputRecord = AbstractRestInteraction.cast(
-                "output record", 
-                ResultRecord.class, 
-                output, 
-                true
-            );
-            if(input instanceof QueryRecord){
-                return handleQuery(interactionSpec, (QueryRecord) input, outputRecord);
-            } else if (input instanceof ObjectRecord) {
-                return handleObject(interactionSpec, (ObjectRecord) input, outputRecord);
+            if(output == null || output instanceof MessageRecord) {
+                return handleOperation(interactionSpec, (MessageRecord)input, (MessageRecord)output);
+            }
+        } else if (input instanceof QueryRecord) {
+            if(output instanceof ConsumerRecord) {
+                return handleConsumer(interactionSpec, (QueryRecord)input, (ConsumerRecord)output);
+            } else if (output == null || output instanceof ResultRecord) {
+                return handleQuery(interactionSpec, (QueryRecord) input, (ResultRecord)output);
+            }
+        } else if (input instanceof ObjectRecord) {
+            if (output == null || output instanceof ResultRecord) {
+                return handleObject(interactionSpec, (ObjectRecord) input, (ResultRecord)output);
             }
         }
         throw ResourceExceptions.initHolder(
     		new NotSupportedException(
-				"Unexpected mapped input record name",
+				"Unexpected record ",
 				BasicException.newEmbeddedExceptionStack(
 					BasicException.Code.DEFAULT_DOMAIN,
 					BasicException.Code.BAD_PARAMETER,
-					new BasicException.Parameter("supported", QueryRecord.NAME, ObjectRecord.NAME, MessageRecord.NAME),
-					new BasicException.Parameter("actual", input == null ? null : input.getRecordName())
+					new BasicException.Parameter("supported-input", QueryRecord.NAME, ObjectRecord.NAME, MessageRecord.NAME),
+					new BasicException.Parameter("actual-input", input == null ? null : input.getRecordName()),
+                    new BasicException.Parameter("supported-output", ResultRecord.NAME, ConsumerRecord.NAME),
+                    new BasicException.Parameter("actual-output", output == null ? null : output.getRecordName())
 				)
 			)                        
 		);
     }
 
-	private boolean handleOperation(
+    private boolean handleOperation(
 		RestInteractionSpec interactionSpec,
-		Record input,
-		Record output
+		MessageRecord input,
+		MessageRecord output
 	) throws ResourceException {
-		final MessageRecord outputRecord = AbstractRestInteraction.cast(
-		    "Invocation Reply", 
-		    MessageRecord.class, 
-		    output, 
-		    true
-		);
 		return invoke(
 		    interactionSpec,
-		    (MessageRecord)input,
-		    outputRecord
+		    input,
+		    output
 		);
 	}
 
@@ -495,6 +512,11 @@ public class AbstractRestInteraction extends AbstractInteraction<RestConnection>
 		}
 	}
 
+	/**
+	 * Retrieves or deletes the matching objects
+	 * 
+	 * @throws ResourceException
+	 */
 	private boolean handleQuery(
 		RestInteractionSpec interactionSpec,
 		QueryRecord queryRecord, 
@@ -502,9 +524,7 @@ public class AbstractRestInteraction extends AbstractInteraction<RestConnection>
 	) throws ResourceException {
 		switch(interactionSpec.getFunction()) {
 		    case GET:
-		        final Path xri = queryRecord.getResourceIdentifier();
-		        final boolean findRequest = xri.isContainerPath() || xri.isPattern();
-		        return findRequest ? find(
+		        return isCollectionRequest(queryRecord) ? find(
 		            interactionSpec, 
 		            queryRecord, 
 		            outputRecord
@@ -522,7 +542,63 @@ public class AbstractRestInteraction extends AbstractInteraction<RestConnection>
 		        return false;
 		}
 	}
-    
+
+    /**
+     * Consumes the matching objects
+     * 
+     * @throws ResourceException
+     */
+    private boolean handleConsumer(
+        RestInteractionSpec interactionSpec,
+        QueryRecord queryRecord,
+        ConsumerRecord consumer
+    ) throws ResourceException {
+        switch(interactionSpec.getFunction()) {
+            case GET:
+                return isCollectionRequest(queryRecord) ? consume(
+                    interactionSpec, 
+                    queryRecord, 
+                    consumer
+                ) : handleSingletonConsumer(
+                    interactionSpec,
+                    queryRecord,
+                    consumer
+                );
+          default:
+              return false;
+        }
+    }
+
+    private boolean handleSingletonConsumer(
+        RestInteractionSpec interactionSpec,
+        QueryRecord queryRecord,
+        ConsumerRecord consumer
+    ) throws ResourceException {
+        final ResultRecord outputRecord = Records.getRecordFactory().createIndexedRecord(ResultRecord.class);
+        final boolean success = get(
+            interactionSpec, 
+            queryRecord, 
+            outputRecord
+        );
+        if(success) {
+            for(Object object : outputRecord) {
+                final ObjectRecord objectRecord = AbstractRestInteraction.cast(
+                    "singleton object", 
+                    ObjectRecord.class, 
+                    object, 
+                    true
+                );
+                consumer.accept(objectRecord);
+            }
+        }
+        return success;
+    }
+
+    private boolean isCollectionRequest(QueryRecord queryRecord) {
+        final Path xri = queryRecord.getResourceIdentifier();
+        return xri.isContainerPath() || xri.isPattern();
+    }
+	
     /* (non-Javadoc)
      * @see org.openmdx.base.rest.spi.RestConnection#execute(javax.resource.cci.InteractionSpec, javax.resource.cci.Record)
      */

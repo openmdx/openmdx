@@ -70,7 +70,7 @@ public class Dataprovider_1Target implements ImportTarget {
         DataproviderRequestProcessor target
     ) {
         this.target = target;
-        this.target2 = (DataproviderRequestProcessor)target.clone();
+        this.target2 = target.clone();
     }
 
     /**

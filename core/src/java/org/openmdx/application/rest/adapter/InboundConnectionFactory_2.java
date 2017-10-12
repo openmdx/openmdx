@@ -290,6 +290,6 @@ public class InboundConnectionFactory_2 extends AbstractConnectionFactory {
             );
         }
         return Constants.RESOURCE_LOCAL.equals(transactionType);
-	};
+	}
 
 }

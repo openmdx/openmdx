@@ -87,25 +87,9 @@ public class SimpleConnectionManager
      * @param connectionClass
      */
     public SimpleConnectionManager(
-        Set<?> credentials, 
         Class<?> connectionClass
     ) {
-        super(credentials, connectionClass);
-    }
-
-    /**
-     * Constructor
-     * 
-     * @param credentials
-     * @param connectionClass
-     * 
-     * @throws ResourceException
-     */
-    public SimpleConnectionManager(
-        Set<?> credentials, 
-        String connectionClass
-    ) throws ResourceException {
-        super(credentials, connectionClass);
+        super(connectionClass);
     }
 
     /**
@@ -117,14 +101,6 @@ public class SimpleConnectionManager
      * The managed connections to be shared
      */
     private final Set<ManagedConnection> idleConnections = new HashSet<ManagedConnection>();
-
-    /* (non-Javadoc)
-     * @see org.openmdx.kernel.application.container.lightweight.AbstractConnectionManager#getManagedConnections()
-     */
-    @Override
-    protected Set<ManagedConnection> getManagedConnections() {
-        return this.idleConnections;
-    }
 
     /* (non-Javadoc)
      * @see org.openmdx.kernel.resource.spi.AbstractConnectionManager#allocateManagedConnection(javax.security.auth.Subject, javax.resource.spi.ManagedConnectionFactory, javax.resource.spi.ConnectionRequestInfo)
@@ -144,38 +120,46 @@ public class SimpleConnectionManager
     	return managedConnection;
     }
 
-	/**
-     * Allocate a managed connection
-     * 
-     * @param managedConnections set of managed connections
-     * @param subject
-     * @param managedConnectionFactory
-     * @param connectionRequestInfo
-     * 
-     * @return a (maybe newly created) managed connection
-     *
-     * @throws ResourceException
-     */
-    @Override
-    protected ManagedConnection allocateMangedConnection(
-        Set<ManagedConnection> managedConnections,
-        Subject subject,
-        ManagedConnectionFactory managedConnectionFactory, 
-        ConnectionRequestInfo connectionRequestInfo
-    ) throws ResourceException{
-        synchronized(managedConnections){
-            ManagedConnection managedConnection = managedConnectionFactory.matchManagedConnections(
-                managedConnections,
-                subject,
-                connectionRequestInfo
-            );
-            return managedConnection == null ? allocateManagedConnection(
-                subject,
-                managedConnectionFactory,
-                connectionRequestInfo
-            ) : managedConnection;        
-        }            
-    }
+	@Override
+	protected ManagedConnection allocateMangedConnection(
+		ManagedConnectionFactory managedConnectionFactory, 
+		ConnectionRequestInfo connectionRequestInfo
+	) throws ResourceException {
+		return allocateManagedConnection(getSubject(), managedConnectionFactory, connectionRequestInfo);
+	}
+    
+//	/**
+//     * Allocate a managed connection
+//     * 
+//     * @param managedConnections set of managed connections
+//     * @param subject
+//     * @param managedConnectionFactory
+//     * @param connectionRequestInfo
+//     * 
+//     * @return a (maybe newly created) managed connection
+//     *
+//     * @throws ResourceException
+//     */
+//    @Override
+//    protected ManagedConnection allocateMangedConnection(
+//        Set<ManagedConnection> managedConnections,
+//        Subject subject,
+//        ManagedConnectionFactory managedConnectionFactory, 
+//        ConnectionRequestInfo connectionRequestInfo
+//    ) throws ResourceException{
+//        synchronized(managedConnections){
+//            ManagedConnection managedConnection = managedConnectionFactory.matchManagedConnections(
+//                managedConnections,
+//                subject,
+//                connectionRequestInfo
+//            );
+//            return managedConnection == null ? allocateManagedConnection(
+//                subject,
+//                managedConnectionFactory,
+//                connectionRequestInfo
+//            ) : managedConnection;        
+//        }            
+//    }
 
     /* (non-Javadoc)
      * @see javax.resource.spi.ConnectionEventListener#connectionClosed(javax.resource.spi.ConnectionEvent)

@@ -623,7 +623,7 @@ public final class XRI_2Marshaller
      * Tests whether the String represents an absolute extensible resource identifier without scheme
      * 
      * @param lenient tells whether exceptions are thrown or mapped to <code>null</code> return values
-     * @param xri
+     * @param resourceIdentifier
      * 
      * @return <code>true</code> if the String represents an absolute extensible resource identifier without scheme 
      * @throws ServiceException 
@@ -687,7 +687,7 @@ public final class XRI_2Marshaller
      * Retrieve the segments of an absolute extensible resource identifier without scheme
      * 
      * @param lenient tells whether exceptions are thrown or mapped to <code>null</code> return values
-     * @param xri
+     * @param path
      * 
      * @return the segments of an absolute extensible resource identifier without scheme
      */

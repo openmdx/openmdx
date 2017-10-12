@@ -92,6 +92,7 @@ public enum CssClass {
 	itable,
 	loading,
 	locked,
+	longText,
 	lookupButtons,
 	lookupInput,
 	lookupSelector,
@@ -132,6 +133,7 @@ public enum CssClass {
 	row,
 	selected,
 	sfhover,
+	shortText,
 	sidebarNav,
 	ssfNav,
 	ssfNavigation,
@@ -196,6 +198,7 @@ public enum CssClass {
 			case hiddenPrint: return "hidden-print";
 			case hiddenSm: return "hidden-sm";
 			case hiddenXs: return "hidden-xs";
+			case longText: return "long-text";
 			case navbarCollapse: return "navbar-collapse";
 			case navbarHeader: return "navbar-header";
 			case navbarNav: return "navbar-nav";
@@ -205,6 +208,7 @@ public enum CssClass {
 			case navHeader: return "nav-header";
 			case navList: return "nav-list";
 			case navTabs: return "nav-tabs";
+			case shortText: return "short-text";
 			case sidebarNav: return "sidebar-nav";
 			case ssfNav: return "ssf-nav";
 			case ssfNavv: return "ssf-navv";

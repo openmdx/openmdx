@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2009-2014, OMSYEX AG, Switzerland
+ * Copyright (c) 2009-2017, OMSYEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -65,6 +65,7 @@ import org.openmdx.base.resource.Records;
 import org.openmdx.base.resource.spi.AbstractInteraction;
 import org.openmdx.base.resource.spi.ResourceExceptions;
 import org.openmdx.base.resource.spi.RestInteractionSpec;
+import org.openmdx.base.rest.cci.ConsumerRecord;
 import org.openmdx.base.rest.cci.MessageRecord;
 import org.openmdx.base.rest.cci.ObjectRecord;
 import org.openmdx.base.rest.cci.QueryRecord;
@@ -200,6 +201,26 @@ public class AbstractRestInteraction extends AbstractInteraction<RestConnection>
         );
     }
 
+    /**
+     * Process Collection
+     * 
+     * @param ispec the interaction spec
+     * @param input the query
+     * @param consumer the record processor
+     */
+    public boolean consume(
+        RestInteractionSpec ispec, 
+        Query_2Facade input, 
+        ConsumerRecord consumer
+    ) throws ServiceException {
+        return pass(
+            input.getPath(), 
+            ispec,
+            input.getDelegate(), 
+            consumer
+        );
+    }
+    
     /**
      * GET Object
      * 
@@ -468,108 +489,153 @@ public class AbstractRestInteraction extends AbstractInteraction<RestConnection>
                     return true;
                 } else {
                     MappedRecord inputRecord = (MappedRecord) input;
-                    IndexedRecord outputRecord = AbstractRestInteraction.cast(
-                        "Result Set", 
-                        IndexedRecord.class, 
-                        output, 
-                        true
-                    );
                     if(org.openmdx.base.rest.spi.QueryRecord.isCompatible(inputRecord)){
                         Query_2Facade facade = Query_2Facade.newInstance(inputRecord, isPreferringNotFoundException());
                         switch(interactionSpec.getFunction()) {
                             case GET:
-                                return facade.isFindRequest() ? find(
-                                    interactionSpec, 
-                                    facade, 
-                                    outputRecord
-                                ) : get(
-                                    interactionSpec, 
-                                    facade, 
-                                    outputRecord
+                                if(facade.isFindRequest()) {
+                                    if(output == null || output instanceof IndexedRecord) {
+                                        return find(
+                                            interactionSpec, 
+                                            facade, 
+                                            (IndexedRecord) output
+                                        );
+                                    } else if (output instanceof ConsumerRecord) {
+                                        return consume(
+                                            interactionSpec, 
+                                            facade, 
+                                            (ConsumerRecord) output
+                                        );
+                                    }
+                                } else {
+                                    if(output == null || output instanceof IndexedRecord) {
+                                        return get(
+                                            interactionSpec, 
+                                            facade, 
+                                            (IndexedRecord) output
+                                        );
+                                    } else if (output instanceof ConsumerRecord) {
+                                        for(Object object : (IndexedRecord) execute(interactionSpec, input)){
+                                            ((ConsumerRecord)output).accept(
+                                                AbstractRestInteraction.cast(
+                                                    "GET reply to be consumed", 
+                                                    ObjectRecord.class, 
+                                                    object, 
+                                                    true
+                                                )
+                                            );
+                                            return true; // singleton consumed
+                                        }
+                                        return false; // nothing consumed
+                                    }
+                                }
+                                throw ResourceExceptions.initHolder(
+                                    new NotSupportedException(
+                                        "Unexpected output Record",
+                                        BasicException.newEmbeddedExceptionStack(
+                                            BasicException.Code.DEFAULT_DOMAIN,
+                                            BasicException.Code.BAD_PARAMETER,
+                                            new BasicException.Parameter("supported", IndexedRecord.class.getName(), ConsumerRecord.class.getName()),
+                                            new BasicException.Parameter("actual", output == null ? null : output.getClass().getName())
+                                        )
+                                    )
                                 );
                             case DELETE: 
                                 return delete(
                                     interactionSpec, 
                                     facade, 
-                                    outputRecord
+                                    AbstractRestInteraction.cast(
+                                        "Result Set", 
+                                        IndexedRecord.class, 
+                                        output, 
+                                        true
+                                    )
                                 );
                             default: 
                                 return false;
                         }
-                    } else if (org.openmdx.base.rest.spi.ObjectRecord.isCompatible(inputRecord)) {
-                        Object_2Facade facade = Object_2Facade.newInstance(inputRecord);
-                        if(facade.isProxyOperation()) {
-                        	final Path transientObjectId = toResourceIdentifier(facade.getTransientObjectId());
-                            switch(interactionSpec.getFunction()) {
-	                            case POST: {
-									final Object_2Facade compatibility = Facades.newObject(transientObjectId);
-	                                compatibility.setValue(
-	                                    AbstractRestInteraction.cast(
-	                                        "Value", 
-	                                        MappedRecord.class, 
-	                                        facade.getValue(), 
-	                                        false
-	                                    )
-	                                );
-	                                return create(
-	                                    interactionSpec,
-	                                    compatibility,
-	                                    outputRecord
-	                                );
-	                            }
-	                            case PUT: {
-	                                return move(
-	                                    interactionSpec,
-	                                    transientObjectId,
-	                                    facade,
-	                                    outputRecord
-	                                );
-	                            }
-	                            default:
-	                                return false;
-	                        }
-                        } else {
-	                        switch(interactionSpec.getFunction()) {
-	                            case GET:
-	                                return validate(
-	                                    interactionSpec, 
-	                                    facade, 
-	                                    outputRecord
-	                                );
-	                            case PUT: 
-	                                return put(
-	                                    interactionSpec, 
-	                                    facade, 
-	                                    outputRecord
-	                                );
-	                            case DELETE:
-	                                return delete(
-	                                    interactionSpec, 
-	                                    facade, 
-	                                    outputRecord
-	                                );
-	                            case POST: 
-	                                return create(
-	                                    interactionSpec, 
-	                                    facade, 
-	                                    outputRecord
-	                                );
-	                            default: 
-	                                return false;
-	                        }
-                        }
-                    } else {
-                        throw ResourceExceptions.initHolder(
-                            new NotSupportedException(
-                                "Unexpected mapped input record name",
-                                BasicException.newEmbeddedExceptionStack(
-                                    BasicException.Code.DEFAULT_DOMAIN,
-                                    BasicException.Code.BAD_PARAMETER,
-                                    new BasicException.Parameter("supported", QueryRecord.NAME, ObjectRecord.NAME, MessageRecord.NAME),
-                                    new BasicException.Parameter("actual", input == null ? null : input.getRecordName())
-                                )
-                            )                        
+                    } else { 
+                        final IndexedRecord outputRecord = AbstractRestInteraction.cast(
+                            "GET reply to be consumed", 
+                            IndexedRecord.class, 
+                            output, 
+                            true
                         );
+                        if (org.openmdx.base.rest.spi.ObjectRecord.isCompatible(inputRecord)) {
+                            Object_2Facade facade = Object_2Facade.newInstance(inputRecord);
+                            if(facade.isProxyOperation()) {
+                            	final Path transientObjectId = toResourceIdentifier(facade.getTransientObjectId());
+                                switch(interactionSpec.getFunction()) {
+    	                            case POST: {
+    									final Object_2Facade compatibility = Facades.newObject(transientObjectId);
+    	                                compatibility.setValue(
+    	                                    AbstractRestInteraction.cast(
+    	                                        "Value", 
+    	                                        MappedRecord.class, 
+    	                                        facade.getValue(), 
+    	                                        false
+    	                                    )
+    	                                );
+    	                                return create(
+    	                                    interactionSpec,
+    	                                    compatibility,
+    	                                    outputRecord
+    	                                );
+    	                            }
+    	                            case PUT: {
+    	                                return move(
+    	                                    interactionSpec,
+    	                                    transientObjectId,
+    	                                    facade,
+    	                                    outputRecord
+    	                                );
+    	                            }
+    	                            default:
+    	                                return false;
+    	                        }
+                            } else {
+    	                        switch(interactionSpec.getFunction()) {
+    	                            case GET:
+    	                                return validate(
+    	                                    interactionSpec, 
+    	                                    facade, 
+    	                                    outputRecord
+    	                                );
+    	                            case PUT: 
+    	                                return put(
+    	                                    interactionSpec, 
+    	                                    facade, 
+    	                                    outputRecord
+    	                                );
+    	                            case DELETE:
+    	                                return delete(
+    	                                    interactionSpec, 
+    	                                    facade, 
+    	                                    outputRecord
+    	                                );
+    	                            case POST: 
+    	                                return create(
+    	                                    interactionSpec, 
+    	                                    facade, 
+    	                                    outputRecord
+    	                                );
+    	                            default: 
+    	                                return false;
+    	                        }
+                            }
+                        } else {
+                            throw ResourceExceptions.initHolder(
+                                new NotSupportedException(
+                                    "Unexpected mapped input record name",
+                                    BasicException.newEmbeddedExceptionStack(
+                                        BasicException.Code.DEFAULT_DOMAIN,
+                                        BasicException.Code.BAD_PARAMETER,
+                                        new BasicException.Parameter("supported", QueryRecord.NAME, ObjectRecord.NAME, MessageRecord.NAME),
+                                        new BasicException.Parameter("actual", input == null ? null : input.getRecordName())
+                                    )
+                                )                        
+                            );
+                        }
                     }
                 }
             } else if (input instanceof IndexedRecord) {

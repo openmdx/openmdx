@@ -152,6 +152,13 @@ public class JSONObject implements Serializable {
             return object == null || object == this;
         }
 
+        /* (non-Javadoc)
+         * @see java.lang.Object#hashCode()
+         */
+        @Override
+        public int hashCode() {
+            return 0;
+        }
 
         /**
          * Get the "null" string value.
@@ -175,6 +182,7 @@ public class JSONObject implements Serializable {
      * <code>JSONObject.NULL.equals(null)</code> returns <code>true</code>.
      * <code>JSONObject.NULL.toString()</code> returns <code>"null"</code>.
      */
+    @SuppressWarnings("synthetic-access")
     public static final Object NULL = new Null();
 
 

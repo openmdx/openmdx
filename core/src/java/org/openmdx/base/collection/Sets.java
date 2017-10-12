@@ -122,6 +122,7 @@ public class Sets {
      * 
      * @return the collection itself if it is a set or a set decorator
      */
+    @SuppressWarnings("unchecked")
     public static <T> Set<T> asSet(
         final T... collection
     ){

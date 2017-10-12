@@ -57,7 +57,6 @@ import org.openmdx.application.dataprovider.cci.FilterProperty;
 import org.openmdx.application.dataprovider.spi.AbstractFilter;
 import org.openmdx.base.accessor.cci.SystemAttributes;
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.base.query.Filter;
 import org.openmdx.base.rest.cci.QueryFilterRecord;
 import org.openmdx.base.rest.spi.Facades;
 import org.openmdx.base.rest.spi.Object_2Facade;

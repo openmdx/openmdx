@@ -82,7 +82,6 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -194,6 +193,7 @@ public class DataObject_1
         this.detached = true;
         this.untouchable = false;
         this.version = version;
+        this.flushableValues = new ConcurrentHashMap<String,Flushable>(); // TODO verify whether tread safety is required
     }
     
     /**
@@ -217,7 +217,10 @@ public class DataObject_1
         this.dataObjectManager = manager;
 		this.identity = identity;
 		this.transientObjectId = transientObjectId == null ? UUIDs.newUUID() : transientObjectId;
-		this.transientValues = identity == null ? new HashMap<String,Object>() : null;
+        this.flushableValues = newFlushableValues();
+		if(identity == null) {
+		    this.transientValues = manager.isThreadSafetyRequired() ? Maps.<String,Object>newConcurrentHashMap() : new HashMap<String,Object>();
+		}
 		this.detached = false;
 		this.untouchable = frozen;
 		manager.putUnlessPresent(
@@ -474,7 +477,7 @@ public class DataObject_1
     /**
      * The flushable value registry
      */
-    transient ConcurrentMap<String,Flushable> flushableValues = new ConcurrentHashMap<String,Flushable>();
+    transient Map<String,Flushable> flushableValues;
 
     /**
      * The persistent aspects
@@ -1510,7 +1513,6 @@ public class DataObject_1
      * @exception   ServiceException
      *              if the object can't be removed
      */
-    @SuppressWarnings("unchecked")
     void objRemove(
         boolean updateCache
     ) throws ServiceException {
@@ -1535,7 +1537,7 @@ public class DataObject_1
         } else {
             CascadeDelete: for(PlugIn_1_0 plugIn : this.dataObjectManager.getPlugIns()) {
                 if(plugIn.requiresCallbackOnCascadedDelete(this)) {
-                    for(Map.Entry<String, ModelElement_1_0> e : ((Map<String, ModelElement_1_0>)getClassifier().objGetMap("allFeature")).entrySet()){
+                    for(Map.Entry<String, ModelElement_1_0> e : getClassifier().objGetMap("allFeature").entrySet()){
                         ModelElement_1_0 featureDef = e.getValue();
                         if(model.isReferenceType(featureDef)) {
                             if(AggregationKind.COMPOSITE.equals(model.getElement(featureDef.getReferencedEnd()).getAggregation())){
@@ -2384,6 +2386,14 @@ public class DataObject_1
         return state != null && state.isOutOfSync();
     }
     
+    /* (non-Javadoc)
+     * @see org.openmdx.base.accessor.cci.DataObject_1_0#objThreadSafetyRequired()
+     */
+    @Override
+    public boolean objThreadSafetyRequired() {
+        return this.dataObjectManager.isThreadSafetyRequired();
+    }
+
     /**
      * Tests whether this object is dirty. Instances that have been modified,
      * deleted, or newly made persistent in the current unit of work return
@@ -3536,6 +3546,10 @@ public class DataObject_1
         }
     }
 
+    private Map<String,Flushable> newFlushableValues(){
+        return objThreadSafetyRequired() ? new ConcurrentHashMap<String,Flushable>() : new HashMap<String,Flushable>();
+    }
+    
     /**
      * Save the data of the <tt>Object_1_0</tt> instance to a stream (that
      * is, serialize it).
@@ -3572,7 +3586,7 @@ public class DataObject_1
         java.io.ObjectInputStream stream
     ) throws java.io.IOException, ClassNotFoundException {
         stream.defaultReadObject();
-        this.flushableValues = new ConcurrentHashMap<String,Flushable>();
+        this.flushableValues = newFlushableValues();
         int count = stream.readInt();
         if(count > 0) {
             TransactionalState_1 state;
@@ -3592,9 +3606,7 @@ public class DataObject_1
         this.dataObjectManager.putUnlessPresent(this.identity, this);
     }
 
-    @SuppressWarnings({
-        "unchecked", "cast"
-    })
+    @SuppressWarnings("cast")
     private final ModelElement_1_0 getAttribute(
         String featured,
         String feature
@@ -3695,11 +3707,11 @@ public class DataObject_1
         String aspectType
     ){
         Map<String, DataObject_1_0> flushable = (Map<String, DataObject_1_0>) this.flushableValues.get(aspectType);
-        return flushable == null ? (Map<String, DataObject_1_0>) Maps.putUnlessPresent(
+        return flushable != null ? flushable : (Map<String, DataObject_1_0>) Maps.putUnlessPresent(
             this.flushableValues,
             aspectType,
             new ManagedAspect(this, aspectType)
-        ) : flushable;
+        );
     }
 
     /* (non-Javadoc)

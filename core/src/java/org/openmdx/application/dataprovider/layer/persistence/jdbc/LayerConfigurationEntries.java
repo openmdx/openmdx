@@ -438,10 +438,12 @@ static public final String REFERENCE_ID_SUFFIX_ATTRIBUTES_SUFFIX = "referenceIdS
      * stringMacroValue then it is replace with stringMacroName. Multiple
      * replacements can be defined for one column.
      * <p>
-     * stringMacroColumn[0] = object_class stringMacroName[0] = CompoundBooking
+     * stringMacroColumn[0] = object_class 
+     * stringMacroName[0] = CompoundBooking
      * stringMacroValue[0] = org:openmdx:booking1:CompoundBooking
      * <p>
-     * stringMacroColumn[0] = object_class stringMacroName[0] = SingleLegBooking
+     * stringMacroColumn[0] = object_class 
+     * stringMacroName[0] = SingleLegBooking
      * stringMacroValue[0] = org:openmdx:booking1:SingleLegBooking
      */
   static public final String STRING_MACRO_COLUMN = "stringMacroColumn";
@@ -846,4 +848,12 @@ static public final String REFERENCE_ID_SUFFIX_ATTRIBUTES_SUFFIX = "referenceIdS
    */
   static public final String CASCADE_DELETES = "cascadeDeletes";
 
+  /*
+   * Order nulls as empty string when ordering. If true, ORDER BY ... ASC is 
+   * expanded to ORDER BY ... ASC NULLS FIRST. if false, ORDER BY ... DESC
+   * is expanded to ORDER BY ... DESC NULLS LAST.
+   * Defaults to <code>false</code>
+   */
+  static public final String ORDER_NULLS_AS_EMPTY = "orderNullsAsEmpty";
+  
 }

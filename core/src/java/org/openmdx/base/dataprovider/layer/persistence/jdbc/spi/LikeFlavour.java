@@ -53,7 +53,38 @@ public enum LikeFlavour {
 			clause.append("utl_raw.cast_to_varchar2(nlssort(").append(columnName).append(",'nls_sort=binary_ai')) LIKE ?");
 			values.add(AccentInsensitivePattern.fold(rawValue.endsWith("%") ? rawValue : (rawValue + '_')));
 		}
-		
+	}, UNACCENT {
+
+        @Override
+        protected void apply(StringBuilder clause, Collection<? super String> values, String columnName, String rawValue) {
+            clause.append("unaccent(").append(columnName).append(") LIKE unaccent(?)");
+            values.add(rawValue);
+        }
+        
+    }, UNACCENT_CI {
+
+        @Override
+        protected void apply(StringBuilder clause, Collection<? super String> values, String columnName, String rawValue) {
+            clause.append("unaccent(").append(columnName).append(") ILIKE unaccent(?)");
+            values.add(rawValue);
+        }
+        
+	}, COLLATE_AI {
+	    
+        @Override
+        protected void apply(StringBuilder clause, Collection<? super String> values, String columnName, String rawValue) {
+            clause.append(columnName).append(" COLLATE Latin1_general_AI LIKE ? COLLATE Latin1_general_AI");
+            values.add(rawValue);
+        }
+        
+    }, COLLATE_CI_AI {
+        
+        @Override
+        protected void apply(StringBuilder clause, Collection<? super String> values, String columnName, String rawValue) {
+            clause.append(columnName).append(" COLLATE Latin1_general_CI_AI LIKE ? COLLATE Latin1_general_CI_AI");
+            values.add(rawValue);
+        }
+
 	}, REGEXP_LIKE {
 
 		@Override
@@ -115,7 +146,7 @@ public enum LikeFlavour {
 	public static List<LikeFlavour> parse(String enumeration) {
 		final String[] sourceEnumeration = OR.split(enumeration.trim());
 		if(sourceEnumeration.length == 0) {
-			throw new IllegalArgumentException("Inavlid CaseInsensitivity enumeration: '" + enumeration + "'");
+			throw new IllegalArgumentException("Invalid CaseInsensitivity enumeration: '" + enumeration + "'");
 		} else {
 			List<LikeFlavour> likeFlavours = new ArrayList<LikeFlavour>(sourceEnumeration.length);
 			for(String name : sourceEnumeration) {

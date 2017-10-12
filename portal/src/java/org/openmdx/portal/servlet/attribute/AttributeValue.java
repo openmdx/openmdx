@@ -269,6 +269,19 @@ public abstract class AttributeValue implements Serializable {
     }
 
     /**
+     * Get raw value.
+     * 
+     * @return
+     */
+    public Object getRawValue(
+    ) {
+    	return this.getValue(
+    		this.fieldDef.qualifiedFeatureName,
+    		true
+    	);
+    }
+ 
+    /**
      * Get feature value.
      * 
      * @param feature

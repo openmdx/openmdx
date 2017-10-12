@@ -1,12 +1,11 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
+ * Project:     openMDX, http://www.openmdx.org/
  * Description: XMI2 Parser
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
  * ====================================================================
  *
- * This software is published under the BSD license
- * as listed below.
+ * This software is published under the BSD license as listed below.
  * 
  * Copyright (c) 2004-2009, OMEX AG, Switzerland
  * All rights reserved.
@@ -46,7 +45,6 @@
  * This product includes software developed by the Apache Software
  * Foundation (http://www.apache.org/).
  */
-
 package org.openmdx.application.mof.externalizer.xmi;
 
 import java.io.PrintStream;
@@ -100,7 +98,6 @@ public class XMI20Parser implements XMIParser {
         PrintStream errors
     ) {
         this.infos = infos;
-        this.warnings = warnings;
         this.errors = errors;
     }
 
@@ -1010,7 +1007,6 @@ public class XMI20Parser implements XMIParser {
     private XMIImporter_1 importer = null;
     private XMIReferenceResolver resolver = null;
     private PrintStream infos = null;
-    private PrintStream warnings = null;
     private PrintStream errors = null;
 
 }

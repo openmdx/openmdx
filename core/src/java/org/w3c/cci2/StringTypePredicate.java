@@ -58,12 +58,49 @@ import java.util.Collection;
  * <li>The wildcard character &ldquo;<code>.</code>&rdquo; stands for a 
  *     single character
  * </ul>
+ * 
+ * <pre> 
+ * 100000000000000 0000000000000000 SOUNDS
+ *   1000000000000 0000000000000000 POSIX_EXPRESSION
+ *    100000000000 0000000000000000 ACCENT_INSENSITIVE
+ *              10 0000000000000000 JSON_QUERY
+ *               1 0000000000000000 X_QUERY
+ *                        100000000 UNICODE_CHARACTER_CLASS
+ *                         10000000 CANON_EQ
+ *                          1000000 UNICODE_CASE
+ *                           100000 DOTALL
+ *                            10000 LITERAL
+ *                             1000 MULTILINE
+ *                              100 COMMENTS
+ *                               10 CASE_INSENSITIVE
+ *                                1 UNIX_LINES
+ * </pre> 
  */
 public interface StringTypePredicate
     extends ComparableTypePredicate<String>, MatchableTypePredicate<String>
 {
 
     /**
+     * Enables (database specific) JSON query processing of the pattern.
+     * <p>
+     * No other flag must be specified in combination with JSON_QUERY 
+     * <p> 
+     * JSON query expression matching can also be enabled via the 
+     * embedded flag expression&nbsp;<tt>(?j)</tt>.
+     */
+    int JSON_QUERY = 0400000;
+    
+    /**
+     * Enables (database specific) XQuery query processing of the pattern.
+     * <p>
+     * No other flag must be specified in combination with X_QUERY 
+     * <p> 
+     * XQuery query expression matching can also be enabled via the 
+     * embedded flag expression&nbsp;<tt>(?X)</tt>.
+     */
+    int X_QUERY = 0200000;
+    
+    /*
      * Enables SoundEx processing of the pattern.
      * <p>
      * When this flag is specified then the input string that specifies the 
@@ -113,8 +150,9 @@ public interface StringTypePredicate
      * <li>java.util.regex.Pattern.CASE_INSENSITIVE
      * <li>org.w3c.cci2.StringTypePredicate.SOUNDS
      * </ul>
-     * @param operand the operand the attribute's value is compared to 
-     * according to the following rules:<ul>
+     * @param operand the attribute's value is compared to the operand  
+     * according to the following rules, unless either the JSON_QUERY
+     * or X_QUERY flag is specified:<ul>
      * <li>The wildcard sequence &ldquo;<code>.*</code>&rdquo; stands for any 
      *     number of characters
      * <li>The wildcard character &ldquo;<code>.</code>&rdquo; stands for a 
@@ -122,8 +160,11 @@ public interface StringTypePredicate
      * </ul>
      * @see java.util.regex.Pattern#CASE_INSENSITIVE
      * @see java.util.regex.Pattern#UNICODE_CASE
-     * @see StringTypePredicate#SOUNDS
+     * @see #SOUNDS
+     * @see #X_QUERY
+     * @see #JSON_QUERY
      */
+
     void like(
         int flags,
         String operand
@@ -136,7 +177,7 @@ public interface StringTypePredicate
      * <li>java.util.regex.Pattern.CASE_INSENSITIVE
      * <li>org.w3c.cci2.StringTypePredicate.SOUNDS
      * </ul>
-     * @param operand the operand the attribute's value is compared to 
+     * @param operand the attribute's value is compared to the operand  
      * according to the following rules:<ul>
      * <li>The wildcard sequence &ldquo;<code>.*</code>&rdquo; stands for any 
      *     number of characters
@@ -145,7 +186,7 @@ public interface StringTypePredicate
      * </ul>
      * @see java.util.regex.Pattern#CASE_INSENSITIVE
      * @see java.util.regex.Pattern#UNICODE_CASE
-     * @see StringTypePredicate#SOUNDS
+     * @see #SOUNDS
      */
     void like(
         int flags,
@@ -159,7 +200,7 @@ public interface StringTypePredicate
      * <li>java.util.regex.Pattern.CASE_INSENSITIVE
      * <li>org.w3c.cci2.StringTypePredicate.SOUNDS
      * </ul>
-     * @param operand the operand the attribute's value is compared to 
+     * @param operand the attribute's value is compared to the operand  
      * according to the following rules:<ul>
      * <li>The wildcard sequence &ldquo;<code>.*</code>&rdquo; stands for any 
      *     number of characters
@@ -168,7 +209,7 @@ public interface StringTypePredicate
      * </ul>
      * @see java.util.regex.Pattern#CASE_INSENSITIVE
      * @see java.util.regex.Pattern#UNICODE_CASE
-     * @see StringTypePredicate#SOUNDS
+     * @see #SOUNDS
      */
     void like(
         int flags,
@@ -182,8 +223,9 @@ public interface StringTypePredicate
      * <li>java.util.regex.Pattern.CASE_INSENSITIVE
      * <li>org.w3c.cci2.StringTypePredicate.SOUNDS
      * </ul>
-     * @param operand the operand the attribute's value is compared to 
-     * according to the following rules:<ul>
+     * @param operand the attribute's value is compared to the operand  
+     * according to the following rules, unless either the JSON_QUERY
+     * or X_QUERY flag is specified:<ul>
      * <li>The wildcard sequence &ldquo;<code>.*</code>&rdquo; stands for any 
      *     number of characters
      * <li>The wildcard character &ldquo;<code>.</code>&rdquo; stands for a 
@@ -191,7 +233,9 @@ public interface StringTypePredicate
      * </ul>
      * @see java.util.regex.Pattern#CASE_INSENSITIVE
      * @see java.util.regex.Pattern#UNICODE_CASE
-     * @see StringTypePredicate#SOUNDS
+     * @see #SOUNDS
+     * @see #X_QUERY
+     * @see #JSON_QUERY
      */
     void unlike(
         int flags,
@@ -205,7 +249,7 @@ public interface StringTypePredicate
      * <li>java.util.regex.Pattern.CASE_INSENSITIVE
      * <li>org.w3c.cci2.StringTypePredicate.SOUNDS
      * </ul>
-     * @param operand the operand the attribute's value is compared to 
+     * @param operand the attribute's value is compared to the operand  
      * according to the following rules:<ul>
      * <li>The wildcard sequence &ldquo;<code>.*</code>&rdquo; stands for any 
      *     number of characters
@@ -214,7 +258,7 @@ public interface StringTypePredicate
      * </ul>
      * @see java.util.regex.Pattern#CASE_INSENSITIVE
      * @see java.util.regex.Pattern#UNICODE_CASE
-     * @see StringTypePredicate#SOUNDS
+     * @see #SOUNDS
      */
     void unlike(
         int flags,
@@ -228,7 +272,7 @@ public interface StringTypePredicate
      * <li>java.util.regex.Pattern.CASE_INSENSITIVE
      * <li>org.w3c.cci2.StringTypePredicate.SOUNDS
      * </ul>
-     * @param operand the operand the attribute's value is compared to 
+     * @param operand the attribute's value is compared to the operand  
      * according to the following rules:<ul>
      * <li>The wildcard sequence &ldquo;<code>.*</code>&rdquo; stands for any 
      *     number of characters
@@ -237,7 +281,7 @@ public interface StringTypePredicate
      * </ul>
      * @see java.util.regex.Pattern#CASE_INSENSITIVE
      * @see java.util.regex.Pattern#UNICODE_CASE
-     * @see StringTypePredicate#SOUNDS
+     * @see #SOUNDS
      */
     void unlike(
         int flags,

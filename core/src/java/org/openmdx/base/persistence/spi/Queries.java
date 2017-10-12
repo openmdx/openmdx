@@ -263,9 +263,9 @@ public class Queries {
     		} else if (token == '"') {
     			// ignore mark-up character in Strings
     		} else if (current == '"') {
-    			index = seek(value, index + 1, '"', optional);
+    			index = seek(value, index + 1, '"', false);
     		} else if (current == '{') {
-    			index = seek(value, index + 1, '}', optional);
+    			index = seek(value, index + 1, '}', false);
     		}
     	}
     	if(optional) {

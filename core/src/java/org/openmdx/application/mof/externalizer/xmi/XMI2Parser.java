@@ -100,7 +100,6 @@ public class XMI2Parser
         PrintStream errors
     ) {
         this.infos = infos;
-        this.warnings = warnings;
         this.errors = errors;
     }
 
@@ -890,7 +889,6 @@ public class XMI2Parser
     private XMIImporter_1 importer = null;
     private XMIReferenceResolver resolver = null;
     private PrintStream infos = null;
-    private PrintStream warnings = null;
     private PrintStream errors = null;
 
 }

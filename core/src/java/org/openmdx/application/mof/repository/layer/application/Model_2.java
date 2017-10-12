@@ -65,7 +65,6 @@ import javax.resource.cci.Interaction;
 import javax.resource.cci.MappedRecord;
 import javax.resource.spi.IllegalStateException;
 
-import org.openmdx.application.mof.cci.ModelAttributes;
 import org.openmdx.application.mof.cci.ModelExceptions;
 import org.openmdx.application.mof.mapping.cci.Mapper_1_0;
 import org.openmdx.application.mof.mapping.cci.Mapper_1_1;
@@ -73,12 +72,16 @@ import org.openmdx.application.mof.mapping.cci.MappingTypes;
 import org.openmdx.application.mof.mapping.spi.MapperFactory_1;
 import org.openmdx.application.mof.repository.accessor.ModelBuilder_1;
 import org.openmdx.application.mof.repository.utils.ModelUtils;
-import org.openmdx.base.accessor.cci.SystemAttributes;
 import org.openmdx.base.dataprovider.cci.Channel;
 import org.openmdx.base.dataprovider.cci.DataproviderRequestProcessor;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.AggregationKind;
 import org.openmdx.base.mof.cci.Model_1_0;
+import org.openmdx.base.mof.repository.cci.ClassifierRecord;
+import org.openmdx.base.mof.repository.cci.ElementRecord;
+import org.openmdx.base.mof.repository.cci.FeatureRecord;
+import org.openmdx.base.mof.repository.cci.OperationRecord;
+import org.openmdx.base.mof.repository.cci.ReferenceRecord;
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.query.IsInCondition;
 import org.openmdx.base.query.Quantifier;
@@ -171,7 +174,10 @@ public class Model_2 extends AbstractRestPort {
     	 * 
     	 * @throws ResourceException 
     	 */
-		protected RestInteraction(
+		@SuppressWarnings({
+            "synthetic-access"
+        })
+        protected RestInteraction(
 			RestConnection connection
 		) throws ResourceException {
 			super(connection, newDelegateInteraction(connection));
@@ -189,42 +195,42 @@ public class Model_2 extends AbstractRestPort {
 	    private boolean isClassifier(
 	    	ObjectRecord object
 	    ){
-	    	return isInstanceOf(object, ModelAttributes.CLASSIFIER);
+	    	return isInstanceOf(object, ClassifierRecord.class);
 	    }
 
 	    private boolean isFeature(
 	    	ObjectRecord object
 	    ){
-	    	return isInstanceOf(object, ModelAttributes.FEATURE);
+	    	return isInstanceOf(object, FeatureRecord.class);
 	    }
 
 	    private boolean isOperation(
 	    	ObjectRecord object
 	    ){
-	    	return isInstanceOf(object, ModelAttributes.OPERATION);
+	    	return isInstanceOf(object, OperationRecord.class);
 	    }
 	    
 	    private boolean isElement(
 	    	ObjectRecord object
 	    ){
-	    	return isInstanceOf(object, ModelAttributes.ELEMENT);
+	    	return isInstanceOf(object, ElementRecord.class);
 	    }
 	    
 	    private boolean isReference(
 	    	ObjectRecord object
 	    ){
-	    	return isInstanceOf(object, ModelAttributes.REFERENCE);
+	    	return isInstanceOf(object, ReferenceRecord.class);
 	    }
 
 	    private boolean isInstanceOf(
 	    	ObjectRecord object,
-	    	String type
+	    	Class<? extends ElementRecord> type
 	    ){
-	    	IndexedRecord instanceOf = (IndexedRecord) object.getValue().get(SystemAttributes.OBJECT_INSTANCE_OF);
-	    	return instanceOf != null && instanceOf.contains(type);
+	        return type.isInstance(object.getValue());
 	    }
 	    
-		private void addToSet(
+		@SuppressWarnings("rawtypes")
+        private void addToSet(
 	    	ObjectRecord object,
 	    	String feature,
 	    	Object element
@@ -430,7 +436,8 @@ public class Model_2 extends AbstractRestPort {
 	     * Set feature 'content' of namespaces
 	     * @throws ResourceException 
 	     */
-	    private void setContent(
+	    @SuppressWarnings("rawtypes")
+        private void setContent(
 	        Map<Path,ObjectRecord> elements
 	    ) throws ResourceException {    
 	        // clear feature subtype
@@ -773,7 +780,8 @@ public class Model_2 extends AbstractRestPort {
 		/**
 		 * Recalculate all derived attributes and update repository
 		 */
-		private boolean invokeEndImport(
+		@SuppressWarnings("synthetic-access")
+        private boolean invokeEndImport(
 			MessageRecord output, MessageRecord output2
 		) throws ResourceException {
 			// 
@@ -815,7 +823,8 @@ public class Model_2 extends AbstractRestPort {
 		/**
 		 * Start the import
 		 */
-		private boolean invokeBeginImport(
+		@SuppressWarnings("synthetic-access")
+        private boolean invokeBeginImport(
 			MessageRecord input,
 			MessageRecord output
 		) {
@@ -825,6 +834,10 @@ public class Model_2 extends AbstractRestPort {
 			return true;
 		}
 
+        @SuppressWarnings({
+            "rawtypes",
+            "synthetic-access"
+        })
 		private boolean invokeExternalizePackage(
 			MessageRecord input,
 			MessageRecord output
@@ -857,7 +870,7 @@ public class Model_2 extends AbstractRestPort {
 			    ZipOutputStream zip = new ZipOutputStream(
 			        bs = new ByteArrayOutputStream()         
 			    );
-			    final List requestedFormat = (List) input.getBody().get("format");
+                final List requestedFormat = (List) input.getBody().get("format");
 			    List<String> formats = requestedFormat.isEmpty() ? STANDARD_FORMAT : requestedFormat;
 			    for(String format : formats) {
 			        Mapper_1_0 mapper = MapperFactory_1.create(format);
@@ -918,6 +931,7 @@ public class Model_2 extends AbstractRestPort {
 			String ofType = (String) input.getBody().get("ofType");
 			boolean includeSubtypes = ((Boolean)input.getBody().get("includeSubtypes")).booleanValue();
 			List<Path> result = new ArrayList<Path>();
+			
 			for(ObjectRecord content : contents) {
 			    if(includeSubtypes) {
 			        List<String> subtypes = getSubtype(ofType);
@@ -936,6 +950,15 @@ public class Model_2 extends AbstractRestPort {
 		}
 
 		/**
+         * @param content
+         * @param subtype
+         * @return
+         */
+        private boolean isInstanceOf(ObjectRecord content, String subtype) {
+            throw new UnsupportedOperationException("Wait a moment: Is " + content.getValue().getRecordName() + " an instance of " + subtype);
+        }
+
+        /**
 		 * Get content
 		 * <p>
 		 * Search elements with matching qualifiedName

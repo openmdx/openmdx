@@ -48,6 +48,7 @@
 package org.openmdx.application.mof.mapping.cci;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.openmdx.base.exception.ServiceException;
@@ -184,18 +185,17 @@ public class ReferenceDef extends StructuralFeatureDef {
   }
 
   //-------------------------------------------------------------------------
+  /**
+   * TODO multi-valued qualifier support
+   */
   private static String getQualifierName(
     ModelElement_1_0 referenceDef,
     Model_1_0 model, 
     String end
   ) throws ServiceException {
-    ModelElement_1_0 referencedEnd = model.getElement(
-      referenceDef.objGetValue(end)
-    );
-    boolean hasQualifiers = !referencedEnd.objGetList("qualifierName").isEmpty();
-    return hasQualifiers 
-      ? (String)referencedEnd.objGetValue("qualifierName") 
-      : null;
+    final ModelElement_1_0 referencedEnd = model.getElement(referenceDef.objGetValue(end));
+    final List<?> qualifiers = referencedEnd.objGetList("qualifierName");
+    return qualifiers.isEmpty() ? null : (String)qualifiers.get(0);
   }
   
   //-------------------------------------------------------------------------

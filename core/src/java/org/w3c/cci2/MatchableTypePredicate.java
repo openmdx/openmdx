@@ -54,6 +54,7 @@ import java.util.Collection;
  * <p>
  * The matching rules depend on the element type
  */
+@SuppressWarnings("unchecked")
 public interface MatchableTypePredicate<V>
     extends AnyTypePredicate
 {

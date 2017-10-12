@@ -483,7 +483,7 @@ public interface Model_1_0 {
     Path getIdentityPattern(
         ModelElement_1_0 classDef
     ) throws ServiceException;
-  
+
 }
 
 //--- End of File -----------------------------------------------------------

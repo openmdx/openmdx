@@ -132,11 +132,6 @@ public class Standard_1 extends OperationAwareLayer_1 {
                 LayerConfigurationEntries.GENERIC_TYPE_PATH
             ).values()
         );
-        // initialize genericObjectType to BasicObject to ensure that the 
-        // system attributes are present.
-        this.basicObjectClassDef = new ModelElement_1(
-            getModel().getDereferencedType("org:openmdx:base:BasicObject")
-        );
 	}
 
 	/**
@@ -186,7 +181,7 @@ public class Standard_1 extends OperationAwareLayer_1 {
             );
         }
         if(this.isGenericTypePath(Object_2Facade.getPath(object))) {
-            return this.basicObjectClassDef; 
+            return getBasicObjectClassDef(); 
         } else {        
             return getModel().getDereferencedType(objectClass);
         }
@@ -526,6 +521,22 @@ public class Standard_1 extends OperationAwareLayer_1 {
      * @deprecated will not be supported by the dataprovider 2 stack
      */
     private ModelElement_1_0 basicObjectClassDef = null;
+
+    
+    /**
+     * initialize genericObjectType to BasicObject to ensure that the system attributes are present.
+     *
+     * @return Returns the basicObjectClassDef.
+     * @throws ServiceException 
+     */
+    private ModelElement_1_0 getBasicObjectClassDef() throws ServiceException {
+        if(this.basicObjectClassDef == null) {
+            this.basicObjectClassDef = new ModelElement_1(
+                getModel().getDereferencedType("org:openmdx:base:BasicObject")
+            );
+        }
+        return this.basicObjectClassDef;
+    }
 
 }
 

@@ -107,12 +107,15 @@ public abstract class AbstractXMLStreamWriter implements XMLStreamWriter {
     }
 
     public void writeComment(String arg0) throws XMLStreamException {
+        // nothing to do
     }
 
     public void writeDTD(String arg0) throws XMLStreamException {
+        // nothing to do
     }
 
     public void writeEndDocument() throws XMLStreamException {
+        // nothing to do
     }
     
     public void serializeAsArray(String name) {

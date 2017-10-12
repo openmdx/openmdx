@@ -399,7 +399,11 @@ public class RestServlet_2 extends HttpServlet {
         ) {
             exceptionStack = exceptionStack.getCause();
         }
-        SysLog.warning("Resource Exception", exceptionStack);
+        if(exceptionStack.getExceptionCode() == BasicException.Code.NOT_FOUND) {
+            SysLog.detail("Resource Exception", exceptionStack);
+        } else {
+            SysLog.warning("Resource Exception", exceptionStack);            
+        }
         response.setStatus(toStatusCode(exceptionStack.getExceptionCode()));
         ServletTarget target = new ServletTarget(request, response);
         restFormatter.format(target, exceptionStack);
@@ -449,11 +453,14 @@ public class RestServlet_2 extends HttpServlet {
         super.init(config);
         try {
             String entityManagerFactoryName = config.getInitParameter("entity-manager-factory-name");
-            // Do not isolate units of works            
             Map<Object,Object> overrides = new HashMap<Object,Object>();
             overrides.put(
-                ConfigurableProperty.Multithreaded.qualifiedName(),
+                ConfigurableProperty.IsolateThreads.qualifiedName(),
                 Boolean.FALSE.toString()
+            );
+            overrides.put(
+                ConfigurableProperty.Multithreaded.qualifiedName(),
+                Boolean.TRUE.toString()
             );
             if(config.getInitParameter("RefInitializeOnCreate") != null) {
                 log("The init parameter 'RefInitializeOnCreate' is no longer supported");
@@ -672,55 +679,76 @@ public class RestServlet_2 extends HttpServlet {
         HttpServletResponse response
     ) throws ServletException, IOException {
         prolog(request, response);
-        Interaction interaction = getInteraction(request);
-        try {
-            Path xri = this.getXri(request);
-            String contentType = request.getContentType();
-            if(
-            	"application/x-www-form-urlencoded".equals(contentType) || 
-            	(contentType == null && !hasQuery(request))
-            ) {                
-            	execute(  
-                    interaction,
-                    !isTransactionObjectIdentifier(xri) && isAutoCommitting(request), 
-                    false, 
-                    InteractionSpecs.getRestInteractionSpecs(false).DELETE, 
-                    Query_2Facade.newInstance(xri).getDelegate()
-                );
-            } else {
-                final MappedRecord object = parseRequest(request, response);
-                execute(  
-                    interaction,
-                    !isControlObjectType(object.getRecordName()) && isAutoCommitting(request), 
-                    false, 
-                    InteractionSpecs.getRestInteractionSpecs(false).DELETE, 
-                    object
-                );
-            }
-            response.setStatus(HttpServletResponse.SC_NO_CONTENT);                    
-        } catch(ResourceException exception) {
-            this.handleException(
-                request,
-                response, 
-                exception
-            );
-        } catch(Exception exception) {
-            this.handleException(
-                request, 
-                response, 
-                exception
-            );
-        } finally {
-            try {
-                if(this.isAutoCommitting(request)) {
-                    Connection connection = interaction.getConnection();
-                    interaction.close();
+        Path xri = this.getXri(request);        
+        // Close connection
+        if(isConnectionObjectIdentifier(xri)) {
+            HttpSession session = request.getSession(true);
+            Connection connection = (Connection)session.getAttribute(Connection.class.getName());
+            if(connection != null) {
+                try {
                     connection.close();
+                } catch (ResourceException exception) {
+                    Throwables.log(exception);
+                }                
+            }
+            session.setAttribute(
+                "org.openmdx.rest.AutoCommit",
+                null
+            );
+            session.setAttribute(
+                Connection.class.getName(),
+                null
+            );
+        } else {
+            Interaction interaction = getInteraction(request);
+            try {
+                String contentType = request.getContentType();
+                if(
+                	"application/x-www-form-urlencoded".equals(contentType) || 
+                	(contentType == null && !hasQuery(request))
+                ) {                
+                	execute(  
+                        interaction,
+                        !isTransactionObjectIdentifier(xri) && isAutoCommitting(request), 
+                        false, 
+                        InteractionSpecs.getRestInteractionSpecs(false).DELETE, 
+                        Query_2Facade.newInstance(xri).getDelegate()
+                    );
                 } else {
-                    interaction.close();
+                    final MappedRecord object = parseRequest(request, response);
+                    execute(  
+                        interaction,
+                        !isControlObjectType(object.getRecordName()) && isAutoCommitting(request), 
+                        false, 
+                        InteractionSpecs.getRestInteractionSpecs(false).DELETE, 
+                        object
+                    );
                 }
-            } catch (ResourceException exception) {
-                Throwables.log(exception);
+                response.setStatus(HttpServletResponse.SC_NO_CONTENT);                    
+            } catch(ResourceException exception) {
+                this.handleException(
+                    request,
+                    response, 
+                    exception
+                );
+            } catch(Exception exception) {
+                this.handleException(
+                    request, 
+                    response, 
+                    exception
+                );
+            } finally {
+                try {
+                    if(this.isAutoCommitting(request)) {
+                        Connection connection = interaction.getConnection();
+                        interaction.close();
+                        connection.close();
+                    } else {
+                        interaction.close();
+                    }
+                } catch (ResourceException exception) {
+                    Throwables.log(exception);
+                }
             }
         }
         epilog(request, response);
@@ -990,23 +1018,7 @@ public class RestServlet_2 extends HttpServlet {
                     );
                 }
             } else {
-                handleException(
-                    request, 
-                    response, 
-                    ResourceExceptions.initHolder(
-                        new ResourceException(
-                            "This session has already established a connection",
-                            BasicException.newEmbeddedExceptionStack(
-                                BasicException.Code.DEFAULT_DOMAIN,
-                                BasicException.Code.ILLEGAL_STATE,
-                                new BasicException.Parameter(
-                                    "AutoCommit",
-                                    this.isAutoCommitting(request)
-                                )
-                            )
-                        )
-                    )
-                );
+                // ignore in case this session has already established a connection
             }
         } else {
             Interaction interaction = getInteraction(request);

@@ -268,7 +268,7 @@ public class StandardFileHandler extends FileHandler {
      *      not supported.
      */
     @Override
-    public void setEncoding(
+    public synchronized void setEncoding(
         String encoding
     ) throws SecurityException, java.io.UnsupportedEncodingException {
         super.setEncoding(encoding);

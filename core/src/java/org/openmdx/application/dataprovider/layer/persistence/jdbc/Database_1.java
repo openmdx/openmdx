@@ -308,6 +308,7 @@ public class Database_1 extends OperationAwareLayer_1 {
         this.database.setDisableAbsolutePositioning(configuration.<Boolean>values(LayerConfigurationEntries.DISABLE_ABSOLUTE_POSITIONING));
         this.database.setReferenceIdPattern(configuration.<String>values(LayerConfigurationEntries.REFERENCE_ID_PATTERN));
         this.database.setAutonumColumn(configuration.<String>values(LayerConfigurationEntries.AUTONUM_COLUMN));
+        this.database.setOrderNullsAsEmpty(configuration.isEnabled(LayerConfigurationEntries.ORDER_NULLS_AS_EMPTY, false));
     }
 
     /**

@@ -62,7 +62,6 @@ import org.openmdx.application.dataprovider.cci.AttributeSelectors;
 import org.openmdx.application.dataprovider.cci.DataproviderReply;
 import org.openmdx.application.dataprovider.cci.DataproviderRequest;
 import org.openmdx.application.dataprovider.spi.Layer_1;
-import org.openmdx.application.mof.cci.ModelAttributes;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
 import org.openmdx.base.mof.cci.ModelHelper;
@@ -145,7 +144,7 @@ public class Standard_1 extends Layer_1 {
     ) {
         try {
             ModelElement_1_0 elementDef = getModel().getElement(facade.getObjectClass()); 
-            return ModelAttributes.STRUCTURE_TYPE.equals(elementDef.objGetClass()) ? null : elementDef;
+            return elementDef.isStructureType() ? null : elementDef;
         } catch(ServiceException e){
             return null;
         }
@@ -188,7 +187,7 @@ public class Standard_1 extends Layer_1 {
         if(touchNonDerivedFeatures) {
             ModelElement_1_0 classDef = this.getClassDef(facade);
             if(classDef != null) {
-                for(Map.Entry<String,ModelElement_1_0> feature : ((Map<String,ModelElement_1_0>)classDef.objGetMap("allFeature")).entrySet()) {
+                for(Map.Entry<String,ModelElement_1_0> feature : classDef.objGetMap("allFeature").entrySet()) {
                     ModelElement_1_0 featureDef = feature.getValue();
                     if(
                         ModelHelper.isStoredAsAttribute(featureDef) &&

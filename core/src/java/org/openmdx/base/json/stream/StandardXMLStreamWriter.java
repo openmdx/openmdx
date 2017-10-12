@@ -189,7 +189,8 @@ public class StandardXMLStreamWriter extends AbstractXMLStreamWriter {
 	    }
 	    
 	    @Override
-	    public void addText(String text) {
+	    public void addText(final String t) {
+	        String text = t;
 	    	if (MIXED_CONTENT_VALUE_KEY == valueKey) {
 	    		text = text.trim();
 	    		if (text.isEmpty()) {

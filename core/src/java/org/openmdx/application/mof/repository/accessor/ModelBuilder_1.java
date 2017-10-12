@@ -58,12 +58,14 @@ import java.util.Set;
 
 import javax.resource.ResourceException;
 
-import org.openmdx.application.mof.cci.ModelAttributes;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.ModelBuilder_1_0;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
 import org.openmdx.base.mof.cci.Model_1_0;
+import org.openmdx.base.mof.repository.cci.ElementRecord;
+import org.openmdx.base.mof.repository.cci.TypedElementRecord;
 import org.openmdx.base.naming.Path;
+import org.openmdx.base.resource.cci.Freezable;
 import org.openmdx.base.resource.spi.Port;
 import org.openmdx.base.rest.cci.RestConnection;
 import org.openmdx.kernel.loading.Classes;
@@ -177,7 +179,7 @@ public class ModelBuilder_1 implements ModelBuilder_1_0 {
     private final ModelLoader modelLoader;
     
     private Map<String,ModelElement_1_0> modelElements;
-    private Map<String, List<AssociationDef>> associationDefs;
+    private Map<String, List<AssociationDef_1>> associationDefs;
     private Model_1 model;
     
     /* (non-Javadoc)
@@ -187,14 +189,24 @@ public class ModelBuilder_1 implements ModelBuilder_1_0 {
     public Model_1_0 build(
     ) throws ServiceException {
         this.modelElements = new HashMap<String, ModelElement_1_0>();
-        this.associationDefs = new HashMap<String, List<AssociationDef>>(); 
+        this.associationDefs = new HashMap<String, List<AssociationDef_1>>(); 
         this.model = new Model_1(this.modelElements, this.associationDefs);
         this.modelLoader.populateModelElements(model);
         populateAssociationDefs();
         completeTypedElements();
+        freeze();
         return model;
     }
 
+    private void freeze(){
+        for(ModelElement_1_0 element : this.modelElements.values()) {
+            final ElementRecord delegate = element.getDelegate();
+            if(delegate instanceof Freezable) {
+                ((Freezable)delegate).makeImmutable();
+            }
+        }
+    }
+    
     /** 
      * Prepare the dereferenced types
      */
@@ -202,8 +214,8 @@ public class ModelBuilder_1 implements ModelBuilder_1_0 {
     ) throws ServiceException {
         for(ModelElement_1_0 elementDef : this.modelElements.values()){
             if(
-                elementDef.isInstanceOf("org:omg:model1:TypedElement") &&
-                !"org:omg:model1".equals(elementDef.jdoGetObjectId().getSegment(4).toClassicRepresentation())
+                elementDef.isInstanceOf(TypedElementRecord.class) &&
+                !elementDef.getQualifiedName().startsWith("org:omg:model1")
             ){
                 //
                 // Handle typed elements except the org:omg:model1 members
@@ -222,7 +234,7 @@ public class ModelBuilder_1 implements ModelBuilder_1_0 {
             //
             // Add only associations used in references to the list of AssociationDefs
             //
-            if(elementDef.objGetClass().equals(ModelAttributes.REFERENCE)) {
+            if(elementDef.isReferenceType()) {
                 addAssociationDef(elementDef);
             }
         }
@@ -241,20 +253,20 @@ public class ModelBuilder_1 implements ModelBuilder_1_0 {
         Path referencedEndPath = elementDef.getReferencedEnd();
         Path exposedEndPath = elementDef.getExposedEnd();
         String referenceName = elementDef.getName();
-        List<AssociationDef> associationDef = associationDefs.get(referenceName);
+        List<AssociationDef_1> associationDef = associationDefs.get(referenceName);
         if(associationDef == null) {
             this.associationDefs.put(
                 referenceName,
-                associationDef = new ArrayList<AssociationDef>()
+                associationDef = new ArrayList<AssociationDef_1>()
             );
         }
         associationDef.add(
-            new AssociationDef(
+            new AssociationDef_1(
                 this.model.getElementType(
-                    ModelHelper.getElement(exposedEndPath, this.modelElements)
+                    ModelHelper_1.getElement(exposedEndPath, this.modelElements)
                 ),
                 this.model.getElementType(
-                    ModelHelper.getElement(referencedEndPath, this.modelElements)
+                    ModelHelper_1.getElement(referencedEndPath, this.modelElements)
                 ),
                 elementDef,
                 this.modelElements

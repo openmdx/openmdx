@@ -47,11 +47,9 @@
  */
 package org.openmdx.application.spi;
 
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Enumeration;
-import java.util.Map;
 import java.util.Properties;
 
 import javax.jdo.Constants;

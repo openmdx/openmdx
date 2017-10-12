@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2014, OMEX AG, Switzerland
+ * Copyright (c) 2004-2017, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -119,13 +119,20 @@ public class Classes {
     //------------------------------------------------------------------------
     
     /**
-     * Retrieve the context class loader
+     * Retrieve the standard class loader
      * 
-     * @return the context class loader
+     * @return the standard class loader
      */
-    private static final ClassLoader getClassLoader(
+    private static final ClassLoader getStandardClassLoader(
     ){
-        return Thread.currentThread().getContextClassLoader();
+        switch(ClassLoaderType.getStandardClassLoaderType()) {
+            case CONTEXT_CLASS_LOADER:
+                return Thread.currentThread().getContextClassLoader();
+            case KERNEL_CLASS_LOADER:    
+                return Classes.class.getClassLoader();
+            default: 
+                throw new RuntimeException("Unsupported class loader type: " + ClassLoaderType.getStandardClassLoaderType());
+        }
     }
 
     /**
@@ -295,7 +302,7 @@ public class Classes {
     ) throws ClassNotFoundException {
         return getClass(
             name,
-            getClassLoader()
+            getStandardClassLoader()
         );
     }
     
@@ -322,7 +329,7 @@ public class Classes {
      *          If I/O errors occur
      */
     public static Enumeration<URL> getResources(String name) throws IOException {
-        return getClassLoader().getResources(name);
+        return getStandardClassLoader().getResources(name);
     }
 
     
@@ -352,7 +359,7 @@ public class Classes {
         Class<?>... interfaces
     ){
         return (T) Proxy.newProxyInstance(
-            getClassLoader(),
+            getStandardClassLoader(),
             interfaces,
             invocationHandler
         );
@@ -640,4 +647,36 @@ public class Classes {
     	}
     }
 
+    
+    //------------------------------------------------------------------------
+    // Class Application Class Loader Type
+    //------------------------------------------------------------------------
+    
+    enum ClassLoaderType {
+        
+        /**
+         * Appliaction classes are loaded by the context class loader
+         */
+        CONTEXT_CLASS_LOADER,
+        
+        /**
+         * Application classes are loaded by the openMDX class loader
+         */
+        KERNEL_CLASS_LOADER;
+
+        private static final ClassLoaderType STANDARD = valueOf(
+            Platform.getProperty("org.openmdx.kernel.loading.StandardClassLoaderType", CONTEXT_CLASS_LOADER.name())
+        );
+        
+        /**
+         * Determine the standard application and resource class loader type
+         *
+         * @return Returns the standard application and resource class loader type
+         */
+        static ClassLoaderType getStandardClassLoaderType() {
+            return STANDARD;
+        }
+        
+    }
+    
 }

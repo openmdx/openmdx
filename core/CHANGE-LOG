@@ -1,5 +1,292 @@
 ==============================================================================
-Version 2.15.0                                                      2016-09-09
+Version 2.15.7                                                      2017-10-12
+==============================================================================
+
+0.    KNOWN ISSUES
+      
+      NONE
+
+1.    NEW FEATURES
+
+      20055466  
+      Consumer Support
+      openMDX 2.15 JRE 6 re-enabled
+      
+      CR20061207
+      Externalizable QueryRecord
+      
+      org.openmdx.base.rest.spi.QueryRecord now implements java.io.Externalizable.
+
+2.    CHANGES  
+     
+2.0.  CHANGED FEATURES
+
+      NONE
+      
+2.1.  FIXED BUGS
+
+      CR20061597
+      Subquery support for NOT_IN's DB implementation 
+      
+      The notAnElementOf () database implementation is now implemented similarily to
+      elementOf.
+
+2.2.  DEPRECATED FEATURES5
+
+      NONE
+      
+2.3.  REMOVED FEATURES
+
+      NONE
+
+
+==============================================================================
+Version 2.15.6                                                     2017-08-31
+==============================================================================
+
+0.    KNOWN ISSUES
+      
+      NONE
+
+1.    NEW FEATURES
+
+      CR20061610
+      RestServet: DELETE connection. The lifecycle of a connection can be 
+      controlled as follows:
+      * POST /opencrx-rest-EDUCASE/org.openmdx.kernel/connection creates a (JCA) 
+        connection and attaches is to the (servlet) session. The session is in 
+        then in AutoCommit=false mode. UOW handling is required for update operations.
+      * DELETE /opencrx-rest-EDUCASE/org.openmdx.kernel/connection closes the 
+        connection attached to the session. The session is then in AutoCommit=true mode.
+        No UOW handling is possible in this mode. 
+
+      CR20061142
+      Database: option orderNullsAsEmpty. The option orderNullsAsEmpty controls
+      ordering as follows:
+      * if true, ORDER BY … ASC is expanded to ORDER BY … ASC NULLS FIRST
+      * if false, ORDER BY … DESC is expanded to ORDER BY … DESC NULLS LAST 
+
+2.    CHANGES  
+     
+2.0.  CHANGED FEATURES
+
+      CR20061691
+      Concurrent Hash Maps in Data Object and View Layer 
+      
+      Avoid the use of concurrent hash maps in data object and view layer 
+      unless the persistence manager is multi-threaded.      
+      
+2.1.  FIXED BUGS
+
+      CR20061597
+      Subquery support for NOT_IN's DB implementation 
+      
+      The notAnElementOf () database implementation is now implemented similarily to
+      elementOf.
+
+2.2.  DEPRECATED FEATURES5
+
+      NONE
+      
+2.3.  REMOVED FEATURES
+
+      NONE
+
+
+==============================================================================
+Version 2.15.5                                                      2017-06-26
+==============================================================================
+
+0.    KNOWN ISSUES
+
+      CR20051350
+      detachCopy
+      
+      detachCopy tries to add a superclass' slices to a subclass.
+
+      CR20044758
+      State of transient object
+      
+      A state can't be added to a transient object
+      
+
+1.    NEW FEATURES
+
+      NONE
+      
+
+2.    CHANGES  
+     
+2.0.  CHANGED FEATURES
+
+      NONE
+            
+2.1.  FIXED BUGS
+
+      CR20060986
+      Aspect cache
+      
+      Avoid an aspect being cached under its qualified and its unqualified 
+      qualifier at the same time.  
+
+2.2.  DEPRECATED FEATURES5
+
+      NONE
+      
+2.3.  REMOVED FEATURES
+
+      NONE
+      
+      
+==============================================================================
+Version 2.15.3                                                      2017-06-24
+==============================================================================
+
+0.    KNOWN ISSUES
+
+      CR20051350
+      detachCopy
+      
+      detachCopy tries to add a superclass' slices to a subclass.
+
+      CR20044758
+      State of transient object
+      
+      A state can't be added to a transient object
+      
+
+1.    NEW FEATURES
+
+      NONE
+      
+
+2.    CHANGES  
+     
+2.0.  CHANGED FEATURES
+
+      NONE
+            
+2.1.  FIXED BUGS
+
+      CR20060986
+      Model Dump
+      
+      Model element serialization corrected  
+
+2.2.  DEPRECATED FEATURES5
+
+      NONE
+      
+2.3.  REMOVED FEATURES
+
+      NONE
+      
+      
+==============================================================================
+Version 2.15.2                                                      2017-05-17
+==============================================================================
+
+0.    KNOWN ISSUES
+
+      CR20051350
+      detachCopy
+      
+      detachCopy tries to add a superclass' slices to a subclass.
+
+      CR20044758
+      State of transient object
+      
+      A state can't be added to a transient object
+      
+
+1.    NEW FEATURES
+
+      CR20057912
+      ldaps Protocol
+      
+      The org.openmdx.resource.ldap.v3.ManagedConnectionFactory supports
+      now ldaps:// in addition to the default ldap:// protocol.
+
+      CR20056684
+      StandardClassLoaderType configuration 
+
+      By modfying either the platform.configuration file or setting the
+      System property org.openmdx.kernel.loading.StandardClassLoaderType
+      one can select between the (default) CONTEXT_CLASS_LOADER and
+      KERNEL_CLASS_LOADER, i.e. openMDX' own class loader.
+
+      CR20052596
+      Apache Pool Upgrade
+      
+      The org.openmdx.uses.org.apache.commons.pool2 classes are now included 
+      in the openmdx-base.jar
+
+      CR20055466  
+      Consumer back-port
+
+      The class java.util.function.Consumer<T> has been backported
+      from JRE 8 to JRE 7.
+
+      CR20053217
+      Application Configuration
+      
+      Allow an application to override default values not only with system
+      properties but with a configuration file.  
+
+      
+2.    CHANGES  
+     
+2.0.  CHANGED FEATURES
+
+      CR10013447 
+      Exception handling in case of HTTP status greater or equal to 400
+      
+      RestParser.paseException converts all RuntimeExceptions to SAXExceptions now
+      
+      CR20052596
+      Apache File Upload Upgrade
+      
+      The org.openmdx.uses.org.apache.commons.fileupload classes are have been 
+      upgraded to version 1.3.2
+
+      CR20053216
+      DatatypeFactory.newInstance()
+      
+      DatatypeFactory.newInstance() invocations replaced by 
+      MutableDatatypeFactory.xmlDatatypeFactory() invocations.
+
+      CR20038707
+      MOF Repository
+      
+      Replace generic implementation by typed JCA records
+            
+2.1.  FIXED BUGS
+
+      CR20055318
+      LightweightTransactionSynchronizationRegistry getTransactionKey() and 
+      -Status()
+      
+      getTransactionKey() and getTramsactionStatus() return now null and
+      STATUS_NO_TRANSACTION, respectively, if there is no active transaction.  
+
+2.2.  DEPRECATED FEATURES5
+
+      CR20052596
+      Apache Pool Upgrade
+      
+      The org.openmdx.uses.org.apache.commons.pool classes are now 
+      deprecated and will be removed in the near future.
+      
+2.3.  REMOVED FEATURES
+
+      CR20055466  
+      generate-ant
+      
+      The obsolete build target generate-ant has been removed.
+      
+      
+==============================================================================
+Version 2.15.1                                                      2016-10-23
 ==============================================================================
 
 0.    KNOWN ISSUES
@@ -12,8 +299,7 @@ Version 2.15.0                                                      2016-09-09
 
 1.    NEW FEATURES
 
-      CR20045116
-      Java 8 support. Add Java 8 as standard platform.
+      NONE
 
       
 2.    CHANGES  
@@ -21,6 +307,41 @@ Version 2.15.0                                                      2016-09-09
 2.0.  CHANGED FEATURES
  
       NONE
+      
+            
+2.1.  FIXED BUGS
+
+      CR20052690
+      Responses with nested struct
+      
+      Responses with nested structs are not parsed correctly .
+
+
+==============================================================================
+Version 2.15.0                                                      2016-09-01
+==============================================================================
+
+0.    KNOWN ISSUES
+
+      CR20044758
+      State of transient object
+      
+      A state can't be added to a transient object
+      
+
+1.    NEW FEATURES
+
+      NONE
+
+      
+2.    CHANGES  
+     
+2.0.  CHANGED FEATURES
+ 
+      CR20050423
+      MOF Repository
+      
+      The MOF repository's memory consumption has been reduced by 80%.
       
             
 2.1.  FIXED BUGS

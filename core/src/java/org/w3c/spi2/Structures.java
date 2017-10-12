@@ -52,7 +52,6 @@ import java.lang.reflect.Array;
 import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Proxy;
 import java.lang.reflect.Type;
@@ -408,7 +407,7 @@ public class Structures {
      * 
      * @exception ClassCastException unless isStructureInstance(structure) evaluates to <code>true</code>
      */
-    static MappedRecord toRecord(
+    public static MappedRecord toRecord(
         Object structure,
         boolean mapNullValues,
         boolean mofCompliant

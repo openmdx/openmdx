@@ -1,14 +1,13 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <!--
 =======================================================================
-= Project:     openMDX/Core, http://www.openmdx.org/
-= Description: JRE 8 Platform Properties
-= Owner:       OMEX AG, Switzerland, http://www.omex.ch
+= Description: openMDX/Security jre-1.7 Platform Properties
+= Copyright:   (c) 2003-2015 OMEX AG
 =======================================================================
 =
 = This software is published under the BSD license as listed below.
 = 
-= Copyright (c) 2007-2014, OMEX AG, Switzerland
+= Copyright (c) 2007-2015, OMEX AG, Switzerland
 = All rights reserved.
 = 
 = Redistribution and use in source and binary forms, with or without 
@@ -33,7 +32,7 @@
 = MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
 = DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS
 = BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
-= EXEMPLARY, OR CONSEQUENTIAL DAMA	GES (INCLUDING, BUT NOT LIMITED
+= EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED
 = TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
 = DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
 = ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
@@ -42,6 +41,4 @@
 = POSSIBILITY OF SUCH DAMAGE.
 = 
 -->
-<project name="openmdx-core-jre-1.8-properties">
-	<property name="tomcat.version" value="7"/>
-</project>
+<project name="openmdx-security-jre-1.7-properties"/>

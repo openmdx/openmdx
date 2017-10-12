@@ -136,13 +136,14 @@ public class WBXMLPlugIn extends StandardPlugIn {
             "qualifierName", 
             "qualifierType", 
             "referencedEnd",
-            "segment", 
+            "segment",
             "scope", 
             "stereotype", 
             "supertype", 
             "tagValue", 
             "type", 
-            "visibility" 
+            "visibility", 
+            "semantics" // for upward compatibility
         }, { // 2: derived features
             "allFeature",
             "allFeatureWithSubtype",
@@ -160,14 +161,13 @@ public class WBXMLPlugIn extends StandardPlugIn {
             "modifiedAt",
             "modifiedBy",
             "name",
-            "object_instanceof",
             "operation",
             "parameter",
             "qualifiedName",
             "reference",
             "referencedEndIsNavigable",
             "subtype"
-        }, { // 2: well known classes            
+        }, { // 3: well known classes            
             "org.openmdx.base.Authority",
             "org.openmdx.base.Provider", 
             "org.omg.model1.AliasType", 

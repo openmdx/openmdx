@@ -48,7 +48,6 @@
 package org.openmdx.base.rest.spi;
 
 import javax.resource.ResourceException;
-import javax.resource.cci.Connection;
 import javax.resource.cci.ConnectionSpec;
 
 import org.openmdx.base.resource.spi.Port;

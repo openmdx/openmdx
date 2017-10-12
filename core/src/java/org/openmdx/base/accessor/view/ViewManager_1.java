@@ -689,6 +689,7 @@ public class ViewManager_1
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#detachCopyAll(java.lang.Object[])
      */
+    @SuppressWarnings("unchecked")
     @Override
     public <T> T[] detachCopyAll(T... pcs) {
         throw new UnsupportedOperationException("Unsupported operation by manager");
@@ -1011,6 +1012,7 @@ public class ViewManager_1
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#makePersistentAll(java.lang.Object[])
      */
+    @SuppressWarnings("unchecked")
     @Override
     public <T> T[] makePersistentAll(T... pcs) {
         return this.connection.makePersistentAll(pcs);

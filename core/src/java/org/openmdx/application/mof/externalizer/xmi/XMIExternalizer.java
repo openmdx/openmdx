@@ -60,7 +60,6 @@ import java.util.Map;
 import javax.resource.ResourceException;
 
 import org.openmdx.application.mof.externalizer.cci.ModelExternalizer_1_0;
-import org.openmdx.application.mof.externalizer.spi.DataproviderMode;
 import org.openmdx.application.mof.externalizer.spi.ModelExternalizer_1;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.kernel.exception.BasicException;

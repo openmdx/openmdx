@@ -85,7 +85,6 @@ abstract public class Object_1 extends Interceptor_1 {
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.spi.DelegatingObject_1#objGetContainer(java.lang.String)
      */
-    @SuppressWarnings("unchecked")
     @Override
     public Container_1_0 objGetContainer(
         String feature

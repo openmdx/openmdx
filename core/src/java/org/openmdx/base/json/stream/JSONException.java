@@ -87,6 +87,7 @@ public class JSONException extends Exception {
         this.cause = t;
     }
 
+    @SuppressWarnings("sync-override")
     public Throwable getCause() {
         return this.cause;
     }

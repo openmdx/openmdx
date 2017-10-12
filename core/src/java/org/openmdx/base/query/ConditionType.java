@@ -220,6 +220,15 @@ public enum ConditionType implements Code {
     }
     
     /**
+     * Determines the inverse condition
+     * 
+     * @return the inverse condition, leaving 0
+     */
+    public static short invert(short code) {
+        return (short) -code;
+    }
+    
+    /**
      * Retrieve the <code>ConditionType</code>'s code
      * 
      * @param type

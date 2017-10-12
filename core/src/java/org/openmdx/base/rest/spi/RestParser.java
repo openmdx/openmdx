@@ -129,6 +129,7 @@ public class RestParser {
      * 
      */
     private static final String ITEM_TAG = "_item";
+    private static final String OBJECTS_TAG = "objects";
     
     /**
      * The XML Readers
@@ -208,18 +209,18 @@ public class RestParser {
     private static XMLReader getReader(
         RestSource source
     ) throws SAXNotRecognizedException, SAXNotSupportedException {
-    	final Format format = source.getFormat();
-		switch(format) {
-    		case WBXML:
+        final Format format = source.getFormat();
+        switch(format) {
+            case WBXML:
                 XMLReader xmlReader = RestParser.wbxmlReaders.get();
                 xmlReader.setFeature(WBXMLReader.EXHAUST, source.isToBeExhausted());
                 return xmlReader;
-    		case XML:
+            case XML:
                 return RestParser.xmlReaders.get();
-    		case JSON:
-    			return RestParser.jsonReaders.get();
-    	}
-    	throw new SAXNotSupportedException("Unsupported input format: " + format);
+            case JSON:
+                return RestParser.jsonReaders.get();
+        }
+        throw new SAXNotSupportedException("Unsupported input format: " + format);
     }
 
     /**
@@ -260,9 +261,9 @@ public class RestParser {
             source.close();
             return handler.getValue(xri);
         } catch (IOException exception) {
-        	throw new SAXException(exception);
-        } catch (RuntimeServiceException exception) {
-        	throw new SAXException(exception);
+            throw new SAXException(exception);
+        } catch (RuntimeException exception) {
+            throw new SAXException(exception);
         }
     }
 
@@ -314,7 +315,7 @@ public class RestParser {
      * 
      * @return a <code>BasicException</code>
      * 
-     * @throws ServiceException
+     * @throws SAXException in case of failure
      */
     public static BasicException parseException(
         RestSource source
@@ -328,7 +329,7 @@ public class RestParser {
             return handler.getValue();
         } catch (IOException exception) {
             throw new SAXException(exception);
-        } catch (RuntimeServiceException exception) {
+        } catch (RuntimeException exception) {
             throw new SAXException(exception);
         }
     }
@@ -424,7 +425,7 @@ public class RestParser {
          * @throws ServiceException
          */
         MappedRecord getValue(
-        	Path xri
+            Path xri
         ) throws SAXException {
             String typeName = this.values.peek().getRecordName();
             if (this.isQueryType(typeName)) {
@@ -432,7 +433,7 @@ public class RestParser {
             } else if (this.isStructureType(typeName)) {
                 return (MappedRecord) this.values.peek();
             } else if (xri.isTransactionalObjectId()){
-            	return this.getObject(null);
+                return this.getObject(null);
             } else {
                 return this.getObject(xri);
             }
@@ -448,64 +449,64 @@ public class RestParser {
         ObjectRecord getObject(
             Path xri
         ) throws SAXException {
-        	final Class<ObjectRecord> recordInterface = ObjectRecord.class;
-			ObjectRecord object = newMappedRecord(recordInterface);
-        	object.setResourceIdentifier(
-			    xri == null ? this.source.getXRI(this.href) : xri
-			);
-			object.setValue((MappedRecord) this.values.peek());
-			if (this.version != null) {
-			    object.setVersion(Base64.decode(this.version));
-			}
-			if(UUIDConversion.isUUID(this.id)) {
-				object.setTransientObjectId(UUIDConversion.fromString(this.id));
-			}
-			return object;
+            final Class<ObjectRecord> recordInterface = ObjectRecord.class;
+            ObjectRecord object = newMappedRecord(recordInterface);
+            object.setResourceIdentifier(
+                xri == null ? this.source.getXRI(this.href) : xri
+            );
+            object.setValue((MappedRecord) this.values.peek());
+            if (this.version != null) {
+                object.setVersion(Base64.decode(this.version));
+            }
+            if(UUIDConversion.isUUID(this.id)) {
+                object.setTransientObjectId(UUIDConversion.fromString(this.id));
+            }
+            return object;
         }
 
-		private <T extends MappedRecord> T newMappedRecord(
-			final Class<T> recordInterface
-		) throws SAXException {
-			try {
-				return recordFactory.createMappedRecord(recordInterface);
-			} catch (ResourceException exception) {
-				throw new SAXException(exception);
-			}
-		}
+        private <T extends MappedRecord> T newMappedRecord(
+            final Class<T> recordInterface
+        ) throws SAXException {
+            try {
+                return recordFactory.createMappedRecord(recordInterface);
+            } catch (ResourceException exception) {
+                throw new SAXException(exception);
+            }
+        }
 
-		private MappedRecord newMappedRecord(
-			String typeName
-		) throws SAXException {
-			try {
-				return recordFactory.createMappedRecord(typeName);
-			} catch (ResourceException exception) {
-				throw new SAXException(exception);
-			}
-		}
+        private MappedRecord newMappedRecord(
+            String typeName
+        ) throws SAXException {
+            try {
+                return recordFactory.createMappedRecord(typeName);
+            } catch (ResourceException exception) {
+                throw new SAXException(exception);
+            }
+        }
 
-		private MappedRecord newMappedRecord(
-			final Multiplicity multiplicity
-		) throws SAXException {
-			return newMappedRecord(multiplicity.code());
-		}
-		
-		private IndexedRecord newIndexedRecord(
-			final Multiplicity multiplicity
-		) throws SAXException {
-			try {
-				return recordFactory.createIndexedRecord(multiplicity.code());
-			} catch (ResourceException exception) {
-				throw new SAXException(exception);
-			}
-		}
-		
+        private MappedRecord newMappedRecord(
+            final Multiplicity multiplicity
+        ) throws SAXException {
+            return newMappedRecord(multiplicity.code());
+        }
+        
+        private IndexedRecord newIndexedRecord(
+            final Multiplicity multiplicity
+        ) throws SAXException {
+            try {
+                return recordFactory.createIndexedRecord(multiplicity.code());
+            } catch (ResourceException exception) {
+                throw new SAXException(exception);
+            }
+        }
+        
         /**
          * Retrieve the interaction's query record
          * 
          * @return the interaction's query record
          */
         MappedRecord getQuery(
-        	Path xri
+            Path xri
         ){
             QueryRecord query = (QueryRecord) this.values.peek();
             if(xri != null) {
@@ -544,6 +545,8 @@ public class RestParser {
                     }
                 } else if(ITEM_TAG.equals(name)) { 
                     propagateData();
+                } else if(OBJECTS_TAG.equals(name)) {
+                    // nothing to do
                 } else {
                     if(this.peekMultivaluedMultiplicity() != null) {
                         this.values.pop();
@@ -656,13 +659,13 @@ public class RestParser {
             }
         }
 
-		private boolean isClassType() throws SAXException {
-			try {
-				return model.isClassType(featureType);
-			} catch (ServiceException exception) {
-				throw new SAXException(exception);
-			}
-		}
+        private boolean isClassType() throws SAXException {
+            try {
+                return model.isClassType(featureType);
+            } catch (ServiceException exception) {
+                throw new SAXException(exception);
+            }
+        }
 
         private Multiplicity peekMultivaluedMultiplicity(
         ){
@@ -716,18 +719,18 @@ public class RestParser {
                     // Begin object or struct
                     MappedRecord mappedRecord = this.newMappedRecord(typeName);
                     if(!this.nestedStructFieldStart) {
-    					if(this.isStructureType(typeName)) {
-    					    // nested struct
-    					    if(!this.values.isEmpty()) {
-    					        // multi-valued org:w3c:anyType
-    					        if(this.values.peek() instanceof IndexedRecord) {
-    					            this.values.pop();
-    					            this.featureType = typeName;
-    					            this.value = mappedRecord;
-    					        }
-    					        Object values = ((MappedRecord)this.values.peek()).get(this.featureName);
-    					        if(values instanceof IndexedRecord) {
-    					            IndexedRecord list = (IndexedRecord)values;
+                        if(this.isStructureType(typeName)) {
+                            // nested struct
+                            if(!this.values.isEmpty()) {
+                                // multi-valued org:w3c:anyType
+                                if(this.values.peek() instanceof IndexedRecord) {
+                                    this.values.pop();
+                                    this.featureType = typeName;
+                                    this.value = mappedRecord;
+                                }
+                                Object values = ((MappedRecord)this.values.peek()).get(this.featureName);
+                                if(values instanceof IndexedRecord) {
+                                    IndexedRecord list = (IndexedRecord)values;
                                     if(attributes.getValue("index") != null) {
                                         this.index = attributes.getValue("index");
                                         int index = Integer.parseInt(this.index);
@@ -742,27 +745,27 @@ public class RestParser {
                                             );
                                         }
                                     }
-    					            list.add(mappedRecord);
-    					        } else {
+                                    list.add(mappedRecord);
+                                } else {
                                     MappedRecord map = (MappedRecord)values;
                                     this.index = attributes.getValue("index");
-                                    map.put(this.index, mappedRecord);					            
-    					        }
-    					    }
-    					}
-    					String href = attributes.getValue("href");
-    					if(href != null) {
-    					     this.href = href;
-    					}
-    					String version = attributes.getValue("version");
-    					if(version != null){
-    					    this.version = version;
-    					}
-    					String id = attributes.getValue("id");
-    					if(id != null) {
-    					     this.id = id;
-    					}
-    					this.values.push(mappedRecord);
+                                    map.put(this.index, mappedRecord);                              
+                                }
+                            }
+                        }
+                        String href = attributes.getValue("href");
+                        if(href != null) {
+                             this.href = href;
+                        }
+                        String version = attributes.getValue("version");
+                        if(version != null){
+                            this.version = version;
+                        }
+                        String id = attributes.getValue("id");
+                        if(id != null) {
+                             this.id = id;
+                        }
+                        this.values.push(mappedRecord);
                     }
                 } else if(ITEM_TAG.equals(qName)) {
                     this.index = attributes.getValue("index");
@@ -770,6 +773,8 @@ public class RestParser {
                     if(featureType != null) {
                         this.featureType = featureType;
                     }
+                } else if(OBJECTS_TAG.equals(qName)) {
+                    // nothing to do
                 } else {
                     if(this.featureName != null) {
                         this.featureNames.push(this.featureName);
@@ -835,48 +840,48 @@ public class RestParser {
                         this.values.push(this.value);
                     } else {
                         switch(this.multiplicity) {
-    	                    case LIST: case SET: {
-    	                    	final MappedRecord holder = (MappedRecord) this.values.peek();
-    	                    	this.value = (Record) holder.get(this.featureName);
-    	                    	if(this.value == null) {
-    								final Multiplicity multiplicity2 = this.multiplicity;
-    								holder.put(
-    								    this.featureName, 
-    								    this.value = newIndexedRecord(multiplicity2)
-    								);
-    	                    	} else {
-    	                    		((IndexedRecord)this.value).clear();
-    	                    	}
-    	                        this.values.push(this.value);
-    	                        break;
-    	                    }
-    	                    case SPARSEARRAY: {
-    	                    	final MappedRecord holder = (MappedRecord) this.values.peek();
-    	                    	this.value = (Record) holder.get(this.featureName);
-    	                    	if(this.value == null) {
-    		                        holder.put(
-    	                                this.featureName, 
-    	                                this.value = newMappedRecord(this.multiplicity)
-    	                            );
-    	                    	} else {
-    	                    		((MappedRecord)this.value).clear();
-    	                    	}
+                            case LIST: case SET: {
+                                final MappedRecord holder = (MappedRecord) this.values.peek();
+                                this.value = (Record) holder.get(this.featureName);
+                                if(this.value == null) {
+                                    final Multiplicity multiplicity2 = this.multiplicity;
+                                    holder.put(
+                                        this.featureName, 
+                                        this.value = newIndexedRecord(multiplicity2)
+                                    );
+                                } else {
+                                    ((IndexedRecord)this.value).clear();
+                                }
                                 this.values.push(this.value);
-    	                        break;
-    	                    }
-    	                    case OPTIONAL: {
-    	                    	final MappedRecord holder = (MappedRecord) this.values.peek();
-    	                    	this.value = (Record) holder.get(this.featureName);
-    	                    	if(this.value == null && !holder.containsKey(this.featureName)) {
-    		                        holder.put(
-    		                        	this.featureName, 
-    		                        	this.value
-    		                        );
-    	                    	}
-    	                        break;
-    	                    }
-    	                    default:
-    	                        this.value = null;
+                                break;
+                            }
+                            case SPARSEARRAY: {
+                                final MappedRecord holder = (MappedRecord) this.values.peek();
+                                this.value = (Record) holder.get(this.featureName);
+                                if(this.value == null) {
+                                    holder.put(
+                                        this.featureName, 
+                                        this.value = newMappedRecord(this.multiplicity)
+                                    );
+                                } else {
+                                    ((MappedRecord)this.value).clear();
+                                }
+                                this.values.push(this.value);
+                                break;
+                            }
+                            case OPTIONAL: {
+                                final MappedRecord holder = (MappedRecord) this.values.peek();
+                                this.value = (Record) holder.get(this.featureName);
+                                if(this.value == null && !holder.containsKey(this.featureName)) {
+                                    holder.put(
+                                        this.featureName, 
+                                        this.value
+                                    );
+                                }
+                                break;
+                            }
+                            default:
+                                this.value = null;
                         }
                     }
                 }
@@ -954,12 +959,12 @@ public class RestParser {
             String typeName
         ) throws SAXException{
             try {
-				return 
-					!ControlObjects_2.isControlObjectType(typeName) &&  
-					model.isStructureType(typeName);
-			} catch (ServiceException exception) {
-				throw new SAXException(exception);
-			}
+                return 
+                    !ControlObjects_2.isControlObjectType(typeName) &&  
+                    model.isStructureType(typeName);
+            } catch (ServiceException exception) {
+                throw new SAXException(exception);
+            }
         }
 
         /**
@@ -973,7 +978,7 @@ public class RestParser {
          * @throws ServiceException
          */
         protected boolean isQueryType(
-        	String typeName
+            String typeName
         ){
             return QueryRecord.NAME.equals(typeName);
         }

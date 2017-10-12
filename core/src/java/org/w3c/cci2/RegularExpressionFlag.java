@@ -21,7 +21,9 @@ public enum RegularExpressionFlag {
 	WHITESPACE_INSENSITIVE(Pattern.COMMENTS,'x','x'),
 	MULTILINE(Pattern.MULTILINE,'m','m'),
 	DOTALL(Pattern.DOTALL, 's', 'n'),
-	UNICODE_CASE(Pattern.UNICODE_CASE, 'u');
+	UNICODE_CASE(Pattern.UNICODE_CASE, 'u'),
+	X_QUERY(StringTypePredicate.X_QUERY, 'X'),
+	JSON_QUERY(StringTypePredicate.X_QUERY, 'j');
 
 	RegularExpressionFlag(int flag, char character, char sqlCharacter) {
 		this.flag = flag;

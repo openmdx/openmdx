@@ -294,16 +294,9 @@ public abstract class NameBasedContext extends AbstractContext {
                 String link = ((LinkRef)object).getLinkName();
                 boolean relative = link.startsWith(".");
                 try {
-                    if(relative) {
-                        return lookup(link.substring(1));
-                    } else {
-                        Context initialContext = new InitialContext(this.environment);
-                        try {
-                            return initialContext.lookup(link);
-                        } finally {
-                            initialContext.close();
-                        }
-                    }
+                	return relative ? 
+                        lookup(link.substring(1)) :
+                        new InitialContext(this.environment).lookup(link);
                 } catch (NamingException namingException) {
                     LinkException linkException = new LinkException(
                         "Could not resolve " + (relative ? "relative" : "absolute") + " link"

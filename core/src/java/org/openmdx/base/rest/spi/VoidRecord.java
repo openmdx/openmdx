@@ -77,7 +77,7 @@ public class VoidRecord
 	/**
 	 * Void can be implemented as singleton
 	 */
-	private static final org.openmdx.base.rest.cci.VoidRecord INSTANCE = new VoidRecord();
+	private static final VoidRecord INSTANCE = new VoidRecord();
 	
     /**
 	 * @return the instance
@@ -90,9 +90,9 @@ public class VoidRecord
      * @see org.openmdx.base.resource.spi.AbstractRecord#clone()
      */
     @Override
-    public AbstractMappedRecord<Member> clone(
-    ) throws CloneNotSupportedException{
-        throw new CloneNotSupportedException("A " + NAME + " record can't be cloned"); 
+    public VoidRecord clone(
+    ){
+        return INSTANCE; 
     }
 
 	/* (non-Javadoc)
@@ -121,4 +121,5 @@ public class VoidRecord
 		return MEMBERS;
 	}
 
+	
 }

@@ -54,7 +54,6 @@ package org.openmdx.portal.servlet.action;
 
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
@@ -64,6 +63,7 @@ import javax.servlet.http.HttpSession;
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.persistence.cci.PersistenceHelper;
+import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.log.SysLog;
 import org.openmdx.portal.servlet.ApplicationContext;
 import org.openmdx.portal.servlet.ViewPort;
@@ -103,6 +103,7 @@ public class SaveAction extends BoundAction {
 	        {
 	            Map<String,Attribute> attributeMap = new HashMap<String,Attribute>();    
 	            boolean success = false;
+	            BasicException canNotCommitException = null;
 	            try {  
 	                success = editView.storeObject(
 	                	requestParameters,
@@ -110,10 +111,10 @@ public class SaveAction extends BoundAction {
 	                    false
 	                );
 	            } catch(Exception e) {
-	                ServiceException e0 = new ServiceException(e);
-	                SysLog.warning(e0.getMessage(), e0.getMessage());
-	                SysLog.warning(e0.getMessage(), e0.getCause());
-	                editView.handleCanNotCommitException(e0.getCause());                    
+	            	ServiceException se = new ServiceException(e);
+	            	canNotCommitException = se.getCause();
+	                SysLog.warning(canNotCommitException.getMessage(), canNotCommitException);
+	                editView.handleCanNotCommitException(canNotCommitException);
 	            }
 	            if(!success) {
 	                try {
@@ -127,7 +128,7 @@ public class SaveAction extends BoundAction {
 	                        workObject.refInitialize(false, false, false);
 	                    }
 	                    // Initialize with received attribute values. This also updates the error messages
-		                app.getErrorMessages().clear();                        	                    
+		                app.getErrorMessages().clear();              	                    
 	                    app.getPortalExtension().updateObject(
 	                        workObject,
 	                        requestParameters,
@@ -150,6 +151,10 @@ public class SaveAction extends BoundAction {
 	                        editView.getMode(),
 	                        editView.isEditMode()
 	                    );
+	                    // Propagate canNotCommitException
+	                    if(canNotCommitException != null) {
+	                    	nextView.handleCanNotCommitException(canNotCommitException);
+	                    }
 	                } catch(Exception e1) {
 		                // Can not stay in edit object view. Return to returnToView as fallback
 	                    nextView = editView.getPreviousView(null);

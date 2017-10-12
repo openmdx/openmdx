@@ -472,6 +472,7 @@ public class EntityManagerProxyFactory_2 extends AbstractPersistenceManagerFacto
                 this.plugIns, 
                 this.optimalFetchSize, 
                 this.cacheThreshold, 
+                getIsolateThreads(), 
                 connectionSpec  
             );
         } catch (ResourceException exception) {

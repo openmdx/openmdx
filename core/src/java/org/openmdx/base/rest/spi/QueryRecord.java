@@ -47,6 +47,12 @@
  */
 package org.openmdx.base.rest.spi;
 
+import java.io.Externalizable;
+import java.io.IOException;
+import java.io.InvalidObjectException;
+import java.io.NotSerializableException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
 import java.util.Collection;
 import java.util.Set;
 
@@ -56,19 +62,20 @@ import javax.resource.cci.Record;
 import org.openmdx.base.collection.Sets;
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.rest.cci.QueryFilterRecord;
+import org.openmdx.kernel.exception.BasicException;
+import org.openmdx.kernel.exception.Throwables;
+import org.xml.sax.SAXException;
 
 /**
  * Query Record
  */
 public class QueryRecord 
     extends AbstractMappedRecord<org.openmdx.base.rest.cci.QueryRecord.Member>
-    implements org.openmdx.base.rest.cci.QueryRecord 
+    implements org.openmdx.base.rest.cci.QueryRecord, Externalizable 
 {
 
     /**
      * Constructor 
-     *
-     * @param keys
      */
 	public QueryRecord() {
         super();
@@ -134,6 +141,11 @@ public class QueryRecord
      */
     private static final Members<Member> MEMBERS = Members.newInstance(Member.class);
 
+    /**
+     * The eagerly acquired REST formatter instance
+     */
+    protected static final RestFormatter restFormatter = RestFormatters.getFormatter();
+    
     /**
      * Implements <code>Serializable</code>
      */
@@ -426,5 +438,55 @@ public class QueryRecord
 	protected Members<Member> members() {
 		return MEMBERS;
 	}
+
+	
+    //--------------------------------------------------------------------------
+    // Implements Externalizable
+    //--------------------------------------------------------------------------
+
+    /* (non-Javadoc)
+     * @see java.io.Externalizable#readExternal(java.io.ObjectInput)
+     */
+    @Override
+    public void readExternal(
+        ObjectInput in
+    ) throws IOException, ClassNotFoundException {
+        try {
+            RestParser.parseResponse(
+                this, 
+                RestParser.asSource(in)
+            );
+        } catch (SAXException exception) {
+            throw Throwables.initCause(
+                new InvalidObjectException(exception.getMessage()),
+                exception,
+                BasicException.Code.DEFAULT_DOMAIN,
+                BasicException.Code.TRANSFORMATION_FAILURE,
+                "Unable to read externalized QueryRecord"
+            );
+        }
+    }
+
+    /* (non-Javadoc)
+     * @see java.io.Externalizable#writeExternal(java.io.ObjectOutput)
+     */
+    @Override
+    public void writeExternal(
+        ObjectOutput out
+    ) throws IOException {
+        try {
+            Target target = restFormatter.asTarget(out); 
+            restFormatter.format(target, this);
+            target.close();
+        } catch (Exception exception) {
+            throw Throwables.initCause(
+                new NotSerializableException(exception.getMessage()),
+                exception,
+                BasicException.Code.DEFAULT_DOMAIN,
+                BasicException.Code.TRANSFORMATION_FAILURE,
+                "Unable to externalize QueryRecord"
+            );
+        }
+    }
 
 }

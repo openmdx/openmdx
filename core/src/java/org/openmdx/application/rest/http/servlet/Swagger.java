@@ -579,7 +579,6 @@ public class Swagger {
             this.typeDef
         );
         // ./reference
-        @SuppressWarnings("unchecked")
         Map<String,Object> references = new TreeMap<String,Object>(this.typeDef.objGetMap("reference"));
         for(Object reference: references.values()) {
             ModelElement_1_0 referenceDef = model.getElement(reference);
@@ -775,7 +774,6 @@ public class Swagger {
             }
         }
         // ./operation
-        @SuppressWarnings("unchecked")
         Map<String,Object> operations = new TreeMap<String,Object>(this.typeDef.objGetMap("operation"));
         for(Object element: operations.values()) {
             ModelElement_1_0 operationDef = model.getElement(element);

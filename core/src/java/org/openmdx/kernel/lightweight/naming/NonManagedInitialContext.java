@@ -50,6 +50,7 @@ package org.openmdx.kernel.lightweight.naming;
 
 import java.util.Map;
 
+import javax.naming.Context;
 import javax.naming.NamingException;
 import javax.naming.spi.NamingManager;
 
@@ -80,8 +81,12 @@ class NonManagedInitialContext extends HashMapContext {
     ) throws NamingException {
         int colon = nameComponent.indexOf(':');
         if(colon > 0) {
-            String scheme = nameComponent.substring(0, colon);
-            return NamingManager.getURLContext(scheme, environment).lookup(nameComponent);
+            final String scheme = nameComponent.substring(0, colon);
+            final Context urlContext = NamingManager.getURLContext(scheme, environment);
+            if(urlContext == null) {
+            	System.out.println("Wait a moment");
+            }
+			return urlContext.lookup(nameComponent);
         } else {
         	return super.resolveLink(nameComponent);
         }

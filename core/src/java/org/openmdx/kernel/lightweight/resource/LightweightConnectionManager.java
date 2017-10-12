@@ -47,19 +47,17 @@
  */
 package org.openmdx.kernel.lightweight.resource;
 
-import java.util.AbstractSet;
-import java.util.HashSet;
-import java.util.Iterator;
+import java.util.HashMap;
+import java.util.IdentityHashMap;
 import java.util.Map;
-import java.util.Set;
-import java.util.WeakHashMap;
 
 import javax.resource.ResourceException;
 import javax.resource.spi.ConnectionRequestInfo;
-import javax.resource.spi.LocalTransactionException;
 import javax.resource.spi.ManagedConnection;
 import javax.resource.spi.ManagedConnectionFactory;
 import javax.security.auth.Subject;
+import javax.transaction.RollbackException;
+import javax.transaction.Status;
 import javax.transaction.Synchronization;
 import javax.transaction.SystemException;
 import javax.transaction.Transaction;
@@ -67,166 +65,60 @@ import javax.transaction.TransactionManager;
 
 import org.openmdx.kernel.log.SysLog;
 import org.openmdx.kernel.resource.spi.AbstractConnectionManager;
-import org.openmdx.uses.org.apache.commons.pool.ObjectPool;
-import org.openmdx.uses.org.apache.commons.pool.PoolableObjectFactory;
-import org.openmdx.uses.org.apache.commons.pool.impl.GenericObjectPool;
+import org.openmdx.kernel.text.format.IndentingFormatter;
+import org.openmdx.uses.org.apache.commons.pool2.ObjectPool;
+import org.openmdx.uses.org.apache.commons.pool2.PooledObject;
+import org.openmdx.uses.org.apache.commons.pool2.PooledObjectFactory;
+import org.openmdx.uses.org.apache.commons.pool2.impl.DefaultPooledObject;
+import org.openmdx.uses.org.apache.commons.pool2.impl.GenericObjectPool;
 
 
 /**
  * Lightweight Connection Manager
- * <p>
- * This implementation uses one connection manager per managed connection
- * factory.
  */
 public class LightweightConnectionManager
     extends AbstractConnectionManager
 {
 
-    /**
+	/**
      * Constructor
      * 
-     * @param credentials the credentials to be used to connect
-     * @param connectionClass the connection class 
-     * @param transactionManager the transaction manager to be used
-     * @param maximumCapacity the maximum number of objects that can be borrowed from me at one time 
-     * @param maximumWait the maximum amount of time to wait for an idle object when the pool is exhausted
+	 * @param connectionClass the connection class 
+	 * @param transactionManager the transaction manager to be used
      */
     public LightweightConnectionManager(
-        Set<?> credentials, 
-        Class<?> connectionClass,
-        TransactionManager transactionManager, 
-        Integer maximumCapacity, 
-        Long maximumWait
+        Class<?> connectionClass, 
+        TransactionManager transactionManager
     ) {
-        super(credentials, connectionClass);
+        super(connectionClass);
         this.transactionManager = transactionManager;
-		this.managedConnectionPool = new GenericObjectPool(
-			new LightweightPoolableObjectFactory(),
-			maximumCapacity == null ? GenericObjectPool.DEFAULT_MAX_ACTIVE : maximumCapacity.intValue(),
-			GenericObjectPool.WHEN_EXHAUSTED_BLOCK,
-			maximumWait == null ? GenericObjectPool.DEFAULT_MAX_WAIT : maximumWait.longValue()			
-		);
+		this.managedConnectionPools = 
+				new HashMap<ManagedConnectionFactory, Map<ConnectionRequestInfo,ObjectPool<ManagedConnection>>>(); 
+		this.connectionRegistries =
+				new IdentityHashMap<Transaction,ConnectionRegistry>();
     }
 
     /**
-     * Constructor
-     * 
-     * @param credentials the credentials to be used to connect
-     * @param connectionClass the connection class 
-     * @param transactionManager the transaction manager to be used
-     * @param maximumCapacity the maximum number of objects that can be borrowed from me at one time 
-     * @param maximumWait the maximum amount of time to wait for an idle object when the pool is exhausted
+     * The transaction manager is used to retrieve the current transaction.
      */
-    public LightweightConnectionManager(
-        Set<?> credentials, 
-        String connectionClass,
-        TransactionManager transactionManager, 
-        Integer maximumCapacity, 
-        Long maximumWait
-    ) throws ResourceException {
-        this(
-            credentials,
-            connectionClass,
-            transactionManager,
-            maximumCapacity,
-            maximumWait,
-            null, // maximumIdle
-            null, // minimumIdle
-            null, // testOnBorrow
-            null, // testOnReturn
-            null, // timeBetweeEvictionRuns
-            null, // numberOfTestsPerEvictionRun
-            null, // minimumEvictableIdleTime
-            null // testWhileIdle
-       );
-    }
-
+    private final TransactionManager transactionManager;
+    
+	/**
+     * The pools of unused connections
+     */
+    private final Map<ManagedConnectionFactory,Map<ConnectionRequestInfo,ObjectPool<ManagedConnection>>> managedConnectionPools;
+    
     /**
-     * Constructor
-     * 
-     * @param credentials the credentials to be used to connect
-     * @param connectionClass the connection class 
-     * @param transactionManager the transaction manager to be used
-     * @param maximumCapacity the maximum number of objects that can be borrowed from me at one time 
-     * @param maximumWait the maximum amount of time to wait for an idle object when the pool is exhausted
-     * @param maximumIdle maxIdle the maximum number of idle objects in my poo
-     * @param minimumIdle minIdle the minimum number of idle objects in my pool
-     * @param testOnBorrow whether or not to validate objects before they are returned by the borrowObject(} method
-     * @param testOnReturn whether or not to validate objects after they are returned to the returnObject(} method
-     * @param timeBetweeEvictionRuns the amount of time (in milliseconds) to sleep between examining idle objects for eviction
-     * @param numberOfTestsPerEvictionRun the number of idle objects to examine per run within the idle object eviction thread (if any)
-     * @param minimumEvictableIdleTime the minimum number of milliseconds an object can sit idle in the pool before it is eligable for eviction
-     * @param testWhileIdle whether or not to validate objects in the idle object eviction thread, if any
+     * Keep track of the connections registered with a transaction
      */
-    public LightweightConnectionManager(
-        Set<?> credentials, 
-        String connectionClass,
-        TransactionManager transactionManager, 
-        Integer maximumCapacity, 
-        Long maximumWait, 
-        Integer maximumIdle, 
-        Integer minimumIdle, 
-        Boolean testOnBorrow, 
-        Boolean testOnReturn, 
-        Long timeBetweeEvictionRuns, 
-        Integer numberOfTestsPerEvictionRun, 
-        Long minimumEvictableIdleTime, 
-        Boolean testWhileIdle
-    ) throws ResourceException {
-        super(credentials, connectionClass);
-        this.transactionManager = transactionManager;
-		this.managedConnectionPool = new GenericObjectPool(
-			new LightweightPoolableObjectFactory(),
-			maximumCapacity == null ? GenericObjectPool.DEFAULT_MAX_ACTIVE : maximumCapacity.intValue(),
-			GenericObjectPool.WHEN_EXHAUSTED_BLOCK,
-			maximumWait == null ? GenericObjectPool.DEFAULT_MAX_WAIT : maximumWait.longValue(),
-		    maximumIdle == null ? GenericObjectPool.DEFAULT_MAX_IDLE : maximumIdle.intValue(),    
-	        minimumIdle == null ? GenericObjectPool.DEFAULT_MIN_IDLE : minimumIdle.intValue(), 
-            testOnBorrow == null ? GenericObjectPool.DEFAULT_TEST_ON_BORROW : testOnBorrow.booleanValue(),
-            testOnReturn == null ? GenericObjectPool.DEFAULT_TEST_ON_RETURN : testOnReturn.booleanValue(),   
-            timeBetweeEvictionRuns == null ? GenericObjectPool.DEFAULT_TIME_BETWEEN_EVICTION_RUNS_MILLIS : timeBetweeEvictionRuns.longValue(),
-            numberOfTestsPerEvictionRun == null ? GenericObjectPool.DEFAULT_NUM_TESTS_PER_EVICTION_RUN :  numberOfTestsPerEvictionRun.intValue(),
-            minimumEvictableIdleTime == null ? GenericObjectPool.DEFAULT_MIN_EVICTABLE_IDLE_TIME_MILLIS : minimumEvictableIdleTime.longValue(),
-            testWhileIdle == null ? GenericObjectPool.DEFAULT_TEST_WHILE_IDLE : testWhileIdle.booleanValue()    
-		);
-    }
+    private final Map<Transaction,ConnectionRegistry> connectionRegistries; 
+    		
     
     /**
      * Implements <code>Serializable</code>.
      */
-    private static final long serialVersionUID = 3256719589399344438L;
-
-    /**
-     * The trasaction manager is used to retrieve the current transaction.
-     */
-    private final TransactionManager transactionManager;
+    private static final long serialVersionUID = 6149851064813039668L;
     
-    /**
-     * Each value is a set of connections enlisted with the given transaction.
-     */
-    private static final Map<Transaction,ManagedConnectionSet> transactionalConnections = 
-        new WeakHashMap<Transaction,ManagedConnectionSet>();
-    
-	/**
-     * A pool of unused connections
-     */
-    final ObjectPool managedConnectionPool;
-    
-	/**
-	 * Subject to be used as makeObject() argument
-	 */
-    transient Subject currentSubject;
-
-	/**
-	 * Managed connection factory to be used as makeObject() argument
-	 */
-	transient ManagedConnectionFactory currentManagedConnectionFactory;
-	
-	/**
-	 * Connection request info to be used as makeObject() argument
-	 */
-	transient ConnectionRequestInfo currentConnectionRequestInfo;
-
 
 	//------------------------------------------------------------------------
     // Extends AbstractConnectionManager
@@ -235,38 +127,51 @@ public class LightweightConnectionManager
     /**
      * Allocate a managed connection
      * 
-     * @param managedConnections set of managed conections
-     * @param subject
-     * @param managedConnectionFactory
-     * @param connectionRequestInfo
-     * 
      * @return a (maybe newly created) managed connection
      *
      * @throws ResourceException
      */
     @Override
     protected ManagedConnection allocateMangedConnection(
-        Set<ManagedConnection> managedConnections,
-        Subject subject,
-        ManagedConnectionFactory managedConnectionFactory, 
+        ManagedConnectionFactory managedConnectionFactory,
         ConnectionRequestInfo connectionRequestInfo
-    ) throws ResourceException{
-        synchronized(managedConnections){
-            ManagedConnection managedConnection = managedConnectionFactory.matchManagedConnections(
-                managedConnections,
-                subject,
-                connectionRequestInfo
-            );
-            if(managedConnection == null) managedConnections.add(
-                managedConnection = allocateManagedConnection(
-                    subject,
-                    managedConnectionFactory,
-                    connectionRequestInfo
-                )
-            );
-            return managedConnection;        
-        }            
+    ) throws ResourceException {
+		final Map<ManagedConnection, ObjectPool<ManagedConnection>> connectionRegistry = getConnectionRegistry();
+        ManagedConnection managedConnection = managedConnectionFactory.matchManagedConnections(
+    		connectionRegistry.keySet(),
+    		getSubject(), // SUbject without credentials!
+            connectionRequestInfo
+        );
+        if(managedConnection == null) {
+        	SysLog.info("connectionRegistries", new IndentingFormatter(this.connectionRegistries));
+        	SysLog.info("managedConnectionPools", new IndentingFormatter(this.managedConnectionPools));
+            managedConnection = createManagedConnection(
+        		managedConnectionFactory, 
+        		connectionRequestInfo,
+				connectionRegistry, 
+				managedConnection
+			);
+        }
+        return managedConnection;        
     }
+
+	private ManagedConnection createManagedConnection(ManagedConnectionFactory managedConnectionFactory,
+		ConnectionRequestInfo connectionRequestInfo,
+		final Map<ManagedConnection, ObjectPool<ManagedConnection>> connectionRegistry,
+		ManagedConnection managedConnection
+	) throws ResourceException {
+		try {
+			final ObjectPool<ManagedConnection> pool = getManagedConnectionPool(managedConnectionFactory, connectionRequestInfo);
+			managedConnection = pool.borrowObject();
+			connectionRegistry.put(managedConnection, pool);
+		} catch (Exception exception) {
+		    throw toResourceException(
+		        exception, 
+		        "Managed connection allocation failed"
+		    );
+		}
+		return managedConnection;
+	}
 
     /**
      * Retrieve the current transaction from the transaction manager,
@@ -283,126 +188,102 @@ public class LightweightConnectionManager
         }
     }
 
-    /* (non-Javadoc)
-     * @see org.openmdx.kernel.application.container.lightweight.AbstractConnectionManager#getManagedConnections()
-     */
-    @Override
-    protected Set<ManagedConnection> getManagedConnections(        
+    private Map<ManagedConnection,ObjectPool<ManagedConnection>> getConnectionRegistry(        
     ) throws ResourceException {
-        Transaction transaction = getTransaction();
-        if(transaction == null) {
-        	throw new LocalTransactionException(
-	            "No active transaction, managed connection can't be allocated"
-	        );
-        } else synchronized(transactionalConnections){
-            ManagedConnectionSet managedConnectionSet = transactionalConnections.get(
-                transaction
-            );
-            if(managedConnectionSet == null) try {
-                managedConnectionSet = new ManagedConnectionSet();
-                transactionalConnections.put(transaction, managedConnectionSet);
-                transaction.registerSynchronization(managedConnectionSet);
-            } catch (Exception exception) {
-                throw toResourceException(
-                    exception, 
-                    "Creation and registration of managed connection set failed"
-                );
-            }
-            return managedConnectionSet;
+        final Transaction transaction = getTransaction();
+        Map<ManagedConnection,ObjectPool<ManagedConnection>> connectionRegistry = this.connectionRegistries.get(transaction);
+        if(connectionRegistry == null) {
+        	connectionRegistry = new ConnectionRegistry(transaction); // registry registers itself
         }
+        return connectionRegistry;
     }
 
-    /**
-     * Allocate a managed connection
-     * 
-     * @param subject
-     * @param managedConnectionFactory
-     * @param connectionRequestInfo
-     * 
-     * @return a (maybe newly created) managed connection
-     * 
-     * @throws ResourceException 
-     */
-    @Override
-    protected synchronized ManagedConnection allocateManagedConnection(
-        Subject subject,
-        ManagedConnectionFactory managedConnectionFactory, 
+    private ObjectPool<ManagedConnection> getManagedConnectionPool(
+		ManagedConnectionFactory managedConnectionFactory, 
         ConnectionRequestInfo connectionRequestInfo
-    ) throws ResourceException{
-		this.currentSubject = subject;
-		this.currentManagedConnectionFactory = managedConnectionFactory;
-		this.currentConnectionRequestInfo = connectionRequestInfo;
-        try {
-            return (ManagedConnection) this.managedConnectionPool.borrowObject();
-        } catch (Exception exception) {
-            throw toResourceException(
-                exception, 
-                "Managed connection allocation failed"
-            );
-        } finally {
-			this.currentSubject = null;
-			this.currentManagedConnectionFactory = null;
-			this.currentConnectionRequestInfo = null;
-        }
+    ){
+    	Map<ConnectionRequestInfo, ObjectPool<ManagedConnection>> pools = this.managedConnectionPools.get(managedConnectionFactory);
+    	if(pools == null) {
+    		pools = new HashMap<ConnectionRequestInfo, ObjectPool<ManagedConnection>>();
+    		this.managedConnectionPools.put(managedConnectionFactory, pools);
+    	}
+    	ObjectPool<ManagedConnection> pool = pools.get(connectionRequestInfo);
+    	if(pool == null) {
+    		pool = new GenericObjectPool<ManagedConnection>(
+				new LightweightPoolableObjectFactory(managedConnectionFactory, connectionRequestInfo)
+			);
+    	}
+    	return pool;
     }
     
-    /**
-     * Pre-allocate managed connections
-     * 
-     * @parame initialCapacity
-     * @param subject
-     * @param managedConnectionFactory
-     * @param connectionRequestInfo
-     * 
-     * @throws ResourceException 
-     */
-    public synchronized void preAllocateManagedConnection(
-		Integer initialCapacity,
-        ManagedConnectionFactory managedConnectionFactory, 
-        ConnectionRequestInfo connectionRequestInfo
-    ) throws ResourceException{
-		if(initialCapacity == null) return;
-		this.currentSubject = super.getSubject();
-		this.currentManagedConnectionFactory = managedConnectionFactory;
-		this.currentConnectionRequestInfo = connectionRequestInfo;
-        try {
-			for(
-		        int i = initialCapacity.intValue();
-				i > 0;
-				i--
-			) this.managedConnectionPool.addObject();
-        } catch (Exception exception) {
-            throw toResourceException(
-                exception, 
-                "Managed connection pre-allocation failed"
-            );
-        } finally {
-			this.currentSubject = null;
-			this.currentManagedConnectionFactory = null;
-			this.currentConnectionRequestInfo = null;
-        }
-    }
-
     
     //------------------------------------------------------------------------
-    // Class ManagedConnectionSet
+    // Class ManagedConnectionMap
     //------------------------------------------------------------------------
     
 	/**
-     * Managed Connection Set
+     * Transactional Connections
      */
-    class ManagedConnectionSet
-        extends AbstractSet<ManagedConnection>
+    class ConnectionRegistry
+        extends IdentityHashMap<ManagedConnection,ObjectPool<ManagedConnection>>
         implements Synchronization 
     {
 
-        private final Set<ManagedConnection> delegate = new HashSet<ManagedConnection>();
-        
-        /* (non-Javadoc)
+    	ConnectionRegistry(Transaction transaction) throws ResourceException {
+			this.transaction = transaction;
+			register();
+		}
+
+		private void register() throws ResourceException {
+			try {
+				if(transaction != null) {
+					transaction.registerSynchronization(this);
+				}
+				connectionRegistries.put(transaction, this);
+			} catch (IllegalStateException e) {
+				throw toResourceException(e, "Unable to register the ConnectionRegistry");
+			} catch (RollbackException e) {
+				throw toResourceException(e, "Unable to register the ConnectionRegistry");
+			} catch (SystemException e) {
+				throw toResourceException(e, "Unable to register the ConnectionRegistry");
+			}
+		}
+
+		private void unregister() {
+            clear();
+			connectionRegistries.remove(transaction);
+		}
+		
+		private final Transaction transaction;
+    	
+        /**
+         * Implements <code>Serializable</code>.
+         */
+		private static final long serialVersionUID = 5465858924325900256L;
+
+		/* (non-Javadoc)
          * @see javax.transaction.Synchronization#afterCompletion(int)
          */
         public void afterCompletion(int status) {
-            this.clear();
+        	final boolean reUse = status == Status.STATUS_COMMITTED || status == Status.STATUS_ROLLEDBACK;
+        	for(Map.Entry<ManagedConnection,ObjectPool<ManagedConnection>> entry : entrySet()) {
+					final ObjectPool<ManagedConnection> pool = entry.getValue();
+					final ManagedConnection connection = entry.getKey();
+					if(reUse) {
+						try {
+							pool.returnObject(connection);
+						} catch (Exception exception) {
+							SysLog.warning("Could not return managed connection to pool", exception);						
+						}
+					} else {
+						try {
+							pool.invalidateObject(connection);
+						} catch (Exception exception) {
+							SysLog.warning("Could not invalidate managed connection", exception);						
+						}
+					}
+        	}
+        	unregister();
         }
 
         /* (non-Javadoc)
@@ -410,64 +291,6 @@ public class LightweightConnectionManager
          */
         public void beforeCompletion() {
             //
-        }
-
-        @Override
-        public Iterator<ManagedConnection> iterator(
-        ) {
-            return new Interceptor(this.delegate.iterator());
-        }
-
-        @Override
-        public int size() {
-            return delegate.size();
-        }
-        
-        /* (non-Javadoc)
-         * @see java.util.AbstractCollection#isEmpty()
-         */
-        @Override
-        public boolean isEmpty() {
-            return delegate.isEmpty();
-        }
-
-        @Override
-        public boolean add(ManagedConnection o) {
-            return this.delegate.add(o);
-        }        
-        
-        /**
-         * Class Interceptor
-         */
-        class Interceptor implements Iterator<ManagedConnection> {
-            
-            public Interceptor(
-                Iterator<ManagedConnection> delegate
-            ) {
-                this.delegate = delegate;
-            }
-            
-            private final Iterator<ManagedConnection> delegate;
-
-            private ManagedConnection current = null;
-            
-            public boolean hasNext() {
-                return this.delegate.hasNext();
-            }
-
-            public ManagedConnection next() {
-                return this.current = this.delegate.next();
-            }
-
-            public void remove() {
-                this.delegate.remove();
-                try {
-                    managedConnectionPool.returnObject(this.current);
-                } catch (Exception exception) {
-					SysLog.warning("Could not return managed connection to pool", exception);						
-                }
-            } 
-            
         }
         
     }
@@ -480,54 +303,51 @@ public class LightweightConnectionManager
 	/**
 	 * Lightweight Poolable Object Factory
 	 */
-    class LightweightPoolableObjectFactory implements PoolableObjectFactory {
+    class LightweightPoolableObjectFactory implements PooledObjectFactory<ManagedConnection> {
+
+    	LightweightPoolableObjectFactory(
+    		ManagedConnectionFactory managedConnectionFactory,
+			ConnectionRequestInfo connectionRequestInfo
+		) {
+			this.managedConnectionFactory = managedConnectionFactory;
+			this.connectionRequestInfo = connectionRequestInfo;
+			this.subject = new Subject();
+		}
+
+		/**
+    	 * Managed connection factory to be used as makeObject() argument
+    	 */
+    	private final ManagedConnectionFactory managedConnectionFactory;
+    	
+    	/**
+    	 * Connection request info to be used as makeObject() argument
+    	 */
+    	private final ConnectionRequestInfo connectionRequestInfo;
+    	
+    	/**
+    	 * A credentialless subject
+    	 */
+    	private final Subject subject;
+    	
+		/* (non-Javadoc)
+		 * @see org.openmdx.uses.org.apache.commons.pool2.PooledObjectFactory#destroyObject(org.openmdx.uses.org.apache.commons.pool2.PooledObject)
+		 */
+		@Override
+		public void destroyObject(PooledObject<ManagedConnection> p) throws Exception {
+			p.getObject().destroy();
+		}
 
 		/* (non-Javadoc)
-		 * @see org.openmdx.uses.org.apache.commons.pool.PoolableObjectFactory#activateObject(java.lang.Object)
+		 * @see org.openmdx.uses.org.apache.commons.pool2.PooledObjectFactory#validateObject(org.openmdx.uses.org.apache.commons.pool2.PooledObject)
 		 */
-		public void activateObject(Object obj) throws Exception {		
-            ManagedConnection managedConnection = (ManagedConnection)obj;
-	        Transaction transaction = getTransaction();
-	        if(transaction != null) {
-    	        transaction.enlistResource(managedConnection.getXAResource());
-	        }
-		}
-	
-		/* (non-Javadoc)
-		 * @see org.openmdx.uses.org.apache.commons.pool.PoolableObjectFactory#destroyObject(java.lang.Object)
-		 */
-		public void destroyObject(Object obj) throws Exception {
-            ManagedConnection managedConnection = (ManagedConnection)obj;
-            managedConnection.destroy();
-		}
-	
-		/* (non-Javadoc)
-		 * @see org.openmdx.uses.org.apache.commons.pool.PoolableObjectFactory#makeObject()
-		 */
-		public Object makeObject() throws Exception {
-			return currentManagedConnectionFactory.createManagedConnection(
-			    currentSubject,
-			    currentConnectionRequestInfo
-			);
-		}
-	
-		/* (non-Javadoc)
-		 * @see org.openmdx.uses.org.apache.commons.pool.PoolableObjectFactory#passivateObject(java.lang.Object)
-		 */
-		public void passivateObject(Object obj) throws Exception {
-            ManagedConnection managedConnection = (ManagedConnection)obj;
-            managedConnection.cleanup();
-		}
-	
-		/* (non-Javadoc)
-		 * @see org.openmdx.uses.org.apache.commons.pool.PoolableObjectFactory#validateObject(java.lang.Object)
-		 */
-		public boolean validateObject(Object obj) {
-		    if(obj instanceof Validatable) {
+		@Override
+		public boolean validateObject(PooledObject<ManagedConnection> p) {
+			ManagedConnection managedConnection = p.getObject();
+		    if(managedConnection instanceof Validatable) {
 		        //
 		        // Validate the object
 		        //
-		        return ((Validatable)obj).validate();
+		        return ((Validatable)managedConnection).validate();
 		    } else {
 	            // 
 	            // There is no validation method
@@ -535,7 +355,36 @@ public class LightweightConnectionManager
 	            return true;
 		    }
 		}
-	
-	}
-	
+
+		/* (non-Javadoc)
+		 * @see org.openmdx.uses.org.apache.commons.pool2.PooledObjectFactory#activateObject(org.openmdx.uses.org.apache.commons.pool2.PooledObject)
+		 */
+		@Override
+		public void activateObject(PooledObject<ManagedConnection> p) throws Exception {
+	        Transaction transaction = getTransaction();
+	        if(transaction != null) {
+    	        transaction.enlistResource(p.getObject().getXAResource());
+	        }
+		}
+
+		/* (non-Javadoc)
+		 * @see org.openmdx.uses.org.apache.commons.pool2.PooledObjectFactory#passivateObject(org.openmdx.uses.org.apache.commons.pool2.PooledObject)
+		 */
+		@Override
+		public void passivateObject(PooledObject<ManagedConnection> p) throws Exception {
+			p.getObject().cleanup();
+		}
+
+		@Override
+		public PooledObject<ManagedConnection> makeObject() throws Exception {
+			return new DefaultPooledObject<ManagedConnection>(
+				managedConnectionFactory.createManagedConnection(
+					subject,
+				    connectionRequestInfo
+				)
+			);
+		}
+
+    }
+    
 }

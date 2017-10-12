@@ -407,6 +407,7 @@ class RefObject_1
         }
 
         /**
+         * TODO multi-valued qualifier support, if necessary
          * Reference (not stored as attribute)
          */
         else if (isReference) {
@@ -414,14 +415,18 @@ class RefObject_1
             if (qualifier instanceof RefObject) {
 
                 /**
+                 * TODO multi-valued qualifier support 
+                 * 
                  * Get qualifier of exposing association end. This qualifier is
                  * used to construct the reference filter:
                  */
                 String exposedEndName = model.getElement(
                     featureDef.getExposedEnd()
                 ).getName();
+                ModelElement_1_0 referencedEnd = model.getElement(featureDef.getReferencedEnd());
+                List<?> qualifierNames = referencedEnd.objGetList("qualifierName");
                 String qualifierName = removeContainerSuffix(
-                    (String) model.getElement(featureDef.getReferencedEnd()).objGetValue("qualifierName")
+                    (String) qualifierNames.get(0)
                 );
                 Container_1_0 container = ((RefObject_1_0)qualifier).refDelegate().objGetContainer(
                     qualifierName

@@ -468,7 +468,10 @@ public class StandardRestFormatter implements RestFormatter {
 	                        //
 	                        // Data types other than large objects
 	                        //
-	                        writer.writeCharacters(value.toString());
+	                        writer.writeCharacters(
+	                           value instanceof BigDecimal
+	                               ? ((BigDecimal)value).toPlainString()
+	                               : value.toString());
 	                    }
 	                }
 	            }
@@ -661,6 +664,7 @@ public class StandardRestFormatter implements RestFormatter {
     /**
      * Print Record
      */
+    @SuppressWarnings("unchecked")
     private static void printRecord(
         RestTarget target,
         int indent,

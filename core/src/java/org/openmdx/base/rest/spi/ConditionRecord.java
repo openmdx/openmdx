@@ -67,7 +67,7 @@ public class ConditionRecord
      * Constructor 
      */
     public ConditionRecord() {
-        this.values = newList(); // maybe it has to be replace later on
+        this.values = newList(); // maybe it has to be replaced later on
     }
 
     /**
@@ -163,7 +163,7 @@ public class ConditionRecord
 	public void makeImmutable() {
 		super.makeImmutable();
 		freeze(this.values);
-	};
+	}
 
 	/* (non-Javadoc)
 	 * @see javax.resource.cci.Record#getRecordName()
@@ -237,10 +237,10 @@ public class ConditionRecord
 		assertMutability();
 		this.type = type;
 		// fix NullPointer: may be null while cloning
+		final boolean unordered = TYPES_WITH_UNORDERED_VALUES.contains(type);
 		if(this.values == null) {
-		    this.values = TYPES_WITH_UNORDERED_VALUES.contains(type) ? newSet() : newList();
+		    this.values = unordered ? newSet() : newList();
 		} else {
-    		final boolean unordered = TYPES_WITH_UNORDERED_VALUES.contains(type);
     		if(this.values.getRecordName().equals(Multiplicity.SET.code()) != unordered) {
     			this.values = unordered ? newSet(this.values) : newList(this.values);
     		}

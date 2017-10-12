@@ -1185,13 +1185,10 @@ public class InboundConnection_2 extends AbstractConnection {
                         );
                         count++;
                     }
-                    if(output instanceof ResultRecord){
-                        ResultRecord outputRecord = (ResultRecord) output;
-                        boolean hasMore = i.hasNext();
-                        outputRecord.setHasMore(hasMore);
-                        if(!hasMore) {
-                            outputRecord.setTotal(position + count);
-                        }
+                    boolean hasMore = i.hasNext();
+                    output.setHasMore(hasMore);
+                    if(!hasMore) {
+                        output.setTotal(position + count);
                     }
                 } else {
                     ListIterator<RefObject> i = objects.listIterator(-position);

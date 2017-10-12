@@ -58,10 +58,8 @@ import java.math.BigInteger;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.Locale;
-import java.util.MissingResourceException;
 import java.util.TimeZone;
 
-import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.Duration;
 import javax.xml.datatype.XMLGregorianCalendar;
@@ -108,36 +106,18 @@ public final class ImmutableDate
     }
 
     /**
-     * Retrieve the mutable data type factory
-     * 
-     * @return the mutable data type factory
-     */
-    private DatatypeFactory getMutableDatatypeFactory(){
-        try {
-            return DatatypeFactory.newInstance();
-        } catch (DatatypeConfigurationException cause) {
-            throw (MissingResourceException) new MissingResourceException(
-                "Unable to get the datatype factory instance",
-                DatatypeFactory.class.getName(),
-                DatatypeFactory.DATATYPEFACTORY_PROPERTY
-            ).initCause(
-                cause
-            );
-        } 
-    }
-    
-    /**
      * Retrieve the mutable equivalent
      * 
      * @return the mutable equivalent
      */
     private XMLGregorianCalendar toMutableDate(){
-        return getEon().signum() == 0 ?  getMutableDatatypeFactory().newXMLGregorianCalendarDate(
+        final DatatypeFactory datatypeFactory = MutableDatatypeFactory.xmlDatatypeFactory();
+        return getEon().signum() == 0 ? datatypeFactory.newXMLGregorianCalendarDate(
             getYear(),
             getMonth(),
             getDay(),
             FIELD_UNDEFINED
-        ) : getMutableDatatypeFactory().newXMLGregorianCalendar(
+        ) : datatypeFactory.newXMLGregorianCalendar(
                 getEonAndYear(), 
                 getMonth(),
                 getDay(),

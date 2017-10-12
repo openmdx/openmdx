@@ -199,6 +199,7 @@ import org.openmdx.portal.servlet.wizards.WizardDefinitionFactory;
 import org.openmdx.ui1.jmi1.ElementDefinition;
 import org.openmdx.ui1.jmi1.FeatureDefinition;
 import org.openmdx.ui1.jmi1.StructuralFeatureDefinition;
+import org.w3c.cci2.MutableDatatypeFactory;
 
 /**
  * DefaultPortalExtension
@@ -652,7 +653,7 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
 	        }
 	        if(qualifiedClassName != null) {
 	            try {
-	                ModelElement_1_0 compositeReference = model.getElement(classDef.objGetValue("compositeReference"));
+	                ModelElement_1_0 compositeReference = model.getElement((Path)classDef.objGetValue("compositeReference"));
 	                ModelElement_1_0 typeDef = model.getElement(compositeReference.getType());
 	                qualifiedTypeName = (String)typeDef.getQualifiedName();
 	            } catch(Exception e) {}
@@ -2508,22 +2509,22 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
 		);   
     	// get all types which are involved in composition hierarchy
     	List<ModelElement_1_0> typesToCheck = new ArrayList<ModelElement_1_0>();
-    	if(!ofType.objGetList("compositeReference").isEmpty()) {
+    	if(ofType.objGetValue("compositeReference") != null) {
     		typesToCheck.add(ofType);
     	} else {
     		for(Iterator<Object> i = ofType.objGetList("allSubtype").iterator(); i.hasNext(); ) {
     			ModelElement_1_0 subtype = model.getElement(i.next());
     			if(
     				!ofType.getQualifiedName().equals(subtype.getQualifiedName()) &&
-    				!subtype.objGetList("compositeReference").isEmpty()
+    				subtype.objGetValue("compositeReference") != null
     			) {
     				typesToCheck.add(subtype);
     			}
     		}
-    	}        
+    	}
     	for(Iterator<ModelElement_1_0> i = typesToCheck.iterator(); i.hasNext(); ) {
     		ModelElement_1_0 type = i.next();
-    		ModelElement_1_0 compositeReference = model.getElement(type.objGetValue("compositeReference"));
+    		ModelElement_1_0 compositeReference = model.getElement((Path)type.objGetValue("compositeReference"));
     		ModelElement_1_0 exposingType = model.getElement(compositeReference.getContainer());
     		this.createCompositionHierarchy(
     			exposingType,
@@ -3292,22 +3293,12 @@ public class DefaultPortalExtension implements PortalExtension_1_0, Serializable
     public static final String ROOT_REALM_NAME = "Root";
     public static final String ROOT_PRINCIPAL_NAME = ADMIN_PRINCIPAL_PREFIX + ROOT_REALM_NAME;
     
-    /**
-     * A lazy initialized DatatypeFactory instance
-     */
-    private static DatatypeFactory datatypeFactory = null;
-
     /**.
      * @return a Datatype Factory Instance
      */
-    protected static synchronized DatatypeFactory xmlDatatypeFactory(
-    ) {
-        if(DefaultPortalExtension.datatypeFactory == null) try {
-        	DefaultPortalExtension.datatypeFactory = DatatypeFactory.newInstance();
-        } catch (DatatypeConfigurationException e) {
-          throw new RuntimeServiceException(e);
-        }
-        return DefaultPortalExtension.datatypeFactory;
+    protected static DatatypeFactory xmlDatatypeFactory(
+    ){
+        return MutableDatatypeFactory.xmlDatatypeFactory();
     }
 
     private ActionFactory actionFactory;

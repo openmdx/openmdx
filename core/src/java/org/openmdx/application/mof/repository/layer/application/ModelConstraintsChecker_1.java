@@ -49,6 +49,7 @@ package org.openmdx.application.mof.repository.layer.application;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -59,16 +60,29 @@ import java.util.Set;
 import org.omg.mof.cci.DirectionKind;
 import org.omg.mof.cci.ScopeKind;
 import org.omg.mof.cci.VisibilityKind;
-import org.openmdx.application.mof.cci.ModelAttributes;
 import org.openmdx.application.mof.cci.ModelConstraints;
 import org.openmdx.application.mof.cci.ModelExceptions;
-import org.openmdx.base.accessor.cci.SystemAttributes;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.AggregationKind;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
 import org.openmdx.base.mof.cci.ModelHelper;
 import org.openmdx.base.mof.cci.Model_1_0;
 import org.openmdx.base.mof.cci.Multiplicity;
+import org.openmdx.base.mof.repository.cci.AssociationEndRecord;
+import org.openmdx.base.mof.repository.cci.AssociationRecord;
+import org.openmdx.base.mof.repository.cci.AttributeRecord;
+import org.openmdx.base.mof.repository.cci.ClassRecord;
+import org.openmdx.base.mof.repository.cci.ConstantRecord;
+import org.openmdx.base.mof.repository.cci.ConstraintRecord;
+import org.openmdx.base.mof.repository.cci.DataTypeRecord;
+import org.openmdx.base.mof.repository.cci.ElementRecord;
+import org.openmdx.base.mof.repository.cci.ExceptionRecord;
+import org.openmdx.base.mof.repository.cci.ImportRecord;
+import org.openmdx.base.mof.repository.cci.OperationRecord;
+import org.openmdx.base.mof.repository.cci.PackageRecord;
+import org.openmdx.base.mof.repository.cci.ParameterRecord;
+import org.openmdx.base.mof.repository.cci.ReferenceRecord;
+import org.openmdx.base.mof.repository.cci.TagRecord;
 import org.openmdx.base.naming.Path;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.log.SysLog;
@@ -258,7 +272,7 @@ public class ModelConstraintsChecker_1 {
         }
         if(elementDef.isStructureFieldType()) {
             SysLog.trace("checking all STRUCTURE_FIELD constraints for element " + elementDef.getQualifiedName());
-            this.verifyStructureFieldContainmentRules(elementDef, violations);
+            this.verifyStructureFieldContainmentRules(elementDef, violations); 
         }
         if(elementDef.isStructureType()) {
             SysLog.trace("checking all STRUCTURE_TYPE constraints for element " + elementDef.getQualifiedName());
@@ -388,7 +402,7 @@ public class ModelConstraintsChecker_1 {
             ) {        
                 ModelElement_1_0 parameterDef = this.model.getElement(it.next());
                 // check argument to be PARAMETER
-                if(!ModelAttributes.PARAMETER.equals(parameterDef.objGetClass())) {
+                if(!parameterDef.isParameterType()) {
                     violations.add(
                         new BasicException.Parameter(
                             ModelConstraints.OPERATION_ARGUMENTS_MUST_BE_PARAMETER,
@@ -433,7 +447,7 @@ public class ModelConstraintsChecker_1 {
                 try {
                     ModelElement_1_0 exceptionDef = this.model.getElement(qualifiedExceptionName);
                     // check argument to be PARAMETER
-                    if(!ModelAttributes.EXCEPTION.equals(exceptionDef.objGetClass())) {
+                    if(!exceptionDef.isExceptionType()) {
                         violations.add(
                             new BasicException.Parameter(
                                 ModelConstraints.OPERATION_EXCEPTION_MUST_BE_EXCEPTION,
@@ -473,7 +487,7 @@ public class ModelConstraintsChecker_1 {
         List violations
     ) throws ServiceException {
         if(!elementDef.isPackageType()) {
-            if (elementDef.objGetList("container").size() != 1) {
+            if (elementDef.objGetValue("container") == null) {
                 violations.add(
                     new BasicException.Parameter(
                         ModelConstraints.MUST_BE_CONTAINED_UNLESS_PACKAGE,
@@ -726,14 +740,14 @@ public class ModelConstraintsChecker_1 {
         ) {        
             ModelElement_1_0 elementDef = this.model.getElement(it.next());
             if(
-                (!elementDef.objGetClass().equals(ModelAttributes.ALIAS_TYPE)) &&
-                (!elementDef.objGetClass().equals(ModelAttributes.CONSTRAINT)) &&
-                (!elementDef.objGetClass().equals(ModelAttributes.TAG))
+                (!elementDef.isAliasType()) &&
+                (!elementDef.isConstraintType()) &&
+                (!elementDef.isTagType())
             ) {
 
                 if (
-                    !dataTypeDef.objGetClass().equals(ModelAttributes.STRUCTURE_TYPE) ||
-                    !elementDef.objGetClass().equals(ModelAttributes.STRUCTURE_FIELD)
+                    !dataTypeDef.isStructureType() ||
+                    !elementDef.isStructureFieldType()
                 ) {
                     violations.add(
                         new BasicException.Parameter(
@@ -1092,14 +1106,11 @@ public class ModelConstraintsChecker_1 {
         );
 
         // precondition: container->allSupertype includes container itself
-        if (!container.objGetList("allSupertype").contains(
-            exposedEnd.getType()
-        )
-        ) {
+        if (!container.objGetList("allSupertype").contains(exposedEnd.getType())) {
             violations.add(
                 new BasicException.Parameter(
                     ModelConstraints.CONTAINER_MUST_MATCH_EXPOSED_TYPE,
-                    referenceDef.getQualifiedName()
+                    referenceDef.getQualifiedName()  
                 )
             );
         }
@@ -1114,13 +1125,13 @@ public class ModelConstraintsChecker_1 {
         ModelElement_1_0 operationDef,
         List violations
     ) throws ServiceException {
-
         verifyContainmentRules(
             operationDef,
-            new String[] { 
-                ModelAttributes.PARAMETER, ModelAttributes.CONSTRAINT,
-                ModelAttributes.TAG
-            },
+            Arrays.asList(
+                ParameterRecord.class,
+                ConstraintRecord.class,
+                TagRecord.class                
+            ),
             ModelConstraints.OPERATION_CONTAINMENT_RULES,
             violations
         );
@@ -1169,12 +1180,12 @@ public class ModelConstraintsChecker_1 {
         ModelElement_1_0 exceptionDef,
         List violations
     ) throws ServiceException {
-
         verifyContainmentRules(
             exceptionDef,
-            new String[] { 
-                ModelAttributes.PARAMETER, ModelAttributes.TAG
-            },
+            Arrays.asList( 
+                ParameterRecord.class, 
+                TagRecord.class
+            ),
             ModelConstraints.EXCEPTION_CONTAINMENT_RULES,
             violations
         );
@@ -1218,10 +1229,11 @@ public class ModelConstraintsChecker_1 {
     ) throws ServiceException {
         verifyContainmentRules(
             associationDef,
-            new String[] { 
-                ModelAttributes.ASSOCIATION_END, ModelAttributes.CONSTRAINT, 
-                ModelAttributes.TAG
-            },
+            Arrays.asList(
+                AssociationEndRecord.class,
+                ConstraintRecord.class,
+                TagRecord.class
+            ),
             ModelConstraints.ASSOCIATIONS_CONTAINMENT_RULES,
             violations
         );
@@ -1374,13 +1386,17 @@ public class ModelConstraintsChecker_1 {
     ) throws ServiceException {
         verifyContainmentRules(
             packageDef,
-            new String[] { 
-                ModelAttributes.PACKAGE, ModelAttributes.CLASS, 
-                ModelAttributes.DATATYPE, ModelAttributes.ASSOCIATION, 
-                ModelAttributes.EXCEPTION, ModelAttributes.CONSTANT, 
-                ModelAttributes.CONSTRAINT, ModelAttributes.IMPORT, 
-                ModelAttributes.TAG
-            },
+            Arrays.asList(
+                PackageRecord.class,
+                ClassRecord.class,
+                DataTypeRecord.class,
+                AssociationRecord.class,
+                ExceptionRecord.class,
+                ConstantRecord.class,
+                ConstraintRecord.class,
+                ImportRecord.class,
+                TagRecord.class
+            ),
             ModelConstraints.PACKAGE_CONTAINMENT_RULES,
             violations
         );
@@ -1580,12 +1596,13 @@ public class ModelConstraintsChecker_1 {
         //
         // Validate the multiplicity
         //
-        Multiplicity multiplicity = ModelHelper.toMultiplicity(elementDef.getMultiplicity());
+        final String rawMultiplicity = elementDef.getMultiplicity();
+        final Multiplicity multiplicity = ModelHelper.toMultiplicity(rawMultiplicity);
         if(multiplicity == null) {
 	        violations.add(
 	            new BasicException.Parameter(
 	                ModelConstraints.INVALID_MULTIPLICITY,
-	                elementDef.getQualifiedName()
+	                elementDef.getQualifiedName() + " with invalid multiplicity " + rawMultiplicity
 	            )
 	        );
         } else {
@@ -1609,6 +1626,8 @@ public class ModelConstraintsChecker_1 {
 
     //---------------------------------------------------------------------------  
     /**
+     * TODO how to support with the given meta model?
+     * 
      * A StructureField contains Constraints and Tags
      * (for details refer to MOF Spec. MOF Model Constraints [C-58])
      */
@@ -1616,15 +1635,15 @@ public class ModelConstraintsChecker_1 {
         ModelElement_1_0 modelStructureField,
         List violations
     ) throws ServiceException {
-
-        verifyContainmentRules(
-            modelStructureField,
-            new String[] { 
-                ModelAttributes.CONSTRAINT, ModelAttributes.TAG
-            },
-            ModelConstraints.STRUCTURE_FIELD_CONTAINMENT_RULES,
-            violations
-        );
+//        verifyContainmentRules(
+//            modelStructureField,
+//            Arrays.asList( 
+//                ConstraintRecord.class, 
+//                TagRecord.class
+//            ),
+//            ModelConstraints.STRUCTURE_FIELD_CONTAINMENT_RULES,
+//            violations
+//        );
     }
 
     //---------------------------------------------------------------------------  
@@ -1653,26 +1672,16 @@ public class ModelConstraintsChecker_1 {
      */ 
     private void verifyContainmentRules(
         ModelElement_1_0 elementDef,
-        String[] allowedContainments,
+        Collection<Class<? extends ElementRecord>> allowedContainments,
         String violatedConstraint,
         List violations
     ) throws ServiceException {
-
         for(
             Iterator it = elementDef.objGetList("content").iterator();
             it.hasNext();
         ) {        
-            ModelElement_1_0 contentElement = this.model.getElement(it.next());
-
-            // build intersection of allowedContainments in elementDef and all
-            // the types elementDef is an instance of
-            // if the intersection is empty, then elementDef is not an allowed
-            // containment instance
-            Set intersection = new HashSet(Arrays.asList(allowedContainments));
-            intersection.retainAll(
-                contentElement.objGetList(SystemAttributes.OBJECT_INSTANCE_OF)
-            );
-            if(intersection.isEmpty()) {
+            final ModelElement_1_0 contentElement = this.model.getElement(it.next());
+            if(!contentElement.isInstanceOf(allowedContainments)) {
                 violations.add(
                     new BasicException.Parameter(
                         violatedConstraint,
@@ -1732,12 +1741,17 @@ public class ModelConstraintsChecker_1 {
 
     private Model_1_0 model = null;
 
-    private final String[] CLASS_CONTAINMENT = {
-        ModelAttributes.CLASS, ModelAttributes.DATATYPE, 
-        ModelAttributes.ATTRIBUTE, ModelAttributes.REFERENCE,
-        ModelAttributes.OPERATION, ModelAttributes.EXCEPTION,
-        ModelAttributes.CONSTANT, ModelAttributes.CONSTRAINT,
-        ModelAttributes.TAG
-    };
+    private final Collection<Class<? extends ElementRecord>> CLASS_CONTAINMENT = Arrays.asList(
+        ClassRecord.class,
+        DataTypeRecord.class,
+        AttributeRecord.class,
+        ReferenceRecord.class,
+        OperationRecord.class,
+        ExceptionRecord.class,
+        OperationRecord.class,
+        ExceptionRecord.class,
+        ConstantRecord.class, 
+        TagRecord.class
+    );
 
 }

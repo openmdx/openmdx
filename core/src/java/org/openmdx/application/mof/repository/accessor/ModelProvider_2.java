@@ -1,7 +1,7 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Description: Model_1Provider 
+ * Description: Model Provider 
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
  * ====================================================================
  *
@@ -61,7 +61,7 @@ import org.openmdx.base.rest.spi.AbstractRestPort;
 public class ModelProvider_2 extends AbstractRestPort {
 
 	/**
-	 * Constructor
+	 * Constructor_
 	 */
 	private ModelProvider_2(
 		Port<RestConnection> delegate

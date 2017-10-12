@@ -284,6 +284,7 @@ public class PersistenceHelper {
         }
     }
     
+    @SuppressWarnings("unchecked")
     public static void setClasses(
         AnyTypePredicate query,
         Class<? extends RefObject>... classes 

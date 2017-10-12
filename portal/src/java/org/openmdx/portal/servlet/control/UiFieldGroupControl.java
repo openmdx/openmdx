@@ -462,10 +462,15 @@ public class UiFieldGroupControl extends Control implements Serializable {
                     p.write("<td class=\"", CssClass.fieldLabel.toString(), "\"></td>");
                   } else {
                     AttributeValue valueHolder = attribute.getValue();
+                	String cssClass = app.getPortalExtension().getDefaultCssClassFieldGroup(valueHolder, app);
+                	if(valueHolder.getCssClassFieldGroup() != null) {
+                		cssClass = valueHolder.getCssClassFieldGroup();
+                	}
                     String stringifiedValue = attribute.getStringifiedValue(
-                       p, 
-                       forEditing, 
-                       false
+                       p,
+                       forEditing,
+                       // default is longText
+						cssClass != null && cssClass.contains(CssClass.shortText.toString())
                     );
                     boolean isRevokeShow = valueHolder.hasPermission(WebKeys.PERMISSION_REVOKE_SHOW);
                     boolean isRevokeEdit = valueHolder.hasPermission(WebKeys.PERMISSION_REVOKE_EDIT);

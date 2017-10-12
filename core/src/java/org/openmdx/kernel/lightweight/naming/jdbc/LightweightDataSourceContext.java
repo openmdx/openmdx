@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2009-2012, OMEX AG, Switzerland
+ * Copyright (c) 2009-2016, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -47,21 +47,11 @@
  */
 package org.openmdx.kernel.lightweight.naming.jdbc;
 
-import java.util.Collections;
-
 import javax.naming.NamingException;
-import javax.resource.ResourceException;
-import javax.resource.spi.ConnectionManager;
 import javax.transaction.TransactionManager;
 
-import org.openmdx.kernel.exception.BasicException;
-import org.openmdx.kernel.exception.Throwables;
 import org.openmdx.kernel.lightweight.naming.spi.ResourceContext;
-import org.openmdx.kernel.lightweight.resource.LightweightConnectionManager;
-import org.openmdx.kernel.lightweight.sql.DatabaseConnection;
-import org.openmdx.kernel.lightweight.sql.DatabaseConnectionRequestInfo;
-import org.openmdx.kernel.lightweight.sql.LightweightXADataSource;
-import org.openmdx.kernel.lightweight.sql.ManagedDatabaseConnectionFactory;
+import org.openmdx.kernel.lightweight.sql.LightweightDataSource;
 
 
 /**
@@ -71,26 +61,18 @@ class LightweightDataSourceContext extends ResourceContext {
 
     /**
      * Constructor 
-     *
-     * @param transactionManager
      */
-    LightweightDataSourceContext(
+    LightweightDataSourceContext (
         TransactionManager transactionManager
     ){
-        this.connectionManager = new LightweightConnectionManager(
-            Collections.emptySet(), // credentials 
-            DatabaseConnection.class,
-            transactionManager, 
-            null, // maximumCapacity 
-            null // maximumWait
-        ); 
+    	this.transactionManager = transactionManager;
     }
-
-    /**
-     * The Connection Manager
-     */
-    private final ConnectionManager connectionManager;
     
+    /**
+     * The Transaction Manager to register the data sources with
+     */
+    private final TransactionManager transactionManager;
+
     /* (non-Javadoc)
      * @see javax.naming.Context#lookup(java.lang.String)
      */
@@ -98,30 +80,11 @@ class LightweightDataSourceContext extends ResourceContext {
         String name
     ) throws NamingException {
         Object dataSource = lookupLink(name);
-        if(dataSource == null) try {
-            bind(
-                name,
-                dataSource = new ManagedDatabaseConnectionFactory(
-                    new LightweightXADataSource(name, environment),
-                    new DatabaseConnectionRequestInfo(
-                        null, // transactionIsolation
-                        null, // validationStatement
-                        null // loginTimeout
-                    )
-                ).createConnectionFactory(
-                    this.connectionManager
-                )
-            );
-        } catch (ResourceException exception) {
-            throw Throwables.initCause(
-                new NamingException("Lazy datasource set-up failed"),
-                exception,
-                BasicException.Code.DEFAULT_DOMAIN,
-                BasicException.Code.MEDIA_ACCESS_FAILURE,
-                new BasicException.Parameter("connectionURL", name)
-            );
+        if(dataSource == null) { 
+        	dataSource = new LightweightDataSource(transactionManager, name);
+            bind(name, dataSource);
         }
         return dataSource;
-    }
+	}
 
 }

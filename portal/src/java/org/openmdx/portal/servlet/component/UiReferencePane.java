@@ -1100,12 +1100,21 @@ public class UiReferencePane extends ReferencePane implements Serializable {
 					for(int k = 0; k < grid.getShowMaxMember(); k++) {
 						boolean nowrap = true;
 						AttributeValue valueHolder = (AttributeValue)cells.get(k);
-						Object value = valueHolder.getValue(true);
+						// cssClass
+						String cssClass = app.getPortalExtension().getDefaultCssClassObjectContainer(valueHolder, app);
+						if(valueHolder.getCssClassObjectContainer() != null) {
+							cssClass = valueHolder.getCssClassObjectContainer();
+						}
+						Object value = valueHolder.getValue(
+							// default is short-text
+							cssClass == null || !cssClass.contains(CssClass.longText.toString())
+						);
 						String stringifiedValue = valueHolder.getStringifiedValue(
-							p, 
+							p,
 							true, 
-							false, 
-							true
+							false,
+							// default is short-text
+							cssClass == null || !cssClass.contains(CssClass.longText.toString())
 						);
 						stringifiedValue = valueHolder instanceof TextValue 
 							? ((TextValue)valueHolder).isPassword() ? "*****" : stringifiedValue 
@@ -1123,11 +1132,6 @@ public class UiReferencePane extends ReferencePane implements Serializable {
 								divEnd = "</div>";
 								iconSpacer = p.getImg("src=\"", p.getResourcePath("images/"), "spacer", p.getImgType(), "\" width=\"5\" height=\"0\" align=\"middle\" border=\"0\" alt=\"\"");
 							}
-						}
-						// cssClass
-						String cssClass = app.getPortalExtension().getDefaultCssClassObjectContainer(valueHolder, app);
-						if(valueHolder.getCssClassObjectContainer() != null) {
-							cssClass = valueHolder.getCssClassObjectContainer();
 						}
 						// Null or empty collection
 						if(stringifiedValue.length() == 0) {

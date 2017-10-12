@@ -133,6 +133,8 @@ public class XMLTarget implements ExportTarget {
 	}
 
 	/**
+	 * TODO multi-valued qualifier support
+	 * 
 	 * Determine an object's qualifier name
 	 * 
 	 * @param object
@@ -145,10 +147,11 @@ public class XMLTarget implements ExportTarget {
         RefObject object
     ) throws ServiceException {
         ModelElement_1_0 objectClass = this.model.getElement(object.refClass().refMofId());
-        if(!objectClass.objGetList("compositeReference").isEmpty()) {
-            ModelElement_1_0 compReference = this.model.getElement(((Path) objectClass.objGetValue("compositeReference")).getLastSegment().toClassicRepresentation());
+        final Path compositeReference = (Path) objectClass.objGetValue("compositeReference");
+        if(compositeReference != null) {
+            ModelElement_1_0 compReference = this.model.getElement(compositeReference.getLastSegment().toClassicRepresentation());
             ModelElement_1_0 associationEnd = this.model.getElement(compReference.getReferencedEnd().getLastSegment().toClassicRepresentation());
-            return (String) associationEnd.objGetValue("qualifierName");
+            return (String) associationEnd.objGetList("qualifierName").get(0);
         }
         if("org:openmdx:base:Authority".equals(objectClass.getQualifiedName())) {
             return "name";

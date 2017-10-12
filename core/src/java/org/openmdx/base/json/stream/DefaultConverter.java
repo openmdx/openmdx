@@ -79,7 +79,7 @@ public class DefaultConverter implements TypeConverter {
 		Object primitive = null;
 		// Attempt to convert to Integer
 		try {
-			primitive = enforce32BitInt ? Integer.valueOf(text) : Long.valueOf(text);
+			primitive = enforce32BitInt ? (Number)Integer.valueOf(text) : (Number)Long.valueOf(text);
 		} catch (Exception e) {/**/}
 		// Attempt to convert to double
 		if (primitive == null) {

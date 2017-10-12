@@ -89,7 +89,8 @@ public abstract class AbstractXMLOutputFactory extends XMLOutputFactory {
     	return new AbstractXMLEventWriter(createXMLStreamWriter(writer));
     }
 
-    public XMLStreamWriter createXMLStreamWriter(OutputStream out, String charset) throws XMLStreamException {
+    public XMLStreamWriter createXMLStreamWriter(final OutputStream out, final String characterSet) throws XMLStreamException {
+        String charset = characterSet;
         if (charset == null) {
             charset = "UTF-8";
         }

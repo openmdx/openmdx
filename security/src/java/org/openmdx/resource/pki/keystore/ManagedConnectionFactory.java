@@ -185,7 +185,7 @@ public class ManagedConnectionFactory extends AbstractManagedConnectionFactory {
      *
      * @return Returns the keyStoreType.
      */
-    public final String getKeyStoreType() {
+    public String getKeyStoreType() {
         return this.keyStoreType;
     }
     
@@ -194,7 +194,7 @@ public class ManagedConnectionFactory extends AbstractManagedConnectionFactory {
      * 
      * @param keyStoreType The keyStoreType to set.
      */
-    public final void setKeyStoreType(
+    public void setKeyStoreType(
         String keyStoreType
     ) {
         this.keyStoreType = keyStoreType;
@@ -205,7 +205,7 @@ public class ManagedConnectionFactory extends AbstractManagedConnectionFactory {
      *
      * @return Returns the passPhraseSeparator.
      */
-    public final String getPassPhraseSeparator() {
+    public String getPassPhraseSeparator() {
         return this.passPhraseSeparator;
     }
 
@@ -214,7 +214,7 @@ public class ManagedConnectionFactory extends AbstractManagedConnectionFactory {
      * 
      * @param passPhraseSeparator The passPhraseSeparator to set.
      */
-    public final void setPassPhraseSeparator(
+    public void setPassPhraseSeparator(
         String passPhraseSeparator
     ) {
         this.passPhraseSeparator = passPhraseSeparator;
@@ -283,9 +283,9 @@ public class ManagedConnectionFactory extends AbstractManagedConnectionFactory {
         Subject subject,
         ConnectionRequestInfo connectionRequestInfo
     ) throws ResourceException {
-    	String alias;
-    	char[][] passPhrases;
-        PasswordCredential credential = getCredential(subject);
+    	final String alias;
+    	final char[][] passPhrases;
+        final PasswordCredential credential = getCredential(subject);
         if(credential == null) {
             alias = null;
             passPhrases = NO_PASS_PHRASES;
@@ -293,10 +293,10 @@ public class ManagedConnectionFactory extends AbstractManagedConnectionFactory {
             alias = credential.getUserName();
             passPhrases = getPassPhrases(credential);
         }
-        String keyStoreType = getKeyStoreType();
-        String connectionURL = getConnectionURL();
+        final String keyStoreType = getKeyStoreType();
+        final String connectionURL = getConnectionURL();
         try {
-            KeyStore keyStore = KeyStore.getInstance(keyStoreType);   
+        	final KeyStore keyStore = KeyStore.getInstance(keyStoreType);   
             keyStore.load(
                 new URL(connectionURL).openStream(),
                 passPhrases.length == 0 || passPhrases[0].length == 0 ? null : passPhrases[0]
@@ -314,28 +314,43 @@ public class ManagedConnectionFactory extends AbstractManagedConnectionFactory {
 		                );
 		            case CERTIFICATE_PROVIDER:
 		            case SIGNATURE_VERIFIER:
-		            	if(alias == null) {
+		            	if(credential == null) {
 		                    throw new ResourceException(
-		                    	"Missing 'UserName' in UserName/Password credential, which is used as certificate alias"
+		                    	"Missing BasicPassword credential, which is required to determine the certificate alias"
 		                    );
+		            	} else if(alias == null) {
+		                    throw new ResourceException(
+		                    	"Missing 'UserName' in BasicPassword credential, which is used as certificate alias"
+		                    );
+		            	} else {
+			            	return new ManagedKeyStoreConnection(
+			            		this.connectionType,
+			                    credential,
+			                    alias,
+			                    keyStore.getCertificate(alias), 
+			                    null, 
+			                    getAlgorithm()
+			                 ); 
 		            	}
-		            	return new ManagedKeyStoreConnection(
-		            		this.connectionType,
-		                    credential,
-		                    alias,
-		                    keyStore.getCertificate(alias), 
-		                    null, 
-		                    getAlgorithm()
-		                 ); 
 		            case SIGNATURE_PROVIDER:		            	
-		            	return new ManagedKeyStoreConnection(
-		            		this.connectionType,
-		                    credential,
-		                    alias,
-		                    keyStore.getCertificate(alias), 
-		                    keyStore.getKey(alias, passPhrases[1]), 
-		                    getAlgorithm()
-		                 );
+		            	if(credential == null) {
+		                    throw new ResourceException(
+		                    	"Missing BasicPassword credential, which is required to determine the certificate and key alias"
+		                    );
+		            	} else if(alias == null) {
+		                    throw new ResourceException(
+		                    	"Missing 'UserName' in UserName/Password credential, which is used as certificate and key alias"
+		                    );
+		            	} else {
+			            	return new ManagedKeyStoreConnection(
+			            		this.connectionType,
+			                    credential,
+			                    alias,
+			                    keyStore.getCertificate(alias), 
+			                    keyStore.getKey(alias, passPhrases[1]), 
+			                    getAlgorithm()
+			                 );
+		            	}
 	            }
             }
             throw new ResourceException(

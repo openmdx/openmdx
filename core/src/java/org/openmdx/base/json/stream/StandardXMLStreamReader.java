@@ -63,39 +63,72 @@ import java.util.Set;
 import javax.xml.namespace.NamespaceContext;
 import javax.xml.stream.XMLStreamException;
 
+import org.openmdx.base.rest.cci.ResultRecord;
+
 public class StandardXMLStreamReader extends AbstractXMLStreamReader {
     private FastStack nodes;
     private String currentValue;
     private StandardNamespaceConvention convention;
     private String valueKey = "$";
+    private static final String OBJECTS_KEY = "objects";
+    private static final String TYPE_TAG = "@type";
+    private static final String RESULT_RECORD_NAME = ResultRecord.NAME.replaceAll(":", ".");
     private NamespaceContext ctx;
     private int popArrayNodes;
-    public StandardXMLStreamReader(JSONObject obj)
-            throws JSONException, XMLStreamException {
+
+    public StandardXMLStreamReader(
+        JSONObject obj
+    ) throws JSONException, XMLStreamException {
         this(obj, new StandardNamespaceConvention());
     }
 
-    public StandardXMLStreamReader(JSONObject obj, StandardNamespaceConvention con)
-            throws JSONException, XMLStreamException {
-        String rootName = (String) obj.keys().next();
+    private static JSONObject mapTypeTagRecursively(
+        JSONObject obj
+    ) throws JSONException {
+        JSONObject mappedObj = obj;
+        if(obj.has(TYPE_TAG)) {
+            mappedObj = new JSONObject();
+            String typeName = obj.getString(TYPE_TAG);
+            obj.remove(TYPE_TAG);
+            mappedObj.put(typeName, obj);
+            for(String key: obj.keySet()) {
+                Object value = obj.get(key);
+                if(value instanceof JSONArray) {
+                    JSONArray array = (JSONArray)value;
+                    for(int i = 0; i < array.length(); i++) {
+                        JSONObject element = array.getJSONObject(i);
+                        array.put(i, mapTypeTagRecursively(element));
+                    }                
+                } else if(value instanceof JSONObject) {
+                    obj.put(key, mapTypeTagRecursively((JSONObject)value));
+                }
+            }
+        }
+        return mappedObj;
+    }
 
+    public StandardXMLStreamReader(
+        JSONObject obj, 
+        StandardNamespaceConvention con
+   ) throws JSONException, XMLStreamException {
+        JSONObject mappedObj = mapTypeTagRecursively(obj);
+        String rootName = mappedObj.keys().next();
         this.convention = con;
         this.nodes = new FastStack();
         this.ctx = con;
-        Object top = obj.get(rootName);
+        Object top = mappedObj.get(rootName);
         if (top instanceof JSONObject) {
             this.node = new Node(null, rootName, (JSONObject)top, convention);
         } else if (top instanceof JSONArray && !(((JSONArray)top).length() == 1 && ((JSONArray)top).get(0).equals(""))) {
-            this.node = new Node(null, rootName, obj, convention);
+            this.node = new Node(null, rootName, mappedObj, convention);
         } else {
             node = new Node(rootName, convention);
-            convention.processAttributesAndNamespaces(node, obj);
+            convention.processAttributesAndNamespaces(node, mappedObj);
             currentValue = JSONObject.NULL.equals(top) ? null : top.toString();
         }
         nodes.push(node);
         event = START_DOCUMENT;
     }
-
 
     public int next() throws XMLStreamException {
         if (event == START_DOCUMENT) {
@@ -268,6 +301,7 @@ public class StandardXMLStreamReader extends AbstractXMLStreamReader {
     }
     
     public void close() throws XMLStreamException {
+        // nothing to do
     }
 
     public String getElementText() throws XMLStreamException {

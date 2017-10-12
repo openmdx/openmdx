@@ -49,6 +49,7 @@ package test.openmdx.app1;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertNull;
@@ -90,6 +91,7 @@ import javax.jdo.Constants;
 import javax.jdo.FetchPlan;
 import javax.jdo.JDOException;
 import javax.jdo.JDOFatalDataStoreException;
+import javax.jdo.JDOHelper;
 import javax.jdo.JDOObjectNotFoundException;
 import javax.jdo.JDOOptimisticVerificationException;
 import javax.jdo.JDOUnsupportedOptionException;
@@ -461,6 +463,7 @@ public class TestMain {
         private final boolean REMOTE_EXCEPTIONS_ARE_GENERIC = true; // TODO CR20020019
         private final boolean PROXIED_EXTENT_IS_AMENDMENT_AWARE = false; // TODO CR20020326
         private final boolean INCOMPLETE_OBJECTS_CAN_BE_FLUSHED = false; // TODO CR20020411
+        private final boolean PROXY_IS_DIRTY_COLLECTION_AWARE = false; // TODO 
         
         protected long id;
 
@@ -795,6 +798,27 @@ public class TestMain {
                 super.taskId = null;
             }
             //
+            // CR20059789
+            //
+            if(!(this instanceof AbstractContainerManagedTransactionTest))
+            try {
+                super.taskId = "CR20059789";
+                final PersistenceManager pm = JDOHelper.getPersistenceManager(segment);
+                pm.currentTransaction().begin();
+                segment.setDescription("CR20059789");
+                assertEquals("CR20059789", segment.getDescription());
+                final org.openmdx.base.persistence.spi.UnitOfWork uow = (org.openmdx.base.persistence.spi.UnitOfWork) 
+                        PersistenceHelper.currentUnitOfWork(pm);
+                uow.beforeCompletion();
+                uow.clear();
+                pm.evictAll();
+                assertEquals("CR20059789", segment.getDescription());
+                pm.currentTransaction().rollback();
+                assertNotEquals("CR20059789", segment.getDescription());
+            } finally {
+                super.taskId = null;
+            }
+            //
             // CR20019971
             //
             try {
@@ -820,6 +844,7 @@ public class TestMain {
                 } else {
                     assertNotNull("Propagated user object", propagated);
                 }
+
             } finally {
                 super.taskId = null;
             }
@@ -3562,6 +3587,13 @@ public class TestMain {
                     TEST_PERSON_COUNT + SIMILAR_NAME_COUNT,
                     numberOfPersons
                 );
+                Counter<Person> counter = new Counter<Person>();
+                allPeople.processAll(personQuery, counter);
+                assertEquals(
+                    "number of persons found with SOUNDS_LIKE",
+                    TEST_PERSON_COUNT + SIMILAR_NAME_COUNT,
+                    counter.getCount()
+                );
                 this.begin();
                 maasteer.clear();
                 int remaining = segment.getPerson().size(); 
@@ -3570,6 +3602,15 @@ public class TestMain {
                     0,
                     remaining
                 );
+                if(PROXY_IS_DIRTY_COLLECTION_AWARE || !(this instanceof ProxyConnectionTest)) {
+                    counter = new Counter<Person>();
+                    allPeople.processAll(personQuery, counter);
+                    assertEquals(
+                        "container emptied",
+                        0,
+                        counter.getCount()
+                    );
+                }
                 this.rollback();
             }
             //
@@ -5752,4 +5793,5 @@ public class TestMain {
         }
         
     }
+
 }

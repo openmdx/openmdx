@@ -170,7 +170,7 @@ public class Ui_1 extends AbstractRestPort {
         ) throws ServiceException {
             this.name = (String)element.getName();
             this.qualifiedName = (String)element.getQualifiedName();
-            this.container = element.getContainer();
+            this.container = element.getModel().getElement(element.getContainer());
             this.modelElement = element;
         }
 
@@ -189,14 +189,14 @@ public class Ui_1 extends AbstractRestPort {
             return this.modelElement;
         }
 
-        public Object getContainer(
+        public ModelElement_1_0 getContainer(
         ) {
             return this.container;
         }
 
         protected final String name;
         protected final String qualifiedName;
-        protected final Object container;
+        protected final ModelElement_1_0 container;
         protected final ModelElement_1_0 modelElement;
 
     }
@@ -224,9 +224,7 @@ public class Ui_1 extends AbstractRestPort {
             this.type = type;
             this.multiplicity = multiplicity;
             this.isChangeable = isChangeable;
-            this.isReference = isReference == null ? 
-                false : 
-                isReference.booleanValue();
+            this.isReference = Boolean.TRUE.equals(isReference);
             this.isReferenceStoredAsAttribute = false;
         }
 
@@ -234,17 +232,16 @@ public class Ui_1 extends AbstractRestPort {
             ModelElement_1_0 element
         ) throws ServiceException {
             super(element);
-            this.type = element.getType();
-            this.multiplicity = (String)element.getMultiplicity();
-            this.isChangeable = (element.isChangeable() == null) || (element.objGetList("isChangeable").isEmpty()) ? 
-                new Boolean(Ui_1.this.changableDefaultValue) : 
-                (Boolean)element.isChangeable();
             Model_1_0 model = Model_1Factory.getModel();
+            this.type = element.getType() == null ? null : model.getElement(element.getType());
+            this.multiplicity = (String)element.getMultiplicity();
+            this.isChangeable = element.isChangeable() == null || element.objGetValue("isChangeable") == null 
+            	? new Boolean(Ui_1.this.changableDefaultValue) 
+            	: element.isChangeable();
             if(model.isAttributeType(element) || model.isStructureFieldType(element)) {
                 this.isReference = false;
                 this.isReferenceStoredAsAttribute = false;
-            }
-            else if(model.isReferenceType(element)) {
+            } else if(model.isReferenceType(element)) {
                 ModelElement_1_0 referencedEnd = model.getElement(element.getReferencedEnd());
                 ModelElement_1_0 exposedEnd = model.getElement(element.getExposedEnd());
                 // A reference is handled as attribute in case of a single-valued reference with aggregation=none
@@ -252,8 +249,7 @@ public class Ui_1 extends AbstractRestPort {
                     !referencedEnd.objGetList("qualifierName").isEmpty() || 
                     !exposedEnd.objGetList("qualifierName").isEmpty();
                 this.isReferenceStoredAsAttribute = model.referenceIsStoredAsAttribute(element);
-            }
-            else {
+            } else {
                 this.isReference = true;
                 this.isReferenceStoredAsAttribute = false;
             }
@@ -269,7 +265,7 @@ public class Ui_1 extends AbstractRestPort {
             return this.isChangeable;
         }
 
-        public Object getType(
+        public ModelElement_1_0 getType(
         ) {
             return this.type;
         }
@@ -278,8 +274,14 @@ public class Ui_1 extends AbstractRestPort {
         ) {
             return this.isReference;
         }
+		/**
+		 * @return the isReferenceStoredAsAttribute
+		 */
+		public boolean isReferenceStoredAsAttribute() {
+			return isReferenceStoredAsAttribute;
+		}
 
-        private final Object type;
+        private final ModelElement_1_0 type;
         private final String multiplicity;
         private final Boolean isChangeable;
         private final boolean isReference;
@@ -311,9 +313,7 @@ public class Ui_1 extends AbstractRestPort {
             ModelElement_1_0 element
         ) throws ServiceException {
             super(element);
-            this.isQuery = element.objGetList("isQuery").isEmpty()
-            ? true
-                : ((Boolean)element.objGetValue("isQuery")).booleanValue();
+            this.isQuery = ((Boolean)element.objGetValue("isQuery")).booleanValue();
         }
 
         private final boolean isQuery;
@@ -501,9 +501,9 @@ public class Ui_1 extends AbstractRestPort {
     	MappedRecord objectReference,
         StructuralFeatureDefinition feature
     ) throws ServiceException {
-    	Object_2Facade objectReferenceFacace;
+    	Object_2Facade objectReferenceFacade;
         try {
-        	objectReferenceFacace = Object_2Facade.newInstance(objectReference);
+        	objectReferenceFacade = Object_2Facade.newInstance(objectReference);
         } catch (ResourceException e) {
         	throw new ServiceException(e);
         }                            	
@@ -511,12 +511,12 @@ public class Ui_1 extends AbstractRestPort {
         ModelElement_1_0 featureType = model.getDereferencedType(
             feature.getType()
         );
-        objectReferenceFacace.attributeValuesAsList("referenceName").add(feature.getName());
-        objectReferenceFacace.attributeValuesAsList("referencedTypeName").add(featureType.getQualifiedName());
+        objectReferenceFacade.attributeValuesAsList("referenceName").add(feature.getName());
+        objectReferenceFacade.attributeValuesAsList("referencedTypeName").add(featureType.getQualifiedName());
         // Reference
         if(feature.isReference()) {
-        	objectReferenceFacace.attributeValuesAsList("referenceIsStoredAsAttribute").add(
-                Boolean.valueOf(feature.isReferenceStoredAsAttribute)
+        	objectReferenceFacade.attributeValuesAsList("referenceIsStoredAsAttribute").add(
+                Boolean.valueOf(feature.isReferenceStoredAsAttribute())
             );
             ModelElement_1_0 element = feature.getModelElement();
             if(element != null) {
@@ -524,27 +524,27 @@ public class Ui_1 extends AbstractRestPort {
                     element.getReferencedEnd()
                 );
                 if(!referencedEnd.objGetList("qualifierName").isEmpty()) {
-                    String qualifierName = (String)referencedEnd.objGetValue("qualifierName");           
-                    objectReferenceFacace.attributeValuesAsList("userDefinedQualifier").add(
+                    String qualifierName = (String)referencedEnd.objGetList("qualifierName").get(0);           
+                    objectReferenceFacade.attributeValuesAsList("userDefinedQualifier").add(
                         new Boolean(!"id".equals(qualifierName))
                     );
-                    objectReferenceFacace.attributeValuesAsList("qualifierLabel").add(qualifierName);
+                    objectReferenceFacade.attributeValuesAsList("qualifierLabel").add(qualifierName);
                 } else {
-                	objectReferenceFacace.attributeValuesAsList("userDefinedQualifier").add(
+                	objectReferenceFacade.attributeValuesAsList("userDefinedQualifier").add(
                         Boolean.FALSE
                     );
                 }
             } else {
-            	objectReferenceFacace.attributeValuesAsList("userDefinedQualifier").add(
+            	objectReferenceFacade.attributeValuesAsList("userDefinedQualifier").add(
                     Boolean.FALSE
                 );                
             }
         } else {
             // Attribute of type class
-        	objectReferenceFacace.attributeValuesAsList("referenceIsStoredAsAttribute").add(
+        	objectReferenceFacade.attributeValuesAsList("referenceIsStoredAsAttribute").add(
                 Boolean.TRUE
             );
-        	objectReferenceFacace.attributeValuesAsList("userDefinedQualifier").add(
+        	objectReferenceFacade.attributeValuesAsList("userDefinedQualifier").add(
                 Boolean.FALSE
             );
         }
@@ -634,7 +634,7 @@ public class Ui_1 extends AbstractRestPort {
         StructuralFeatureDefinition feature
     ) throws ServiceException {
     	Model_1_0 model = Model_1Factory.getModel();
-        ModelElement_1_0 elementType = model.getElement(feature.getType());
+        ModelElement_1_0 elementType = feature.getType();
         if(feature.getModelElement() == null) {
             return model.isClassType(elementType);
         } else {
@@ -981,7 +981,6 @@ public class Ui_1 extends AbstractRestPort {
     private List<Ui_1.StructuralFeatureDefinition> getStructFeatureDefinitions(
         ModelElement_1_0 paramType
     ) throws ServiceException {
-        @SuppressWarnings("unchecked")
         Collection<ModelElement_1_0> fieldDefs = paramType.objGetMap("field").values();
         List<Ui_1.StructuralFeatureDefinition> featureDefinitions = new ArrayList<Ui_1.StructuralFeatureDefinition>();
         for(ModelElement_1_0 fieldDef: fieldDefs) {
@@ -1002,7 +1001,6 @@ public class Ui_1 extends AbstractRestPort {
      * @return
      * @throws ServiceException
      */
-    @SuppressWarnings("unchecked")
     private List<Ui_1.StructuralFeatureDefinition> getStructuralFeatureDefinitions(
         Path segmentIdentity,
         ModelElement_1_0 classDef,
@@ -1010,13 +1008,13 @@ public class Ui_1 extends AbstractRestPort {
         boolean attributesOnly
     ) throws ServiceException {
     	Model_1_0 model = Model_1Factory.getModel();
-        List<ModelElement_1_0> featureDefs = new ArrayList(
+        List<ModelElement_1_0> featureDefs = new ArrayList<ModelElement_1_0>(
             model.getStructuralFeatureDefs(
                 classDef, 
                 includeSubtypes, 
                 true, 
                 attributesOnly
-            ).values()          
+            ).values()
         );
         Map<String,Ui_1.StructuralFeatureDefinition> featureDefinitions = new HashMap<String,Ui_1.StructuralFeatureDefinition>();
         // Add modeled structural features
@@ -1076,7 +1074,6 @@ public class Ui_1 extends AbstractRestPort {
      * @return
      * @throws ServiceException
      */
-    @SuppressWarnings("unchecked")
     private List<Ui_1.OperationDefinition> getOperationDefinitions(
         Path segmentIdentity,
         ModelElement_1_0 classDef
@@ -1084,12 +1081,8 @@ public class Ui_1 extends AbstractRestPort {
     	Model_1_0 model = Model_1Factory.getModel();
         Map<String,Ui_1.OperationDefinition> featureDefinitions = new HashMap<String,Ui_1.OperationDefinition>();
         // Add modeled operations
-        Collection features = classDef.objGetMap("allFeature").values();
-        for(
-            Iterator<ModelElement_1_0> i = features.iterator(); 
-            i.hasNext(); 
-        ) {
-            ModelElement_1_0 feature = i.next();
+        Collection<ModelElement_1_0> features = classDef.objGetMap("allFeature").values();
+        for(ModelElement_1_0 feature: features) {
             if(model.isOperationType(feature)) {
                 OperationDefinition featureDefinition = new OperationDefinition(feature);
                 featureDefinitions.put(
@@ -1343,28 +1336,26 @@ public class Ui_1 extends AbstractRestPort {
             boolean useDefaultIconKey
         ) throws ResourceException {
         	try {
+                if(
+                    (Ui_1.this.existingElementDefinitions == null) ||
+                    (Ui_1.this.existingElementDefinitions.get(segmentIdentity) == null) ||
+                    elementName.length() == 0
+                ) {
+                    SysLog.error("Unable to retrieve element definition", Arrays.asList(elementName, Ui_1.this.existingElementDefinitions, Ui_1.this.existingElementDefinitions == null ? null : Ui_1.this.existingElementDefinitions.get(segmentIdentity), elementName));
+                }
 	            // Verify whether definition already exists
 	        	ObjectRecord elementDefinition = null;
-	            PathComponent components = new PathComponent(elementName);
-	            for(
-	                int i = 0; 
-	                i < components.size(); 
-	                i++
-	            ) {
-	                if(
-	                    (Ui_1.this.existingElementDefinitions == null) ||
-	                    (Ui_1.this.existingElementDefinitions.get(segmentIdentity) == null) ||
-	                    (components.getSuffix(i) == null)
-	                ) {
-	                    SysLog.error("Unable to retrieve element definition", Arrays.asList(elementName, Ui_1.this.existingElementDefinitions, Ui_1.this.existingElementDefinitions == null ? null : Ui_1.this.existingElementDefinitions.get(segmentIdentity), components.getSuffix(i)));
-	                } else {
-	                    elementDefinition = Ui_1.this.existingElementDefinitions.get(segmentIdentity).get(
-	                        new PathComponent(components.getSuffix(i)).toString()
-	                    );
-	                    if(elementDefinition != null) {
-	                        return elementDefinition;
-	                    }
-	                }
+	        	String lookupName = elementName;
+	        	while(true) {
+                    elementDefinition = Ui_1.this.existingElementDefinitions.get(segmentIdentity).get(lookupName);
+                    if(elementDefinition != null) {
+                        return elementDefinition;
+                    }
+                    int pos = lookupName.indexOf(":");
+                    if(pos < 0) {
+                    	break;
+                    }
+                    lookupName = lookupName.substring(pos + 1);
 	            }
 	            // No element definition found for element
 	            // Get from Root segment

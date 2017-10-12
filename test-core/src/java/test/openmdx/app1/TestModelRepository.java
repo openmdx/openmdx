@@ -56,7 +56,9 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.net.URL;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
@@ -64,7 +66,9 @@ import java.util.TreeSet;
 
 import javax.naming.Context;
 
+import org.junit.Assert;
 import org.junit.ClassRule;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.openmdx.application.mof.repository.accessor.ModelBuilder_1;
@@ -108,8 +112,6 @@ public class TestModelRepository {
         Map<Path, ModelElement_1_0> content1 = getContent(model);
         ByteArrayOutputStream outputStream1 =  new ByteArrayOutputStream();
         Model_1Dumper.save(outputStream1, "application/vnd.openmdx-xmi.wbxml", model);
-        model = loadForeignModel("xri://+zip*(xri://+resource/test/opencrx/openmdxmof.wbxml.zip)/openmdxmof.wbxml");
-        model = loadForeignModel("xri://+resource/test/opencrx/openmdxmof.wbxml");
         ByteArrayInputStream inputStream = new ByteArrayInputStream(outputStream1.toByteArray());
         long startLoading = System.currentTimeMillis();
         model = new ModelBuilder_1(false, inputStream).build();
@@ -120,6 +122,19 @@ public class TestModelRepository {
         Model_1Dumper.save(outputStream3, "application/vnd.openmdx-xmi.wbxml", model);
         assertRepositoryEquality(content1, content3);
     }
+
+    /**
+     * CR20020284
+     */
+    @Test
+    public void loadForeignModel() throws ServiceException, IOException{
+        Model_1_0 model1 = loadForeignModel("xri://+zip*(xri://+resource/test/opencrx/openmdxmof.wbxml.zip)/openmdxmof.wbxml");
+        Map<Path, ModelElement_1_0> content1 = getContent(model1);
+        Model_1_0 model2 = loadForeignModel("xri://+resource/test/opencrx/openmdxmof.wbxml");
+        Map<Path, ModelElement_1_0> content2 = getContent(model2);
+        assertRepositoryEquality(content1, content2);
+    }
+    
     
     private Map<Path,ModelElement_1_0> getContent(
         Model_1_0 model
@@ -154,26 +169,14 @@ public class TestModelRepository {
             Set<String> f1 = new TreeSet<String>(e1.objDefaultFetchGroup());
             Set<String> f2 = new TreeSet<String>(e2.objDefaultFetchGroup());
             if(!e1.jdoGetObjectId().getLastSegment().toClassicRepresentation().contains("$UNNAMED$")){ 
-                if(!"org.omg.model1.Class".equals(e1.objGetClass())){
-                    f1.remove("allFeature");
-                    f1.remove("allFeatureWithSubtype");
-                    f1.remove(SystemAttributes.OBJECT_INSTANCE_OF);
-                    f2.remove("allFeature");
-                    f2.remove("allFeatureWithSubtype");
-                    f2.remove(SystemAttributes.OBJECT_INSTANCE_OF);
-                }
-                f1.remove("dereferencedType");
-                f1.remove("content");
-                f1.remove("compositeReference");
-                f1.remove(SystemAttributes.OBJECT_IDENTITY);
-                f2.remove("dereferencedType");
-                f2.remove("content");
-                f2.remove("compositeReference");
-                f2.remove(SystemAttributes.OBJECT_IDENTITY);
+                f1.remove(SystemAttributes.CREATED_BY);
+                f1.remove(SystemAttributes.MODIFIED_BY);
+                f2.remove(SystemAttributes.CREATED_BY);
+                f2.remove(SystemAttributes.MODIFIED_BY);
                 assertEquals("Model type " + e1.objGetClass() +  ": " + k.toXRI(), f1, f2);
                 for(String f : f1) {
-                    Object v1 = ((Delegating_1_0<ObjectRecord>)e1).objGetDelegate().get(f);
-                    Object v2 = ((Delegating_1_0<ObjectRecord>)e2).objGetDelegate().get(f);
+                    Object v1 = e1.getDelegate().get(f);
+                    Object v2 = e2.getDelegate().get(f);
                     String property = "Feature " + k.toXRI() + "#" + f;
                     if(v1 == null) {
                         assertNull(property, v2);
@@ -185,20 +188,118 @@ public class TestModelRepository {
         }
     }
             
+    public static void main(String...strings) throws ServiceException, FileNotFoundException{
+        Set<String> classes = new HashSet<String>();
+        final Model_1_0 model = Model_1Factory.getModel();
+//        for(ModelElement_1_0 element : model.getContent()) {
+//            classes.add(element.objGetClass().substring(15));
+//        }
+        classes.add("Tag");
+        final File dir = new File("build/src/java/org/openmdx/base/mof/repository/spi");
+        dir.mkdirs();
+        for(String name : classes) {
+            final File file = new File(dir, name + "Record.java");
+            final ModelElement_1_0 classDef = model.getElement("org:omg:model1:" + name);
+            final Map<String, ModelElement_1_0> attributeDefs = model.getAttributeDefs(classDef, false, true);
+            final PrintWriter writer = new PrintWriter(file);
+            writer.println("/*");
+            writer.println(" * ====================================================================");
+            writer.println(" * Project:     openMDX/Core, http://www.openmdx.org/");
+            writer.println(" * Description: Query Record");
+            writer.println(" * Description: org::omg::model1::" + name + " Record");
+            writer.println(" */");
+            writer.println("package org.openmdx.base.mof.repository.spi;");
+            writer.println();
+            writer.println("import org.openmdx.base.rest.spi.AbstractMappedRecord;");
+            writer.println();
+            writer.println("/**");
+            writer.println(" * org::omg::model1::" + name + " Record");
+            writer.println(" */");
+            writer.println("public class " + name + "Record");
+            writer.println("  extends AbstractMappedRecord<org.openmdx.base.mof.repository.cci." + name  + "Record.Member>");
+            writer.println("  implements org.openmdx.base.mof.repository.cci." + name + "Record");
+            writer.println("{");
+            writer.println();
+            writer.println("    /**");
+            writer.println("     * Allows to share the member information among the instances");
+            writer.println("     */");
+            writer.println("    private static final Members<Member> MEMBERS = Members.newInstance(Member.class);");
+            writer.println();
+            writer.println();
+            writer.println("    /**");
+            writer.println("     * Implements <code>Serializable</code>");
+            writer.println("     */");
+            writer.println();
+            writer.println("    @Override");
+            writer.println("    public void makeImmutable() {");
+            writer.println("        super.makeImmutable();");
+            writer.println("    }");
+            writer.println();
+            writer.println("    @Override");
+            writer.println("    public String getRecordName() {");
+            writer.println("        return NAME;");
+            writer.println("    }");
+            writer.println();
+            writer.println("    /**");
+            writer.println("     * Retrieve a value by index");
+            writer.println("     *");
+            writer.println("     * @param index the index");
+            writer.println("     * @return the value");
+            writer.println("     */");
+            writer.println("     @Override");
+            writer.println("     protected Object get(");
+            writer.println("         Member index");
+            writer.println(      "){");
+            writer.println("         switch(index) {");
+            for(String attr : attributeDefs.keySet()) {
+                writer.println("             case " + attr + ": return null; // TODO");
+            }
+            writer.println("             default: return super.get(index);");
+            writer.println(      "}");
+            writer.println();
+            writer.println("    /**");
+            writer.println("     * Retrieve a value by index");
+            writer.println("     * ");
+            writer.println("     * @param index the index");
+            writer.println("     * @param value the new value");
+            writer.println("     * ");
+            writer.println("     * @return the old value");
+            writer.println("     */");
+            writer.println("     @Override");
+            writer.println("     protected void put(");
+            writer.println("         Member index,");
+            writer.println("         Object value");
+            writer.println("     ){");
+            writer.println("         switch(index) {");
+            for(String attr : attributeDefs.keySet()) {
+                writer.println("             case " + attr + ":");
+                writer.println("                 break;");
+            }
+            writer.println("            default:");
+            writer.println("                 super.put(index, value);");
+            writer.println("         }");
+            writer.println("     }");
+            writer.println("         ");
+            writer.println();
+            writer.println("    @Override");
+            writer.println("    protected Members<Member> members() {");
+            writer.println("        return MEMBERS;");
+            writer.println("    }");
+            writer.println();
+            writer.println("}");
+            
+            writer.close();
+        }
+    }
+    
     private void dumpModel(
         File destination,
         boolean binary
     ) throws FileNotFoundException, ServiceException{
-        Model_1_0 model = Model_1Factory.getModel();
-        if(binary) {
-            final File file = new File(destination, "openmdxmof.wbxml");
-            final FileOutputStream outputStream = new FileOutputStream(file);
-            Model_1Dumper.save(outputStream, "application/vnd.openmdx-xmi.wbxml", model);
-        } else {
-            final File file = new File(destination, "openmdxmof.xml");
-            final FileOutputStream outputStream =  new FileOutputStream(file);
-            Model_1Dumper.save(outputStream, "text/xml", model);
-        }
+        final String mimeType = binary ? "application/vnd.openmdx-xmi.wbxml" : "text/xml";
+        final File file = new File(destination, binary ? "openmdxmof.wbxml" : "openmdxmof.xml");
+        final FileOutputStream outputStream = new FileOutputStream(file);
+        Model_1Dumper.save(outputStream, mimeType, Model_1Factory.getModel());
     }
     
     @Test

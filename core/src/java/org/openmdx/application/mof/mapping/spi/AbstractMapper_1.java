@@ -98,7 +98,7 @@ public abstract class AbstractMapper_1 implements Mapper_1_0 {
       else {
         String packageName =
           this.model.toJavaPackageName(
-            element.jdoGetObjectId(),
+            element.getQualifiedName(),
             packageSuffix,
             dereferenceType
           ).replace('.', '/');

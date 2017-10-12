@@ -106,6 +106,7 @@ public abstract class AbstractPersistenceManagerFactory<P extends PersistenceMan
         this.setMultithreaded(getFlag(configuration,ConfigurableProperty.Multithreaded));
         this.setCopyOnAttach(getFlag(configuration,ConfigurableProperty.CopyOnAttach));
         this.setContainerManaged(getFlag(configuration,ConfigurableProperty.ContainerManaged));
+        this.setIsolateThreads(getFlag(configuration,ConfigurableProperty.IsolateThreads));
         if(configuration.containsKey(ConfigurableProperty.ConnectionUserName.qualifiedName())) this.setConnectionUserName(
             (String)configuration.get(ConfigurableProperty.ConnectionUserName.qualifiedName())
         );
@@ -796,7 +797,7 @@ public abstract class AbstractPersistenceManagerFactory<P extends PersistenceMan
     public void setContainerManaged(boolean flag){
         this.setProperty(ConfigurableProperty.ContainerManaged, Boolean.valueOf(flag));
     }
-    
+
     /**
      * Tell whether the transaction is container managed 
      * 
@@ -804,6 +805,22 @@ public abstract class AbstractPersistenceManagerFactory<P extends PersistenceMan
      */
     public boolean getContainerManaged(){
         return Boolean.TRUE.equals(this.configurableProperties.get(ConfigurableProperty.ContainerManaged));
+    }
+    
+    /**
+     * Defines, whether each thread sees his own unit of work
+     * 
+     * @param flag the isolate threads flag
+     */
+    public void setIsolateThreads(boolean flag){
+        this.setProperty(ConfigurableProperty.IsolateThreads, Boolean.valueOf(flag));
+    }
+    
+    /**
+     * Tells, whether each thread sees his own unit of work
+     */
+    public boolean getIsolateThreads(){
+        return Boolean.TRUE.equals(this.configurableProperties.get(ConfigurableProperty.IsolateThreads));
     }
     
     /* (non-Javadoc)
@@ -1033,6 +1050,10 @@ public abstract class AbstractPersistenceManagerFactory<P extends PersistenceMan
         AbstractPersistenceManagerFactory.DEFAULT_CONFIGURATION.put(
             ConfigurableProperty.Multithreaded.qualifiedName(), 
             Boolean.TRUE.toString()
+        );
+        AbstractPersistenceManagerFactory.DEFAULT_CONFIGURATION.put(
+            ConfigurableProperty.IsolateThreads.qualifiedName(), 
+            Boolean.FALSE.toString()
         );
         AbstractPersistenceManagerFactory.DEFAULT_CONFIGURATION.put(
             ConfigurableProperty.CopyOnAttach.qualifiedName(),

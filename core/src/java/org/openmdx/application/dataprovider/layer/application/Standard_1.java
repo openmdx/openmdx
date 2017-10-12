@@ -48,7 +48,6 @@
 package org.openmdx.application.dataprovider.layer.application;
 
 import javax.resource.ResourceException;
-import javax.resource.cci.Connection;
 import javax.resource.cci.Interaction;
 
 import org.openmdx.application.dataprovider.spi.Layer_1;

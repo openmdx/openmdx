@@ -85,9 +85,7 @@ extends AbstractClassMapper {
     /**
      * Constructor 
      */
-    @SuppressWarnings({
-        "unchecked", "cast"
-    })
+    @SuppressWarnings("cast")
     public InstanceMapper(
         ModelElement_1_0 classDef,
         Writer writer,

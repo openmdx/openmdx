@@ -61,7 +61,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.zip.ZipOutputStream;
 
-import org.openmdx.application.mof.cci.ModelAttributes;
 import org.openmdx.application.mof.mapping.spi.AbstractMapper_1;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
@@ -132,7 +131,7 @@ public class Uml2Mapper_1
             i.hasNext();
         ) {
             ModelElement_1_0 elementDef = (ModelElement_1_0) i.next();
-            if(elementDef.objGetClass().equals(ModelAttributes.PACKAGE)) {
+            if(elementDef.isPackageType()) {
                 String qualifiedName = elementDef.getQualifiedName().substring(
                     0, 
                     elementDef.getQualifiedName().lastIndexOf(":")
@@ -251,11 +250,11 @@ public class Uml2Mapper_1
     ) throws ServiceException {
 
         // Primitive
-        if (elementDef.objGetClass().equals(ModelAttributes.PRIMITIVE_TYPE)) {
+        if (elementDef.isPrimitiveType()) {
             mapper.mapPrimitiveType(elementDef);
         }
         // Alias
-        else if (elementDef.objGetClass().equals(ModelAttributes.ALIAS_TYPE)) {
+        else if (elementDef.isAliasType()) {
             ModelElement_1_0 typeDef = this.model.getElement(elementDef.getType());
             boolean refTypeIsPrimitive = typeDef.isPrimitiveType();
             mapper.mapAliasType(elementDef, typeDef, refTypeIsPrimitive);
@@ -291,7 +290,7 @@ public class Uml2Mapper_1
             // Map navigable association ends as class members
             for(Iterator i = this.model.getContent().iterator(); i.hasNext(); ) {
                 ModelElement_1_0 candidate = (ModelElement_1_0)i.next();
-                if(candidate.objGetClass().equals(ModelAttributes.ASSOCIATION)) {
+                if(candidate.isAssociationType()) {
                     ModelElement_1_0 associationEnd1Def = this.model.getElement(candidate.objGetList("content").get(0));
                     ModelElement_1_0 associationEnd2Def = this.model.getElement(candidate.objGetList("content").get(1));
                     // End 1
@@ -323,7 +322,7 @@ public class Uml2Mapper_1
             mapper.mapClassEnd(elementDef, hasFeatures);
         }
         // Attribute
-        else if (elementDef.objGetClass().equals(ModelAttributes.ATTRIBUTE)) {
+        else if (elementDef.isAttributeType()) {
             ModelElement_1_0 typeDef = this.model.getElement(elementDef.getType());
             boolean refTypeIsPrimitive = typeDef.isPrimitiveType();
             boolean isDerived = elementDef.isDerived().booleanValue();
@@ -336,7 +335,7 @@ public class Uml2Mapper_1
                 refTypeIsPrimitive);
         } 
         // Association
-        else if (elementDef.objGetClass().equals(ModelAttributes.ASSOCIATION)) {
+        else if (elementDef.isAssociationType()) {
             ModelElement_1_0 associationEnd1Def = this.model.getElement(elementDef.objGetList("content").get(0));
             ModelElement_1_0 associationEnd2Def = this.model.getElement(elementDef.objGetList("content").get(1));
             mapper.mapAssociationBegin(
@@ -367,7 +366,7 @@ public class Uml2Mapper_1
             );
         }
         // Operation
-        else if (elementDef.objGetClass().equals(ModelAttributes.OPERATION)) {
+        else if (elementDef.isOperationType()) {
             ModelElement_1_0 returnType = null;
             for(
                 Iterator i = elementDef.objGetList("content").iterator(); 
@@ -393,7 +392,7 @@ public class Uml2Mapper_1
             mapper.mapOperationEnd(elementDef);
         }
         // Exception
-        else if(elementDef.objGetClass().equals(ModelAttributes.EXCEPTION)) {
+        else if(elementDef.isExceptionType()) {
             mapper.mapOperationBegin(
                 elementDef, 
                 null
@@ -410,7 +409,7 @@ public class Uml2Mapper_1
             mapper.mapOperationEnd(elementDef);
         }
         // Parameter
-        else if(elementDef.objGetClass().equals(ModelAttributes.PARAMETER)) {
+        else if(elementDef.isParameterType()) {
             ModelElement_1_0 typeDef = this.model.getElement(elementDef.getType());
             mapper.mapParameter(
                 elementDef, 
@@ -418,7 +417,7 @@ public class Uml2Mapper_1
             );
         } 
         // Structure type 
-        else if (elementDef.objGetClass().equals(ModelAttributes.STRUCTURE_TYPE)) {
+        else if (elementDef.isStructureType()) {
             boolean hasFields = this.hasStructureFields(elementDef.objGetList("content"));
             mapper.mapClassBegin(
                 elementDef, 
@@ -439,7 +438,7 @@ public class Uml2Mapper_1
             );
         }
         // Structure field
-        else if(elementDef.objGetClass().equals(ModelAttributes.STRUCTURE_FIELD)) {
+        else if(elementDef.isStructureFieldType()) {
             ModelElement_1_0 typeDef = this.model.getElement(elementDef.getType());
             boolean refTypeIsPrimitive = typeDef.isPrimitiveType();
             mapper.mapAttribute(
@@ -458,7 +457,7 @@ public class Uml2Mapper_1
         if (!content.isEmpty()) {
             for (Iterator iterator = content.iterator(); iterator.hasNext();) {
                 ModelElement_1_0 elementDef = this.model.getElement(iterator.next());
-                if (elementDef.objGetClass().equals(ModelAttributes.STRUCTURE_FIELD)) { 
+                if (elementDef.isStructureFieldType()) { 
                     return true; 
                 }
             }
@@ -473,15 +472,15 @@ public class Uml2Mapper_1
             for (Iterator iterator = content.iterator(); iterator.hasNext();) {
                 ModelElement_1_0 elementDef = this.model.getElement(iterator
                     .next());
-                if (elementDef.objGetClass().equals(ModelAttributes.ATTRIBUTE)) {
+                if (elementDef.isAttributeType()) {
                     return true;
                 } 
-                else if (elementDef.objGetClass().equals(ModelAttributes.OPERATION)) {
+                else if (elementDef.isOperationType()) {
                     return true;
                 }
                 // in openMDX exceptions are modeled as operations and are therefore 
                 // structural features as well in the broadest sense
-                else if (elementDef.objGetClass().equals(ModelAttributes.EXCEPTION)) { 
+                else if (elementDef.isExceptionType()) { 
                     return true; 
                 }
             }

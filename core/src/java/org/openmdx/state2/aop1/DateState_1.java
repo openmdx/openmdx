@@ -462,7 +462,6 @@ public class DateState_1
      * 
      * @return <code>true</code> if all attributes apart from the ones to be ignored are equal
      */
-    @SuppressWarnings("unchecked")
     protected boolean similar(
         DataObject_1_0 left,
         DataObject_1_0 right
@@ -477,7 +476,7 @@ public class DateState_1
         Set<String> leftFetched = left.objDefaultFetchGroup();
         Set<String> rightFetched = right.objDefaultFetchGroup();
         Collection<String> ignorable = ignorableAttributes();
-        for(Map.Entry<String,ModelElement_1_0> feature : ((Map<String,ModelElement_1_0>)classifier.objGetMap("allFeature")).entrySet()){
+        for(Map.Entry<String,ModelElement_1_0> feature : classifier.objGetMap("allFeature").entrySet()){
             ModelElement_1_0 featureDef = feature.getValue();
             String featureName = feature.getKey();
             if(!ignorable.contains(featureName) && this.isAttribute(featureDef) && !ModelHelper.isDerived(featureDef)) {

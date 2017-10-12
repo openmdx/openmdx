@@ -55,6 +55,7 @@ import java.util.ResourceBundle;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+import org.openmdx.base.collection.Maps;
 import org.openmdx.kernel.log.SysLog;
 
 
@@ -129,16 +130,11 @@ public class Domains {
         String domainId
     ){
         Map<Integer,String> domain = this.domains.get(domainId);
-        if(domain == null) {
-            Map<Integer,String> concurrent = this.domains.putIfAbsent(
-                domainId,
-                domain = newDomain(domainId)
-            );
-            if(concurrent != null) {
-                return concurrent;
-            }
-        }
-        return domain;
+        return domain != null ? domain : Maps.putUnlessPresent(
+            this.domains, 
+            domainId, 
+            newDomain(domainId)
+        );
     }
 
     /**

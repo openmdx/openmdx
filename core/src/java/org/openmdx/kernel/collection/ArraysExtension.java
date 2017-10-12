@@ -60,6 +60,8 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
 
+import org.openmdx.base.resource.cci.Freezable;
+
 /**
  * Array Utility Class
  */
@@ -222,14 +224,8 @@ public class ArraysExtension {
     @SuppressWarnings("rawtypes")
     public static class AsList
         extends AbstractList
-        implements Cloneable, Serializable
+        implements Cloneable, Serializable, Freezable
     {
-
-        /**
-         * 
-         */
-        private static final long serialVersionUID = 3258134669471267120L;
-
 
         /**
          * Constructor 
@@ -247,7 +243,7 @@ public class ArraysExtension {
             this.array = array;
             this.size = size;
         }
-
+        
         /**
          * Constructor 
          * 
@@ -263,6 +259,31 @@ public class ArraysExtension {
         ){
             this(array, Array.getLength(array));
         }
+        
+        protected AsList(
+        ){
+            // Deserialization
+        }
+
+        /**
+         * Implements <code>Seializable</code>
+         */
+        private static final long serialVersionUID = 3258134669471267120L;
+
+        /**
+         * Implements <code>Freezable</code>
+         */
+        private boolean immutable;
+        
+        /**
+         * @serial
+         */
+        private Object array;
+
+        /**
+         * @serial
+         */
+        private int size;
 
         /**
          * Get the array backing-up the List.
@@ -275,21 +296,6 @@ public class ArraysExtension {
         ){
             return this.array;
         }
-
-        protected AsList(
-        ){
-            // Deserialization
-        }
-
-        /**
-         * @serial
-         */
-        private Object array;
-
-        /**
-         * @serial
-         */
-        private int size;
 
         /**
          * Returns the element at the specified position in this list.
@@ -350,6 +356,10 @@ public class ArraysExtension {
             int index,
             Object element
         ){
+            if(this.immutable) throw new UnsupportedOperationException(
+                "Modification is no longer supported " +
+                "as soon as the colloction is made immutable"
+            );
             if(index >= this.size) throw new IndexOutOfBoundsException(
                 "Index " + index + " exceeds the size " + this.size
             );
@@ -374,8 +384,25 @@ public class ArraysExtension {
             );
         }
 
+        /* (non-Javadoc)
+         * @see org.openmdx.base.resource.cci.Freezable#makeImmutable()
+         */
+        @Override
+        public void makeImmutable() {
+            this.immutable = true;
+        }
+
+        /* (non-Javadoc)
+         * @see org.openmdx.base.resource.cci.Freezable#isImmutable()
+         */
+        @Override
+        public boolean isImmutable() {
+            return this.immutable;
+        }
+
     }
 
+    
     //------------------------------------------------------------------------
     // Class AsMap
     //------------------------------------------------------------------------

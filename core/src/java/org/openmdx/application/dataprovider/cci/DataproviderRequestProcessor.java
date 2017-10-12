@@ -677,7 +677,7 @@ public final class DataproviderRequestProcessor
         short direction
     ) throws ServiceException {
         RequestedList target = new RequestedList(
-            (DataproviderRequestProcessor)clone(),
+            clone(),
             referenceFilter,
             attributeFilter,
             attributeSelector,

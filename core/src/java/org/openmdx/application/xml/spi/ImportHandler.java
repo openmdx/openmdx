@@ -57,6 +57,7 @@ import java.net.URL;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -83,7 +84,6 @@ import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.exception.Throwables;
 import org.openmdx.kernel.loading.Resources;
 import org.openmdx.kernel.log.SysLog;
-import org.openmdx.kernel.xml.EntityMapper;
 import org.w3c.spi2.Datatypes;
 import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
@@ -528,8 +528,9 @@ public class ImportHandler extends DefaultHandler {
         }
         List<String> element = parseElement(localpart);
         String qualifierName = ImportHandler.qualifierNames.get(localpart);
-        String attributeMultiplicity = ImportHandler.attributeMultiplicities.get(
-            this.currentLocalpartObject + ":" + localpart
+        String multiplicityKey = this.currentLocalpartObject + ":" + localpart;
+        final String attributeMultiplicity = ImportHandler.attributeMultiplicities.get(
+            multiplicityKey
         );
         //
         // element has a qualifier --> new object
@@ -921,20 +922,36 @@ public class ImportHandler extends DefaultHandler {
                         ) {
                             // SPARSEARRAY
                             // In case of v2 format the multiplicity is not set
-                            List<Object> values = facade.getAttributeValuesAsGuardedList(attributeName);
                             if (
                                 this.currentAttributeOperation == null || 
                                 "".equals(this.currentAttributeOperation) || 
                                 "set".equals(this.currentAttributeOperation)
                             ) {
-                                if (absolutePosition < 0) {
-                                    values.add(value);
+                                if(facade.isTypeSafe()) {
+                                    if(facade.isCollection(attributeName)) {
+                                        if (absolutePosition < 0) {
+                                            Collection<Object> values = facade.attributeValuesAsCollection(attributeName);
+                                            values.add(value);
+                                        } else {
+                                            List<Object> values = facade.getAttributeValuesAsGuardedList(attributeName);
+                                            values.set(absolutePosition, value);
+                                        }
+                                    } else {
+                                        facade.setAttributeValue(attributeName, value);
+                                    }
                                 } else {
-                                    values.set(absolutePosition, value);
+                                    List<Object> values = facade.getAttributeValuesAsGuardedList(attributeName);
+                                    if (absolutePosition < 0) {
+                                        values.add(value);
+                                    } else {
+                                        values.set(absolutePosition, value);
+                                    }
                                 }
                             } else if ("add".equals(this.currentAttributeOperation)) {
+                                List<Object> values = facade.getAttributeValuesAsGuardedList(attributeName);
                                 values.add(value);
                             } else if ("remove".equals(this.currentAttributeOperation)) {
+                                List<Object> values = facade.getAttributeValuesAsGuardedList(attributeName);
                                 values.remove(value);
                             } else {
                                 notSupported = true;
@@ -994,9 +1011,7 @@ public class ImportHandler extends DefaultHandler {
                 // </item> is the end tag for a value of a multi-valued attribute.
                 // Leave currentPath unchanged.
                 this.currentPath = this.currentPath.getParent();
-                if(Multiplicity.MAP.code().equals(this.currentAttributeMultiplicity)) {
-                    this.currentAttributeMultiplicity = null;
-                }
+                this.currentAttributeMultiplicity = null;
              }
             this.currentAttributeValue = null;
             this.previousElementEnded = true;

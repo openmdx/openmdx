@@ -64,6 +64,7 @@ import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
 import org.openmdx.base.mof.cci.ModelHelper;
 import org.openmdx.base.naming.Path;
+import org.openmdx.base.query.ConditionType;
 import org.openmdx.base.query.Quantifier;
 import org.openmdx.base.rest.cci.QueryFilterRecord;
 import org.openmdx.kernel.exception.BasicException;
@@ -169,10 +170,10 @@ public class RidOidQueryDatabase_2 extends Database_2 {
         Connection connection,
         DbObject dbObject,
         String column,
-        ModelElement_1_0 filterPropertyDef,
+        boolean negation,
+        ModelElement_1_0 filterPropertyDef, 
         StringBuilder clause, 
-        List<Object> clauseValues, 
-        Object[] values
+        List<Object> clauseValues, Object[] values
     ) throws ServiceException {
         if(useRidAndOid(filterPropertyDef)) {
             clause.append("(");
@@ -229,8 +230,8 @@ public class RidOidQueryDatabase_2 extends Database_2 {
                 connection,
                 dbObject,
                 column,
-                filterPropertyDef,
-                clause, clauseValues, values
+                negation,
+                filterPropertyDef, clause, clauseValues, values
             );
         }
     }
@@ -381,8 +382,8 @@ public class RidOidQueryDatabase_2 extends Database_2 {
         FilterProperty filterProperty,
         ModelElement_1_0 filterPropertyDef,
         String columnName,
-        List<Object> clauseValues, 
-        StringBuilder clause
+        ConditionType condition, 
+        List<Object> clauseValues, StringBuilder clause
     ) throws ServiceException {
         ModelElement_1_0 referencedType = getReferenceType(filterPropertyDef);        
         String joinViewAliasName = viewAliasName + "v";
@@ -446,16 +447,16 @@ public class RidOidQueryDatabase_2 extends Database_2 {
             excludingFilterClauses, 
             excludingFilterValues
         );
-        boolean isForAll = filterProperty.quantor() == Quantifier.FOR_ALL.code();
-        clause.append("(").append(isForAll ? "NOT " : "").append("EXISTS (SELECT 1 FROM ").append(view1).append(" ").append(joinViewAliasName).append(" WHERE (");
+        final Membership membership = new Membership(Quantifier.valueOf(filterProperty.quantor()), condition);
+        clause.append("(").append(membership.isMember() ? " " : "NOT ").append("EXISTS (SELECT 1 FROM ").append(view1).append(" ").append(joinViewAliasName).append(" WHERE (");
         for(int i = 0; i < joinColumns1.size(); i++) {
             clause.append(i == 0 ? "" : " AND ").append(joinColumns1.get(i)).append(" = ").append(joinColumns2.get(i));
         }
-        clause.append(") AND (").append(isForAll ? "(1=0)" : "(1=1)");
+        clause.append(") AND (").append(membership.isNegated() ? "(1=0)" : "(1=1)");
         for(int i = 0, iLimit = includingFilterClauses.size(); i < iLimit; i++) {
             if(includingFilterClauses.get(i).length() > 0) {
                 clause.append(
-                    isForAll ? " OR NOT " : " AND "
+                    membership.isNegated() ? " OR NOT " : " AND "
                 ).append(
                     includingFilterClauses.get(i)
                 );

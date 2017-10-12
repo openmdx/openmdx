@@ -50,6 +50,7 @@ package org.openmdx.base.resource.spi;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.util.AbstractMap;
+import java.util.AbstractSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -57,7 +58,9 @@ import java.util.Set;
 
 import javax.resource.cci.MappedRecord;
 
+import org.openmdx.base.resource.cci.Freezable;
 import org.openmdx.kernel.collection.InternalizedKeyMap;
+import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.text.MultiLineStringRepresentation;
 import org.openmdx.kernel.text.format.IndentingFormatter;
 import org.w3c.cci2.ImmutableDatatype;
@@ -76,7 +79,7 @@ import org.w3c.cci2.ImmutableDatatype;
 @SuppressWarnings({"rawtypes","unchecked"})
 class VariableSizeMappedRecord 
     extends AbstractMap
-    implements MappedRecord, MultiLineStringRepresentation
+    implements MappedRecord, MultiLineStringRepresentation, Freezable
 {
 
     /**
@@ -108,14 +111,19 @@ class VariableSizeMappedRecord
     /**
      * The values are serialized explicitly
      */
-    private transient Map values;
+    private transient Map<Object,Object> values;
+    
+    /**
+     * Implements <code>Freezable</code>
+     */
+    private boolean immutable = false;
     
     /**
      * Implements <code>Serializable</code>
      */
     private static final long serialVersionUID = 7135299628146306393L;
 
-
+    
     //------------------------------------------------------------------------
     // Implements Serializable
     //------------------------------------------------------------------------
@@ -125,6 +133,8 @@ class VariableSizeMappedRecord
      * 
      * @param out
      * @throws IOException
+            // TODO Auto-generated method stub
+            return null
      */
     private void writeObject(
         ObjectOutputStream out
@@ -132,7 +142,7 @@ class VariableSizeMappedRecord
         out.defaultWriteObject();
         int size = this.values.size();
         out.writeInt(size);
-        for(Map.Entry<?, ?> entry : (Set<Map.Entry<?, ?>>)this.values.entrySet()) {
+        for(Map.Entry<?, ?> entry : this.values.entrySet()) {
             out.writeObject(entry.getKey());
             out.writeObject(entry.getValue());
         }
@@ -163,7 +173,57 @@ class VariableSizeMappedRecord
            );
        }
     }
+
     
+    //--------------------------------------------------------------------------
+    // Implements Freezable
+    //--------------------------------------------------------------------------
+    
+    /* (non-Javadoc)
+     * @see org.openmdx.base.resource.cci.Freezable#makeImmutable()
+     */
+    @Override
+    public synchronized void makeImmutable() {
+        if(!this.immutable) {
+            for(Map.Entry<?,Object> e : this.values.entrySet()){
+                Object original = e.getValue();
+                Object immutable = Isolation.toImmutable(original);
+                if(original != immutable) {
+                    e.setValue(immutable);
+                }
+            }
+            this.immutable = true;
+        }
+    }
+    
+    /* (non-Javadoc)
+     * @see org.openmdx.base.resource.cci.Freezable#isImmutable()
+     */
+    @Override
+    public boolean isImmutable() {
+        return this.immutable;
+    }
+    
+    /**
+     * Asserts that the object is mutable
+     * 
+     * @throws IllegalStateException if the record is immutable
+     */
+    protected void assertMutability(){
+        if(this.immutable) {
+            throw new IllegalStateException(
+                "This record is frozen",
+                BasicException.newEmbeddedExceptionStack(
+                    BasicException.Code.DEFAULT_DOMAIN,
+                    BasicException.Code.ILLEGAL_STATE,
+                    new BasicException.Parameter("class", getClass().getName()),
+                    new BasicException.Parameter("name", getRecordName()),
+                    new BasicException.Parameter("immutable", Boolean.TRUE)
+                )
+            );
+        }
+    }
+
     
     //--------------------------------------------------------------------------
     // Extends AbstractMap
@@ -201,6 +261,7 @@ class VariableSizeMappedRecord
         Object key,
         Object value
     ){
+        assertMutability();
         return this.values.put(
             key, 
             value
@@ -216,7 +277,7 @@ class VariableSizeMappedRecord
     @Override
     public Set entrySet(
     ){
-        return this.values.entrySet();
+        return new EntrySet();
     }
 
     /* (non-Javadoc)
@@ -225,6 +286,7 @@ class VariableSizeMappedRecord
     @Override
     public void clear(
     ) {
+        assertMutability();
         this.values.clear();        
     }
 
@@ -274,6 +336,7 @@ class VariableSizeMappedRecord
     public Object remove(
         Object key
     ) {
+        assertMutability();
         return this.values.remove(key);
     }
 
@@ -428,4 +491,108 @@ class VariableSizeMappedRecord
         return IndentingFormatter.toString(this);
     }
 
+    /**
+     * Entry Set
+     */
+    @SuppressWarnings("synthetic-access")
+    class EntrySet extends AbstractSet {
+        
+        /* (non-Javadoc)Kbje
+         * @see java.util.AbstractCollection#iterator()
+         */
+        @Override
+        public Iterator iterator() {
+            return new EntryIterator(values.entrySet().iterator());
+        }
+
+        /* (non-Javadoc)
+         * @see java.util.AbstractCollection#size()
+         */
+        @Override
+        public int size() {
+            return values.size();
+        }
+        
+    }
+
+    /**
+     * Entry Iterator
+     */
+    class EntryIterator implements Iterator {
+        
+        /**
+         * Constructor 
+         */
+        EntryIterator(
+            Iterator<Map.Entry<Object, Object>> delegate
+        ) {
+            this.delegate = delegate;
+        }
+        
+        private final Iterator<Map.Entry<Object, Object>> delegate;
+
+        /* (non-Javadoc)
+         * @see java.util.Iterator#hasNext()
+         */
+        @Override
+        public boolean hasNext() {
+            return delegate.hasNext();
+        }
+
+        /* (non-Javadoc)
+         * @see java.util.Iterator#next()
+         */
+        @Override
+        public Object next() {
+            return new RecordEntry(delegate.next());
+        }
+
+        /* (non-Javadoc)
+         * @see java.util.Iterator#remove()
+         */
+        @Override
+        public void remove() {
+            assertMutability();
+            delegate.remove();
+        }
+        
+    }
+
+    class RecordEntry implements Map.Entry {
+
+        RecordEntry (
+            Map.Entry<Object, Object> delegate
+        ){
+            this.delegate = delegate;
+        }
+        
+        private final Entry<Object, Object> delegate;
+
+        /* (non-Javadoc)
+         * @see java.util.Map.Entry#getKey()
+         */
+        @Override
+        public Object getKey() {
+            return delegate.getKey();
+        }
+
+        /* (non-Javadoc)
+         * @see java.util.Map.Entry#getValue()
+         */
+        @Override
+        public Object getValue() {
+            return delegate.getValue();
+        }
+
+        /* (non-Javadoc)
+         * @see java.util.Map.Entry#setValue(java.lang.Object)
+         */
+        @Override
+        public Object setValue(Object value) {
+            assertMutability();
+            return delegate.setValue(value);
+        }
+        
+    }
+    
 }

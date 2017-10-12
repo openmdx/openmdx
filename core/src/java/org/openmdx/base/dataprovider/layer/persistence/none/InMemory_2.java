@@ -98,9 +98,9 @@ import org.openmdx.kernel.log.SysLog;
  * <li>namespaceId
  * </ul>
  * <p>
- * A single namespace must not be used by different threads
- * concurrently.
+ * A single namespace must not be used by different threadscconcurrently.
  */
+@SuppressWarnings("synthetic-access")
 public class InMemory_2 implements Port<RestConnection> {
 
 	/**
@@ -521,7 +521,7 @@ public class InMemory_2 implements Port<RestConnection> {
 		/* (non-Javadoc)
 		 * @see org.openmdx.base.rest.spi.AbstractRestInteraction#delete(org.openmdx.base.resource.spi.RestInteractionSpec, org.openmdx.base.rest.cci.QueryRecord)
 		 */
-		@Override
+        @Override
 		protected boolean delete(
 			RestInteractionSpec ispec, 
 			QueryRecord input
@@ -832,7 +832,7 @@ public class InMemory_2 implements Port<RestConnection> {
                 } else if("core".equals(feature) && isCoreInstance(getClassifier(candidate))){
                 	return Collections.emptySet().iterator();
                 } else {
-					final Object values = ((ObjectRecord)candidate).getValue().get(feature);
+					final Object values = candidate.getValue().get(feature);
 		    		if(values == null) {
 		    			return Collections.emptySet().iterator();
 		    		} else if(values instanceof IndexedRecord) {

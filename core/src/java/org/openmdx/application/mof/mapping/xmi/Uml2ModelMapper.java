@@ -53,6 +53,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.AggregationKind;
@@ -83,10 +84,13 @@ public class Uml2ModelMapper {
         ModelElement_1_0 operationDef,
         ModelElement_1_0 returnType
     ) throws ServiceException {
-        String name = operationDef.getName();
-        Boolean isQuery = operationDef.objGetList("isQuery").isEmpty()
-            ? null
-            : (Boolean)operationDef.objGetValue("isQuery");
+        final String name = operationDef.getName();
+        final Boolean isQuery;
+        if(operationDef.isExceptionType()) {
+            isQuery = null;
+        } else {
+            isQuery = (Boolean)operationDef.objGetValue("isQuery");
+        }
         String returnTypeQualifiedName = returnType == null
             ? null
             : (String)returnType.getQualifiedName();
@@ -104,11 +108,12 @@ public class Uml2ModelMapper {
         pw.println(">");
         
         // Annotation
-        if(!operationDef.objGetList("annotation").isEmpty()) {            
+        String annotation = (String)operationDef.objGetValue("annotation");
+        if(annotation != null) {            
             pw.write(indent, 0, nTabs);
             pw.print("\t<ownedComment");
             this.printAttribute("xmi:id", this.createId());
-            this.printAttribute("body", this.toHTMLString((String)operationDef.objGetValue("annotation")));
+            this.printAttribute("body", this.toHTMLString(annotation));
             pw.println("/>");
         }
         
@@ -121,7 +126,7 @@ public class Uml2ModelMapper {
             pw.write(indent, 0, nTabs); 
             pw.print("\t\t<details");
             this.printAttribute("xmi:id", this.createId());
-            this.printAttribute("key", (String)operationDef.objGetValue("stereotype"));
+            this.printAttribute("key", (String)operationDef.objGetList("stereotype").get(0));
             pw.println("/>");        
             pw.write(indent, 0, nTabs); 
             pw.println("\t</eAnnotations>");
@@ -194,11 +199,12 @@ public class Uml2ModelMapper {
         pw.println(">");
 
         // Annotation
-        if(!associationDef.objGetList("annotation").isEmpty()) {            
+        String annotation = (String)associationDef.objGetValue("annotation");
+        if(annotation != null) {            
             pw.write(indent, 0, nTabs);
             pw.print("\t<ownedComment");
             this.printAttribute("xmi:id", this.createId());
-            this.printAttribute("body", this.toHTMLString((String)associationDef.objGetValue("annotation")));
+            this.printAttribute("body", this.toHTMLString(annotation));
             pw.println("/>");
         }
         
@@ -251,9 +257,11 @@ public class Uml2ModelMapper {
             this.mapMultiplicity(multiplicity);
             
             // Qualifier
-            if(!associationEndDef.objGetList("qualifierName").isEmpty()) {
-                String qualifierName = (String)associationEndDef.objGetValue("qualifierName");
-                ModelElement_1_0 qualifierType = (ModelElement_1_0)qualifierTypes.get(0);
+            List<?> qualifierNames = associationEndDef.objGetList("qualifierName");
+            int i = 0;
+            for(Object rawQualifierName : qualifierNames) {
+                String qualifierName = (String) rawQualifierName;
+                ModelElement_1_0 qualifierType = (ModelElement_1_0)qualifierTypes.get(i++);
                 String qualifierTypeName = qualifierType.getQualifiedName();
                 
                 pw.write(indent, 0, nTabs);
@@ -394,11 +402,12 @@ public class Uml2ModelMapper {
         pw.println(">");
 
         // Annotation
-        if(!attributeDef.objGetList("annotation").isEmpty()) {            
+        String annotation = (String)attributeDef.objGetValue("annotation");
+        if(annotation != null) {            
             pw.write(indent, 0, nTabs);
             pw.print("\t<ownedComment");
             this.printAttribute("xmi:id", this.createId());
-            this.printAttribute("body", this.toHTMLString((String)attributeDef.objGetValue("annotation")));
+            this.printAttribute("body", this.toHTMLString(annotation));
             pw.println("/>");
         }
                 
@@ -505,11 +514,12 @@ public class Uml2ModelMapper {
         pw.println(">");
 
         // Annotation
-        if(!classDef.objGetList("annotation").isEmpty()) {
+        String annotation = (String)classDef.objGetValue("annotation");
+        if(annotation != null) {
             pw.write(indent, 0, nTabs);
             pw.print("\t<ownedComment");
             this.printAttribute("xmi:id", this.createId());
-            this.printAttribute("body", this.toHTMLString((String)classDef.objGetValue("annotation")));
+            this.printAttribute("body", this.toHTMLString(annotation));
             pw.println("/>");
         }
         // Stereotypes
@@ -520,13 +530,19 @@ public class Uml2ModelMapper {
             this.printAttribute("xmi:id", this.createId());
             this.printAttribute("source", "keywords");
             pw.println(">");
-
             pw.write(indent, 0, nTabs);
             pw.print("\t\t<details");
             this.printAttribute("xmi:id", this.createId());
-            this.printAttribute("key", asStructureType ? Stereotypes.STRUCT : (String)classDef.objGetValue("stereotype"));
+            final String key;
+            if(asStructureType) {
+                key = Stereotypes.STRUCT;
+            } else {
+                Set<Object> stereotypes = classDef.objGetSet("stereotype");
+                key = stereotypes.isEmpty() ? null : (String)stereotypes.iterator().next();
+            }
+            this.printAttribute("key", key);
             pw.println("/>");
-            
+
             pw.write(indent, 0, nTabs);
             pw.println("\t</eAnnotations>");
         }

@@ -170,7 +170,7 @@ public class PlugInFactory<T> extends BeanFactory<T> {
 	){
         return new PlugInFactory<T>(
 		    instanceClass,
-		    PlugInFactory.<T>getClass(configuration, "class", true),
+		    BeanFactory.<T>getClass(configuration, "class", true),
 		    configuration
 		);
     }
@@ -230,7 +230,7 @@ public class PlugInFactory<T> extends BeanFactory<T> {
     ){
         return new PlugInFactory<T>(
 		    instanceClass,
-		    (Class<? extends T>) PlugInFactory.getClass("class", beanClassName), 
+		    (Class<? extends T>) BeanFactory.getClass("class", beanClassName), 
 		    configuration
 		);
     }

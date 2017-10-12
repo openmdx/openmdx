@@ -306,7 +306,7 @@ public class RequestedObject
     public ObjectRecord clone(
     ){
         try {
-            return (ObjectRecord) Object_2Facade.cloneObject(this.getObject());
+            return Object_2Facade.cloneObject(this.getObject());
         } catch(ServiceException exception) {
             throw new RuntimeServiceException(exception.getCause());
         }

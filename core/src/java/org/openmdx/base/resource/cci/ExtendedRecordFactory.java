@@ -198,4 +198,24 @@ public interface ExtendedRecordFactory extends RecordFactory {
     Object value
   );
 
+  /**
+   * Creates a variable size IndexedRecord with the given name, short 
+   * description and content. The size will always be in the range 0 to 1.  
+   * 
+   * @param     recordName
+   *            The name of the record acts as a pointer to the meta
+   *            information (stored in the metadata repository) for a specific 
+   *            record type. 
+   * @param     recordShortDescription
+   *            The short description of the Record; or <code>null</null>.
+   * @param     value
+   *            The single value of the tiny indexed record; or 
+   *            <code>null</null> for an empty record
+   */
+  IndexedRecord tinyIndexedRecord(
+    String recordName,
+    String recordShortDescription,
+    Object value
+  );
+  
 }

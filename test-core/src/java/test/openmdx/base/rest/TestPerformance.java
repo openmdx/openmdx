@@ -79,6 +79,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.rest.spi.Object_2Facade;
+import org.w3c.cci2.MutableDatatypeFactory;
 import org.w3c.format.DateTimeFormat;
 
 /**
@@ -110,7 +111,7 @@ public class TestPerformance {
 	@Before
     public void setUp(
     ) throws Exception {
-        this.xmlDatatypeFactory = DatatypeFactory.newInstance();
+        this.xmlDatatypeFactory = MutableDatatypeFactory.xmlDatatypeFactory();
         this.valueObjects = new HashMap<Path, ValueObject>();
         this.valueMaps = new HashMap<Path, Map<String, Object>>();
         this.dataproviderObjects = new HashMap<Path, MappedRecord>();

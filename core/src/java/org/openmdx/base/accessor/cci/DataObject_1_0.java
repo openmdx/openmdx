@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2009, OMEX AG, Switzerland
+ * Copyright (c) 2004-2017, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -475,5 +475,14 @@ public interface DataObject_1_0
      */
     ServiceException getInaccessibilityReason(
     ) throws ServiceException;
+ 
+
+    /**
+     * Used to minimize overhead
+     * 
+     * @return <code>true</code> if its persistence manager is neither multi-threaded
+     * nor thread isolating
+     */
+    boolean objThreadSafetyRequired();
     
 }

@@ -191,5 +191,13 @@ public class Interceptor_1
             next.jdoPreStore();
         }
     }
+
+    /* (non-Javadoc)
+     * @see org.openmdx.base.accessor.cci.DataObject_1_0#isSingleThreaded()
+     */
+    @Override
+    public boolean objThreadSafetyRequired() {
+        return delegate.objThreadSafetyRequired();
+    }
     
 }

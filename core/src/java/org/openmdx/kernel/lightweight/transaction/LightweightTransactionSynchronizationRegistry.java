@@ -96,9 +96,9 @@ public final class LightweightTransactionSynchronizationRegistry
      * 
      * @return the active transaction
      */
-    private LightweightTransaction getTransaction(){
+    private LightweightTransaction getTransaction(boolean required){
         LightweightTransaction transaction = this.transactionManager.bindings.get(Thread.currentThread());
-        if (transaction == null) throw new IllegalStateException(
+        if (required && transaction == null) throw new IllegalStateException(
             "No transaction is active"
         );
         return transaction;
@@ -108,7 +108,7 @@ public final class LightweightTransactionSynchronizationRegistry
      * @see javax.transaction.TransactionSynchronizationRegistry#getResource(java.lang.Object)
      */
     public Object getResource(Object key) {
-        return getTransaction().managedResources.get(key);
+        return getTransaction(true).managedResources.get(key);
     }
 
     /* (non-Javadoc)
@@ -122,14 +122,16 @@ public final class LightweightTransactionSynchronizationRegistry
      * @see javax.transaction.TransactionSynchronizationRegistry#getTransactionKey()
      */
     public Object getTransactionKey() {
-        return getTransaction().xid;
+        final LightweightTransaction transaction = getTransaction(false);
+        return transaction == null ? null : transaction.xid;
     }
 
     /* (non-Javadoc)
      * @see javax.transaction.TransactionSynchronizationRegistry#getTransactionStatus()
      */
     public int getTransactionStatus() {
-        return getTransaction().status;
+        final LightweightTransaction transaction = getTransaction(false);
+        return transaction == null ? Status.STATUS_NO_TRANSACTION : transaction.status;
     }
 
     /* (non-Javadoc)
@@ -139,14 +141,14 @@ public final class LightweightTransactionSynchronizationRegistry
         Object key, 
         Object value
     ) {
-        getTransaction().managedResources.put(key, value);
+        getTransaction(true).managedResources.put(key, value);
     }
 
     /* (non-Javadoc)
      * @see javax.transaction.TransactionSynchronizationRegistry#registerInterposedSynchronization(javax.transaction.Synchronization)
      */
     public void registerInterposedSynchronization(Synchronization sync) {
-        getTransaction().interposedSynchronization = sync;
+        getTransaction(true).interposedSynchronization = sync;
     }
 
     /* (non-Javadoc)
@@ -155,7 +157,7 @@ public final class LightweightTransactionSynchronizationRegistry
     public void setRollbackOnly(
     ) {
         try {
-            getTransaction().setRollbackOnly();
+            getTransaction(true).setRollbackOnly();
         } catch (SystemException exception) {
             throw new RuntimeException(exception);
         }

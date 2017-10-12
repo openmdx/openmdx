@@ -136,7 +136,7 @@ public class InMemory_1 extends AbstractPersistence_1 {
         String objectClass,
         String featureName
     ) throws ServiceException{
-        return (ModelElement_1_0)getModel().getElement(objectClass).objGetMap("allFeature").get(featureName);
+        return getModel().getElement(objectClass).objGetMap("allFeature").get(featureName);
     }
     
     /**
@@ -625,19 +625,19 @@ public class InMemory_1 extends AbstractPersistence_1 {
                                 
                                 private final Iterator<?> delegate = superTypes.iterator();
 
-//                              @Override
+                                @Override
                                 public boolean hasNext() {
                                     return delegate.hasNext();
                                 }
                                 
 
-//                              @Override
+                                @Override
                                 public String next() {
                                     Path superType = (Path) this.delegate.next();
                                     return superType.getLastSegment().toClassicRepresentation();
                                 }
 
-//                              @Override
+                                @Override
                                 public void remove() {
                                     throw new UnsupportedOperationException();
                                 }
@@ -660,12 +660,12 @@ public class InMemory_1 extends AbstractPersistence_1 {
 
                                 private final Iterator<?> delegate = getValuesIterator(candidate, attribute);
                                 
-//                              @Override
+                                @Override
                                 public boolean hasNext() {
                                     return delegate.hasNext();
                                 }
 
-//                              @Override
+                                @Override
                                 public MappedRecord next() {
                                     Path path = (Path) this.delegate.next();
                                     Map<String, MappedRecord> container = InMemory_1.this.referenceMap.get(
@@ -684,7 +684,7 @@ public class InMemory_1 extends AbstractPersistence_1 {
                                     }
                                 }
 
-//                              @Override
+                                @Override
                                 public void remove() {
                                     throw new UnsupportedOperationException();
                                 }

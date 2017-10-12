@@ -111,6 +111,8 @@ public abstract class AbstractPattern implements Serializable {
 			final FlagsAndValue flagsAndValue = EmbeddedFlags.getInstance().parse(valueWithEmbeddedFlags);
 			if(flagsAndValue.getFlagSet().contains(RegularExpressionFlag.ACCENT_INSENSITIVE)){
 				return AccentInsensitivePattern.newInstance(flagsAndValue);
+			} else if(flagsAndValue.getFlagSet().contains(RegularExpressionFlag.JSON_QUERY)) {
+			    return JsonQueryPattern.newInstance(flagsAndValue);
 			} else {
 				return RegularExpressionPattern.newInstance(flagsAndValue);
 			}

@@ -108,6 +108,7 @@ public abstract class AbstractXMLStreamReader implements XMLStreamReader {
     }
 
     public void require(int arg0, String arg1, String arg2) throws XMLStreamException {
+        // nothing to do
     }
 
     public int getAttributeCount() {
@@ -145,7 +146,7 @@ public abstract class AbstractXMLStreamReader implements XMLStreamReader {
     }
 
     public String getAttributeValue(String ns, String local) {
-        return (String) node.getAttributes().get(new QName(ns, local));
+        return node.getAttributes().get(new QName(ns, local));
     }
 
     public String getAttributeType(int arg0) {

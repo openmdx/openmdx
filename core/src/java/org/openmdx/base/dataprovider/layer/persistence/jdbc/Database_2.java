@@ -62,6 +62,7 @@ import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.StringReader;
 import java.io.Writer;
+import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.net.URI;
@@ -1342,6 +1343,25 @@ public class Database_2 extends AbstractRestPort implements Database_1_0, DataTy
         this.cascadeDeletes = cascadeDeletes;
     }
     
+    
+    /**
+     * Get orderNullsAsEmpty.
+     * 
+     * @return
+     */
+    public boolean isOrderNullsAsEmpty() {
+        return this.orderNullsAsEmpty;
+    }
+
+    /**
+     * Set orderNullsAsEmpty.
+     * 
+     * @return
+     */
+    public void setOrderNullsAsEmpty(boolean orderNullsAsEmpty) {
+        this.orderNullsAsEmpty = orderNullsAsEmpty;
+    }
+
     /* (non-Javadoc)
      * @see org.openmdx.base.dataprovider.layer.persistence.jdbc.spi.Database_1_0#getDatabaseConfiguration()
      */
@@ -3934,7 +3954,7 @@ public class Database_2 extends AbstractRestPort implements Database_1_0, DataTy
         String featureName
     ){
         try {
-            return (ModelElement_1_0)getModel().getElement(objectClass).objGetMap("allFeature").get(featureName);
+            return getModel().getElement(objectClass).objGetMap("allFeature").get(featureName);
         } catch(Exception exception){
             return null;
         }
@@ -4497,51 +4517,47 @@ public class Database_2 extends AbstractRestPort implements Database_1_0, DataTy
                 this.getCalendarMarshaller().unmarshal(val.toString().substring(0, 10)),
                 isEmbedded
             );
-        }
-        //
-        // org::w3c::date
-        // org::w3c::dateTime
-        //
-        else if(
+        } else if(
             PrimitiveTypes.DATE.equals(featureType) ||
             PrimitiveTypes.DATETIME.equals(featureType) ||
             val instanceof Timestamp ||
             val instanceof Time
         ) {
+            //
+            // org::w3c::date
+            // org::w3c::dateTime
+            //
             this.setValue(
                 target, 
                 index, 
                 this.getCalendarMarshaller().unmarshal(val),
                 isEmbedded
             );
-        } 
-        //
-        // org::w3c::duration
-        //
-        else if(PrimitiveTypes.DURATION.equals(featureType)) {
+        } else if(PrimitiveTypes.DURATION.equals(featureType)) {
+            //
+            // org::w3c::duration
+            //
             this.setValue(
                 target, 
                 index, 
                 this.getDurationMarshaller().unmarshal(val),
                 isEmbedded
             );
-        } 
-        //
-        // URIs
-        //
-        else if (PrimitiveTypes.ANYURI.equals(featureType)) {
+        } else if (PrimitiveTypes.ANYURI.equals(featureType)) {
+            //
+            // URIs
+            //
             this.setValue(
                 target, 
                 index, 
                 URIMarshaller.NORMALIZE.marshal(val),
                 isEmbedded
             );
-        }
-        //
-        // openMDX 1 clients expect all numbers to be returned 
-        // as BigIntegers
-        //
-        else if(val instanceof Number) {
+        } else if(val instanceof Number) {
+            //
+            // openMDX 1 clients expect all numbers to be returned 
+            // as BigIntegers
+            //
             Object value = val instanceof BigDecimal ? 
                 val : 
                 new BigDecimal(val.toString());
@@ -4551,11 +4567,10 @@ public class Database_2 extends AbstractRestPort implements Database_1_0, DataTy
                 value,
                 isEmbedded
             );
-        } 
-        //
-        // default 
-        //
-        else if(val instanceof String) {
+        } else if(val instanceof String) {
+            //
+            // default 
+            //
             String databaseProductName = this.getDatabaseProductName(conn);
             if("Oracle".equals(databaseProductName)) {
                 // Oracle maps empty strings to null. Fill list with empty strings up to index.                
@@ -4572,18 +4587,30 @@ public class Database_2 extends AbstractRestPort implements Database_1_0, DataTy
                 val,
                 isEmbedded
             );
-        }
-        //
-        // unknown 
-        //
-        else {
+        } else {
+            //
+            // unknown 
+            //
+            if(PrimitiveTypes.STRING.equals(featureType)) {
+                // As fall-back get value by invoking getValue() on val
+                try {
+                    Method getValueMethod = val.getClass().getMethod("getValue");
+                    this.setValue(
+                        target, 
+                        index, 
+                        getValueMethod.invoke(val),
+                        isEmbedded
+                    );
+                    return;
+                } catch(Exception ignore) { /* ignore */}
+            }
             throw new ServiceException(
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.NOT_SUPPORTED, 
                 "invalid column type. Supported are [Number|String|byte[]|Blob|Timestamp|Time]",
                 new BasicException.Parameter("featureType", featureType),
                 new BasicException.Parameter("columnType", val.getClass().getName())
-            );
+            );  
         }
     }
 
@@ -4780,7 +4807,7 @@ public class Database_2 extends AbstractRestPort implements Database_1_0, DataTy
              * FOR_ALL --> all attribute values must match --> all slices must match
              * THERE_EXISTS --> at least one attribute value must match --> at least one row must match --> subtract all rows which do not match
              */
-            if(filterProperty.quantor() == (negate ? Quantifier.FOR_ALL.code() : Quantifier.THERE_EXISTS.code())) {
+            if(filterProperty.quantor() == (negate ? Quantifier.FOR_ALL : Quantifier.THERE_EXISTS).code()) {
                 // For embedded features the clause is of the form (expr0 OR expr1 OR ... OR exprN)
                 // where N is the upper bound for the embedded feature 
                 int upperBound = this.getEmbeddedFeature(filterProperty.name()) != null 
@@ -4901,11 +4928,12 @@ public class Database_2 extends AbstractRestPort implements Database_1_0, DataTy
     }
 
     /**
-     * Add an IS_IN clause
+     * Add an IS_IN or IS_NOT_IN clause
      * 
      * @param connection 
      * @param dbObject 
      * @param columnName
+     * @param negation true for IS_NOT_IN, false for IS_IN,
      * @param filterPropertyDef
      * @param clause
      * @param clauseValues
@@ -4915,12 +4943,13 @@ public class Database_2 extends AbstractRestPort implements Database_1_0, DataTy
         Connection connection,
         DbObject dbObject,
         String columnName,
-        ModelElement_1_0 filterPropertyDef,
+        boolean negation,
+        ModelElement_1_0 filterPropertyDef, 
         StringBuilder clause, 
         List<Object> clauseValues, 
         Object[] values
-        ) throws ServiceException {
-        clause.append(columnName).append(" IN (");
+    ) throws ServiceException {
+        clause.append(columnName).append(negation ? " NOT IN (" : " IN (");
         String separator = "";
         for(Object value : values){
             clause.append(
@@ -4935,7 +4964,7 @@ public class Database_2 extends AbstractRestPort implements Database_1_0, DataTy
         }
         clause.append(")");
     }
-
+    
     /**
      * Fill IS_LIKE or IS_UNLIKE clause
      * 
@@ -5089,7 +5118,11 @@ public class Database_2 extends AbstractRestPort implements Database_1_0, DataTy
             String requestedProvider = xri.getSegment(2).toClassicRepresentation();
             if(":*".equals(requestedProvider) && context != null && context.size() > 2){
                 return new Path(
-                    new String[]{xri.getSegment(0).toClassicRepresentation(), xri.getSegment(1).toClassicRepresentation(), context.getSegment(2).toClassicRepresentation()}
+                    new String[]{
+                        xri.getSegment(0).toClassicRepresentation(),
+                        xri.getSegment(1).toClassicRepresentation(),
+                        context.getSegment(2).toClassicRepresentation()
+                    }
                 ).getDescendant(
                     xri.getSuffix(3)
                 );
@@ -5123,13 +5156,16 @@ public class Database_2 extends AbstractRestPort implements Database_1_0, DataTy
         ModelElement_1_0 referencedType
     ) throws ServiceException {
         StringBuilder clause = new StringBuilder();
-        short operator = filterProperty.operator();
-        int quantor = filterProperty.quantor();
+        final ConditionType operator;
+        final Quantifier quantor;
         if(negate) {
-            quantor = quantor == Quantifier.THERE_EXISTS.code() ? Quantifier.FOR_ALL.code() : Quantifier.THERE_EXISTS.code();
-            operator = (short)-operator;
+            quantor = Quantifier.valueOf(Quantifier.invert(filterProperty.quantor()));
+            operator = ConditionType.valueOf(ConditionType.invert(filterProperty.operator()));
+        } else {
+            quantor = Quantifier.valueOf(filterProperty.quantor());
+            operator = ConditionType.valueOf(filterProperty.operator());
         }
-        switch(ConditionType.valueOf(operator)) {
+        switch(operator) {
 
             /**
              * Evaluate the following:
@@ -5139,27 +5175,61 @@ public class Database_2 extends AbstractRestPort implements Database_1_0, DataTy
             case IS_NOT_IN:
                 // Q = {}
                 if(filterProperty.getValues().length == 0) {
-                    if(quantor == Quantifier.FOR_ALL.code()) {
+                    if(quantor == Quantifier.FOR_ALL) {
                         clause.append("(1=1)");
-                    }
-                    else {
+                    } else {
                         clause.append("(").append(columnName).append(" IS NOT NULL)");
                     }
                 }
 
                 // Q <> {}
                 else {
-                    clause.append("(").append(columnName).append(" NOT IN (").append(getPlaceHolder(conn, filterProperty.getValue(0)));
-                    clauseValues.add(this.externalizeStringValue(columnName, filterProperty.getValue(0)));
-                    for(
-                        int j = 1; 
-                        j < filterProperty.getValues().length; 
-                        j++
-                        ) {
-                        clause.append(", ").append(getPlaceHolder(conn, filterProperty.getValue(j)));
-                        clauseValues.add(this.externalizeStringValue(columnName, filterProperty.getValue(j)));
+                    // Complex filter value
+                    if(
+                        (filterProperty.getValues().length > 0) && 
+                        (filterProperty.getValue(0) instanceof QueryFilterRecord)
+                    ) {
+                        if(filterPropertyDef.isReferenceType()) {
+                            addComplexFilter(
+                                conn,
+                                dbObject,
+                                statedObject,
+                                reference,
+                                viewAliasName,
+                                filterProperty,
+                                filterPropertyDef,
+                                columnName,
+                                ConditionType.IS_NOT_IN,
+                                clauseValues, 
+                                clause
+                            );
+                        } else {
+                            throw new ServiceException(
+                                BasicException.Code.DEFAULT_DOMAIN,
+                                BasicException.Code.ASSERTION_FAILURE,
+                                "Filter property with value of type " + QueryFilterRecord.class.getName() + " must be a Reference",
+                                new BasicException.Parameter("filter.property", filterProperty),
+                                new BasicException.Parameter("filter.definition", filterPropertyDef)                                
+                            );
+                        }
+                    } else {
+                        clause.append("(");
+                        //
+                        // Scalar filter value
+                        //
+                        this.isInToSqlClause(
+                            conn,
+                            dbObject,
+                            columnName,
+                            true,
+                            filterPropertyDef, 
+                            clause, 
+                            clauseValues, 
+                            filterProperty.getValues()
+                        );
+                        clause.append(")");
+
                     }
-                    clause.append("))");
                 }
                 break;
 
@@ -5183,10 +5253,9 @@ public class Database_2 extends AbstractRestPort implements Database_1_0, DataTy
 
                 // Q = {}
                 if(filterProperty.getValues().length == 0) {
-                    if(quantor == Quantifier.THERE_EXISTS.code()) {
+                    if(quantor == Quantifier.THERE_EXISTS) {
                         clause.append("(1=0)");
-                    }
-                    else {
+                    } else {
                         clause.append("(").append(columnName).append(" IS NULL)");
                     }
                 } 
@@ -5208,8 +5277,8 @@ public class Database_2 extends AbstractRestPort implements Database_1_0, DataTy
                                 filterProperty,
                                 filterPropertyDef,
                                 columnName,
-                                clauseValues, 
-                                clause
+                                ConditionType.IS_IN,
+                                clauseValues, clause
                             );
                         } else {
                             throw new ServiceException(
@@ -5229,10 +5298,10 @@ public class Database_2 extends AbstractRestPort implements Database_1_0, DataTy
                             conn,
                             dbObject,
                             columnName,
-                            filterPropertyDef,
+                            false,
+                            filterPropertyDef, 
                             clause, 
-                            clauseValues, 
-                            filterProperty.getValues()
+                            clauseValues, filterProperty.getValues()
                         );
                         clause.append(")");
 
@@ -5425,7 +5494,7 @@ public class Database_2 extends AbstractRestPort implements Database_1_0, DataTy
                     BasicException.Code.DEFAULT_DOMAIN,
                     BasicException.Code.BAD_PARAMETER,
                     "Unsupported operator", 
-                    new BasicException.Parameter("operator", ConditionType.valueOf(operator))
+                    new BasicException.Parameter("operator", operator)
                 );
         }
         return clause.toString();
@@ -5438,19 +5507,39 @@ public class Database_2 extends AbstractRestPort implements Database_1_0, DataTy
         StringBuilder clause, 
         Object v
     ) throws ServiceException {
-        String externalized = (String)this.externalizeStringValue(columnName, v);
-        EmbeddedFlags.FlagsAndValue flagsAndValue = this.embeddedFlags.parse(externalized);
-        externalized = this.sqlWildcards.fromJDO(flagsAndValue.getValue());
-        final EnumSet<RegularExpressionFlag> flagSet = flagsAndValue.getFlagSet();
-        if(flagSet.contains(RegularExpressionFlag.ACCENT_INSENSITIVE)){
+        EmbeddedFlags.FlagsAndValue flagsAndValue = this.embeddedFlags.parse((String)this.externalizeStringValue(columnName, v));
+        EnumSet<RegularExpressionFlag> flagSet = flagsAndValue.getFlagSet();
+        String externalized;
+        if(flagSet.contains(RegularExpressionFlag.X_QUERY) || flagSet.contains(RegularExpressionFlag.JSON_QUERY)){
+            externalized = flagsAndValue.getValue();
+        } else {
+            externalized = this.sqlWildcards.fromJDO(flagsAndValue.getValue());
+        }
+        if(flagSet.contains(RegularExpressionFlag.ACCENT_INSENSITIVE) && flagSet.contains(RegularExpressionFlag.CASE_INSENSITIVE)){
+            isLikeToSqlClause(conn, columnName, clauseValues, clause, externalized, "CASE_AND_ACCENT.INSENSITIVITY", LikeFlavour.NOT_SUPPORTED);
+        } else if(flagSet.contains(RegularExpressionFlag.ACCENT_INSENSITIVE)){
             isLikeToSqlClause(conn, columnName, clauseValues, clause, externalized, "ACCENT.INSENSITIVITY", LikeFlavour.NOT_SUPPORTED);
-        } else if(flagSet.contains(RegularExpressionFlag.POSIX_EXPRESSION)){
-            isLikeToSqlClause(conn, columnName, clauseValues, clause, externalized, "POSIX.EXPRESSION", LikeFlavour.NOT_SUPPORTED);
         } else if(flagSet.contains(RegularExpressionFlag.CASE_INSENSITIVE)){
             isLikeToSqlClause(conn, columnName, clauseValues, clause, externalized, "CASE.INSENSITIVITY", LikeFlavour.LOWER_SQL);
+        } else if(flagSet.contains(RegularExpressionFlag.POSIX_EXPRESSION)){
+            isLikeToSqlClause(conn, columnName, clauseValues, clause, externalized, "POSIX.EXPRESSION", LikeFlavour.NOT_SUPPORTED);
+        } else if(flagSet.contains(RegularExpressionFlag.X_QUERY)){
+            throw new UnsupportedOperationException("X_QUERY not yet supported"); // TODO
+        } else if(flagSet.contains(RegularExpressionFlag.JSON_QUERY)){
+            // @TODO hard-coded for PG. Better use LikeFlavour
+            String operator = "@>";
+            if(externalized.startsWith("?&") || externalized.startsWith("?|") || externalized.startsWith("@>")) {
+                operator = externalized.substring(0, 2);
+                externalized = externalized.substring(2);
+            } else if(externalized.startsWith("?")) {
+                operator = externalized.substring(0, 1);
+                externalized = externalized.substring(1);
+            }
+            clause.append("(").append(columnName).append(" ").append(operator).append(" ? ").append(")");
+            clauseValues.add(externalized);                  
         } else {
             clause.append("(").append(columnName).append(" LIKE ? ").append(getEscapeClause(conn)).append(")");
-            clauseValues.add(externalized);                  
+            clauseValues.add(externalized);
         }
     }
 
@@ -5504,6 +5593,7 @@ public class Database_2 extends AbstractRestPort implements Database_1_0, DataTy
      * @param filterProperty
      * @param filterPropertyDef
      * @param columnName
+     * @param negation 
      * @param clauseValues
      * @param clause
      * @throws ServiceException
@@ -5517,6 +5607,7 @@ public class Database_2 extends AbstractRestPort implements Database_1_0, DataTy
         FilterProperty filterProperty,
         ModelElement_1_0 filterPropertyDef,
         String columnName,
+        ConditionType condition, 
         List<Object> clauseValues, 
         StringBuilder clause
     ) throws ServiceException {
@@ -5526,7 +5617,7 @@ public class Database_2 extends AbstractRestPort implements Database_1_0, DataTy
         String joinClauseEnd = null;
         String joinColumn = null;
         DbObject joinObject = null;
-        boolean joinWithState = false; // TODO to be evaluated and USED for non RID/OID DBs, too!
+        final boolean joinWithState = false; // TODO to be evaluated and USED for non RID/OID DBs, too!
         // Reference
         if(model.referenceIsStoredAsAttribute(filterPropertyDef)) {
             Path identityPattern = model.getIdentityPattern(referencedType);
@@ -5740,14 +5831,15 @@ public class Database_2 extends AbstractRestPort implements Database_1_0, DataTy
             excludingFilterClauses,
             excludingFilterValues
         );
-        boolean isForAll = filterProperty.quantor() == Quantifier.FOR_ALL.code();
+        
+        final Membership membership = new Membership(Quantifier.valueOf(filterProperty.quantor()), condition);
         clause.append(
-            "(" + joinClauseBegin + (isForAll ? " NOT" : "") + " IN (SELECT " + joinColumn + " FROM " + view1 + " " + viewAliasName + "v WHERE " + (isForAll ? "(1=0)" : "(1=1)")
+            "(" + joinClauseBegin + (membership.isMember() ? " IN " : " NOT IN ") + "(SELECT " + joinColumn + " FROM " + view1 + " " + viewAliasName + "v WHERE " + (membership.isNegated() ? "(1=0)" : "(1=1)")
         );
         for(int i = 0; i < includingFilterClauses.size(); i++) {
             if(!includingFilterClauses.get(i).isEmpty()) {
                 clause
-                    .append(isForAll ? " OR NOT " : " AND ")
+                    .append(membership.isNegated() ? " OR NOT " : " AND ")
                     .append(includingFilterClauses.get(i));
                 clauseValues.addAll(
                     includingFilterValues.get(i)
@@ -7160,14 +7252,27 @@ public class Database_2 extends AbstractRestPort implements Database_1_0, DataTy
                         for(AttributeSpecifier specifier: attributeSpecifiers) {
                             // only add to ORDER set if specified order
                             if(specifier.order() != SortOrder.UNSORTED.code()) {
-                                if(!hasOrderBy) statement += " ORDER BY"; 
+                                if(!hasOrderBy) {
+                                    statement += " ORDER BY"; 
+                                }
                                 boolean viewIsIndexed = dbObject.getIndexColumn() != null;              
                                 statement += hasOrderBy ? ", " : " ";
                                 if(specifier.name().startsWith("(")) {
-                                    statement += specifier.name() + (specifier.order() == SortOrder.DESCENDING.code() ? " DESC" : " ASC");
+                                    statement += 
+                                        specifier.name() + 
+                                        (specifier.order() == SortOrder.DESCENDING.code() 
+                                            ? " DESC" + (Database_2.this.isOrderNullsAsEmpty() ? " NULLS LAST" : "")
+                                            : " ASC" + (Database_2.this.isOrderNullsAsEmpty() ? " NULLS FIRST" : "")
+                                        );
                                 } else {
                                     // order on mixin view (vm.) in case of indexed slices, otherwise on primary view (v.)
-                                    statement += (viewIsIndexed ? "vm." : "v.") + getColumnName(conn, specifier.name(), 0, false, true, false) + (specifier.order() == SortOrder.DESCENDING.code() ? " DESC" : " ASC");
+                                    statement += 
+                                        (viewIsIndexed ? "vm." : "v.") +
+                                        getColumnName(conn, specifier.name(), 0, false, true, false) +
+                                        (specifier.order() == SortOrder.DESCENDING.code() 
+                                            ? " DESC" + (Database_2.this.isOrderNullsAsEmpty() ? " NULLS LAST" : "")
+                                            : " ASC" + (Database_2.this.isOrderNullsAsEmpty() ? " NULLS FIRST" : "")
+                                        );
                                 }
                                 hasOrderBy = true;
                             }
@@ -8242,6 +8347,7 @@ public class Database_2 extends AbstractRestPort implements Database_1_0, DataTy
     protected boolean useViewsForRedundantColumns = true;
     protected boolean usePreferencesTable = true;
     protected boolean cascadeDeletes = true;
+    protected boolean orderNullsAsEmpty = false;
     protected SparseArray<String> columnNameFrom = new TreeSparseArray<String>();
     protected SparseArray<String> columnNameTo = new TreeSparseArray<String>();
     protected SparseArray<Path> type = new TreeSparseArray<Path>();

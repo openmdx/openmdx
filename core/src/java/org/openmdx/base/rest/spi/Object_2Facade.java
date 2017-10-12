@@ -299,7 +299,7 @@ public class Object_2Facade {
     
     public Object getAttributeValues(
         String attributeName
-    ) throws ServiceException {
+    ){
         MappedRecord value = this.getValue();
         Object v = value.get(attributeName);
         return 
@@ -336,6 +336,14 @@ public class Object_2Facade {
     ) throws ServiceException{
         return attributeValuesAsList(attributeName).get(0);
         
+    }
+    
+    public void setAttributeValue(
+        String attributeName,
+        Object value
+    ){
+        MappedRecord record = this.getValue(); 
+        record.put(attributeName, value);
     }
     
     public void replaceAttributeValuesAsListBySingleton(
@@ -397,11 +405,43 @@ public class Object_2Facade {
     ) throws ServiceException {
         String objectClass = getObjectClass();
         List<Object> values = attributeValuesAsList(attributeName);
-        if(objectClass.startsWith("org:omg:model1:") || objectClass.startsWith("org:openmdx:system:")) {
+        if(isCollectionAware(objectClass)) {
             return values;
         } else {
             return new GuardedList(objectClass, attributeName, values);
         }
+    }
+
+    private boolean isCollectionAware(String objectClass) {
+        return isTypeSafe(objectClass) || objectClass.startsWith("org:openmdx:system:");
+    }
+
+    private boolean isTypeSafe(String objectClass) {
+        return objectClass.startsWith("org:omg:model1:");
+    }
+    
+    public boolean isTypeSafe(){
+        return isTypeSafe(getObjectClass());
+    }
+    
+    public boolean isCollection(
+       String attributeName
+    ){
+       return getRawValue(attributeName) instanceof Collection;
+    }
+
+    /**
+     * @param attributeName
+     * @return
+     */
+    public Object getRawValue(String attributeName) {
+        return this.getValue().get(attributeName);
+    }
+
+    public Collection<Object> attributeValuesAsCollection(
+        String attributeName
+    ) throws ServiceException {
+        return (Collection<Object>)getRawValue(attributeName);
     }
     
     public List<Object> attributeValuesAsList(
@@ -465,10 +505,10 @@ public class Object_2Facade {
             return null;
         }
         else if(v instanceof List) {
-            return ((List<Object>)v).get(0);
+            return ((List<?>)v).get(0);
         }
         else if(v instanceof SparseArray) {
-            return ((SparseArray<Object>)v).get(Integer.valueOf(0));
+            return ((SparseArray<?>)v).get(Integer.valueOf(0));
         }
         else {
             return v;
@@ -545,59 +585,6 @@ public class Object_2Facade {
         this.delegate.setVersion(version);
     }
 
-    private List assertMultiplicity(
-        MappedRecord object,
-        String featureName,
-        List values
-    ) throws ServiceException {
-        final int size = values.size();
-        if(size > 1) {
-            String type = object.getRecordName();
-            if(!type.startsWith("org:omg:model1:")) {
-                if(isSingleValued(type, featureName)) {
-                    Object singleton = null;
-                    for(Object value : values){
-                        if(value == null) {
-                            // Ignore
-                        } else if(singleton == null) {
-                            singleton = value;
-                        } else if (!singleton.equals(value)) {
-                            throw new ServiceException(
-                                BasicException.Code.DEFAULT_DOMAIN,
-                                BasicException.Code.ASSERTION_FAILURE,
-                                "UNRECOVERABLE MULTIPLICITY FAILURE: Conflicting values for optional or single valued field",
-                                new BasicException.Parameter("xri", this.getPath()),
-                                new BasicException.Parameter("type", type),
-                                new BasicException.Parameter("featureName", featureName),
-                                new BasicException.Parameter("size", size),
-                                new BasicException.Parameter("values", values),
-                                new BasicException.Parameter("object", object)
-                            ).log();
-                        }
-                    }
-                    new ServiceException(
-                        BasicException.Code.DEFAULT_DOMAIN,
-                        BasicException.Code.ASSERTION_FAILURE,
-                        "RECOVERABLE MULTIPLICITY FAILURE: Recoverable value for optional or single valued field",
-                        new BasicException.Parameter("xri", this.getPath()),
-                        new BasicException.Parameter("type", type),
-                        new BasicException.Parameter("featureName", featureName),
-                        new BasicException.Parameter("size", size),
-                        new BasicException.Parameter("values", values),
-                        new BasicException.Parameter("value", singleton),
-                        new BasicException.Parameter("object", object)
-                    ).log();
-                    if(singleton == null) {
-                        return Collections.emptyList();
-                    } else {
-                        return Collections.singletonList(singleton);
-                    }
-                }
-            }
-        }
-        return values;
-    }
-    
     /**
      * Clone the wrapped object 
      * 
@@ -609,14 +596,14 @@ public class Object_2Facade {
     public Object_2Facade cloneObject(
     ) throws ServiceException{
         Object_2Facade copy;
-		try {
-			copy = newInstance(
-			    this.getPath(),
-			    this.getObjectClass()
-			);
-		} catch (ResourceException exception) {
-			throw new ServiceException(exception);
-		}
+        try {
+            copy = newInstance(
+                this.getPath(),
+                this.getObjectClass()
+            );
+        } catch (ResourceException exception) {
+            throw new ServiceException(exception);
+        }
         copy.setVersion(this.getVersion());
         MappedRecord value = this.getValue();
         for(String key: (Set<String>)value.keySet()) {
@@ -633,7 +620,7 @@ public class Object_2Facade {
                     key,
                     Multiplicity.LIST
                 )).addAll(
-                    assertMultiplicity(value, key, (List)source)
+                    (List)source
                 );                
             } else if (source instanceof Map<?,?>){
                 ((Map)copy.attributeValues(
@@ -655,7 +642,7 @@ public class Object_2Facade {
         }
         return copy;
     }
-    
+
     /**
      * Clone an object 
      * 
@@ -667,11 +654,55 @@ public class Object_2Facade {
     public static ObjectRecord cloneObject(
         MappedRecord object
     ) throws ServiceException {
-		try {
-			return newInstance(object).cloneObject().getDelegate();
-		} catch (ResourceException e) {
-			throw new ServiceException(e);
-		}
+        try {
+            return newInstance(object).cloneObject().getDelegate();
+        } catch (ResourceException e) {
+            throw new ServiceException(e);
+        }
+    }
+
+    /**
+     * Clone the wrapped object 
+     * 
+     * @param the delegate's record name
+     * 
+     * @return a facade of the clone
+     * @throws ResourceException 
+     * 
+     * @throws ServiceException
+     */
+    public Object_2Facade transformObject(
+        String dataRecordName
+    ) throws ServiceException{
+        try {
+            final MappedRecord target = Records.getRecordFactory().createMappedRecord(dataRecordName);
+            final MappedRecord source = this.getValue();
+            for(Object key : source.keySet()) {
+                if(target.containsKey(key)){
+                    final Object value = source.get(key);
+                    try {
+                        target.put(key, value);
+                    } catch (RuntimeException exception) {
+                        throw new ServiceException(
+                            exception,
+                            BasicException.Code.DEFAULT_DOMAIN,
+                            BasicException.Code.TRANSFORMATION_FAILURE,
+                            "Object transformation failure",
+                            new BasicException.Parameter("source type", source.getRecordName()),
+                            new BasicException.Parameter("target type", target.getRecordName()),
+                            new BasicException.Parameter("key", key),
+                            new BasicException.Parameter("value", value)
+                        );
+                    }
+                }
+            }
+            final Object_2Facade that = new Object_2Facade();
+            that.setPath(this.getPath());
+            that.setValue(target);
+            return that;
+        } catch (ResourceException exception) {
+            throw new ServiceException(exception);
+        }
     }
     
     /**
@@ -807,7 +838,11 @@ public class Object_2Facade {
                 return false;
             } 
             else if(values instanceof List) {
-                return ((List)values).add(element);
+                try {
+                    return ((List)values).add(element);
+                } catch (UnsupportedOperationException e) {
+                    throw new UnsupportedOperationException("Unable to add " + element + " to " + values);
+                }
             }
             else {
                 if(values == null) {

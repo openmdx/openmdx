@@ -54,7 +54,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -72,20 +71,21 @@ import javax.xml.datatype.XMLGregorianCalendar;
 import org.openmdx.base.accessor.cci.DataObject_1_0;
 import org.openmdx.base.accessor.cci.Structure_1_0;
 import org.openmdx.base.accessor.cci.SystemAttributes;
-import org.openmdx.base.collection.Maps;
+import org.openmdx.base.collection.TypeSafeMarshallingMap;
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.base.marshalling.Marshaller;
+import org.openmdx.base.marshalling.TypeSafeMarshaller;
 import org.openmdx.base.mof.cci.AggregationKind;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
 import org.openmdx.base.mof.cci.Model_1_0;
 import org.openmdx.base.mof.cci.Multiplicity;
 import org.openmdx.base.mof.cci.PrimitiveTypes;
 import org.openmdx.base.mof.cci.Stereotypes;
+import org.openmdx.base.mof.repository.cci.ClassRecord;
+import org.openmdx.base.mof.repository.cci.ElementRecord;
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.rest.spi.Facades;
 import org.openmdx.base.rest.spi.Object_2Facade;
 import org.openmdx.kernel.exception.BasicException;
-import org.openmdx.kernel.log.SysLog;
 import org.w3c.cci2.LargeObject;
 import org.w3c.spi2.Datatypes;
 
@@ -93,7 +93,7 @@ import org.w3c.spi2.Datatypes;
  * Helper class to access MOF repository. The class adds utility 
  * functions and provides a cache for fast model element access.
  */
-public class Model_1 implements Marshaller, Model_1_0 {
+public class Model_1 implements Model_1_0 {
 
     /**
      * Constructor 
@@ -103,10 +103,12 @@ public class Model_1 implements Marshaller, Model_1_0 {
      */
     Model_1(
         Map<String,ModelElement_1_0> modelElements,
-        Map<String,List<AssociationDef>> associationDefs
+        Map<String,List<AssociationDef_1>> associationDefs
     ){
         this.modelElements = modelElements;
         this.associationDefMap = associationDefs;
+        this.elementMarshaller = new ModelElementMarshaller(modelElements);
+        this.recordMarshaller = new ModelRecordMarshaller(modelElements);
     }
 
     /**
@@ -117,45 +119,39 @@ public class Model_1 implements Marshaller, Model_1_0 {
     /**
      * The eagerly populated association definitions
      */
-    private final Map<String,List<AssociationDef>> associationDefMap;
-    
-    /**
-     * The lazily populated structural feature definitions
-     */
-    private final ConcurrentMap<Path,Map<Boolean,Map<Boolean,Map<Boolean,Map<String,ModelElement_1_0>>>>> structuralFeatureDefMap = new ConcurrentHashMap<Path,Map<Boolean,Map<Boolean,Map<Boolean,Map<String,ModelElement_1_0>>>>>();
+    private final Map<String,List<AssociationDef_1>> associationDefMap;
     
     /**
      * The lazily populated shared associations
      */
     private final ConcurrentMap<Path,Boolean> sharedAssociations = new ConcurrentHashMap<Path,Boolean>();
-    
+
     /**
      * To populate the root association definition
      */
     private static final String AUTHORITY_TYPE_NAME = "org:openmdx:base:Authority";
     
-    /* (non-Javadoc)
-     * @see org.openmdx.base.marshalling.Marshaller#marshal(java.lang.Object)
+    /**
+     * Defines which primitive types are numeric ones
      */
-    @Override
-    public Object marshal(
-        Object source
-    ) throws ServiceException {
-        return source instanceof Path ? this.modelElements.get(((Path)source).getLastSegment().toClassicRepresentation()) : source;
-    }
-
-    /* (non-Javadoc)
-     * @see org.openmdx.base.marshalling.Marshaller#unmarshal(java.lang.Object)
+    private static final List<String> NUMERIC_TYPES = Arrays.asList(
+        PrimitiveTypes.DECIMAL,
+        PrimitiveTypes.INTEGER,
+        PrimitiveTypes.LONG,
+        PrimitiveTypes.SHORT
+    );
+    
+    /**
+     * The element marshaller
      */
-    @Override
-    public Object unmarshal(
-        Object source
-    ) throws ServiceException {
-        return source instanceof ModelElement_1_0 ? 
-            ((ModelElement_1_0)source).jdoGetObjectId() :
-            source;
-    }
+    private final TypeSafeMarshaller<Path, ModelElement_1_0> elementMarshaller;
 
+    /**
+     * The element marshaller
+     */
+    private final TypeSafeMarshaller<Path, ElementRecord> recordMarshaller;
+    
+    
     //---------------------------------------------------------------------------
     /**
      * Returns the AssociationDefs matching the object path. result[0] contains
@@ -163,16 +159,16 @@ public class Model_1 implements Marshaller, Model_1_0 {
      * elements of the path. result[1] is a list containing 1..n AssociationDefs
      * depending on whether the reference qualifies uniquely or not.
      */ 
-    private AssociationDef[] getAssociationDefs(
+    private AssociationDef_1[] getAssociationDefs(
         Path objectPath
     ) throws ServiceException {
         //
         // Iterate all reference names and follow the ReferenceLinks
         //     
-        AssociationDef prev = null;
+        AssociationDef_1 prev = null;
         // start from root association The association to the authority
         // is not modeled and is created is virtual association.
-        AssociationDef current = new AssociationDef(
+        AssociationDef_1 current = new AssociationDef_1(
             null,
             this.getDereferencedType(AUTHORITY_TYPE_NAME),
             this.getDereferencedType(AUTHORITY_TYPE_NAME + ":provider"),
@@ -185,7 +181,7 @@ public class Model_1 implements Marshaller, Model_1_0 {
         ) {
             String referenceName = objectPath.getSegment(i).toClassicRepresentation();
             // get candidate association definitions
-            List<AssociationDef> candidates = this.associationDefMap.get(referenceName);
+            List<AssociationDef_1> candidates = this.associationDefMap.get(referenceName);
             if(candidates == null) {
                 throw new ServiceException(
                     BasicException.Code.DEFAULT_DOMAIN,
@@ -196,8 +192,8 @@ public class Model_1 implements Marshaller, Model_1_0 {
                 );
             }    
             // get next associations
-            List<AssociationDef> next = new ArrayList<AssociationDef>();
-            for(AssociationDef associationDef : candidates){
+            List<AssociationDef_1> next = new ArrayList<AssociationDef_1>();
+            for(AssociationDef_1 associationDef : candidates){
                 String exposedEndQualifiedName = associationDef.getExposedType().getQualifiedName();
                 // Test whether one of the current referenced types matches the exposed type of 
                 // the next candidate association
@@ -237,7 +233,7 @@ public class Model_1 implements Marshaller, Model_1_0 {
                 int matching = 0;
                 int index = 0;
                 int jj = 0;
-                for(AssociationDef assocationDef : next){
+                for(AssociationDef_1 assocationDef : next){
                     // model name (segment name) must match the path authority
                     String modelName = assocationDef.getReference().jdoGetObjectId().getSegment(4).toClassicRepresentation();
                     String authorityName = objectPath.getSegment(0).toClassicRepresentation();
@@ -249,7 +245,7 @@ public class Model_1 implements Marshaller, Model_1_0 {
                 }
                 if(matching != 1) {        
                     List<String> matches = new ArrayList<String>();
-                    for(AssociationDef associationDef : next){
+                    for(AssociationDef_1 associationDef : next){
                         Path referencePath = associationDef.getReference().jdoGetObjectId(); 
                         if(referencePath.getSegment(4).toClassicRepresentation().equals(objectPath.getSegment(0).toClassicRepresentation())) {
                             matches.add(referencePath.getSegment(6).toClassicRepresentation());
@@ -274,7 +270,7 @@ public class Model_1 implements Marshaller, Model_1_0 {
                 current = next.get(0);
             }      
         }      
-        return new AssociationDef[]{
+        return new AssociationDef_1[]{
             prev,
             current 
         };
@@ -791,7 +787,7 @@ public class Model_1 implements Marshaller, Model_1_0 {
     public ModelElement_1_0 getElement(
         java.lang.Object element
     ) throws ServiceException {
-        ModelElement_1_0 e = ModelHelper.findElement(
+        ModelElement_1_0 e = ModelHelper_1.findElement(
             element,
             this.modelElements
         ); 
@@ -806,12 +802,40 @@ public class Model_1 implements Marshaller, Model_1_0 {
         return e;
     }
 
+    /**
+     * Retrieve a model element
+     * 
+     * @param xri the model elements object id
+     * 
+     * @return the model element, or <code>null</code> in case of a <code>null</code> XRI
+     * 
+     * @exception IllegalArgumentException if no model element can be found for the given XRI
+     */
+    ModelElement_1_0 getElement(Path xri) {
+        final String qualifiedName = toQualifiedName(xri);
+        final ModelElement_1_0 element = this.modelElements.get(qualifiedName);
+        if(element == null) {
+            throw BasicException.initHolder(
+                new IllegalArgumentException(
+                    "No model element with the XRI " + xri,
+                    BasicException.newEmbeddedExceptionStack(
+                        BasicException.Code.DEFAULT_DOMAIN,
+                        BasicException.Code.INVALID_CONFIGURATION,
+                        new BasicException.Parameter("xri",xri),
+                        new BasicException.Parameter("qualifiedName",qualifiedName)
+                   )
+               )
+            );
+        }
+        return element;
+    }
+
     //-------------------------------------------------------------------------
     @Override
     public ModelElement_1_0 findElement(
         Object element
     ) {
-        return ModelHelper.findElement(
+        return ModelHelper_1.findElement(
             element,
             this.modelElements
         );
@@ -882,29 +906,21 @@ public class Model_1 implements Marshaller, Model_1_0 {
         String feature,
         boolean includeSubtypes
     ) throws ServiceException {
+        final String kind;
         if(this.isStructureType(classifierDef)) {
             //
             // Structure
             //
-            return (ModelElement_1_0)classifierDef.objGetMap("field").get(feature);
+            kind = "field";
         } else {
-            //
             // Class
             //
-            if(includeSubtypes) {
-                //
-                // references stored as attributes are in maps allReference and allAttribute. 
-                // give allReference priority in case feature is a reference
-                //
-                return (ModelElement_1_0)classifierDef.objGetMap("allFeatureWithSubtype").get(feature);
-            } else {
-                //
-                // references stored as attributes are in maps allReference and allAttribute. 
-                // give allReference priority in case feature is a reference
-                //
-                return (ModelElement_1_0)classifierDef.objGetMap("allFeature").get(feature);
-            }
+            // references stored as attributes are in maps allReference and allAttribute. 
+            // give allReference priority in case feature is a reference
+            //
+            kind = includeSubtypes ? "allFeatureWithSubtype" : "allFeature";
         }
+        return classifierDef.objGetMap(kind).get(feature);
     }
 
     //---------------------------------------------------------------------------
@@ -949,9 +965,6 @@ public class Model_1 implements Marshaller, Model_1_0 {
      * @return Map map of features of class, its supertypes and subtypes. The
      *          map contains an entry of the form (featureName, featureDef).
      */
-    @SuppressWarnings({
-        "cast", "rawtypes", "unchecked"
-    })
     @Override
     public Map<String,ModelElement_1_0> getStructuralFeatureDefs(
         ModelElement_1_0 classDef,
@@ -959,60 +972,14 @@ public class Model_1 implements Marshaller, Model_1_0 {
         boolean includeDerived,
         boolean attributesOnly
     ) throws ServiceException {
-        Map<Boolean,Map<Boolean,Map<Boolean,Map<String,ModelElement_1_0>>>> allStructuralFeatureDefs = this.structuralFeatureDefMap.get(classDef.jdoGetObjectId());
-        if(allStructuralFeatureDefs == null) {
-            allStructuralFeatureDefs = new HashMap<Boolean,Map<Boolean,Map<Boolean,Map<String,ModelElement_1_0>>>>();
-            for(int ii = 0; ii < 2; ii++) {
-                boolean bIncludeSubtypes = ii == 0; 
-                Map<Boolean,Map<Boolean,Map<String,ModelElement_1_0>>> structuralFeatureDefsIncludeSubtypes = new HashMap<Boolean,Map<Boolean,Map<String,ModelElement_1_0>>>();
-                allStructuralFeatureDefs.put(
-                    Boolean.valueOf(bIncludeSubtypes),
-                    structuralFeatureDefsIncludeSubtypes
-                );
-                for(int jj = 0; jj < 2; jj++) {
-                    boolean bIncludeDerived = jj == 0;
-                    Map<Boolean,Map<String,ModelElement_1_0>> structuralFeatureDefsIncludeDerived = new HashMap<Boolean,Map<String,ModelElement_1_0>>();
-                    structuralFeatureDefsIncludeSubtypes.put(
-                        Boolean.valueOf(bIncludeDerived),
-                        structuralFeatureDefsIncludeDerived
-                    );
-                    for(int kk = 0; kk < 2; kk++) {
-                        boolean bAttributesOnly = kk == 0; 
-                        Map<String,ModelElement_1_0> featureDefs = classDef.objGetMap(
-                            bIncludeSubtypes ? "allFeatureWithSubtype" : "allFeature"
-                        );
-                        Map<String,ModelElement_1_0> structuralFeatureDefs = new HashMap<String,ModelElement_1_0>();
-                        for(ModelElement_1_0 featureDef : featureDefs.values()){
-                            if(
-                                this.isAttributeType(featureDef) || 
-                                (this.isReferenceType(featureDef) && (!bAttributesOnly || this.referenceIsStoredAsAttribute(featureDef)))          
-                            ) {
-                                Boolean isDerived = (Boolean)featureDef.isDerived();
-                                if(bIncludeDerived || (isDerived == null) || !isDerived.booleanValue()) {
-                                    structuralFeatureDefs.put(
-                                        (String)featureDef.getName(),
-                                        featureDef
-                                    );
-                                }
-                            }
-                        }          
-                        structuralFeatureDefsIncludeDerived.put(
-                            Boolean.valueOf(bAttributesOnly),
-                            structuralFeatureDefs
-                        );
-                    }
-                }
-            }
-            allStructuralFeatureDefs = Maps.putUnlessPresent(
-                this.structuralFeatureDefMap,
-                (Path)classDef.jdoGetObjectId(),
-                allStructuralFeatureDefs
-            );
-        }
-        Map<Boolean,Map<Boolean,Map<String,ModelElement_1_0>>> structuralFeatureDefsIncludeSubtypes = (Map)allStructuralFeatureDefs.get(Boolean.valueOf(includeSubtypes));
-        Map<Boolean,Map<String,ModelElement_1_0>> structuralFeatureDefsIncludeDerived = (Map<Boolean,Map<String,ModelElement_1_0>>)structuralFeatureDefsIncludeSubtypes.get(Boolean.valueOf(includeDerived));
-        Map<String,ModelElement_1_0> structuralFeatureDefs = (Map<String,ModelElement_1_0>)structuralFeatureDefsIncludeDerived.get(Boolean.valueOf(attributesOnly));
-        return structuralFeatureDefs;
+        final ClassRecord delegate = (ClassRecord) classDef.getDelegate();
+        final Map<String, Path> structuralFeatures = delegate.getStructuralFeature(
+            this.recordMarshaller, 
+            includeSubtypes, 
+            includeDerived, 
+            attributesOnly
+        );
+        return new TypeSafeMarshallingMap<String,Path,ModelElement_1_0>(this.elementMarshaller, structuralFeatures);
     }
 
     //-------------------------------------------------------------------------
@@ -1020,7 +987,7 @@ public class Model_1 implements Marshaller, Model_1_0 {
     public boolean referenceIsStoredAsAttribute(
         java.lang.Object referenceType
     ) throws ServiceException {
-        return ModelHelper.referenceIsStoredAsAttribute(
+        return ModelHelper_1.referenceIsStoredAsAttribute(
             referenceType,
             this.modelElements
         );
@@ -1031,7 +998,7 @@ public class Model_1 implements Marshaller, Model_1_0 {
     public boolean referenceIsDerived(
         java.lang.Object referenceType
     ) throws ServiceException {
-        return ModelHelper.referenceIsDerived(
+        return ModelHelper_1.referenceIsDerived(
             referenceType,
             this.modelElements
         );
@@ -1042,7 +1009,7 @@ public class Model_1 implements Marshaller, Model_1_0 {
     public ModelElement_1_0 getDereferencedType(
         java.lang.Object element
     ) throws ServiceException {
-        return ModelHelper.getDereferencedType(
+        return ModelHelper_1.getDereferencedType(
             element,
             this.modelElements
         );
@@ -1061,7 +1028,7 @@ public class Model_1 implements Marshaller, Model_1_0 {
     public ModelElement_1_0 getReferenceType(
         Path path
     ) throws ServiceException {
-        AssociationDef[] assocDefs = this.getAssociationDefs(path);
+        final AssociationDef_1[] assocDefs = this.getAssociationDefs(path);
         return assocDefs[1].getReference();
     }
 
@@ -1078,16 +1045,10 @@ public class Model_1 implements Marshaller, Model_1_0 {
     public boolean isNumericType(
         java.lang.Object type
     ) throws ServiceException {
-        ModelElement_1_0 typeDef = this.getDereferencedType(type);
-        if(typeDef.isPrimitiveType()) {
-            String typeName = typeDef.getQualifiedName();
-            return 
-            PrimitiveTypes.DECIMAL.equals(typeName) ||
-            PrimitiveTypes.INTEGER.equals(typeName) ||
-            PrimitiveTypes.LONG.equals(typeName) ||
-            PrimitiveTypes.SHORT.equals(typeName);
-        }
-        return false;
+        final ModelElement_1_0 typeDef = this.getDereferencedType(type);
+        return 
+            typeDef.isPrimitiveType() &&
+            NUMERIC_TYPES.contains(typeDef.getQualifiedName());
     }
 
     //-------------------------------------------------------------------------
@@ -1353,11 +1314,18 @@ public class Model_1 implements Marshaller, Model_1_0 {
             object instanceof DataObject_1_0 ? ((DataObject_1_0)object).objGetClass() :
             null;
         for(Object supertype : this.getElement(objectClass).objGetList("allSupertype")){ 
-            if(typeName.equals(((Path)supertype).getLastSegment().toClassicRepresentation())) {
+            if(typeName.equals(toQualifiedName((Path)supertype))) {
                 return true;
             }
         }
         return false;
+    }
+
+    /**
+     * Extract the MOF id from the object id
+     */
+    public static String toQualifiedName(Path xri) {
+        return xri.getLastSegment().toClassicRepresentation();
     }
 
     //-------------------------------------------------------------------------
@@ -1368,7 +1336,8 @@ public class Model_1 implements Marshaller, Model_1_0 {
     ) throws ServiceException {
         String typeName = this.getElement(type).getQualifiedName();
         for(Object supertype : this.getElement(objectType).objGetList("allSupertype")){
-            if(typeName.equals(((Path)supertype).getLastSegment().toClassicRepresentation())) {
+            Path xri = (Path)supertype;
+            if(typeName.equals(toQualifiedName(xri))) {
                 return true;
             }
         }
@@ -1410,8 +1379,8 @@ public class Model_1 implements Marshaller, Model_1_0 {
         ModelElement_1_0 element = dereferenceType ? 
             this.getDereferencedType(type) : 
             this.getElement(type);
-        return ModelHelper.toJavaPackageName( 
-            element.jdoGetObjectId().getSegment(4).toClassicRepresentation(),
+        return ModelHelper_1.toJavaPackageName( 
+            element.getSegmentName(),
             packageSuffix
         );
     }
@@ -1443,7 +1412,7 @@ public class Model_1 implements Marshaller, Model_1_0 {
     public ModelElement_1_0[] getTypes(
         Path path
     ) throws ServiceException {
-        AssociationDef[] assocDefs = this.getAssociationDefs(path);
+        AssociationDef_1[] assocDefs = this.getAssociationDefs(path);
         return new ModelElement_1_0[]{
             assocDefs[0].getReferencedType(), 
             assocDefs[1].getExposedType(), 
@@ -1501,7 +1470,12 @@ public class Model_1 implements Marshaller, Model_1_0 {
         }
         List<String> components = new ArrayList<String>();
         ModelElement_1_0 currentClassDef = classDef;
+        String authority = null;
         while(!this.isSubtypeOf(currentClassDef, "org:openmdx:base:Authority")) {
+            if(this.isSubtypeOf(currentClassDef, "org:openmdx:base:Segment")) {
+                authority = currentClassDef.getQualifiedName();
+                authority = authority.substring(0, authority.lastIndexOf(":"));
+            }
             ModelElement_1_0 compositeReference = this.getCompositeReference(currentClassDef);
             if(compositeReference == null) {
                 return null;
@@ -1514,10 +1488,13 @@ public class Model_1 implements Marshaller, Model_1_0 {
             ModelElement_1_0 exposedEnd = this.getElement(compositeReference.getExposedEnd());     
             currentClassDef = this.getElement(exposedEnd.getType());
         }
-        String className = classDef.getQualifiedName();        
+        if(authority == null) {
+            authority = classDef.getQualifiedName();
+            authority = authority.substring(0, authority.lastIndexOf(":"));
+        }
         components.add(
             0,
-            className.substring(0, className.lastIndexOf(":"))
+            authority
         );
         Path pattern = new Path(
             components.toArray(new String[components.size()])
@@ -1525,6 +1502,13 @@ public class Model_1 implements Marshaller, Model_1_0 {
         return pattern;
     }
 
+    TypeSafeMarshaller<Path, ModelElement_1_0> getElementMarshaller(){
+        return this.elementMarshaller;
+    }
+
+    TypeSafeMarshaller<Path, ElementRecord> getRecordMarshaller(){
+        return this.recordMarshaller;
+    }
     
     /**
      * This accessor is reserved for the model's builder
@@ -1536,5 +1520,3 @@ public class Model_1 implements Marshaller, Model_1_0 {
     }
     
 }
-
-//--- End of File -----------------------------------------------------------

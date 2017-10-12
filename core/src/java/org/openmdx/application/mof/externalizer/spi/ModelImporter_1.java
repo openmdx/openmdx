@@ -94,8 +94,6 @@ abstract public class ModelImporter_1 implements ModelImporter_1_0 {
     
     protected static final String DEFAULT_ATTRIBUTE_MULTIPLICITY = "1..1";
     protected static final int DEFAULT_ATTRIBUTE_MAX_LENGTH = 200;
-    protected static final boolean DEFAULT_ATTRIBUTE_IS_UNIQUE = false;
-    protected static final boolean DEFAULT_ATTRIBUTE_IS_LANGUAGE_NEUTRAL = true;
     
     protected static final String PROVIDER_NAME = "Mof";
     private static final Path PROVIDER_ROOT_PATH = new Path(

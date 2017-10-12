@@ -1,33 +1,36 @@
 ==============================================================================
-Version 2.15.0                                                      2016-09-09
+Version 2.15.2                                                      2017-05-17
 ==============================================================================
 
 0.    KNOWN ISSUES
-
-      NONE
+      none
 
 1.    NEW FEATURES
-      
-      CR20045116
-      Java 8 support. Add Java 8 as standard platform.
 
+      CR20043249
+      ldaps Protocol
+      
+      The org.openmdx.resource.ldap.v3.ManagedConnectionFactory supports
+      now ldaps:// in addition to the default ldap:// protocol.
+      
 2.    CHANGES  
      
 2.0.  CHANGED FEATURES
- 
-      NONE
       
+      20057912  
+      Annotation support
+      
+      Make some formerly final Methods non-final allowing to override them in  
+      order to add annotations.
+            
 2.1.  FIXED BUGS
+      none
 
-      NONE
-      
-2.2.  DEPRECATED FEATURES
-
-      NONE
+2.2.  DEPRECATED FEATURES5
+      none
       
 2.3.  REMOVED FEATURES
-
-      NONE
+      none
 
 ==============================================================================
 Version 2.14.0                                                      2015-01-23

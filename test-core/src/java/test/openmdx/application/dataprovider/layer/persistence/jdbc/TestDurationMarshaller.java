@@ -61,6 +61,7 @@ import org.openmdx.application.dataprovider.layer.persistence.jdbc.LayerConfigur
 import org.openmdx.base.dataprovider.layer.persistence.jdbc.datatypes.DurationMarshaller;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.kernel.exception.BasicException;
+import org.w3c.cci2.MutableDatatypeFactory;
 
 public class TestDurationMarshaller extends TestCase {
     
@@ -103,7 +104,7 @@ public class TestDurationMarshaller extends TestCase {
     @Override
     protected void setUp(
     ) throws Exception {
-        this.datatypeFactory = DatatypeFactory.newInstance();
+        this.datatypeFactory = MutableDatatypeFactory.xmlDatatypeFactory();
         this.intervalDurationMarshaller = DurationMarshaller.newInstance(
             LayerConfigurationEntries.DURATION_TYPE_INTERVAL
         );

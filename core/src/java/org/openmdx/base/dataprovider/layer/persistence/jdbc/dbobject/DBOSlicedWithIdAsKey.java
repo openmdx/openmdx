@@ -159,11 +159,10 @@ extends SlicedDbObject
                     //   <li>Does not perform well for all databases
                     // </ul>
                     // rid is a LIKE pattern. Remove %
-                    if(rid.endsWith("/%")) {           
+                    if(rid != null && rid.endsWith("/%")) {           
                         this.getReferenceValues().add(rid.substring(0, rid.length()-1));
                         this.getReferenceValues().add(rid.substring(0, rid.length()-2) + "0");
-                    }
-                    else {
+                    } else {
                         this.getReferenceValues().add(rid + "/");
                         this.getReferenceValues().add(rid + "0");            
                     }

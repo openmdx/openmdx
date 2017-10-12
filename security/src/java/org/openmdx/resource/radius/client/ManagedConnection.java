@@ -58,7 +58,7 @@ import org.openmdx.uses.net.sourceforge.jradiusclient.RadiusConnection;
 /**
  * Managed RADIUS Connection
  */
-class ManagedConnection extends AbstractManagedConnection {
+public class ManagedConnection extends AbstractManagedConnection {
 
     /**
      * Constructor 

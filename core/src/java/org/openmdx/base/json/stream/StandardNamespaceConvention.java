@@ -250,7 +250,7 @@ public class StandardNamespaceConvention implements Convention, NamespaceContext
         }
 
         String jns = name.substring( 0, dot );
-        String xns = (String) getNamespaceURI( jns );
+        String xns = getNamespaceURI( jns );
 
         if ( xns == null ) {
             qname = new QName( name );

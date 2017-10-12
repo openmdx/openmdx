@@ -49,10 +49,6 @@ package org.openmdx.base.rest.cci;
 
 import java.util.Set;
 
-import javax.resource.cci.MappedRecord;
-
-import org.openmdx.base.naming.Path;
-
 /**
  * <code>org::openmdx::kernel::Query</code>
  */

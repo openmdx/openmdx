@@ -55,8 +55,9 @@ import javax.resource.cci.IndexedRecord;
 import javax.resource.cci.MappedRecord;
 import javax.resource.cci.Record;
 
+import org.openmdx.base.mof.repository.spi.ModelRecordFactory;
 import org.openmdx.base.resource.cci.ExtendedRecordFactory;
-import org.openmdx.base.rest.spi.ModelElementRecord;
+import org.openmdx.base.rest.spi.KernelRecordFactory;
 import org.openmdx.kernel.exception.BasicException;
 
 /**
@@ -117,17 +118,11 @@ public class StandardRecordFactory implements ExtendedRecordFactory {
     public MappedRecord createMappedRecord(
         String recordName
     ) throws ResourceException {
-        return 
-    		org.openmdx.base.rest.cci.ConditionRecord.NAME.equals(recordName) ? new org.openmdx.base.rest.spi.ConditionRecord() : 
-    		org.openmdx.base.rest.cci.MessageRecord.NAME.equals(recordName) ? new org.openmdx.base.rest.spi.MessageRecord() : 
-			org.openmdx.base.rest.cci.FeatureOrderRecord.NAME.equals(recordName) ? new org.openmdx.base.rest.spi.FeatureOrderRecord() : 
-            org.openmdx.base.rest.cci.ObjectRecord.NAME.equals(recordName) ? new org.openmdx.base.rest.spi.ObjectRecord() : 
-        	org.openmdx.base.rest.cci.QueryFilterRecord.NAME.equals(recordName) ? new org.openmdx.base.rest.spi.QueryFilterRecord() : 
-    		org.openmdx.base.rest.cci.QueryExtensionRecord.NAME.equals(recordName) ? new org.openmdx.base.rest.spi.QueryExtensionRecord() : 
-            org.openmdx.base.rest.cci.QueryRecord.NAME.equals(recordName) ? new org.openmdx.base.rest.spi.QueryRecord() : 
-            org.openmdx.base.rest.cci.VoidRecord.NAME.equals(recordName) ? org.openmdx.base.rest.spi.VoidRecord.getInstance() :
-            recordName.startsWith("org:omg:model1:") ? ModelElementRecord.getInstance(recordName) : 
-            new VariableSizeMappedRecord(recordName);
+        final MappedRecord typedRecord = KernelRecordFactory.supports(recordName) ? KernelRecordFactory.createMappedRecord(recordName) :
+        ModelRecordFactory.supports(recordName) ? ModelRecordFactory.createMappedRecord(recordName) :
+        org.openmdx.base.rest.cci.VoidRecord.NAME.equals(recordName) ? org.openmdx.base.rest.spi.VoidRecord.getInstance() : 
+        null;
+        return typedRecord == null ? new VariableSizeMappedRecord(recordName) : typedRecord;
     }
 
     /* (non-Javadoc)
@@ -139,15 +134,8 @@ public class StandardRecordFactory implements ExtendedRecordFactory {
 	) throws ResourceException {
 		return cast(
 			typedInterface, 
-    		org.openmdx.base.rest.cci.ConditionRecord.class == typedInterface ? new org.openmdx.base.rest.spi.ConditionRecord() : 
-	        org.openmdx.base.rest.cci.MessageRecord.class == typedInterface ? new org.openmdx.base.rest.spi.MessageRecord() : 
-	    	org.openmdx.base.rest.cci.FeatureOrderRecord.class == typedInterface ? new org.openmdx.base.rest.spi.FeatureOrderRecord() : 
-	        org.openmdx.base.rest.cci.ObjectRecord.class == typedInterface ? new org.openmdx.base.rest.spi.ObjectRecord() : 
-	        org.openmdx.base.rest.cci.QueryFilterRecord.class == typedInterface ? new org.openmdx.base.rest.spi.QueryFilterRecord() : 
-	        org.openmdx.base.rest.cci.QueryExtensionRecord.class == typedInterface ? new org.openmdx.base.rest.spi.QueryExtensionRecord() : 
-	        org.openmdx.base.rest.cci.QueryRecord.class == typedInterface ? new org.openmdx.base.rest.spi.QueryRecord() : 
-	        org.openmdx.base.rest.cci.VoidRecord.class == typedInterface ? org.openmdx.base.rest.spi.VoidRecord.getInstance() :
-			null
+            org.openmdx.base.rest.cci.VoidRecord.class == typedInterface ? org.openmdx.base.rest.spi.VoidRecord.getInstance() :
+            KernelRecordFactory.createMappedRecord(typedInterface)    
 		);
 	}
 
@@ -160,9 +148,8 @@ public class StandardRecordFactory implements ExtendedRecordFactory {
 	) throws ResourceException {
 		return cast(
 			typedInterface,
-    		org.openmdx.base.rest.cci.ResultRecord.class == typedInterface ? new org.openmdx.base.rest.spi.ResultRecord() : 
-			null
-		);
+			KernelRecordFactory.createIndexedRecord(typedInterface)
+ 		);
 	}
 
 	private static <T extends Record> T cast(
@@ -276,6 +263,7 @@ public class StandardRecordFactory implements ExtendedRecordFactory {
         );   
     }
 
+
     /**
      * Creates an IndexedRecord with the given name, description and content.  
      * <p>
@@ -340,6 +328,22 @@ public class StandardRecordFactory implements ExtendedRecordFactory {
         Object value
     ) {
         return new SingletonIndexedRecord(
+            recordName,
+            recordShortDescription,
+            value
+        );
+    }
+
+    /* (non-Javadoc)
+     * @see org.openmdx.base.resource.cci.ExtendedRecordFactory#tinyIndexedRecord(java.lang.String, java.lang.String, java.lang.Object)
+     */
+    @Override
+    public IndexedRecord tinyIndexedRecord(
+        String recordName,
+        String recordShortDescription,
+        Object value
+    ) {
+        return new TinyIndexedRecord(
             recordName,
             recordShortDescription,
             value

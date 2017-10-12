@@ -1,67 +1,29 @@
 /*
- * $Header: /cvsroot/openmdx/core/src/java/org/openmdx/uses/org/apache/commons/fileupload/FileUpload.java,v 1.4 2010/06/02 13:46:30 hburger Exp $
- * $Revision: 1.4 $
- * $Date: 2010/06/02 13:46:30 $
- *
+ * ====================================================================
+ * Project:     openMDX/Core, http://www.openmdx.org/
  * ====================================================================
  *
- * The Apache Software License, Version 1.1
+ * This software has been copied from its original 
+ * org.apache.commons.fileupload namespace to the 
+ * org.openmdx.uses.org.apache.commons.fileupload namespace in order 
+ * to be used by openMDX based applications. 
+ * 
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
  *
- * Copyright (c) 2001-2003 The Apache Software Foundation.  All rights
- * reserved.
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- *
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- *
- * 3. The end-user documentation included with the redistribution, if
- *    any, must include the following acknowlegement:
- *       "This product includes software developed by the
- *        Apache Software Foundation (http://www.apache.org/)."
- *    Alternately, this acknowlegement may appear in the software itself,
- *    if and wherever such third-party acknowlegements normally appear.
- *
- * 4. The names "The Jakarta Project", "Commons", and "Apache Software
- *    Foundation" must not be used to endorse or promote products derived
- *    from this software without prior written permission. For written
- *    permission, please contact apache@apache.org.
- *
- * 5. Products derived from this software may not be called "Apache"
- *    nor may "Apache" appear in their names without prior written
- *    permission of the Apache Group.
- *
- * THIS SOFTWARE IS PROVIDED ``AS IS'' AND ANY EXPRESSED OR IMPLIED
- * WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
- * OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED.  IN NO EVENT SHALL THE APACHE SOFTWARE FOUNDATION OR
- * ITS CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
- * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
- * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF
- * USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
- * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
- * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
- * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
- * SUCH DAMAGE.
- * ====================================================================
- *
- * This software consists of voluntary contributions made by many
- * individuals on behalf of the Apache Software Foundation.  For more
- * information on the Apache Software Foundation, please see
- * <http://www.apache.org/>.
- *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
-
-
 package org.openmdx.uses.org.apache.commons.fileupload;
-
 
 /**
  * <p>High level API for processing file uploads.</p>
@@ -69,66 +31,54 @@ package org.openmdx.uses.org.apache.commons.fileupload;
  * <p>This class handles multiple files per single HTML widget, sent using
  * <code>multipart/mixed</code> encoding type, as specified by
  * <a href="http://www.ietf.org/rfc/rfc1867.txt">RFC 1867</a>.  Use {@link
- * #parseRequest(HttpServletRequest)} to acquire a list of {@link
- * org.apache.commons.fileupload.FileItem}s associated with a given HTML
- * widget.</p>
+ * #parseRequest(RequestContext)} to acquire a list
+ * of {@link org.openmdx.uses.org.apache.commons.fileupload.FileItem FileItems} associated
+ * with a given HTML widget.</p>
  *
  * <p>How the data for individual parts is stored is determined by the factory
  * used to create them; a given part may be in memory, on disk, or somewhere
  * else.</p>
  *
- * @author <a href="mailto:Rafal.Krzewski@e-point.pl">Rafal Krzewski</a>
- * @author <a href="mailto:dlr@collab.net">Daniel Rall</a>
- * @author <a href="mailto:jvanzyl@apache.org">Jason van Zyl</a>
- * @author <a href="mailto:jmcnally@collab.net">John McNally</a>
- * @author <a href="mailto:martinc@apache.org">Martin Cooper</a>
- * @author Sean C. Sullivan
- *
- * @version $Id: FileUpload.java,v 1.4 2010/06/02 13:46:30 hburger Exp $
+ * @version $Id: FileUpload.java 1454690 2013-03-09 12:08:48Z simonetripodi $
  */
 public class FileUpload
-    extends FileUploadBase
- {
+    extends FileUploadBase {
 
     // ----------------------------------------------------------- Data members
-
 
     /**
      * The factory to use to create new form items.
      */
     private FileItemFactory fileItemFactory;
 
-
     // ----------------------------------------------------------- Constructors
 
-
     /**
-     * Constructs an instance of this class which uses the default factory to
-     * create <code>FileItem</code> instances.
+     * Constructs an uninitialised instance of this class.
+     *
+     * A factory must be
+     * configured, using <code>setFileItemFactory()</code>, before attempting
+     * to parse requests.
      *
      * @see #FileUpload(FileItemFactory)
      */
-    public FileUpload()
-    {
+    public FileUpload() {
         super();
     }
-
 
     /**
      * Constructs an instance of this class which uses the supplied factory to
      * create <code>FileItem</code> instances.
      *
      * @see #FileUpload()
+     * @param fileItemFactory The factory to use for creating file items.
      */
-    public FileUpload(FileItemFactory fileItemFactory)
-    {
+    public FileUpload(FileItemFactory fileItemFactory) {
         super();
         this.fileItemFactory = fileItemFactory;
     }
 
-
     // ----------------------------------------------------- Property accessors
-
 
     /**
      * Returns the factory class used when creating file items.
@@ -136,11 +86,9 @@ public class FileUpload
      * @return The factory class for new file items.
      */
     @Override
-    public FileItemFactory getFileItemFactory()
-    {
+    public FileItemFactory getFileItemFactory() {
         return fileItemFactory;
     }
-
 
     /**
      * Sets the factory class to use when creating file items.
@@ -148,10 +96,8 @@ public class FileUpload
      * @param factory The factory class for new file items.
      */
     @Override
-    public void setFileItemFactory(FileItemFactory factory)
-    {
+    public void setFileItemFactory(FileItemFactory factory) {
         this.fileItemFactory = factory;
     }
-
 
 }

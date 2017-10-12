@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2010-2013, OMEX AG, Switzerland
+ * Copyright (c) 2010-2017, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -350,7 +350,7 @@ public abstract class AbstractHttpInteraction extends AbstractRestInteraction {
         return process(
             RestFunction.DELETE == interactionSpec.getFunction() ? DELETE_SPEC : interactionSpec, 
             input, 
-            null
+            (IndexedRecord)null
         );
     }
 

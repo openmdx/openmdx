@@ -49,7 +49,6 @@ package org.openmdx.application.mof.repository.accessor;
 
 import java.io.InputStream;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.openmdx.application.xml.spi.ImportHelper;
@@ -58,6 +57,7 @@ import org.openmdx.application.xml.spi.MapTarget;
 import org.openmdx.base.accessor.cci.SystemAttributes;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
+import org.openmdx.base.mof.repository.cci.ElementRecord;
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.rest.cci.ObjectRecord;
 import org.openmdx.base.rest.spi.Object_2Facade;
@@ -100,21 +100,24 @@ class ModelRepositoryLoader implements ModelLoader {
     ) throws ServiceException {
         this.target = model.getModelElements();
         reCreateModelElements(model);
-        completeInstanceOf();
     }
 
     /**
      * @param channel
      * @throws ServiceException
      */
+    @SuppressWarnings("unchecked")
     private void reCreateModelElements(
         Model_1 model
     ) throws ServiceException {
         for(Map.Entry<Path, ObjectRecord> entry : getContent().entrySet()) {
             if(!"org:omg:model1:Segment".equals(Object_2Facade.getObjectClass(entry.getValue()))){
+                final Path xri = entry.getKey();
+                final ElementRecord elementRecord = (ElementRecord) entry.getValue().getValue();
+                elementRecord.put(SystemAttributes.OBJECT_IDENTITY, xri);
                 target.put(
-                    entry.getKey().getLastSegment().toClassicRepresentation(),
-                    new ModelElement_1(entry.getValue(), model)
+                    xri.getLastSegment().toClassicRepresentation(),
+                    new ModelElement_1(elementRecord, model)
                 );
             }
         }
@@ -139,25 +142,4 @@ class ModelRepositoryLoader implements ModelLoader {
         return content;
     }
 
-    /**
-     * Calculate the "object_instanceof" values
-     * 
-     * @throws ServiceException
-     */
-    private void completeInstanceOf(
-    ) throws ServiceException {
-        for(Map.Entry<String,ModelElement_1_0> entry : target.entrySet()){
-            ModelElement_1_0 element = entry.getValue();
-            if(element.isClassType()) {
-                List<Object> objectInstanceOf = element.objGetList(SystemAttributes.OBJECT_INSTANCE_OF);
-                for(Object p : element.objGetList("allSupertype")) {
-                    String superType = ((Path)p).getLastSegment().toClassicRepresentation();
-                    if(!objectInstanceOf.contains(superType)) {
-                        objectInstanceOf.add(superType);
-                    }
-                }
-            }
-        }
-    }
-    
 }

@@ -608,7 +608,8 @@ public final class DataproviderRequestProcessor implements Channel {
 		public ConnectionFactory getConnectionFactory() {
 			return new AbstractConnectionFactory() {
 				
-				@Override
+				@SuppressWarnings("synthetic-access")
+                @Override
 				public Connection getConnection(
 					ConnectionSpec properties
 				) throws ResourceException {
@@ -682,7 +683,7 @@ public final class DataproviderRequestProcessor implements Channel {
     		return success.booleanValue();
     	}
     	
-    	private void onCompletion(
+    	void onCompletion(
     		boolean success
     	){
     		this.success = Boolean.valueOf(success);
@@ -701,14 +702,14 @@ public final class DataproviderRequestProcessor implements Channel {
     		return this.objectFuture;
     	}
     	
-    	@SuppressWarnings("rawtypes")
+    	@SuppressWarnings({"rawtypes","synthetic-access"})
 		class ObjectFuture extends AbstractMappedRecord implements ObjectRecord {
 
 			private Members<Member> members;
     		private ObjectRecord delegate;
 			private static final long serialVersionUID = 2587154012169349226L;
     		
-        	ObjectRecord getDelegate(
+            ObjectRecord getDelegate(
 	    	){
 	    		if(success == null) {
 					throw new IllegalStateException(

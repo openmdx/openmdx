@@ -171,14 +171,16 @@ public final class FilterProperty implements Serializable  {
         } else {
             List<FilterProperty> filterProperties = new ArrayList<FilterProperty>();
             for(ConditionRecord condition : filter.getCondition()) {
-                filterProperties.add(
-                    new FilterProperty(
-                        Quantifier.codeOf(condition.getQuantifier()),
-                        condition.getFeature(),
-                        ConditionType.codeOf(condition.getType()),
-                        condition.getValue()
-                    )
-                );
+                if(condition != null) {
+                    filterProperties.add(
+                        new FilterProperty(
+                            Quantifier.codeOf(condition.getQuantifier()),
+                            condition.getFeature(),
+                            ConditionType.codeOf(condition.getType()),
+                            condition.getValue()
+                        )
+                    );
+                }
             }
             List<QueryExtensionRecord> extensions = filter.getExtension();
             if(extensions != null) {

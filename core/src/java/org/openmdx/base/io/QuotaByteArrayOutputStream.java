@@ -79,7 +79,7 @@ public class QuotaByteArrayOutputStream extends java.io.ByteArrayOutputStream {
 		}
 		counter.count++;
 		if(counter.count % 100 == 0) {
-			SysLog.log(Level.WARNING, "{0} has created {1} byte array output streams", id, Integer.valueOf(counter.count));			
+			SysLog.log(Level.INFO, "{0} has created {1} byte array output streams", id, Integer.valueOf(counter.count));			
 		}
 	}
 	

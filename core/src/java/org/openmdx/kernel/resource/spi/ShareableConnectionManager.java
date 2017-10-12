@@ -64,8 +64,6 @@ public class ShareableConnectionManager extends AbstractConnectionManager {
 
     /**
      * Constructor
-     * 
-     * @param credentials
      */
     public ShareableConnectionManager(
         Set<?> credentials
@@ -75,33 +73,12 @@ public class ShareableConnectionManager extends AbstractConnectionManager {
 
     /**
      * Constructor
-     * 
-     * @param credentials
-     * @param connectionClass
      */
-    public ShareableConnectionManager(
-        Set<?> credentials, 
-        Class<?> connectionClass
-    ) {
-        super(credentials, connectionClass);
-    }
+    public ShareableConnectionManager(Class<?> connectionClass) {
+		super(connectionClass);
+	}
 
-    /**
-     * Constructor
-     * 
-     * @param credentials
-     * @param connectionClass
-     * 
-     * @throws ResourceException
-     */
-    public ShareableConnectionManager(
-        Set<?> credentials, 
-        String connectionClass
-    ) throws ResourceException {
-        super(credentials, connectionClass);
-    }
-
-    /**
+	/**
      * Implements <code>Serializable</code>.
      */
     private static final long serialVersionUID = 2446478778635712446L;
@@ -111,19 +88,8 @@ public class ShareableConnectionManager extends AbstractConnectionManager {
      */
     private final Set<ManagedConnection> sharedConnections = new HashSet<ManagedConnection>();
 
-    /* (non-Javadoc)
-     * @see org.openmdx.kernel.application.container.lightweight.AbstractConnectionManager#getManagedConnections()
-     */
-    @Override
-    protected Set<ManagedConnection> getManagedConnections() {
-        return this.sharedConnections;
-    }
-
     /**
      * Allocate a managed connection
-     * 
-     * @param managedConnections set of managed conections
-     * @param subject
      * @param managedConnectionFactory
      * @param connectionRequestInfo
      * 
@@ -133,24 +99,24 @@ public class ShareableConnectionManager extends AbstractConnectionManager {
      */
     @Override
     protected ManagedConnection allocateMangedConnection(
-        Set<ManagedConnection> managedConnections,
-        Subject subject,
-        ManagedConnectionFactory managedConnectionFactory, 
+        ManagedConnectionFactory managedConnectionFactory,
         ConnectionRequestInfo connectionRequestInfo
     ) throws ResourceException{
-        synchronized(managedConnections){
-            ManagedConnection managedConnection = managedConnectionFactory.matchManagedConnections(
-                managedConnections,
+        synchronized(this.sharedConnections){
+            final Subject subject = getSubject();
+			ManagedConnection managedConnection = managedConnectionFactory.matchManagedConnections(
+                this.sharedConnections,
                 subject,
                 connectionRequestInfo
             );
-            if(managedConnection == null) managedConnections.add(
+            if(managedConnection == null) {
                 managedConnection = allocateManagedConnection(
-                    subject,
+            		subject,
                     managedConnectionFactory,
                     connectionRequestInfo
-                )
-            );
+	            );
+	            this.sharedConnections.add(managedConnection);
+            }
             return managedConnection;        
         }            
     }

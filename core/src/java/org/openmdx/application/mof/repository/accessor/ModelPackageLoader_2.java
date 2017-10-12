@@ -56,7 +56,6 @@ import javax.resource.ResourceException;
 import javax.resource.cci.MappedRecord;
 
 import org.omg.mof.spi.Names;
-import org.openmdx.application.mof.cci.ModelAttributes;
 import org.openmdx.application.xml.spi.Dataprovider_2Target;
 import org.openmdx.application.xml.spi.ImportHelper;
 import org.openmdx.application.xml.spi.ImportMode;
@@ -64,6 +63,7 @@ import org.openmdx.base.accessor.cci.SystemAttributes;
 import org.openmdx.base.dataprovider.cci.Channel;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
+import org.openmdx.base.mof.repository.cci.ElementRecord;
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.resource.Records;
 import org.openmdx.base.resource.spi.Port;
@@ -91,11 +91,11 @@ public class ModelPackageLoader_2 implements ModelLoader {
         String[] qualifiedPackageNames,
         boolean metaData
     ) throws ResourceException {
-    	this(
-    		ModelProvider_2.newInstance(metaData),
-    		xmlValidation,
-    		qualifiedPackageNames
-    	);
+        this(
+            ModelProvider_2.newInstance(metaData),
+            xmlValidation,
+            qualifiedPackageNames
+        );
     }
 
     /**
@@ -107,7 +107,7 @@ public class ModelPackageLoader_2 implements ModelLoader {
         Port<RestConnection> modelProvider,
         boolean xmlValidation 
     ) throws ResourceException {
-    	this(modelProvider, xmlValidation, null);
+        this(modelProvider, xmlValidation, null);
     }
     
     /**
@@ -129,7 +129,7 @@ public class ModelPackageLoader_2 implements ModelLoader {
      * The MOF repository provider
      */
     static private final Path PROVIDER_ROOT_PATH = new Path(
-    	"xri://@openmdx*org.omg.model1/provider/Mof"
+        "xri://@openmdx*org.omg.model1/provider/Mof"
     );
     
     /**
@@ -162,16 +162,16 @@ public class ModelPackageLoader_2 implements ModelLoader {
         this.modelElements = model.getModelElements();
         if(this.qualifiedPackageNames != null) {
             try {
-				importModels();
-			} catch (ResourceException e) {
-				throw new ServiceException(e);
-			}
+                importModels();
+            } catch (ResourceException e) {
+                throw new ServiceException(e);
+            }
         }
         try {
-			loadElements(model);
-		} catch (ResourceException e) {
-			throw new ServiceException(e);
-		}
+            loadElements(model);
+        } catch (ResourceException e) {
+            throw new ServiceException(e);
+        }
         completeFeatures();
         completeAllFeatures();
         completeAllFeatureWithSubtypes();
@@ -200,7 +200,7 @@ public class ModelPackageLoader_2 implements ModelLoader {
      */
     private void beginImport(
     ) throws ResourceException {
-        MessageRecord params = (MessageRecord) newMappedRecord(MessageRecord.NAME);
+        final MessageRecord params = Records.getRecordFactory().createMappedRecord(MessageRecord.class);
         params.setResourceIdentifier(PROVIDER_ROOT_PATH.getDescendant("segment", "-", "beginImport"));
         params.setBody(null);
         this.channel.addOperationRequest(params);
@@ -213,17 +213,10 @@ public class ModelPackageLoader_2 implements ModelLoader {
      */
     private void endImport(
     ) throws ResourceException {
-        MessageRecord params = (MessageRecord) newMappedRecord(MessageRecord.NAME);
+        final MessageRecord params = Records.getRecordFactory().createMappedRecord(MessageRecord.class);
         params.setResourceIdentifier(PROVIDER_ROOT_PATH.getDescendant("segment", "-", "endImport"));
         params.setBody(null);
         this.channel.addOperationRequest(params);
-    }
-    
-    @SuppressWarnings("unchecked")
-    private static Map<String,ModelElement_1_0> newMappedRecord(
-        String type
-    ) throws ResourceException{
-        return Records.getRecordFactory().createMappedRecord(type);
     }
     
     /**
@@ -243,7 +236,7 @@ public class ModelPackageLoader_2 implements ModelLoader {
         String qualifiedPackageName, 
         String modelName
     ){
-        String resourcePath = ModelHelper.toJavaPackageName(qualifiedPackageName, Names.XMI_PACKAGE_SUFFIX).replace('.', '/') + '/' + modelName;
+        String resourcePath = ModelHelper_1.toJavaPackageName(qualifiedPackageName, Names.XMI_PACKAGE_SUFFIX).replace('.', '/') + '/' + modelName;
         URL resourceURL = Resources.getResource(resourcePath + ".wbxml");
         return resourceURL == null ? (
             XRI_2Protocols.RESOURCE_PREFIX + resourcePath + ".xml" 
@@ -258,7 +251,7 @@ public class ModelPackageLoader_2 implements ModelLoader {
      * @throws ServiceException
      */
     private void importModel(
-    	String qualifiedPackageName
+        String qualifiedPackageName
     ) throws ServiceException{
         final String modelName = qualifiedPackageName.substring(
             qualifiedPackageName.lastIndexOf(':') + 1
@@ -281,7 +274,7 @@ public class ModelPackageLoader_2 implements ModelLoader {
     private void completeAllFeatureWithSubtypes(
     ) throws ServiceException {
         for(ModelElement_1_0 classDef : modelElements.values()) {
-            if(classDef.objGetClass().equals(ModelAttributes.CLASS)) {
+            if(classDef.isClassType()) {
                 completeAllFeatureWithSubtype(classDef);
             }
         }
@@ -294,7 +287,6 @@ public class ModelPackageLoader_2 implements ModelLoader {
      * 
      * @throws ServiceException
      */
-    @SuppressWarnings("unchecked")
     private void completeAllFeatureWithSubtype(
         ModelElement_1_0 classDef
     ) throws ServiceException {
@@ -304,7 +296,7 @@ public class ModelPackageLoader_2 implements ModelLoader {
             Iterator<?> j = classDef.objGetList("allSubtype").iterator();
             j.hasNext();
         ) {
-            ModelElement_1_0 subtype = ModelHelper.findElement(j.next(), modelElements);
+            ModelElement_1_0 subtype = ModelHelper_1.findElement(j.next(), modelElements);
             allFeatureWithSubtype.putAll(subtype.objGetMap("attribute"));
             allFeatureWithSubtype.putAll(subtype.objGetMap("reference"));        
             allFeatureWithSubtype.putAll(subtype.objGetMap("operation"));        
@@ -319,7 +311,7 @@ public class ModelPackageLoader_2 implements ModelLoader {
     private void completeAllFeatures(
     ) throws ServiceException {
         for(ModelElement_1_0 classDef : modelElements.values()) {
-            if(classDef.objGetClass().equals(ModelAttributes.CLASS)) {
+            if(classDef.isClassType()) {
                 completeAllFeature(classDef);
             }
         }
@@ -332,7 +324,6 @@ public class ModelPackageLoader_2 implements ModelLoader {
      * 
      * @throws ServiceException
      */
-    @SuppressWarnings("unchecked")
     private void completeAllFeature(ModelElement_1_0 classDef)
         throws ServiceException {
         Map<String,ModelElement_1_0> allFeature = classDef.objGetMap("allFeature");
@@ -341,7 +332,7 @@ public class ModelPackageLoader_2 implements ModelLoader {
             Iterator<?> j = allSupertypes.iterator();
             j.hasNext();
         ) {
-            ModelElement_1_0 supertype = ModelHelper.findElement(j.next(), modelElements);
+            ModelElement_1_0 supertype = ModelHelper_1.findElement(j.next(), modelElements);
             allFeature.putAll(supertype.objGetMap("attribute"));
             allFeature.putAll(supertype.objGetMap("reference"));
             allFeature.putAll(supertype.objGetMap("operation"));
@@ -359,9 +350,9 @@ public class ModelPackageLoader_2 implements ModelLoader {
     ) throws ServiceException {
         for(ModelElement_1_0 element : modelElements.values()) {
             // feature = content + content of all supertypes. 
-            if(element.objGetClass().equals(ModelAttributes.STRUCTURE_TYPE)) {
+            if(element.isStructureType()) {
                 completeFeature(element, element.objGetList("content"));
-            } else if(element.objGetClass().equals(ModelAttributes.CLASS)) {
+            } else if(element.isClassType()) {
                 completeFeature(element, element.objGetList("feature"));
             }
         }
@@ -375,18 +366,18 @@ public class ModelPackageLoader_2 implements ModelLoader {
      * 
      * @throws ServiceException
      */
-    @SuppressWarnings("unchecked")
     private void completeFeature(ModelElement_1_0 element, List<Object> content)
         throws ServiceException {
         Map<String,ModelElement_1_0> attributes = element.objGetMap("attribute");
         Map<String,ModelElement_1_0> references = element.objGetMap("reference");
         Map<String,ModelElement_1_0> fields = element.objGetMap("field");
         Map<String,ModelElement_1_0> operations = element.objGetMap("operation");
+
         for(
             Iterator<?> j = content.iterator();
             j.hasNext();
         ) {
-        	Path contentElementId = (Path) j.next();
+            Path contentElementId = (Path) j.next();
             String contentElementName = contentElementId.getLastSegment().toClassicRepresentation();
             if(!modelElements.containsKey(contentElementName)) {
                 throw new ServiceException (
@@ -398,50 +389,31 @@ public class ModelPackageLoader_2 implements ModelLoader {
                 );
             }
             ModelElement_1_0 contentElement = modelElements.get(contentElementName);
-            if(contentElement.objGetClass().equals(ModelAttributes.ATTRIBUTE)) {
+            if(contentElement.isAttributeType()) {
                 attributes.put(
                     contentElement.getName(),
                     contentElement
                 );
-            } else if(contentElement.objGetClass().equals(ModelAttributes.OPERATION)) {
+            } else if(contentElement.isOperationType()) {
                 operations.put(
                     contentElement.getName(),
                     contentElement
                 );
-            } else if(contentElement.objGetClass().equals(ModelAttributes.REFERENCE)) {
+            } else if(contentElement.isReferenceType()) {
                 references.put(
                     contentElement.getName(),
                     contentElement
                 );
                 // add references stored as attribute to the list of attributes
-                if(ModelHelper.referenceIsStoredAsAttribute(contentElement.jdoGetObjectId(), modelElements)) {
-                    ModelElement_1_0 attribute = new ModelElement_1(contentElement);
-                    attribute.objSetValue(
-                        SystemAttributes.OBJECT_CLASS,
-                        ModelAttributes.ATTRIBUTE
-                    );
-                    attribute.objSetValue(
-                        "isDerived",
-                        Boolean.valueOf(
-                            ModelHelper.referenceIsDerived(contentElement, modelElements)
-                        )
-                    );
-                    // Maximum length of path
-                    attribute.objSetValue(
-                        "maxLength",
-                        new Integer(1024)
-                    );
-                    // If reference has a qualifier --> multiplicity 0..n
-                    if(!ModelHelper.findElement(contentElement.getReferencedEnd(), modelElements).objGetList("qualifierName").isEmpty()) {
-                        attribute.objSetValue("multiplicity", org.openmdx.base.mof.cci.ModelHelper.UNBOUND);
-                    }
-                    SysLog.trace("referenceIsStoredAsAttribute", attribute.jdoGetObjectId());
+                final ModelElement_1_0 referenceStoredAsAttribute = ModelHelper_1.getReferenceStoredAsAttribute(contentElement, modelElements);
+                if(referenceStoredAsAttribute != null) {
+                    SysLog.trace("referenceIsStoredAsAttribute", referenceStoredAsAttribute.getQualifiedName());
                     attributes.put(
-                        attribute.getName(),
-                        attribute
+                        referenceStoredAsAttribute.getName(),
+                        referenceStoredAsAttribute
                     );
                 }
-            } else if(contentElement.objGetClass().equals(ModelAttributes.STRUCTURE_FIELD)) {
+            } else if(contentElement.isStructureFieldType()) {
                 fields.put(
                     contentElement.getName(),
                     contentElement
@@ -452,7 +424,6 @@ public class ModelPackageLoader_2 implements ModelLoader {
 
     /**
      * Load the elements from the provider
-     * @param model TODO
      * 
      * @throws ServiceException
      */
@@ -468,9 +439,13 @@ public class ModelPackageLoader_2 implements ModelLoader {
                 Object_2Facade.getPath(modelPackage).getChild("element")
             );
             for(MappedRecord elementDef : elementDefs) {
+                final Path xri = Object_2Facade.getPath(elementDef);
+                final String mofId = xri.getLastSegment().toClassicRepresentation();
+                ElementRecord elementRecord = (ElementRecord) Object_2Facade.getValue(elementDef);
+                elementRecord.put(SystemAttributes.OBJECT_IDENTITY, xri);
                 modelElements.put(
-                    Object_2Facade.getPath(elementDef).getLastSegment().toClassicRepresentation(),
-                    new ModelElement_1(elementDef, model)
+                    mofId,
+                    new ModelElement_1(elementRecord, model)
                 ); 
             }
         }

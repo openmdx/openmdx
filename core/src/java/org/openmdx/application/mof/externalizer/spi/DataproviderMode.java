@@ -51,16 +51,14 @@ import java.util.Collection;
 import java.util.List;
 
 import javax.resource.ResourceException;
-import javax.resource.cci.IndexedRecord;
 import javax.resource.cci.MappedRecord;
 
-import org.openmdx.base.mof.cci.Multiplicity;
-import org.openmdx.base.resource.Records;
 import org.openmdx.base.rest.cci.ObjectRecord;
 
 /**
  * TODO to be inlined
  */
+@SuppressWarnings("rawtypes")
 public enum DataproviderMode {
 	
 	/**
@@ -75,15 +73,7 @@ public enum DataproviderMode {
     		String feature,
     		Collection<?> values
     	) throws ResourceException{
-    		final MappedRecord mappedRecord = target.getValue();
-    		List indexedRecord = (List) mappedRecord.get(feature);
-    		if(indexedRecord == null) {
-    			mappedRecord.put(
-    				feature,
-    				indexedRecord = newListRecord()
-    			);
-    		}
-    		indexedRecord.addAll(values);
+    		target.getValue().put(feature, values);
     	}
     		
         @SuppressWarnings("unchecked")
@@ -140,13 +130,7 @@ public enum DataproviderMode {
         	Collection<?> values
         ) throws ResourceException {
     		final MappedRecord mappedRecord = target.getValue();
-    		List indexedRecord = (List) mappedRecord.get(feature);
-    		if(indexedRecord == null) {
-    			mappedRecord.put(
-    				feature,
-    				indexedRecord = newListRecord()
-    			);
-    		}
+    		final List indexedRecord = (List) mappedRecord.get(feature);
     		indexedRecord.addAll(values);
         }
 
@@ -249,8 +233,4 @@ public enum DataproviderMode {
     	String feature
     ) throws ResourceException;
 
-	protected IndexedRecord newListRecord() throws ResourceException {
-		return Records.getRecordFactory().createIndexedRecord(Multiplicity.LIST.code());
-	}
-	
 }

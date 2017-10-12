@@ -190,16 +190,11 @@ public class PersistenceManagers {
     }
 
     /**
-     * Make Persistent ALl
-     * 
-     * @param pm
-     * @param pcs
-     * 
-     * @return
+     * Make Persistent All
      */
     public static <T> T[] makePersistentAll(
         PersistenceManager pm,
-        T... pcs
+        T[] pcs
     ) {
         List<JDOException> exceptions = null;
         for(Object pc : pcs) try {
@@ -452,7 +447,7 @@ public class PersistenceManagers {
      */
     public static <T> T[] detachCopyAll(
         PersistenceManager pm,
-        T... pcs
+        T[] pcs
     ) {
         List<JDOException> exceptions = null;
         T[] objects = pcs.clone();

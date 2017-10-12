@@ -51,7 +51,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import javax.jdo.JDOFatalUserException;
-import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
@@ -90,15 +89,9 @@ public class ComponentEnvironment {
     ) throws BasicException{
         Factory<?> factory = registry.get(objectClass);
         if(factory == null) {
-            String jndiName = "java:comp/" + objectClass.getSimpleName();
+            final String jndiName = "java:comp/" + objectClass.getSimpleName();
             try {
-                Context context = new InitialContext();
-                try {
-                    Object object = context.lookup(jndiName);
-                    return objectClass.cast(object);
-                } finally {
-                    context.close();
-                }
+            	return objectClass.cast(new InitialContext().lookup(jndiName));
             } catch (NamingException exception) {
                 throw BasicException.newStandAloneExceptionStack(
                     exception,

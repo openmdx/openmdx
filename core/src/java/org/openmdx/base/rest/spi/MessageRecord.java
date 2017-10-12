@@ -107,7 +107,7 @@ public class MessageRecord
 	public void makeImmutable() {
 		super.makeImmutable();
 		freeze(this.body);
-	};
+	}
     
     /* (non-Javadoc)
      * @see org.openmdx.base.resource.spi.AbstractRecord#clone()

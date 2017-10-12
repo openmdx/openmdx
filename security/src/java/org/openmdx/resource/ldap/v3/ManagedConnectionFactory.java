@@ -48,6 +48,9 @@
  */
 package org.openmdx.resource.ldap.v3;
 
+import java.net.URI;
+import java.net.URISyntaxException;
+
 import javax.resource.ResourceException;
 import javax.resource.spi.ConnectionRequestInfo;
 import javax.resource.spi.EISSystemException;
@@ -60,6 +63,7 @@ import org.openmdx.resource.ldap.spi.ManagedConnection;
 import netscape.ldap.LDAPConnection;
 import netscape.ldap.LDAPException;
 import netscape.ldap.LDAPv3;
+import netscape.ldap.factory.JSSESocketFactory;
 
 
 /**
@@ -79,6 +83,12 @@ public class ManagedConnectionFactory extends AbstractManagedConnectionFactory {
 	 */
     private static final long serialVersionUID = -396153144173718931L;
 
+    /**
+     * LDAP over SSL port
+     */
+    private static final int DEFAULT_SSL_PORT = 636;
+    
+    	
     /* (non-Javadoc)
      * @see org.openmdx.resource.spi.AbstractManagedConnectionFactory#isManagedConnectionShareable()
      */
@@ -87,7 +97,17 @@ public class ManagedConnectionFactory extends AbstractManagedConnectionFactory {
 	    return false;
     }
 
-
+    /**
+     * Create the physical LDAP Connection
+     * 
+     * @param useSSL tells, whether an ldap or an ldaps connection shall be established
+     * 
+     * @return a physical connection instance
+     */
+    protected LDAPv3 createConnection(boolean useSSL) {
+    	return useSSL ? new LDAPConnection(new JSSESocketFactory())  : new LDAPConnection();
+    }
+    
 	/* (non-Javadoc)
      * @see javax.resource.spi.ManagedConnectionFactory#createManagedConnection(javax.security.auth.Subject, javax.resource.spi.ConnectionRequestInfo)
      */
@@ -95,22 +115,32 @@ public class ManagedConnectionFactory extends AbstractManagedConnectionFactory {
         Subject subject,
         ConnectionRequestInfo connectionRequestInfo
     ) throws ResourceException {
-        PasswordCredential credential = this.getCredential(subject);
-        try {
-        	LDAPv3 physicalConnection = new LDAPConnection();
+        final PasswordCredential credential = this.getCredential(subject);
+        final String connectionURL = this.getConnectionURL();
+		try {
+			final URI connectionURI = new URI(connectionURL);
+			final boolean useSSL = "ldaps".equalsIgnoreCase(connectionURI.getScheme());
+			int port = connectionURI.getPort();
+			if(port < 0) {
+				port = useSSL ? DEFAULT_SSL_PORT : LDAPConnection.DEFAULT_PORT;
+			}
+			final String host = connectionURI.getHost();
+        	final LDAPv3 physicalConnection = createConnection(useSSL);
+			final String distinguishedName = credential == null ? this.getUserName() : credential.getUserName();
+			final String password = credential == null ? this.getPassword() : new String (credential.getPassword());
 			physicalConnection.connect(
 				this.getProtocolVersion(),
-				this.getConnectionURL(), 
-				LDAPConnection.DEFAULT_PORT,
-				credential == null ? this.getUserName() : credential.getUserName(),
-				credential == null ? this.getPassword() : new String (credential.getPassword())
+				host, 
+				port,
+				distinguishedName,
+				password
 			);
 	        return new ManagedConnection(
                 physicalConnection,
                 credential
              );
 		} catch (LDAPException exception) {
-			 String message = "Could not connect to LDAP host(s) \"" + this.getConnectionURL() + "\".";
+			 String message = "Could not connect to LDAP host \"" + connectionURL + "\". ";
 		     switch( exception.getLDAPResultCode() ) {
 		         case LDAPException.NO_SUCH_OBJECT:
 		        	 message += "User \"" + credential.getUserName() + "\" does not exist.";
@@ -123,6 +153,13 @@ public class ManagedConnectionFactory extends AbstractManagedConnectionFactory {
 			 throw this.log(
 				new EISSystemException(
 					message,
+					exception
+				)
+			);
+		} catch (URISyntaxException exception) {
+			 throw this.log(
+				new EISSystemException(
+					"Could not connect to LDAP host \"" + connectionURL + "\". Invalid connection URL.",
 					exception
 				)
 			);

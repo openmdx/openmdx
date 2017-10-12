@@ -202,13 +202,21 @@ public abstract class AbstractManagedConnectionFactory implements ManagedConnect
 	protected PasswordCredential getCredential(
 		Subject subject
 	) throws ResourceException{
-		if(subject != null) {
+		if(subject == null) {
+			final String userName = getUserName();
+			final String password = getPassword();
+			if(userName != null && password != null) {
+				final PasswordCredential credential = new PasswordCredential(userName, password.toCharArray());
+				credential.setManagedConnectionFactory(this);
+				return credential;
+			}
+		} else {
 			for(PasswordCredential credential : subject.getPrivateCredentials(PasswordCredential.class)) {
 				if(credential.getManagedConnectionFactory() == this) {
 					return credential;
 				}
 			}
-		}
+		} 
 		return null;
 	}
 
@@ -267,7 +275,7 @@ public abstract class AbstractManagedConnectionFactory implements ManagedConnect
 	 * 
 	 * @param password The password to set.
 	 */
-	public final void setPassword(
+	public void setPassword(
 		String password
 	) {
 		this.password = password;
@@ -278,7 +286,7 @@ public abstract class AbstractManagedConnectionFactory implements ManagedConnect
 	 *
 	 * @return Returns the password.
 	 */
-	public final String getPassword() {
+	public String getPassword() {
 		return this.password;
 	}    
 
@@ -287,7 +295,7 @@ public abstract class AbstractManagedConnectionFactory implements ManagedConnect
 	 *
 	 * @return Returns the userName.
 	 */
-	public final String getUserName() {
+	public String getUserName() {
 		return this.userName;
 	}
 
@@ -296,7 +304,7 @@ public abstract class AbstractManagedConnectionFactory implements ManagedConnect
 	 * 
 	 * @param userName The userName to set.
 	 */
-	public final void setUserName(
+	public void setUserName(
 		String userName 
 	) {
 		this.userName = userName;

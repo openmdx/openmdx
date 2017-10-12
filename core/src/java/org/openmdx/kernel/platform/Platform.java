@@ -48,6 +48,7 @@
 package org.openmdx.kernel.platform;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Properties;
 
 import org.openmdx.kernel.log.SysLog;
@@ -64,39 +65,23 @@ public class Platform {
         // Avoid instantiation
     }
 
+    /**
+     * The lazily loaded configuration
+     */
     private static Properties configuration;
+    
+    /**
+     * The configuration file name
+     */
+    private static final String CONFIGURATION = "platform.properties";
 
-    private static Properties loadConfiguration(){
-        Properties configuration = new Properties();
-        try {
-            configuration.load(
-                Platform.class.getResourceAsStream("platform.properties")
-            );
-        } catch (IOException exception) {
-            SysLog.error(
-                "Platform configuration acquisition failure",
-                exception
-            );
-        }
-        return configuration;
-    }
-    
-    private static Properties getConfiguration(
-    ){
-        if(Platform.configuration == null) {
-            Platform.configuration = loadConfiguration();
-        }
-        return Platform.configuration;
-    }
-    
     /**
      * The property value has the following sources<ol>
      * <li>System Property
      * <li>Platform Configuration
-     * <li>Default Value
      * </ol>
      * 
-     * @param key
+     * @param key the property name or configuration entry
      * 
      * @return the platform specific value
      */
@@ -112,9 +97,11 @@ public class Platform {
      * The property value has the following sources<ol>
      * <li>System Property
      * <li>Platform Configuration
+     * <li>Default Value
      * </ol>
      * 
-     * @param key
+     * @param key the property name or configuration entry
+     * @param defaultValue the default value
      * 
      * @return the platform specific value
      */
@@ -138,4 +125,30 @@ public class Platform {
         return getProperty("platform");
     }
 
+    private static Properties getConfiguration(
+    ){
+        if(Platform.configuration == null) {
+            Platform.configuration = loadConfiguration();
+        }
+        return Platform.configuration;
+    }
+    
+    private static Properties loadConfiguration(){
+        final Properties configuration = new Properties();
+        final InputStream stream = Platform.class.getResourceAsStream(CONFIGURATION);
+        if(stream == null) {
+            SysLog.error(CONFIGURATION + " missing");
+        } else {
+	        try {
+				configuration.load(stream);
+	        } catch (IOException exception) {
+	            SysLog.error(
+            		CONFIGURATION + " processing failure",
+	                exception
+	            );
+	        }
+        }
+        return configuration;
+    }
+    
 }
