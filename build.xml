@@ -49,7 +49,7 @@
 >
 	<description>Builds the openMDX projects</description>
 	
-	<target name="all" depends="-all,-ant,-core,-security,-client,-portal,-test-core" description="Cleans, builds and makes distributions for all projects"/>	
+	<target name="all" depends="-all,-ant,-core,-security,-client,-portal,-test-core,-tomcat" description="Cleans, builds and makes distributions for all projects"/>	
 	
 	<!-- ******************************************************************* -->
 	<!-- * -projecthelp -->
