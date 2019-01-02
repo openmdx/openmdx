@@ -55,6 +55,7 @@
 	<property name="project.specification.title" value="openMDX/Tomcat"/>
 
 	<property name="openmdx.home" location=".."/>
+	<property name="build.ignore.jpa" value="true" />
 
 	<!-- Slash separated platform list, the last entry being the default -->
 	<property name="project.platform.list" value="jre-1.8"/>
