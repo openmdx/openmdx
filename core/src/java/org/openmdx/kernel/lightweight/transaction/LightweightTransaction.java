@@ -234,7 +234,7 @@ final class LightweightTransaction implements Transaction {
      * Similarly, the afterCompletion callback will be called after 2-phase commit completes 
      * but before any SessionSynchronization and Transaction afterCompletion callbacks.
      */
-    Synchronization interposedSynchronization;
+    final List<Synchronization> interposedSynchronizations = new ArrayList<Synchronization>();
     
     
     // ------------------------------------------------------------- Properties
@@ -274,41 +274,45 @@ final class LightweightTransaction implements Transaction {
     private List<Throwable> beforeCompletion(
     ) throws IllegalStateException, SystemException{
         List<Throwable> warnings = null;
-        if(this.interposedSynchronization != null) try {
-            this.interposedSynchronization.beforeCompletion();
-        } catch (RuntimeException exception) {
-            if(warnings == null) {
-                warnings = new ArrayList<Throwable>();
+        for(Synchronization interposedSynchronization : this.interposedSynchronizations) {
+            try {
+                interposedSynchronization.beforeCompletion();
+            } catch (RuntimeException exception) {
+                if(warnings == null) {
+                    warnings = new ArrayList<Throwable>();
+                }
+                warnings.add(
+                    Throwables.log(BasicException.newStandAloneExceptionStack(
+                        exception,
+                        BasicException.Code.DEFAULT_DOMAIN,
+                        BasicException.Code.ROLLBACK,
+                        "Transaction.beforeCompletionFail",
+                        new BasicException.Parameter("xid", this.xid),
+                        new BasicException.Parameter("status", getStatusAsString())
+                    ))
+                );
+                this.setRollbackOnly();
             }
-            warnings.add(
-                Throwables.log(BasicException.newStandAloneExceptionStack(
-                    exception,
-                    BasicException.Code.DEFAULT_DOMAIN,
-                    BasicException.Code.ROLLBACK,
-                    "Transaction.beforeCompletionFail",
-                    new BasicException.Parameter("xid", this.xid),
-                    new BasicException.Parameter("status", getStatusAsString())
-                ))
-            );
-            this.setRollbackOnly();
         }
-        for(Synchronization synchronization : synchronizationObjects) try {
-            synchronization.beforeCompletion();
-        } catch (RuntimeException exception) {
-            if(warnings == null) {
-                warnings = new ArrayList<Throwable>();
+        for(Synchronization synchronization : synchronizationObjects) {
+            try {
+                synchronization.beforeCompletion();
+            } catch (RuntimeException exception) {
+                if(warnings == null) {
+                    warnings = new ArrayList<Throwable>();
+                }
+                warnings.add(
+                    Throwables.log(BasicException.newStandAloneExceptionStack(
+                        exception,
+                        BasicException.Code.DEFAULT_DOMAIN,
+                        BasicException.Code.ROLLBACK,
+                        "Transaction.beforeCompletionFail",
+                        new BasicException.Parameter("xid", this.xid),
+                        new BasicException.Parameter("status", getStatusAsString())
+                    ))
+                );
+                this.setRollbackOnly();
             }
-            warnings.add(
-                Throwables.log(BasicException.newStandAloneExceptionStack(
-                    exception,
-                    BasicException.Code.DEFAULT_DOMAIN,
-                    BasicException.Code.ROLLBACK,
-                    "Transaction.beforeCompletionFail",
-                    new BasicException.Parameter("xid", this.xid),
-                    new BasicException.Parameter("status", getStatusAsString())
-                ))
-            );
-            this.setRollbackOnly();
         }
         return warnings == null ? Collections.<Throwable>emptyList(): warnings;
     }
@@ -325,22 +329,24 @@ final class LightweightTransaction implements Transaction {
         int status
     ){
         List<Throwable> warnings = null;
-        if(this.interposedSynchronization != null) try {
-            this.interposedSynchronization.afterCompletion(status);
-        } catch (RuntimeException exception) {
-            if(warnings == null) {
-                warnings = new ArrayList<Throwable>();
+        for(Synchronization interposedSynchronization : this.interposedSynchronizations) {
+            try {
+                interposedSynchronization.afterCompletion(status);
+            } catch (RuntimeException exception) {
+                if(warnings == null) {
+                    warnings = new ArrayList<Throwable>();
+                }
+                warnings.add(
+                    Throwables.log(BasicException.newStandAloneExceptionStack(
+                        exception,
+                        BasicException.Code.DEFAULT_DOMAIN,
+                        BasicException.Code.GENERIC,
+                        "Transaction.afterCompletionFail",
+                        new BasicException.Parameter("xid", this.xid),
+                        new BasicException.Parameter("status", getStatusAsString())
+                        ))
+                    );
             }
-            warnings.add(
-                Throwables.log(BasicException.newStandAloneExceptionStack(
-                    exception,
-                    BasicException.Code.DEFAULT_DOMAIN,
-                    BasicException.Code.GENERIC,
-                    "Transaction.afterCompletionFail",
-                    new BasicException.Parameter("xid", this.xid),
-                    new BasicException.Parameter("status", getStatusAsString())
-                ))
-            );
         }
         for(Synchronization synchronization : synchronizationObjects) try {
             synchronization.afterCompletion(status);
@@ -359,11 +365,7 @@ final class LightweightTransaction implements Transaction {
                 ))
             );
         }
-        if(warnings == null) {
-            return Collections.emptyList();
-        } else {
-            return warnings;
-        }
+        return warnings == null ? Collections.<Throwable>emptyList() : warnings;
     }
     
     /**
@@ -734,15 +736,37 @@ final class LightweightTransaction implements Transaction {
             }
         }
         status = Status.STATUS_ROLLEDBACK;
-		
+        //
         // Call synchronized objects afterCompletion
-        if(this.interposedSynchronization != null) {
-            this.interposedSynchronization.afterCompletion(status);
+        //
+        for(Synchronization interposedSynchronization : this.interposedSynchronizations) {
+            try {
+                interposedSynchronization.afterCompletion(status);
+            } catch (RuntimeException exception) {
+                Throwables.log(BasicException.newStandAloneExceptionStack(
+                    exception,
+                    BasicException.Code.DEFAULT_DOMAIN,
+                    BasicException.Code.ROLLBACK,
+                    "Transaction.beforeCompletionFail",
+                    new BasicException.Parameter("xid", this.xid),
+                    new BasicException.Parameter("status", getStatusAsString())
+                ));
+            }
         }
         for(Synchronization synchronization : synchronizationObjects) {
-            synchronization.afterCompletion(status);
-        }
-        
+            try {
+                synchronization.beforeCompletion();
+            } catch (RuntimeException exception) {
+                Throwables.log(BasicException.newStandAloneExceptionStack(
+                    exception,
+                    BasicException.Code.DEFAULT_DOMAIN,
+                    BasicException.Code.ROLLBACK,
+                    "Transaction.beforeCompletionFail",
+                    new BasicException.Parameter("xid", this.xid),
+                    new BasicException.Parameter("status", getStatusAsString())
+                ));
+            }
+        }        
     }
     
     

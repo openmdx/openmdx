@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2011, OMEX AG, Switzerland
+ * Copyright (c) 2011-2018, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -47,9 +47,10 @@
  */
 package org.openmdx.base.mof.cci;
 
-import java.io.IOException;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.logging.Level;
@@ -66,14 +67,42 @@ import org.openmdx.kernel.log.SysLog;
 public class Persistency {
 
     /**
+     * The Meta-Inf located configuration
+     */
+    private static final String CONFIGURATION_NAME = "openmdxorm.properties";
+    
+    /**
+     * Sanity check input
+     */
+    private static final List<String> PERSISTENCY_REQUIRED = Arrays.asList(
+        "org:openmdx:base:Creatable:createdAt",
+        "org:openmdx:base:Creatable:createdBy",
+        "org:openmdx:base:Modifiable:modifiedAt",
+        "org:openmdx:base:Modifiable:modifiedBy",
+        "org:openmdx:base:Removable:removedBy",
+        "org:openmdx:base:Removable:removedAt",
+        "org:openmdx:state2:StateCapable:stateVersion"
+    );
+
+    /**
+     * Sanity check input
+     */
+    private static final List<String> TRANSIENCY_REQUIRED = Arrays.asList(
+        "org:openmdx:state2:Legacy:validTimeUnique",
+        "org:openmdx:state2:StateCapable:transactionTimeUnique"
+    );
+    
+    /**
      * Constructor 
      * 
      * @throws ServiceException 
      */
     private Persistency() throws ServiceException {
+        final String openmdxormProperties = locateConfiguration();
+        SysLog.info("ORM mapping: Scanning for Persistence Modifiers", openmdxormProperties); 
         try {
             Properties persistenceModifiers = new Properties();
-            for(URL url : Resources.getMetaInfResources("openmdxorm.properties")) {
+            for(URL url : Resources.getMetaInfResources(CONFIGURATION_NAME)) {
                 SysLog.log(
                     Level.INFO,
                     "Sys|ORM mapping: Persistence Modifiers|Apply configuration {0}", 
@@ -85,7 +114,7 @@ public class Persistency {
                     String attribute = (String) e.getKey();
                     String modifier = (String) e.getValue();
                     SysLog.log(
-                        Level.FINE, 
+                        Level.FINE,  
                         "Sys|ORM mapping: Persistence Modifiers|Feature {0} has modifier {1}", 
                         attribute, modifier
                     );
@@ -95,26 +124,84 @@ public class Persistency {
                         this.persistentFeatures.put(attribute, Boolean.TRUE);
                     } else {
                         SysLog.log(
-                            Level.WARNING, 
+                            Level.SEVERE, 
                             "Sys|ORM mapping: Persistence Modifiers|Modifier {1} for feature {0} is not supported", 
                             attribute, modifier
                         );
                     }
                 }
             }
-        } catch (IOException exception) {
-            throw new ServiceException(
-                exception,
-                BasicException.Code.DEFAULT_DOMAIN,
-                BasicException.Code.INVALID_CONFIGURATION, 
-                "Unable to load the openMDX specific ORM configuration"
+        } catch (Exception cause) {
+            throw logAsSevere(
+                new ServiceException(
+                    cause,
+                    BasicException.Code.DEFAULT_DOMAIN,
+                    BasicException.Code.INVALID_CONFIGURATION, 
+                    "Unable to load the openMDX specific ORM configuration",
+                    new BasicException.Parameter("Persistence modifiers", openmdxormProperties)
+                )
             );
-        } catch (ClassCastException exception) {
-            throw new ServiceException(
-                exception,
-                BasicException.Code.DEFAULT_DOMAIN,
-                BasicException.Code.INVALID_CONFIGURATION, 
-                "Unable to load the openMDX specific ORM configuration"
+        }
+        sanityCheck();
+    }
+
+    /**
+     * Throw eagerly an exception to avoid erroneous behaviour due to configuration load problems
+     * 
+     * @throws ServiceException in case of an unexpected configuration
+     */
+    private void sanityCheck() throws ServiceException {
+        for(String feature : PERSISTENCY_REQUIRED) {
+            assertPersistency(feature, Boolean.TRUE);
+        }
+        for(String feature : TRANSIENCY_REQUIRED) {
+            assertPersistency(feature, Boolean.FALSE);
+        }
+    }
+    
+    /**
+     * Validate a given feature's persistency configuration
+     * 
+     * @throws ServiceException in case of an unexpected configuration
+     */
+    private void assertPersistency(
+        String feature, 
+        Boolean expected
+    ) throws ServiceException {
+        final Boolean actual = this.persistentFeatures.get(feature);
+        if(expected != actual) {
+            throw logAsSevere(
+                new ServiceException(
+                    BasicException.Code.DEFAULT_DOMAIN,
+                    BasicException.Code.ASSERTION_FAILURE, 
+                    "Sanity check: Unexpected openMDX ORM persistency configuration",
+                    new BasicException.Parameter("feature", actual),
+                    new BasicException.Parameter("expected", expected),
+                    new BasicException.Parameter("actual", actual)
+                )
+            );
+        }
+    }
+    
+    /**
+     * Locate the openMDX ORM configuration for logging and exception amendment.
+     * 
+     * @return the openMDX ORM configuration 
+     * 
+     * @throws ServiceException 
+     */
+    private String locateConfiguration() throws ServiceException {
+        try {
+            return Resources.toMetaInfPath(CONFIGURATION_NAME);
+        } catch (Exception cause) {
+            throw logAsSevere(
+                new ServiceException(
+                    cause,
+                    BasicException.Code.DEFAULT_DOMAIN,
+                    BasicException.Code.INVALID_CONFIGURATION, 
+                    "Unable to locate the openMDX specific ORM configuration",
+                    new BasicException.Parameter("configuration-name", CONFIGURATION_NAME)
+                )
             );
         }
     }
@@ -134,7 +221,7 @@ public class Persistency {
      * 
      * @return the instance
      * 
-     * @throws ServiceException 
+     * @throws ServiceException in case of a configuration or assertion failure 
      */
     public static Persistency getInstance() throws ServiceException{
         if(instance == null) {
@@ -153,7 +240,7 @@ public class Persistency {
     public boolean isPersistentAttribute(
         ModelElement_1_0 featureDef
     ) throws ServiceException {
-        Boolean persistent = this.persistentFeatures.get(featureDef.getQualifiedName());
+        final Boolean persistent = this.persistentFeatures.get(featureDef.getQualifiedName());
         return persistent == null ? isNonDerivedAttribute(featureDef) : persistent.booleanValue();
     }
     
@@ -167,13 +254,30 @@ public class Persistency {
     private boolean isNonDerivedAttribute(
         ModelElement_1_0 featureDef
     ) throws ServiceException {
-        Model_1_0 model = featureDef.getModel();
+        final Model_1_0 model = featureDef.getModel();
         return (
             model.isAttributeType(featureDef) ||
             (model.isReferenceType(featureDef) && model.referenceIsStoredAsAttribute(featureDef)) 
         ) && (
             !ModelHelper.isDerived(featureDef)
         );
+    }
+    
+    /**
+     * Log the exception stack at level severe
+     * 
+     * @param exception the exception to be logged 
+     * 
+     * @return the {code exception}
+     */
+    private static ServiceException logAsSevere(ServiceException exception) {
+        final BasicException cause = exception.getCause();
+        SysLog.log(
+            Level.SEVERE,
+            cause == null ? exception.getMessage() : cause.getDescription(),
+            exception
+        );
+        return exception;
     }
     
 }

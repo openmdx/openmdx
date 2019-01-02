@@ -86,6 +86,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.jdo.Constants;
 import javax.jdo.FetchPlan;
@@ -358,9 +362,19 @@ public class TestMain {
             return (org.openmdx.base.persistence.spi.UnitOfWork) PersistenceHelper.currentUnitOfWork(entityManager);            
         }
         
+		protected boolean isContainerManaged(){
+		    return false;
+		}
+		
         @Before
         public  void setUp(){
             entityManagerFactory = newEntityManagerFactory();
+            if(!isContainerManaged()) {
+                prolog();
+            }
+        }
+
+        protected void prolog() {
             this.entityManager = entityManagerFactory.getPersistenceManager();
             this.authority = this.entityManager.getObjectById(
                 Authority.class,
@@ -511,7 +525,6 @@ public class TestMain {
             return "ID" + this.id++;
         }
 
-        @SuppressWarnings("unchecked")
         protected void testCR20019014(){
             PropertyQuery query = (PropertyQuery) entityManager.newQuery(
                 Property.class
@@ -907,6 +920,7 @@ public class TestMain {
                         RegularExpressionFlag.CASE_INSENSITIVE.getFlag(), 
                         "Pg0"
                     );
+                    ((Query)invoiceQuery).getFetchPlan().setFetchSize(FetchPlan.FETCH_SIZE_GREEDY);
                     List<Invoice> invoices = segment.getInvoice(invoiceQuery);
                     assertEquals(1, invoices.size());
                 }
@@ -3453,17 +3467,18 @@ public class TestMain {
             SegmentHasPerson.Person<Person> personCollection;
             List<Person> personList;
             try {
-                super.taskId = "CR20019366";
+                super.taskId = "CR20019366 & CR20071972";
                 personCollection = segment.getPerson();
-                Person[] personArray = new Person[personCollection.size()];
+                final Person[] personArray = new Person[personCollection.size()];
                 personCollection.toArray(personArray);
                 for(Person person20019366 : personArray) {
-                    if(this instanceof ProxyConnectionTest) {
-                        assertFalse("Person Proxy", person20019366 instanceof NaturalPerson);
-                    } else {
-                        assertTrue("Person", person20019366 instanceof NaturalPerson);
-                        assertFalse("Person", ((NaturalPerson)person20019366).isRetired());
-                    }
+                    validatePerson(person20019366);
+                }
+                final Stream<Person> personStream = personCollection.stream();
+                final Collector<Person, ?, List<Person>> personCollector = Collectors.toList();
+                personList = personStream.collect(personCollector);
+                for(Person person20071972 : personList) {
+                    validatePerson(person20071972);
                 }
                 personList = segment.getPerson((PersonQuery)null);
                 Iterator<Person> containerIterator = personCollection.iterator();
@@ -3854,10 +3869,19 @@ public class TestMain {
             }
             PersonFormatNameAsResult formattedName = person.formatNameAs(personFormatNameAsParams);
             this.commit(); // result available after commit only               
-            System.out.println("formatted name=" + formattedName.getFormattedName());
-            System.out.println("formatted name as set=" + formattedName.getFormattedNameAsSet());
-            System.out.println("formatted name as list=" + formattedName.getFormattedNameAsList());
-            System.out.println("formatted name as sparsearray=" + formattedName.getFormattedNameAsSparseArray());
+            final String formattedNameString = formattedName.getFormattedName();
+            Assert.assertNotNull("formattedNameString must not be null", formattedNameString);
+            Assert.assertFalse("formattedNameString must not be empty".isEmpty());
+            System.out.println("formatted name=" + formattedNameString);
+            final Set<String> formattedNameSet = formattedName.getFormattedNameAsSet();
+            Assert.assertEquals("formattedNameSet must have cardinality 1", 1, formattedNameSet.size());
+            System.out.println("formatted name as set=" + formattedNameSet);
+            final List<String> formattedNameList = formattedName.getFormattedNameAsList();
+            Assert.assertEquals("formattedNameList must have cardinality 1", 1, formattedNameList.size());
+            System.out.println("formatted name as list=" + formattedNameList);
+            final SparseArray<String> formattedNameArray = formattedName.getFormattedNameAsSparseArray();
+            Assert.assertEquals("formattedNameArray must have cardinality 1", 1, formattedNameArray.size());
+            System.out.println("formatted name as sparsearray=" + formattedNameArray);
 
             // test optional argument
             this.begin(); // isQuery() is false               
@@ -3884,7 +3908,7 @@ public class TestMain {
             }
             formattedName = person.formatNameAs(personFormatNameAsParams);
             this.commit(); // result available after commit only               
-            System.out.println("formatted name=" + formattedName.getFormattedName());
+            System.out.println("formatted name=" + formattedNameString);
             try {
                 switch(this.nextStructureCreation()) {
                     case BY_MEMBER:
@@ -4816,6 +4840,23 @@ public class TestMain {
 //            }
         }
 
+        /**
+         * @param person20019366
+         */
+        private void validatePerson(Person person20019366) {
+            assertNotNull("Person", person20019366);
+            if(this instanceof ProxyConnectionTest) {
+                assertFalse("Mix-In interface should be absent", person20019366 instanceof NaturalPerson);
+            } else {
+                if(!(person20019366 instanceof NaturalPerson)) {
+                    System.out.println("Expected " + NaturalPerson.class.getName() + ", found " + (person20019366 == null ? "null" : person20019366.getClass().getName()));
+                    System.out.println("Wait a moment");
+                }
+                assertTrue("Mix-In interface should be present", person20019366 instanceof NaturalPerson);
+                assertFalse("Person", ((NaturalPerson)person20019366).isRetired());
+            }
+        }
+
 		private InternationalPostalAddress createPostalAddress(
 			test.openmdx.app1.jmi1.Segment segment, String id
 		) throws ServiceException {
@@ -5535,6 +5576,14 @@ public class TestMain {
          */
         protected abstract Boolean isOptimistic();
                 
+        /* (non-Javadoc)
+         * @see test.openmdx.app1.TestMain.AbstractTest#isContainerManaged()
+         */
+        @Override
+        protected boolean isContainerManaged() {
+            return true;
+        }
+
         protected boolean testConcurrentAccess(){
             return false;
         }
@@ -5570,6 +5619,9 @@ public class TestMain {
                 this.userTransaction.rollback();
             }
             this.userTransaction.begin();
+            if(isContainerManaged()) {
+                prolog();
+            }
             super.resetAuditSegment();
             super.resetDataSegment();
             super.testCR20019462();

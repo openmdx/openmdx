@@ -84,6 +84,7 @@ import org.openmdx.base.naming.Path;
 import org.openmdx.kernel.exception.BasicException;
 import org.w3c.cci2.BinaryLargeObject;
 import org.w3c.cci2.BinaryLargeObjects;
+import org.w3c.cci2.SortedMaps;
 import org.w3c.cci2.SparseArray;
 
 /**
@@ -111,12 +112,12 @@ public class Jmi1StructInvocationHandler implements InvocationHandler, Marshalle
         String methodName
     ) throws ServiceException {
         String structName = this.delegate.getRecordName();
-        ConcurrentMap<String,ModelElement_1_0> fields = allFields.get(structName);
+        ConcurrentMap<String,ModelElement_1_0> fields = ALL_FIELDS.get(structName);
         if(fields == null) {
             fields = Maps.putUnlessPresent(
-                allFields,
+                ALL_FIELDS,
                 structName, 
-                new ConcurrentHashMap<String,ModelElement_1_0>()
+                new ConcurrentHashMap<>()
             );
         }
         ModelElement_1_0 fieldDef = fields.get(methodName);
@@ -174,7 +175,7 @@ public class Jmi1StructInvocationHandler implements InvocationHandler, Marshalle
         Class<?> methodClass = method.getDeclaringClass();
         if(methodClass == RefStruct.class) {
             if("refFieldNames".equals(methodName)) {
-                return new ArrayList<String>(this.delegate.keySet());
+                return new ArrayList<>(this.delegate.keySet());
             } 
             else if ("refGetValue".equals(methodName)) {
                 Model_1_0 model = Model_1Factory.getModel();
@@ -222,9 +223,7 @@ public class Jmi1StructInvocationHandler implements InvocationHandler, Marshalle
      * 
      * @return the structure field value
      */
-    @SuppressWarnings({
-        "unchecked", "rawtypes"
-    })
+    @SuppressWarnings("rawtypes")
     private Object getValue(
         ModelElement_1_0 fieldDef
     ) throws ServiceException {
@@ -236,22 +235,28 @@ public class Jmi1StructInvocationHandler implements InvocationHandler, Marshalle
                     value instanceof Collection ? ((Collection<?>)value).iterator().next() : value
                 );
 	        case LIST:
-	            return  new MarshallingList(
+	            return value == null ? Collections.emptyList() : new MarshallingList(
                     this, 
-                    value instanceof List ? (List)value : Collections.singletonList(value)
+                    value instanceof List ? (List<?>)value : Collections.singletonList(value)
                 );
 	        case SET:
-	            return  new MarshallingSet(
+	            return value == null ? Collections.emptySet() : new MarshallingSet(
                     this, 
-                    value instanceof Collection ? (Collection)value : Collections.singleton(value)
+                    value instanceof Collection<?> ? (Collection)value : Collections.singleton(value)
                 );
 	        case SPARSEARRAY:
-	            SparseArray target = new TreeSparseArray();
-	            for(Object e : ((Map)value).entrySet()) {
-	                Map.Entry<?, ?> entry = (Map.Entry<?, ?>) e;
-	                target.put(entry.getKey(), marshal(entry.getValue()));
+	            if(value == null) {
+	                return SortedMaps.emptySparseArray();
+	            } else if (value instanceof Map<?,?>){
+	                SparseArray<Object> target = new TreeSparseArray<>();
+	                for(Object e : ((Map<?,?>)value).entrySet()) {
+	                    Map.Entry<?, ?> entry = (Map.Entry<?, ?>) e;
+	                    target.put((Integer)entry.getKey(), marshal(entry.getValue()));
+	                }
+	                return target;
+	            } else {
+	                return SortedMaps.singletonSparseArray(marshal(value));
 	            }
-	            return target;
         	default:
                 return value;
         }
@@ -341,8 +346,7 @@ public class Jmi1StructInvocationHandler implements InvocationHandler, Marshalle
     //-----------------------------------------------------------------------
     // Members
     //-----------------------------------------------------------------------
-    protected final static ConcurrentMap<String,ConcurrentMap<String,ModelElement_1_0>> allFields = 
-        new ConcurrentHashMap<String,ConcurrentMap<String,ModelElement_1_0>>();
+    protected final static ConcurrentMap<String,ConcurrentMap<String,ModelElement_1_0>> ALL_FIELDS = new ConcurrentHashMap<>();
     protected final MappedRecord delegate;
     protected final Jmi1Package_1_0 refPackage;
 

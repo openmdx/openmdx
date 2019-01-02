@@ -133,7 +133,7 @@ implements Serializable {
             ((ObjectReference)v).refresh();
         }
         else if(v instanceof Collection) {
-            for(Iterator i = ((Collection)v).iterator(); i.hasNext(); ) {
+            for(Iterator<?> i = ((Collection<?>)v).iterator(); i.hasNext(); ) {
                 Object e = i.next();
                 if(e instanceof ObjectReference) {
                     ((ObjectReference)e).refresh();
@@ -145,7 +145,6 @@ implements Serializable {
     /* (non-Javadoc)
      * @see org.openmdx.portal.servlet.attribute.AttributeValue#getValue(boolean)
      */
-    @SuppressWarnings("unchecked")
     @Override
     public Object getValue(
         boolean shortFormat
@@ -171,9 +170,9 @@ implements Serializable {
                 this.app
             );        
         } else if(value instanceof Collection) {
-            return new MarshallingCollection(
+            return new MarshallingCollection<>(
                 this.objectReferenceMarshaller,
-                (Collection)value
+                (Collection<?>)value
             );
         } else if(value instanceof RefObject_1_0) {
             return new ObjectReference(
@@ -231,7 +230,7 @@ implements Serializable {
         }
         else if(value instanceof Collection) {
             List<String> titles = new ArrayList<String>();
-            for(Iterator i = ((Collection)value).iterator(); i.hasNext(); ) {
+            for(Iterator<?> i = ((Collection<?>)value).iterator(); i.hasNext(); ) {
                 titles.add(i.next().toString());
             }
             return titles.toString();

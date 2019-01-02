@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2006-2010, OMEX AG, Switzerland
+ * Copyright (c) 2006-2018, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -50,7 +50,9 @@ package org.openmdx.resource.radius.client;
 import java.io.IOException;
 
 import javax.resource.ResourceException;
+import javax.resource.spi.ConnectionRequestInfo;
 import javax.resource.spi.security.PasswordCredential;
+import javax.security.auth.Subject;
 
 import org.openmdx.resource.spi.AbstractManagedConnection;
 import org.openmdx.uses.net.sourceforge.jradiusclient.RadiusConnection;
@@ -58,20 +60,18 @@ import org.openmdx.uses.net.sourceforge.jradiusclient.RadiusConnection;
 /**
  * Managed RADIUS Connection
  */
-public class ManagedConnection extends AbstractManagedConnection {
+public class ManagedConnection extends AbstractManagedConnection<ManagedConnectionFactory> {
 
     /**
      * Constructor 
-     *
-     * @param credential
-     * @param certificate
-     * @param key
      */
     ManagedConnection(
-        PasswordCredential credential,
+        ManagedConnectionFactory factory,
+        PasswordCredential credential, 
+        ConnectionRequestInfo connectionRequestInfo, 
         RadiusConnection radiusClient
     ) {
-    	super("RADIUS","1.0",credential);
+    	super(factory,"RADIUS","1.0", credential, connectionRequestInfo);
         this.radiusClient = radiusClient;
     }
 
@@ -95,22 +95,22 @@ public class ManagedConnection extends AbstractManagedConnection {
     @Override
     public void destroy(
     ) throws ResourceException {
-    	try {
-	        this.radiusClient.close();
+        try {
+            this.radiusClient.close();
         } catch (IOException exception) {
-        	throw new ResourceException(
-        		"Could not close the RADIUS client's sockets",
-        		exception
-        	);
+            throw new ResourceException(
+                "Could not close the RADIUS client's sockets",
+                exception
+            );
         }
-    	super.destroy();
+        super.destroy();
     }
 
     /* (non-Javadoc)
      * @see org.openmdx.resource.spi.AbstractManagedConnection#newConnection()
      */
     @Override
-    protected Object newConnection() {
+    protected Object newConnection(Subject subject, ConnectionRequestInfo connectionRequestInfo) {
     	return new Connection();
     }
 

@@ -475,10 +475,6 @@ public class PropertyDescriptor extends FeatureDescriptor {
      *
      * @since 1.4
      */
-    @edu.umd.cs.findbugs.annotations.SuppressFBWarnings(
-    	value = "ES_COMPARING_STRINGS_WITH_EQ", 
-    	justification = "Use original implementation"
-    )
     public boolean equals(Object obj) {
         if (this == obj) {
             return true;

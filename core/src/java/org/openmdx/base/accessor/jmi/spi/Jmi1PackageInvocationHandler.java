@@ -211,7 +211,7 @@ public class Jmi1PackageInvocationHandler implements InvocationHandler {
                     //
                     // Structs
                     //
-                    List<Object> iargs = new ArrayList<Object>();
+                    List<Object> iargs = new ArrayList<>();
                     if(args != null) {
                         for(int i = 0; i < args.length; i++) {
                             iargs.add(args[i]);
@@ -257,6 +257,6 @@ public class Jmi1PackageInvocationHandler implements InvocationHandler {
     // Members
     //-----------------------------------------------------------------------
     protected final RefPackage_1 delegation;
-    protected final static ConcurrentMap<String,String> qualifiedMofNames = new ConcurrentHashMap<String,String>();
+    protected final static ConcurrentMap<String,String> qualifiedMofNames = new ConcurrentHashMap<>();
     
 }

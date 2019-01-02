@@ -107,13 +107,13 @@ public class Loader {
       String path
   ) {
       List<String> dirs = new ArrayList<String>();
-      Set paths = this.context.getResourcePaths(path);
+      Set<String> paths = this.context.getResourcePaths(path);
       if(paths != null) {
           for(
-              Iterator i = paths.iterator(); 
+              Iterator<String> i = paths.iterator(); 
               i.hasNext(); 
           ) {        
-              String p = (String)i.next();
+              String p = i.next();
               if(p.endsWith("/")) {
                   dirs.add(p);
               }
@@ -128,14 +128,14 @@ public class Loader {
     String resourcePath
   ) {
     SysLog.info("Inspecting " + resourcePath);
-    Set resources = context.getResourcePaths(resourcePath);
+    Set<String> resources = context.getResourcePaths(resourcePath);
     CRC32 crc = new CRC32();
     if(resources != null) {
         for(
-            Iterator i = resources.iterator(); 
+            Iterator<String> i = resources.iterator(); 
             i.hasNext(); 
         ) {
-          String path = (String)i.next();
+          String path = i.next();
           if(!path.endsWith("/")) {
             try {
               InputStream is = context.getResourceAsStream(path);

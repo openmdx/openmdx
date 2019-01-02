@@ -175,9 +175,11 @@
 		<ant dir="${openmdx.home}/core" inheritAll="false" target="deliverables">
 			<property name="build.target.platform" value="${build.java.platform}"/>
 		</ant> 
+		<!-- no jt files since 2.16.0
 		<antcall target="-preprocess-jt-files-">
 			<param name="preprocess-jt.target" value="java"/>
 		</antcall>
+		-->
 		<antcall target="-preprocess-model-files-"/>
 	</target>
 
@@ -227,6 +229,7 @@
 		description="Populate the project's distribution directory" 
 		depends="deliverables-init,build,source-archives,web-archives,java-archives"
 	>
+		<mkdir dir="${build.dir}/tmp"/>
 		<openmdx:archive 
 			destfile="${deliver.dir}/deployment-unit/test-app1."
 			format="ear"

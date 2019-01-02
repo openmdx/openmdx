@@ -17,6 +17,7 @@ import org.openmdx.base.query.IsGreaterCondition;
 import org.openmdx.base.query.IsGreaterOrEqualCondition;
 import org.openmdx.base.query.Quantifier;
 import org.openmdx.base.text.conversion.JavaBeans;
+import org.openmdx.state2.spi.TechnicalAttributes;
 import org.w3c.spi.DatatypeFactories;
 
 /**
@@ -174,12 +175,12 @@ public class TestXMLGregorianCalendar {
        Filter original = new Filter(
            new IsGreaterOrEqualCondition(
                Quantifier.THERE_EXISTS, 
-               "stateValidFrom", 
+               TechnicalAttributes.STATE_VALID_FROM, 
                true, 
                DatatypeFactories.xmlDatatypeFactory().newXMLGregorianCalendarDate(2000, 4, 1, DatatypeConstants.FIELD_UNDEFINED)
            ), new IsGreaterCondition(
                Quantifier.THERE_EXISTS, 
-               "stateValidTo", 
+               TechnicalAttributes.STATE_VALID_TO, 
                false, 
                DatatypeFactories.immutableDatatypeFactory().newDate("2049-12-31")
            )

@@ -61,16 +61,16 @@ public interface DateStateContext
     //------------------------------------------------------------------------
 
     /**
-     * Tells from when on modifications are valid
+     * Tells from which application-time point on the information is valid
      * 
-     * @return the view's validFrom
+     * @return the beginning of the application-time
      */
     public XMLGregorianCalendar getValidFrom();
 
     /**
-     * Tells up to when on modifications are valid
+     * Tells up to which application-time point the information is valid
      * 
-     * @return the view's validFrom
+     * @return the end of the application-time
      */
     public XMLGregorianCalendar getValidTo();
 

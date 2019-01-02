@@ -272,7 +272,7 @@ public class RefPackage_1 implements Jmi1Package_1_0, Serializable {
             return target;
         } else if (source instanceof SparseArray<?>) {
             MappedRecord target = Records.getRecordFactory().createMappedRecord(Multiplicity.SPARSEARRAY.code());
-            for(Object e : target.entrySet()) {
+            for(Object e : ((SparseArray<?>)source).entrySet()) {
                 Map.Entry<?, ?> entry = (Map.Entry<?, ?>) e;
                 target.put(
                     entry.getKey(),

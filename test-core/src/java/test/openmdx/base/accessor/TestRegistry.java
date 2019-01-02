@@ -51,7 +51,7 @@ import java.util.Arrays;
 import java.util.UUID;
 
 import org.junit.Test;
-import org.openmdx.base.collection.ConcurrentWeakRegistry;
+import org.openmdx.base.collection.WeakRegistry;
 import org.openmdx.base.collection.Registry;
 import org.openmdx.base.naming.Path;
 import org.openmdx.kernel.id.UUIDs;
@@ -251,13 +251,13 @@ public class TestRegistry {
             this.delegate = delegate;
         }
         
-        private Registry<PersistenceCapable, PersistenceCapable> registry = new ConcurrentWeakRegistry<PersistenceCapable, PersistenceCapable>();
+        private Registry<PersistenceCapable, PersistenceCapable> registry = new WeakRegistry<PersistenceCapable, PersistenceCapable>(false);
         private Manager delegate;
         
         /* (non-Javadoc)
          * @see test.openmdx.base.accessor.TestRegistry.Manager#newInstance()
          */
-//      @Override
+        @Override
         public PersistenceCapable newInstance() {
             PersistenceCapable nextInstance = this.delegate.newInstance();
             PersistenceCapable thisInstance = new DelegatingObject(nextInstance);
@@ -271,7 +271,7 @@ public class TestRegistry {
         /* (non-Javadoc)
          * @see test.openmdx.base.accessor.TestRegistry.Manager#clear()
          */
-//      @Override
+        @Override
         public void clear() {
             this.delegate.clear();
             this.registry.clear();
@@ -280,7 +280,7 @@ public class TestRegistry {
         /* (non-Javadoc)
          * @see test.openmdx.base.accessor.TestRegistry.Manager#close()
          */
-//      @Override
+        @Override
         public void close() {
             this.registry.clear();
             this.delegate.close();
@@ -291,7 +291,7 @@ public class TestRegistry {
         /* (non-Javadoc)
          * @see test.openmdx.base.accessor.TestRegistry.Manager#size()
          */
-//      @Override
+        @Override
         public int[] size() {
             int[] others = this.delegate.size();
             int[] sizes = new int[others.length + 1];
@@ -307,13 +307,13 @@ public class TestRegistry {
      */
     static class DataObjectManager implements Manager {
         
-        private Registry<UUID, Object> transientRegistry = new ConcurrentWeakRegistry<UUID, Object>();
-        private Registry<Path, Object> persistentRegistry = new ConcurrentWeakRegistry<Path, Object>();
+        private Registry<UUID, Object> transientRegistry = new WeakRegistry<UUID, Object>(false);
+        private Registry<Path, Object> persistentRegistry = new WeakRegistry<Path, Object>(false);
 
         /* (non-Javadoc)
          * @see test.openmdx.base.accessor.TestRegistry.Manager#newInstance()
          */
-//      @Override
+        @Override
         public PersistenceCapable newInstance(
         ) {
             PersistenceCapable instance = new DataObject();
@@ -325,7 +325,7 @@ public class TestRegistry {
         /* (non-Javadoc)
          * @see test.openmdx.base.accessor.TestRegistry.Manager#clear()
          */
-//      @Override
+        @Override
         public void clear() {
             this.persistentRegistry.clear();
             this.transientRegistry.clear();
@@ -334,7 +334,7 @@ public class TestRegistry {
         /* (non-Javadoc)
          * @see test.openmdx.base.accessor.TestRegistry.Manager#close()
          */
-//      @Override
+        @Override
         public void close() {
             clear();
             this.persistentRegistry = null;
@@ -344,7 +344,7 @@ public class TestRegistry {
         /* (non-Javadoc)
          * @see test.openmdx.base.accessor.TestRegistry.Manager#size()
          */
-//      @Override
+        @Override
         public int[] size() {
             return new int[]{
                 this.transientRegistry.values().size(),

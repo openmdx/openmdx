@@ -124,7 +124,7 @@ public class ManagedUserTransactionFactory implements ObjectFactory {
         /* (non-Javadoc)
          * @see org.openmdx.kernel.loading.Factory#instantiate()
          */
-    //  @Override
+        @Override
         public TransactionManager instantiate(
         ){
             return LightweightTransactionManager.getInstance();
@@ -133,7 +133,7 @@ public class ManagedUserTransactionFactory implements ObjectFactory {
         /* (non-Javadoc)
          * @see org.openmdx.kernel.loading.Factory#getInstanceClass()
          */
-    //  @Override
+        @Override
         public Class<? extends TransactionManager> getInstanceClass(
         ){
             return TransactionManager.class;

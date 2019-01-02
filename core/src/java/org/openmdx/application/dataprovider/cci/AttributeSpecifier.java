@@ -69,65 +69,79 @@ import org.openmdx.kernel.exception.BasicException;
 /**
  * Specifies an attribute to be retrieved
  */
-public final class AttributeSpecifier
-implements Serializable
-{
+public final class AttributeSpecifier implements Serializable {
 
     /**
-     * Implements <code>Serializable</code>
+     * Retrieve all attribute values
+     * 
+     * @param       name
+     *              the attribute's name
      */
-    private static final long serialVersionUID = 3834306220118193458L;
+    public AttributeSpecifier(
+        String name
+    ) {
+        this(name,SortOrder.UNSORTED.code());
+    }
 
     /**
      * Constructor
      * 
-     * @param name
-     * @param position
-     * @param size
-     * @param direction
-     * @param order
-     * 
+     * @param       name
+     *              the attribute's name
+     * @param       order
+     *              defines whether this attribute is relevant for the order;
+     *              it is applicable to find requests only
      * @exception   IllegalArgumentException
      *              if any of the arguments has an illegal value
      */
     public AttributeSpecifier(
         String name,
-        int position,
-        int size,
-        short direction,
+        short order
+    ){
+        this(name, null, order);
+    }
+
+    /**
+     * Constructor
+     * 
+     * @param       name
+     *              the attribute's name
+     * @param       pointer
+     *              an XPath or JSON pointer
+     * @param       order
+     *              defines whether this attribute is relevant for the order;
+     *              it is applicable to find requests only
+     * @exception   IllegalArgumentException
+     *              if any of the arguments has an illegal value
+     */
+    public AttributeSpecifier(
+        String name,
+        String pointer,
         short order
     ){
         Set<String> invalid = new HashSet<String>();
-
         if(
             name == null
-        ) invalid.add("position");
+        ) {
+            invalid.add("name");
+        }
         this.name = name;
-
-        if(
-            position < 0
-        ) invalid.add("position");
-        this.position = position;
-
-        if(
-            size < 0
-        ) invalid.add("size");
-        this.size = size;
-
-        if(
-            direction != SortOrder.ASCENDING.code() &&
-            direction != SortOrder.DESCENDING.code()
-        ) invalid.add("direction");
-        this.direction = direction;
-
         if(
             order != SortOrder.UNSORTED.code() &&
             order != SortOrder.ASCENDING.code() &&
             order != SortOrder.DESCENDING.code()
-        ) invalid.add("order");
+        ) {
+            invalid.add("order");
+        }
         this.order = order;
-
-        if (! invalid.isEmpty()) { 
+        if(
+            pointer != null && 
+            !pointer.startsWith("/")
+        ) {
+            invalid.add("pointer");
+        }
+        this.pointer = pointer;
+        if (!invalid.isEmpty()) { 
             throw BasicException.initHolder(
                 new IllegalArgumentException(
                     "Illegal value for arguments " + invalid,
@@ -135,9 +149,7 @@ implements Serializable
                         BasicException.Code.DEFAULT_DOMAIN,
                         BasicException.Code.INVALID_CONFIGURATION,
                         new BasicException.Parameter("name",name),
-                        new BasicException.Parameter("position",position),
-                        new BasicException.Parameter("size",size),
-                        new BasicException.Parameter("direction",direction),
+                        new BasicException.Parameter("pointer",pointer),
                         new BasicException.Parameter("order",order)
                    )
                )
@@ -146,63 +158,25 @@ implements Serializable
     }
 
     /**
-     * Retrieve all attribute values
+     * Implements <code>Serializable</code>
      */
-    public AttributeSpecifier(
-        String name
-    ) {
-        this(name,0,Integer.MAX_VALUE,SortOrder.ASCENDING.code(),SortOrder.UNSORTED.code());
-    }
-
-    /**
-     * Retrieve the specified attribute values
-     *
-     * @param       name
-     *              the attribute's name
-     * @param       position
-     *              start position of the values to be retrieved
-     * @param       size
-     *              the maximum size of the values to be retrieved
-     * @param       direction
-     *              the direction of the retrieval
-     *
-     * @see SortOrder
-     */
-    public AttributeSpecifier(
-        String name,
-        int position,
-        int size,
-        short direction
-    ) {
-        this(name,position,size,direction,SortOrder.UNSORTED.code());
-    }
-
-    /**
-     * Retrieve the next specified attribute according to order.
-     * Used for sorting purposes only.
-     *
-     * @param       name
-     *              the attribute's name
-     * @param       position
-     *              start position of the values to be retrieved
-     * @param       order
-     *              defines whether this attribute is relevant for the order;
-     *              it is applicable to find requests only
-     *
-     * @see SortOrder
-     */
-    public AttributeSpecifier(
-        String name,
-        int position,
-        short order
-    ) {
-        this(name,position,1,SortOrder.ASCENDING.code(),order);
-    }
-
+    private static final long serialVersionUID = -2014082079642825679L;
+    
     /**
      * The attribute's name
      */
     final private String name;
+
+    /**
+     * The associated XPath or JSON pointer
+     */
+    final private String pointer;
+    
+    private static final String[] TO_STRING_FIELDS = {
+        "name",
+        "pointer",
+        "order"
+    };
 
     /**
      * Get the attribute's name
@@ -215,32 +189,15 @@ implements Serializable
     }
 
     /**
-     * Start position of the values to be retrieved
-     */ 
-    final private int position;
-
-    private static final String[] TO_STRING_FIELDS = {
-        "name",
-        "position",
-        "size",
-        "direction",
-        "order"
-    };
-
-    /**
-     * Get the start position of the values to be retrieved
+     * Get the feature's pointer
      *
-     * @return      the start position of the values to be retrieved.
+     * @return the feature's pointer
      */
-    public int position() {
-        return this.position;
+    public String pointer(
+    ){
+        return this.pointer;
     }
-
-    /**
-     * The maximum size of the values to be retrieved
-     */
-    final private int size;
-
+    
     /**
      * Convert attribute specifiers to order specifiers
      * 
@@ -257,48 +214,15 @@ implements Serializable
             OrderSpecifier[] orderSpecifiers = new OrderSpecifier[attributeSpecifiers.length];
             int i = 0;
             for(AttributeSpecifier attributeSpecifier: attributeSpecifiers) {
-                if(attributeSpecifier.position() == 0) {
-                    orderSpecifiers[i++] = new OrderSpecifier(
-                        attributeSpecifier.name(),
-                        SortOrder.valueOf(attributeSpecifier.order())
-                    );
-                } else {
-                    throw new IllegalArgumentException(
-                        "Ordering is no longer supported for multivalued attributes"
-                    );
-                }
+                orderSpecifiers[i++] = new OrderSpecifier(
+                    attributeSpecifier.name(),
+                    SortOrder.valueOf(attributeSpecifier.order())
+                );
             }
             return Arrays.asList(orderSpecifiers);
         }
-        
     }
                      
-                           
-    /**
-     * Return the maximum size of the values to be retrieved
-     */
-    public int size() {
-        return this.size;
-    }   
-
-    /**
-     * The direction of value retrieval
-     *
-     * @see SortOrder
-     */ 
-    final private short direction;
-
-    /**
-     * Get the direction of value retrieval
-     *
-     * @return      the direction of value retrieval
-     *
-     * @see SortOrder
-     */ 
-    public short direction(){
-        return this.direction;
-    }
-
     /**
      * The sort order
      *
@@ -326,8 +250,8 @@ implements Serializable
                 final SortOrder sortOrder = orderSpecifier.getSortOrder();
                 attributeSpecifiers.add(
                     new AttributeSpecifier(
-                        orderSpecifier.getFeature(),
-                        0, // position
+                        orderSpecifier.featureName(),
+                        orderSpecifier.featurePointer(),
                         (sortOrder == null ? SortOrder.UNSORTED : sortOrder).code()
                     )
                 );
@@ -361,13 +285,11 @@ implements Serializable
     public String toString() {
         return Records.getRecordFactory().asMappedRecord(
 		    getClass().getName(), 
-		    name + '[' + position + ']',
+		    pointer == null ? name : name + pointer,
 		    TO_STRING_FIELDS, 
 		    new Object[]{
 		        name,
-		        Integer.valueOf(position), 
-		        Integer.valueOf(size), 
-		        SortOrder.valueOf(direction), 
+		        pointer, 
 		        SortOrder.valueOf(order)
 		    }
 		).toString();
@@ -382,9 +304,7 @@ implements Serializable
         AttributeSpecifier that = (AttributeSpecifier)object;
         return 
         this.name.equals(that.name) &&
-        this.position == that.position &&
-        this.size == that.size &&
-        this.direction == that.direction &&
+        (this.pointer == null ? that.pointer == null : this.pointer.equals(that.pointer)) &&
         this.order == that.order;
     }
 

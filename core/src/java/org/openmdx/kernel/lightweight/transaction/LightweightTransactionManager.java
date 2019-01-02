@@ -47,8 +47,6 @@
  */
 package org.openmdx.kernel.lightweight.transaction;
 
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 import java.util.logging.Level;
 
 import javax.transaction.HeuristicMixedException;
@@ -78,26 +76,20 @@ public final class LightweightTransactionManager implements TransactionManager {
      * Constructor 
      */
     private LightweightTransactionManager() {
-        this.transactionIdFactory = new TransactionIdFactory();
-        this.bindings = new ConcurrentHashMap<Thread, LightweightTransaction>();
+        super();
     }
 
     /**
-     * Transaction bindings thread id <-> transaction object.
+     * The transactions bound to a given thread
      */
-    final ConcurrentMap<Thread, LightweightTransaction> bindings;
+    private final ThreadLocal<LightweightTransaction> currentTransactions = new ThreadLocal<LightweightTransaction>();
 
     /**
      * The transaction id factory singleton
      */
-    private final TransactionIdFactory transactionIdFactory;
+    private final TransactionIdFactory transactionIdFactory = new TransactionIdFactory();
 
-    /**
-     * The transaction manager must be a singleton
-     */
-    private static LightweightTransactionManager instance;
-    
-    private static final ThreadLocal<Integer> timeouts = new ThreadLocal<Integer>(){
+    private final ThreadLocal<Integer> timeouts = new ThreadLocal<Integer>(){
 
 		/* (non-Javadoc)
 		 * @see java.lang.ThreadLocal#initialValue()
@@ -111,14 +103,16 @@ public final class LightweightTransactionManager implements TransactionManager {
     
     /**
      * The transaction manager must be a singleton
+     */
+    private static final LightweightTransactionManager instance = new LightweightTransactionManager();
+    
+    /**
+     * The transaction manager must be a singleton
      * 
      * @return the transaction manager singleton
      */
     public static synchronized LightweightTransactionManager getInstance(
     ){
-        if(instance == null) {
-            instance = new LightweightTransactionManager();
-        }
         return instance;
     }
 
@@ -135,15 +129,15 @@ public final class LightweightTransactionManager implements TransactionManager {
      */
     public void begin(
     ) throws NotSupportedException, SystemException {
-        if(getTransaction() != null) throw new NotSupportedException(
+        if(currentTransactions.get() != null) throw new NotSupportedException(
             "There is already an active transaction, nested transactions are not supported"
         );        
         LightweightTransaction currentTransaction = new LightweightTransaction(
             this.transactionIdFactory
         );
-        currentTransaction.setTimeout(timeouts.get().intValue());
-        bindings.put(Thread.currentThread(), currentTransaction);
         SysLog.log(Level.FINEST,"Begin {0}", currentTransaction);
+        currentTransaction.setTimeout(timeouts.get().intValue());
+        currentTransactions.set(currentTransaction);
     }
 
 
@@ -172,13 +166,12 @@ public final class LightweightTransactionManager implements TransactionManager {
         throws RollbackException, HeuristicMixedException,
         HeuristicRollbackException, SecurityException, IllegalStateException,
         SystemException {
-
-        Transaction currentTransaction = getTransaction(true);
-        SysLog.log(Level.FINEST,"Commit {0}", currentTransaction);
+        final Transaction currentTransaction = getTransaction(true); // assert that a transaction is active
         try {
+            SysLog.log(Level.FINEST,"Commit {0}", currentTransaction);
             currentTransaction.commit();
         } finally {
-            bindings.remove(Thread.currentThread());
+            currentTransactions.remove();
         }
     }
 
@@ -197,13 +190,13 @@ public final class LightweightTransactionManager implements TransactionManager {
      */
     public void rollback(
     ) throws SecurityException, IllegalStateException, SystemException {
-        Transaction currentTransaction = bindings.remove(Thread.currentThread());
-        if (currentTransaction == null) throw new IllegalStateException(
-            "There is no active transaction"
-        );
-        SysLog.log(Level.FINEST,"Rollback {0}", currentTransaction);
-        currentTransaction.rollback();
-
+        final Transaction currentTransaction = getTransaction(true); // assert that a transaction is active
+        try {
+            SysLog.log(Level.FINEST,"Rollback {0}", currentTransaction);
+            currentTransaction.rollback();
+        } finally {
+            currentTransactions.remove();
+        }
     }
 
 
@@ -219,7 +212,7 @@ public final class LightweightTransactionManager implements TransactionManager {
      */
     public void setRollbackOnly(
     ) throws IllegalStateException, SystemException {
-        Transaction currentTransaction = getTransaction(true);
+        final Transaction currentTransaction = getTransaction(true); // assert that a transaction is active
         SysLog.log(Level.INFO,"Set {0} to rollback-only", currentTransaction);
         currentTransaction.setRollbackOnly();
     }
@@ -235,7 +228,7 @@ public final class LightweightTransactionManager implements TransactionManager {
      */
     public int getStatus(
     ) throws SystemException {
-        Transaction currentTransaction = getTransaction();
+        final Transaction currentTransaction = currentTransactions.get();
         return currentTransaction == null ? Status.STATUS_NO_TRANSACTION : currentTransaction.getStatus();
     }
 
@@ -251,7 +244,7 @@ public final class LightweightTransactionManager implements TransactionManager {
      */
     public LightweightTransaction getTransaction(
     ){
-        return bindings.get(Thread.currentThread());
+        return currentTransactions.get();
     }
 
     /**
@@ -265,15 +258,16 @@ public final class LightweightTransactionManager implements TransactionManager {
      * @exception IllegalStateException if there is no active transaction when one is expected
      * @exception NotSupportedException in case of a nested transaction attempt
      */
-    private LightweightTransaction getTransaction(
+    LightweightTransaction getTransaction(
         boolean exists
     ){
-        LightweightTransaction transaction = getTransaction();
-        if(exists == (transaction != null)) {
-            return transaction;
-        } else  throw new IllegalStateException(
-            exists ? "There is no active transaction" : "The current transaction is still active"
-        );
+        final LightweightTransaction transaction = currentTransactions.get();
+        if(exists != (transaction != null)) {
+            throw new IllegalStateException(
+                exists ? "There is no active transaction" : "The current transaction is still active"
+            );
+        }
+        return transaction;
     }
     
     /**
@@ -295,13 +289,11 @@ public final class LightweightTransactionManager implements TransactionManager {
         Transaction tobj
     ) throws InvalidTransactionException, IllegalStateException, SystemException {
         getTransaction(false); // assert that no transaction is active
-        if (tobj instanceof LightweightTransaction) {
-            bindings.put(Thread.currentThread(), (LightweightTransaction) tobj);
-        } else throw new InvalidTransactionException();
-
-
+        if (!(tobj instanceof LightweightTransaction)) {
+            throw new InvalidTransactionException();
+        }
+        currentTransactions.set((LightweightTransaction) tobj);
     }
-
 
     /**
      * Suspend the transaction currently associated with the calling thread
@@ -316,9 +308,10 @@ public final class LightweightTransactionManager implements TransactionManager {
      */
     public Transaction suspend(
     ) throws SystemException {
-        return bindings.remove(Thread.currentThread());
+        final LightweightTransaction currentTransaction = currentTransactions.get();
+        currentTransactions.remove();
+        return currentTransaction;
     }
-
 
     /**
      * Modify the value of the timeout value that is associated with the

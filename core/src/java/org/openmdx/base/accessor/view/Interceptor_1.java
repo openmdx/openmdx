@@ -137,6 +137,10 @@ public class Interceptor_1
         return this.self.jdoGetPersistenceManager();
     }
 
+    protected boolean isMultithreaded() {
+        return jdoGetPersistenceManager().getMultithreaded();
+    }
+    
     public void objDelete(
     ) throws ServiceException {
         DataObject_1_0 delegate = getDelegate();

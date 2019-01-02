@@ -78,7 +78,6 @@ import org.openmdx.base.mof.cci.Multiplicity;
 import org.openmdx.base.mof.cci.PrimitiveTypes;
 import org.openmdx.base.mof.spi.Model_1Factory;
 import org.openmdx.base.naming.Path;
-import org.openmdx.base.naming.PathComponent;
 import org.openmdx.base.resource.InteractionSpecs;
 import org.openmdx.base.resource.Records;
 import org.openmdx.base.resource.spi.ResourceExceptions;
@@ -551,8 +550,8 @@ public class Ui_1 extends AbstractRestPort {
     }
 
     private int compareOrder(
-        List o1,
-        List o2
+        List<?> o1,
+        List<?> o2
     ) throws ServiceException {
         for(
             int i = 0;
@@ -567,7 +566,7 @@ public class Ui_1 extends AbstractRestPort {
         return new Integer(o1.size()).compareTo(new Integer(o2.size()));
     }
 
-    private List getOrderFieldGroup(
+    private List<?> getOrderFieldGroup(
     	MappedRecord elementDefinition
     ) throws ServiceException {
     	Object_2Facade elementDefinitionFacade;
@@ -576,7 +575,7 @@ public class Ui_1 extends AbstractRestPort {
         } catch (ResourceException e) {
         	throw new ServiceException(e);
         }
-        List order = elementDefinitionFacade.attributeValuesAsList("orderFieldGroup");
+        List<?> order = elementDefinitionFacade.attributeValuesAsList("orderFieldGroup");
         if((order == null) || order.isEmpty()) {
             order = elementDefinitionFacade.attributeValuesAsList("order");
         }
@@ -885,7 +884,7 @@ public class Ui_1 extends AbstractRestPort {
 	        // do not use addClones because attributes with no values must not
 	        // be replaced/cleared
 	        for(
-	            Iterator i = overloadWithFacade.getValue().keySet().iterator();
+	            Iterator<?> i = overloadWithFacade.getValue().keySet().iterator();
 	            i.hasNext();
 	        ) {
 	            String attributeName = (String)i.next();
@@ -1887,13 +1886,13 @@ public class Ui_1 extends AbstractRestPort {
 		                    7
 		                );
 		            for(
-		                Iterator j = groupFacade.attributeValuesAsList("member").iterator();
+		                Iterator<?> j = groupFacade.attributeValuesAsList("member").iterator();
 		                j.hasNext();
 		                memberIndex++
 		            ) {
 		                Path e = (Path)j.next();
 		                MappedRecord elementDefinition = cachedDefinitions.get(e);
-		                List columnBreak;
+		                List<?> columnBreak;
 		                try {
 			                columnBreak = Object_2Facade.newInstance(elementDefinition).attributeValuesAsList("columnBreak");
 		                } catch (ResourceException e0) {
@@ -1943,7 +1942,6 @@ public class Ui_1 extends AbstractRestPort {
 	     * @param inspectorClass
 	     * @throws ServiceException
 	     */
-	    @SuppressWarnings("unchecked")
 	    private void addElementsToAttributePane(
 	        Path segmentIdentity,
 	        MappedRecord pane,
@@ -1994,7 +1992,7 @@ public class Ui_1 extends AbstractRestPort {
 		                            (definitionIsActive == null) || // default is true
 		                            definitionIsActive.booleanValue()
 		                        ) {
-		                            List order = Ui_1.this.getOrderFieldGroup(
+		                            List<?> order = Ui_1.this.getOrderFieldGroup(
 		                                definition
 		                            );
 		                            if(order.size() < 3) {
@@ -2039,7 +2037,7 @@ public class Ui_1 extends AbstractRestPort {
 		                                );
 		                                Ui_1.this.setElementDefinitionDefaultLayout(tab);
 		                                // Add tab to pane and sort by tabName
-		                                List members = Object_2Facade.newInstance(pane).attributeValuesAsList("member");
+		                                List<Object> members = Object_2Facade.newInstance(pane).attributeValuesAsList("member");
 		                                int k = 0;
 		                                while(
 		                                    (k < members.size()) &&
@@ -2099,7 +2097,7 @@ public class Ui_1 extends AbstractRestPort {
 		                                	groupElementDefinitionFacade.attributeValuesAsList("inPlace")
 		                                );
 		                                // add group to tab and sort by groupName
-		                                List members = Object_2Facade.newInstance(tab).attributeValuesAsList("member");
+		                                List<Object> members = Object_2Facade.newInstance(tab).attributeValuesAsList("member");
 		                                int k = 0;
 		                                while(
 		                                    (k < members.size()) && 
@@ -2149,7 +2147,7 @@ public class Ui_1 extends AbstractRestPort {
 		                                        SysLog.error("Can not find member in list of cached definitions", Arrays.asList(new Object[]{members.get(pos), cachedDefinitions}));
 		                                        break;
 		                                    }
-		                                    List existing = Ui_1.this.getOrderFieldGroup(def);
+		                                    List<?> existing = Ui_1.this.getOrderFieldGroup(def);
 		                                    int res = Ui_1.this.compareOrder(
 		                                        order, 
 		                                        existing
@@ -2222,7 +2220,7 @@ public class Ui_1 extends AbstractRestPort {
 		        ModelElement_1_0 classDef = model.getElement(forClass);
 		        // Create inspector for all supertypes
 		        for(
-		            Iterator i = classDef.objGetList("allSupertype").iterator();
+		            Iterator<?> i = classDef.objGetList("allSupertype").iterator();
 		            i.hasNext(); 
 		        ) {
 		            ModelElement_1_0 supertype = model.getElement(i.next());
@@ -2480,7 +2478,7 @@ public class Ui_1 extends AbstractRestPort {
 		                if(operationDef.getModelElement() != null) {
 		                    // Map parameter to FieldGroup
 		                    for(
-		                        Iterator j = operationDef.getModelElement().objGetList("content").iterator();
+		                        Iterator<?> j = operationDef.getModelElement().objGetList("content").iterator();
 		                        j.hasNext();
 		                    ) {        
 		                        // create group and add to tab
@@ -2639,7 +2637,7 @@ public class Ui_1 extends AbstractRestPort {
 	    private MappedRecord getAttributeContainerDefinition(
 	        Path segmentIdentity,
 	        StructuralFeatureDefinition featureDef,
-	        List featureOrder,
+	        List<?> featureOrder,
 	        int level,
 	        ModelElement_1_0 inspectorClass
 	    ) throws ResourceException {
@@ -2732,7 +2730,7 @@ public class Ui_1 extends AbstractRestPort {
 			            	Object_2Facade overloadDefinitionFacade = Object_2Facade.newInstance(overloadDefinition);
 			            	definitionFacade.setPath(overloadDefinitionFacade.getPath());
 			                for(
-			                    Iterator i = overloadDefinitionFacade.getValue().keySet().iterator();
+			                    Iterator<?> i = overloadDefinitionFacade.getValue().keySet().iterator();
 			                    i.hasNext();
 			                ) {
 			                    String attributeName = (String)i.next();
@@ -2928,8 +2926,8 @@ public class Ui_1 extends AbstractRestPort {
 	        List<Object> showMemberRange,
 	        List<Ui_1.StructuralFeatureDefinition> featureDefinitions,
 	        ModelElement_1_0 inspectorClass,
-	        Map memberMimeTypes,
-	        Map memberDefaultValues
+	        Map<?,?> memberMimeTypes,
+	        Map<?,?> memberDefaultValues
 	    ) throws ResourceException {
 	        /**
 	         * Iterate all features and create tabs and groups according to
@@ -2980,7 +2978,7 @@ public class Ui_1 extends AbstractRestPort {
 		                    inspectorClass,
 		                    false // no default iconKey for fields
 		                );
-		                List order = Ui_1.this.getOrderObjectContainer(
+		                List<?> order = Ui_1.this.getOrderObjectContainer(
 		                    elementDefinition
 		                );
 		                try {
@@ -3061,7 +3059,7 @@ public class Ui_1 extends AbstractRestPort {
 			                            int r = members.size() - 1;
 			                            while(l <= r) {
 			                                int pos = (l + r) / 2;
-			                                List existing = Ui_1.this.getOrderObjectContainer(
+			                                List<?> existing = Ui_1.this.getOrderObjectContainer(
 			                                    (MappedRecord)elementDefinitions.get(members.get(pos))
 			                                );
 			                                int res = Ui_1.this.compareOrder(
@@ -3177,7 +3175,8 @@ public class Ui_1 extends AbstractRestPort {
 		/* (non-Javadoc)
 	     * @see org.openmdx.base.rest.spi.AbstractRestInteraction#find(org.openmdx.base.resource.spi.RestInteractionSpec, org.openmdx.base.rest.cci.QueryRecord, org.openmdx.base.rest.cci.ResultRecord)
 	     */
-	    @Override
+	    @SuppressWarnings("unchecked")
+		@Override
 		protected boolean find(
 			RestInteractionSpec ispec, 
 			QueryRecord input,
@@ -3192,7 +3191,7 @@ public class Ui_1 extends AbstractRestPort {
             	try {
 		            // Return assertableInspector for all loaded classes
 		            for(
-		                Iterator i = model.getContent().iterator(); 
+		                Iterator<?> i = model.getContent().iterator(); 
 		                i.hasNext();
 		            ) {
 		                ModelElement_1_0 elementDef = (ModelElement_1_0)i.next();

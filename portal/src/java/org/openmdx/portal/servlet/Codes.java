@@ -237,7 +237,7 @@ public final class Codes implements Serializable {
 	    			Class<?> entryClass = Classes.getApplicationClass(entryClassName);
 	    			entryQuery = pm.newQuery(entryClass);
 	    			entryQuery.getFetchPlan().setGroup(FetchPlan.ALL);	
-	    			entryQuery.getFetchPlan().setFetchSize(Integer.MAX_VALUE);    			
+	    			entryQuery.getFetchPlan().setFetchSize(FetchPlan.FETCH_SIZE_GREEDY);
 	    		} catch(Exception ignore) {}
 	    		@SuppressWarnings("unchecked")
 	            RefContainer<RefObject_1_0> entries = (RefContainer<RefObject_1_0>)codeEntryContainer.refGetValue("entry");
@@ -336,7 +336,7 @@ public final class Codes implements Serializable {
 					Class<?> codeEntryContainerClass = Classes.getApplicationClass(codeEntryContainerClassName);
 			        codeEntryContainerQuery = pm.newQuery(codeEntryContainerClass);
 			        codeEntryContainerQuery.getFetchPlan().setGroup(FetchPlan.ALL);
-			        codeEntryContainerQuery.getFetchPlan().setFetchSize(Integer.MAX_VALUE);
+			        codeEntryContainerQuery.getFetchPlan().setFetchSize(FetchPlan.FETCH_SIZE_GREEDY);
 				} catch(Exception ignore) {}
 		        @SuppressWarnings("unchecked")
 		        RefContainer<RefObject_1_0> codeEntryContainers = (RefContainer<RefObject_1_0>)codeSegment.refGetValue("valueContainer");

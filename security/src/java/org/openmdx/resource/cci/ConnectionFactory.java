@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2007-2010, OMEX AG, Switzerland
+ * Copyright (c) 2007-2018, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -50,9 +50,22 @@ package org.openmdx.resource.cci;
 /**
  * Generic Connection Factory
  */
-public interface ConnectionFactory <C,E extends Exception> {
+public interface ConnectionFactory <C extends AutoCloseable,E extends Exception> {
 
-	C getConnection(
-	) throws E;
+    /**
+     * Get a connection with resource adapter managed authentication
+     * 
+     * @return an EIS specific connection
+     */
+	C getConnection() throws E;
+	
+    /**
+     * Get a connection with application managed authentication
+     * 
+     * @param authenticationInfo tells which credentials to use for authentication
+     * 
+     * @return an EIS specific connection
+     */
+    C getConnection(AuthenticationInfo authenticationInfo) throws E;
 	
 }

@@ -92,19 +92,19 @@ public class LayoutLoader
     System.out.println(messagePrefix + "Loading layouts");
     SysLog.info("Loading layouts");
     // 2-dim list: first index=locale, second index = layout file name
-    List layoutNames = new ArrayList();
+    List<List<String>> layoutNames = new ArrayList<>();
     for(int i = 0; i < locale.length; i++) {
-        Set localeLayoutPaths = new HashSet();
+        Set<String> localeLayoutPaths = new HashSet<>();
         if(locale[i] != null) {
             localeLayoutPaths = context.getResourcePaths("/WEB-INF/config/layout/" + locale[i]);
             if(localeLayoutPaths == null) {
-                localeLayoutPaths = Collections.EMPTY_SET;
+                localeLayoutPaths = Collections.emptySet();
             }
         }
-        List localeLayoutNames = new ArrayList();
+        List<String> localeLayoutNames = new ArrayList<>();
         layoutNames.add(localeLayoutNames);
-        for(Iterator j = localeLayoutPaths.iterator(); j.hasNext(); ) {
-            String path = (String)j.next();
+        for(Iterator<String> j = localeLayoutPaths.iterator(); j.hasNext(); ) {
+            String path = j.next();
             if(!path.endsWith("/")) {            
                 SysLog.info("Loading " + path);
                 localeLayoutNames.add(path);

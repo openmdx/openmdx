@@ -64,6 +64,7 @@ import java.util.Set;
 import java.util.UUID;
 
 import javax.jdo.Constants;
+import javax.jdo.FetchPlan;
 import javax.jdo.JDOException;
 import javax.jdo.JDOHelper;
 import javax.jdo.PersistenceManager;
@@ -121,6 +122,7 @@ import org.openmdx.base.rest.cci.RestConnectionSpec;
 import org.openmdx.base.rest.cci.ResultRecord;
 import org.openmdx.base.rest.spi.AbstractConnection;
 import org.openmdx.base.rest.spi.AbstractRestInteraction;
+import org.openmdx.base.rest.spi.Numbers;
 import org.openmdx.base.rest.spi.Object_2Facade;
 import org.openmdx.base.transaction.Status;
 import org.openmdx.kernel.exception.BasicException;
@@ -131,6 +133,11 @@ import org.w3c.spi2.Datatypes;
 
 /**
  * Inbound Connection
+ * 
+ * TODO Let's configure<ul>
+ * <li>the optimal fetch size</li>
+ * <li>a maximal batch size limit (leading to quota exceeded exception when exceeded)</li>
+ * </ul>
  */
 public class InboundConnection_2 extends AbstractConnection {
 
@@ -169,6 +176,16 @@ public class InboundConnection_2 extends AbstractConnection {
      */
     protected static final Path BASE_AUTHORITY = new Path("xri://@openmdx*org.openmdx.base");
 
+    /** 
+     * Used in case of FetchPlan.FETCH_SIZE_OPTIMAL
+     */
+    protected static final int OPTIMAL_FETCH_SIZE = 64;
+
+    /** 
+     * No limit (yet) in case of FetchPlan.FETCH_SIZE_GREEDY
+     */
+    protected static final int BATCH_SIZE_LIMIT = Integer.MAX_VALUE;
+    
     protected UnitOfWork currentUnitOfWork(){
         return (UnitOfWork) PersistenceHelper.currentUnitOfWork(getPersistenceManager());
     }
@@ -962,7 +979,7 @@ public class InboundConnection_2 extends AbstractConnection {
                         features = features == null ? new HashSet<String>() : new HashSet<String>(features);
                         for(FeatureOrderRecord orderSpecifier: queryFilter.getOrderSpecifier()) {
                             features.add(
-                                orderSpecifier.getFeature()
+                                orderSpecifier.featureName()
                             );
                         }
                     }
@@ -1170,12 +1187,13 @@ public class InboundConnection_2 extends AbstractConnection {
             Query query = this.toRefQuery(input);
             List<RefObject> objects = (List<RefObject>)query.execute();
             if(output != null){
-                int size = input.getSize().intValue();
-                int position = input.getPosition().intValue();
+                final Long size = input.getSize();
+                final int batchSize = getBatchSize(size);
+                final int position = Numbers.getValue(input.getPosition(), 0);
                 if(position >= 0) {
                     ListIterator<RefObject> i = objects.listIterator(position);
                     int count = 0;
-                    while(i.hasNext() && count < size){
+                    while(i.hasNext() && count < batchSize){
                         output.add(
                             this.toJcaRecord(
                                 i.next(),
@@ -1194,7 +1212,7 @@ public class InboundConnection_2 extends AbstractConnection {
                     ListIterator<RefObject> i = objects.listIterator(-position);
                     for(
                         int count = 0;
-                        i.hasPrevious() && count < size;
+                        i.hasPrevious() && count < batchSize;
                         count++
                     ) {
                         output.add(
@@ -1209,6 +1227,13 @@ public class InboundConnection_2 extends AbstractConnection {
                 }
             }
             return true;
+        }
+
+        private int getBatchSize(final Long size) {
+            final int fetchSize = Numbers.getValue(size, FetchPlan.FETCH_SIZE_OPTIMAL);
+            return 
+                fetchSize == FetchPlan.FETCH_SIZE_GREEDY ? BATCH_SIZE_LIMIT : 
+                fetchSize == FetchPlan.FETCH_SIZE_OPTIMAL ? OPTIMAL_FETCH_SIZE : fetchSize;
         }
 
         /* (non-Javadoc)
@@ -1307,7 +1332,6 @@ public class InboundConnection_2 extends AbstractConnection {
 
 	@Override
 	public ConnectionFactory getConnectionFactory() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 

@@ -82,7 +82,7 @@ public class ManagedConnectionFactory extends AbstractManagedConnectionFactory {
     }
 
 	/**
-     * Implements <code>Serializable</code>
+     * Implements <code>java.io.Serializable</code>
      */
     private static final long serialVersionUID = 8198549417001170970L;
 
@@ -175,7 +175,8 @@ public class ManagedConnectionFactory extends AbstractManagedConnectionFactory {
                 throw log(
                     new InvalidPropertyException(
                         "A pass phrase separator must be one character long: '" + getPassPhraseSeparator() + "'"
-                    )
+                    ),
+                    true
                 );
         }
     }
@@ -276,16 +277,14 @@ public class ManagedConnectionFactory extends AbstractManagedConnectionFactory {
     	this.revocationEnabled = revocationEnabled;
     }
 
-	/* (non-Javadoc)
-     * @see javax.resource.spi.ManagedConnectionFactory#createManagedConnection(javax.security.auth.Subject, javax.resource.spi.ConnectionRequestInfo)
-     */
-    public ManagedConnection createManagedConnection(
+    @Override
+    protected ManagedConnection newManagedConnection(
         Subject subject,
         ConnectionRequestInfo connectionRequestInfo
     ) throws ResourceException {
     	final String alias;
     	final char[][] passPhrases;
-        final PasswordCredential credential = getCredential(subject);
+        final PasswordCredential credential = getPasswordCredential(subject);
         if(credential == null) {
             alias = null;
             passPhrases = NO_PASS_PHRASES;
@@ -306,27 +305,42 @@ public class ManagedConnectionFactory extends AbstractManagedConnectionFactory {
 		            case CERTIFICATE_VALIDATOR:
 		            	PKIXParameters parameters = new PKIXParameters(keyStore);
 		            	parameters.setRevocationEnabled(this.isRevocationEnabled());
+                        log(
+                            "Creating managed {0} connection with algorithm {1}",
+                            this.connectionType,
+                            getAlgorithm()
+                        );
 		            	return new ManagedKeyStoreConnection(
+		            	    this,
 		            		this.connectionType,
 		                	credential,
+		                	connectionRequestInfo, 
 		                	parameters, 
 		                	getAlgorithm()
 		                );
 		            case CERTIFICATE_PROVIDER:
 		            case SIGNATURE_VERIFIER:
 		            	if(credential == null) {
-		                    throw new ResourceException(
+		            	    throw new ResourceException(
 		                    	"Missing BasicPassword credential, which is required to determine the certificate alias"
 		                    );
 		            	} else if(alias == null) {
 		                    throw new ResourceException(
-		                    	"Missing 'UserName' in BasicPassword credential, which is used as certificate alias"
+	                            "Missing 'UserName' in BasicPassword credential, which is used as certificate alias"
 		                    );
 		            	} else {
+	                        log(
+	                            "Creating managed {0} connection for certificate with alias {1} and algorithm {2}",
+	                            this.connectionType,
+	                            alias,
+	                            getAlgorithm()
+	                        );
 			            	return new ManagedKeyStoreConnection(
+			            	    this,
 			            		this.connectionType,
 			                    credential,
-			                    alias,
+			                    connectionRequestInfo,
+			                    alias, 
 			                    keyStore.getCertificate(alias), 
 			                    null, 
 			                    getAlgorithm()
@@ -335,50 +349,64 @@ public class ManagedConnectionFactory extends AbstractManagedConnectionFactory {
 		            case SIGNATURE_PROVIDER:		            	
 		            	if(credential == null) {
 		                    throw new ResourceException(
-		                    	"Missing BasicPassword credential, which is required to determine the certificate and key alias"
+	                            "Missing BasicPassword credential, which is required to determine the certificate and key alias"
 		                    );
 		            	} else if(alias == null) {
 		                    throw new ResourceException(
 		                    	"Missing 'UserName' in UserName/Password credential, which is used as certificate and key alias"
 		                    );
 		            	} else {
+		            	    log(
+		            	        "Creating managed {0} connection for key with alias {1} and algorithm {2}",
+		            	        connectionType,
+		            	        alias,
+		            	        getAlgorithm()
+		            	    );
 			            	return new ManagedKeyStoreConnection(
+			            	    this,
 			            		this.connectionType,
 			                    credential,
-			                    alias,
+			                    connectionRequestInfo,
+			                    alias, 
 			                    keyStore.getCertificate(alias), 
-			                    keyStore.getKey(alias, passPhrases[1]), 
-			                    getAlgorithm()
+			                    keyStore.getKey(alias, passPhrases[1]), getAlgorithm()
 			                 );
 		            	}
 	            }
             }
             throw new ResourceException(
-            	"Missing 'ConnectionType'"
+                "Missing 'ConnectionType'"
             );
         } catch (NoSuchAlgorithmException exception) {
             throw log(
-                (ResourceException) new EISSystemException(
-                    "Unable to to retrieve a " + alias + " validator"
+                (EISSystemException) new EISSystemException(
+                    "Unable to to retrieve a " + 
+                    this.connectionType + 
+                    " with algorithm '" + 
+                    getAlgorithm() +
+                    "'"
                 ).initCause(
                     exception
-                )
+                ),
+                true
             );
         } catch (GeneralSecurityException exception) {
             throw log(
-                (ResourceException) new EISSystemException(
+                (EISSystemException) new EISSystemException(
                     "Unable to load " + keyStoreType + " key store from " + connectionURL
                 ).initCause(
                     exception
-                )
+                ),
+                true
             );
         } catch (MalformedURLException exception) {
             throw log(
                 (ResourceException) new InvalidPropertyException(
-                    "Invalid key store URL: " + connectionURL
+                    "Invalid key store URL  '" + connectionURL + "'"
                 ).initCause(
                     exception
-                )
+                ),
+                true
             );
         } catch (IOException exception) {
             throw log(
@@ -386,8 +414,11 @@ public class ManagedConnectionFactory extends AbstractManagedConnectionFactory {
                     "Unable to load key store from " + connectionURL
                 ).initCause(
                     exception
-                )
+                ),
+                true
             );
+        } catch (ResourceException exception) {
+            throw log(exception, true);
         }
     }
 

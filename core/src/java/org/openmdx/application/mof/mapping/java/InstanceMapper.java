@@ -1760,7 +1760,7 @@ extends AbstractClassMapper {
             this.pw.println("   * <p>");
             this.pw.println("   * This method is equivalent to<pre>");
             this.pw.println("   *   list.clear();");
-            this.pw.println("   *   for(" + elementType + " e : attributeName){");
+            this.pw.println("   *   for(" + elementType + " e : " + attributeName + "){");
             this.pw.println("   *     list.add(e);");
             this.pw.println("   *   }");
             this.pw.println("   * </pre>");
@@ -1830,7 +1830,7 @@ extends AbstractClassMapper {
             this.pw.println("   * <p>");
             this.pw.println("   * This method is equivalent to<pre>");
             this.pw.println("   *   set.clear();");
-            this.pw.println("   *   for(" + elementType + " e : attributeName){");
+            this.pw.println("   *   for(" + elementType + " e : " + attributeName + "){");
             this.pw.println("   *     set.add(e);");
             this.pw.println("   *   }");
             this.pw.println("   * </pre>");

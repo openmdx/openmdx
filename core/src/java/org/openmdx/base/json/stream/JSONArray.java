@@ -824,10 +824,6 @@ public class JSONArray implements Serializable {
      * @return a printable, displayable, transmittable
      *  representation of the array.
      */
-    @edu.umd.cs.findbugs.annotations.SuppressFBWarnings(
-	    value="NP_TOSTRING_COULD_RETURN_NULL", 
-	    justification="As expected by JSON"
-    )
     public String toString() {
         try {
             return '[' + join(",") + ']';

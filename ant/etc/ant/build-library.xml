@@ -1777,53 +1777,5 @@ java.util.logging.FileHandler.formatter = ${openmdx.log.formatter}
 	</target>
 	<target name="-include-platform-" depends="init,test,distribution"/>
 	<target name="-init-platform"/>
-	<!-- ******************************************************************* -->
-	<!-- * -validate-war- -->
-	<!-- ******************************************************************* -->
-	<target name="-validate-war-">
-		<taskdef classname="org.apache.jasper.JspC" name="jasper2" >
-			<classpath id="jspc.classpath">
-				<pathelement location="${java.home}/../lib/tools.jar"/>
-				<path refid="project.bin.classpath"/>
-				<fileset dir="${tomcat.home}/bin">
-					<include name="*.jar"/>
-				</fileset>
-				<fileset dir="${tomcat.home}/lib">
-					<include name="*.jar"/>
-				</fileset>
-			</classpath>
-		</taskdef>
-		<unzip
-		  src="${build.dir}/module/${module.name}"
-		  dest="${build.dir}/tmp/jspc/webapp"
-	  	/>
-		<jasper2 
-		  validateXml="false" 
-		  uriroot="${build.dir}/tmp/jspc/webapp" 
-		  outputDir="${build.dir}/tmp/jspc/src" 
-    	/>
-		<!-- compile JSPs -->
-		<mkdir dir="${build.dir}/tmp/jspc/classes"/>
-		<mkdir dir="${build.dir}/tmp/jspc/lib"/>
-		<javac destdir="${build.dir}/tmp/jspc/classes"
-			optimize="off"
-			encoding="UTF-8"
-			debug="on" failonerror="false"
-			classpathref="project.bin.classpath"
-			srcdir="${build.dir}/tmp/jspc/src" 
-			excludes="**/*.smap"
-		>
-			<classpath>
-				<fileset dir="${tomcat.home}/lib">
-					<include name="*.jar"/>
-				</fileset>
-				<fileset dir="${tomcat.home}/bin">
-					<include name="*.jar"/>
-				</fileset>
-			</classpath>
-			<include name="**" />
-			<exclude name="tags/**" />
-		</javac>
-	</target>
 
 </project>

@@ -350,7 +350,7 @@ public class RestParser {
     /**
      * Provide a <code>parse()</code> source
      * 
-     * @param source the <code>ObjectInput</code>
+     * @param input the <code>ObjectInput</code>
      * 
      * @return a <code>Source</code>
      */
@@ -997,8 +997,6 @@ public class RestParser {
 
         /**
          * Constructor to parse an object or a record
-         * 
-         * @param source
          */
         ExceptionHandler() {
         }

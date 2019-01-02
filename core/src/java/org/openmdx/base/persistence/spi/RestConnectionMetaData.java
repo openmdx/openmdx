@@ -51,7 +51,6 @@ import java.io.Serializable;
 import java.util.Collections;
 import java.util.List;
 
-import javax.annotation.Nonnull;
 import javax.resource.ResourceException;
 import javax.resource.cci.ConnectionMetaData;
 
@@ -75,7 +74,7 @@ public class RestConnectionMetaData implements ConnectionMetaData, Serializable 
 	 * @param principalChain
 	 */
 	public RestConnectionMetaData(
-		@Nonnull List<String> principalChain
+		List<String> principalChain
 	) {
 		this.userName = principalChain.toString();
 	}

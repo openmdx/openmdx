@@ -52,8 +52,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
-import junit.framework.Assert;
-
+import org.junit.Assert;
 import org.junit.Test;
 import org.w3c.cci2.SparseArray;
 import org.w3c.spi.PrimitiveTypeParsers;

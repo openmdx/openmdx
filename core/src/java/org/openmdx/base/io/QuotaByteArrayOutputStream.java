@@ -54,6 +54,12 @@ import java.util.logging.Level;
 
 import org.openmdx.kernel.log.SysLog;
 
+/**
+ * QuotaByteArrayOutputStream
+ *
+ * @deprecated
+ */
+@Deprecated
 public class QuotaByteArrayOutputStream extends java.io.ByteArrayOutputStream {
 
 	private static class Counter {

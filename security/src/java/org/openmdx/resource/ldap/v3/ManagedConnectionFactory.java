@@ -5,10 +5,9 @@
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
  * ====================================================================
  *
- * This software is published under the BSD license
- * as listed below.
+ * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2007, OMEX AG, Switzerland
+ * Copyright (c) 2007-2018, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -54,7 +53,6 @@ import java.net.URISyntaxException;
 import javax.resource.ResourceException;
 import javax.resource.spi.ConnectionRequestInfo;
 import javax.resource.spi.EISSystemException;
-import javax.resource.spi.security.PasswordCredential;
 import javax.security.auth.Subject;
 
 import org.openmdx.resource.ldap.spi.AbstractManagedConnectionFactory;
@@ -71,7 +69,7 @@ import netscape.ldap.factory.JSSESocketFactory;
  */
 public class ManagedConnectionFactory extends AbstractManagedConnectionFactory {
 
-	/**
+    /**
      * Constructor
      */
     public ManagedConnectionFactory() {
@@ -81,89 +79,81 @@ public class ManagedConnectionFactory extends AbstractManagedConnectionFactory {
 	/**
 	 * Implements <code>Serializable</code>
 	 */
-    private static final long serialVersionUID = -396153144173718931L;
+    private static final long serialVersionUID = 5970793592667548449L;
 
     /**
      * LDAP over SSL port
      */
     private static final int DEFAULT_SSL_PORT = 636;
     
-    	
     /* (non-Javadoc)
      * @see org.openmdx.resource.spi.AbstractManagedConnectionFactory#isManagedConnectionShareable()
      */
     @Override
     protected boolean isManagedConnectionShareable() {
-	    return false;
+	    return true;
     }
 
-    /**
-     * Create the physical LDAP Connection
-     * 
-     * @param useSSL tells, whether an ldap or an ldaps connection shall be established
-     * 
-     * @return a physical connection instance
-     */
-    protected LDAPv3 createConnection(boolean useSSL) {
-    	return useSSL ? new LDAPConnection(new JSSESocketFactory())  : new LDAPConnection();
-    }
-    
-	/* (non-Javadoc)
-     * @see javax.resource.spi.ManagedConnectionFactory#createManagedConnection(javax.security.auth.Subject, javax.resource.spi.ConnectionRequestInfo)
-     */
-    public javax.resource.spi.ManagedConnection createManagedConnection(
+    @Override
+    protected javax.resource.spi.ManagedConnection newManagedConnection(
         Subject subject,
         ConnectionRequestInfo connectionRequestInfo
     ) throws ResourceException {
-        final PasswordCredential credential = this.getCredential(subject);
+		return new ManagedConnection(
+            this,
+            getPasswordCredential(subject),
+            connectionRequestInfo, 
+            createPhysicalConnection(getConnectionURI())
+         );
+    }
+
+    /**
+     * Create (and validate) the connection URI
+     */
+    private URI getConnectionURI() throws ResourceException {
         final String connectionURL = this.getConnectionURL();
-		try {
-			final URI connectionURI = new URI(connectionURL);
-			final boolean useSSL = "ldaps".equalsIgnoreCase(connectionURI.getScheme());
-			int port = connectionURI.getPort();
-			if(port < 0) {
-				port = useSSL ? DEFAULT_SSL_PORT : LDAPConnection.DEFAULT_PORT;
-			}
-			final String host = connectionURI.getHost();
-        	final LDAPv3 physicalConnection = createConnection(useSSL);
-			final String distinguishedName = credential == null ? this.getUserName() : credential.getUserName();
-			final String password = credential == null ? this.getPassword() : new String (credential.getPassword());
-			physicalConnection.connect(
-				this.getProtocolVersion(),
-				host, 
-				port,
-				distinguishedName,
-				password
-			);
-	        return new ManagedConnection(
-                physicalConnection,
-                credential
-             );
-		} catch (LDAPException exception) {
-			 String message = "Could not connect to LDAP host \"" + connectionURL + "\". ";
-		     switch( exception.getLDAPResultCode() ) {
-		         case LDAPException.NO_SUCH_OBJECT:
-		        	 message += "User \"" + credential.getUserName() + "\" does not exist.";
-		             break;
-		         case LDAPException.INVALID_CREDENTIALS:
-		        	 message += "Invalid password for user \"" + credential.getUserName() + "\".";
-		             System.out.println( "Invalid password." );
-		             break;
-		     }
-			 throw this.log(
-				new EISSystemException(
-					message,
-					exception
-				)
-			);
-		} catch (URISyntaxException exception) {
-			 throw this.log(
-				new EISSystemException(
-					"Could not connect to LDAP host \"" + connectionURL + "\". Invalid connection URL.",
-					exception
-				)
-			);
-		}
+        try {
+            return new URI(connectionURL);
+        } catch (URISyntaxException exception) {
+            throw this.log(
+                new EISSystemException(
+                    "Could not connect to LDAP host \"" + connectionURL + "\". Invalid connection URL.",
+                    exception
+                ), 
+                true
+            );
+        }
+    }
+
+    /**
+     * Create the physical connection
+     * 
+     * @param uri the connection URI
+     * 
+     * @return the {@code Cloneable} physical connection
+     * 
+     * @throws ResourceException 
+     */
+    private LDAPv3 createPhysicalConnection(final URI uri) throws ResourceException {
+        final boolean useSSL = "ldaps".equalsIgnoreCase(uri.getScheme());
+        int port = uri.getPort();
+        if(port < 0) {
+        	port = useSSL ? DEFAULT_SSL_PORT : LDAPConnection.DEFAULT_PORT;
+        }
+        final String host = uri.getHost();
+        final LDAPv3 physicalConnection = useSSL ? new LDAPConnection(new JSSESocketFactory())  : new LDAPConnection();
+        try {
+            physicalConnection.connect(host, port);
+        } catch (LDAPException exception) {
+            throw this.log(
+               new EISSystemException(
+                   "Could not connect to LDAP host \"" + uri + "\". ",
+                   exception
+               ),
+               true
+           );
+        }
+        return physicalConnection;
     }
 
     

@@ -395,7 +395,7 @@ function getSelectedGridRows(tableID, headerRows) {
           var param = strArray[1].split("'parameter', '");
           if (param[1]) {
             /*objectID found*/
-            selectedStr=selectedStr+param[1].substring(0, 1+param[1].indexOf(')'))+' ';
+            selectedStr=selectedStr+param[1].substring(0, 1+param[1].indexOf(')*'))+' ';
           }
         }
       }

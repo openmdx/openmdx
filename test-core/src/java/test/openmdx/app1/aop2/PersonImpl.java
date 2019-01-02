@@ -59,11 +59,10 @@ import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.openmdx.base.accessor.jmi.cci.RefPackage_1_0;
 import org.openmdx.base.aop2.AbstractObject;
-import org.openmdx.base.collection.TreeSparseArray;
 import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.jmi1.Void;
 import org.openmdx.kernel.exception.BasicException;
-import org.w3c.cci2.SparseArray;
+import org.w3c.cci2.SortedMaps;
 
 import test.openmdx.app1.jmi1.Address;
 import test.openmdx.app1.jmi1.App1Package;
@@ -165,13 +164,11 @@ public class PersonImpl <S extends test.openmdx.app1.jmi1.Person, N extends test
                 same.getLastName()
             );
             String asString = formattedName.toString();
-            SparseArray<String> asSparseArray = new TreeSparseArray<String>();
-            asSparseArray.put(0, asString);
             return app1Package.createPersonFormatNameAsResult(
                 asString,
                 Collections.singletonList(asString),
                 Collections.singleton(asString),
-                asSparseArray
+                SortedMaps.singletonSparseArray(asString)
             );
         } else throw new CanNotFormatNameException(
             BasicException.Code.DEFAULT_DOMAIN,

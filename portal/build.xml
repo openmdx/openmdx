@@ -174,12 +174,6 @@
 			<zipfileset dir="src/js/com/yahoo/yui/assets" prefix="js/yui/build/assets" />
 			<zipfileset dir="src/js/com/bootstrap" prefix="js/bootstrap" />
 			<zipfileset dir="src/js/com/jquery" prefix="js/jquery" />
-			<zipfileset dir="src/js/org/polymer" prefix="js/polymer">
-				<exclude name="**/bower.json" />
-				<exclude name="**/.*" />
-				<exclude name="**/demo/**" />
-				<exclude name="**/test/**" />
-			</zipfileset>
 			<zipfileset dir="src/js/org/openmdx/portal" prefix="js">
 				<include name="ssf.js"/>
 				<include name="guicontrol.js"/>
@@ -316,7 +310,7 @@
 			<classpath refid="project.bin.classpath"/>
 			<link href="http://java.sun.com/javase/6/docs/api/" offline="true" packagelistLoc="${openmdx.home}/core/etc/javadoc/j2se/"/>
 			<link href="http://java.sun.com/javaee/5/docs/api/" offline="true" packagelistLoc="${openmdx.home}/core/etc/javadoc/j2ee/"/>
-			<link href="http://www.openmdx.org/openmdx/core/${openmdx.public.version}/java-${build.java.platform}/" offline="true" packagelistLoc="${openmdx.home}/core/build/jre-1.6/doc/api/"/>
+			<link href="http://www.openmdx.org/openmdx/core/${openmdx.public.version}/java-${build.java.platform}/" offline="true" packagelistLoc="${openmdx.home}/core/build/${build.target.platform}/doc/api/"/>
 			<group>
 				<title>${project.specification.title} Radius</title>
 				<package name="org.openmdx.portal"/>

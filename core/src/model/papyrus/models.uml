@@ -45,4 +45,7 @@
   <packageImport xmi:type="uml:PackageImport" xmi:id="_Th7QwHLyEeGDZOi-upD3nQ">
     <importedPackage xmi:type="uml:Package" href="../openMDX 2 ~ Core (EMF)/org.openmdx.preferences2.uml#_c6xKEHLfEeGNgPDkuA6txQ"/>
   </packageImport>
+  <packageImport xmi:type="uml:PackageImport" xmi:id="_heK7oEwAEeiP_v9qilBc9Q">
+    <importedPackage xmi:type="uml:Model" href="../openMDX%202%20~%20Core%20(EMF)/org.openmdx.database2.uml#_9M97kHLeEeGNgPDkuA6txR"/>
+  </packageImport>
 </uml:Model>

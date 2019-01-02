@@ -104,19 +104,19 @@ public class DataLoader
     	String messagePrefix = new Date() + "  ";
         System.out.println(messagePrefix + "Loading data");
         SysLog.info("Loading data");
-        List dirs = this.getDirectories("/WEB-INF/config/" + location + "/");
+        List<String> dirs = this.getDirectories("/WEB-INF/config/" + location + "/");
         // Iterate all data directories. Each directory my contain
         // segment-specific data files
         for(
-            Iterator i = dirs.iterator(); 
+            Iterator<String> i = dirs.iterator(); 
             i.hasNext(); 
         ) {
-            String dir = (String)i.next();
+            String dir = i.next();
             Set<String> resourcePaths = this.context.getResourcePaths(dir);
             if(resourcePaths == null) return;
             resourcePaths = new TreeSet<String>(resourcePaths);
             try {
-                for(Iterator j = resourcePaths.iterator(); j.hasNext(); ) {        
+                for(Iterator<String> j = resourcePaths.iterator(); j.hasNext(); ) {        
                     String path = (String)j.next();
                     Map<Path,ObjectRecord> data = new LinkedHashMap<Path,ObjectRecord>();
                     if(!path.endsWith("/")) {
@@ -201,7 +201,7 @@ public class DataLoader
 	                                        	(RefObject_1_0)store.getObjectById(parentIdentity);
 	                                    } catch(Exception e) {}
 	                                    if(parent != null) {
-	                                        RefContainer container = (RefContainer)parent.refGetValue(
+	                                        RefContainer<?> container = (RefContainer<?>)parent.refGetValue(
 	                                        	entryPath.getSegment(entryPath.size() - 2).toClassicRepresentation()
 	                                        );
 	                                        container.refAdd(

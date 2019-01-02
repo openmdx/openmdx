@@ -1,13 +1,13 @@
 /*
  * ====================================================================
  * Project:     openMDX/Security, http://www.openmdx.org/
- * Description: ConnectionFactory 
+ * Description: Key Store Connection Factory 
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2006-2010, OMEX AG, Switzerland
+ * Copyright (c) 2006-2018, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -53,25 +53,24 @@ import java.security.cert.CertStoreException;
 import javax.resource.ResourceException;
 import javax.resource.spi.ConnectionManager;
 
+import org.openmdx.resource.spi.AbstractConnection;
 import org.openmdx.resource.spi.AbstractConnectionFactory;
-import org.openmdx.resource.spi.AbstractManagedConnectionFactory;
 
 /**
  * ConnectionFactory
  */
 public class ConnectionFactory
-	extends AbstractConnectionFactory<Object>
-    implements org.openmdx.resource.cci.ConnectionFactory<Object,GeneralSecurityException>
+	extends AbstractConnectionFactory<AbstractConnection,GeneralSecurityException>
 {
 
-	/**
+    /**
      * Constructor
      * 
-     * @param managedConnectionFactory 
-     * @param connectionManager
+     * @param managedConnectionFactory a managed keystore connection factory
+     * @param connectionManager a connection manager
      */
     public ConnectionFactory(
-        AbstractManagedConnectionFactory managedConnectionFactory, 
+        ManagedConnectionFactory managedConnectionFactory, 
         ConnectionManager connectionManager
     ) {
     	super(
@@ -83,29 +82,22 @@ public class ConnectionFactory
     /**
      * Implements <code>Serializable</code>
      */
-    private static final long serialVersionUID = 3968136698456468988L;
+    private static final long serialVersionUID = 7245892255466082966L;
 
     
     //------------------------------------------------------------------------
     // Implements ConnectionFactory
     //------------------------------------------------------------------------
-    
-	/* (non-Javadoc)
-     * @see org.openmdx.resource.cci.ConnectionFactory#getConnection()
+
+    /* (non-Javadoc)
+     * @see org.openmdx.resource.spi.AbstractConnectionFactory#toEISException(javax.resource.ResourceException)
      */
-//  @Override
-    public Object getConnection(
-    ) throws GeneralSecurityException {
-        try {
-            return newConnection(
-                null // connectionRequestInfo
-            );
-        } catch (ResourceException exception) {
-            throw new CertStoreException(
-                "Connection to key store could not be established",
-                exception
-            );
-        }
+    @Override
+    protected GeneralSecurityException toEISException(ResourceException exception) {
+        return new CertStoreException(
+            "Connection to key store could not be established",
+            exception
+        );
     }
 
 }

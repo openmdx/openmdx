@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2015, OMEX AG, Switzerland
+ * Copyright (c) 2004-2018, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -61,8 +61,7 @@ import java.util.Set;
 import java.util.SortedMap;
 import java.util.Stack;
 import java.util.TreeSet;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
+import java.util.function.Predicate;
 
 import javax.resource.cci.MappedRecord;
 import javax.xml.datatype.Duration;
@@ -72,6 +71,7 @@ import org.openmdx.base.accessor.cci.DataObject_1_0;
 import org.openmdx.base.accessor.cci.Structure_1_0;
 import org.openmdx.base.accessor.cci.SystemAttributes;
 import org.openmdx.base.collection.TypeSafeMarshallingMap;
+import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.marshalling.TypeSafeMarshaller;
 import org.openmdx.base.mof.cci.AggregationKind;
@@ -124,7 +124,22 @@ public class Model_1 implements Model_1_0 {
     /**
      * The lazily populated shared associations
      */
-    private final ConcurrentMap<Path,Boolean> sharedAssociations = new ConcurrentHashMap<Path,Boolean>();
+    private final SharedAssociations sharedAssociations = new SharedAssociations(
+        new Predicate<Path>() {
+
+            @Override
+            public boolean test(Path reference) {
+                try {
+                    final ModelElement_1_0 referenceType = getReferenceType(reference);
+                    final ModelElement_1_0 referencedEnd = getElement(referenceType.getReferencedEnd());
+                    return "shared".equals(referencedEnd.getAggregation());
+                } catch (ServiceException exception) {
+                    throw new RuntimeServiceException(exception);
+                }
+            }
+            
+        }
+    );
 
     /**
      * To populate the root association definition
@@ -151,8 +166,6 @@ public class Model_1 implements Model_1_0 {
      */
     private final TypeSafeMarshaller<Path, ElementRecord> recordMarshaller;
     
-    
-    //---------------------------------------------------------------------------
     /**
      * Returns the AssociationDefs matching the object path. result[0] contains
      * the AssociationDefs corresponding to the last and second last reference 
@@ -276,7 +289,6 @@ public class Model_1 implements Model_1_0 {
         };
     }
 
-    //---------------------------------------------------------------------------
     private void verifyObjectCollection(
         Object values,
         Object type,
@@ -364,7 +376,6 @@ public class Model_1 implements Model_1_0 {
         validationContext.pop();      
     }
 
-    //-------------------------------------------------------------------------
     @SuppressWarnings("unchecked")
     private void verifyObject(
         Object value,
@@ -554,7 +565,6 @@ public class Model_1 implements Model_1_0 {
                     new BasicException.Parameter("context", validationContext)
                 );        
             }       
-            @SuppressWarnings("cast")
             Map<String,ModelElement_1_0> fieldDefs = (Map<String,ModelElement_1_0>)typeDef.objGetMap("field");
             // complete fieldNames with all required fields in case of includeRequired
             if((fieldDefs != null) && enforceRequired) {
@@ -782,7 +792,6 @@ public class Model_1 implements Model_1_0 {
         }
     }
 
-    //-------------------------------------------------------------------------
     @Override
     public ModelElement_1_0 getElement(
         java.lang.Object element
@@ -830,7 +839,6 @@ public class Model_1 implements Model_1_0 {
         return element;
     }
 
-    //-------------------------------------------------------------------------
     @Override
     public ModelElement_1_0 findElement(
         Object element
@@ -841,14 +849,12 @@ public class Model_1 implements Model_1_0 {
         );
     }
 
-    //-------------------------------------------------------------------------
     @Override
     public Collection<ModelElement_1_0> getContent(
     ) throws ServiceException {
         return this.modelElements.values();
     }  
 
-    //-------------------------------------------------------------------------
     @Override
     public boolean isLocal(
         Object type,
@@ -859,7 +865,6 @@ public class Model_1 implements Model_1_0 {
         return packageNamePackage.equals(packageNameType);
     }
 
-    //---------------------------------------------------------------------------
     /**
      * Tells whether the given XRI contains a shared association
      * 
@@ -871,35 +876,14 @@ public class Model_1 implements Model_1_0 {
     @Override
     public boolean containsSharedAssociation(
         Path xri
-    ) throws ServiceException{
-        int size = xri.size();
-        if(size <= 5) {
-            return false;
-        } else {
-        	String[] k = new String[size / 2 + 1];
-        	k[0] = xri.getSegment(0).toClassicRepresentation();
-            for(int i = 1, j = 1; i < size; i+=2){
-            	k[j++] = xri.getSegment(i).toClassicRepresentation();
-            }
-            Path key = new Path(k);
-            Boolean sharedAssociation = this.sharedAssociations.get(key);
-            if(sharedAssociation == null) {
-                Boolean parentIsShared = this.sharedAssociations.get(key.getParent());
-                if(parentIsShared == null ? containsSharedAssociation(xri.getPrefix(size - 2)) : parentIsShared.booleanValue()) {
-                    sharedAssociation = Boolean.TRUE;
-                } else {
-                    Path reference = size % 2 == 0 ? xri : xri.getParent();
-                    ModelElement_1_0 referenceType = this.getReferenceType(reference);
-                    ModelElement_1_0 referencedEnd = this.getElement(referenceType.getReferencedEnd());
-                    sharedAssociation = Boolean.valueOf("shared".equals(referencedEnd.getAggregation()));
-                }
-                this.sharedAssociations.put(key, sharedAssociation);
-            }
-            return sharedAssociation.booleanValue();
+    ) throws ServiceException {
+        try {
+            return this.sharedAssociations.containsSharedAssociation(xri);
+        } catch (RuntimeServiceException exception) {
+            throw new ServiceException(exception);
         }
     }
     
-    //---------------------------------------------------------------------------
     @Override
     public ModelElement_1_0 getFeatureDef(
         ModelElement_1_0 classifierDef,
@@ -923,7 +907,6 @@ public class Model_1 implements Model_1_0 {
         return classifierDef.objGetMap(kind).get(feature);
     }
 
-    //---------------------------------------------------------------------------
     /**
      * Return the set of attributes and references of the specified class, 
      * and if specified its subtypes.
@@ -982,7 +965,6 @@ public class Model_1 implements Model_1_0 {
         return new TypeSafeMarshallingMap<String,Path,ModelElement_1_0>(this.elementMarshaller, structuralFeatures);
     }
 
-    //-------------------------------------------------------------------------
     @Override
     public boolean referenceIsStoredAsAttribute(
         java.lang.Object referenceType
@@ -993,7 +975,6 @@ public class Model_1 implements Model_1_0 {
         );
     }
 
-    //-------------------------------------------------------------------------
     @Override
     public boolean referenceIsDerived(
         java.lang.Object referenceType
@@ -1004,7 +985,6 @@ public class Model_1 implements Model_1_0 {
         );
     }
 
-    //-------------------------------------------------------------------------
     @Override
     public ModelElement_1_0 getDereferencedType(
         java.lang.Object element
@@ -1015,7 +995,6 @@ public class Model_1 implements Model_1_0 {
         );
     }
 
-    //-------------------------------------------------------------------------
     @Override
     public ModelElement_1_0 getElementType(
         ModelElement_1_0 elementDef
@@ -1023,7 +1002,6 @@ public class Model_1 implements Model_1_0 {
     	return elementDef.getDereferencedType();
     }
 
-    //-------------------------------------------------------------------------
     @Override
     public ModelElement_1_0 getReferenceType(
         Path path
@@ -1032,7 +1010,6 @@ public class Model_1 implements Model_1_0 {
         return assocDefs[1].getReference();
     }
 
-    //-------------------------------------------------------------------------
     @Override
     public boolean isPrimitiveType(
         java.lang.Object type
@@ -1040,7 +1017,6 @@ public class Model_1 implements Model_1_0 {
         return this.getDereferencedType(type).isPrimitiveType();
     }
 
-    //-------------------------------------------------------------------------
     @Override
     public boolean isNumericType(
         java.lang.Object type
@@ -1051,7 +1027,6 @@ public class Model_1 implements Model_1_0 {
             NUMERIC_TYPES.contains(typeDef.getQualifiedName());
     }
 
-    //-------------------------------------------------------------------------
     @Override
     public boolean isStructureType(
         java.lang.Object type
@@ -1059,7 +1034,6 @@ public class Model_1 implements Model_1_0 {
         return this.getDereferencedType(type).isStructureType();
     }
 
-    //-------------------------------------------------------------------------
     @Override
     public boolean isStructureFieldType(
         java.lang.Object type
@@ -1067,7 +1041,6 @@ public class Model_1 implements Model_1_0 {
         return this.getDereferencedType(type).isStructureFieldType();
     }
 
-    //---------------------------------------------------------------------------
     @Override
     public void verifyObjectCollection(
         Object values,
@@ -1090,7 +1063,6 @@ public class Model_1 implements Model_1_0 {
         );
     }
 
-    //-------------------------------------------------------------------------
     /**
      * Verifies an object
      * 
@@ -1135,14 +1107,12 @@ public class Model_1 implements Model_1_0 {
         }
     }
 
-    //-------------------------------------------------------------------------
     private Object getElementInError (
         DataObject_1_0 object
     ){
         return object.jdoGetObjectId(); 
     }
 
-    //-------------------------------------------------------------------------
     @Override
     public void verifyObject(
         Object value,
@@ -1159,7 +1129,6 @@ public class Model_1 implements Model_1_0 {
         );
     }
 
-    //-------------------------------------------------------------------------
     /**
      * Verifies a single the value to be of the specified type. 
      * The multiplicity is required to validate Stereotypes.STREAM types only.
@@ -1202,7 +1171,6 @@ public class Model_1 implements Model_1_0 {
         );
     }
 
-    //-------------------------------------------------------------------------
     /**
      * Verifies a single the value to be of the specified type. 
      * The multiplicity is required to validate Stereotypes.STREAM types only.
@@ -1253,7 +1221,6 @@ public class Model_1 implements Model_1_0 {
         );
     }
 
-    //-------------------------------------------------------------------------
     @Override
     public boolean isClassType(
         java.lang.Object type
@@ -1261,7 +1228,6 @@ public class Model_1 implements Model_1_0 {
         return this.getDereferencedType(type).isClassType();
     }
 
-    //-------------------------------------------------------------------------
     @Override
     public boolean isStructuralFeatureType(
         java.lang.Object type
@@ -1270,7 +1236,6 @@ public class Model_1 implements Model_1_0 {
         return typeDef.isReferenceType() || typeDef.isAttributeType();
     }
 
-    //-------------------------------------------------------------------------
     @Override
     public boolean isReferenceType(
         java.lang.Object type
@@ -1278,7 +1243,6 @@ public class Model_1 implements Model_1_0 {
         return this.getDereferencedType(type).isReferenceType();
     }
 
-    //-------------------------------------------------------------------------
     @Override
     public boolean isAttributeType(
         java.lang.Object type
@@ -1286,7 +1250,6 @@ public class Model_1 implements Model_1_0 {
         return this.getDereferencedType(type).isAttributeType();
     }
 
-    //-------------------------------------------------------------------------
     @Override
     public boolean isOperationType(
         java.lang.Object type
@@ -1294,7 +1257,6 @@ public class Model_1 implements Model_1_0 {
         return this.getDereferencedType(type).isOperationType();
     }
 
-    //-------------------------------------------------------------------------
     @Override
     public boolean isPackageType(
         java.lang.Object type
@@ -1302,7 +1264,6 @@ public class Model_1 implements Model_1_0 {
         return this.getDereferencedType(type).isPackageType();
     }
 
-    //-------------------------------------------------------------------------
     @Override
     public boolean objectIsSubtypeOf(
         Object object,
@@ -1328,7 +1289,6 @@ public class Model_1 implements Model_1_0 {
         return xri.getLastSegment().toClassicRepresentation();
     }
 
-    //-------------------------------------------------------------------------
     @Override
     public boolean isSubtypeOf(
         Object objectType,
@@ -1344,7 +1304,6 @@ public class Model_1 implements Model_1_0 {
         return false;
     }
     
-    //-------------------------------------------------------------------------
     @Override
     public boolean isInstanceof(
         DataObject_1_0 object,
@@ -1356,7 +1315,6 @@ public class Model_1 implements Model_1_0 {
         );
     }
 
-    //---------------------------------------------------------------------------  
     @Override
     public String toJavaPackageName(
         Object type,
@@ -1369,7 +1327,6 @@ public class Model_1 implements Model_1_0 {
         );
     }
 
-    //---------------------------------------------------------------------------  
     @Override
     public String toJavaPackageName(
         Object type,
@@ -1385,10 +1342,6 @@ public class Model_1 implements Model_1_0 {
         );
     }
 
-    //---------------------------------------------------------------------------
-    /* (non-Javadoc)
-     * @see org.openmdx.model1.accessor.basic.cci.Model_1_3#getCompositeReference(org.openmdx.model1.accessor.basic.cci.ModelElement_1_0)
-     */
     @Override
     public ModelElement_1_0 getCompositeReference(
         ModelElement_1_0 classDef
@@ -1408,7 +1361,6 @@ public class Model_1 implements Model_1_0 {
         return null;
     }
 
-    //---------------------------------------------------------------------------
     public ModelElement_1_0[] getTypes(
         Path path
     ) throws ServiceException {
@@ -1420,27 +1372,14 @@ public class Model_1 implements Model_1_0 {
         };
     }
 
-
-    //------------------------------------------------------------------------
-    // Implements Model_1_5
-    //------------------------------------------------------------------------
-
-    /* (non-Javadoc)
-     * @see org.openmdx.model1.accessor.basic.cci.Model_1_5#isAssociationType(java.lang.Object)
-     */
+    @Override
     public boolean isAssociationType(
         Object type
     ) throws ServiceException {
         return this.getDereferencedType(type).isAssociationType();
     }
-
-    //------------------------------------------------------------------------
-    // Implements Model_1_6
-    //------------------------------------------------------------------------
-
-    /* (non-Javadoc)
-     * @see org.openmdx.model1.accessor.basic.cci.Model_1_6#getLeastDerived(java.lang.String)
-     */
+    
+    @Override
     public String getLeastDerived(
         String qualifiedClassName
     ) throws ServiceException {
@@ -1459,16 +1398,22 @@ public class Model_1 implements Model_1_0 {
         }
     }
     
-    /* (non-Javadoc)
-     * @see org.openmdx.base.mof.cci.Model_1_0#getIdentityPattern(org.openmdx.base.mof.cci.ModelElement_1_0)
-     */
+    @Override
     public Path getIdentityPattern(
         ModelElement_1_0 classDef
+    ) throws ServiceException {
+        return getIdentityPattern(classDef, false);
+    }
+
+    @Override
+    public Path getIdentityPattern(
+        final ModelElement_1_0 classDef, 
+        final boolean takeSubclassesIntoConsideration
     ) throws ServiceException {
         if(!classDef.isClassifierType()) {
             return null;            
         }
-        List<String> components = new ArrayList<String>();
+        final List<String> components = new ArrayList<String>();
         ModelElement_1_0 currentClassDef = classDef;
         String authority = null;
         while(!this.isSubtypeOf(currentClassDef, "org:openmdx:base:Authority")) {
@@ -1478,7 +1423,23 @@ public class Model_1 implements Model_1_0 {
             }
             ModelElement_1_0 compositeReference = this.getCompositeReference(currentClassDef);
             if(compositeReference == null) {
-                return null;
+                if(takeSubclassesIntoConsideration) {
+                    for (Object subtype : currentClassDef.objGetList("allSubtype")) {
+                        final ModelElement_1_0 aCompositeReference = this.getCompositeReference(this.getElement(subtype));
+                        if(aCompositeReference == null) {
+                            // continue
+                        } else if(compositeReference == null) {
+                            compositeReference = aCompositeReference;
+                        } else if (compositeReference != aCompositeReference) {
+                            return null; // lack of uniqueness
+                        }
+                    }
+                    if(compositeReference == null) {
+                        return null;
+                    }
+                } else {
+                    return null;
+                }
             }
             components.add(0, ":*");
             components.add(

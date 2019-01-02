@@ -1462,8 +1462,8 @@ public class Structures {
         /**
          * Save a mapped record into a Java Bean
          * 
-         * @param source
-         * @param channel the Java bean to be updated
+         * @param structure
+         * @param javaBean the Java bean to be updated
          * 
          * @throws Exception 
          */

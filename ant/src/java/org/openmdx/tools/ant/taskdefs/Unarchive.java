@@ -406,7 +406,7 @@ public class Unarchive extends Task {
 			//
 			// create intermediary directories - sometimes zip don't add them
 			//
-			File dirF = fileUtils.getParentFile(file);
+			File dirF = (file == null) ? null : file.getParentFile();
 			if (dirF != null) dirF.mkdirs();
 			if (isDirectory) {
 				file.mkdirs();

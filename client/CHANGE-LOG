@@ -1,82 +1,28 @@
 ==============================================================================
-Version 2.14.0                                                      2015-01-23
+Version 2.16.2                                                      2019-01-02
 ==============================================================================
 
 1.    NEW FEATURES
-      none
+      
+      NONE
       
 2.    CHANGES  
      
 2.0.  CHANGED FEATURES
-      none
+      
+      NONE
              
 2.1.  FIXED BUGS
-      none
+      
+      NONE
 
 2.2.  DEPRECATED FEATURES
-      none
+      
+      NONE
             
 2.3   REMOVED FEATURES
-      none
+      
+      NONE
  
 ==============================================================================
-Version 2.13.0                                                      2013-04-29
-==============================================================================
 
-0.    KNOWN ISSUES
-      none
-      
-1.    NEW FEATURES
-
-      CR10011145
-      Xerces classes required for Dalvik 
-      
-      System.setProperty(
-        "javax.xml.datatype.DatatypeFactory",
-        "org.openmdx.dalvik.uses.org.apache.xerces.jaxp.datatype.DatatypeFactoryImpl"
-      );
-      
-2.    CHANGES  
-     
-2.0.  CHANGED FEATURES
-      none
-
-2.1.  FIXED BUGS
-      none
-          
-2.2.  DEPRECATED FEATURES
-      none
-
-2.3.  REMOVED FEATURES
-      none
-
-==============================================================================
-Version 2.12.0                                                      2013-01-18
-==============================================================================
-
-0.    KNOWN ISSUES
-      none
-      
-1.    NEW FEATURES
-
-      CR20020217
-      Separation of client and server packages
-      
-      This sub-project offers two different client archives:
-      * openmdx-client.jar (for Standard Java clients)
-      * openmdx-dalvik.jar (for Dalvik clients)
-      
-2.    CHANGES  
-     
-2.0.  CHANGED FEATURES
-      none
-
-2.1.  FIXED BUGS
-      none
-          
-2.2.  DEPRECATED FEATURES
-      none
-
-2.3.  REMOVED FEATURES
-      none
-        

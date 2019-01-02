@@ -50,8 +50,6 @@ package org.openmdx.kernel.configuration;
 
 import java.util.Map;
 
-import javax.annotation.Nonnull;
-
 /**
  * To access the components or subcomponents configuration
  */
@@ -67,8 +65,8 @@ public interface ConfigurationProvider {
      *              is <code>null</code>
      *
      */
-    @Nonnull Configuration getConfiguration(
-        @Nonnull String section
+    Configuration getConfiguration(
+        String section
     );
 
     /**
@@ -82,9 +80,9 @@ public interface ConfigurationProvider {
      *              is <code>null</code>
      *
      */
-    @Nonnull Configuration getConfiguration(
-        @Nonnull String section,
-        @Nonnull Map<String,?> override
+    Configuration getConfiguration(
+        String section,
+        Map<String,?> override
     );
 
 }

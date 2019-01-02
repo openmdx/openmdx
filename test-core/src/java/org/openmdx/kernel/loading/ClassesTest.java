@@ -49,8 +49,7 @@ package org.openmdx.kernel.loading;
 
 import java.math.BigDecimal;
 
-import junit.framework.Assert;
-
+import org.junit.Assert;
 import org.junit.Test;
 
 

@@ -23,7 +23,7 @@ public enum RegularExpressionFlag {
 	DOTALL(Pattern.DOTALL, 's', 'n'),
 	UNICODE_CASE(Pattern.UNICODE_CASE, 'u'),
 	X_QUERY(StringTypePredicate.X_QUERY, 'X'),
-	JSON_QUERY(StringTypePredicate.X_QUERY, 'j');
+	JSON_QUERY(StringTypePredicate.JSON_QUERY, 'j');
 
 	RegularExpressionFlag(int flag, char character, char sqlCharacter) {
 		this.flag = flag;

@@ -17,8 +17,7 @@ CREATE VIEW BeforeImage_Address AS SELECT
     street,
     country,
     city
-FROM app1_Address 
-where p$$object_oid$1 IS NOT NULL;
+FROM app1_aud_Address;
 
 DROP VIEW Involvement_Address;
 CREATE VIEW Involvement_Address AS SELECT 
@@ -42,8 +41,7 @@ CREATE VIEW Involvement_Address AS SELECT
   'data' as p$$object__rid$0,  
   p$$object_rsx as p$$object__rid$1,  
   p$$object_oid$0 as p$$object__oid  
-FROM app1_Address
-WHERE p$$object_oid$1 IS NOT NULL;
+FROM app1_aud_Address;
 
 DROP VIEW BeforeImage_Address_;
 CREATE VIEW BeforeImage_Address_ AS SELECT
@@ -56,8 +54,7 @@ CREATE VIEW BeforeImage_Address_ AS SELECT
     p$$object_oid$1,
     object_idx,
     address_line
-FROM app1_Address_N 
-where p$$object_oid$1 IS NOT NULL;
+FROM app1_aud_Address_;
 
 DROP VIEW BeforeImage_DOC;
 CREATE VIEW BeforeImage_DOC AS SELECT 
@@ -68,7 +65,6 @@ CREATE VIEW BeforeImage_DOC AS SELECT
     p$$object_oid$0 || '!' || p$$object_oid$1 object_oid,
     p$$object_oid$0,
     p$$object_oid$1,
-    object_idx,
     p$$object_parent__rid,
     p$$object_parent__oid,
     object__class,
@@ -78,9 +74,21 @@ CREATE VIEW BeforeImage_DOC AS SELECT
     modified_by_0,
     description,
     content,
+    text
+FROM app1_aud_DOC;
+
+DROP VIEW BeforeImage_DOC_;
+CREATE VIEW BeforeImage_DOC_ AS SELECT 
+    'audit*' || p$$object_rsx object_rid,
+    'audit' as p$$object_rid$0,
+    p$$object_rsx,
+    p$$object_rsx as p$$object_rid$1,
+    p$$object_oid$0 || '!' || p$$object_oid$1 object_oid,
+    p$$object_oid$0,
+    p$$object_oid$1,
+    object_idx,
     keyword
-FROM app1_DOC 
-where p$$object_oid$1 IS NOT NULL;
+FROM app1_aud_DOC_;
 
 DROP VIEW Involvement_DOC;
 CREATE VIEW Involvement_DOC AS SELECT 
@@ -104,8 +112,7 @@ CREATE VIEW Involvement_DOC AS SELECT
   'data' as p$$object__rid$0,  
   p$$object_rsx as p$$object__rid$1,  
   p$$object_oid$0 as p$$object__oid  
-FROM app1_DOC
-WHERE object_idx = 0 AND p$$object_oid$1 IS NOT NULL;
+FROM app1_aud_DOC;
 
 DROP VIEW BeforeImage_Invoice;
 CREATE VIEW BeforeImage_Invoice AS SELECT
@@ -116,7 +123,6 @@ CREATE VIEW BeforeImage_Invoice AS SELECT
     p$$object_oid$0 || '!' || p$$object_oid$1 object_oid,
     p$$object_oid$0,
     p$$object_oid$1,
-    object_idx,
     p$$object_parent__rid,
     p$$object_parent__oid,
     object__class,
@@ -126,8 +132,7 @@ CREATE VIEW BeforeImage_Invoice AS SELECT
     modified_at,
     created_by_0,
     modified_by_0
-FROM app1_Invoice 
-where p$$object_oid$1 IS NOT NULL;
+FROM app1_aud_Invoice;
 
 DROP VIEW Involvement_Invoice;
 CREATE VIEW Involvement_Invoice AS SELECT 
@@ -151,8 +156,7 @@ CREATE VIEW Involvement_Invoice AS SELECT
   'data' as p$$object__rid$0,  
   p$$object_rsx as p$$object__rid$1,  
   p$$object_oid$0 as p$$object__oid  
-FROM app1_Invoice
-WHERE object_idx = 0 AND p$$object_oid$1 IS NOT NULL;
+FROM app1_aud_Invoice;
 
 DROP VIEW BeforeImage_InvoicePosition;
 CREATE VIEW BeforeImage_InvoicePosition AS SELECT
@@ -163,7 +167,6 @@ CREATE VIEW BeforeImage_InvoicePosition AS SELECT
     p$$object_oid$0 || '!' || p$$object_oid$1 object_oid,
     p$$object_oid$0,
     p$$object_oid$1,
-    object_idx,
     p$$object_parent__rid,
     p$$object_parent__oid,
     object__class,
@@ -174,8 +177,7 @@ CREATE VIEW BeforeImage_InvoicePosition AS SELECT
     created_by_0,
     modified_by_0,
     product_id
-FROM app1_InvoicePosition 
-where p$$object_oid$1 IS NOT NULL;
+FROM app1_aud_InvoicePosition;
 
 DROP VIEW Involvement_InvoicePosition;
 CREATE VIEW Involvement_InvoicePosition AS SELECT 
@@ -199,8 +201,7 @@ CREATE VIEW Involvement_InvoicePosition AS SELECT
   'data' as p$$object__rid$0,  
   p$$object_rsx as p$$object__rid$1,  
   p$$object_oid$0 as p$$object__oid  
-FROM app1_InvoicePosition
-WHERE object_idx = 0 AND p$$object_oid$1 IS NOT NULL;
+FROM app1_aud_InvoicePosition;
 
 DROP VIEW BeforeImage_Member;
 CREATE VIEW BeforeImage_Member AS SELECT
@@ -211,7 +212,6 @@ CREATE VIEW BeforeImage_Member AS SELECT
     p$$object_oid$0 || '!' || p$$object_oid$1 object_oid,
     p$$object_oid$0,
     p$$object_oid$1,
-    object_idx,
     p$$object_parent__rid,
     p$$object_parent__oid,
     object__class,
@@ -226,8 +226,7 @@ CREATE VIEW BeforeImage_Member AS SELECT
     m2,
     p$$m2__rid,
     p$$m2__oid
-FROM app1_Member 
-where p$$object_oid$1 IS NOT NULL;
+FROM app1_aud_Member;
 
 DROP VIEW Involvement_Member;
 CREATE VIEW Involvement_Member AS SELECT 
@@ -251,8 +250,7 @@ CREATE VIEW Involvement_Member AS SELECT
   'data' as p$$object__rid$0,  
   p$$object_rsx as p$$object__rid$1,  
   p$$object_oid$0 as p$$object__oid  
-FROM app1_Member
-WHERE object_idx = 0 AND p$$object_oid$1 IS NOT NULL;
+FROM app1_aud_Member;
 
 DROP VIEW BeforeImage_PersonGroup;
 CREATE VIEW BeforeImage_PersonGroup AS SELECT 
@@ -272,8 +270,7 @@ CREATE VIEW BeforeImage_PersonGroup AS SELECT
     modified_by_0,
     created_by_0,
     name
-FROM app1_PersonGroup 
-where p$$object_oid$1 IS NOT NULL;
+FROM app1_aud_PersonGroup;
   
 DROP VIEW Involvement_PersonGroup;
 CREATE VIEW Involvement_PersonGroup AS SELECT 
@@ -297,8 +294,7 @@ CREATE VIEW Involvement_PersonGroup AS SELECT
   'data' as p$$object__rid$0,  
   p$$object_rsx as p$$object__rid$1,  
   p$$object_oid$0 as p$$object__oid  
-FROM app1_PersonGroup
-WHERE p$$object_oid$1 IS NOT NULL;
+FROM app1_aud_PersonGroup;
   
 DROP VIEW BeforeImage_SLICED;
 CREATE VIEW BeforeImage_SLICED AS SELECT 
@@ -309,7 +305,6 @@ CREATE VIEW BeforeImage_SLICED AS SELECT
     p$$object_oid$0 || '!' || p$$object_oid$1 object_oid,
     p$$object_oid$0,
     p$$object_oid$1,
-    object_idx,
     p$$object_parent__rid,
     p$$object_parent__oid,
     object__class,
@@ -324,9 +319,6 @@ CREATE VIEW BeforeImage_SLICED AS SELECT
     foreign_id,
     postal_code,
     description,
-    assigned_address,
-    p$$assigned_address__rid,
-    p$$assigned_address__oid,
     product_id,
     salutation,
     street,
@@ -336,18 +328,30 @@ CREATE VIEW BeforeImage_SLICED AS SELECT
     birthdate,
     member_of_group,
     birthdate_as_date_time,
-    person_group,
-    p$$person_group__rid,
-    p$$person_group__oid,
     country,
     sex,
-    given_name,
     product_group_id,
-    place_of_birth,
-    additional_info
-FROM app1_SLICED 
-where p$$object_oid$1 IS NOT NULL;
+    place_of_birth
+FROM app1_aud_SLICED;
   
+DROP VIEW BeforeImage_SLICED_;
+CREATE VIEW BeforeImage_SLICED_ AS SELECT 
+    'audit*' || p$$object_rsx object_rid,
+    'audit' as p$$object_rid$0,
+    p$$object_rsx,
+    p$$object_rsx as p$$object_rid$1,
+    p$$object_oid$0 || '!' || p$$object_oid$1 object_oid,
+    p$$object_oid$0,
+    p$$object_oid$1,
+    object_idx,
+    assigned_address,
+    p$$assigned_address__rid,
+    p$$assigned_address__oid,
+    given_name,
+    additional_info
+FROM app1_aud_SLICED_;
+
+
 DROP VIEW Involvement_SLICED;
 CREATE VIEW Involvement_SLICED AS SELECT 
   p$$unit_of_work__rid p$$object_parent__rid,
@@ -370,8 +374,7 @@ CREATE VIEW Involvement_SLICED AS SELECT
   'data' as p$$object__rid$0,  
   p$$object_rsx as p$$object__rid$1,  
   p$$object_oid$0 as p$$object__oid  
-FROM app1_SLICED
-WHERE object_idx = 0 AND p$$object_oid$1 IS NOT NULL;
+FROM app1_aud_SLICED;
   
 DROP VIEW BeforeImage_MessageTemplate;
 CREATE VIEW BeforeImage_MessageTemplate AS SELECT
@@ -382,7 +385,6 @@ CREATE VIEW BeforeImage_MessageTemplate AS SELECT
     p$$object_oid$0 || '!' || p$$object_oid$1 object_oid,
     p$$object_oid$0,
     p$$object_oid$1,
-    object_idx,
     p$$object_parent__rid,
     p$$object_parent__oid,
     object__class,
@@ -392,8 +394,7 @@ CREATE VIEW BeforeImage_MessageTemplate AS SELECT
     modified_at,
     created_by_0,
     modified_by_0
-FROM app1_MessageTemplate 
-where p$$object_oid$1 IS NOT NULL;
+FROM app1_aud_MessageTemplate;
 
 DROP VIEW Involvement_MessageTemplate;
 CREATE VIEW Involvement_MessageTemplate AS SELECT 
@@ -417,8 +418,7 @@ CREATE VIEW Involvement_MessageTemplate AS SELECT
   'data' as p$$object__rid$0,  
   p$$object_rsx as p$$object__rid$1,  
   p$$object_oid$0 as p$$object__oid  
-FROM app1_MessageTemplate
-WHERE object_idx = 0 AND p$$object_oid$1 IS NOT NULL;
+FROM app1_aud_MessageTemplate;
 
 DROP VIEW Involvement_ALL;
 CREATE VIEW Involvement_ALL AS 

@@ -104,7 +104,7 @@ public interface MessageRecord extends RequestRecord {
      * 
      * @return a shallow clone
      * 
-     * @throws CloneNotSupportedException in case of a <code>RequestedMessage</code>
+     * @throws CloneNotSupportedException 
      */
     MessageRecord clone(
     ) throws CloneNotSupportedException;

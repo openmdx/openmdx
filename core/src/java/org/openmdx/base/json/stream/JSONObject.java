@@ -1128,10 +1128,6 @@ public class JSONObject implements Serializable {
      *  with <code>{</code>&nbsp;<small>(left brace)</small> and ending
      *  with <code>}</code>&nbsp;<small>(right brace)</small>.
      */
-    @edu.umd.cs.findbugs.annotations.SuppressFBWarnings(
-	    value="NP_TOSTRING_COULD_RETURN_NULL", 
-	    justification="As expected by JSON"
-    )
     public String toString() {
         try {
             Iterator<?>     keys = keys();
@@ -1270,10 +1266,6 @@ public class JSONObject implements Serializable {
         return quote(value.toString());
     }
 
-    @edu.umd.cs.findbugs.annotations.SuppressFBWarnings(
-	    value="EC_NULL_ARG", 
-	    justification="As defined by JSON's NULL value"
-    )
     private static boolean isEquilvalentToNull(Object value) {
 		return value == null || value.equals(null);
 	}

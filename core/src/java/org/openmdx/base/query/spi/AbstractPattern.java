@@ -49,9 +49,8 @@ package org.openmdx.base.query.spi;
 
 import java.io.Serializable;
 
-import org.openmdx.application.dataprovider.spi.EmbeddedFlags;
-import org.openmdx.application.dataprovider.spi.EmbeddedFlags.FlagsAndValue;
 import org.openmdx.base.naming.Path;
+import org.openmdx.base.query.spi.EmbeddedFlags;
 import org.openmdx.kernel.url.protocol.XRI_1Protocols;
 import org.w3c.cci2.RegularExpressionFlag;
 
@@ -108,7 +107,7 @@ public abstract class AbstractPattern implements Serializable {
 		if(valueWithEmbeddedFlags.startsWith(XRI_1Protocols.OPENMDX_PREFIX)) {
 			return PathPattern.newInstance(valueWithEmbeddedFlags);
 		} else {
-			final FlagsAndValue flagsAndValue = EmbeddedFlags.getInstance().parse(valueWithEmbeddedFlags);
+			final EmbeddedFlags.FlagsAndValue flagsAndValue = EmbeddedFlags.getInstance().parse(valueWithEmbeddedFlags);
 			if(flagsAndValue.getFlagSet().contains(RegularExpressionFlag.ACCENT_INSENSITIVE)){
 				return AccentInsensitivePattern.newInstance(flagsAndValue);
 			} else if(flagsAndValue.getFlagSet().contains(RegularExpressionFlag.JSON_QUERY)) {

@@ -234,7 +234,7 @@ public class DataManager_2Bean implements SessionBean {
     /* (non-Javadoc)
      * @see javax.ejb.SessionBean#ejbActivate()
      */
-//  @Override
+    @Override
     public void ejbActivate(
     ) throws EJBException, RemoteException {
         // TODO restore unit of work
@@ -244,7 +244,7 @@ public class DataManager_2Bean implements SessionBean {
     /* (non-Javadoc)
      * @see javax.ejb.SessionBean#ejbPassivate()
      */
-//  @Override
+    @Override
     public void ejbPassivate(
     ) throws EJBException, RemoteException {
         // TODO save unit of work
@@ -254,7 +254,7 @@ public class DataManager_2Bean implements SessionBean {
     /* (non-Javadoc)
      * @see javax.ejb.SessionBean#ejbRemove()
      */
-//  @Override
+    @Override
     public void ejbRemove(
     ) throws EJBException, RemoteException {
         disconnect();
@@ -263,7 +263,7 @@ public class DataManager_2Bean implements SessionBean {
     /* (non-Javadoc)
      * @see javax.ejb.SessionBean#setSessionContext(javax.ejb.SessionContext)
      */
-//  @Override
+    @Override
     public void setSessionContext(
         SessionContext sessionContext
     ) throws EJBException, RemoteException {

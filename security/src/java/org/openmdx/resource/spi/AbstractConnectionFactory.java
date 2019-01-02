@@ -55,65 +55,94 @@ import javax.resource.Referenceable;
 import javax.resource.ResourceException;
 import javax.resource.spi.ConnectionManager;
 import javax.resource.spi.ConnectionRequestInfo;
+import javax.resource.spi.ManagedConnectionFactory;
+
+import org.openmdx.resource.cci.AuthenticationInfo;
+import org.openmdx.resource.cci.ConnectionFactory;
+import org.openmdx.resource.cci.NoConnectionRequestInfo;
 
 /**
  * Abstract Connection Factory
  */
-public class AbstractConnectionFactory <C> implements Serializable, Referenceable {
+public abstract class AbstractConnectionFactory <C extends AutoCloseable, E extends Exception> 
+    implements Serializable, Referenceable, ConnectionFactory<C,E>
+{
 
-	/**
+    /**
      * Constructor
-     * 
-     * @param managedConnectionFactory 
-     * @param connectionManager
      */
     protected AbstractConnectionFactory(
-        AbstractManagedConnectionFactory managedConnectionFactory, 
+        ManagedConnectionFactory managedConnectionFactory, 
         ConnectionManager connectionManager
     ) {
         this.managedConnectionFactory = managedConnectionFactory;
-        this.connectionManager = 
-        	connectionManager == null ? this.managedConnectionFactory.getConnectionManager() : 
-        	connectionManager;    
+        this.connectionManager = connectionManager;    
     }
 
-	/**
+    private final ManagedConnectionFactory managedConnectionFactory;
+    private final ConnectionManager connectionManager;
+    private Reference reference;
+
+    /**
      * Implements <code>Serializable</code>
      */
     private static final long serialVersionUID = 717396893019818237L;
-
-    /**
-     * 
-     */
-    private final AbstractManagedConnectionFactory managedConnectionFactory;
     
     /**
-     * 
+     * Use by the parameterless getConnection method
      */
-    private final ConnectionManager connectionManager;
-	
-    /**
-     * 
-     */
-    private Reference reference = null;
+    protected static final ConnectionRequestInfo DEFAULT_CONNECTION_REQUEST_INFO = new NoConnectionRequestInfo();
+    
+    
+    //------------------------------------------------------------------------
+    // Implements ConnectionFactory
+    //------------------------------------------------------------------------    
 
-    /**
-     * Create a new connection
-     * 
-     * @param connection request info
-     * 
-     * @return a new connection
-     * @throws ResourceException 
+    /* (non-Javadoc)
+     * @see org.openmdx.resource.cci.ConnectionFactory#getConnection()
      */
     @SuppressWarnings("unchecked")
-    protected C newConnection(
-    	ConnectionRequestInfo connectionRquestInfo
-    ) throws ResourceException{
-    	return (C) this.connectionManager.allocateConnection(
-            this.managedConnectionFactory, 
-            connectionRquestInfo
-        );
+    @Override
+    public C getConnection(
+    ) throws E {
+        try {
+            return (C) this.connectionManager.allocateConnection(
+                this.managedConnectionFactory, 
+                DEFAULT_CONNECTION_REQUEST_INFO
+            );
+        } catch (ResourceException exception) {
+            throw toEISException(exception);
+        }
     }
+
+
+    /* (non-Javadoc)
+     * @see org.openmdx.resource.cci.ConnectionFactory#getConnection(javax.resource.spi.ConnectionRequestInfo)
+     */
+    @SuppressWarnings("unchecked")
+    @Override
+    public C getConnection(
+        AuthenticationInfo authenticationInfo
+    ) throws E {
+        try {
+            return (C) this.connectionManager.allocateConnection(
+                this.managedConnectionFactory, 
+                authenticationInfo
+            );
+        } catch (ResourceException exception) {
+            throw toEISException(exception);
+        }
+    }
+
+    /**
+     * Map the resource exception to an EIS specific exception
+     * 
+     * @param exception the resource exception
+     * 
+     * @return an EIS specific exception
+     */
+    abstract protected E toEISException(ResourceException exception);
+
     
     //------------------------------------------------------------------------
     // Implements Referenceable

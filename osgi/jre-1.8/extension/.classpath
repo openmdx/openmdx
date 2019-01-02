@@ -1,21 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JRE 8"/>
 	<classpathentry exported="true" kind="lib" path="lib/jdo2-api.jar" sourcepath="src/jdo2-api.java.zip"/>
-	<classpathentry exported="true" kind="lib" path="lib/junit.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/junit.jar" sourcepath="src/junit.java.zip"/>
 	<classpathentry exported="true" kind="lib" path="lib/netscape-ldap.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/openjpa.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/openjpa.jar" sourcepath="src/openjpa.java.zip"/>
 	<classpathentry exported="true" kind="lib" path="lib/jcache.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/resource.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/commons-collections.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/commons-lang.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/concurrent.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/serp.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/ejb.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/javax.enterprise.deploy.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/mail.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/annotations.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/asm.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/hamcrest-core.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/hamcrest-core.jar" sourcepath="src/hamcrest-core.java.zip"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JRE 8"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

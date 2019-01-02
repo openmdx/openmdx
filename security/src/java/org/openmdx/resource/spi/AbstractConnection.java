@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2006-2010, OMEX AG, Switzerland
+ * Copyright (c) 2006-2018, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -47,23 +47,32 @@
  */
 package org.openmdx.resource.spi;
 
-
 /**
  * Abstract Connection
  */
-public class AbstractConnection {
+public abstract class AbstractConnection implements AutoCloseable {
+
+    /**
+     * Constructor
+     */
+    protected AbstractConnection() {
+        super();
+    }
 
     /**
      * The managed connection associated with this connection handle
      */
-    private AbstractManagedConnection managedConnection;
+    private AbstractManagedConnection<?> managedConnection;
 
     /**
      * Used by <code>AbstractManagedConnection</code>
      */
     void associateManagedConnection(
-    	AbstractManagedConnection managedConnection
+    	AbstractManagedConnection<?> managedConnection
     ){
+        if(managedConnection == this.managedConnection){
+            return;
+        }
     	if(managedConnection != null && this.managedConnection != null){
     		this.managedConnection.dissociateConnection(this, false);
     	}
@@ -75,7 +84,7 @@ public class AbstractConnection {
      * 
      * @return the currently associated managed connection
      */
-    protected AbstractManagedConnection getManagedConnection(){
+    protected AbstractManagedConnection<?> getManagedConnection(){
     	return this.managedConnection;
     }
 

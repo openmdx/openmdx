@@ -144,9 +144,11 @@
 			<param name="version-file.property-file" location="${openmdx.home}/openmdx.version.properties"/>
 			<param name="version-file.template-file" location="${basedir}/etc/ant/Version.java.template"/>
 		</antcall>
+		<!-- no jt files since 2.16.0
 		<antcall target="-preprocess-jt-files-">
 			<param name="preprocess-jt.target" value="java"/>
 		</antcall>
+		-->
 		<fail message="JRE ${build.target.jre} not found" unless="build.target.jre.found"/>
 		<patternset id="openmdx-bootstrap.content">
 			<include name="org/openmdx/kernel/**/*.java"/>
@@ -464,7 +466,7 @@
 			<link 
 				href="http://www.openmdx.org/openmdx/core/${openmdx.public.version}/java-${build.java.platform}/" 
 				offline="true" 
-				packagelistLoc="${openmdx.home}/core/build/jre-1.6/doc/api/"
+				packagelistLoc="${openmdx.home}/core/build/${build.target.platform}/doc/api/"
 			/>			
 			<group>
 				<title>${project.specification.title} Kernel</title>

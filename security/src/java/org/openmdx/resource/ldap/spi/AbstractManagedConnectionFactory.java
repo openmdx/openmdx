@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2007-2010, OMEX AG, Switzerland
+ * Copyright (c) 2007-2018, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -50,10 +50,10 @@ package org.openmdx.resource.ldap.spi;
 import javax.resource.ResourceException;
 import javax.resource.spi.ConnectionManager;
 
-
+import netscape.ldap.LDAPException;
 
 /**
- * Abstract Managed LDAP Connection FactoryAbstract Managed LDAP Connection Factory
+ * Abstract Managed LDAP Connection Factory
  */
 public abstract class AbstractManagedConnectionFactory 
 	extends org.openmdx.resource.spi.AbstractManagedConnectionFactory 
@@ -67,7 +67,7 @@ public abstract class AbstractManagedConnectionFactory
     }
 
 	/**
-     * Implements <code>Serializable</code>
+     * Implements <code>java.io.Serializable</code>
      */
     private static final long serialVersionUID = -1024116393801026171L;
 
@@ -104,13 +104,26 @@ public abstract class AbstractManagedConnectionFactory
     /* (non-Javadoc)
      * @see javax.resource.spi.ManagedConnectionFactory#createConnectionFactory(javax.resource.spi.ConnectionManager)
      */
-    public Object createConnectionFactory(
+	@Override
+    public org.openmdx.resource.cci.ConnectionFactory<org.openmdx.resource.ldap.cci.LDAPConnection,LDAPException> createConnectionFactory(
         ConnectionManager connectionManager
     ) throws ResourceException {
+	    log("Create a new connection factory with the provided connection manager");
         return new ConnectionFactory(
         	this, 
         	connectionManager
         );
+    }
+
+    /* (non-Javadoc)
+     * @see org.openmdx.resource.spi.AbstractManagedConnectionFactory#createConnectionFactory()
+     */
+    @SuppressWarnings("unchecked")
+    @Override
+    public org.openmdx.resource.cci.ConnectionFactory<org.openmdx.resource.ldap.cci.LDAPConnection,LDAPException> createConnectionFactory()
+        throws ResourceException {
+        log("Create a new connection factory with the internal connection manager");
+        return (org.openmdx.resource.cci.ConnectionFactory<org.openmdx.resource.ldap.cci.LDAPConnection, LDAPException>) super.createConnectionFactory();
     }
 
 }

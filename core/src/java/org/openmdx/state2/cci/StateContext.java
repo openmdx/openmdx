@@ -67,19 +67,19 @@ public interface StateContext<V> {
     //------------------------------------------------------------------------
 
     /**
-     * Tells which valid time point is reflected
+     * Tells which application-time point is reflected
      * 
-     * @return the view's valid time point
+     * @return the view's application-time point
      */
     public V getValidAt();
     
     /**
-     * Tells which transaction time point is reflected
+     * Tells which system-time point is reflected
      * <p>
      * All committed changes are taken into consideration in case of 
      * <code>null</code>.
      * 
-     * @return the view's transaction time point
+     * @return the view's system-time point
      */
     public Date getExistsAt();
 

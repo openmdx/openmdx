@@ -67,8 +67,8 @@ import org.openmdx.kernel.jdo.ReducedJDOHelper;
  */
 final class Selection_1 extends AbstractContainer_1 {
 
-    /**   
-     * Standard Constructor 
+    /**
+     * Standard Constructor
      * 
      * @param superMap
      * @param selector
@@ -76,8 +76,8 @@ final class Selection_1 extends AbstractContainer_1 {
     Selection_1(
         Container_1_0 superMap,
         DataObjectFilter selector
-    ){
-    	this.container = (Container_1) superMap.container();
+    ) {
+        this.container = (Container_1) superMap.container();
         this.superMap = superMap;
         this.objectFilter = selector;
     }
@@ -91,25 +91,27 @@ final class Selection_1 extends AbstractContainer_1 {
      * 
      */
     private final DataObjectFilter objectFilter;
-    
+
     /**
      * 
      */
     private final Container_1_0 superMap;
-    
+
     @Override
     public void openmdxjdoEvict(
-        boolean evictAllMembers, 
+        boolean evictAllMembers,
         boolean evictAllSubSets // TODO restrict to the SubSet's SubSets
-    ){
-        if(evictAllMembers) {
+    ) {
+        if (evictAllMembers) {
             super.evictMembers();
         }
         super.evictStored();
         this.superMap.openmdxjdoEvict(false, evictAllSubSets);
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see org.openmdx.base.accessor.rest.AbstractContainer_1#getFilter()
      */
     @Override
@@ -117,65 +119,80 @@ final class Selection_1 extends AbstractContainer_1 {
         return this.objectFilter;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see org.openmdx.base.accessor.rest.AbstractContainer_1#container()
      */
     @Override
     public Container_1 container() {
         return this.container;
     }
-    
-    /* (non-Javadoc)
+
+    /*
+     * (non-Javadoc)
+     * 
      * @see org.openmdx.base.accessor.rest.AbstractContainer_1#getConditions()
      */
     @Override
     protected List<ConditionRecord> getConditions() {
         return objectFilter.getDelegate(this.openmdxjdoGetDataObjectManager());
     }
-    
-    /* (non-Javadoc)
+
+    /*
+     * (non-Javadoc)
+     * 
      * @see org.openmdx.base.accessor.rest.AbstractContainer_1#getExtension()
      */
     @Override
     protected List<QueryExtensionRecord> getExtensions() {
         return objectFilter.getExtensions();
     }
-    
-    /* (non-Javadoc)
+
+    /*
+     * (non-Javadoc)
+     * 
      * @see org.openmdx.base.accessor.rest.AbstractContainer_1#isIgnoreCache()
      */
     @Override
     protected boolean isIgnoreCache() {
-        return 
-            this.container.isIgnoreCache() || 
+        return this.container.isIgnoreCache() ||
             (this.getExtensions() != null && !this.getExtensions().isEmpty());
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see org.openmdx.base.accessor.rest.AbstractContainer_1#isRetrieved()
      */
     @Override
     public boolean isRetrieved() {
         return this.superMap.isRetrieved() || getStored().isRetrieved();
     }
-    
-    /* (non-Javadoc)
+
+    /*
+     * (non-Javadoc)
+     * 
      * @see org.openmdx.base.accessor.rest.AbstractContainer_1#openmdxjdoGetPersistenceManager()
      */
     @Override
     public DataObjectManager_1 openmdxjdoGetDataObjectManager() {
         return this.container.openmdxjdoGetDataObjectManager();
     }
-    
-    /* (non-Javadoc)
+
+    /*
+     * (non-Javadoc)
+     * 
      * @see org.openmdx.base.persistence.spi.PersistenceCapableContainer#openmdxjdoGetPersistenceManager()
      */
     @Override
-    public PersistenceManager jdoGetPersistenceManager(){
-    	return this.container.jdoGetPersistenceManager();
+    public PersistenceManager jdoGetPersistenceManager() {
+        return this.container.jdoGetPersistenceManager();
     }
-    
-    /* (non-Javadoc)
+
+    /*
+     * (non-Javadoc)
+     * 
      * @see org.openmdx.base.persistence.spi.PersistenceCapableCollection#openmdxjdoGetContainerId()
      */
     @Override
@@ -184,8 +201,10 @@ final class Selection_1 extends AbstractContainer_1 {
             "Query XRIs not yet supported"
         );
     }
-    
-    /* (non-Javadoc)
+
+    /*
+     * (non-Javadoc)
+     * 
      * @see org.openmdx.base.persistence.spi.PersistenceCapableCollection#openmdxjdoGetTransientContainerId()
      */
     @Override
@@ -194,8 +213,10 @@ final class Selection_1 extends AbstractContainer_1 {
             "Query XRIs not yet supported"
         );
     }
-    
-    /* (non-Javadoc)
+
+    /*
+     * (non-Javadoc)
+     * 
      * @see org.openmdx.base.persistence.spi.PersistenceCapableCollection#openmdxjdoIsPersistent()
      */
     @Override
@@ -203,8 +224,9 @@ final class Selection_1 extends AbstractContainer_1 {
         return this.container.jdoIsPersistent();
     }
 
-    
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see org.openmdx.base.accessor.rest.AbstractContainer_1#isExtent()
      */
     @Override
@@ -212,8 +234,9 @@ final class Selection_1 extends AbstractContainer_1 {
         return container().isExtent();
     }
 
-    
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see org.openmdx.base.accessor.rest.AbstractContainer_1#isPlainExtent()
      */
     @Override
@@ -231,69 +254,89 @@ final class Selection_1 extends AbstractContainer_1 {
     @Override
     protected boolean isInContainerOrExtent(
         Object candidate
-    ){
-        return isExtent() ? 
-            ((Path) ReducedJDOHelper.getObjectId(candidate)).isLike(getFilter().getIdentityPattern()) :
-            super.isInContainerOrExtent(candidate);
+    ) {
+        return isExtent() ? ((Path) ReducedJDOHelper.getObjectId(candidate)).isLike(getFilter().getIdentityPattern())
+            : super.isInContainerOrExtent(candidate);
     }
-    
-    /* (non-Javadoc)
+
+    /*
+     * (non-Javadoc)
+     * 
      * @see org.openmdx.base.persistence.spi.PersistenceCapableCollection#openmdxjdoRetrieve(javax.jdo.FetchPlan)
      */
     @Override
     public void openmdxjdoRetrieve(
         FetchPlan fetchPlan
     ) {
-      if(!this.isRetrieved()) try {
-          this.getStored().retrieveAll(fetchPlan);
-      } catch (ServiceException exception) {
-          throw new JDODataStoreException("retrieveAll() failure", exception);
-      }
+        if (!this.isRetrieved()) {
+            try {
+                this.getStored().retrieveAll(fetchPlan);
+            } catch (ServiceException exception) {
+                throw new JDODataStoreException("retrieveAll() failure", exception);
+            }
+        }
     }
-    
-    /* (non-Javadoc)
+
+    /*
+     * (non-Javadoc)
+     * 
      * @see java.util.Map#containsKey(java.lang.Object)
      */
     @Override
-    public boolean containsKey(Object key) {
+    public boolean containsKey(
+        Object key
+    ) {
         DataObject_1_0 candidate = this.superMap.get(key);
         return candidate != null && this.objectFilter.accept(candidate);
     }
-    
-    /* (non-Javadoc)
+
+    /*
+     * (non-Javadoc)
+     * 
      * @see java.util.Map#containsValue(java.lang.Object)
      */
     @Override
-    public boolean containsValue(Object value) {
-        return 
-            this.isInContainerOrExtent(value) &&
+    public boolean containsValue(
+        Object value
+    ) {
+        return this.isInContainerOrExtent(value) &&
             !ReducedJDOHelper.isDeleted(value) &&
             this.objectFilter.accept(value);
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see java.util.Map#get(java.lang.Object)
      */
     @Override
-    public DataObject_1_0 get(Object key) {
+    public DataObject_1_0 get(
+        Object key
+    ) {
         DataObject_1_0 candidate = this.superMap.get(key);
         return candidate != null && this.objectFilter.accept(candidate) ? candidate : null;
     }
-    
-    /* (non-Javadoc)
+
+    /*
+     * (non-Javadoc)
+     * 
      * @see java.util.Map#put(java.lang.Object, java.lang.Object)
      */
     @Override
-    public DataObject_1_0 put(String key, DataObject_1_0 value) {
-        if(this.objectFilter.accept(value)) {
+    public DataObject_1_0 put(
+        String key, DataObject_1_0 value
+    ) {
+        if (this.objectFilter.accept(value)) {
             return this.superMap.put(key, value);
         }
-        throw new IllegalArgumentException (
+        throw new IllegalArgumentException(
             "The object is not a member of this collection"
         );
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see java.lang.Object#toString()
      */
     @Override
@@ -304,12 +347,10 @@ final class Selection_1 extends AbstractContainer_1 {
     /**
      * Tell the cache that the selection is empty
      */
-    void markAsEmpty(
-    ){
-        if(hasStored()) {
+    void markAsEmpty() {
+        if (hasStored()) {
             this.getStored().setTotal(0);
         }
     }
 
 }
-    

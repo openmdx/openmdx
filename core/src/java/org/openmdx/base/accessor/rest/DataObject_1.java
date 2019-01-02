@@ -81,12 +81,10 @@ import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.annotation.Nullable;
 import javax.jdo.FetchPlan;
 import javax.jdo.JDOException;
 import javax.jdo.JDOFatalInternalException;
@@ -186,14 +184,15 @@ public class DataObject_1
      */
     public DataObject_1(
         Path identity, 
-        Object version
+        Object version, 
+        boolean multithreaded
     ){
         this.identity = identity;
         this.transientObjectId = null;
         this.detached = true;
         this.untouchable = false;
         this.version = version;
-        this.flushableValues = new ConcurrentHashMap<String,Flushable>(); // TODO verify whether tread safety is required
+        this.flushableValues = Maps.newMap(multithreaded);
     }
     
     /**
@@ -214,12 +213,13 @@ public class DataObject_1
         String objectClass, 
         boolean frozen
     ) throws ServiceException{
+        final boolean threadSafetyRequired = manager.isThreadSafetyRequired();
         this.dataObjectManager = manager;
 		this.identity = identity;
 		this.transientObjectId = transientObjectId == null ? UUIDs.newUUID() : transientObjectId;
-        this.flushableValues = newFlushableValues();
+        this.flushableValues = Maps.newMap(threadSafetyRequired);
 		if(identity == null) {
-		    this.transientValues = manager.isThreadSafetyRequired() ? Maps.<String,Object>newConcurrentHashMap() : new HashMap<String,Object>();
+            this.transientValues = Maps.newMapSupportingNullValues(threadSafetyRequired);
 		}
 		this.detached = false;
 		this.untouchable = frozen;
@@ -445,8 +445,8 @@ public class DataObject_1
     protected transient MappedRecord persistentValues = null;
 
     /**
-    *
-    */
+     *
+     */
     protected Map<String,Object> transientValues;
     
     /**
@@ -624,9 +624,9 @@ public class DataObject_1
     private boolean isAspectHasCore(
         String feature
     ) throws ServiceException {
-        return "core".equals(feature) && isAspect();
+        return SystemAttributes.CORE.equals(feature) && isAspect();
     }
-    
+
     /**
      * Retrieve the object's transactional state
      * 
@@ -1041,7 +1041,7 @@ public class DataObject_1
 		        new Filter(
 		            new IsInCondition(
 		                Quantifier.THERE_EXISTS,
-		                "core",
+		                SystemAttributes.CORE,
 		                true, // IS_IN,
 		                this.jdoIsPersistent() ? this.jdoGetObjectId() : this.jdoGetTransactionalObjectId()
 		            )
@@ -1122,7 +1122,7 @@ public class DataObject_1
         if(transactional) {
             this.addTo(unitOfWork);
         } else {
-            transactional = unitOfWork.getMembers().contains(this);
+            transactional = unitOfWork.isMember(this);
         }
         if(transactional) {
             if(makeDirty != null) {
@@ -1516,6 +1516,24 @@ public class DataObject_1
     void objRemove(
         boolean updateCache
     ) throws ServiceException {
+        objRemove();
+    }
+
+    /**
+     * Removes an object.
+     * <p>
+     * Neither <code>getValue()</code> nor <code>setValue()</code>
+     * calls are allowed after an <code>remove()</code> invocation and
+     * <code>isDeleted()</code> will return <code>true</code> unless the
+     * object has been transient.
+     * 
+     * @exception   ServiceException NOT_SUPPORTED
+     *              If the object refuses to be removed.
+     * @exception   ServiceException
+     *              if the object can't be removed
+     */
+    void objRemove(
+    ) throws ServiceException {
         Model_1_0 model = getModel();
         //
         // Cascade Removal To Children
@@ -1526,12 +1544,18 @@ public class DataObject_1
                 BasicException.Code.ILLEGAL_STATE,
                 "Attempt to remove a transient object"
             );
-        } else if(this.jdoIsNew()) {
+        }
+        if(this.jdoIsNew()) {
             for(Flushable flushable : this.flushableValues.values()) {
                 if(flushable instanceof Container_1) {
-                    this.dataObjectManager.deletePersistentAll(
-                        ((Container_1)flushable).values()
-                    );
+                	for (DataObject_1_0 child : ((Container_1)flushable).values()) {
+                		//
+                		// Be aware that an aspect could have been removed by its core for example
+                		//
+                		if(child instanceof DataObject_1) {
+                			((DataObject_1)child).objRemove();
+                		}
+                	}
                 }
             }
         } else {
@@ -1544,7 +1568,6 @@ public class DataObject_1
                                 this.dataObjectManager.deletePersistentAll(
                                     this.objGetContainer(e.getKey()).values()
                                 );
-//                                this.objGetContainer(e.getKey()).clear();
                             }
                         }
                     }
@@ -1568,14 +1591,9 @@ public class DataObject_1
         ){
             this.getAspects().clear();
         }
-        //
-        // Cache management
-        //
-        if(updateCache) {
-            Container_1 container = this.getContainer(true);
-            if(container != null) {
-                container.removeFromChache(this.identity.getLastSegment().toClassicRepresentation());
-            }
+        Container_1 container = this.getContainer(true);
+        if(container != null) {
+            container.removeFromChache(this.identity.getLastSegment().toClassicRepresentation());
         }
     }
 
@@ -2524,7 +2542,7 @@ public class DataObject_1
     public boolean jdoIsTransactional(
     ) {
         try {
-            return this.getUnitOfWork().getMembers().contains(this);
+            return this.getUnitOfWork().isMember(this);
         } catch(Exception e) {
             throw new JDOUserException(
                 "Unable to get object state",
@@ -3166,7 +3184,7 @@ public class DataObject_1
 	 * Null-safe streamable test
 	 */
 	private static boolean isStreamedValue(
-		@Nullable ModelElement_1_0 featureDef
+		ModelElement_1_0 featureDef
 	) throws ServiceException {
 		return featureDef != null && ModelHelper.getMultiplicity(featureDef).isStreamValued();
 	}
@@ -3546,10 +3564,6 @@ public class DataObject_1
         }
     }
 
-    private Map<String,Flushable> newFlushableValues(){
-        return objThreadSafetyRequired() ? new ConcurrentHashMap<String,Flushable>() : new HashMap<String,Flushable>();
-    }
-    
     /**
      * Save the data of the <tt>Object_1_0</tt> instance to a stream (that
      * is, serialize it).
@@ -3586,7 +3600,7 @@ public class DataObject_1
         java.io.ObjectInputStream stream
     ) throws java.io.IOException, ClassNotFoundException {
         stream.defaultReadObject();
-        this.flushableValues = newFlushableValues();
+        this.flushableValues = Maps.newMap(objThreadSafetyRequired());
         int count = stream.readInt();
         if(count > 0) {
             TransactionalState_1 state;

@@ -54,7 +54,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -103,21 +102,23 @@ public class Swagger {
      * @throws ServiceException
      * @throws JSONException
      */
-    private void setType(
+    private boolean setType(
         JSONObject node,
         ModelElement_1_0 typeDef,
         Multiplicity multiplicity,
         boolean complexTypeAsPath,
         String prefix
    ) throws ServiceException, JSONException {
+        boolean isRef = false;
         ModelElement_1_0 dereferencedType = typeDef.getModel().getDereferencedType(typeDef);
         if(dereferencedType.isPrimitiveType()) {
             if(
                 PrimitiveTypes.SHORT.equals(dereferencedType.getQualifiedName()) ||
                 PrimitiveTypes.INTEGER.equals(dereferencedType.getQualifiedName())
-                ) {
+            ) {
                 if(!multiplicity.isSingleValued()) {
                     node.put("$ref", (prefix == null ? "" : prefix) + "Integer" + LIST_SUFFIX);
+                    isRef = true;
                 } else {
                     node.put("type", "integer");
                     node.put("format", "int32");
@@ -125,6 +126,7 @@ public class Swagger {
             } else if(PrimitiveTypes.LONG.equals(dereferencedType.getQualifiedName())) {
                 if(!multiplicity.isSingleValued()) {
                     node.put("$ref", (prefix == null ? "" : prefix) + "Long" + LIST_SUFFIX);
+                    isRef = true;
                 } else {
                     node.put("type", "integer");                    
                     node.put("format", "int64");
@@ -132,12 +134,14 @@ public class Swagger {
             } else if(PrimitiveTypes.BOOLEAN.equals(dereferencedType.getQualifiedName())) {
                 if(!multiplicity.isSingleValued()) {
                     node.put("$ref", (prefix == null ? "" : prefix) + "Boolean" + LIST_SUFFIX);
+                    isRef = true;
                 } else {
                     node.put("type", "boolean");
                 }
             } else if(PrimitiveTypes.DATE.equals(dereferencedType.getQualifiedName())) {
                 if(!multiplicity.isSingleValued()) {
                     node.put("$ref", (prefix == null ? "" : prefix) + "Date" + LIST_SUFFIX);
+                    isRef = true;
                 } else {
                     node.put("type", "string");
                     node.put("format", "date");
@@ -145,6 +149,7 @@ public class Swagger {
             } else if(PrimitiveTypes.DATETIME.equals(dereferencedType.getQualifiedName())) {
                 if(!multiplicity.isSingleValued()) {
                     node.put("$ref", (prefix == null ? "" : prefix) + "DateTime" + LIST_SUFFIX);
+                    isRef = true;
                 } else {
                     node.put("type", "string");
                     node.put("format", "date-time");
@@ -152,12 +157,14 @@ public class Swagger {
             } else if(PrimitiveTypes.DECIMAL.equals(dereferencedType.getQualifiedName())) {
                 if(!multiplicity.isSingleValued()) {
                     node.put("$ref", (prefix == null ? "" : prefix) + "Decimal" + LIST_SUFFIX);
+                    isRef = true;
                 } else {
                     node.put("type", "number");
                 }
             } else {
                 if(!multiplicity.isSingleValued()) {
                     node.put("$ref", (prefix == null ? "" : prefix) + "String" + LIST_SUFFIX);
+                    isRef = true;
                 } else {
                     node.put("type", "string");
                 }
@@ -166,17 +173,22 @@ public class Swagger {
             if(complexTypeAsPath) {
                 if(!multiplicity.isSingleValued()) {
                     node.put("$ref", (prefix == null ? "" : prefix) + "Path" + LIST_SUFFIX);
+                    isRef = true;
                 } else {
                     node.put("$ref", (prefix == null ? "" : prefix) + "Path");
+                    isRef = true;
                 }
             } else {
                 if(!multiplicity.isSingleValued()) {
                     node.put("$ref", (prefix == null ? "" : prefix) + dereferencedType.getQualifiedName() + LIST_SUFFIX);
+                    isRef = true;
                 } else {
                     node.put("$ref", (prefix == null ? "" : prefix) + dereferencedType.getQualifiedName());
+                    isRef = true;
                 }
             }
         }
+        return isRef;
     }
 
     /**
@@ -189,40 +201,60 @@ public class Swagger {
     ) throws JSONException {
         JSONArray parameters = this.newParameters();
         // queryType
-        JSONObject queryType = new JSONObject();
-        queryType.put("name", "queryType");
-        queryType.put("in", "query");
-        queryType.put("required", false);
-        queryType.put("type", "string");
-        parameters.put(queryType);
+        {
+            JSONObject queryType = new JSONObject();
+            queryType.put("name", "queryType");
+            queryType.put("in", "query");
+            queryType.put("required", false);
+            JSONObject schema = new JSONObject();
+            queryType.put("schema", schema);
+            schema.put("type", "string");
+            parameters.put(queryType);
+        }
         // query
-        JSONObject query = new JSONObject();
-        query.put("name", "query");
-        query.put("in", "query");
-        query.put("required", false);
-        query.put("type", "string");
-        parameters.put(query);
+        {
+            JSONObject query = new JSONObject();
+            query.put("name", "query");
+            query.put("in", "query");
+            query.put("required", false);
+            JSONObject schema = new JSONObject();
+            query.put("schema", schema);
+            schema.put("type", "string");
+            parameters.put(query);
+        }
         // position
-        JSONObject position = new JSONObject();
-        position.put("name", "position");
-        position.put("in", "query");
-        position.put("required", false);
-        position.put("type", "integer");
-        parameters.put(position);
+        {
+            JSONObject position = new JSONObject();
+            position.put("name", "position");
+            position.put("in", "query");
+            position.put("required", false);
+            JSONObject schema = new JSONObject();
+            position.put("schema", schema);
+            schema.put("type", "integer");
+            parameters.put(position);
+        }
         // size
+        {
         JSONObject size = new JSONObject();
-        size.put("name", "size");
-        size.put("in", "query");
-        size.put("required", false);
-        size.put("type", "integer");
-        parameters.put(size);
+            size.put("name", "size");
+            size.put("in", "query");
+            size.put("required", false);
+            JSONObject schema = new JSONObject();
+            size.put("schema", schema);
+            schema.put("type", "integer");
+            parameters.put(size);
+        }
         // groups
-        JSONObject groups = new JSONObject();
-        groups.put("name", "groups");
-        groups.put("in", "query");
-        groups.put("required", false);
-        groups.put("type", "string");
-        parameters.put(groups);
+        {
+            JSONObject groups = new JSONObject();
+            groups.put("name", "groups");
+            groups.put("in", "query");
+            groups.put("required", false);
+            JSONObject schema = new JSONObject();
+            groups.put("schema", schema);
+            schema.put("type", "string");
+            parameters.put(groups);
+        }
         return parameters;
     }
 
@@ -236,35 +268,62 @@ public class Swagger {
     private JSONObject newPathParameter(
         String name
     ) throws JSONException {
-        JSONObject qualifier = new JSONObject();
-        qualifier.put("name", name);
-        qualifier.put("in", "path");
-        qualifier.put("required", true);
-        qualifier.put("type", "string");
-        return qualifier;
+        JSONObject parameter = new JSONObject();
+        parameter.put("name", name);
+        parameter.put("in", "path");
+        parameter.put("required", true);
+        JSONObject schema = new JSONObject();
+        parameter.put("schema", schema);
+        schema.put("type", "string");
+        return parameter;
     }
 
     /**
-     * Create new body parameter for given name and type.
+     * Create new request body for given name and type.
      * 
-     * @param name
+     * @param description
      * @param typeDef
      * @return
      * @throws JSONException
      * @throws ServiceException
      */
-    private JSONObject newBodyParameter(
-        String name,
+    private JSONObject newRequestBody(
+        String description,
         ModelElement_1_0 typeDef
     ) throws JSONException, ServiceException {
-        JSONObject qualifier = new JSONObject();
-        qualifier.put("name", name);
-        qualifier.put("in", "body");
-        qualifier.put("required", true);
+        Model_1_0 model = typeDef.getModel();
+        List<ModelElement_1_0> subtypeDefs = new ArrayList<ModelElement_1_0>();
+        for(Object subtype: typeDef.objGetSet("allSubtype")) {
+            ModelElement_1_0 subtypeDef = model.getElement(subtype);
+            if(!Boolean.TRUE.equals(subtypeDef.isAbstract())) {
+                subtypeDefs.add(subtypeDef);
+            }
+        }
+        JSONObject requestBody = new JSONObject();
+        requestBody.put("description", description);
+        requestBody.put("required", true);
+        JSONObject content = new JSONObject();
+        requestBody.put("content", content);
         JSONObject schema = new JSONObject();
-        schema.put("$ref", "#/definitions/" + typeDef.getQualifiedName() + TYPE_SUFFIX);
-        qualifier.put("schema", schema);
-        return qualifier;
+        if(subtypeDefs.size() == 1) {
+            schema.put("$ref", "#/components/schemas/" + typeDef.getQualifiedName() + TYPE_SUFFIX);
+        } else {
+            JSONArray oneOf = new JSONArray();
+            for(ModelElement_1_0 subTypeDef: subtypeDefs) {
+                JSONObject type = new JSONObject();
+                type.put("$ref", "#/components/schemas/" + subTypeDef.getQualifiedName() + TYPE_SUFFIX);
+                oneOf.put(type);
+            }
+            schema.put("oneOf", oneOf);
+        }
+        JSONObject applicationJson = new JSONObject();
+        applicationJson.put("schema", schema);
+        content.put("application/json", applicationJson);
+        JSONObject applicationXml = new JSONObject();
+        applicationXml.put("schema", schema);
+        content.put("application/xml", applicationXml);
+        requestBody.put("content", content);
+        return requestBody;
     }
 
     /**
@@ -283,21 +342,19 @@ public class Swagger {
         String description,
         JSONArray tags,
         JSONArray parameters,
+        JSONObject requestBody,
         JSONObject responses
     ) throws JSONException {
         JSONObject operation = new JSONObject();
         operation.put("description", description);
         operation.put("operationId", operationId);
         operation.put("tags", tags);
-        JSONArray consumes = new JSONArray();
-        consumes.put("application/json");
-        consumes.put("application/xml");
-        operation.put("consumes", consumes);
-        JSONArray produces = new JSONArray();
-        produces.put("application/json");
-        produces.put("application/xml");
-        operation.put("produces", produces);
-        operation.put("parameters", parameters);
+        if(parameters != null) {
+            operation.put("parameters", parameters);
+        }
+        if(requestBody != null) {
+            operation.put("requestBody", requestBody);
+        }
         operation.put("responses", responses);             
         return operation;
     }
@@ -314,18 +371,44 @@ public class Swagger {
     private JSONObject newObjectResponse(
         ModelElement_1_0 typeDef,
         String description,
-        Multiplicity multiplicity
+        Multiplicity multiplicity,
+        Map<Object,ModelElement_1_0> collectedTypeDefs
     ) throws ServiceException, JSONException {
+        List<ModelElement_1_0> subtypeDefs = new ArrayList<ModelElement_1_0>();
+        Model_1_0 model = typeDef.getModel();
+        for(Object subtype: typeDef.objGetSet("allSubtype")) {
+            ModelElement_1_0 subtypeDef = model.getElement(subtype);
+            if(!Boolean.TRUE.equals(subtypeDef.isAbstract())) {
+                subtypeDefs.add(subtypeDef);
+                collectedTypeDefs.put(subtypeDef.jdoGetObjectId(), subtypeDef);
+            }
+        }
         JSONObject response = new JSONObject();
+        JSONObject content = new JSONObject();
+        JSONObject applicationJson = new JSONObject();
+        JSONObject applicationXml = new JSONObject();
         JSONObject schema = new JSONObject();
-        this.setType(
-            schema, 
-            typeDef, 
-            multiplicity, 
-            false, 
-            "#/definitions/"
-        );
-        response.put("schema", schema);
+        JSONArray oneOf = new JSONArray();
+        for(ModelElement_1_0 subTypeDef: subtypeDefs) {
+            JSONObject type = new JSONObject();
+            this.setType(
+                type, 
+                subTypeDef, 
+                multiplicity, 
+                false, 
+                "#/components/schemas/"
+            );
+            oneOf.put(type);
+        }
+        schema.put("oneOf", oneOf);
+        JSONObject discriminator = new JSONObject();
+        discriminator.put("propertyName", TYPE_PROPERTY);
+        schema.put("discriminator", discriminator);
+        applicationJson.put("schema", schema);
+        content.put("application/json", applicationJson);
+        applicationXml.put("schema", schema);
+        content.put("application/xml", applicationXml);
+        response.put("content", content);
         response.put("description", description);
         return response;
     }
@@ -401,18 +484,14 @@ public class Swagger {
         if(typeDef.isStructureType()) {
             elements = typeDef.objGetMap("field").values();
         } else {
-            if(SWAGGER_SUPPORTS_POLYMORPHISM) {
-                elements = typeDef.objGetMap("feature").values();                     
-            } else {
-                elements = new TreeMap<String,ModelElement_1_0>(
-                    model.getStructuralFeatureDefs(
-                        typeDef, 
-                        true, // includeSubtypes
-                        true, // includeDerived
-                        false // attributesOnly
-                        )
-                    ).values();
-            }
+            elements = new TreeMap<String,ModelElement_1_0>(
+                model.getStructuralFeatureDefs(
+                    typeDef, 
+                    true, // includeSubtypes
+                    true, // includeDerived
+                    false // attributesOnly
+                    )
+                ).values();
         }
         JSONArray required = new JSONArray();
         for(Object element: elements) {
@@ -425,18 +504,20 @@ public class Swagger {
                 JSONObject property = new JSONObject();
                 try {
                     ModelElement_1_0 elementTypeDef = model.getDereferencedType(elementDef.getType());
-                    property.put("description", "<span title=\"" + elementDef.getQualifiedName() + "" + "\">&laquo;" + ModelHelper.getMultiplicity(elementDef).code()  + "&raquo; " + elementTypeDef.getQualifiedName() + "</span>");
-                    this.setType(
+                    boolean isRef = this.setType(
                         property,
                         elementTypeDef,
                         ModelHelper.getMultiplicity(elementDef),
                         true,
-                        "#/definitions/"
+                        "#/components/schemas/"
                     );
                     boolean isReadOnly = 
                         !elementDef.isStructureFieldType() && 
                         !ModelHelper.isChangeable(elementDef);
-                    property.put("readOnly", isReadOnly);
+                    if(!isRef) {
+                        property.put("readOnly", isReadOnly);
+                        property.put("description", "<span title=\"" + elementDef.getQualifiedName() + "" + "\">&laquo;" + ModelHelper.getMultiplicity(elementDef).code()  + "&raquo; " + elementTypeDef.getQualifiedName() + "</span>");
+                    }
                     if(!excludeProperties.contains(elementDef.getName())) {
                         properties.put(
                             elementDef.getName(), 
@@ -446,9 +527,6 @@ public class Swagger {
                             ModelHelper.getMultiplicity(elementDef) == Multiplicity.SINGLE_VALUE && 
                             !isReadOnly
                         ) {
-                            if(SWAGGER_SUPPORTS_POLYMORPHISM) {
-                                required.put(elementDef.getName());
-                            }
                         }
                     }
                 } catch(Exception e) {
@@ -496,9 +574,6 @@ public class Swagger {
                 }
             }
         }
-        if(SWAGGER_SUPPORTS_POLYMORPHISM && subTypes != null) {
-            typeDefinition.put("subTypes", subTypes);
-        }
         typeDefinition.put("properties", properties);
         if(required.length() > 0) {
             typeDefinition.put("required", required);
@@ -535,30 +610,24 @@ public class Swagger {
                 }
             }
         }
-        JSONObject typeDefinition = null;
+        JSONObject typeDefinition = this.newDefinition(
+            typeDef,
+            withDiscriminator,
+            subTypes,
+            excludeProperties
+        );
+        for(ModelElement_1_0 subtypeDef: subtypeDefs) {
+            this.putAllDefinitions(
+                subtypeDef,
+                false, // no discriminator for sub-types
+                definitions,
+                Collections.<String>emptySet()
+            );
+        }
         definitions.put(
             typeDef.getQualifiedName(),
-            typeDefinition = this.newDefinition(
-                typeDef,
-                withDiscriminator,
-                subTypes,
-                excludeProperties
-            )
+            typeDefinition
         );
-        Set<String> excludePropertiesSubtype = new HashSet<String>(excludeProperties);
-        excludePropertiesSubtype.addAll(
-            typeDefinition.getJSONObject("properties").keySet()
-            );
-        if(SWAGGER_SUPPORTS_POLYMORPHISM) {
-            for(ModelElement_1_0 subtypeDef: subtypeDefs) {
-                this.putAllDefinitions(
-                    subtypeDef,
-                    false, // no discriminator for sub-types
-                    definitions,
-                    excludePropertiesSubtype
-                );
-            }
-        }
     }
 
     /**
@@ -592,6 +661,7 @@ public class Swagger {
                     referencedTypeDef.jdoGetObjectId(), 
                     referencedTypeDef
                 );
+                // Collect subtypes of referenceType
                 Set<String> subtypeNames = new TreeSet<String>();
                 for(Object subtype: referencedTypeDef.objGetSet("allSubtype")) {
                     ModelElement_1_0 subtypeDef = model.getElement(subtype);
@@ -617,13 +687,16 @@ public class Swagger {
                             this.newTags().put(referenceDef.getName()),                             
                             // parameters
                             this.newQueryParameters(),
+                            // requestBody
+                            null,
                             // responses
                             this.newResponse().put(
                                 "default",
                                 this.newObjectResponse(
                                     referencedTypeDef,
-                                    "List<" + referencedTypeDef.getQualifiedName() + ">",
-                                    Multiplicity.LIST
+                                    "List&lt;" + referencedTypeDef.getQualifiedName() + "&gt;",
+                                    Multiplicity.LIST,
+                                    collectedTypeDefs
                                 )
                             )
                         )
@@ -639,8 +712,11 @@ public class Swagger {
                                 // tags
                                 this.newTags().put(referenceDef.getName()),                             
                                 // parameters
-                                this.newParameters().put(
-                                    this.newBodyParameter("object", referencedTypeDef)
+                                null,
+                                // requestBody
+                                this.newRequestBody(
+                                    "in",
+                                    referencedTypeDef
                                 ),
                                 // responses
                                 this.newResponse().put(
@@ -648,7 +724,8 @@ public class Swagger {
                                     this.newObjectResponse(
                                         referencedTypeDef,
                                         referencedTypeDef.getQualifiedName(),
-                                        Multiplicity.SINGLE_VALUE
+                                        Multiplicity.SINGLE_VALUE,
+                                        collectedTypeDefs
                                     )
                                 )
                             )
@@ -674,13 +751,16 @@ public class Swagger {
                             this.newParameters().put(
                                 this.newPathParameter("id")
                             ),
+                            // requestBody
+                            null,
                             // responses
                             this.newResponse().put(
                                 "default",
                                 this.newObjectResponse(
                                     referencedTypeDef,
                                     referencedTypeDef.getQualifiedName(),
-                                    Multiplicity.SINGLE_VALUE
+                                    Multiplicity.SINGLE_VALUE,
+                                    collectedTypeDefs
                                 )
                             ).put(
                                 Integer.toString(HttpServletResponse.SC_NOT_FOUND),
@@ -702,6 +782,8 @@ public class Swagger {
                                 this.newParameters().put(
                                     this.newPathParameter("id")
                                 ),
+                                // requestBody
+                                null,
                                 // responses
                                 this.newResponse().put(
                                     Integer.toString(HttpServletResponse.SC_OK),
@@ -720,11 +802,11 @@ public class Swagger {
                                 // parameters
                                 this.newParameters().put(
                                     this.newPathParameter("id")
-                                ).put(
-                                    this.newBodyParameter(
-                                        "object", 
-                                        referencedTypeDef
-                                    )
+                                ),
+                                // requestBody
+                                this.newRequestBody(
+                                    "in", 
+                                    referencedTypeDef
                                 ),
                                 // responses
                                 this.newResponse().put(
@@ -732,7 +814,8 @@ public class Swagger {
                                     this.newObjectResponse(
                                         referencedTypeDef,
                                         referencedTypeDef.getQualifiedName(),
-                                        Multiplicity.SINGLE_VALUE
+                                        Multiplicity.SINGLE_VALUE,
+                                        collectedTypeDefs
                                     )
                                 ).put(
                                     Integer.toString(HttpServletResponse.SC_BAD_REQUEST),
@@ -751,8 +834,11 @@ public class Swagger {
                                 // parameters
                                 this.newParameters().put(
                                     this.newPathParameter("id")
-                                ).put(
-                                    this.newBodyParameter("object", referencedTypeDef)
+                                ),
+                                // requestBody
+                                this.newRequestBody(
+                                    "in",
+                                    referencedTypeDef
                                 ),
                                 // responses
                                 this.newResponse().put(
@@ -760,7 +846,8 @@ public class Swagger {
                                     this.newObjectResponse(
                                         referencedTypeDef,
                                         referencedTypeDef.getQualifiedName(),
-                                        Multiplicity.SINGLE_VALUE
+                                        Multiplicity.SINGLE_VALUE,
+                                        collectedTypeDefs
                                     )
                                 )
                             )
@@ -811,8 +898,11 @@ public class Swagger {
                                 // tags
                                 this.newTags().put(operationDef.getName()),                             
                                 // parameters
-                                this.newParameters().put(
-                                    this.newBodyParameter("in", inParamTypeDef)
+                                null,
+                                // requestBody
+                                this.newRequestBody(
+                                    "in",
+                                    inParamTypeDef
                                 ),
                                 // responses
                                 this.newResponse().put(
@@ -820,7 +910,8 @@ public class Swagger {
                                     this.newObjectResponse(
                                         resultParamTypeDef,
                                         resultParamTypeDef.getQualifiedName(),
-                                        Multiplicity.SINGLE_VALUE
+                                        Multiplicity.SINGLE_VALUE,
+                                        collectedTypeDefs
                                     )
                                 )
                             )
@@ -845,13 +936,7 @@ public class Swagger {
     ) throws ServiceException {
         try {
             JSONObject api = new JSONObject();
-            api.put("swagger", "2.0");
-            if(basePath != null) {
-                api.put("basePath", basePath);
-            }
-            if(host != null) {
-                api.put("host", host);
-            }
+            api.put("openapi", "3.0.0");
             // info
             JSONObject info = new JSONObject();
             info.put("title", this.typeDef.getQualifiedName());
@@ -869,6 +954,12 @@ public class Swagger {
                 version = version + ".0";
             }
             info.put("version", version.length() < 3 ? "1.0" : version);
+            // servers
+            JSONArray servers = new JSONArray();
+            JSONObject server = new JSONObject();
+            server.put("url", basePath);
+            servers.put(server);
+            api.put("servers", servers);
             // paths
             JSONObject paths = new JSONObject();
             Map<Object,ModelElement_1_0> collectedTypeDefs = new HashMap<Object,ModelElement_1_0>();
@@ -876,11 +967,14 @@ public class Swagger {
                 paths,
                 collectedTypeDefs
             );
-            // definitions
-            JSONObject definitions = new JSONObject();
+            // components
+            JSONObject components = new JSONObject();
+            // schemas
+            JSONObject schemas = new JSONObject();
+            components.put("schemas", schemas);
             // Path
             {
-                JSONObject definition = new JSONObject();
+                JSONObject schema = new JSONObject();
                 JSONObject properties = new JSONObject();
                 // @href
                 {
@@ -894,12 +988,12 @@ public class Swagger {
                     property.put("type", "string");
                     properties.put(ATTRIBUTE_VALUE_PROPERTY, property);                         
                 }
-                definition.put("properties", properties);
-                definitions.put("Path", definition);
+                schema.put("properties", properties);
+                schemas.put("Path", schema);
             }
             // PathElement
             {
-                JSONObject definition = new JSONObject();
+                JSONObject schema = new JSONObject();
                 JSONObject properties = new JSONObject();
                 // @href
                 {
@@ -920,28 +1014,28 @@ public class Swagger {
                     property.put("type", "string");
                     properties.put(ATTRIBUTE_VALUE_PROPERTY, property);                         
                 }
-                definition.put("properties", properties);
-                definitions.put("PathElement", definition);
+                schema.put("properties", properties);
+                schemas.put("PathElement", schema);
             }
             // PathList
             {
-                JSONObject definition = new JSONObject();
+                JSONObject schema = new JSONObject();
                 JSONObject properties = new JSONObject();
                 // _item
                 {
                     JSONObject property = new JSONObject();
                     JSONObject items = new JSONObject();
                     property.put("type", "array");
-                    items.put("$ref", "#/definitions/PathElement");
+                    items.put("$ref", "#/components/schemas/PathElement");
                     property.put("items", items);
                     properties.put("_item", property);
                 }
-                definition.put("properties", properties);
-                definitions.put("Path" + LIST_SUFFIX, definition);
+                schema.put("properties", properties);
+                schemas.put("Path" + LIST_SUFFIX, schema);
             }
             // StringElement
             {
-                JSONObject definition = new JSONObject();
+                JSONObject schema = new JSONObject();
                 JSONObject properties = new JSONObject();
                 // @index
                 {
@@ -956,28 +1050,28 @@ public class Swagger {
                     property.put("type", "string");
                     properties.put(ATTRIBUTE_VALUE_PROPERTY, property);                         
                 }
-                definition.put("properties", properties);
-                definitions.put("StringElement", definition);
+                schema.put("properties", properties);
+                schemas.put("StringElement", schema);
             }
             // StringList
             {
-                JSONObject definition = new JSONObject();
+                JSONObject schema = new JSONObject();
                 JSONObject properties = new JSONObject();
                 // _item
                 {
                     JSONObject property = new JSONObject();
                     JSONObject items = new JSONObject();
                     property.put("type", "array");
-                    items.put("$ref", "#/definitions/StringElement");
+                    items.put("$ref", "#/components/schemas/StringElement");
                     property.put("items", items);
                     properties.put("_item", property);
                 }
-                definition.put("properties", properties);
-                definitions.put("String" + LIST_SUFFIX, definition);
+                schema.put("properties", properties);
+                schemas.put("String" + LIST_SUFFIX, schema);
             }
             // IntegerElement
             {
-                JSONObject definition = new JSONObject();
+                JSONObject schema = new JSONObject();
                 JSONObject properties = new JSONObject();
                 // @index
                 {
@@ -993,28 +1087,28 @@ public class Swagger {
                     property.put("format", "int32");                     
                     properties.put(ATTRIBUTE_VALUE_PROPERTY, property);                         
                 }
-                definition.put("properties", properties);
-                definitions.put("IntegerElement", definition);
+                schema.put("properties", properties);
+                schemas.put("IntegerElement", schema);
             }
             // IntegerList
             {
-                JSONObject definition = new JSONObject();
+                JSONObject schema = new JSONObject();
                 JSONObject properties = new JSONObject();
                 // _item
                 {
                     JSONObject property = new JSONObject();
                     JSONObject items = new JSONObject();
                     property.put("type", "array");
-                    items.put("$ref", "#/definitions/IntegerElement");
+                    items.put("$ref", "#/components/schemas/IntegerElement");
                     property.put("items", items);
                     properties.put("_item", property);
                 }
-                definition.put("properties", properties);
-                definitions.put("Integer" + LIST_SUFFIX, definition);
+                schema.put("properties", properties);
+                schemas.put("Integer" + LIST_SUFFIX, schema);
             }
             // LongElement
             {
-                JSONObject definition = new JSONObject();
+                JSONObject schema = new JSONObject();
                 JSONObject properties = new JSONObject();
                 // @index
                 {
@@ -1030,28 +1124,28 @@ public class Swagger {
                     property.put("format", "int64");
                     properties.put(ATTRIBUTE_VALUE_PROPERTY, property);                         
                 }
-                definition.put("properties", properties);
-                definitions.put("LongElement", definition);
+                schema.put("properties", properties);
+                schemas.put("LongElement", schema);
             }
             // LongList
             {
-                JSONObject definition = new JSONObject();
+                JSONObject schema = new JSONObject();
                 JSONObject properties = new JSONObject();
                 // _item
                 {
                     JSONObject property = new JSONObject();
                     JSONObject items = new JSONObject();
                     property.put("type", "array");
-                    items.put("$ref", "#/definitions/LongElement");
+                    items.put("$ref", "#/components/schemas/LongElement");
                     property.put("items", items);
                     properties.put("_item", property);
                 }
-                definition.put("properties", properties);
-                definitions.put("Long" + LIST_SUFFIX, definition);
+                schema.put("properties", properties);
+                schemas.put("Long" + LIST_SUFFIX, schema);
             }
             // DateElement
             {
-                JSONObject definition = new JSONObject();
+                JSONObject schema = new JSONObject();
                 JSONObject properties = new JSONObject();
                 // @index
                 {
@@ -1067,28 +1161,28 @@ public class Swagger {
                     property.put("format", "date");
                     properties.put(ATTRIBUTE_VALUE_PROPERTY, property);                         
                 }                     
-                definition.put("properties", properties);
-                definitions.put("DateElement", definition);
+                schema.put("properties", properties);
+                schemas.put("DateElement", schema);
             }
             // DateList
             {
-                JSONObject definition = new JSONObject();
+                JSONObject schema = new JSONObject();
                 JSONObject properties = new JSONObject();
                 // _item
                 {
                     JSONObject property = new JSONObject();
                     JSONObject items = new JSONObject();
                     property.put("type", "array");
-                    items.put("$ref", "#/definitions/DateElement");
+                    items.put("$ref", "#/components/schemas/DateElement");
                     property.put("items", items);
                     properties.put("_item", property);
                 }
-                definition.put("properties", properties);
-                definitions.put("Date" + LIST_SUFFIX, definition);
+                schema.put("properties", properties);
+                schemas.put("Date" + LIST_SUFFIX, schema);
             }
             // DateTimeElement
             {
-                JSONObject definition = new JSONObject();
+                JSONObject schema = new JSONObject();
                 JSONObject properties = new JSONObject();
                 // @index
                 {
@@ -1104,28 +1198,28 @@ public class Swagger {
                     property.put("format", "date-time");
                     properties.put(ATTRIBUTE_VALUE_PROPERTY, property);                         
                 }                     
-                definition.put("properties", properties);
-                definitions.put("DateTimeElement", definition);
+                schema.put("properties", properties);
+                schemas.put("DateTimeElement", schema);
             }
             // DateTimeList
             {
-                JSONObject definition = new JSONObject();
+                JSONObject schema = new JSONObject();
                 JSONObject properties = new JSONObject();
                 // _item
                 {
                     JSONObject property = new JSONObject();
                     JSONObject items = new JSONObject();
                     property.put("type", "array");
-                    items.put("$ref", "#/definitions/DateTimeElement");
+                    items.put("$ref", "#/components/schemas/DateTimeElement");
                     property.put("items", items);
                     properties.put("_item", property);
                 }
-                definition.put("properties", properties);
-                definitions.put("DateTime" + LIST_SUFFIX, definition);
+                schema.put("properties", properties);
+                schemas.put("DateTime" + LIST_SUFFIX, schema);
             }                 
             // BooleanElement
             {
-                JSONObject definition = new JSONObject();
+                JSONObject schema = new JSONObject();
                 JSONObject properties = new JSONObject();
                 // @index
                 {
@@ -1140,28 +1234,28 @@ public class Swagger {
                     property.put("type", "boolean");
                     properties.put(ATTRIBUTE_VALUE_PROPERTY, property);                         
                 }                     
-                definition.put("properties", properties);
-                definitions.put("BooleanElement", definition);
+                schema.put("properties", properties);
+                schemas.put("BooleanElement", schema);
             }
             // BooleanList
             {
-                JSONObject definition = new JSONObject();
+                JSONObject schema = new JSONObject();
                 JSONObject properties = new JSONObject();
                 // _item
                 {
                     JSONObject property = new JSONObject();
                     JSONObject items = new JSONObject();
                     property.put("type", "array");
-                    items.put("$ref", "#/definitions/BooleanElement");
+                    items.put("$ref", "#/components/schemas/BooleanElement");
                     property.put("items", items);
                     properties.put("_item", property);
                 }
-                definition.put("properties", properties);
-                definitions.put("Boolean" + LIST_SUFFIX, definition);
+                schema.put("properties", properties);
+                schemas.put("Boolean" + LIST_SUFFIX, schema);
             }                 
             // DecimalElement
             {
-                JSONObject definition = new JSONObject();
+                JSONObject schema = new JSONObject();
                 JSONObject properties = new JSONObject();
                 // @index
                 {
@@ -1176,31 +1270,31 @@ public class Swagger {
                     property.put("type", "number");
                     properties.put(ATTRIBUTE_VALUE_PROPERTY, property);                         
                 }
-                definition.put("properties", properties);
-                definitions.put("DecimalElement", definition);
+                schema.put("properties", properties);
+                schemas.put("DecimalElement", schema);
             }
             // DecimalList
             {
-                JSONObject definition = new JSONObject();
+                JSONObject schema = new JSONObject();
                 JSONObject properties = new JSONObject();
                 // _item
                 {
                     JSONObject property = new JSONObject();
                     JSONObject items = new JSONObject();
                     property.put("type", "array");
-                    items.put("$ref", "#/definitions/DecimalElement");
+                    items.put("$ref", "#/components/schemas/DecimalElement");
                     property.put("items", items);
                     properties.put("_item", property);
                 }
-                definition.put("properties", properties);
-                definitions.put("Decimal" + LIST_SUFFIX, definition);
+                schema.put("properties", properties);
+                schemas.put("Decimal" + LIST_SUFFIX, schema);
             }                 
             for(ModelElement_1_0 typeDef: collectedTypeDefs.values()) {
-                if(!definitions.has(typeDef.getQualifiedName())) {
+                if(!schemas.has(typeDef.getQualifiedName())) {
                     this.putAllDefinitions(
                         typeDef,
                         true, // withDiscriminator
-                        definitions,
+                        schemas,
                         Collections.<String>emptySet()
                         );
                 }
@@ -1242,13 +1336,13 @@ public class Swagger {
                             typeDef,
                             Multiplicity.SINGLE_VALUE,
                             false, 
-                            "#/definitions/"
+                            "#/components/schemas/"
                         );
                         property.put("items", items);
                         properties.put("objects", property);
                     }
                     type.put("properties", properties);
-                    definitions.put(
+                    schemas.put(
                         typeDef.getQualifiedName() + LIST_SUFFIX, 
                         type
                     );
@@ -1260,18 +1354,18 @@ public class Swagger {
                     // qualifiedTypeName
                     {
                         JSONObject property = new JSONObject();
-                        property.put("$ref", "#/definitions/" + typeDef.getQualifiedName());
+                        property.put("$ref", "#/components/schemas/" + typeDef.getQualifiedName());
                         properties.put(typeDef.getQualifiedName().replace(":", "."), property);
                     }
                     type.put("properties", properties);
-                    definitions.put(
+                    schemas.put(
                         typeDef.getQualifiedName() + TYPE_SUFFIX, 
                         type
                     );
                 }
             }
             api.put("paths", paths);
-            api.put("definitions", definitions);
+            api.put("components", components);
             api.put("info", info);
             api.write(out);
         } catch(Exception e) {
@@ -1282,7 +1376,6 @@ public class Swagger {
     //-----------------------------------------------------------------------
     // Members
     //-----------------------------------------------------------------------
-    private static final boolean SWAGGER_SUPPORTS_POLYMORPHISM = false;
     private static final String TYPE_PROPERTY = "@type";
     private static final String HREF_PROPERTY = "@href";
     private static final String HAS_MORE_PROPERTY = "@hasMore";

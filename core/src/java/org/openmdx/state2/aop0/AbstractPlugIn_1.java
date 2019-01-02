@@ -52,13 +52,13 @@ import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
 
-import javax.annotation.Nullable;
 import javax.jdo.JDOUserCallbackException;
 import javax.jdo.listener.DeleteLifecycleListener;
 import javax.jdo.listener.InstanceLifecycleEvent;
 import javax.jdo.listener.StoreLifecycleListener;
 
 import org.openmdx.base.accessor.cci.DataObject_1_0;
+import org.openmdx.base.accessor.cci.SystemAttributes;
 import org.openmdx.base.accessor.rest.DataObject_1;
 import org.openmdx.base.accessor.rest.UnitOfWork_1;
 import org.openmdx.base.accessor.spi.ExceptionHelper;
@@ -72,6 +72,7 @@ import org.openmdx.base.naming.PathComponent;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.jdo.ReducedJDOHelper;
 import org.openmdx.state2.spi.Propagation;
+import org.openmdx.state2.spi.TechnicalAttributes;
 
 /**
  * Abstract org::openmdx::state2 Plug-In
@@ -130,7 +131,7 @@ public abstract class AbstractPlugIn_1 implements PlugIn_1_0, StoreLifecycleList
                     BasicException.Code.NOT_SUPPORTED,
                     "setCore() must no longer be used to set the validTimeUnique flag",
                     ExceptionHelper.newObjectIdParameter("target", target),
-                    ExceptionHelper.newObjectIdParameter("core", core)
+                    ExceptionHelper.newObjectIdParameter(SystemAttributes.CORE, core)
                 );
             } else if(model.isInstanceof(core, "org:openmdx:state2:StateCapable")) {
                 core.getAspect("org:openmdx:state2:BasicState").values().add(target);
@@ -140,7 +141,7 @@ public abstract class AbstractPlugIn_1 implements PlugIn_1_0, StoreLifecycleList
                     BasicException.Code.BAD_PARAMETER,
                     "A BasicState's core object must be StateCapable",
                     ExceptionHelper.newObjectIdParameter("target", target),
-                    ExceptionHelper.newObjectIdParameter("core", core),
+                    ExceptionHelper.newObjectIdParameter(SystemAttributes.CORE, core),
                     new BasicException.Parameter("expected","org:openmdx:state2:StateCapable"),   
                     new BasicException.Parameter("actual",core == null ? null : core.objGetClass())
                 );
@@ -204,7 +205,7 @@ public abstract class AbstractPlugIn_1 implements PlugIn_1_0, StoreLifecycleList
         final DataObject_1 object,
         final String qualifier
     ) throws ServiceException {
-    	final DataObject_1_0 core = (DataObject_1_0) object.objGetValue("core");
+    	final DataObject_1_0 core = (DataObject_1_0) object.objGetValue(SystemAttributes.CORE);
         if(qualifier == null) { 
             throw new ServiceException(
                 BasicException.Code.DEFAULT_DOMAIN,
@@ -212,7 +213,7 @@ public abstract class AbstractPlugIn_1 implements PlugIn_1_0, StoreLifecycleList
                 "A state is added to the container through its core reference only",
                 ExceptionHelper.newObjectIdParameter("id", this),
                 new BasicException.Parameter("qualifier", qualifier),
-                ExceptionHelper.newObjectIdParameter("core", core)
+                ExceptionHelper.newObjectIdParameter(SystemAttributes.CORE, core)
             );
         } else if(core == null) {
             // We are processing a proxy's request
@@ -227,9 +228,9 @@ public abstract class AbstractPlugIn_1 implements PlugIn_1_0, StoreLifecycleList
                     ExceptionHelper.newObjectIdParameter("id", this),
                     new BasicException.Parameter("qualifier",qualifier)
                 );
-                final Integer id = successor((Integer) core.objGetValue("stateVersion"));
+                final Integer id = successor((Integer) core.objGetValue(TechnicalAttributes.STATE_VERSION));
                 core.objSetValue(
-                    "stateVersion",
+                    TechnicalAttributes.STATE_VERSION,
                     id
                 );
                 return newBasicStateQualifier(
@@ -313,7 +314,7 @@ public abstract class AbstractPlugIn_1 implements PlugIn_1_0, StoreLifecycleList
 	 * @see org.openmdx.base.aop0.PlugIn_1_0#isAspect(org.openmdx.base.accessor.rest.DataObject_1)
 	 */
     @Override
-	@Nullable public Boolean isAspect(
+	public Boolean isAspect(
 		DataObject_1 object
 	) throws ServiceException {
 		return null;

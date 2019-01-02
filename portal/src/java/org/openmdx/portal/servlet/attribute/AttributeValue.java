@@ -111,7 +111,7 @@ public abstract class AttributeValue implements Serializable {
         }
         if(valueClass != null) {
             try {
-                Constructor valueConstructor = valueClass.getConstructor(
+                Constructor<?> valueConstructor = valueClass.getConstructor(
                     new Class[]{
                         Object.class, 
                         FieldDef.class, 
@@ -335,7 +335,7 @@ public abstract class AttributeValue implements Serializable {
                 return null;
             }
         } else {
-            Object value = ((Map)this.object).get(feature);
+            Object value = ((Map<?,?>)this.object).get(feature);
             return value == null ? this.getDefaultValue() : value;
         }
     }
@@ -362,16 +362,16 @@ public abstract class AttributeValue implements Serializable {
      * @return
      */
     @SuppressWarnings("unchecked")
-    protected Collection getValues(
+    protected Collection<?> getValues(
         boolean shortFormat
     ) {
-        Collection values = null;
+        Collection<Object> values = null;
         Object value = this.getValue(shortFormat);
         if(value instanceof Collection) {
-            values = (Collection)value;
+            values = (Collection<Object>)value;
         }
         else {
-            values = new ArrayList();
+            values = new ArrayList<>();
             if((value != null) && (value.toString().trim().length() > 0)) {
                 values.add(value);
             }
@@ -416,8 +416,8 @@ public abstract class AttributeValue implements Serializable {
             shortFormat
         );
         if(value instanceof Collection) {
-            if(((Collection)value).size() > 0) {
-                Object v = ((Collection)value).iterator().next();
+            if(((Collection<?>)value).size() > 0) {
+                Object v = ((Collection<?>)value).iterator().next();
                 return v == null ? null : v.toString();
             } else {
                 return null;
@@ -447,7 +447,7 @@ public abstract class AttributeValue implements Serializable {
         StringBuilder stringifiedValue = new StringBuilder();
         if(value instanceof Collection) {
             for(
-                Iterator i = ((Collection)value).iterator(); 
+                Iterator<?> i = ((Collection<?>)value).iterator(); 
                 i.hasNext(); 
             ) {
                 Object v = null;

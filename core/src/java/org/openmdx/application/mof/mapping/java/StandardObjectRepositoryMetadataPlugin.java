@@ -1,14 +1,13 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
+ * Project:     openMDX, http://www.openmdx.org/
  * Description: StandardObjectRelationalMapping 
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
  * ====================================================================
  *
- * This software is published under the BSD license
- * as listed below.
+ * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2007, OMEX AG, Switzerland
+ * Copyright (c) 2007-2018, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -46,68 +45,53 @@
  * This product includes software developed by other organizations as
  * listed in the NOTICE file.
  */
-
 package org.openmdx.application.mof.mapping.java;
 
 import java.util.List;
 import java.util.Locale;
 
 import org.omg.mof.spi.Identifier;
+import org.openmdx.application.mof.mapping.spi.StandardDigest;
 
 
 /**
- * StandardObjectRelationalMapping
- *
+ * Standard Object Relational Mapping
  */
 public class StandardObjectRepositoryMetadataPlugin
     implements ObjectRepositoryMetadataPlugin
 {
 
-    /* (non-Javadoc)
-     * @see org.openmdx.model1.mapping.spi.ObjectRepositoryMetadataPlugin#getMappingName()
-     */
+    @Override
     public String getMappingName() {
         return "standard";
     }
 
-    /* (non-Javadoc)
-     * @see org.openmdx.model1.mapping.spi.ObjectRepositoryMetadataPlugin#getDesicriminatorColumn(java.util.List)
-     */
+    @Override
     public String getDiscriminatorColumnName(List<String> qualifiedClassName) {
         return "DTYPE";
     }
 
-    /* (non-Javadoc)
-     * @see org.openmdx.model1.mapping.spi.ObjectRepositoryMetadataPlugin#getIndexColumnName(java.util.List)
-     */
+    @Override
     public String getIndexColumnName(List<String> qualifiedClassName) {
         return "IDX";
     }
 
-    /* (non-Javadoc)
-     * @see org.openmdx.model1.mapping.spi.ObjectRepositoryMetadataPlugin#getIdentityColumnName(java.util.List)
-     */
+    @Override
     public String getIdentityColumnName(List<String> qualifiedClassName) {
         return qualifiedClassName.get(qualifiedClassName.size() - 1).toUpperCase(Locale.US) + "_ID";
     }
 
-    /* (non-Javadoc)
-     * @see org.openmdx.model1.mapping.spi.ObjectRepositoryMetadataPlugin#getIdentityColumnName(java.util.List, java.lang.String)
-     */
+    @Override
     public String getFieldColumnName(List<String> qualifiedClassName, String fieldName) {
         return Identifier.CONSTANT.toIdentifier(fieldName);
     }
 
-    /* (non-Javadoc)
-     * @see org.openmdx.model1.mapping.spi.ObjectRepositoryMetadataPlugin#getSizeColumnName(java.lang.String)
-     */
+    @Override
     public String getSizeColumnName(String fieldColumnName) {
         return fieldColumnName + "_";
     }
 
-    /* (non-Javadoc)
-     * @see org.openmdx.model1.mapping.plugin.ObjectRepositoryMetadataPlugin#getEmbeddedColumnName(java.lang.String, int)
-     */
+    @Override
     public String getEmbeddedColumnName(
         String fieldColumnName, 
         int index
@@ -115,9 +99,7 @@ public class StandardObjectRepositoryMetadataPlugin
         return fieldColumnName + "_" + index;
     }
 
-    /* (non-Javadoc)
-     * @see org.openmdx.model1.mapping.spi.ObjectRepositoryMetadataPlugin#getDesicriminatorValue(java.lang.String, java.util.List)
-     */
+    @Override
     public String getDiscriminatorValue(String packageDigest, List<String> qualifiedClassName) {
         StringBuilder className = new StringBuilder();
         for(String element: qualifiedClassName) {
@@ -126,120 +108,24 @@ public class StandardObjectRepositoryMetadataPlugin
         return className.toString();
     }
 
-    /* (non-Javadoc)
-     * @see org.openmdx.model1.mapping.spi.ObjectRepositoryMetadataPlugin#getTableName(java.lang.String, java.util.List)
-     */
+    @Override
     public String getTableName(
         String packageDigest, 
         List<String> qualifiedClassName
     ) {
-        return (
-            packageDigest == null ? getTablePrefix(
-                qualifiedClassName, 
-                DIGEST_PATTERN[
-                    qualifiedClassName.size() - 1 > DIGEST_PATTERN.length ? 
-                        DIGEST_PATTERN.length - 1 : 
-                        qualifiedClassName.size() - 2
-                ]
-            ) : new StringBuilder(
-                packageDigest
-            )
-        ).append(
-            '_'
-        ).append(
-            qualifiedClassName.get(qualifiedClassName.size() - 1)
-        ).toString(
-        ).toUpperCase(
-            Locale.US
-        );
+        return packageDigest == null ? 
+            StandardDigest.toObjectNameWithCalculatedPackageDigest(qualifiedClassName) :
+            StandardDigest.toObjectNameWithGivenPackageDigest(packageDigest, qualifiedClassName);
     }
 
-    private StringBuilder getTablePrefix(
-        List<String> components,
-        int[] size
-    ){
-        StringBuilder name = new StringBuilder();
-        char version = '0';
-        for(
-            int i = 0;
-            i < size.length;
-            i++
-        ) {
-            int l = components.get(i).length();
-            char v = getVersion(components.get(i));
-            if(v > 0) {
-                version = v;
-                l--;
-            }
-            if (i + 1 == size.length) {
-                name.append(version);
-            }
-            switch(size[i]) {
-                case 1:  
-                    name.append(
-                        components.get(i).charAt(0)
-                    );
-                    break;
-                case 2: 
-                    name.append(
-                        components.get(i).charAt(0)
-                    ).append(
-                        components.get(i).charAt(l > 4 ? 4 : l - 1)
-                    );
-                    break;
-                case 4:
-                    if(l >= 4) {
-                        name.append(
-                            components.get(i).substring(0, 2)
-                        ).append(
-                            components.get(i).substring(l - 2, l)
-                        );
-                    } else {
-                        name.append(components.get(i).substring(0, l));
-                    }
-                    break;
-                default: {
-                    name.append(
-                        components.get(i).substring(0, l > size[i] ? size[i] : l)
-                    );
-                }
-            }
-        }
-        return name;   
-    }
-
-    private char getVersion(
-        String component
-    ){
-        char c = component.charAt(component.length() - 1);
-        return c >= '0' && c <= '9' ? c : 0; 
-    }
-    
-    /* (non-Javadoc)
-     * @see org.openmdx.model1.mapping.spi.ObjectRepositoryMetadataPlugin#getSliceTableName(java.lang.String)
-     */
+    @Override
     public String getSliceTableName(String tableName) {
         return tableName + "_";
     }
 
-    /* (non-Javadoc)
-     * @see org.openmdx.model1.mapping.spi.ObjectRepositoryMetadataPlugin#getDefaultDecimalScale(java.util.List, java.lang.String)
-     */
+    @Override
     public String getDecimalScale(List<String> qualifiedClassName, String fieldName) {
         return "9";
     }
-
-    /**
-     * Digest creation rules
-     */
-    private static final int[][] DIGEST_PATTERN = new int[][] {
-        {7},
-        {2, 5},
-        {1, 2, 4},
-        {1, 2, 2, 2},
-        {1, 1, 1, 2, 2},
-        {1, 1, 1, 1, 1, 2},
-        {1, 1, 1, 1, 1, 1, 1},
-    };
     
 }

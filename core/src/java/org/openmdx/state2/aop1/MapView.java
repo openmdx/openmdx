@@ -66,20 +66,20 @@ import org.openmdx.kernel.exception.Throwables;
  * SortedMapView
  *
  */
-public class MapView implements SortedMap<Integer,Object> {
+public class MapView implements SortedMap<Integer, Object> {
 
     /**
-     * Constructor 
+     * Constructor
      *
      * @param involvedMembers
      */
-    private MapView (
-        InvolvedMembers<DataObject_1_0,SortedMap<Integer,Object>> involvedMembers
-    ){
+    private MapView(
+        InvolvedMembers<DataObject_1_0, SortedMap<Integer, Object>> involvedMembers
+    ) {
         this.members = involvedMembers;
         this.indices = SetView.newKeySet(involvedMembers, involvedMembers.feature);
     }
-    
+
     /**
      * Sorted Map View Factory Method
      * 
@@ -88,45 +88,48 @@ public class MapView implements SortedMap<Integer,Object> {
      * 
      * @return a new sorted map view
      */
-    static SortedMap<Integer,Object> newObjectMap(
+    static SortedMap<Integer, Object> newObjectMap(
         final Involved<DataObject_1_0> involvedStates,
         final String feature
-    ){
+    ) {
         return new MapView(
-            new InvolvedMembers<DataObject_1_0,SortedMap<Integer,Object>>(
+            new InvolvedMembers<DataObject_1_0, SortedMap<Integer, Object>>(
                 involvedStates,
                 feature
             ) {
 
                 @Override
-                protected SortedMap<Integer,Object> getMember(
+                protected SortedMap<Integer, Object> getMember(
                     DataObject_1_0 state
-                ) throws ServiceException {
+                )
+                    throws ServiceException {
                     return state.objGetSparseArray(feature);
                 }
-                
+
             }
         );
     }
-    
-    private final InvolvedMembers<DataObject_1_0,SortedMap<Integer,Object>> members;
-    
+
+    private final InvolvedMembers<DataObject_1_0, SortedMap<Integer, Object>> members;
+
     /**
      * The key-set is eagerly instantiated
      */
     final Set<Integer> indices;
-    
+
     /**
      * The entry-set is lazily instantiated
      */
     private Set<Map.Entry<Integer, Object>> entries;
-    
+
     /**
-     * The values are lazily 
+     * The values are lazily
      */
     private Collection<Object> values;
-    
-    /* (non-Javadoc)
+
+    /*
+     * (non-Javadoc)
+     * 
      * @see java.util.SortedMap#comparator()
      */
     public Comparator<? super Integer> comparator() {
@@ -141,37 +144,35 @@ public class MapView implements SortedMap<Integer,Object> {
         return this.members.getIdParameter();
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see java.util.SortedMap#firstKey()
      */
     public Integer firstKey() {
         try {
             UniqueValue<Integer> reply = new UniqueValue<Integer>();
-            for(SortedMap<Integer,Object> delegate : this.members.getInvolved(AccessMode.FOR_QUERY)) {
+            for (SortedMap<Integer, Object> delegate : this.members.getInvolved(AccessMode.FOR_QUERY)) {
                 reply.set(delegate.firstKey());
             }
             return reply.get();
         } catch (ServiceException exception) {
-            throw Throwables.initCause(
-                new IllegalStateException(
-                    "The underlying states inappropriate for the unique determination of the given property"
-                ),
-                exception,
-                BasicException.Code.DEFAULT_DOMAIN,
-                BasicException.Code.ILLEGAL_STATE,
-                getIdParameter()
+            throw toIllegalStateException(
+                exception, "The underlying states are inappropriate for the unique determination of the given property"
             );
         }
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see java.util.SortedMap#headMap(java.lang.Object)
      */
     public SortedMap<Integer, Object> headMap(
         final Integer toKey
     ) {
         return new MapView(
-            new InvolvedMembers<DataObject_1_0,SortedMap<Integer, Object>>(
+            new InvolvedMembers<DataObject_1_0, SortedMap<Integer, Object>>(
                 members.involvedStates,
                 members.feature
             ) {
@@ -179,47 +180,46 @@ public class MapView implements SortedMap<Integer,Object> {
                 @Override
                 protected SortedMap<Integer, Object> getMember(
                     DataObject_1_0 state
-                ) throws ServiceException {
+                )
+                    throws ServiceException {
                     return state.objGetSparseArray(feature).headMap(toKey);
                 }
-                
+
             }
-            
+
         );
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see java.util.SortedMap#lastKey()
      */
     public Integer lastKey() {
         try {
             UniqueValue<Integer> reply = new UniqueValue<Integer>();
-            for(SortedMap<Integer,Object> delegate : this.members.getInvolved(AccessMode.FOR_QUERY)) {
+            for (SortedMap<Integer, Object> delegate : this.members.getInvolved(AccessMode.FOR_QUERY)) {
                 reply.set(delegate.lastKey());
             }
             return reply.get();
         } catch (ServiceException exception) {
-            throw Throwables.initCause(
-                new IllegalStateException(
-                    "The underlying states inappropriate for the unique determination of the given property"
-                ),
-                exception,
-                BasicException.Code.DEFAULT_DOMAIN,
-                BasicException.Code.ILLEGAL_STATE,
-                getIdParameter()
+            throw toIllegalStateException(
+                exception, "The underlying states are inappropriate for the unique determination of the given property"
             );
         }
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see java.util.SortedMap#subMap(java.lang.Object, java.lang.Object)
      */
     public SortedMap<Integer, Object> subMap(
-        final Integer fromKey, 
+        final Integer fromKey,
         final Integer toKey
     ) {
         return new MapView(
-            new InvolvedMembers<DataObject_1_0,SortedMap<Integer, Object>>(
+            new InvolvedMembers<DataObject_1_0, SortedMap<Integer, Object>>(
                 members.involvedStates,
                 members.feature
             ) {
@@ -227,23 +227,26 @@ public class MapView implements SortedMap<Integer,Object> {
                 @Override
                 protected SortedMap<Integer, Object> getMember(
                     DataObject_1_0 state
-                ) throws ServiceException {
+                )
+                    throws ServiceException {
                     return state.objGetSparseArray(feature).subMap(fromKey, toKey);
                 }
-                
+
             }
-            
+
         );
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see java.util.SortedMap#tailMap(java.lang.Object)
      */
     public SortedMap<Integer, Object> tailMap(
         final Integer fromKey
     ) {
         return new MapView(
-            new InvolvedMembers<DataObject_1_0,SortedMap<Integer, Object>>(
+            new InvolvedMembers<DataObject_1_0, SortedMap<Integer, Object>>(
                 members.involvedStates,
                 members.feature
             ) {
@@ -251,84 +254,81 @@ public class MapView implements SortedMap<Integer,Object> {
                 @Override
                 protected SortedMap<Integer, Object> getMember(
                     DataObject_1_0 state
-                ) throws ServiceException {
+                )
+                    throws ServiceException {
                     return state.objGetSparseArray(feature).tailMap(fromKey);
                 }
-                
+
             }
-            
+
         );
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see java.util.Map#clear()
      */
     public void clear() {
-        for(SortedMap<Integer,Object> delegate : this.members.getInvolved(AccessMode.FOR_QUERY)) {
+        for (SortedMap<Integer, Object> delegate : this.members.getInvolved(AccessMode.FOR_QUERY)) {
             delegate.clear();
         }
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see java.util.Map#containsKey(java.lang.Object)
      */
     public boolean containsKey(Object key) {
         try {
             UniqueValue<Boolean> reply = new UniqueValue<Boolean>();
-            for(SortedMap<Integer,Object> delegate : this.members.getInvolved(AccessMode.FOR_QUERY)) {
+            for (SortedMap<Integer, Object> delegate : this.members.getInvolved(AccessMode.FOR_QUERY)) {
                 reply.set(Boolean.valueOf(delegate.containsKey(key)));
             }
             return reply.get().booleanValue();
         } catch (ServiceException exception) {
-            throw Throwables.initCause(
-                new IllegalStateException(
-                    "The underlying states inappropriate for the unique determination of the given property"
-                ),
-                exception,
-                BasicException.Code.DEFAULT_DOMAIN,
-                BasicException.Code.ILLEGAL_STATE,
-                getIdParameter()
+            throw toIllegalStateException(
+                exception, "The underlying states are inappropriate for the unique determination of the given property"
             );
         }
     }
 
-    /* (non-Javadoc) 
+    /*
+     * (non-Javadoc)
+     * 
      * @see java.util.Map#containsValue(java.lang.Object)
      */
     public boolean containsValue(Object value) {
         try {
             UniqueValue<Boolean> reply = new UniqueValue<Boolean>();
-            for(SortedMap<Integer,Object> delegate : this.members.getInvolved(AccessMode.FOR_QUERY)) {
+            for (SortedMap<Integer, Object> delegate : this.members.getInvolved(AccessMode.FOR_QUERY)) {
                 reply.set(Boolean.valueOf(delegate.containsValue(value)));
             }
             return reply.get().booleanValue();
         } catch (ServiceException exception) {
-            throw Throwables.initCause(
-                new IllegalStateException(
-                    "The underlying states inappropriate for the unique determination of the given property"
-                ),
-                exception,
-                BasicException.Code.DEFAULT_DOMAIN,
-                BasicException.Code.ILLEGAL_STATE,
-                getIdParameter()
+            throw toIllegalStateException(
+                exception, "The underlying states are inappropriate for the unique determination of the given property"
             );
         }
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see java.util.Map#entrySet()
      */
     public Set<Map.Entry<Integer, Object>> entrySet() {
-        return this.entries == null ? this.entries = new AbstractSet<Map.Entry<Integer,Object>>(){
+        return this.entries == null ? this.entries = new AbstractSet<Map.Entry<Integer, Object>>() {
 
             @Override
             public Iterator<java.util.Map.Entry<Integer, Object>> iterator() {
-                return new Iterator<java.util.Map.Entry<Integer, Object>>(){
+                return new Iterator<java.util.Map.Entry<Integer, Object>>() {
 
                     private Iterator<Integer> keys = MapView.this.indices.iterator();
-                    
+
                     private Integer current = null;
-                    
+
                     public boolean hasNext() {
                         return keys.hasNext();
                     }
@@ -336,11 +336,11 @@ public class MapView implements SortedMap<Integer,Object> {
                     public java.util.Map.Entry<Integer, Object> next() {
                         final Integer key = this.current = this.keys.next();
                         final Object value = MapView.this.get(key);
-                        return new Map.Entry<Integer, Object>(){
+                        return new Map.Entry<Integer, Object>() {
 
                             public Integer getKey() {
                                 return key;
-                               
+
                             }
 
                             public Object getValue() {
@@ -354,14 +354,14 @@ public class MapView implements SortedMap<Integer,Object> {
                     }
 
                     public void remove() {
-                        if(this.current == null) {
-                            throw new IllegalStateException("No current element");                            
+                        if (this.current == null) {
+                            throw new IllegalStateException("No current element");
                         } else {
                             MapView.this.remove(this.current);
                             this.current = null;
                         }
                     }
-                    
+
                 };
             }
 
@@ -370,138 +370,141 @@ public class MapView implements SortedMap<Integer,Object> {
                 return MapView.this.size();
             }
 
-            /* (non-Javadoc)
+            /*
+             * (non-Javadoc)
+             * 
              * @see java.util.AbstractCollection#isEmpty()
              */
             @Override
             public boolean isEmpty() {
                 return MapView.this.isEmpty();
             }
-            
-        }  : this.entries;
+
+        } : this.entries;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see java.util.Map#get(java.lang.Object)
      */
     public Object get(Object key) {
         try {
             UniqueValue<Object> reply = new UniqueValue<Object>();
-            for(SortedMap<Integer,Object> delegate : this.members.getInvolved(AccessMode.FOR_QUERY)) {
+            for (SortedMap<Integer, Object> delegate : this.members.getInvolved(AccessMode.FOR_QUERY)) {
                 reply.set(delegate.get(key));
             }
             return reply.get();
         } catch (ServiceException exception) {
-            throw Throwables.initCause(
-                new IllegalStateException(
-                    "The underlying states inappropriate for the unique determination of the given value"
-                ),
-                exception,
-                BasicException.Code.DEFAULT_DOMAIN,
-                BasicException.Code.ILLEGAL_STATE,
-                getIdParameter()
+            throw toIllegalStateException(
+                exception, "The underlying states are inappropriate for the unique determination of the given value"
             );
         }
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see java.util.Map#isEmpty()
      */
     public boolean isEmpty() {
         try {
             UniqueValue<Boolean> reply = new UniqueValue<Boolean>();
-            for(SortedMap<Integer,Object> delegate : this.members.getInvolved(AccessMode.FOR_QUERY)) {
+            for (SortedMap<Integer, Object> delegate : this.members.getInvolved(AccessMode.FOR_QUERY)) {
                 reply.set(Boolean.valueOf(delegate.isEmpty()));
             }
             return reply.get().booleanValue();
         } catch (ServiceException exception) {
-            throw Throwables.initCause(
-                new IllegalStateException(
-                    "The underlying states inappropriate for the unique determination of the given property"
-                ),
-                exception,
-                BasicException.Code.DEFAULT_DOMAIN,
-                BasicException.Code.ILLEGAL_STATE,
-                getIdParameter()
+            throw toIllegalStateException(
+                exception, "The underlying states are inappropriate for the unique determination of the given property"
             );
         }
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see java.util.Map#keySet()
      */
     public Set<Integer> keySet() {
         return this.indices;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see java.util.Map#put(java.lang.Object, java.lang.Object)
      */
-    public Object put(Integer key, Object value) {
+    public Object put(
+        Integer key,
+        Object value
+    ) {
         Object reply = get(key);
-        for(SortedMap<Integer,Object> delegate : this.members.getInvolved(AccessMode.FOR_QUERY)) {
+        for (SortedMap<Integer, Object> delegate : this.members.getInvolved(AccessMode.FOR_QUERY)) {
             delegate.put(key, value);
         }
         return reply;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see java.util.Map#putAll(java.util.Map)
      */
     public void putAll(Map<? extends Integer, ? extends Object> t) {
-        for(SortedMap<Integer,Object> delegate : this.members.getInvolved(AccessMode.FOR_QUERY)) {
+        for (SortedMap<Integer, Object> delegate : this.members.getInvolved(AccessMode.FOR_QUERY)) {
             delegate.putAll(t);
         }
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see java.util.Map#remove(java.lang.Object)
      */
     public Object remove(Object key) {
         Object reply = get(key);
-        for(SortedMap<Integer,Object> delegate : this.members.getInvolved(AccessMode.FOR_QUERY)) {
+        for (SortedMap<Integer, Object> delegate : this.members.getInvolved(AccessMode.FOR_QUERY)) {
             delegate.remove(key);
         }
         return reply;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see java.util.Map#size()
      */
     public int size() {
         try {
             UniqueValue<Integer> reply = new UniqueValue<Integer>();
-            for(SortedMap<Integer,Object> delegate : this.members.getInvolved(AccessMode.FOR_QUERY)) {
+            for (SortedMap<Integer, Object> delegate : this.members.getInvolved(AccessMode.FOR_QUERY)) {
                 reply.set(Integer.valueOf(delegate.size()));
             }
             return reply.get().intValue();
         } catch (ServiceException exception) {
-            throw Throwables.initCause(
-                new IllegalStateException(
-                    "The underlying states inappropriate for the unique determination of the given property"
-                ),
-                exception,
-                BasicException.Code.DEFAULT_DOMAIN,
-                BasicException.Code.ILLEGAL_STATE,
-                getIdParameter()
+            throw toIllegalStateException(
+                exception, "The underlying states are inappropriate for the unique determination of the given property"
             );
         }
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see java.util.Map#values()
      */
     public Collection<Object> values() {
-        return this.values == null ? this.values = new AbstractCollection<Object>(){
+        return this.values == null ? this.values = new AbstractCollection<Object>() {
 
             @Override
             public Iterator<Object> iterator() {
-                return new Iterator<Object>(){
+                return new Iterator<Object>() {
 
                     private Iterator<Integer> keys = MapView.this.indices.iterator();
-                    
+
                     private Integer current = null;
-                    
+
                     public boolean hasNext() {
                         return keys.hasNext();
                     }
@@ -513,14 +516,14 @@ public class MapView implements SortedMap<Integer,Object> {
                     }
 
                     public void remove() {
-                        if(this.current == null) {
-                            throw new IllegalStateException("No current element");                            
+                        if (this.current == null) {
+                            throw new IllegalStateException("No current element");
                         } else {
                             MapView.this.remove(this.current);
                             this.current = null;
                         }
                     }
-                    
+
                 };
             }
 
@@ -529,16 +532,33 @@ public class MapView implements SortedMap<Integer,Object> {
                 return MapView.this.size();
             }
 
-            /* (non-Javadoc)
+            /*
+             * (non-Javadoc)
+             * 
              * @see java.util.AbstractCollection#isEmpty()
              */
             @Override
             public boolean isEmpty() {
                 return MapView.this.isEmpty();
             }
-            
+
         } : this.values;
 
+    }
+
+    private IllegalStateException toIllegalStateException(
+        ServiceException exception,
+        final String message
+    ) {
+        return Throwables.initCause(
+            new IllegalStateException(
+                message + ". " + exception.getCause().getDescription()
+            ),
+            exception,
+            BasicException.Code.DEFAULT_DOMAIN,
+            BasicException.Code.ILLEGAL_STATE,
+            getIdParameter()
+        );
     }
 
 }

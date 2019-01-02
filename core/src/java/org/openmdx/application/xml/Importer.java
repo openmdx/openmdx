@@ -65,7 +65,6 @@ import javax.jdo.PersistenceManager;
 import org.openmdx.application.xml.jmi.BasicImportPlugIn;
 import org.openmdx.application.xml.jmi.PersistenceManagerTarget;
 import org.openmdx.application.xml.jmi.StateImportPlugIn;
-import org.openmdx.application.xml.spi.Dataprovider_1Target;
 import org.openmdx.application.xml.spi.Dataprovider_2Target;
 import org.openmdx.application.xml.spi.ImportHelper;
 import org.openmdx.application.xml.spi.ImportMode;
@@ -335,25 +334,9 @@ public class Importer {
      * @param target
      * 
      * @return the corresponding <code>ImportTarget</code>
-     * 
-     * @deprecated will not be supported by the data provider 2 stack 
-     */
-    @Deprecated
-    public static ImportTarget asTarget(
-   		org.openmdx.application.dataprovider.cci.DataproviderRequestProcessor target
-    ){
-        return new Dataprovider_1Target(target);
-    }
-    
-    /**
-     * <code>ImportTarget</code> factory method
-     * 
-     * @param target
-     * 
-     * @return the corresponding <code>ImportTarget</code>
      */
     public static ImportTarget asTarget(
-    		Channel target
+		Channel target
     ){
         return new Dataprovider_2Target(target);
     }

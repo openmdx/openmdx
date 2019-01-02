@@ -168,7 +168,7 @@ class RefObject_1
     // -------------------------------------------------------------------------
 
     /**
-     * Implements <code>Serializable</code>
+     * Implements <code>java.io.Serializable</code>
      */
     private static final long serialVersionUID = -276854474114899063L;
 
@@ -181,6 +181,7 @@ class RefObject_1
     private transient ModelElement_1_0 refClassDef = null;
 
     private static final byte[] EMPTY_LARGE_OBJECT = new byte[] {};
+    private static final Path ROOT_PATH = new Path(new String[] {});
     
     /**
      * @serial
@@ -589,7 +590,7 @@ class RefObject_1
                         (value != null) && 
                         (value.getClass().isArray())
                 ) {
-                    newValue = new ArrayList();
+                    newValue = new ArrayList<>();
                     for (int i = 0; i < Array.getLength(value); i++) {
                         final Object element = 
                             (value instanceof short[]) ?  Short.valueOf(((short[]) value)[i]) : 
@@ -1065,7 +1066,7 @@ class RefObject_1
         } 
         else if (value instanceof SortedMap) {
             ((SortedMap<Integer,Object>) values).put(
-                Integer.valueOf(((Integer) ((SortedMap) values).lastKey()).intValue() + 1),
+                Integer.valueOf(((Integer) ((SortedMap<?,?>) values).lastKey()).intValue() + 1),
                 value
             );
         } 
@@ -1520,7 +1521,7 @@ class RefObject_1
                                     } else if (this.object.getModel().isClassType(type)) {
                                         SysLog.detail("Initialization of object references not supported", featureDef);
                                     } else if (PrimitiveTypes.OBJECT_ID.equals(qualifiedTypeName)) {
-                                        this.setValue(featureDef, new Path(new String[0]));
+                                        this.setValue(featureDef, ROOT_PATH);
                                     } else if(
                                         "org:omg:model1:PrimitiveType".equals(qualifiedTypeName)
                                     ) {

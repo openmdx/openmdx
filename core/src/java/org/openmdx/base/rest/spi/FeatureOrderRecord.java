@@ -48,106 +48,127 @@
 
 package org.openmdx.base.rest.spi;
 
-import org.openmdx.base.query.SortOrder;
+import java.io.IOException;
+import java.io.ObjectInputStream;
 
+import org.openmdx.base.query.SortOrder;
 
 /**
  * Feature Order Record
  */
-public class FeatureOrderRecord 
+public class FeatureOrderRecord
     extends AbstractMappedRecord<org.openmdx.base.rest.cci.FeatureOrderRecord.Member>
-    implements org.openmdx.base.rest.cci.FeatureOrderRecord 
-{
+    implements org.openmdx.base.rest.cci.FeatureOrderRecord {
 
-	/**
-     * Constructor 
+    /**
+     * Constructor
      */
     public FeatureOrderRecord() {
-    	super();
+        super();
     }
 
-	/**
-     * Constructor 
+    /**
+     * Constructor
      */
     public FeatureOrderRecord(
-    	String feature,
-    	SortOrder sortOrder
+        String feature,
+        SortOrder sortOrder
     ) {
         this.feature = feature;
         this.sortOrder = sortOrder;
+        initialize();
     }
-    
+
     /**
-     * Constructor 
+     * Constructor
      *
      * @param that
      */
     protected FeatureOrderRecord(
-    	FeatureOrderRecord that
-    ){
+        FeatureOrderRecord that
+    ) {
         super(that);
+        initialize();
     }
-    
+
     /**
      * Allows to share the member information among the instances
      */
     private static final Members<Member> MEMBERS = Members.newInstance(Member.class);
-    
+
     /**
      * Implements <code>Serializable</code>
      */
-	private static final long serialVersionUID = 529577445898774041L;
+    private static final long serialVersionUID = 529577445898774041L;
 
     /**
      * The name of the feature the order should be applied to
      */
     private String feature;
-    
+
     /**
      * The sort oder
      */
     private SortOrder sortOrder;
-    
 
-    /* (non-Javadoc)
+    /**
+     * The feature's name part
+     */
+    private transient String featureName;
+
+    /**
+     * The feature's pointer part
+     */
+    private transient String featurePointer;
+
+    /*
+     * (non-Javadoc)
+     * 
      * @see org.openmdx.base.resource.spi.AbstractRecord#clone()
      */
     @Override
-    public FeatureOrderRecord clone(
-    ){
+    public FeatureOrderRecord clone() {
         return new FeatureOrderRecord(this);
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see javax.resource.cci.Record#getRecordName()
      */
     @Override
     public String getRecordName() {
         return NAME;
     }
-    
+
     /**
      * Retrieve a value by index
      * 
-     * @param index the index
+     * @param index
+     *            the index
      * @return the value
      */
     @Override
     protected Object get(
         Member index
-    ){
-        switch(index) {
-            case feature: return getFeature();
-            case sortOrder: return jcaValue(getSortOrder());
-            default: return super.get(index);
+    ) {
+        switch (index) {
+            case feature:
+                return getFeature();
+            case sortOrder:
+                return jcaValue(getSortOrder());
+            default:
+                return super.get(index);
         }
     }
 
     /**
-     * Set a value by index 
+     * Set a value by index
      * 
-     * @param index the index
-     * @param value the new value
+     * @param index
+     *            the index
+     * @param value
+     *            the new value
      * 
      * @return the old value
      */
@@ -155,63 +176,123 @@ public class FeatureOrderRecord
     protected void put(
         Member index,
         Object value
-    ){
-        switch(index) {
+    ) {
+        switch (index) {
             case feature:
                 setFeature((String) value);
                 break;
-            case sortOrder: 
-                setSortOrder(SortOrder.valueOf(((Short)value).shortValue()));
+            case sortOrder:
+                setSortOrder(SortOrder.valueOf(((Short) value).shortValue()));
                 break;
             default:
-            	super.put(index, value);
+                super.put(index, value);
         }
     }
 
-	@Override
-	public SortOrder getSortOrder() {
-		return this.sortOrder;
-	}
+    @Override
+    public SortOrder getSortOrder() {
+        return this.sortOrder;
+    }
 
-	protected void setSortOrder(SortOrder sortOrder) {
-		assertMutability();
-		this.sortOrder = sortOrder;
-	}
+    protected void setSortOrder(
+        SortOrder sortOrder
+    ) {
+        assertMutability();
+        this.sortOrder = sortOrder;
+    }
 
-	@Override
-	public String getFeature() {
-		return this.feature;
-	}
+    @Override
+    public String getFeature() {
+        return this.feature;
+    }
 
-	protected void setFeature(String feature) {
-		assertMutability();
-		this.feature = feature;
-	}
+    protected void setFeature(
+        String feature
+    ) {
+        assertMutability();
+        this.feature = feature;
+        initialize();
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * org.openmdx.base.rest.spi.AbstractMappedRecord#getRecordShortDescription(
+     * )
+     */
+    @Override
+    public String getRecordShortDescription() {
+        if (this.feature == null) {
+            return super.getRecordShortDescription();
+        } else {
+            StringBuilder description = new StringBuilder().append(
+                this.sortOrder == null ? ' ' : this.sortOrder.symbol()).append(
+                    this.feature);
+            return description.toString();
+        }
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.openmdx.base.rest.spi.AbstractMappedRecord#members()
+     */
+    @Override
+    protected Members<Member> members() {
+        return MEMBERS;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.openmdx.base.rest.cci.FeatureOrderRecord#hasFeaturePointer()
+     */
+    @Override
+    public boolean hasFeaturePointer() {
+        return this.featurePointer != null;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.openmdx.base.rest.cci.FeatureOrderRecord#featureName()
+     */
+    @Override
+    public String featureName() {
+        return this.featureName;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.openmdx.base.rest.cci.FeatureOrderRecord#featurePointer()
+     */
+    @Override
+    public String featurePointer() {
+        return this.featurePointer;
+    }
+
+    /**
+     * Calculate the derived features
+     */
+    private void initialize(){
+        final int i = this.feature == null ? -1: this.feature.indexOf('/');
+        if (i < 0) {
+            this.featureName = this.feature;
+            this.featurePointer = null;
+        } else {
+            this.featureName = this.feature.substring(0, i);
+            this.featurePointer = this.feature.substring(i);
+        }
+    }
     
-    /* (non-Javadoc)
-	 * @see org.openmdx.base.rest.spi.AbstractMappedRecord#getRecordShortDescription()
-	 */
-	@Override
-	public String getRecordShortDescription() {
-		if(this.feature == null) {
-			return super.getRecordShortDescription();
-		} else {
-			StringBuilder description = new StringBuilder(
-			).append(
-					this.sortOrder == null ? ' ' : this.sortOrder.symbol()
-			).append(
-			    this.feature
-			);
-	        return description.toString();
-		}
-	}
-
-	/* (non-Javadoc)
-	 * @see org.openmdx.base.rest.spi.AbstractMappedRecord#members()
-	 */
-	@Override
-	protected Members<Member> members() {
-		return MEMBERS;
-	}
+    private void readObject(
+        ObjectInputStream inputStream
+    )
+        throws ClassNotFoundException, IOException {
+        inputStream.defaultReadObject();
+        initialize();
+    }
 
 }

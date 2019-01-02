@@ -644,7 +644,6 @@ public class ObjectInspectorServlet extends HttpServlet {
      * @throws ServletException
      * @throws IOException
      */
-    @SuppressWarnings("unchecked")
     private void handleRequest(
         HttpServletRequest req, 
         HttpServletResponse res

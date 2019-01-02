@@ -54,7 +54,7 @@ import java.util.Map;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
-import org.openmdx.application.dataprovider.layer.persistence.jdbc.LayerConfigurationEntries;
+import org.openmdx.base.dataprovider.layer.persistence.jdbc.LayerConfigurationEntries;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.resource.Records;

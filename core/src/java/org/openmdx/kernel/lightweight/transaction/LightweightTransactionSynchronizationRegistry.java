@@ -62,19 +62,6 @@ public final class LightweightTransactionSynchronizationRegistry
 {
 
     /**
-     * Constructor 
-     */
-    private LightweightTransactionSynchronizationRegistry(
-    ) {
-        this.transactionManager = LightweightTransactionManager.getInstance();
-    }
-
-    /**
-     * Keep a reference to avoid repeated synchronized singleton retrieval
-     */
-    private final LightweightTransactionManager transactionManager;
-
-    /**
      * The transaction synchronization registry instance may be shared
      */
     private static volatile TransactionSynchronizationRegistry instance;
@@ -97,11 +84,8 @@ public final class LightweightTransactionSynchronizationRegistry
      * @return the active transaction
      */
     private LightweightTransaction getTransaction(boolean required){
-        LightweightTransaction transaction = this.transactionManager.bindings.get(Thread.currentThread());
-        if (required && transaction == null) throw new IllegalStateException(
-            "No transaction is active"
-        );
-        return transaction;
+        final LightweightTransactionManager transactionManager = LightweightTransactionManager.getInstance();
+        return required ? transactionManager.getTransaction(true) : transactionManager.getTransaction();
     }
     
     /* (non-Javadoc)
@@ -148,7 +132,7 @@ public final class LightweightTransactionSynchronizationRegistry
      * @see javax.transaction.TransactionSynchronizationRegistry#registerInterposedSynchronization(javax.transaction.Synchronization)
      */
     public void registerInterposedSynchronization(Synchronization sync) {
-        getTransaction(true).interposedSynchronization = sync;
+        getTransaction(true).interposedSynchronizations.add(sync);
     }
 
     /* (non-Javadoc)

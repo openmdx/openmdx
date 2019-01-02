@@ -49,6 +49,7 @@ package org.openmdx.application.rest.http.servlet;
 
 import static org.openmdx.base.accessor.rest.spi.ControlObjects_2.isConnectionObjectIdentifier;
 import static org.openmdx.base.accessor.rest.spi.ControlObjects_2.isControlObjectType;
+import static org.openmdx.base.accessor.rest.spi.ControlObjects_2.isSessionIdentifier;
 import static org.openmdx.base.accessor.rest.spi.ControlObjects_2.isTransactionCommitIdentifier;
 import static org.openmdx.base.accessor.rest.spi.ControlObjects_2.isTransactionObjectIdentifier;
 
@@ -255,6 +256,20 @@ public class RestServlet_2 extends HttpServlet {
         return interactionVerb == null || Integer.parseInt(interactionVerb) != InteractionSpec.SYNC_SEND;
     }
 
+    /**
+     * Tells whether null values shall be serialized
+     * 
+     * @param request
+     * 
+     * @return <code>true</code> if null values shall be serialized.
+     */
+    protected boolean isSerializeNulls(
+        HttpServletRequest request
+    ){
+        String serializeNulls = request.getHeader("serialize-nulls");
+        return serializeNulls == null ? false : Boolean.parseBoolean(serializeNulls);
+    }
+
     protected Connection newConnection(
     	String configurationName,
     	CallbackHandler callbackHandler
@@ -406,7 +421,10 @@ public class RestServlet_2 extends HttpServlet {
         }
         response.setStatus(toStatusCode(exceptionStack.getExceptionCode()));
         ServletTarget target = new ServletTarget(request, response);
-        restFormatter.format(target, exceptionStack);
+        restFormatter.format(
+            target,
+            exceptionStack
+        );
         try {
             target.close();
         } catch (IOException ignored) {
@@ -431,7 +449,10 @@ public class RestServlet_2 extends HttpServlet {
         request.getSession().removeAttribute(Connection.class.getName());
         response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         ServletTarget target = new ServletTarget(request, response);
-        restFormatter.format(target, exceptionStack);
+        restFormatter.format(
+            target,
+            exceptionStack
+        );
         try {
             target.close();
         } catch (IOException ignored) {
@@ -679,9 +700,10 @@ public class RestServlet_2 extends HttpServlet {
         HttpServletResponse response
     ) throws ServletException, IOException {
         prolog(request, response);
-        Path xri = this.getXri(request);        
-        // Close connection
-        if(isConnectionObjectIdentifier(xri)) {
+        Path xri = this.getXri(request);
+        // Close connection|session
+        // Closing the session also closes the connection
+        if(isSessionIdentifier(xri) || isConnectionObjectIdentifier(xri)) {
             HttpSession session = request.getSession(true);
             Connection connection = (Connection)session.getAttribute(Connection.class.getName());
             if(connection != null) {
@@ -699,6 +721,13 @@ public class RestServlet_2 extends HttpServlet {
                 Connection.class.getName(),
                 null
             );
+            if(isSessionIdentifier(xri)) {
+                try {
+                    session.invalidate();
+                } catch (IllegalStateException exception) {
+                    Throwables.log(exception);
+                }
+            }
         } else {
             Interaction interaction = getInteraction(request);
             try {
@@ -818,6 +847,7 @@ public class RestServlet_2 extends HttpServlet {
                 InteractionSpec get = InteractionSpecs.getRestInteractionSpecs(
                     !this.isAutoCommitting(request) && this.isRetainValues(request)
                 ).GET;
+                boolean serializeNulls = this.isSerializeNulls(request);
                 // Object
                 if(xri.isObjectPath()) {
                     if(xri.isPattern()) {
@@ -834,7 +864,11 @@ public class RestServlet_2 extends HttpServlet {
                         } else {
                             response.setStatus(HttpServletResponse.SC_OK);
                             ServletTarget target = new ServletTarget(request, response); 
-                            restFormatter.format(target, toObjectRecord(output.get(0)));
+                            restFormatter.format(
+                                target,
+                                toObjectRecord(output.get(0)),
+                                serializeNulls
+                            );
                             target.close();
                         }
                     }
@@ -938,7 +972,12 @@ public class RestServlet_2 extends HttpServlet {
                         } else {
                             response.setStatus(HttpServletResponse.SC_OK);
                             ServletTarget target = new ServletTarget(request, response); 
-                            restFormatter.format(target, xri, output);
+                            restFormatter.format(
+                                target,
+                                xri,
+                                output,
+                                serializeNulls
+                            );
                             target.close();
                         }
                     }
@@ -1004,6 +1043,7 @@ public class RestServlet_2 extends HttpServlet {
                     		new RequestCallbackHandler(request)
                         )
                     );
+                    response.setStatus(HttpServletResponse.SC_NO_CONTENT);
                 } catch (ResourceException exception) {
                     handleException(
                         request,
@@ -1019,10 +1059,12 @@ public class RestServlet_2 extends HttpServlet {
                 }
             } else {
                 // ignore in case this session has already established a connection
+                response.setStatus(HttpServletResponse.SC_NO_CONTENT);
             }
         } else {
             Interaction interaction = getInteraction(request);
             boolean isAutoCommitting = this.isAutoCommitting(request);
+            boolean serializeNulls = this.isSerializeNulls(request);            
             try {
                 final MappedRecord value = parseRequest(request, response);
                 if(org.openmdx.base.rest.spi.ObjectRecord.isCompatible(value)) {
@@ -1058,7 +1100,8 @@ public class RestServlet_2 extends HttpServlet {
                         for(Object record : output){
                             restFormatter.format(
                                 target, 
-                                toObjectRecord(record)
+                                toObjectRecord(record),
+                                serializeNulls
                             );
                         }
                         target.close();
@@ -1079,14 +1122,23 @@ public class RestServlet_2 extends HttpServlet {
                     } else if(multivalued) {
                        response.setStatus(HttpServletResponse.SC_OK);
                        ServletTarget target = new ServletTarget(request, response);
-                       restFormatter.format(target, xri, output);
+                       restFormatter.format(
+                           target,
+                           xri,
+                           output,
+                           serializeNulls
+                       );
                        target.close();
                     } else if(output.isEmpty()) {
                        response.setStatus(HttpServletResponse.SC_NOT_FOUND);
                     } else{
                        response.setStatus(HttpServletResponse.SC_OK);
                        ServletTarget target = new ServletTarget(request, response);
-                       restFormatter.format(target, toObjectRecord(output.get(0)));
+                       restFormatter.format(
+                           target,
+                           toObjectRecord(output.get(0)),
+                           serializeNulls
+                       );
                        target.close();
                     }
                 } else {
@@ -1118,7 +1170,12 @@ public class RestServlet_2 extends HttpServlet {
                         }
                         response.setStatus(HttpServletResponse.SC_OK);
                         ServletTarget target = new ServletTarget(request, response);
-                        restFormatter.format(target, "result", reply);
+                        restFormatter.format(
+                            target,
+                            "result",
+                            reply,
+                            serializeNulls
+                        );
                         target.close();
                     }
                 }
@@ -1168,6 +1225,7 @@ public class RestServlet_2 extends HttpServlet {
         Interaction interaction = getInteraction(request);
         try {
             MappedRecord input = parseRequest(request, response);
+            boolean serializeNulls = this.isSerializeNulls(request);            
             IndexedRecord output = (IndexedRecord)execute(  
                 interaction,
                 isAutoCommitting(request), 
@@ -1183,7 +1241,8 @@ public class RestServlet_2 extends HttpServlet {
                 for(Object record : output) {
                     restFormatter.format(
                         target, 
-                        toObjectRecord(record)
+                        toObjectRecord(record),
+                        serializeNulls
                     );
                 }
                 target.close();

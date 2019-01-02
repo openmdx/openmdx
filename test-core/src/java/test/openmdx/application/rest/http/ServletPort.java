@@ -70,6 +70,7 @@ import javax.resource.ResourceException;
 import javax.resource.cci.Interaction;
 import javax.servlet.AsyncContext;
 import javax.servlet.DispatcherType;
+import javax.servlet.ReadListener;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
@@ -78,11 +79,13 @@ import javax.servlet.ServletInputStream;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
+import javax.servlet.WriteListener;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import javax.servlet.http.HttpUpgradeHandler;
 import javax.servlet.http.Part;
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
@@ -843,6 +846,32 @@ public class ServletPort
                     throws ServletException {
                     throw new UnsupportedOperationException();
                 }
+                /* (non-Javadoc)
+                 * @see javax.servlet.ServletRequest#getContentLengthLong()
+                 */
+                @Override
+                public long getContentLengthLong() {
+                    // TODO Auto-generated method stub
+                    return 0;
+                }
+                /* (non-Javadoc)
+                 * @see javax.servlet.http.HttpServletRequest#changeSessionId()
+                 */
+                @Override
+                public String changeSessionId() {
+                    // TODO Auto-generated method stub
+                    return null;
+                }
+                /* (non-Javadoc)
+                 * @see javax.servlet.http.HttpServletRequest#upgrade(java.lang.Class)
+                 */
+                @Override
+                public <T extends HttpUpgradeHandler> T upgrade(Class<T> handlerClass)
+                    throws IOException,
+                    ServletException {
+                    // TODO Auto-generated method stub
+                    return null;
+                }
             }
             class EmbeddedResponse implements HttpServletResponse {
                 protected final Map<String,String> headers = new HashMap<String,String>();
@@ -992,6 +1021,16 @@ public class ServletPort
                                 throws IOException {
                                 this.delegate.write(b);
                             }
+                            @Override
+                            public boolean isReady() {
+                                // TODO Auto-generated method stub
+                                return false;
+                            }
+                            @Override
+                            public void setWriteListener(WriteListener writeListener) {
+                                // TODO Auto-generated method stub
+                                
+                            }
                         };
                     }
                     return this.binarySink;
@@ -1062,6 +1101,14 @@ public class ServletPort
                 public int getStatus() {
                     throw new UnsupportedOperationException();
                 }
+                /* (non-Javadoc)
+                 * @see javax.servlet.ServletResponse#setContentLengthLong(long)
+                 */
+                @Override
+                public void setContentLengthLong(long len) {
+                    // TODO Auto-generated method stub
+                    
+                }
             }
         }
     }
@@ -1124,45 +1171,35 @@ public class ServletPort
         ){
             return new ServletInputStream(
             ) {
-                BinarySink source = isBinary() ? binarySink : asBinarySource();
+                final BinarySink source = isBinary() ? binarySink : asBinarySource();
                 private final byte[] data = source.getBuffer();
                 private final int count = source.size();
                 private int cursor = 0;
                 private int mark = 0;
-                /* (non-Javadoc)
-                 * @see java.io.InputStream#read()
-                 */
+
                 @Override
                 public int read(
                 ) throws IOException {
-                    return this.cursor < this.count ? this.data[this.cursor++] & 0xff : -1;
+                    return this.isReady() ? this.data[this.cursor++] & 0xff : -1;
                 }
-                /* (non-Javadoc)
-                 * @see java.io.InputStream#available()
-                 */
+
                 @Override
                 public int available(
                 ) throws IOException {
                     return this.count - this.cursor;
                 }
-                /* (non-Javadoc)
-                 * @see java.io.InputStream#mark(int)
-                 */
+
                 @Override
                 public synchronized void mark(int readlimit) {
                     this.mark = this.cursor;
                 }
-                /* (non-Javadoc)
-                 * @see java.io.InputStream#markSupported()
-                 */
+
                 @Override
                 public boolean markSupported(
                 ) {
                     return true;
                 }
-                /* (non-Javadoc)
-                 * @see java.io.InputStream#read(byte[], int, int)
-                 */
+
                 @Override
                 public int read(
                     byte[] data,
@@ -1173,17 +1210,13 @@ public class ServletPort
                     System.arraycopy(this.data, this.cursor, data, offset, count);
                     return count;
                 }
-                /* (non-Javadoc)
-                 * @see java.io.InputStream#reset()
-                 */
+
                 @Override
                 public synchronized void reset(
                 ) throws IOException {
                     this.cursor = this.mark;
                 }
-                /* (non-Javadoc)
-                 * @see java.io.InputStream#skip(long)
-                 */
+
                 @Override
                 public long skip(
                     long n
@@ -1191,6 +1224,21 @@ public class ServletPort
                     long count = Math.min(this.count - this.cursor, n);
                     this.cursor += count;
                     return count;
+                }
+
+                @Override
+                public boolean isFinished() {
+                    return this.cursor >= this.count;
+                }
+
+                @Override
+                public boolean isReady() {
+                    return this.cursor < this.count;
+                }
+                
+                @Override
+                public void setReadListener(ReadListener readListener) {
+                    throw new UnsupportedOperationException();
                 }
             };
         }

@@ -126,7 +126,6 @@ org.openmdx.base.naming.*
 	  $.noConflict();
 	</script>
     <script src="js/bootstrap/js/bootstrap.min.js"></script>
-	<script src="js/polymer/components/webcomponentsjs/webcomponents-lite.min.js"></script>    
 	<script src="js/portal-all.js"></script>
 	<script src="js/calendar/lang/calendar-<%= app.getCurrentLocaleAsString() %>.js"></script>
 	<!--[if lt IE 7]><script type="text/javascript" src="js/iehover-fix.js"></script><![endif]-->

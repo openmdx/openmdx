@@ -69,9 +69,14 @@ public interface FeatureOrderRecord extends MappedRecord {
     SortOrder getSortOrder();
     
     /**
-     * Retrieve the name of the feature
+     * Retrieve the name of the feature, optionally followed by a pointer.
      * 
-     * @return the name of the feature
+     * @return the name of the feature or a path consisting of the 
+     * name followed by a pointer, e.g. an XPath or a JSONPointer.
+     * 
+     * @see #hasFeaturePointer()
+     * @see #featureName()
+     * @see #featurePointer()
      */
     String getFeature();
 
@@ -82,6 +87,30 @@ public interface FeatureOrderRecord extends MappedRecord {
      */
     FeatureOrderRecord clone();
 
+    /**
+     * Tells whether the feature is recognised by a name only or
+     * by a name followed by a path.
+     * 
+     * @return <code>false</code> if the feature is identified by a name only
+     */
+    boolean hasFeaturePointer();
+    
+    /**
+     * Returns the feature name in case of a feature path.
+     * The same as <code>getFeature()</code> if <code>hasFeaturePointer() is <code>false</code>.
+     * 
+     * @return the name
+     */
+    String featureName();
+    
+    /**
+     * Returns the feature pointer (starting with a '/') in case of a path,
+     * or <code>null</code> if <code>hasFeaturePointer() is <code>false</code>.
+     * 
+     * @return the feature pointer, e.g. XPath or JSONPointer (RFC 6901)
+     */
+    String featurePointer();
+    
     enum Member {
         feature,
         sortOrder

@@ -291,8 +291,9 @@ extends SlicedDbObject
     public int getIndex(
         FastResultSet frs
     ) throws SQLException {
-        if(frs.getColumnNames().contains(this.database.getObjectIdxColumnName())) {
-            return ((Number)frs.getObject(this.database.getObjectIdxColumnName())).intValue();
+        final String objectIdxColumnName = this.database.getObjectIdxColumnName();
+        if(frs.getColumnNames().contains(objectIdxColumnName)) {
+            return ((Number)frs.getObject(objectIdxColumnName)).intValue();
         }
         else {
             return 0;

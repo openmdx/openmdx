@@ -61,6 +61,7 @@ import org.openmdx.kernel.log.SysLog;
  * This <code>TransactionManager<code> factory supports<ol>
  * <li><code>java:comp/TransactionManager</code> JNDI lookup <em>(Standard)</em>
  * <li><code>java:/TransactionManager</code> JNDI lookup <em>(JBoss)</em>
+ * <li><code>java:appserver/TransactionManager JNDI lookup <em>(GlassFish)</em>
  * <li><code>com.ibm.ws.Transaction.TransactionManagerFactory.getTransactionManager()</code> <em>(WebSphere)</em> 
  * </ul>
  * <p>
@@ -103,14 +104,15 @@ public class TransactionManagerFactory
      */
     private final static String[] JNDI_NAMES = {
         "java:comp/TransactionManager", // 1st
-        "java:/TransactionManager" // 2nd
+        "java:/TransactionManager", // 2nd
+        "java:appserver/TransactionManager" // 3rd
     };
     
     /**
      * The initial vendor specific methods to try
      */
     private final static String[] METHOD_NAMES = {
-        "com.ibm.ws.Transaction.TransactionManagerFactory.getTransactionManager" // 3rd
+        "com.ibm.ws.Transaction.TransactionManagerFactory.getTransactionManager" // 4th
     };
     
     /**
@@ -256,10 +258,7 @@ public class TransactionManagerFactory
         return transactionManager;
     }
 
-    /* (non-Javadoc)
-     * @see org.openmdx.kernel.loading.Factory#instantiate()
-     */
-//  @Override
+    @Override
     public TransactionManager instantiate(
     ) {
         TransactionManager transactionManager = null; 
@@ -276,10 +275,7 @@ public class TransactionManagerFactory
         );
     }
 
-    /* (non-Javadoc)
-     * @see org.openmdx.kernel.loading.Factory#getInstanceClass()
-     */
-//  @Override
+    @Override
     public Class<? extends TransactionManager> getInstanceClass() {
         return TransactionManager.class;
     }

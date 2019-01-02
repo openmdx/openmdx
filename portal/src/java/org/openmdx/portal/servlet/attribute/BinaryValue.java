@@ -119,7 +119,7 @@ public class BinaryValue extends AttributeValue implements Serializable {
 	            );
 	          } catch(JmiServiceException e) {}
 	        } else {
-	            mimeType = (String)((Map)object).get(mimeTypeFeature);
+	            mimeType = (String)((Map<?,?>)object).get(mimeTypeFeature);
 	        }
 	        // not defined on object. return default
 	        if(mimeType == null) {
@@ -222,7 +222,7 @@ public class BinaryValue extends AttributeValue implements Serializable {
             if(bytes == null) {
             	this.isNull = true;
             } else if(bytes instanceof Collection) {
-                this.isNull = ((Collection)bytes).isEmpty();
+                this.isNull = ((Collection<?>)bytes).isEmpty();
             } else {
                 this.isNull = false;
             }
@@ -350,7 +350,7 @@ public class BinaryValue extends AttributeValue implements Serializable {
         try {
             Object value = super.getValue(false);
             if(value instanceof Collection) {
-                value = ((Collection)value).iterator().next();
+                value = ((Collection<?>)value).iterator().next();
             }
             if(value instanceof byte[]) {
                 byte[] bytes = (byte[])value;
@@ -404,7 +404,7 @@ public class BinaryValue extends AttributeValue implements Serializable {
      * 
      * @return
      */
-    protected Map getMimeTypeParams(
+    protected Map<String,String> getMimeTypeParams(
     ) {
         Map<String,String> params = new HashMap<String,String>();
         int pos = 0;
@@ -429,7 +429,7 @@ public class BinaryValue extends AttributeValue implements Serializable {
      * @param request
      * @return
      */
-    protected Set getAcceptedMimeTypes(
+    protected Set<String> getAcceptedMimeTypes(
         HttpServletRequest request
     ) {
         // get accepted mime types. Required for rendering binaries  
@@ -470,7 +470,7 @@ public class BinaryValue extends AttributeValue implements Serializable {
         String styleModifier
     ) throws ServiceException {
         HtmlEncoder_1_0 htmlEncoder = p.getApplicationContext().getHtmlEncoder();                
-        Map popupImages = (Map)p.getProperty(ViewPort.PROPERTY_POPUP_IMAGES);        
+        Map<String,CharSequence> popupImages = (Map<String,CharSequence>)p.getProperty(ViewPort.PROPERTY_POPUP_IMAGES);        
         String imageId = org.openmdx.kernel.id.UUIDs.newUUID().toString();
         CharSequence imageSrc = p.getEncodedHRef(binaryValueAction);
         if(popupImages != null) {
@@ -554,11 +554,11 @@ public class BinaryValue extends AttributeValue implements Serializable {
 	            HttpServletRequest request = p.getHttpServletRequest();          
 	            styleModifier = "style=\"height: " + (1.2+(attribute.getSpanRow()-1)*1.5) + "em\"";
 	            Action binaryValueAction = (Action)this.getValue(false);
-	            Set acceptedMimeTypes = this.getAcceptedMimeTypes(request);
+	            Set<String> acceptedMimeTypes = this.getAcceptedMimeTypes(request);
 	            // mimeType                                     
 	            boolean isAcceptedMimeType = false;
-	            for(Iterator i = acceptedMimeTypes.iterator(); i.hasNext(); ) {
-	                if(this.getMimeType().startsWith((String)i.next())) {
+	            for(Iterator<String> i = acceptedMimeTypes.iterator(); i.hasNext(); ) {
+	                if(this.getMimeType().startsWith(i.next())) {
 	                    isAcceptedMimeType = true;
 	                    break;
 	                }

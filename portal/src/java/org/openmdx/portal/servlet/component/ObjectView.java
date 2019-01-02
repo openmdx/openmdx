@@ -230,8 +230,7 @@ public abstract class ObjectView extends View implements Serializable {
     	boolean mapObjects
     ) throws ServiceException {
     	PersistenceManager pm = JDOHelper.getPersistenceManager(this.getObjectReference().getObject());
-    	@SuppressWarnings("unchecked")
-		Collection<ModelElement_1_0> fields = structDef.objGetMap("field").values();
+    	Collection<ModelElement_1_0> fields = structDef.objGetMap("field").values();
     	for(ModelElement_1_0 field: fields) {
     		String fieldName = (String)field.getQualifiedName();
     		try {

@@ -164,9 +164,9 @@ public class FilterLoader
         );
         // Create a filter for each referenced type (only if there is more than one referenced type)
         if(!"org:openmdx:base:ExtentCapable".equals(referencedType.getQualifiedName())) {
-	        Map assertableInspectors = uiContext.getAssertableInspectors(UiContext.MAIN_PERSPECTIVE);
+	        Map<String,org.openmdx.ui1.jmi1.AssertableInspector> assertableInspectors = uiContext.getAssertableInspectors(UiContext.MAIN_PERSPECTIVE);
 	        if(referencedType.objGetList("allSubtype").size() > 1) {
-	            for(Iterator k = referencedType.objGetList("allSubtype").iterator(); k.hasNext(); ) {
+	            for(Iterator<?> k = referencedType.objGetList("allSubtype").iterator(); k.hasNext(); ) {
 	                ModelElement_1_0 subtype = model.getElement(k.next());
 	                if(!((Boolean)subtype.isAbstract()).booleanValue()) {
 	                    String inspectorQualifiedName = (String)subtype.getQualifiedName();
@@ -285,8 +285,7 @@ public class FilterLoader
             for(ModelElement_1_0 element: this.model.getContent()) {
                 if(element.isClassType()) {
                     // Default filters for all modeled features
-                	@SuppressWarnings("unchecked")
-                    Collection<ModelElement_1_0> features = element.objGetMap("allFeature").values();
+                	Collection<ModelElement_1_0> features = element.objGetMap("allFeature").values();
                     for(ModelElement_1_0 feature: features) {
                         if(feature.isReferenceType() && !this.model.referenceIsStoredAsAttribute(feature)) {                            
                             String qualifiedReferenceName = element.getQualifiedName() + ":" + feature.getName();

@@ -86,7 +86,7 @@ public class TestThreadSafety
         implements Runnable {
 
         public ServletTester(
-            List objectXris
+            List<?> objectXris
         ) {
           this.actions = new Action[objectXris.size()+1];
           for(int i = 0; i < objectXris.size(); i++) {

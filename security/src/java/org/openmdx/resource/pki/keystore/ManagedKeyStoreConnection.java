@@ -62,48 +62,45 @@ import java.security.cert.Certificate;
 import java.security.cert.PKIXParameters;
 
 import javax.resource.ResourceException;
+import javax.resource.spi.ConnectionRequestInfo;
 import javax.resource.spi.security.PasswordCredential;
+import javax.security.auth.Subject;
 
 import org.openmdx.resource.spi.AbstractManagedConnection;
 
 /**
  * Managed Key Store Connection 
  */
-class ManagedKeyStoreConnection extends AbstractManagedConnection {
+class ManagedKeyStoreConnection extends AbstractManagedConnection<ManagedConnectionFactory> {
 
 	/**
 	 * Constructor
-	 * 
-	 * @param connectionType
-	 * @param credential
 	 */
 	private ManagedKeyStoreConnection(
-    	ConnectionType connectionType,
-        PasswordCredential credential
+    	ManagedConnectionFactory factory,
+        ConnectionType connectionType, 
+        PasswordCredential credential, 
+        ConnectionRequestInfo connectionRequestInfo
     ){
-    	super("KeyStore","1.0",credential);
+    	super(factory,"KeyStore","1.0", credential, connectionRequestInfo);
 		this.connectionType = connectionType;
 	}
 		
 	/**
      * Constructor
-     * 
-     * @param connectionType
-	 * @param credential
-	 * @param alias 
-	 * @param certificate
-	 * @param key
-	 * @param algorithm
+	 * @param connectionRequestInfo TODO
      */
     ManagedKeyStoreConnection(
+        ManagedConnectionFactory factory,
     	ConnectionType connectionType,
         PasswordCredential credential,
-        String alias,
+        ConnectionRequestInfo connectionRequestInfo,
+        String alias, 
         Certificate certificate, 
         Key key, 
         String algorithm
     ) {
-    	this(connectionType, credential);
+    	this(factory, connectionType, credential, connectionRequestInfo);
     	this.alias = alias; 
         this.certificate = certificate;
         this.key = key;
@@ -112,21 +109,18 @@ class ManagedKeyStoreConnection extends AbstractManagedConnection {
 
 	/**
      * Constructor 
-     * 
-     * @param connectionType
-     * @param credential
-     * @param parameters
-     * @param algorithm 
      *
      * @throws NoSuchAlgorithmException 
      */
     ManagedKeyStoreConnection(
+        ManagedConnectionFactory factory,
     	ConnectionType connectionType,
         PasswordCredential credential,
+        ConnectionRequestInfo connectionRequestInfo, 
         PKIXParameters parameters, 
         String algorithm
     ) throws NoSuchAlgorithmException {
-    	this(connectionType, credential);
+    	this(factory, connectionType, credential, connectionRequestInfo);
         this.alias = null;
         this.certificate = null;
         this.key = null;
@@ -251,7 +245,7 @@ class ManagedKeyStoreConnection extends AbstractManagedConnection {
      * @see org.openmdx.resource.spi.AbstractManagedConnection#newConnection()
      */
     @Override
-    protected Object newConnection(
+    protected Object newConnection(Subject subject, ConnectionRequestInfo connectionRequestInfo
     ) throws ResourceException {
     	switch(this.connectionType) {
 	    	case CERTIFICATE_PROVIDER: 

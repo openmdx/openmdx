@@ -54,15 +54,15 @@ package org.openmdx.state2.cci;
 public enum ViewKind {
     
     /**
-     * A Time Point View is defined by an optional existence time point 
-     * (<code>validAt</code>) and a mandatory effectivity time point 
+     * A Time Point View is defined by an optional system-time point 
+     * (<code>validAt</code>) and a mandatory applicaton-time point 
      * (<code>validFor</code>).
      */
     TIME_POINT_VIEW,
     
     /**
-     * A Time Range View is defined by an effectivity range (starting with 
-     * <code>validFrom</code> and ending with <code>validTo for 
+     * A Time Range View is defined by an application-time range (starting 
+     * with <code>validFrom</code> and ending with <code>validTo for 
      * <code>DateStates</code> and <code>invalidFrom</code> for 
      * <code>DateTimeStates</code>, respectively).
      * <p>

@@ -12,8 +12,6 @@
  * Read the entire license text here: http://www.gnu.org/licenses/lgpl.html
  */
 
-// $Id: calendar.js,v 1.4 2009/01/22 07:45:21 cmu Exp $
-
 /** The Calendar object constructor. */
 Calendar = function (firstDayOfWeek, dateStr, onSelected, onClose) {
 	// member variables
@@ -713,21 +711,21 @@ Calendar.cellClick = function(el, ev) {
 
 /**
  *  This function creates the calendar inside the given parent.  If _par is
- *  null than it creates a popup calendar inside the BODY element.  If _par is
- *  an element, be it BODY, then it creates a non-popup calendar (still
- *  hidden).  Some properties need to be set before calling this function.
+ *  null than it creates a popup calendar inside the BODY element otherwise
+ *  inside _par.
  */
 Calendar.prototype.create = function (_par) {
 	var parent = null;
 	if (! _par) {
-		// default parent is the document body, in which case we create
-		// a popup calendar.
 		parent = document.getElementsByTagName("body")[0];
-		this.isPopup = true;
 	} else {
-		parent = _par;
-		this.isPopup = false;
+		if(typeof _par == "string") {
+			parent = document.getElementById(_par);
+		} else {
+			parent = _par;
+		}
 	}
+	this.isPopup = true;
 	this.date = this.dateStr ? new Date(this.dateStr) : new Date();
 
 	var table = Calendar.createElement("table");

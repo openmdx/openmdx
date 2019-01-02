@@ -52,34 +52,36 @@ import java.util.Map;
 
 import org.openmdx.kernel.exception.BasicException;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-
 /**
  * Internalized Keys
  */
 public class InternalizedKeys {
 
     /**
-     * Constructor 
+     * Constructor
      */
     public InternalizedKeys() {
         // Avoid instantiation
     }
-    
+
     /**
      * Short Cache extension
      */
-    private static Map<Short,Short> shortCache = new HashMap<Short,Short>();
-    
+    private static final Map<Short, Short> shortCacheExtension = new HashMap<Short, Short>();
+    private static final short JDK_SHORT_CACHE_LOWER_BOUND = -128;
+    private static final short JDK_SHORT_CACHE_UPPER_BOUND = 127;
+
     /**
      * Integer Cache Extension
      */
-    private static Map<Integer,Integer> integerCache = new HashMap<Integer,Integer>();
+    private static final Map<Integer, Integer> integerCacheExtension = new HashMap<Integer, Integer>();
+    private static final int JDK_INTEGER_CACHE_LOWER_BOUND = -128;
+    private static final int JDK_INTEGER_CACHE_UPPER_BOUND = 127;
 
     /**
      * Long Cache Extension
      */
-    private static Map<Long,Long> longCache = new HashMap<Long,Long>();
+    private static Map<Long, Long> longCache = new HashMap<Long, Long>();
 
     /**
      * Dertermines whether the given key is internalizable
@@ -90,15 +92,14 @@ public class InternalizedKeys {
      */
     public static boolean isInternalizable(
         Object key
-    ){
-        return 
-            key == null ||
-            key instanceof String || 
-            key instanceof Integer || 
-            key instanceof Long || 
+    ) {
+        return key == null ||
+            key instanceof String ||
+            key instanceof Integer ||
+            key instanceof Long ||
             key instanceof Short;
     }
-        
+
     /**
      * Normalize the key to use an identity hash map.
      * <p>
@@ -106,28 +107,34 @@ public class InternalizedKeys {
      * <li><code>String</code>s
      * <li><code>Integer</code>s in the range <code>-128</code> to <code>128</code>
      * </ul>
+     * 
      * @param <T>
      * 
-     * @param key the key to be normalized
+     * @param key
+     *            the key to be normalized
      * 
      * @return the normalized key
      * 
-     * @exception IllegalArgumentException unless the key is one of<ul>
-     * <li>a <code>java.lang.String</code> instance
-     * <li>a <code>java.lang.Instance</code> instance in the range 
-     * <code>-128</code> to <code>127</code>
-     * </ul>
-     * @exception NullPointerException if the key is <code>null</code>
-     * @exception IllegalArgumentException if the key can't be internalized
+     * @exception IllegalArgumentException
+     *                unless the key is one of
+     *                <ul>
+     *                <li>a <code>java.lang.String</code> instance
+     *                <li>a <code>java.lang.Instance</code> instance in the range
+     *                <code>-128</code> to <code>127</code>
+     *                </ul>
+     * @exception NullPointerException
+     *                if the key is <code>null</code>
+     * @exception IllegalArgumentException
+     *                if the key can't be internalized
      */
     @SuppressWarnings("unchecked")
     public static <T> T internalize(
         T key
     ) {
-        if(key == null) {
+        if (key == null) {
             return null;
-        } else if(key instanceof String) {
-            return (T) ((String)key).intern();
+        } else if (key instanceof String) {
+            return (T) ((String) key).intern();
         } else if (key instanceof Integer) {
             return (T) internalize((Integer) key);
         } else if (key instanceof Long) {
@@ -153,73 +160,85 @@ public class InternalizedKeys {
     /**
      * Internalize an Short
      * 
-     * @param actual the actual value
+     * @param actual
+     *            the actual value
      * 
      * @return an internalized Short
      */
-    @SuppressFBWarnings(value = "RC_REF_COMPARISON", justification = "Short's cache size is unknown")
-    private static Short internalize(Short actual) {
-        Short candidate = Short.valueOf(actual.shortValue());
-        if(candidate == actual || candidate == Short.valueOf(actual.shortValue())) {
-            return candidate;
-        }
-        synchronized(shortCache) {
-            Short cached = shortCache.get(candidate);
-            if(cached == null) {
-                shortCache.put(candidate, candidate);
-                return candidate;
-            } else {
-                return cached;
+    private static Short internalize(
+        Short actual
+    ) {
+        final short value = actual.shortValue();
+        final Short internalized;
+        if (value >= JDK_SHORT_CACHE_LOWER_BOUND && value <= JDK_SHORT_CACHE_UPPER_BOUND) {
+            internalized = Short.valueOf(value);
+        } else {
+            synchronized (shortCacheExtension) {
+                final Short cached = shortCacheExtension.get(actual);
+                if (cached == null) {
+                    internalized = Short.valueOf(value);
+                    shortCacheExtension.put(internalized, internalized);
+                } else {
+                    internalized = cached;
+                }
             }
         }
+        return internalized;
     }
-    
+
     /**
      * Internalize an Integer
      * 
-     * @param actual the actual value
+     * @param actual
+     *            the actual value
      * 
      * @return an internalized Integer
      */
-    @SuppressFBWarnings(value = "RC_REF_COMPARISON", justification = "Integer's cache size is unknown")
-    private static Integer internalize(Integer actual) {
-        Integer candidate = Integer.valueOf(actual.intValue());
-        if(candidate == actual || candidate == Integer.valueOf(actual.intValue())) {
-            return candidate;
-        }
-        synchronized(integerCache) {
-            Integer cached = integerCache.get(candidate);
-            if(cached == null) {
-                integerCache.put(candidate, candidate);
-                return candidate;
-            } else {
-                return cached;
+    private static Integer internalize(
+        Integer actual
+    ) {
+        final int value = actual.intValue();
+        final Integer internalized;
+        if (value >= JDK_INTEGER_CACHE_LOWER_BOUND && value <= JDK_INTEGER_CACHE_UPPER_BOUND) {
+            internalized = Integer.valueOf(value);
+        } else {
+            synchronized (integerCacheExtension) {
+                final Integer cached = integerCacheExtension.get(actual);
+                if (cached == null) {
+                    internalized = Integer.valueOf(value);
+                    integerCacheExtension.put(internalized, internalized);
+                } else {
+                    internalized = cached;
+                }
             }
         }
+        return internalized;
     }
 
     /**
      * Internalize a Long
      * 
-     * @param actual the actual value
+     * @param actual
+     *            the actual value
      * 
      * @return an internalized Long
      */
-    @SuppressFBWarnings(value = "RC_REF_COMPARISON", justification = "Long's cache size is unknown")
-    private static Long internalize(Long actual) {
-        Long candidate = Long.valueOf(actual.intValue());
-        if(candidate == actual || candidate == Long.valueOf(actual.longValue())) {
-            return candidate;
-        }
-        synchronized(longCache) {
-            Long cached = longCache.get(candidate);
-            if(cached == null) {
-                longCache.put(candidate, candidate);
-                return candidate;
+    private static Long internalize(
+        Long actual
+    ) {
+        final long value = actual.longValue();
+        final Long internalized;
+        // There is no requirement for the JDK to cache any long values
+        synchronized (longCache) {
+            final Long cached = longCache.get(actual);
+            if (cached == null) {
+                internalized = Long.valueOf(value);
+                longCache.put(internalized, internalized);
             } else {
-                return cached;
+                internalized = cached;
             }
         }
+        return internalized;
     }
-    
+
 }

@@ -53,10 +53,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.EnumSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 
 import javax.jdo.Extent;
 import javax.jdo.FetchGroup;
@@ -79,13 +78,14 @@ import javax.resource.cci.InteractionSpec;
 import org.openmdx.application.mof.cci.ModelAttributes;
 import org.openmdx.base.accessor.cci.DataObjectManager_1_0;
 import org.openmdx.base.accessor.cci.DataObject_1_0;
+import org.openmdx.base.accessor.cci.SystemAttributes;
 import org.openmdx.base.accessor.spi.AbstractUnitOfWork_1;
 import org.openmdx.base.aop1.PlugIn_1_0;
-import org.openmdx.base.collection.ConcurrentWeakRegistry;
 import org.openmdx.base.collection.Maps;
 import org.openmdx.base.collection.MarshallingMap;
 import org.openmdx.base.collection.MarshallingSet;
 import org.openmdx.base.collection.Unmarshalling;
+import org.openmdx.base.collection.WeakRegistry;
 import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.marshalling.Marshaller;
@@ -94,10 +94,10 @@ import org.openmdx.base.mof.cci.ModelElement_1_0;
 import org.openmdx.base.mof.cci.Model_1_0;
 import org.openmdx.base.mof.spi.Model_1Factory;
 import org.openmdx.base.naming.Path;
-import org.openmdx.base.persistence.spi.UnitOfWork;
 import org.openmdx.base.persistence.spi.MarshallingInstanceLifecycleListener;
 import org.openmdx.base.persistence.spi.Transactions;
 import org.openmdx.base.persistence.spi.TransientContainerId;
+import org.openmdx.base.persistence.spi.UnitOfWork;
 import org.openmdx.base.resource.InteractionSpecs;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.jdo.ReducedJDOHelper;
@@ -129,7 +129,7 @@ public class ViewManager_1
         PersistenceManagerFactory factory, 
         DataObjectManager_1_0 connection,
         PlugIn_1_0[] plugIns,
-        ConcurrentMap<InteractionSpec, ViewManager_1> objectFactories,
+        Map<InteractionSpec, ViewManager_1> objectFactories,
         InteractionSpec interactionSpec,
         UnitOfWork unitOfWork
     ){
@@ -159,7 +159,7 @@ public class ViewManager_1
             }
             
         } : unitOfWork;
-        this.registry = new ConcurrentWeakRegistry<DataObject_1_0,ObjectView_1>();
+        this.registry = new WeakRegistry<DataObject_1_0,ObjectView_1>(connection.getPersistenceManagerFactory().getMultithreaded());
         this.instanceLifecycleListener = new MarshallingInstanceLifecycleListener(
             this.registry,
             this.interactionSpec == null ? this : null
@@ -186,7 +186,7 @@ public class ViewManager_1
             factory,
             connection,
             plugIns,
-            new ConcurrentHashMap<InteractionSpec, ViewManager_1>(), // objectFactories
+            Maps.<InteractionSpec, ViewManager_1>newMap(factory.getMultithreaded()), // objectFactories
             null, // interactionSpec
             null // transaction
         );
@@ -224,7 +224,7 @@ public class ViewManager_1
     /**
      * 
      */
-    private ConcurrentMap<InteractionSpec, ViewManager_1> objectFactories;
+    private final Map<InteractionSpec, ViewManager_1> objectFactories;
     
     /**
      * The unit of work
@@ -244,7 +244,7 @@ public class ViewManager_1
     /**
      * Maps data objects to object views
      */
-    private ConcurrentWeakRegistry<DataObject_1_0,ObjectView_1> registry;
+    private final WeakRegistry<DataObject_1_0,ObjectView_1> registry;
 
     /**
      * Unregister an object view
@@ -488,7 +488,6 @@ public class ViewManager_1
             this.connection.close();
             this.connection = null;
             this.registry.close();
-            this.registry = null;
         }
     }
 
@@ -1452,7 +1451,7 @@ public class ViewManager_1
                 		}
                 	}
 	                if(model.isInstanceof(dataObject, "org:openmdx:state2:BasicState")) {
-	                    DataObject_1_0 core = (DataObject_1_0) dataObject.objGetValue("core");
+	                    DataObject_1_0 core = (DataObject_1_0) dataObject.objGetValue(SystemAttributes.CORE);
 	                    if(core != null) {
 	                        dataObject = core;
 	                    }

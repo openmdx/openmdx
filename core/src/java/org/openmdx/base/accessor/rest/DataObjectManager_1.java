@@ -62,7 +62,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
 
 import javax.jdo.Constants;
 import javax.jdo.Extent;
@@ -93,15 +92,16 @@ import javax.resource.cci.LocalTransaction;
 import org.openmdx.base.accessor.cci.DataObjectManager_1_0;
 import org.openmdx.base.accessor.cci.DataObject_1_0;
 import org.openmdx.base.accessor.cci.Structure_1_0;
+import org.openmdx.base.accessor.cci.SystemAttributes;
 import org.openmdx.base.accessor.rest.spi.CacheAccessor_2_0;
 import org.openmdx.base.accessor.rest.spi.DataStoreCache_2_0;
 import org.openmdx.base.accessor.rest.spi.ManagedConnectionCache_2_0;
 import org.openmdx.base.accessor.spi.PersistenceManager_1_0;
 import org.openmdx.base.aop0.PlugIn_1_0;
-import org.openmdx.base.collection.ConcurrentWeakRegistry;
 import org.openmdx.base.collection.Maps;
 import org.openmdx.base.collection.Registry;
 import org.openmdx.base.collection.Sets;
+import org.openmdx.base.collection.WeakRegistry;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.marshalling.Marshaller;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
@@ -200,6 +200,8 @@ public class DataObjectManager_1 implements Marshaller, DataObjectManager_1_0 {
                 this.threadSafetyRequired
             );
         }
+        this.persistentRegistry = new WeakRegistry<Path, DataObject_1>(this.threadSafetyRequired);
+        this.transientRegistry = new WeakRegistry<UUID, DataObject_1>(this.threadSafetyRequired);
     }
 
     /**
@@ -280,12 +282,12 @@ public class DataObjectManager_1 implements Marshaller, DataObjectManager_1_0 {
     /**
      * Maps an object id to its data object
      */
-    private final Registry<Path,DataObject_1> persistentRegistry = new ConcurrentWeakRegistry<Path, DataObject_1>();
+    private final Registry<Path,DataObject_1> persistentRegistry;
     
     /**
      * Maps a transactional object id to its data object
      */
-    private final Registry<UUID,DataObject_1> transientRegistry = new ConcurrentWeakRegistry<UUID, DataObject_1>();
+    private final Registry<UUID,DataObject_1> transientRegistry;
     
     /**
      * The underlying REST connection
@@ -760,7 +762,7 @@ public class DataObjectManager_1 implements Marshaller, DataObjectManager_1_0 {
         Object pc
     ) {
         try {
-            ((DataObject_1)pc).objRemove(true);
+            ((DataObject_1)pc).objRemove();
         } catch(Exception e) {
             throw new JDOUserException(
                 "unable to delete object",
@@ -1587,7 +1589,9 @@ public class DataObjectManager_1 implements Marshaller, DataObjectManager_1_0 {
     public void refreshAll() {
         UnitOfWork_1 unitOfWork = currentUnitOfWork();
         if(unitOfWork.isActive()) {
-            refreshAll(unitOfWork.getMembers());
+            unitOfWork.refreshMembers();
+        } else {
+            PersistenceManagers.refreshAll(this, this.transientRegistry.values());
         }
     }
 
@@ -2069,7 +2073,7 @@ public class DataObjectManager_1 implements Marshaller, DataObjectManager_1_0 {
             // object is in state new.
             if(object.jdoIsNew()) {
                 if(getModel().isInstanceof(object, "org:openmdx:base:Aspect")) {
-                    DataObject_1_0 core = (DataObject_1_0) object.objGetValue("core");
+                    DataObject_1_0 core = (DataObject_1_0) object.objGetValue(SystemAttributes.CORE);
                     if(core != null) {
                         return core.jdoGetObjectId();
                     }
@@ -2130,7 +2134,7 @@ public class DataObjectManager_1 implements Marshaller, DataObjectManager_1_0 {
         AspectObjectDispatcher(
             boolean threadSafetyRequired
         ){
-            this.sharedContexts = threadSafetyRequired ? new ConcurrentHashMap<UUID,Map<Class<?>,Object>>() : new HashMap<UUID,Map<Class<?>,Object>>();
+            this.sharedContexts = Maps.newMap(threadSafetyRequired);
         }
         
         private final Map<UUID,Map<Class<?>,Object>> sharedContexts;

@@ -63,16 +63,12 @@ import java.util.Set;
 import javax.xml.namespace.NamespaceContext;
 import javax.xml.stream.XMLStreamException;
 
-import org.openmdx.base.rest.cci.ResultRecord;
-
 public class StandardXMLStreamReader extends AbstractXMLStreamReader {
     private FastStack nodes;
     private String currentValue;
     private StandardNamespaceConvention convention;
     private String valueKey = "$";
-    private static final String OBJECTS_KEY = "objects";
     private static final String TYPE_TAG = "@type";
-    private static final String RESULT_RECORD_NAME = ResultRecord.NAME.replaceAll(":", ".");
     private NamespaceContext ctx;
     private int popArrayNodes;
 

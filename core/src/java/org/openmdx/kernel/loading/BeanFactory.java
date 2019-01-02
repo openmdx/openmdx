@@ -62,6 +62,7 @@ import java.util.Map;
 import org.openmdx.kernel.configuration.Configuration;
 import org.openmdx.kernel.configuration.MapConfiguration;
 import org.openmdx.kernel.exception.BasicException;
+import org.w3c.cci2.SortedMaps;
 import org.w3c.cci2.SparseArray;
 import org.w3c.spi.PrimitiveTypeParsers;
 
@@ -274,10 +275,12 @@ public class BeanFactory<T> implements Factory<T> {
             List<BasicException.Parameter> parameters = new ArrayList<BasicException.Parameter>();
             parameters.add(new BasicException.Parameter("class", actualClass.getName()));
             for(String e : this.configuration.singleValuedEntryNames()) {
-                parameters.add(new BasicException.Parameter(e, configuration.getOptionalValue(e, null)));
+                final Object value = configuration.getOptionalValue(e, null);
+                parameters.add(new BasicException.Parameter(e, value));
             }
             for(String e : this.configuration.multiValuedEntryNames()) {
-                parameters.add(new BasicException.Parameter(e, configuration.getValues(e, null)));
+                final SparseArray<Object> values = configuration.getValues(e, null);
+                parameters.add(new BasicException.Parameter(e, values));
             }
             throw BasicException.initHolder(
                 new RuntimeException(
@@ -323,29 +326,47 @@ public class BeanFactory<T> implements Factory<T> {
 		if(!RESERVED_ENTRIES.contains(entryName)) {
 			final Method setter = introspector.getPropertyModifier(this.actualClass, entryName); 
 			final Class<?> parameterType = setter.getParameterTypes()[0];
-			Object arg = null;
+			final Object arg;
 			if(parameterType.isArray()) {
 			    arg = toArray(entryName, parameterType);
 			} else if(parameterType == SparseArray.class) {
-			    Type genericParameterType = setter.getGenericParameterTypes()[0];
-			    Class<?> elementType = String.class; // default
-			    if(ParameterizedType.class.isAssignableFrom(genericParameterType.getClass())) {
-			        Type[] actualTypeArguments = ((ParameterizedType)genericParameterType).getActualTypeArguments();
-			        if(actualTypeArguments != null && actualTypeArguments.length > 0) {
-			            try {
-			                elementType = Class.forName(actualTypeArguments[0].toString().split(" ")[1]);
-			            } catch(Exception ignore) {
-			                // ignore
-			            }
-			        }
+			    final Class<?> elementType = getElementType(setter.getGenericParameterTypes()[0]);
+			    if(this.configuration.multiValuedEntryNames().contains(entryName)) {
+			        arg = this.configuration.getValues(entryName, elementType);
+			    } else if(this.configuration.singleValuedEntryNames().contains(entryName)){ 
+			        final Object value = this.configuration.getOptionalValue(entryName, elementType);
+                    arg = value == null ?
+                        SortedMaps.<T>emptySparseArray() :
+                        SortedMaps.singletonSparseArray(value);
+			    } else {
+			        arg = SortedMaps.<T>emptySparseArray();
 			    }
-			    arg = this.configuration.getValues(entryName, elementType);
 			} else {
 			    arg = toSingleValue(entryName, parameterType);
 			}
 			setter.invoke(instance, arg);
 		}
 	}
+
+    private Class<?> getElementType(
+        Type genericParameterType
+    ) {
+        final Type[] actualTypeArguments = ((ParameterizedType)genericParameterType).getActualTypeArguments();
+        if(actualTypeArguments != null && actualTypeArguments.length > 0) {
+            final Type elementTypeArgument = actualTypeArguments[0];
+            if(elementTypeArgument instanceof Class<?>) {
+                return (Class<?>) elementTypeArgument;
+            } else {
+                try {
+                    return Class.forName(elementTypeArgument.toString().split(" ")[1]);
+                } catch(Exception ignore) {
+                    return String.class; // default
+                }
+            }
+        } else {
+            return String.class; // default
+        }
+    }
 
 	/**
 	 * Retrieve the value for the setter

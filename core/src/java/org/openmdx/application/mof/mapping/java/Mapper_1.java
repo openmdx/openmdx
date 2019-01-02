@@ -397,8 +397,6 @@ public class Mapper_1 extends AbstractMapper_1 implements Mapper_1_1 {
                 ReferenceRecord referenceAsAttributeRecord = (ReferenceRecord) referenceAsAttribute.getDelegate();
                 referenceAsAttributeRecord.put(ReferenceRecord.Member.multiplicity, newMultiplicity);
             }
-// Wait a moment
-//            referenceAsAttribute.objSetValue("isDerived", association.isDerived());
         }
         try {
             if (VisibilityKind.PUBLIC_VIS.equals(visibility)) {

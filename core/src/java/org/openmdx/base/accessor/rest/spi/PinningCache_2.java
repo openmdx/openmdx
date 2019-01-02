@@ -413,7 +413,7 @@ public class PinningCache_2 extends BasicCache_2 {
     static <E> Set<E> newSet(
         E[] entries
     ){
-        Set<E> set = Sets.newConcurrentHashSet();
+        Set<E> set = Sets.newSetSupportingNullValues(true);
         if(entries != null) {
             for(E entry : entries) {
                 set.add(entry);

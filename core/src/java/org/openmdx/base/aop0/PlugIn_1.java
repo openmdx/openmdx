@@ -275,7 +275,7 @@ public class PlugIn_1
                     return; // new objects may be deleted
                 }
                 if(model.isInstanceof(persistentInstance, "org:openmdx:base:Aspect")) {
-                    DataObject_1 core = (DataObject_1)persistentInstance.objGetValue("core");
+                    DataObject_1 core = (DataObject_1)persistentInstance.objGetValue(SystemAttributes.CORE);
                     if(core == null || core.jdoIsDeleted()) {
                     	// a core object's aspects may be deleted together with the core object
                     	// or if the core object is lacking due to model misuse (e.g. stated objects

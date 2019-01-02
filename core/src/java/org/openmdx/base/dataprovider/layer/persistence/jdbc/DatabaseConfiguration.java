@@ -56,7 +56,6 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 
-import org.openmdx.application.dataprovider.layer.persistence.jdbc.LayerConfigurationEntries;
 import org.openmdx.base.dataprovider.layer.persistence.jdbc.dbobject.DbObjectConfiguration;
 import org.openmdx.base.dataprovider.layer.persistence.jdbc.spi.Database_1_0;
 import org.openmdx.base.exception.ServiceException;

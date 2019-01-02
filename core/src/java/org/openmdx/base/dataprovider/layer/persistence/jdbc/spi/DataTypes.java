@@ -1,6 +1,6 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
+ * Project:     openMDX, http://www.openmdx.org/
  * Description: Data Types
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
  * ====================================================================
@@ -53,7 +53,7 @@ import java.sql.Connection;
 import org.openmdx.base.exception.ServiceException;
 
 /**
- * DateTimeProvider
+ * Date Types 
  */
 public interface DataTypes {
 
@@ -108,5 +108,5 @@ public interface DataTypes {
     String getBooleanType(
         Connection connection
     ) throws ServiceException;
-    
+
 }

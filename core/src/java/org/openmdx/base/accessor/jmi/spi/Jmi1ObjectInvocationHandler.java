@@ -972,7 +972,6 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
      * 
      * @return the corresponding RefContainer arguments
      */
-    @edu.umd.cs.findbugs.annotations.SuppressFBWarnings(value = "IM_BAD_CHECK_FOR_ODD", justification="i is a natural number")
     private static Object[] jmiToRef(
         Object[] source
     ){
@@ -1107,7 +1106,7 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
                         // initCause() might succeed
                         //
                         Class<?> insufficientClass = this.getActualClass(cause);
-                        List<String> insufficientInterfaces = new ArrayList<String>();
+                        List<String> insufficientInterfaces = new ArrayList<>();
                         for(Class<?> implemented : insufficientClass.getInterfaces()) {
                              insufficientInterfaces.add(implemented.getName());
                         }
@@ -1130,7 +1129,7 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
                             } else {
                                 Class<?> argumentClass = arguments[i].getClass(); 
                                 actualArgumentClass[i] = argumentClass.getName();
-                                List<String> interfaces = new ArrayList<String>();
+                                List<String> interfaces = new ArrayList<>();
                                 for(Class<?> actualInterface : argumentClass.getInterfaces()) {
                                     interfaces.add(actualInterface.getName());
                                 }

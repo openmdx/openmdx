@@ -102,6 +102,15 @@ public interface RefQuery_1_0 extends Query, Cloneable {
   );
 
   /**
+   * Allows to specify the sort order for a JSON field.
+   */
+  void refAddValue(
+    String featureName,
+    SortOrder order,
+    String jsonPointer
+  );
+
+  /**
    * Allows to specify the sort order for a field.
    * 
    * @param featureDef
@@ -110,6 +119,18 @@ public interface RefQuery_1_0 extends Query, Cloneable {
   void refAddValue(
     ModelElement_1_0 featureDef,
     SortOrder order
+  );
+  
+  /**
+   * Allows to specify the sort order for a JSON field.
+   * 
+   * @param featureDef
+   * @param order
+   */
+  void refAddValue(
+    ModelElement_1_0 featureDef,
+    SortOrder order,
+    String jsonPointer
   );
   
   /**

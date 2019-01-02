@@ -187,8 +187,8 @@ public class BooleanValue
         label = this.getLabel(attribute, p, label);
         String title = this.getTitle(attribute, label);
         String boolImages = "";
-        Collection values = this.getValues(false);
-        for(Iterator e = values.iterator(); e.hasNext(); ) {
+        Collection<?> values = this.getValues(false);
+        for(Iterator<?> e = values.iterator(); e.hasNext(); ) {
             if(Boolean.TRUE.equals(e.next())) {
             	boolImages += p.getImg("src=\"", p.getResourcePath("images/checked"), p.getImgType(), "\" alt=\"checked\"");
             } else {

@@ -59,6 +59,7 @@ import javax.xml.XMLConstants;
 
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.text.Charsets;
+import org.openmdx.base.xml.spi.FeatureSupport;
 import org.openmdx.base.xml.spi.LargeObjectWriter;
 import org.openmdx.kernel.exception.BasicException;
 import org.xml.sax.Attributes;
@@ -75,29 +76,29 @@ import org.xml.sax.SAXParseException;
 import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.AttributesImpl;
 
-
 /**
  * WBXML Reader
  */
-public class WBXMLReader implements XMLReader {
+public class WBXMLReader implements XMLReader, FeatureSupport {
 
     /**
      * Constructor
      * <p>
-     * The plug-in is<ul>
+     * The plug-in is
+     * <ul>
      * <li>either set via setProperty({@link WBXMLPlugIns#PLUG_IN}, plugIn)
      * <li>or PUBLIC id based (per document)
      * </ul>
      */
-    public WBXMLReader(
-    ) {
+    public WBXMLReader() {
         this.plugIn = null;
     }
 
     /**
-     * Constructor 
+     * Constructor
      *
-     * @param plugIn the {@link WBXMLPlugIns#PLUG_IN PlugIn} property
+     * @param plugIn
+     *            the {@link WBXMLPlugIns#PLUG_IN PlugIn} property
      */
     public WBXMLReader(
         PlugIn plugIn
@@ -126,7 +127,7 @@ public class WBXMLReader implements XMLReader {
     private PlugIn plugIn;
 
     /**
-     * The buffer for readStringI() 
+     * The buffer for readStringI()
      */
     private final ByteArrayOutputStream buffer = new ByteArrayOutputStream();
 
@@ -176,13 +177,14 @@ public class WBXMLReader implements XMLReader {
      * @param publicDocumentId
      * 
      * @return the plug-in to be used for this document
-     * @throws ServiceException 
+     * @throws ServiceException
      */
     private PlugIn getPlugIn(
         String publicDocumentId
-    ) throws ServiceException{
-        if(this.plugIn == null) {
-            if(publicDocumentId != null) {
+    )
+        throws ServiceException {
+        if (this.plugIn == null) {
+            if (publicDocumentId != null) {
                 return WBXMLPlugIns.newInstance(publicDocumentId);
             }
             throw new ServiceException(
@@ -211,7 +213,8 @@ public class WBXMLReader implements XMLReader {
         Charset charset,
         InputStream in,
         int byteCount
-    ) throws IOException {
+    )
+        throws IOException {
         return StandardStringSource.isSupported(charset) ? new StandardStringSource(
             charset,
             in,
@@ -222,17 +225,19 @@ public class WBXMLReader implements XMLReader {
             byteCount
         );
     }
-    
+
     /**
      * Parse the binary stream
      * 
-     * @param in the stream to be parsed
-     * @throws SAXException 
-     * @throws IOException 
+     * @param in
+     *            the stream to be parsed
+     * @throws SAXException
+     * @throws IOException
      */
     private void parse(
         InputStream in
-    ) throws IOException, SAXException{
+    )
+        throws IOException,SAXException {
         this.tagPage = 0;
         this.attributePage = 0;
         this.in = in;
@@ -242,7 +247,7 @@ public class WBXMLReader implements XMLReader {
             // Version
             //
             int version = readByte();
-            if(version != Version.SPECIFICATION_VERSION_ID) {
+            if (version != Version.SPECIFICATION_VERSION_ID) {
                 throw new ServiceException(
                     BasicException.Code.DEFAULT_DOMAIN,
                     BasicException.Code.NOT_SUPPORTED,
@@ -255,8 +260,9 @@ public class WBXMLReader implements XMLReader {
             // Document type
             //
             final int publicid = readInt();
-            final String publicDocumentId = publicid == ExternalIdentifiers.LITERAL ? readStringFromTable() : ExternalIdentifiers.toPublicDocumentId(publicid);
-			this.plugIn = getPlugIn(publicDocumentId);
+            final String publicDocumentId = publicid == ExternalIdentifiers.LITERAL ? readStringFromTable()
+                : ExternalIdentifiers.toPublicDocumentId(publicid);
+            this.plugIn = getPlugIn(publicDocumentId);
             //
             // Character Encoding
             //
@@ -266,7 +272,7 @@ public class WBXMLReader implements XMLReader {
             // String Table
             //
             int stringTableSize = readInt();
-            if(stringTableSize > 0){
+            if (stringTableSize > 0) {
                 this.plugIn.setStringTable(
                     newStringSource(
                         Charset.forName(this.charset),
@@ -279,10 +285,7 @@ public class WBXMLReader implements XMLReader {
             // Body
             //
             this.contentHandler.startDocument();
-            for(
-                boolean epilog = false;
-                !epilog;
-            ){
+            for (boolean epilog = false; !epilog;) {
                 int id = this.in.read();
                 switch (id) {
                     case -1:
@@ -297,8 +300,8 @@ public class WBXMLReader implements XMLReader {
                         break;
                     case GlobalTokens.END:
                         Object tag = this.stack.removeLast();
-                        if(tag instanceof CodeResolution) {
-                            CodeResolution t = (CodeResolution)tag;
+                        if (tag instanceof CodeResolution) {
+                            CodeResolution t = (CodeResolution) tag;
                             this.contentHandler.endElement(
                                 t.namespaceURI,
                                 t.localName,
@@ -307,8 +310,8 @@ public class WBXMLReader implements XMLReader {
                         } else {
                             this.contentHandler.endElement(
                                 XMLConstants.NULL_NS_URI,
-                                (String)tag,
-                                (String)tag
+                                (String) tag,
+                                (String) tag
                             );
                         }
                         epilog = this.stack.isEmpty();
@@ -321,9 +324,9 @@ public class WBXMLReader implements XMLReader {
 
                     case GlobalTokens.STR_I: {
                         String s = readInlineString();
-                        if(this.characters.length < s.length()) {
+                        if (this.characters.length < s.length()) {
                             int newLength = 2 * this.characters.length;
-                            while(newLength < s.length()) {
+                            while (newLength < s.length()) {
                                 newLength *= 2;
                             }
                             this.characters = new char[newLength];
@@ -352,9 +355,9 @@ public class WBXMLReader implements XMLReader {
 
                     case GlobalTokens.STR_T: {
                         String s = readStringFromTable();
-                        if(this.characters.length < s.length()) {
+                        if (this.characters.length < s.length()) {
                             int newLength = 2 * this.characters.length;
-                            while(newLength < s.length()) {
+                            while (newLength < s.length()) {
                                 newLength *= 2;
                             }
                             this.characters = new char[newLength];
@@ -366,15 +369,15 @@ public class WBXMLReader implements XMLReader {
 
                     default:
                         Object resolvedTag = this.plugIn.resolveTag(this.tagPage, (id & 0x03f));
-                        if(resolvedTag instanceof CodeResolution) {
+                        if (resolvedTag instanceof CodeResolution) {
                             this.readElement(
-                                (CodeResolution)resolvedTag,
+                                (CodeResolution) resolvedTag,
                                 (id & GlobalTokens.ATTRIBUTE_FLAG) != 0,
                                 (id & GlobalTokens.CONTENT_FLAG) != 0
                             );
                         } else {
                             this.readElement(
-                                (String)resolvedTag,
+                                (String) resolvedTag,
                                 (id & GlobalTokens.ATTRIBUTE_FLAG) != 0,
                                 (id & GlobalTokens.CONTENT_FLAG) != 0
                             );
@@ -382,13 +385,9 @@ public class WBXMLReader implements XMLReader {
                         epilog = this.stack.isEmpty();
                 }
             }
-            if(this.exhaust) {
-                for(
-                    int id = this.in.read();
-                    id >= 0;
-                    id = this.in.read()
-                ){
-                    if(id == GlobalTokens.PI) {
+            if (this.exhaust) {
+                for (int id = this.in.read(); id >= 0; id = this.in.read()) {
+                    if (id == GlobalTokens.PI) {
                         this.readProcessingInstruction();
                     } else {
                         throw new ServiceException(
@@ -416,7 +415,8 @@ public class WBXMLReader implements XMLReader {
 
     private void handleExtensions(
         int id
-    ) throws ServiceException, IOException, SAXException {
+    )
+        throws ServiceException,IOException,SAXException {
         switch (id) {
             case GlobalTokens.EXT_I_0:
                 this.plugIn.ext0(readInlineString());
@@ -451,11 +451,11 @@ public class WBXMLReader implements XMLReader {
             case GlobalTokens.OPAQUE: {
                 int len = readInt();
                 byte[] buf = new byte[len];
-                for (int i = 0; i < len; i++){
+                for (int i = 0; i < len; i++) {
                     buf[i] = (byte) readByte();
                 }
-                if(this.contentHandler instanceof LargeObjectWriter) {
-                    ((LargeObjectWriter)this.contentHandler).writeBinaryData(buf, 0, len);
+                if (this.contentHandler instanceof LargeObjectWriter) {
+                    ((LargeObjectWriter) this.contentHandler).writeBinaryData(buf, 0, len);
                 } else {
                     this.plugIn.opaque(buf);
                 }
@@ -466,12 +466,12 @@ public class WBXMLReader implements XMLReader {
     /**
      * Read a processing instruction
      * 
-     * @throws ServiceException 
-     * @throws SAXException 
-     * @throws IOException 
+     * @throws ServiceException
+     * @throws SAXException
+     * @throws IOException
      */
-    private void readProcessingInstruction(
-    ) throws IOException, SAXException, ServiceException{
+    private void readProcessingInstruction()
+        throws IOException,SAXException,ServiceException {
         Attributes processingInstruction = readAttributes();
         this.contentHandler.processingInstruction(
             processingInstruction.getQName(0),
@@ -488,14 +488,11 @@ public class WBXMLReader implements XMLReader {
      * @throws SAXException
      * @throws ServiceException
      */
-    private Attributes readAttributes(
-    ) throws IOException, SAXException, ServiceException {
+    private Attributes readAttributes()
+        throws IOException,SAXException,ServiceException {
         AttributesImpl result = new AttributesImpl();
-        for(
-            int id = readByte();
-            id != GlobalTokens.END;
-        ){
-            if(id == GlobalTokens.SWITCH_PAGE) {
+        for (int id = readByte(); id != GlobalTokens.END;) {
+            if (id == GlobalTokens.SWITCH_PAGE) {
                 this.attributePage = readByte();
                 id = readByte();
             } else {
@@ -503,17 +500,19 @@ public class WBXMLReader implements XMLReader {
                 String value = attribute.valueStart;
                 StringBuilder buffer = null;
                 id = readByte();
-                while (id > 128 || id == GlobalTokens.ENTITY || id == GlobalTokens.STR_I || id == GlobalTokens.STR_T || (id >= GlobalTokens.EXT_I_0 && id <= GlobalTokens.EXT_I_2) || (id >= GlobalTokens.EXT_T_0 && id <= GlobalTokens.EXT_T_2)) {
-                    if(buffer == null) {
+                while (id > 128 || id == GlobalTokens.ENTITY || id == GlobalTokens.STR_I || id == GlobalTokens.STR_T
+                    || (id >= GlobalTokens.EXT_I_0 && id <= GlobalTokens.EXT_I_2) || (id >= GlobalTokens.EXT_T_0
+                        && id <= GlobalTokens.EXT_T_2)) {
+                    if (buffer == null) {
                         buffer = new StringBuilder(value);
                     }
                     switch (id) {
                         case GlobalTokens.ENTITY:
                             buffer.append((char) readInt());
-                        break;
+                            break;
                         case GlobalTokens.STR_I:
                             buffer.append(readInlineString());
-                        break;
+                            break;
                         case GlobalTokens.EXT_I_0:
                         case GlobalTokens.EXT_I_1:
                         case GlobalTokens.EXT_I_2:
@@ -525,16 +524,16 @@ public class WBXMLReader implements XMLReader {
                         case GlobalTokens.EXT_2:
                         case GlobalTokens.OPAQUE:
                             handleExtensions(id);
-                        break;
+                            break;
                         case GlobalTokens.STR_T:
                             buffer.append(readStringFromTable());
-                        break;
+                            break;
                         default:
                             buffer.append(this.plugIn.resolveAttributeValue(this.attributePage, id));
                     }
                     id = readByte();
                 }
-                if(buffer != null) {
+                if (buffer != null) {
                     value = buffer.toString();
                 }
                 result.addAttribute(attribute.namespaceURI, attribute.localName, attribute.name, null, value);
@@ -543,19 +542,19 @@ public class WBXMLReader implements XMLReader {
         return result;
     }
 
-
     private void readElement(
         CodeResolution tag,
         boolean hasAttributes,
         boolean hasContent
-    ) throws IOException, SAXException, ServiceException {
+    )
+        throws IOException,SAXException,ServiceException {
         this.contentHandler.startElement(
             tag.namespaceURI,
             tag.localName,
             tag.name,
             hasAttributes ? readAttributes() : new AttributesImpl()
         );
-        if(hasContent) {
+        if (hasContent) {
             this.stack.add(tag);
         } else {
             this.contentHandler.endElement(
@@ -570,14 +569,15 @@ public class WBXMLReader implements XMLReader {
         String tag,
         boolean hasAttributes,
         boolean hasContent
-    ) throws IOException, SAXException, ServiceException {
+    )
+        throws IOException,SAXException,ServiceException {
         contentHandler.startElement(
             XMLConstants.NULL_NS_URI,
             tag,
             tag,
             hasAttributes ? readAttributes() : new AttributesImpl()
         );
-        if(hasContent) {
+        if (hasContent) {
             stack.add(tag);
         } else {
             contentHandler.endElement(
@@ -588,9 +588,11 @@ public class WBXMLReader implements XMLReader {
         }
     }
 
-    int readByte() throws IOException, SAXException {
+    int readByte()
+        throws IOException,SAXException {
         int i = in.read();
-        if(i == -1) throw new SAXException("Unexpected EOF");
+        if (i == -1)
+            throw new SAXException("Unexpected EOF");
         return i;
     }
 
@@ -602,7 +604,8 @@ public class WBXMLReader implements XMLReader {
      * @throws SAXException
      * @throws IOException
      */
-    private int readInt() throws SAXException, IOException {
+    private int readInt()
+        throws SAXException,IOException {
         int result = 0;
         int i;
         do {
@@ -621,12 +624,15 @@ public class WBXMLReader implements XMLReader {
      * @throws IOException
      * @throws SAXException
      */
-    private String readInlineString() throws IOException, SAXException {
+    private String readInlineString()
+        throws IOException,SAXException {
         this.buffer.reset();
         while (true) {
             int i = in.read();
-            if(i == -1) throw new SAXException("Unexpected EOF");
-            if(i == 0) return buffer.toString(this.charset);
+            if (i == -1)
+                throw new SAXException("Unexpected EOF");
+            if (i == 0)
+                return buffer.toString(this.charset);
             buffer.write(i);
         }
     }
@@ -638,10 +644,10 @@ public class WBXMLReader implements XMLReader {
      * 
      * @throws IOException
      * @throws SAXException
-     * @throws ServiceException 
+     * @throws ServiceException
      */
-    private String readStringFromTable(
-    ) throws IOException, SAXException, ServiceException {
+    private String readStringFromTable()
+        throws IOException,SAXException,ServiceException {
         return this.plugIn.resolveString(readInt()).toString();
     }
 
@@ -649,25 +655,29 @@ public class WBXMLReader implements XMLReader {
     // Implements XMLReader
     //------------------------------------------------------------------------
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see org.xml.sax.XMLReader#getContentHandler()
      */
     @Override
-    public ContentHandler getContentHandler(
-    ) {
+    public ContentHandler getContentHandler() {
         return this.contentHandler;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see org.xml.sax.XMLReader#getDTDHandler()
      */
     @Override
-    public DTDHandler getDTDHandler(
-    ) {
+    public DTDHandler getDTDHandler() {
         return null;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see org.xml.sax.XMLReader#getEntityResolver()
      */
     @Override
@@ -675,7 +685,9 @@ public class WBXMLReader implements XMLReader {
         return null;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see org.xml.sax.XMLReader#getErrorHandler()
      */
     @Override
@@ -683,47 +695,69 @@ public class WBXMLReader implements XMLReader {
         return this.errorHandler;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see org.xml.sax.XMLReader#getFeature(java.lang.String)
      */
     @Override
     public boolean getFeature(
         String name
-    ) throws SAXNotRecognizedException, SAXNotSupportedException {
-        if(WBXMLReader.EXHAUST.equals(name)) {
+    )
+        throws SAXNotRecognizedException,SAXNotSupportedException {
+        if (WBXMLReader.EXHAUST.equals(name)) {
             return this.exhaust;
-        } else throw new SAXNotRecognizedException(
-            "Feature: " + name
-        );
+        } else
+            throw new SAXNotRecognizedException(
+                "Feature: " + name
+            );
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.openmdx.base.xml.spi.FeatureSupport#isFeatureSupported(java.lang.String)
+     */
+    @Override
+    public boolean isFeatureSupported(
+        String feature
+    ) {
+        return WBXMLReader.EXHAUST.equals(feature);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
      * @see org.xml.sax.XMLReader#getProperty(java.lang.String)
      */
     @Override
     public Object getProperty(
         String name
-    ) throws SAXNotRecognizedException, SAXNotSupportedException {
-        if(WBXMLPlugIns.PLUG_IN.equals(name)) {
+    )
+        throws SAXNotRecognizedException,SAXNotSupportedException {
+        if (WBXMLPlugIns.PLUG_IN.equals(name)) {
             return this.plugIn;
         } else {
             throw new SAXNotRecognizedException("Property: " + name);
         }
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see org.xml.sax.XMLReader#parse(org.xml.sax.InputSource)
      */
     @Override
     public void parse(
         final InputSource input
-    ) throws IOException, SAXException {
+    )
+        throws IOException,SAXException {
         this.locator = newLocator(input);
-        if(input.getByteStream() != null) {
+        if (input.getByteStream() != null) {
             parse(input.getByteStream());
-        } else if(input.getSystemId() != null) {
+        } else if (input.getSystemId() != null) {
             parse(new URL(input.getSystemId()).openStream());
-        } else if(input.getCharacterStream() != null) {
+        } else if (input.getCharacterStream() != null) {
             throw new SAXNotSupportedException(
                 "A WBXML reader needs binary input"
             );
@@ -735,14 +769,15 @@ public class WBXMLReader implements XMLReader {
     /**
      * Creates a WBXML Locator
      * 
-     * @param input the input source
+     * @param input
+     *            the input source
      * 
      * @return a WBXML Locator
      */
-	private Locator newLocator(
-		final InputSource input
-	) {
-		return new Locator(){
+    private Locator newLocator(
+        final InputSource input
+    ) {
+        return new Locator() {
 
             @Override
             public int getColumnNumber() {
@@ -765,74 +800,100 @@ public class WBXMLReader implements XMLReader {
             }
 
         };
-	}
+    }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see org.xml.sax.XMLReader#parse(java.lang.String)
      */
     @Override
     public void parse(
         String systemId
-    ) throws IOException, SAXException {
+    )
+        throws IOException,SAXException {
         parse(new InputSource(systemId));
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see org.xml.sax.XMLReader#setContentHandler(org.xml.sax.ContentHandler)
      */
     @Override
-    public void setContentHandler(ContentHandler handler) {
+    public void setContentHandler(
+        ContentHandler handler
+    ) {
         this.contentHandler = handler;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see org.xml.sax.XMLReader#setDTDHandler(org.xml.sax.DTDHandler)
      */
     @Override
-    public void setDTDHandler(DTDHandler handler) {
+    public void setDTDHandler(
+        DTDHandler handler
+    ) {
         // no DTD will be provided
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see org.xml.sax.XMLReader#setEntityResolver(org.xml.sax.EntityResolver)
      */
     @Override
-    public void setEntityResolver(EntityResolver resolver) {
+    public void setEntityResolver(
+        EntityResolver resolver
+    ) {
         // no entity resolution will take place
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see org.xml.sax.XMLReader#setErrorHandler(org.xml.sax.ErrorHandler)
      */
     @Override
-    public void setErrorHandler(ErrorHandler handler) {
+    public void setErrorHandler(
+        ErrorHandler handler
+    ) {
         this.errorHandler = handler;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see org.xml.sax.XMLReader#setFeature(java.lang.String, boolean)
      */
     @Override
     public void setFeature(
         String name,
         boolean value
-    ) throws SAXNotRecognizedException, SAXNotSupportedException {
-        if(WBXMLReader.EXHAUST.equals(name)) {
+    )
+        throws SAXNotRecognizedException,SAXNotSupportedException {
+        if (WBXMLReader.EXHAUST.equals(name)) {
             this.exhaust = value;
-        } else throw new SAXNotRecognizedException(
-            "Feature: " + name
-        );
+        } else
+            throw new SAXNotRecognizedException(
+                "Feature: " + name
+            );
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see org.xml.sax.XMLReader#setProperty(java.lang.String, java.lang.Object)
      */
     @Override
     public void setProperty(
         String name,
         Object value
-     ) throws SAXNotRecognizedException, SAXNotSupportedException {
-        if(WBXMLPlugIns.PLUG_IN.equals(name)) {
+    )
+        throws SAXNotRecognizedException,SAXNotSupportedException {
+        if (WBXMLPlugIns.PLUG_IN.equals(name)) {
             this.plugIn = (PlugIn) value;
         } else {
             throw new SAXNotRecognizedException("Property: " + name);

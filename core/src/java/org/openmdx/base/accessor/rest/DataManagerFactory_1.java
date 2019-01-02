@@ -66,7 +66,6 @@ import javax.resource.ResourceException;
 import javax.resource.cci.Connection;
 
 import org.openmdx.application.configuration.Configuration;
-import org.openmdx.application.dataprovider.cci.SharedConfigurationEntries;
 import org.openmdx.application.spi.PropertiesConfigurationProvider;
 import org.openmdx.base.accessor.cci.DataObjectManager_1_0;
 import org.openmdx.base.accessor.rest.spi.BasicCache_2;
@@ -204,9 +203,6 @@ public class DataManagerFactory_1
                             this.connectionFactory
                         );
                         if(connectionFactoryName != null) {
-                            plugInConfiguration.values(
-                    		    SharedConfigurationEntries.DATABASE_CONNECTION_FACTORY
-                    		);
                             SparseArray<Object> datasourceNames = plugInConfiguration.values(
                             	DATABASE_CONNECTION_FACTORY_NAME
                             );

@@ -68,7 +68,6 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
 
@@ -105,12 +104,12 @@ public class CodeUtility {
 	 * @param lookupCode
 	 * @return
 	 */
-	private Map lookupCode(
+	private Map<String,String> lookupCode(
 		Document document,
 		String lookupContainerName,
 		String lookupCode
 	) {
-      Map codeEntry = new HashMap();
+      Map<String,String> codeEntry = new HashMap<>();
       NodeList containerNodes = document.getElementsByTagName("CodeValueContainer");
       for(int i = 0; i < containerNodes.getLength();  i++) {
         org.w3c.dom.Node containerNode = containerNodes.item(i);
@@ -164,7 +163,7 @@ public class CodeUtility {
 	 * @throws ServiceException
 	 */
 	protected void split(
-		List locale,
+		List<String> locale,
 		File sourceDir,
 		File targetDir
 	) throws ServiceException {
@@ -210,7 +209,7 @@ public class CodeUtility {
 	                  catch (ResourceException e) {
 	                	  throw new ServiceException(e);
 	                  }
-	                  Map mergedCode = 
+	                  Map<String,String> mergedCode = 
 	                      this.lookupCode(
 	                          mergedCodes, 
 	                          codeFacade.getPath().getParent().getParent().getLastSegment().toClassicRepresentation(), 
@@ -386,7 +385,7 @@ public class CodeUtility {
 	 * @throws ServiceException
 	 */
 	protected void merge(
-		List locale,
+		List<String> locale,
 		File sourceDir,
 		File targetDir
 		) throws ServiceException {
@@ -401,7 +400,7 @@ public class CodeUtility {
 		for(int u = 0; u < en_US_files.length; u++) {
 			// Get all locale specific files for en_US_files[k]
 			Map<Path,MappedRecord> mergedCodes = new TreeMap<Path,MappedRecord>();
-			Set codeValueContainers = new HashSet(); // collect CodeValueContainer which are required in next step
+			Set<MappedRecord> codeValueContainers = new HashSet<>(); // collect CodeValueContainer which are required in next step
 			for(int i = 0; i < locale.size(); i++) {              
 				// Read entries
 				File file =  new File(sourceDir.getAbsolutePath() + File.separatorChar + locale.get(i) + File.separatorChar + en_US_files[u].getName());
@@ -466,17 +465,17 @@ public class CodeUtility {
 				}
 			}
 			// Try numeric sort of entries
-			Map sortedCodes = new TreeMap();
-			for(Iterator i = mergedCodes.entrySet().iterator(); i.hasNext(); ) {
-				Entry entry = (Entry)i.next();
+			Map<? super Comparable<?>,MappedRecord> sortedCodes = new TreeMap<>();
+			for(Iterator<Map.Entry<Path,MappedRecord>> i = mergedCodes.entrySet().iterator(); i.hasNext(); ) {
+				Map.Entry<Path,MappedRecord> entry = i.next();
 				String codeKey = ((Path)entry.getKey()).getLastSegment().toClassicRepresentation();
 				try {
 					sortedCodes.put(
-						new Integer(codeKey),
+						Integer.valueOf(codeKey),
 						entry.getValue()
-						);
+					);
 				} catch(NumberFormatException e) {
-					sortedCodes = mergedCodes;
+					sortedCodes = (Map)mergedCodes; // Dirty, but works for values() only access. Nevertheless assignment to a sortedCodesValues for both cases would be better
 					break;
 				}
 			}
@@ -571,7 +570,7 @@ public class CodeUtility {
 	protected void run(
 		String[] args
 	) throws ServiceException {
-      this.locales = new ArrayList();
+      this.locales = new ArrayList<>();
       this.sourceDir = new File(".");
       this.targetDir = new File(".");
       String command = "merge";
@@ -628,7 +627,7 @@ public class CodeUtility {
 	//-------------------------------------------------------------------------
 	// Members    
 	//-------------------------------------------------------------------------    
-	private List locales = null;
+	private List<String> locales = null;
 	private File sourceDir = null;
 	private File targetDir = null;
   

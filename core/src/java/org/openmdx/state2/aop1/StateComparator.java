@@ -57,6 +57,7 @@ import org.openmdx.base.accessor.cci.DataObject_1_0;
 import org.openmdx.base.accessor.cci.SystemAttributes;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.state2.spi.Order;
+import org.openmdx.state2.spi.TechnicalAttributes;
 
 /**
  * StateComparator
@@ -94,8 +95,8 @@ public class StateComparator
         }
         try {
             int validFrom = Order.compareValidFrom(
-                (XMLGregorianCalendar)o1.objGetValue("stateValidFrom"),
-                (XMLGregorianCalendar)o2.objGetValue("stateValidFrom")
+                (XMLGregorianCalendar)o1.objGetValue(TechnicalAttributes.STATE_VALID_FROM),
+                (XMLGregorianCalendar)o2.objGetValue(TechnicalAttributes.STATE_VALID_FROM)
             ); 
             if(validFrom != 0) {
                 return validFrom;

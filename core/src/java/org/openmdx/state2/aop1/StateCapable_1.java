@@ -48,9 +48,11 @@
 
 package org.openmdx.state2.aop1;
 
+import org.openmdx.base.accessor.cci.SystemAttributes;
 import org.openmdx.base.accessor.view.Interceptor_1;
 import org.openmdx.base.accessor.view.ObjectView_1_0;
 import org.openmdx.base.exception.ServiceException;
+import org.openmdx.state2.spi.TechnicalAttributes;
 
 /**
  * org::openmdx::state2::StateCapable plug-in
@@ -80,7 +82,7 @@ public class StateCapable_1 extends Interceptor_1 {
     ) throws ServiceException{
     	return Boolean.valueOf(
             super.getModel().isInstanceof(self, "org:openmdx:base:Aspect") && 
-            super.objGetValue("core") == null
+            super.objGetValue(SystemAttributes.CORE) == null
         );    	
     }
     
@@ -93,9 +95,9 @@ public class StateCapable_1 extends Interceptor_1 {
     ) throws ServiceException {
         Object value = super.objGetValue(feature);
         if(value == null) {
-        	if("stateVersion".equals(feature)) {
+        	if(TechnicalAttributes.STATE_VERSION.equals(feature)) {
         		value = stateVersionDefaultValue();
-        	} else if ("transactionTimeUnique".equals(feature)) {
+        	} else if (TechnicalAttributes.TRANSACTION_TIME_UNIQUE.equals(feature)) {
         		value = transactionTimeUniqueDefaultValue();
         	}
         }

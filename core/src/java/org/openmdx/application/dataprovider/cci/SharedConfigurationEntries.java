@@ -86,22 +86,6 @@ public class SharedConfigurationEntries {
   static public final String DATAPROVIDER_CONNECTION_FACTORY = "dataprovider";
 
   /**
-   * SEQUENCE_SUPPORTED flag
-   * 
-   * @deprecated will not be supported by the dataprovider 2 stack
-   */
-  @Deprecated
-  static public final String SEQUENCE_SUPPORTED = "sequenceSupported";
-
-  /**
-   * BATCH_SIZE for find operations
-   * 
-   * @deprecated The dataprovider 2 stack will handle this feature at
-   * plug-in level
-   */
-  static public final String BATCH_SIZE = "batchSize";
-
-  /**
    * Java bean plug-in enumeration
    */
   static public final String PLUG_IN = "plugIn";

@@ -114,12 +114,12 @@ class ImplementationMapping_1 implements Mapping_1_0 {
     /**
      * The implementation descriptors
      */
-    private final ConcurrentMap<String,ImplementationDescriptor> implementationDescriptors = new ConcurrentHashMap<String, ImplementationDescriptor>();
+    private final ConcurrentMap<String,ImplementationDescriptor> implementationDescriptors = new ConcurrentHashMap<>();
     
     /**
      * The aspect descriptors
      */
-    private final ConcurrentMap<String,AspectImplementationDescriptor> aspectDescriptors = new ConcurrentHashMap<String, AspectImplementationDescriptor>();
+    private final ConcurrentMap<String,AspectImplementationDescriptor> aspectDescriptors = new ConcurrentHashMap<>();
     
     /**
      * Map which contains &lt;&lsaquo;model-package-name&rsaquo;, &lsaquo;java-package-name&rsaquo;&gt; 
@@ -262,7 +262,7 @@ class ImplementationMapping_1 implements Mapping_1_0 {
                 //
                 // Aspect Implementation Classes
                 //
-                aspectImplementationClasses = new ArrayList<AspectImplementationDescriptor>();
+                aspectImplementationClasses = new ArrayList<>();
                 for(Object supertypePath : Model_1Factory.getModel().getElement(qualifiedClassName).objGetList("allSupertype")){                    
                     AspectImplementationDescriptor descriptor = this.getAspectDescriptor(((Path)supertypePath).getLastSegment().toClassicRepresentation());
                     if(descriptor != null) {
@@ -272,7 +272,7 @@ class ImplementationMapping_1 implements Mapping_1_0 {
                 //
                 // Mixed-in Interfaces
                 //
-                mixedInInterfaces = new ArrayList<Class<?>>(mixedInInterfaces);
+                mixedInInterfaces = new ArrayList<>(mixedInInterfaces);
                 for(AspectImplementationDescriptor aspectImplementationClass : aspectImplementationClasses) {
                     for(Class<?> mixedInInterface : Classes.getInterfaces(aspectImplementationClass.implementationClass)){
                         ImplementationDescriptor.add(mixedInInterface, mixedInInterfaces);
@@ -282,7 +282,7 @@ class ImplementationMapping_1 implements Mapping_1_0 {
             //
             // Combined interfaces
             //
-            Set<Class<?>> combinedInterfaces = new LinkedHashSet<Class<?>>();
+            Set<Class<?>> combinedInterfaces = new LinkedHashSet<>();
             // CCI
             SpecificationMapping_1.SpecificationDescriptor interfaceDescriptor = this.specificationMapping.getSpecificationDescriptor(qualifiedClassName); 
             combinedInterfaces.add(interfaceDescriptor.jmi1Interface);
@@ -452,7 +452,7 @@ class ImplementationMapping_1 implements Mapping_1_0 {
         /**
          * 
          */
-        private final ConcurrentMap<Method,InvocationDescriptor> invocationDescriptors = new ConcurrentHashMap<Method, InvocationDescriptor>();
+        private final ConcurrentMap<Method,InvocationDescriptor> invocationDescriptors = new ConcurrentHashMap<>();
         
         /* (non-Javadoc)
          * @see org.openmdx.base.accessor.jmi.spi.Jmi1Mapping_1_0#getAspectImplementationDescriptors()

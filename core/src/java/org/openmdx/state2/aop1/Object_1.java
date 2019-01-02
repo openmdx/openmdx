@@ -48,13 +48,12 @@
 package org.openmdx.state2.aop1;
 
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 
 import org.openmdx.base.accessor.cci.Container_1_0;
 import org.openmdx.base.accessor.cci.DataObject_1_0;
 import org.openmdx.base.accessor.view.Interceptor_1;
 import org.openmdx.base.accessor.view.ObjectView_1_0;
+import org.openmdx.base.collection.Maps;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
 import org.openmdx.kernel.exception.BasicException;
@@ -80,7 +79,7 @@ abstract public class Object_1 extends Interceptor_1 {
     /**
      * The container cache
      */
-    private ConcurrentMap<String,Container_1_0> containers = new ConcurrentHashMap<String,Container_1_0>();
+    private final Map<String, Container_1_0> containers = Maps.newMap(isMultithreaded());
     
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.spi.DelegatingObject_1#objGetContainer(java.lang.String)
@@ -120,8 +119,7 @@ abstract public class Object_1 extends Interceptor_1 {
             ) : super.objGetContainer(
                 feature
             );
-            Container_1_0 concurrent = this.containers.putIfAbsent(feature, container);
-            return concurrent == null ? container : concurrent;
+            return Maps.putUnlessPresent(this.containers, feature, container);
         } else {
             return container;
         }

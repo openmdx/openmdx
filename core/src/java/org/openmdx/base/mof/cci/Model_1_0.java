@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2013, OMEX AG, Switzerland
+ * Copyright (c) 2004-2018, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -67,7 +67,7 @@ public interface Model_1_0 {
      * 
      * @throws ServiceException if model element not found.
      */
-    public ModelElement_1_0 getElement(
+    ModelElement_1_0 getElement(
         Object element
     ) throws ServiceException;
 
@@ -76,35 +76,35 @@ public interface Model_1_0 {
      * org:omg:model1 compliant. Derived attributes are provided as well. Returns
      * null if the model element can not be found.
      */
-    public ModelElement_1_0 findElement(
+    ModelElement_1_0 findElement(
         Object element
     );
 
     /**
      * Returns all elements of the model package.
      */
-    public Collection<ModelElement_1_0> getContent(
+    Collection<ModelElement_1_0> getContent(
     ) throws ServiceException;
 
     /**
      * Dereferences the given 'element', i.e. if 'element' is an alias type returns the
      * referenced element recursively.
      */
-    public ModelElement_1_0 getDereferencedType(
+    ModelElement_1_0 getDereferencedType(
         Object element
     ) throws ServiceException;
 
     /**
      * Get dereferenced type of element.
      */
-    public ModelElement_1_0 getElementType(
+    ModelElement_1_0 getElementType(
         ModelElement_1_0 element
     ) throws ServiceException;
 
     /**
      * Return the model element of type org:omg:model1:Reference corresponding to path.
      */
-    public ModelElement_1_0 getReferenceType(
+    ModelElement_1_0 getReferenceType(
         Path path
     ) throws ServiceException;
 
@@ -115,14 +115,14 @@ public interface Model_1_0 {
      * 
      * @return <code>true</code> if the given XRI contains a shared association 
      */
-    public boolean containsSharedAssociation(
+    boolean containsSharedAssociation(
         Path xri
     ) throws ServiceException;
     
     /**
      * Returns true if the given element is local to the given modelPackage.
      */
-    public boolean isLocal(
+    boolean isLocal(
         Object type,
         Object modelPackage
     ) throws ServiceException;
@@ -137,7 +137,7 @@ public interface Model_1_0 {
      * @param includeSubtypes if true the subclasses are included in the search.
      * @return ModelElement_1_0 definition of the feature or null.
      */
-    public ModelElement_1_0 getFeatureDef(
+    ModelElement_1_0 getFeatureDef(
         ModelElement_1_0 classifierDef,
         String feature,
         boolean includeSubtypes
@@ -155,7 +155,7 @@ public interface Model_1_0 {
      * @return Map map of attributes of class, its supertypes and subtypes. The
      *          map contains an entry of the form (attributeName, attributeDef).
      */
-    public Map<String,ModelElement_1_0> getAttributeDefs(
+    Map<String,ModelElement_1_0> getAttributeDefs(
         ModelElement_1_0 classDef,
         boolean includeSubtypes,
         boolean includeDerived
@@ -166,84 +166,84 @@ public interface Model_1_0 {
      * as path in the exposed object. These references can also be interpreted
      * attributes of complex type".
      */
-    public boolean referenceIsStoredAsAttribute(
+    boolean referenceIsStoredAsAttribute(
         Object referenceType
     ) throws ServiceException;
 
     /**
      * returns true if the association belonging to reference is derived. 
      */
-    public boolean referenceIsDerived(
+    boolean referenceIsDerived(
         Object referenceType
     ) throws ServiceException;
 
     /**
      * Checks whether the dereferenced 'type' is primitive.
      */
-    public boolean isPrimitiveType(
+    boolean isPrimitiveType(
         Object type
     ) throws ServiceException;
 
     /**
      * Checks whether the dereferenced 'type' is primitive and numeric.
      */
-    public boolean isNumericType(
+    boolean isNumericType(
         Object type
     ) throws ServiceException;
 
     /**
      * returns true, if the given type is instanceof STRUCTURE_TYPE
      */
-    public boolean isStructureType(
+    boolean isStructureType(
         Object type
     ) throws ServiceException;
 
     /**
      * returns true, if the given type is instanceof STRUCTURE_FIELD
      */
-    public boolean isStructureFieldType(
+    boolean isStructureFieldType(
         Object type
     ) throws ServiceException;
 
     /**
      * returns true, if the given type is instanceof CLASS
      */
-    public boolean isClassType(
+    boolean isClassType(
         Object type
     ) throws ServiceException;
 
     /**
      * Returns true, if the given type is instanceof ATTRIBUTE or REFERENCE.
      */
-    public boolean isStructuralFeatureType(
+    boolean isStructuralFeatureType(
         Object type
     ) throws ServiceException;
 
     /**
      * Returns true, if the given type is instanceof REFERENCE.
      */
-    public boolean isReferenceType(
+    boolean isReferenceType(
         Object type
     ) throws ServiceException;
 
     /**
      * Returns true, if the given type is instanceof ATTRIBUTE.
      */
-    public boolean isAttributeType(
+    boolean isAttributeType(
         Object type
     ) throws ServiceException;
 
     /**
      * Returns true, if the given type is instanceof OPERATION.
      */
-    public boolean isOperationType(
+    boolean isOperationType(
         Object type
     ) throws ServiceException;
 
     /**
      * Returns true, if the given type is instanceof PACKAGE.
      */
-    public boolean isPackageType(
+    boolean isPackageType(
         Object type
     ) throws ServiceException;
 
@@ -267,7 +267,7 @@ public interface Model_1_0 {
      * 
      * @param removeDerived removes all derived features.
      */
-    public void verifyObject(
+    void verifyObject(
         Object value,
         Object type,
         String multiplicity,
@@ -281,7 +281,7 @@ public interface Model_1_0 {
      * is validated. validateValue() is called to validate a single
      * value.
      */
-    public void verifyObjectCollection(
+    void verifyObjectCollection(
         Object values,
         Object type,
         String multiplicity,
@@ -292,12 +292,12 @@ public interface Model_1_0 {
      * returns true, if the given DataproviderObject or DataObject_1_0 is instance of
      * the given type.
      */
-    public boolean objectIsSubtypeOf(
+    boolean objectIsSubtypeOf(
         Object object,
         Object ofType
     ) throws ServiceException;
 
-    public boolean isInstanceof(
+    boolean isInstanceof(
         DataObject_1_0 object,
         Object type
     ) throws ServiceException;
@@ -305,7 +305,7 @@ public interface Model_1_0 {
     /**
      * Returns true if type is subtype of ofType. 
      */
-    public boolean isSubtypeOf(
+    boolean isSubtypeOf(
         Object type,
         Object ofType
     ) throws ServiceException;
@@ -320,19 +320,19 @@ public interface Model_1_0 {
      * are both 'Role' which is not the correct OBJECT_TYPE. In cases of
      * model recursions OBJECT_TYPE = lastReferencedClass.
      */
-    public ModelElement_1_0[] getTypes(
+    ModelElement_1_0[] getTypes(
         Path path
     ) throws ServiceException;
 
     /**
      * returns the Java package name of the given model element.
      */
-    public String toJavaPackageName(
+    String toJavaPackageName(
         Object type,
         String packageSuffix
     ) throws ServiceException;
 
-    public String toJavaPackageName(
+    String toJavaPackageName(
         Object type,
         String packageSuffix,
         boolean dereferenceType
@@ -384,7 +384,7 @@ public interface Model_1_0 {
      * 
      * @param removeDerived removes all derived features.
      */
-    public void verifyObject(
+    void verifyObject(
         Object value,
         Object type,
         String multiplicity,
@@ -462,7 +462,7 @@ public interface Model_1_0 {
     /**
      * returns true, if the given type is instanceof ASSOCIATION
      */
-    public boolean isAssociationType(
+    boolean isAssociationType(
         Object type
     ) throws ServiceException;
 
@@ -478,12 +478,28 @@ public interface Model_1_0 {
 
     /**
      * Return identity pattern for class element
+     * 
+     * @param classDef the class, for which the identity pattern shall be determined
      * @return identity pattern for specified class, null if classDef is not of type class.
      */
     Path getIdentityPattern(
         ModelElement_1_0 classDef
     ) throws ServiceException;
 
-}
+    /**
+     * Return identity pattern for class element
+     * 
+     * @param classDef the class, for which the identity pattern shall be determined
+     * @param takeSubclassesIntoConsideration if <code>false</code> then <code>null</code>
+     * is returned in case of a <code>root</code> class, otherwise the subclasses' pattern
+     * is used provided it is unique
+     * @return identity pattern for specified class, null if classDef is not of type class.
+     * @deprecated Will be replaced by a more general solution, soon
+     */
+    @Deprecated
+    Path getIdentityPattern(
+        ModelElement_1_0 classDef, 
+        boolean takeSubclassesIntoConsideration
+    ) throws ServiceException;
 
-//--- End of File -----------------------------------------------------------
+}

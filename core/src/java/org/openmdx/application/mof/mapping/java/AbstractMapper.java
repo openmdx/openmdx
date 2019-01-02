@@ -768,11 +768,15 @@ public abstract class AbstractMapper
     protected String getOrderType(
         StructuralFeatureDef featureDef
     ){
-        return
-            Multiplicity.SINGLE_VALUE.code().equals(featureDef.getMultiplicity()) ||
-            Multiplicity.OPTIONAL.code().equals(featureDef.getMultiplicity()) ?
-            "org.w3c.cci2.SimpleTypeOrder" :
-            null; // "org.w3c.cci2.MultivaluedTypeOrder" no longer supported
+        final String multiplicity = featureDef.getMultiplicity();
+        if(Multiplicity.SINGLE_VALUE.code().equals(multiplicity) ||
+            Multiplicity.OPTIONAL.code().equals(multiplicity)
+        ){
+            return PrimitiveTypes.STRING.equals(featureDef.getQualifiedTypeName()) ?
+                "org.w3c.cci2.StringTypeOrder" :
+                "org.w3c.cci2.SimpleTypeOrder";
+        }
+        return null;
     }
 
     // -----------------------------------------------------------------------

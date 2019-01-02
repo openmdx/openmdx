@@ -57,6 +57,7 @@ import javax.resource.cci.Record;
 
 import org.openmdx.base.accessor.cci.Container_1_0;
 import org.openmdx.base.accessor.cci.DataObject_1_0;
+import org.openmdx.base.accessor.cci.SystemAttributes;
 import org.openmdx.base.accessor.spi.ExceptionHelper;
 import org.openmdx.base.accessor.view.Interceptor_1;
 import org.openmdx.base.accessor.view.ObjectView_1_0;
@@ -123,7 +124,7 @@ public class Aspect_1 extends Interceptor_1 {
         boolean required
     ) throws ServiceException {
         if(this.core == null) { 
-            this.core = (DataObject_1_0) this.self.objGetDelegate().objGetValue("core");
+            this.core = (DataObject_1_0) this.self.objGetDelegate().objGetValue(SystemAttributes.CORE);
         }
         if(required && this.core == null) {
             throw new ServiceException(
@@ -148,7 +149,7 @@ public class Aspect_1 extends Interceptor_1 {
         DataObject_1_0 core
     ) throws ServiceException {
         validateCore(core);
-        super.objSetValue("core", this.core = core);
+        super.objSetValue(SystemAttributes.CORE, this.core = core);
     }
 
     /**
@@ -172,7 +173,7 @@ public class Aspect_1 extends Interceptor_1 {
     public Object objGetValue(
         String feature
     ) throws ServiceException {
-        if("core".equals(feature)) {
+        if(SystemAttributes.CORE.equals(feature)) {
             return getCore(false);
         } else {
             return getDelegate(feature).objGetValue(feature);
@@ -258,7 +259,7 @@ public class Aspect_1 extends Interceptor_1 {
     protected void validateCore(
         DataObject_1_0 newValue
     ) throws ServiceException{
-        DataObject_1_0 oldValue = (DataObject_1_0) this.self.objGetDelegate().objGetValue("core");
+        DataObject_1_0 oldValue = (DataObject_1_0) this.self.objGetDelegate().objGetValue(SystemAttributes.CORE);
         if(newValue != oldValue) {
             if(oldValue != null) throw new ServiceException(
                 BasicException.Code.DEFAULT_DOMAIN,
@@ -302,7 +303,7 @@ public class Aspect_1 extends Interceptor_1 {
         String feature, 
         Object to
     ) throws ServiceException {
-        if("core".equals(feature)) {
+        if(SystemAttributes.CORE.equals(feature)) {
             setCore((DataObject_1_0) to);
         } else {
             getDelegate(feature).objSetValue(feature, to);

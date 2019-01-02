@@ -49,6 +49,7 @@ package org.openmdx.resource.spi;
 
 import java.io.PrintWriter;
 import java.util.Collections;
+import java.util.Objects;
 import java.util.Set;
 
 import javax.resource.ResourceException;
@@ -58,8 +59,6 @@ import javax.resource.spi.ManagedConnection;
 import javax.resource.spi.ManagedConnectionFactory;
 import javax.resource.spi.security.PasswordCredential;
 import javax.security.auth.Subject;
-
-import org.openmdx.kernel.resource.spi.ShareableConnectionManager;
 
 /**
  * Abstract Managed URL Connection Factory
@@ -81,7 +80,7 @@ public abstract class AbstractManagedConnectionFactory implements ManagedConnect
 	/**
 	 * Lazily calculated hash code
 	 */
-	private volatile int hash = 0;
+	private int hash = 0;
 
 	/**
 	 * 
@@ -109,16 +108,6 @@ public abstract class AbstractManagedConnectionFactory implements ManagedConnect
     private ConnectionManager connectionManager;
     
     /**
-     * An empty password
-     */
-    private static final char[] EMPTY_PASSWORD = {};
-    
-    /**
-     * An empty user name
-     */
-    private static final String EMPTY_USER_NAME = "";    
-
-    /**
      * Tells whether this factory creates shareable connections
      * 
      * @return <code>true</code> if this factory creates shareable connections
@@ -129,19 +118,18 @@ public abstract class AbstractManagedConnectionFactory implements ManagedConnect
     /* (non-Javadoc)
      * @see javax.resource.spi.ManagedConnectionFactory#matchManagedConnections(java.util.Set, javax.security.auth.Subject, javax.resource.spi.ConnectionRequestInfo)
      */
-    
-//  @Override
+    @Override
 	@SuppressWarnings("rawtypes")
     public final ManagedConnection matchManagedConnections(
         Set managedConnections,
         Subject subject,
         ConnectionRequestInfo connectionRequestInfo
     ) throws ResourceException {
-        PasswordCredential credential = this.getCredential(subject);
+        final PasswordCredential credential = PasswordCredentials.getPasswordCredential(this, subject);
         for(Object managedConnection : managedConnections) {
             if(managedConnection instanceof AbstractManagedConnection) {
             	AbstractManagedConnection candidate = (AbstractManagedConnection) managedConnection;
-            	if(candidate.matches(credential)) {
+            	if(candidate.matches(this, credential, connectionRequestInfo)) {
             		return candidate;
             	}
             }
@@ -154,17 +142,15 @@ public abstract class AbstractManagedConnectionFactory implements ManagedConnect
      * 
      * @return the resource adapter's internal connection manager
      */
-	ConnectionManager getConnectionManager(
+	private ConnectionManager getConnectionManager(
     ){
         if(this.connectionManager == null) {
-            String password = this.getPassword();
-            String userName = this.getUserName();
-            PasswordCredential credential = new PasswordCredential(
-                userName == null ? EMPTY_USER_NAME : userName,
-                password == null ? EMPTY_PASSWORD : password.toCharArray()
+            final String password = this.getPassword();
+            final String userName = this.getUserName();
+            final Set<PasswordCredential> credentials =  password != null || userName != null ? Collections.singleton(
+                PasswordCredentials.newPasswordCredential(this, userName, password)
+            ) : Collections.emptySet(
             );
-            credential.setManagedConnectionFactory(this);
-            Set<PasswordCredential> credentials = Collections.singleton(credential);
             this.connectionManager = this.isManagedConnectionShareable() ? new ShareableConnectionManager(
                 credentials
             ) : new SimpleConnectionManager(
@@ -179,7 +165,7 @@ public abstract class AbstractManagedConnectionFactory implements ManagedConnect
      */
     public Object createConnectionFactory(
     ) throws ResourceException {
-        return createConnectionFactory(null);
+        return createConnectionFactory(getConnectionManager());
     }
 
 	/* (non-Javadoc)
@@ -199,7 +185,7 @@ public abstract class AbstractManagedConnectionFactory implements ManagedConnect
 	 * 
 	 * @throws ResourceException
 	 */
-	protected PasswordCredential getCredential(
+	protected PasswordCredential getPasswordCredential(
 		Subject subject
 	) throws ResourceException{
 		if(subject == null) {
@@ -210,14 +196,10 @@ public abstract class AbstractManagedConnectionFactory implements ManagedConnect
 				credential.setManagedConnectionFactory(this);
 				return credential;
 			}
+			return null;
 		} else {
-			for(PasswordCredential credential : subject.getPrivateCredentials(PasswordCredential.class)) {
-				if(credential.getManagedConnectionFactory() == this) {
-					return credential;
-				}
-			}
+		    return PasswordCredentials.getPasswordCredential(this, subject);
 		} 
-		return null;
 	}
 
 	/* (non-Javadoc)
@@ -225,7 +207,7 @@ public abstract class AbstractManagedConnectionFactory implements ManagedConnect
 	 */
 	public void setLogWriter(
 		PrintWriter logWriter
-	) throws ResourceException {
+	){
 		this.logWriter = logWriter;
 	}
 
@@ -249,27 +231,36 @@ public abstract class AbstractManagedConnectionFactory implements ManagedConnect
 		this.connectionURL = connectionURL;
 	}
 
-	/**
-	 * Log and return an exception
-	 * 
-	 * @param an exception
-	 * 
-	 * @return the exception
-	 */
-	protected final ResourceException log(
-		ResourceException exception
-	){
-		try {
-			PrintWriter logWriter = this.getLogWriter();
-			if(logWriter != null) {
-				exception.printStackTrace(logWriter);
-			}
-		} catch (Exception ignore) {
-			// Ensure that the original exception will be available
-		}
-		return exception;
-	}
+    /**
+     * Log and return an exception
+     * 
+     * @param an exception t
+     * 
+     * @return the exception
+     */
+    protected ResourceException log(
+        ResourceException exception,
+        boolean printStackTrace
+    ){
+        LogWriter.log(getLogWriter(), exception, printStackTrace);
+        return exception;
+    }
 
+    /**
+     * Logs a message by replacing the placeholders {0}, {1} etc. by the 
+     * arguments' string values
+     * 
+     * @param target the optional target
+     * @param pattern the pattern
+     * @param arguments the (optional) arguments
+     */
+    protected void log(
+        String pattern,
+        Object... arguments 
+    ){
+        LogWriter.log(getLogWriter(), pattern, arguments);
+    }
+    
 	/**
 	 * Set password.
 	 * 
@@ -331,7 +322,7 @@ public abstract class AbstractManagedConnectionFactory implements ManagedConnect
 		){
 			return false;
 		} else {
-			AbstractManagedConnectionFactory that = (AbstractManagedConnectionFactory) other;
+			final AbstractManagedConnectionFactory that = (AbstractManagedConnectionFactory) other;
 			return 
 				this.connectionURL.equals(that.connectionURL) && (
 					this.userName == null ? that.userName == null : this.userName.equals(that.userName)
@@ -347,23 +338,44 @@ public abstract class AbstractManagedConnectionFactory implements ManagedConnect
 	@Override
 	public int hashCode(
 	) {
-		if(this.hash == 0) synchronized(this) {
-			if(this.hash == 0) {
-				if(this.connectionURL == null) {
-					this.hash = System.identityHashCode(this);
-				} else {
-					int hash = this.connectionURL.hashCode();
-					if(this.userName != null) {
-						hash += this.userName.hashCode();
-					}
-					if(this.password != null) {
-						hash += this.password.hashCode();
-					}
-					this.hash = hash;
-				}
-			}
+		if(this.hash == 0) {
+		    this.hash = this.connectionURL == null ? System.identityHashCode(
+		        this
+		    ) : Objects.hash(
+	            this.connectionURL,
+	            this.userName,
+	            this.password
+	        );
 		}
 		return this.hash;
 	}
 
+    /* (non-Javadoc)
+     * @see javax.resource.spi.ManagedConnectionFactory#createManagedConnection(javax.security.auth.Subject, javax.resource.spi.ConnectionRequestInfo)
+     */
+    @Override
+    public final ManagedConnection createManagedConnection(
+        Subject subject,
+        ConnectionRequestInfo connectionRequestInfo
+    ) throws ResourceException {
+        final ManagedConnection managedConnection = newManagedConnection(subject, connectionRequestInfo);
+        managedConnection.setLogWriter(getLogWriter());
+        return managedConnection;
+    }
+
+    /**
+     * Callback method for to create a managed connection
+     * 
+     * @param subject the subject with its credentials
+     * @param connectionRequestInfo the connection request info
+     * 
+     * @return a newly created managed connection
+     * 
+     * @throws ResourceException
+     */
+    protected abstract ManagedConnection newManagedConnection(
+        Subject subject,
+        ConnectionRequestInfo connectionRequestInfo
+    ) throws ResourceException;
+    
 }

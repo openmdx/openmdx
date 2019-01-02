@@ -206,13 +206,13 @@ public class EntityManagerFactory_1
         //
         try {
             Properties properties = PropertiesProvider.toProperties(configuration);
-            Configuration viewyManagerConfiguration = PropertiesConfigurationProvider.getConfiguration(
+            Configuration viewManagerConfiguration = PropertiesConfigurationProvider.getConfiguration(
                 properties,
                 "org", "openmdx", "jdo", "ViewManager"
             );
-            List<PlugIn_1_0> viewManagerPlugIns = new ArrayList<PlugIn_1_0>();
+            List<PlugIn_1_0> viewManagerPlugIns = new ArrayList<>();
             for(
-                ListIterator<?> i = viewyManagerConfiguration.values(
+                ListIterator<?> i = viewManagerConfiguration.values(
                     "plugIn"
                 ).populationIterator();
                 i.hasNext();
@@ -311,7 +311,7 @@ public class EntityManagerFactory_1
     /**
      * The shared user objects
      */
-    private final Map<String,Object> userObjects = new HashMap<String,Object>();
+    private final Map<String,Object> userObjects = new HashMap<>();
     
     /**
      * The top level layer manager factory
@@ -331,7 +331,7 @@ public class EntityManagerFactory_1
     /**
      * The default configuration
      */
-    protected static final Map<String, Object> DEFAULT_CONFIGURATION = new HashMap<String, Object>(
+    protected static final Map<String, Object> DEFAULT_CONFIGURATION = new HashMap<>(
         AbstractPersistenceManagerFactory.DEFAULT_CONFIGURATION
     );
 
@@ -381,7 +381,7 @@ public class EntityManagerFactory_1
         Map overrides, 
         Map props
     ){
-        Map<Object,Object> configuration = new HashMap<Object,Object>(DEFAULT_CONFIGURATION);
+        Map<Object,Object> configuration = new HashMap<>(DEFAULT_CONFIGURATION);
         configuration.putAll(props);
         try {
             String entityManagerName = (String)props.get(ConfigurableProperty.Name.qualifiedName());
@@ -507,7 +507,7 @@ public class EntityManagerFactory_1
         //
         // User Objects
         //
-        Map<String,Object> userObjects = new HashMap<String,Object>(sharedUserObjects);
+        Map<String,Object> userObjects = new HashMap<>(sharedUserObjects);
         plugInConfiguration.values(
             "userObjects"
         ).put(
@@ -529,7 +529,7 @@ public class EntityManagerFactory_1
         //
         // Model Mapping
         // 
-        Map<String,String> implementationMap = new HashMap<String,String>();
+        Map<String,String> implementationMap = new HashMap<>();
         plugInConfiguration.values(
             "implementationMap"
         ).put(

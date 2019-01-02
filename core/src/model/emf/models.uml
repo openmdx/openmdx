@@ -45,4 +45,7 @@
   <eAnnotations xmi:id="_Th7QwHLyEeGDZOi-upD3nQ" source="org.openmdx.preferences2">
     <references xmi:type="uml:Package" href="org.openmdx.preferences2.uml#_c6xKEHLfEeGNgPDkuA6txQ"/>
   </eAnnotations>
+  <eAnnotations xmi:id="_Th7QwHLyEeGDZOi-upD3nR" source="org.openmdx.database2">
+    <references xmi:type="uml:Package" href="org.openmdx.database2.uml#_c6xKEHLfEeGNgPDkuA6txR"/>
+  </eAnnotations>
 </uml:Model>

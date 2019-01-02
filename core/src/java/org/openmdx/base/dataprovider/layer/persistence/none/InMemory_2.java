@@ -94,55 +94,57 @@ import org.openmdx.kernel.log.SysLog;
 /**
  * An in-memory data store
  * 
- * Required configuration entries<ul>
+ * Required configuration entries
+ * <ul>
  * <li>namespaceId
  * </ul>
  * <p>
- * A single namespace must not be used by different threadscconcurrently.
+ * A single namespace must not be used by different threads concurrently.
  */
-@SuppressWarnings("synthetic-access")
 public class InMemory_2 implements Port<RestConnection> {
 
-	/**
-	 * @return the namespaceId
-	 */
-	public String getNamespaceId() {
-		return this.namespaceId;
-	}
+    /**
+     * @return the namespaceId
+     */
+    public String getNamespaceId() {
+        return this.namespaceId;
+    }
 
-	/**
-	 * Sets the namspace id and provides the namespace local data
-	 * 
-	 * @param namespaceId the namespaceId to set
-	 */
-	public void setNamespaceId(String namespaceId) {
-		this.namespaceId = namespaceId;
-		this.data = getData(namespaceId);
-	}
+    /**
+     * Sets the namspace id and provides the namespace local data
+     * 
+     * @param namespaceId
+     *            the namespaceId to set
+     */
+    public void setNamespaceId(
+        String namespaceId
+    ) {
+        this.namespaceId = namespaceId;
+        this.data = getData(namespaceId);
+    }
 
-	private String namespaceId;
+    private String namespaceId;
 
-	/**
-	 * To identify extent queries
-	 */
-	private static final Path EXTENT_PATTERN = new Path("xri://@openmdx*($.)/provider/($..)/segment/($..)/extent");
-	
-	/**
-	 * For internal requests
-	 */
-	private final InteractionSpecs INTERNAL = InteractionSpecs.getRestInteractionSpecs(false);
-	
-	/**
-	 * Namespace local data
-	 */
-	protected SortedMap<Path,SortedMap<XRISegment,ObjectRecord>> data;
-	
-	/**
-	 * ClassLoader local storage
-	 */
-	private static final SortedMap<String,SortedMap<Path,SortedMap<XRISegment,ObjectRecord>>> storage = 
-			new TreeMap<String, SortedMap<Path,SortedMap<XRISegment,ObjectRecord>>>();
-	
+    /**
+     * To identify extent queries
+     */
+    private static final Path EXTENT_PATTERN = new Path("xri://@openmdx*($.)/provider/($..)/segment/($..)/extent");
+
+    /**
+     * For internal requests
+     */
+    private final InteractionSpecs INTERNAL = InteractionSpecs.getRestInteractionSpecs(false);
+
+    /**
+     * Namespace local data
+     */
+    protected SortedMap<Path, SortedMap<XRISegment, ObjectRecord>> data;
+
+    /**
+     * ClassLoader local storage
+     */
+    private static final SortedMap<String, SortedMap<Path, SortedMap<XRISegment, ObjectRecord>>> storage = new TreeMap<String, SortedMap<Path, SortedMap<XRISegment, ObjectRecord>>>();
+
     /**
      * Defines the large objects' buffer size
      */
@@ -153,10 +155,34 @@ public class InMemory_2 implements Port<RestConnection> {
      * 
      * @param namespaceId
      */
-    protected static void dropNamespace(String namespaceId) {
-    	storage.remove(namespaceId);
+    protected static void dropNamespace(
+        String namespaceId
+    ) {
+        storage.remove(namespaceId);
     }
-    
+
+    /**
+     * Stll used by some configurations
+     * 
+     * @param datasourceName
+     */
+    @Deprecated
+    public void setDatasourceName(
+        String datasourceName
+    ) {
+        // nothing to do
+    }
+
+    /**
+     * Stll used by some configurations
+     * 
+     * @return <code>null</code>
+     */
+    @Deprecated
+    public String getDatasourceName() {
+        return null;
+    }
+
     /**
      * Retrieve the namespace local data
      * 
@@ -164,29 +190,32 @@ public class InMemory_2 implements Port<RestConnection> {
      * 
      * @return the namespace local data
      */
-    private static synchronized SortedMap<Path,SortedMap<XRISegment,ObjectRecord>> getData(
-    	String namespaceId
+    private static synchronized SortedMap<Path, SortedMap<XRISegment, ObjectRecord>> getData(
+        String namespaceId
     ) {
-    	SortedMap<Path,SortedMap<XRISegment,ObjectRecord>> data = storage.get(namespaceId);
-    	if(data == null) {
+        SortedMap<Path, SortedMap<XRISegment, ObjectRecord>> data = storage.get(namespaceId);
+        if (data == null) {
             SysLog.detail("Create namespace", namespaceId);
-    		storage.put(
-    			namespaceId,
-    			data = new TreeMap<Path,SortedMap<XRISegment,ObjectRecord>>()
-    		);
-    	} else {
+            storage.put(
+                namespaceId,
+                data = new TreeMap<Path, SortedMap<XRISegment, ObjectRecord>>());
+        } else {
             SysLog.detail("Attach namespace", namespaceId);
-    	}
-    	return data;
+        }
+        return data;
     }
-    
-    /* (non-Javadoc)
-     * @see org.openmdx.application.dataprovider.spi.OperationAwareLayer_1#getInteraction(javax.resource.cci.Connection)
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.openmdx.application.dataprovider.spi.OperationAwareLayer_1#
+     * getInteraction(javax.resource.cci.Connection)
      */
     @Override
     public Interaction getInteraction(
         RestConnection connection
-    ) throws ResourceException {
+    )
+        throws ResourceException {
         return new RestInteraction(connection);
     }
 
@@ -197,10 +226,10 @@ public class InMemory_2 implements Port<RestConnection> {
 
         /**
          * Retrieve the large object's value
+         * 
          * @return
          */
-        Object getValue(
-        );
+        Object getValue();
 
     }
 
@@ -227,14 +256,12 @@ public class InMemory_2 implements Port<RestConnection> {
          */
         Blob(
             InputStream source
-        ) throws IOException {
+        )
+            throws IOException {
             ByteArrayOutputStream target = new ByteArrayOutputStream(source.available());
             byte[] buffer = new byte[CHUNK_SIZE];
-            for(
-                int i = source.read(buffer);
-                i > 0;
-                i = source.read(buffer)
-            ) target.write(buffer, 0, i);
+            for (int i = source.read(buffer); i > 0; i = source.read(buffer))
+                target.write(buffer, 0, i);
             this.value = target.toByteArray();
         }
 
@@ -243,8 +270,7 @@ public class InMemory_2 implements Port<RestConnection> {
          * 
          * @return
          */
-        public Object getValue(
-        ){
+        public Object getValue() {
             return new ByteArrayInputStream(this.value);
         }
 
@@ -272,14 +298,12 @@ public class InMemory_2 implements Port<RestConnection> {
          */
         Clob(
             Reader source
-        ) throws IOException {
+        )
+            throws IOException {
             CharArrayWriter target = new CharArrayWriter();
             char[] buffer = new char[CHUNK_SIZE];
-            for(
-                int i = source.read(buffer);
-                i > 0;
-                i = source.read(buffer)
-            ) target.write(buffer, 0, i);
+            for (int i = source.read(buffer); i > 0; i = source.read(buffer))
+                target.write(buffer, 0, i);
             this.value = target.toCharArray();
         }
 
@@ -288,564 +312,613 @@ public class InMemory_2 implements Port<RestConnection> {
          * 
          * @return
          */
-        public Object getValue(
-        ){
+        public Object getValue() {
             return new CharArrayReader(this.value);
         }
 
     }
 
-    
     //------------------------------------------------------------------------
     // Class RestInteraction
     //------------------------------------------------------------------------
-    
+
     class RestInteraction extends AbstractRestInteraction {
 
-		protected RestInteraction(
-			RestConnection connection
-		) {
-			super(connection);
-		}
-		
-		/* (non-Javadoc)
-		 * @see org.openmdx.base.rest.spi.AbstractRestInteraction#put(org.openmdx.base.resource.spi.RestInteractionSpec, org.openmdx.base.rest.cci.ObjectRecord, javax.resource.cci.IndexedRecord)
-		 */
-		@Override
-		public boolean update(
-			RestInteractionSpec ispec, 
-			ObjectRecord input,
-			ResultRecord output
-		) throws ResourceException {
-			final Path xri = input.getResourceIdentifier();
-			final ObjectRecord beforeImage;
-			try {
-				beforeImage = getMandatoryObject(xri);
-			} catch (ResourceException exception) {
-				throw ResourceExceptions.initHolder(
-					new ResourceException(
-						"Unable to update the object with the given resource identifier: "
-						+ "The object could not be found in the name space",	
-						BasicException.newEmbeddedExceptionStack(
-							exception,
-							BasicException.Code.DEFAULT_DOMAIN,
-							BasicException.Code.NOT_FOUND,
-							new BasicException.Parameter("resourceIdentifier", xri),
-							new BasicException.Parameter("functionName", ispec.getFunctionName()),
-							new BasicException.Parameter("interactionVerb", ispec.getInteractionVerbName())
-						)
-					)
-				);
-			}
-			if(!input.getRecordName().equals(beforeImage.getRecordName())) {
-				throw ResourceExceptions.initHolder(
-					new ResourceException(
-						"It is not allowed to change the object class",	
-						BasicException.newEmbeddedExceptionStack(
-							BasicException.Code.DEFAULT_DOMAIN,
-							BasicException.Code.BAD_PARAMETER,
-							new BasicException.Parameter("resourceIdentifier", xri),
-							new BasicException.Parameter("functionName", ispec.getFunctionName()),
-							new BasicException.Parameter("interactionVerb", ispec.getInteractionVerbName()),
-							new BasicException.Parameter("oldClass", beforeImage.getRecordName()),
-							new BasicException.Parameter("newClass",input.getRecordName())
-						)
-					)
-				);
-			}
-			final ObjectRecord afterImage = beforeImage.clone();
-			mergeObjectValues(input, afterImage);
-			final SortedMap<XRISegment, ObjectRecord> container = getMandatoryContainer(xri.getParent());
-			final ObjectRecord replaced = container.put(xri.getLastSegment(), afterImage);
-			try {
-				validateBeforeImage(input, replaced);
-			} catch (ResourceException exception) {
-				container.put(xri.getLastSegment(), replaced);
-				throw ResourceExceptions.initHolder(
-					new ResourceException(
-						"Unable to update the object with the given resource identifier: "
-						+ "The object has been modifed since it was read",	
-						BasicException.newEmbeddedExceptionStack(
-							exception,
-							BasicException.Code.DEFAULT_DOMAIN,
-							BasicException.Code.CONCURRENT_ACCESS_FAILURE,
-							new BasicException.Parameter("resourceIdentifier", xri),
-							new BasicException.Parameter("functionName", ispec.getFunctionName()),
-							new BasicException.Parameter("interactionVerb", ispec.getInteractionVerbName())
-						)
-					)
-				);
-			}
-			return true;
-		}
+        protected RestInteraction(
+            RestConnection connection
+        ) {
+            super(connection);
+        }
 
-		@SuppressWarnings("unchecked")
-		private void mergeObjectValues(
-			ObjectRecord input,
-			ObjectRecord afterImage
-		) throws ResourceException {
-			final MappedRecord value;
-			try {
-				value = (MappedRecord) afterImage.getValue().clone();
-			} catch (CloneNotSupportedException exception) {
-				throw ResourceExceptions.toSystemException(exception);
-			}
-			value.putAll(input.getValue());
-			afterImage.setValue(value);
-		}
-
-		/* (non-Javadoc)
-		 * @see org.openmdx.base.rest.spi.AbstractRestInteraction#find(org.openmdx.base.resource.spi.RestInteractionSpec, org.openmdx.base.rest.cci.QueryRecord, org.openmdx.base.rest.cci.ResultRecord)
-		 */
-		@SuppressWarnings({"unchecked","rawtypes"})
-		@Override
-		protected boolean find(
-			RestInteractionSpec ispec, 
-			QueryRecord input,
-			ResultRecord output
-		) throws ResourceException {
-			// TODO position, size
-			final Path xri = input.getResourceIdentifier();
-			final boolean extentQuery = xri.isLike(EXTENT_PATTERN);
-			final QueryFilterRecord queryFilter = input.getQueryFilter();
-			final ObjectRecordFilter objectFilter = queryFilter == null || queryFilter.getCondition().isEmpty() ?
-				null : new ObjectRecordFilter(queryFilter, extentQuery);
-			final ObjectRecordComparator comparator = queryFilter == null ? null : ObjectRecordComparator.getInstance(
-				queryFilter.getOrderSpecifier()
-			);
-			List<ObjectRecord> target = comparator == null ? output : new ArrayList();
-			if(extentQuery) {
-				findInExtent(target, objectFilter);
-			} else {
-				findInContainer(target, xri, objectFilter);
-			}
-			if(comparator != null){
-				Collections.sort(target, comparator);
-				output.addAll(target);
-			}
-			output.setHasMore(false);
-			return true;
-		}
-
-		private void findInContainer(
-			List<ObjectRecord> target, 
-			final Path xri,
-			final ObjectRecordFilter objectFilter
-		) {
-			final Path containerFilter;
-			final XRISegment segmentFilter;
-			if(xri.isObjectPath()){
-				containerFilter = xri.getParent();
-				segmentFilter = xri.getLastSegment();
-			} else {
-				containerFilter = xri;
-				segmentFilter = null;
-			}
-			if(containerFilter.isPattern()) {
-				for(Map.Entry<Path, SortedMap<XRISegment, ObjectRecord>> c : data.entrySet()){
-					if(c.getKey().isLike(containerFilter)){
-						findInContainer(target, c.getValue(), segmentFilter, objectFilter);
-					}
-				}
-			} else {
-				findInContainer(target, data.get(containerFilter), segmentFilter, objectFilter);
-			}
-		}
-
-		private void findInExtent(
-			List<ObjectRecord> target, 
-			final ObjectRecordFilter objectFilter
-		) {
-			final Path identityPattern = objectFilter.getIdentityPattern();
-			for(SortedMap<XRISegment, ObjectRecord> c : data.values()) {
-				for(ObjectRecord o : c.values()) {
-					if(
-						o.getResourceIdentifier().isLike(identityPattern) &&	
-						objectFilter.accept(o)
-					) {
-						target.add(o);
-					}
-				}
-			}
-		}
-
-		private void findInContainer(
-			List<ObjectRecord> output,
-			SortedMap<XRISegment, ObjectRecord> container,
-			XRISegment segmentFilter, 
-			ObjectRecordFilter 
-			objectFilter
-		) {
-			if(container != null) {
-				for(Map.Entry<XRISegment, ObjectRecord> o : container.entrySet()) {
-					if(segmentFilter == null || segmentFilter.matches(o.getKey())){
-						final ObjectRecord candidate = o.getValue();
-						if(objectFilter == null || objectFilter.accept(candidate)){
-							output.add(candidate);
-						}
-					}
-				}
-			}
-		}
-
-		/* (non-Javadoc)
-		 * @see org.openmdx.base.rest.spi.AbstractRestInteraction#get(org.openmdx.base.resource.spi.RestInteractionSpec, org.openmdx.base.rest.cci.QueryRecord, org.openmdx.base.rest.cci.ResultRecord)
-		 */
-		@SuppressWarnings("unchecked")
-		@Override
-		protected boolean get(
-			RestInteractionSpec ispec, 
-			QueryRecord input,
-			ResultRecord output
-		) throws ResourceException {
-			final Path xri = input.getResourceIdentifier();
-			final ObjectRecord object;
-			if(xri.size() <= 3) {
-				object = getMandatoryObject(xri);
-			} else {
-				final SortedMap<XRISegment, ObjectRecord> container = getOptionalContainer(xri.getParent());
-				if(container == null) {
-				    return false;
-				}
-				object = container.get(xri.getLastSegment());
-				if(object == null) {
-				    return false;
-				}
-			}
-			output.add(object);
-			output.setHasMore(false);
-			output.setTotal(1L);
-			return true;
-		}
-
-		/* (non-Javadoc)
-		 * @see org.openmdx.base.rest.spi.AbstractRestInteraction#delete(org.openmdx.base.resource.spi.RestInteractionSpec, org.openmdx.base.rest.cci.QueryRecord)
-		 */
+        /*
+         * (non-Javadoc)
+         * 
+         * @see
+         * org.openmdx.base.rest.spi.AbstractRestInteraction#put(org.openmdx.
+         * base.resource.spi.RestInteractionSpec,
+         * org.openmdx.base.rest.cci.ObjectRecord,
+         * javax.resource.cci.IndexedRecord)
+         */
         @Override
-		protected boolean delete(
-			RestInteractionSpec ispec, 
-			QueryRecord input
-		) throws ResourceException {
-			final ResultRecord objects = Records.getRecordFactory().createIndexedRecord(ResultRecord.class);
-			find(INTERNAL.GET, input, objects);
-			boolean success = false;
-			for(Object object : objects){
-				success |= delete(INTERNAL.DELETE, (ObjectRecord) object);
-			}
-			return success;
-		}
+        public boolean update(
+            RestInteractionSpec ispec,
+            ObjectRecord input,
+            ResultRecord output
+        )
+            throws ResourceException {
+            final Path xri = input.getResourceIdentifier();
+            final ObjectRecord beforeImage;
+            try {
+                beforeImage = getMandatoryObject(xri);
+            } catch (ResourceException exception) {
+                throw ResourceExceptions.initHolder(
+                    new ResourceException(
+                        "Unable to update the object with the given resource identifier: "
+                            + "The object could not be found in the name space",
+                        BasicException.newEmbeddedExceptionStack(
+                            exception,
+                            BasicException.Code.DEFAULT_DOMAIN,
+                            BasicException.Code.NOT_FOUND,
+                            new BasicException.Parameter("resourceIdentifier", xri),
+                            new BasicException.Parameter("functionName", ispec.getFunctionName()),
+                            new BasicException.Parameter("interactionVerb", ispec.getInteractionVerbName()))));
+            }
+            if (!input.getRecordName().equals(beforeImage.getRecordName())) {
+                throw ResourceExceptions.initHolder(
+                    new ResourceException(
+                        "It is not allowed to change the object class",
+                        BasicException.newEmbeddedExceptionStack(
+                            BasicException.Code.DEFAULT_DOMAIN,
+                            BasicException.Code.BAD_PARAMETER,
+                            new BasicException.Parameter("resourceIdentifier", xri),
+                            new BasicException.Parameter("functionName", ispec.getFunctionName()),
+                            new BasicException.Parameter("interactionVerb", ispec.getInteractionVerbName()),
+                            new BasicException.Parameter("oldClass", beforeImage.getRecordName()),
+                            new BasicException.Parameter("newClass", input.getRecordName()))));
+            }
+            final ObjectRecord afterImage = beforeImage.clone();
+            mergeObjectValues(input, afterImage);
+            final SortedMap<XRISegment, ObjectRecord> container = getMandatoryContainer(xri.getParent());
+            final ObjectRecord replaced = container.put(xri.getLastSegment(), afterImage);
+            try {
+                validateBeforeImage(input, replaced);
+            } catch (ResourceException exception) {
+                container.put(xri.getLastSegment(), replaced);
+                throw ResourceExceptions.initHolder(
+                    new ResourceException(
+                        "Unable to update the object with the given resource identifier: "
+                            + "The object has been modifed since it was read",
+                        BasicException.newEmbeddedExceptionStack(
+                            exception,
+                            BasicException.Code.DEFAULT_DOMAIN,
+                            BasicException.Code.CONCURRENT_ACCESS_FAILURE,
+                            new BasicException.Parameter("resourceIdentifier", xri),
+                            new BasicException.Parameter("functionName", ispec.getFunctionName()),
+                            new BasicException.Parameter("interactionVerb", ispec.getInteractionVerbName()))));
+            }
+            return true;
+        }
 
-		/* (non-Javadoc)
-		 * @see org.openmdx.base.rest.spi.AbstractRestInteraction#verify(org.openmdx.base.resource.spi.RestInteractionSpec, org.openmdx.base.rest.cci.ObjectRecord)
-		 */
-		@Override
-		protected boolean verify(
-			RestInteractionSpec ispec, 
-			ObjectRecord input
-		) throws ResourceException {
-			final Path xri = input.getResourceIdentifier();
-			getMandatoryObject(xri);
-			validateBeforeImage(input, getMandatoryObject(xri));
-			return true;
-		}
+        @SuppressWarnings("unchecked")
+        private void mergeObjectValues(
+            ObjectRecord input,
+            ObjectRecord afterImage
+        )
+            throws ResourceException {
+            final MappedRecord value;
+            try {
+                value = (MappedRecord) afterImage.getValue().clone();
+            } catch (CloneNotSupportedException exception) {
+                throw ResourceExceptions.toResourceException(exception);
+            }
+            value.putAll(input.getValue());
+            afterImage.setValue(value);
+        }
 
-		/* (non-Javadoc)
-		 * @see org.openmdx.base.rest.spi.AbstractRestInteraction#delete(org.openmdx.base.resource.spi.RestInteractionSpec, org.openmdx.base.rest.cci.ObjectRecord)
-		 */
-		@Override
-		protected boolean delete(
-			RestInteractionSpec ispec, 
-			ObjectRecord input
-		) throws ResourceException {
-			final Path xri = input.getResourceIdentifier();
-			final SortedMap<XRISegment, ObjectRecord> container = getOptionalContainer(xri.getParent());
-			if(container == null) {
-				return false;
-			}
-			final ObjectRecord beforeImage = container.remove(xri.getLastSegment());
-			// Remove composites
-			{
-			    for(Iterator<Path> i = InMemory_2.this.data.keySet().iterator(); i.hasNext(); ) {
-			        Path containerIdentity = i.next();
-			        if(containerIdentity.startsWith(xri)) {
-			            i.remove();
-			        }
-			    }
-			}
-			if(beforeImage == null){
-				return false;
-			}
-			try {
-				validateBeforeImage(input, beforeImage);
-			} catch (ResourceException exception) {
-				container.put(xri.getLastSegment(), beforeImage);
-				throw ResourceExceptions.initHolder(
-					new ResourceException(
-						"Unable to delete the object with the given resource identifier: "
-						+ "The object has been modifed since it was read",	
-						BasicException.newEmbeddedExceptionStack(
-							exception,
-							BasicException.Code.DEFAULT_DOMAIN,
-							BasicException.Code.CONCURRENT_ACCESS_FAILURE,
-							new BasicException.Parameter("resourceIdentifier", xri),
-							new BasicException.Parameter("functionName", ispec.getFunctionName()),
-							new BasicException.Parameter("interactionVerb", ispec.getInteractionVerbName())
-						)
-					)
-				);
-			}
-			return true;                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       
-		}
+        /*
+         * (non-Javadoc)
+         * 
+         * @see
+         * org.openmdx.base.rest.spi.AbstractRestInteraction#find(org.openmdx.
+         * base.resource.spi.RestInteractionSpec,
+         * org.openmdx.base.rest.cci.QueryRecord,
+         * org.openmdx.base.rest.cci.ResultRecord)
+         */
+        @SuppressWarnings({
+            "unchecked", "rawtypes"
+        })
+        @Override
+        protected boolean find(
+            RestInteractionSpec ispec,
+            QueryRecord input,
+            ResultRecord output
+        )
+            throws ResourceException {
+            // TODO position, size
+            final Path xri = input.getResourceIdentifier();
+            final boolean extentQuery = xri.isLike(EXTENT_PATTERN);
+            final QueryFilterRecord queryFilter = input.getQueryFilter();
+            final ObjectRecordFilter objectFilter = queryFilter == null || queryFilter.getCondition().isEmpty() ? null
+                : new ObjectRecordFilter(queryFilter, extentQuery);
+            final ObjectRecordComparator comparator = queryFilter == null ? null : ObjectRecordComparator.getInstance(
+                queryFilter.getOrderSpecifier());
+            List<ObjectRecord> target = comparator == null ? output : new ArrayList();
+            if (extentQuery) {
+                findInExtent(target, objectFilter);
+            } else {
+                findInContainer(target, xri, objectFilter);
+            }
+            if (comparator != null) {
+                Collections.sort(target, comparator);
+                output.addAll(target);
+            }
+            output.setHasMore(false);
+            return true;
+        }
 
-		private void validateBeforeImage(
-			ObjectRecord input,
-			ObjectRecord beforeImage
-		) throws ResourceException {
-			final Object beforeImageVersion = beforeImage.getVersion();
-			if(beforeImageVersion != null) {
-				final Object expectedVersion = input.getVersion();
-				if(!expectedVersion.equals(beforeImageVersion)) {
-					throw ResourceExceptions.initHolder(
-						new ResourceException(
-							"Validation failed",	
-							BasicException.newEmbeddedExceptionStack(
-								BasicException.Code.DEFAULT_DOMAIN,
-								BasicException.Code.CONCURRENT_ACCESS_FAILURE,
-								new BasicException.Parameter("resourceIdentifier", input.getResourceIdentifier()),
-								new BasicException.Parameter("expectedVersion", expectedVersion),
-								new BasicException.Parameter("beforeImageVersion", beforeImageVersion)
-							)
-						)
-					);
-				}
-			}
-		}
-		
-		/* (non-Javadoc)
-		 * @see org.openmdx.base.rest.spi.AbstractRestInteraction#create(org.openmdx.base.resource.spi.RestInteractionSpec, org.openmdx.base.rest.cci.ObjectRecord, org.openmdx.base.rest.cci.ResultRecord)
-		 */
-		@Override
-		protected boolean create(
-			RestInteractionSpec ispec, 
-			ObjectRecord input,
-			ResultRecord output
-		) throws ResourceException {
-			final Path xri = input.getResourceIdentifier();
-			final SortedMap<XRISegment, ObjectRecord> container; 
-			try {
-				container  = getMandatoryContainer(xri.getParent());
-			} catch (ResourceException exception) {
-				throw ResourceExceptions.initHolder(
-					new ResourceException(
-						"Unable to create the object with the given resource identifier: "
-						+ "The parent object is missing in the namespace",	
-						BasicException.newEmbeddedExceptionStack(
-							exception,
-							BasicException.Code.DEFAULT_DOMAIN,
-							BasicException.Code.NOT_FOUND,
-							new BasicException.Parameter("resourceIdentifier", xri),
-							new BasicException.Parameter("functionName", ispec.getFunctionName()),
-							new BasicException.Parameter("interactionVerb", ispec.getInteractionVerbName())
-						)
-					)
-				);
-			}
-			final ObjectRecord inTheWay = container.get(xri.getLastSegment());
-			if(inTheWay != null) {
-				throw ResourceExceptions.initHolder(
-					new ResourceException(
-						"Unable to create the object with the given id: "
-						+ "There is already an object with this resource identifier in the namespace",	
-						BasicException.newEmbeddedExceptionStack(
-							BasicException.Code.DEFAULT_DOMAIN,
-							BasicException.Code.DUPLICATE,
-							new BasicException.Parameter("resourceIdentifier", xri),
-							new BasicException.Parameter("functionName", ispec.getFunctionName()),
-							new BasicException.Parameter("interactionVerb", ispec.getInteractionVerbName())
-						)
-					)
-				);
-			}
-			final ObjectRecord afterImage = input.clone();
-			container.put(xri.getLastSegment(), afterImage);
-			return true;
-		}
+        private void findInContainer(
+            List<ObjectRecord> target,
+            final Path xri,
+            final ObjectRecordFilter objectFilter
+        ) {
+            final Path containerFilter;
+            final XRISegment segmentFilter;
+            if (xri.isObjectPath()) {
+                containerFilter = xri.getParent();
+                segmentFilter = xri.getLastSegment();
+            } else {
+                containerFilter = xri;
+                segmentFilter = null;
+            }
+            if (containerFilter.isPattern()) {
+                for (Map.Entry<Path, SortedMap<XRISegment, ObjectRecord>> c : data.entrySet()) {
+                    if (c.getKey().isLike(containerFilter)) {
+                        findInContainer(target, c.getValue(), segmentFilter, objectFilter);
+                    }
+                }
+            } else {
+                findInContainer(target, getOptionalContainer(containerFilter), segmentFilter, objectFilter);
+            }
+        }
 
-		private SortedMap<XRISegment, ObjectRecord> getOptionalContainer(
-			Path xri
-		){
-			return data.get(xri);
-		}
-		
-		private SortedMap<XRISegment, ObjectRecord> getMandatoryContainer(
-			Path xri
-		) throws ResourceException {
-			SortedMap<XRISegment, ObjectRecord> container = getOptionalContainer(xri);
-			if(container == null && xri.size() > 1) {
-				try {
-					getMandatoryObject(xri.getParent());
-				} catch (ResourceException exception){ 
-					throw ResourceExceptions.initHolder(
-						new ResourceException(
-							"Unable to retrieve the container with the given resource identifier",	
-							BasicException.newEmbeddedExceptionStack(
-								exception,
-								BasicException.Code.DEFAULT_DOMAIN,
-								BasicException.Code.NOT_FOUND,
-								new BasicException.Parameter("resourceIdentifier", xri)
-							)
-						)
-					);
-				}
-				data.put(
-					xri,
-					container = new TreeMap<XRISegment, ObjectRecord>()
-				);
-			}
-			return container;
-		}
-		
-		private ObjectRecord getOptionalObject(Path xri) {
-			final SortedMap<XRISegment, ObjectRecord> container = getOptionalContainer(xri.getParent());
-			return container == null ? null : container.get(xri.getLastSegment());
-		}
+        private void findInExtent(
+            List<ObjectRecord> target,
+            final ObjectRecordFilter objectFilter
+        ) {
+            final Path identityPattern = objectFilter.getIdentityPattern();
+            for (SortedMap<XRISegment, ObjectRecord> c : data.values()) {
+                for (ObjectRecord o : c.values()) {
+                    if (o.getResourceIdentifier().isLike(identityPattern) &&
+                        objectFilter.accept(o)) {
+                        target.add(o);
+                    }
+                }
+            }
+        }
 
-		private ObjectRecord getMandatoryObject(
-			Path xri
-		) throws ResourceException {
-			ObjectRecord object = getOptionalObject(xri);
-			if(object == null) {
-				switch(xri.size()) {
-					case 1: 
-						object = newObject(xri, "org:openmdx:base:Authority");
-						break;
-					case 3:	
-						object = newObject(xri, "org:openmdx:base:Provider");
-						break;
-					default:
-						throw ResourceExceptions.initHolder(
-							new ResourceException(
-								"Unable to retrieve the object with the given resource identifier",	
-								BasicException.newEmbeddedExceptionStack(
-									BasicException.Code.DEFAULT_DOMAIN,
-									BasicException.Code.NOT_FOUND,
-									new BasicException.Parameter("resourceIdentifier", xri)
-								)
-							)
-						);
-				}
-			}
-			return object;
-		}
+        private void findInContainer(
+            List<ObjectRecord> output,
+            SortedMap<XRISegment, ObjectRecord> container,
+            XRISegment segmentFilter,
+            ObjectRecordFilter objectFilter
+        ) {
+            if (container != null) {
+                for (Map.Entry<XRISegment, ObjectRecord> o : container.entrySet()) {
+                    if (segmentFilter == null || segmentFilter.matches(o.getKey())) {
+                        final ObjectRecord candidate = o.getValue();
+                        if (objectFilter == null || objectFilter.accept(candidate)) {
+                            output.add(candidate);
+                        }
+                    }
+                }
+            }
+        }
 
-		private ObjectRecord newObject(
-			Path xri, 
-			String type
-		) throws ResourceException {
-			final ObjectRecord object = newObject(xri);
-			final MappedRecord value = Records.getRecordFactory().createMappedRecord(
-				type
-			);
-			object.setValue(value);
-			return object;
-		}
-		
-    }    
+        /*
+         * (non-Javadoc)
+         * 
+         * @see
+         * org.openmdx.base.rest.spi.AbstractRestInteraction#get(org.openmdx.
+         * base.resource.spi.RestInteractionSpec,
+         * org.openmdx.base.rest.cci.QueryRecord,
+         * org.openmdx.base.rest.cci.ResultRecord)
+         */
+        @SuppressWarnings("unchecked")
+        @Override
+        protected boolean get(
+            RestInteractionSpec ispec,
+            QueryRecord input,
+            ResultRecord output
+        )
+            throws ResourceException {
+            final Path xri = input.getResourceIdentifier();
+            final ObjectRecord object;
+            if (xri.size() <= 3) {
+                object = getMandatoryObject(xri);
+            } else {
+                final SortedMap<XRISegment, ObjectRecord> container = getOptionalContainer(xri.getParent());
+                if (container == null) {
+                    return false;
+                }
+                object = container.get(xri.getLastSegment());
+                if (object == null) {
+                    return false;
+                }
+            }
+            output.add(object);
+            output.setHasMore(false);
+            output.setTotal(1L);
+            return true;
+        }
 
-    
+        /*
+         * (non-Javadoc)
+         * 
+         * @see
+         * org.openmdx.base.rest.spi.AbstractRestInteraction#delete(org.openmdx.
+         * base.resource.spi.RestInteractionSpec,
+         * org.openmdx.base.rest.cci.QueryRecord)
+         */
+        @Override
+        protected boolean delete(
+            RestInteractionSpec ispec,
+            QueryRecord input
+        )
+            throws ResourceException {
+            final ResultRecord objects = Records.getRecordFactory().createIndexedRecord(ResultRecord.class);
+            find(INTERNAL.GET, input, objects);
+            boolean success = false;
+            for (Object object : objects) {
+                success |= delete(INTERNAL.DELETE, (ObjectRecord) object);
+            }
+            return success;
+        }
+
+        /*
+         * (non-Javadoc)
+         * 
+         * @see
+         * org.openmdx.base.rest.spi.AbstractRestInteraction#verify(org.openmdx.
+         * base.resource.spi.RestInteractionSpec,
+         * org.openmdx.base.rest.cci.ObjectRecord)
+         */
+        @Override
+        protected boolean verify(
+            RestInteractionSpec ispec,
+            ObjectRecord input
+        )
+            throws ResourceException {
+            final Path xri = input.getResourceIdentifier();
+            getMandatoryObject(xri);
+            validateBeforeImage(input, getMandatoryObject(xri));
+            return true;
+        }
+
+        /*
+         * (non-Javadoc)
+         * 
+         * @see
+         * org.openmdx.base.rest.spi.AbstractRestInteraction#delete(org.openmdx.
+         * base.resource.spi.RestInteractionSpec,
+         * org.openmdx.base.rest.cci.ObjectRecord)
+         */
+        @Override
+        protected boolean delete(
+            RestInteractionSpec ispec,
+            ObjectRecord input
+        )
+            throws ResourceException {
+            final Path xri = input.getResourceIdentifier();
+            final SortedMap<XRISegment, ObjectRecord> container = getOptionalContainer(xri.getParent());
+            if (container == null) {
+                return false;
+            }
+            final ObjectRecord beforeImage = container.remove(xri.getLastSegment());
+            // Remove composites
+            {
+                for (Iterator<Path> i = InMemory_2.this.data.keySet().iterator(); i.hasNext();) {
+                    Path containerIdentity = i.next();
+                    if (containerIdentity.startsWith(xri)) {
+                        i.remove();
+                    }
+                }
+            }
+            if (beforeImage == null) {
+                return false;
+            }
+            try {
+                validateBeforeImage(input, beforeImage);
+            } catch (ResourceException exception) {
+                container.put(xri.getLastSegment(), beforeImage);
+                throw ResourceExceptions.initHolder(
+                    new ResourceException(
+                        "Unable to delete the object with the given resource identifier: "
+                            + "The object has been modifed since it was read",
+                        BasicException.newEmbeddedExceptionStack(
+                            exception,
+                            BasicException.Code.DEFAULT_DOMAIN,
+                            BasicException.Code.CONCURRENT_ACCESS_FAILURE,
+                            new BasicException.Parameter("resourceIdentifier", xri),
+                            new BasicException.Parameter("functionName", ispec.getFunctionName()),
+                            new BasicException.Parameter("interactionVerb", ispec.getInteractionVerbName()))));
+            }
+            return true;
+        }
+
+        private void validateBeforeImage(
+            ObjectRecord input,
+            ObjectRecord beforeImage
+        )
+            throws ResourceException {
+            final Object beforeImageVersion = beforeImage.getVersion();
+            if (beforeImageVersion != null) {
+                final Object expectedVersion = input.getVersion();
+                if (!expectedVersion.equals(beforeImageVersion)) {
+                    throw ResourceExceptions.initHolder(
+                        new ResourceException(
+                            "Validation failed",
+                            BasicException.newEmbeddedExceptionStack(
+                                BasicException.Code.DEFAULT_DOMAIN,
+                                BasicException.Code.CONCURRENT_ACCESS_FAILURE,
+                                new BasicException.Parameter("resourceIdentifier", input.getResourceIdentifier()),
+                                new BasicException.Parameter("expectedVersion", expectedVersion),
+                                new BasicException.Parameter("beforeImageVersion", beforeImageVersion))));
+                }
+            }
+        }
+
+        /*
+         * (non-Javadoc)
+         * 
+         * @see
+         * org.openmdx.base.rest.spi.AbstractRestInteraction#create(org.openmdx.
+         * base.resource.spi.RestInteractionSpec,
+         * org.openmdx.base.rest.cci.ObjectRecord,
+         * org.openmdx.base.rest.cci.ResultRecord)
+         */
+        @Override
+        protected boolean create(
+            RestInteractionSpec ispec,
+            ObjectRecord input,
+            ResultRecord output
+        )
+            throws ResourceException {
+            final Path xri = input.getResourceIdentifier();
+            final SortedMap<XRISegment, ObjectRecord> container;
+            try {
+                container = getMandatoryContainer(xri.getParent());
+            } catch (ResourceException exception) {
+                throw ResourceExceptions.initHolder(
+                    new ResourceException(
+                        "Unable to create the object with the given resource identifier: "
+                            + "The parent object is missing in the namespace",
+                        BasicException.newEmbeddedExceptionStack(
+                            exception,
+                            BasicException.Code.DEFAULT_DOMAIN,
+                            BasicException.Code.NOT_FOUND,
+                            new BasicException.Parameter("resourceIdentifier", xri),
+                            new BasicException.Parameter("functionName", ispec.getFunctionName()),
+                            new BasicException.Parameter("interactionVerb", ispec.getInteractionVerbName()))));
+            }
+            final ObjectRecord inTheWay = container.get(xri.getLastSegment());
+            if (inTheWay != null) {
+                throw ResourceExceptions.initHolder(
+                    new ResourceException(
+                        "Unable to create the object with the given id: "
+                            + "There is already an object with this resource identifier in the namespace",
+                        BasicException.newEmbeddedExceptionStack(
+                            BasicException.Code.DEFAULT_DOMAIN,
+                            BasicException.Code.DUPLICATE,
+                            new BasicException.Parameter("resourceIdentifier", xri),
+                            new BasicException.Parameter("functionName", ispec.getFunctionName()),
+                            new BasicException.Parameter("interactionVerb", ispec.getInteractionVerbName()))));
+            }
+            final ObjectRecord afterImage = input.clone();
+            container.put(xri.getLastSegment(), afterImage);
+            return true;
+        }
+
+        private SortedMap<XRISegment, ObjectRecord> getOptionalContainer(
+            Path xri
+        ) {
+            return data.get(xri);
+        }
+
+        private SortedMap<XRISegment, ObjectRecord> getMandatoryContainer(
+            Path xri
+        )
+            throws ResourceException {
+            SortedMap<XRISegment, ObjectRecord> container = getOptionalContainer(xri);
+            if (container == null && xri.size() > 1) {
+                try {
+                    getMandatoryObject(xri.getParent());
+                } catch (ResourceException exception) {
+                    throw ResourceExceptions.initHolder(
+                        new ResourceException(
+                            "Unable to retrieve the container with the given resource identifier",
+                            BasicException.newEmbeddedExceptionStack(
+                                exception,
+                                BasicException.Code.DEFAULT_DOMAIN,
+                                BasicException.Code.NOT_FOUND,
+                                new BasicException.Parameter("resourceIdentifier", xri))));
+                }
+                data.put(
+                    xri,
+                    container = new TreeMap<XRISegment, ObjectRecord>());
+            }
+            return container;
+        }
+
+        private ObjectRecord getOptionalObject(
+            Path xri
+        ) {
+            final SortedMap<XRISegment, ObjectRecord> container = getOptionalContainer(xri.getParent());
+            return container == null ? null : container.get(xri.getLastSegment());
+        }
+
+        private ObjectRecord getMandatoryObject(
+            Path xri
+        )
+            throws ResourceException {
+            ObjectRecord object = getOptionalObject(xri);
+            if (object == null) {
+                switch (xri.size()) {
+                    case 1:
+                        object = newObject(xri, "org:openmdx:base:Authority");
+                        break;
+                    case 3:
+                        object = newObject(xri, "org:openmdx:base:Provider");
+                        break;
+                    default:
+                        throw ResourceExceptions.initHolder(
+                            new ResourceException(
+                                "Unable to retrieve the object with the given resource identifier",
+                                BasicException.newEmbeddedExceptionStack(
+                                    BasicException.Code.DEFAULT_DOMAIN,
+                                    BasicException.Code.NOT_FOUND,
+                                    new BasicException.Parameter("resourceIdentifier", xri))));
+                }
+            }
+            return object;
+        }
+
+        private ObjectRecord newObject(
+            Path xri,
+            String type
+        )
+            throws ResourceException {
+            final ObjectRecord object = newObject(xri);
+            final MappedRecord value = Records.getRecordFactory().createMappedRecord(
+                type);
+            object.setValue(value);
+            return object;
+        }
+
+    }
+
     //------------------------------------------------------------------------
     // Class ObjectRecordFilter
     //------------------------------------------------------------------------
-    
+
     class ObjectRecordFilter extends ObjectFilter {
 
-    	/**
-    	 * Constructor
-    	 */
-    	private ObjectRecordFilter(
-    		QueryFilterRecord filter, 
-    		boolean extentQuery
-    	) {
-    		super(null, filter, extentQuery);
-    	}
+        /**
+         * Constructor
+         */
+        private ObjectRecordFilter(
+            QueryFilterRecord filter,
+            boolean extentQuery
+        ) {
+            super(null, filter, extentQuery);
+        }
 
-		/**
-    	 * Implements <code>Serializable</code>
-    	 */
-    	private static final long serialVersionUID = -3151451305490323997L;
+        /**
+         * Implements <code>Serializable</code>
+         */
+        private static final long serialVersionUID = -3151451305490323997L;
 
-    	@Override
-    	protected ObjectRecordFilter newFilter(
-    		QueryFilterRecord delegate
-    	){
-    		return new ObjectRecordFilter(delegate, extentQuery);
-    	}
+        @Override
+        protected ObjectRecordFilter newFilter(
+            QueryFilterRecord delegate
+        ) {
+            return new ObjectRecordFilter(delegate, extentQuery);
+        }
 
-    	@Override
-    	protected ModelElement_1_0 getClassifier(
-    		Object object
-    	){
-    		try {
-    			return Model_1Factory.getModel().getElement(((ObjectRecord)object).getValue().getRecordName());
-    		} catch (ServiceException e) {
-    			throw new RuntimeServiceException(e); // TODO
-    		}
-    	}
+        @Override
+        protected ModelElement_1_0 getClassifier(
+            Object object
+        ) {
+            try {
+                return Model_1Factory.getModel().getElement(((ObjectRecord) object).getValue().getRecordName());
+            } catch (ServiceException e) {
+                throw new RuntimeServiceException(e); // TODO
+            }
+        }
 
-    	@Override
-    	protected boolean isEmpty(
-    		Object object, 
-    		String featureName,
-    		QueryFilterRecord filter
-    	) throws ServiceException {
-    		final Path xri = ((ObjectRecord)object).getResourceIdentifier().getChild(featureName);
-    		final ObjectRecordFilter objectFilter = new ObjectRecordFilter(filter, false);
-    		for(ObjectRecord candidate : data.get(xri).values()){
-    			if(objectFilter.accept(candidate)){
-    				return false;
-    			}
-    		}
-    		return true;
-    	}
-
-    	@Override
-    	protected Iterator<?> getValuesIterator(
-    		Object candidate,
-    		ConditionRecord condition
-    	){
-    		try {
-				return getValuesIterator((ObjectRecord)candidate, condition.getFeature());
-			} catch (ServiceException e) {
-				throw new RuntimeServiceException(e); // TODO
-			}
-    	}
-
-		private Iterator<?> getValuesIterator(
-			ObjectRecord candidate,
-			String feature
-		) throws ServiceException {
-            if(SystemAttributes.OBJECT_CLASS.equals(feature)){
-                return Collections.singleton(candidate.getValue().getRecordName()).iterator();
-            } else {    
-                if(SystemAttributes.OBJECT_INSTANCE_OF.equals(feature)){
-                    return newInstanceOfIterator(getClassifier(candidate));
-                } else if("core".equals(feature) && isCoreInstance(getClassifier(candidate))){
-                	return Collections.emptySet().iterator();
-                } else {
-					final Object values = candidate.getValue().get(feature);
-		    		if(values == null) {
-		    			return Collections.emptySet().iterator();
-		    		} else if(values instanceof IndexedRecord) {
-		    			return ((IndexedRecord)values).iterator();
-		    		} else if (values instanceof MappedRecord) {
-		    			return ((MappedRecord)values).values().iterator();
-		    		} else {
-		    			return Collections.singleton(values).iterator();
-		    		}
+        private Map<XRISegment, ObjectRecord> getContainerAsEmptyMapWhenMissing(
+            Path xri
+        ) {
+            final SortedMap<XRISegment, ObjectRecord> container = data.get(xri);
+            return container == null ? Collections.emptyMap() : container;
+        }
+        
+        @Override
+        protected boolean isEmpty(
+            Object object,
+            String featureName,
+            QueryFilterRecord filter
+        )
+            throws ServiceException {
+            final Path xri = ((ObjectRecord) object).getResourceIdentifier().getChild(featureName);
+            final ObjectRecordFilter objectFilter = new ObjectRecordFilter(filter, false);
+            for (ObjectRecord candidate : getContainerAsEmptyMapWhenMissing(xri).values()) {
+                if (objectFilter.accept(candidate)) {
+                    return false;
                 }
             }
-		}
-    	
+            return true;
+        }
+
+        @Override
+        protected Iterator<?> getValuesIterator(
+            Object candidate,
+            ConditionRecord condition
+        ) {
+            if (candidate instanceof ObjectRecord) {
+                final ObjectRecord objectRecord = (ObjectRecord) candidate;
+                return getValuesIterator(objectRecord, condition.getFeature());
+            }
+            if (candidate instanceof Path) {
+                final Path xri = (Path) candidate;
+                final ObjectRecord objectRecord = getContainerAsEmptyMapWhenMissing(xri.getParent()).get(xri.getLastSegment());
+                if (objectRecord == null) {
+                    throw new RuntimeServiceException(
+                        BasicException.Code.DEFAULT_DOMAIN,
+                        BasicException.Code.BAD_PARAMETER,
+                        "Unresolvable resource identifier",
+                        new BasicException.Parameter("xri", xri));
+                }
+                return getValuesIterator(objectRecord, condition.getFeature());
+            }
+            throw new RuntimeServiceException(
+                BasicException.Code.DEFAULT_DOMAIN,
+                BasicException.Code.BAD_PARAMETER,
+                "Unexpected value holder",
+                new BasicException.Parameter("acceptable", ObjectRecord.class.getName(), Path.class.getName()),
+                new BasicException.Parameter("actual", candidate == null ? null : candidate.getClass().getName()));
+        }
+
+        private Iterator<?> getValuesIterator(
+            ObjectRecord candidate,
+            String feature
+        ) {
+            if (SystemAttributes.OBJECT_CLASS.equals(feature)) {
+                return Collections.singleton(candidate.getValue().getRecordName()).iterator();
+            } else
+                try {
+                    if (SystemAttributes.OBJECT_INSTANCE_OF.equals(feature)) {
+                        return newInstanceOfIterator(getClassifier(candidate));
+                    } else if (SystemAttributes.CORE.equals(feature) && isCoreInstance(getClassifier(candidate))) {
+                        return Collections.emptySet().iterator();
+                    } else {
+                        final Object values = candidate.getValue().get(feature);
+                        return 
+                            values == null ? Collections.emptySet().iterator() :
+                            values instanceof IndexedRecord ? ((IndexedRecord) values).iterator() :
+                            values instanceof MappedRecord ? ((MappedRecord) values).values().iterator() :
+                            Collections.singleton(values).iterator();
+                    }
+                } catch (ServiceException e) {
+                    throw new RuntimeServiceException(
+                        e,
+                        BasicException.Code.DEFAULT_DOMAIN,
+                        BasicException.Code.BAD_PARAMETER,
+                        "Unable to retrieve the given feature's values",
+                        new BasicException.Parameter("xri", candidate.getResourceIdentifier()),
+                        new BasicException.Parameter("feature", feature));
+                }
+        }
+
     }
 
 }

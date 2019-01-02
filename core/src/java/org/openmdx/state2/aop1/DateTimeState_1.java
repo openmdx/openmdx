@@ -59,6 +59,7 @@ import org.openmdx.base.persistence.cci.PersistenceHelper;
 import org.openmdx.kernel.jdo.ReducedJDOHelper;
 import org.openmdx.state2.cci.DateTimeStateContext;
 import org.openmdx.state2.spi.Order;
+import org.openmdx.state2.spi.TechnicalAttributes;
 
 /**
  * Registers the the delegates with their manager
@@ -87,11 +88,11 @@ public class DateTimeState_1 extends BasicState_1<DateTimeStateContext> {
         DataObject_1_0 dataObject
     ) throws ServiceException {
         DateTimeStateContext context = (DateTimeStateContext) self.getInteractionSpec();
-        if(dataObject.objGetValue("stateValidFrom") == null) {
-            dataObject.objSetValue("stateValidFrom", context.getValidFrom());
+        if(dataObject.objGetValue(TechnicalAttributes.STATE_VALID_FROM) == null) {
+            dataObject.objSetValue(TechnicalAttributes.STATE_VALID_FROM, context.getValidFrom());
         }
-        if(dataObject.objGetValue("stateInvalidFrom") == null) {
-            dataObject.objSetValue("stateInvalidFrom", context.getInvalidFrom());
+        if(dataObject.objGetValue(TechnicalAttributes.STATE_INVALID_FROM) == null) {
+            dataObject.objSetValue(TechnicalAttributes.STATE_INVALID_FROM, context.getInvalidFrom());
         }
     }
 
@@ -100,7 +101,7 @@ public class DateTimeState_1 extends BasicState_1<DateTimeStateContext> {
      */
     @Override
     protected boolean isValidTimeFeature(String featureName) {
-        return "stateValidFrom".equals(featureName) || "stateInvalidFrom".equals(featureName);
+        return TechnicalAttributes.STATE_VALID_FROM.equals(featureName) || TechnicalAttributes.STATE_INVALID_FROM.equals(featureName);
     }
 
     /* (non-Javadoc)
@@ -111,8 +112,8 @@ public class DateTimeState_1 extends BasicState_1<DateTimeStateContext> {
         String feature
     ) throws ServiceException {
         return 
-            "stateValidFrom".equals(feature) ? ((DateTimeStateContext)self.getInteractionSpec()).getValidFrom() :
-            "stateInvalidFrom".equals(feature) ? ((DateTimeStateContext)self.getInteractionSpec()).getInvalidFrom() :
+            TechnicalAttributes.STATE_VALID_FROM.equals(feature) ? ((DateTimeStateContext)self.getInteractionSpec()).getValidFrom() :
+                TechnicalAttributes.STATE_INVALID_FROM.equals(feature) ? ((DateTimeStateContext)self.getInteractionSpec()).getInvalidFrom() :
             super.objGetValue(feature);
     }
 
@@ -134,7 +135,7 @@ public class DateTimeState_1 extends BasicState_1<DateTimeStateContext> {
             DataObject_1_0 predecessor;
             if(boundaryCrossing.startsEarlier) {
                 predecessor = PersistenceHelper.clone(source);
-                predecessor.objSetValue("stateInvalidFrom", context.getValidFrom());
+                predecessor.objSetValue(TechnicalAttributes.STATE_INVALID_FROM, context.getValidFrom());
                 if(!predecessor.jdoIsNew()) {
                     states.add(predecessor);
                 }
@@ -147,7 +148,7 @@ public class DateTimeState_1 extends BasicState_1<DateTimeStateContext> {
             DataObject_1_0 successor;
             if(boundaryCrossing.endsLater) {
                 successor = PersistenceHelper.clone(source);
-                successor.objSetValue("stateValidFrom", context.getInvalidFrom());
+                successor.objSetValue(TechnicalAttributes.STATE_VALID_FROM, context.getInvalidFrom());
                 if(!successor.jdoIsNew()) {
                     states.add(successor);
                 }
@@ -158,8 +159,8 @@ public class DateTimeState_1 extends BasicState_1<DateTimeStateContext> {
             // Handle the period which is involved
             //
             DataObject_1_0 target = PersistenceHelper.clone(source);
-            target.objSetValue("stateValidFrom", context.getValidFrom());
-            target.objSetValue("stateInvalidFrom", context.getInvalidFrom());
+            target.objSetValue(TechnicalAttributes.STATE_VALID_FROM, context.getValidFrom());
+            target.objSetValue(TechnicalAttributes.STATE_INVALID_FROM, context.getInvalidFrom());
             if(!target.jdoIsNew()) {
                 states.add(target);
             }
@@ -180,11 +181,11 @@ public class DateTimeState_1 extends BasicState_1<DateTimeStateContext> {
         DateTimeStateContext context = getContext();
         return BoundaryCrossing.valueOf(
             Order.compareValidFrom(
-                (Date) candidate.objGetValue("stateValidFrom"),
+                (Date) candidate.objGetValue(TechnicalAttributes.STATE_VALID_FROM),
                 context.getValidFrom() 
             ) < 0,
             Order.compareInvalidFrom(
-                (Date) candidate.objGetValue("stateInvalidFrom"),
+                (Date) candidate.objGetValue(TechnicalAttributes.STATE_INVALID_FROM),
                 context.getInvalidFrom() 
             ) > 0
         );
@@ -199,8 +200,8 @@ public class DateTimeState_1 extends BasicState_1<DateTimeStateContext> {
     ) throws ServiceException {
         DateTimeStateContext context = getContext();
         return 
-            Order.compareValidFromToValidTo(context.getValidFrom(), (Date) candidate.objGetValue("stateValidTo")) < 0 &&
-            Order.compareValidFromToValidTo((Date) candidate.objGetValue("stateValidFrom"), context.getInvalidFrom()) < 0;
+            Order.compareValidFromToValidTo(context.getValidFrom(), (Date) candidate.objGetValue(TechnicalAttributes.STATE_VALID_TO)) < 0 &&
+            Order.compareValidFromToValidTo((Date) candidate.objGetValue(TechnicalAttributes.STATE_VALID_FROM), context.getInvalidFrom()) < 0;
     }
 
     
@@ -220,27 +221,27 @@ public class DateTimeState_1 extends BasicState_1<DateTimeStateContext> {
             switch(context.getViewKind()) {
                 case TIME_POINT_VIEW:
                     return Order.compareValidFrom(
-                        (Date) candidate.objGetValue("stateValidFrom"),
+                        (Date) candidate.objGetValue(TechnicalAttributes.STATE_VALID_FROM),
                         context.getValidAt()
                     ) <= 0 && Order.compareInvalidFrom(
                         context.getValidAt(),
-                        (Date) candidate.objGetValue("stateInvalidFrom")
+                        (Date) candidate.objGetValue(TechnicalAttributes.STATE_INVALID_FROM)
                     ) <= 0;
                 case TIME_RANGE_VIEW:
                 	return accessMode == AccessMode.UNDERLYING_STATE ? (
                         Order.compareValidFrom(
                             context.getValidFrom(), 
-                            (Date) candidate.objGetValue("stateValidFrom")
+                            (Date) candidate.objGetValue(TechnicalAttributes.STATE_VALID_FROM)
                         ) >= 0 && Order.compareInvalidFrom(
-                            (Date) candidate.objGetValue("stateInvalidFrom"),
+                            (Date) candidate.objGetValue(TechnicalAttributes.STATE_INVALID_FROM),
                             context.getInvalidFrom()
                         ) >= 0 
                     ) : (
                 		Order.compareValidFromToValidTo(
 	                        context.getValidFrom(), 
-	                        (Date) candidate.objGetValue("stateValidTo")
+	                        (Date) candidate.objGetValue(TechnicalAttributes.STATE_VALID_TO)
 	                    ) <= 0 && Order.compareValidFromToValidTo(
-	                        (Date) candidate.objGetValue("stateValidFrom"),
+	                        (Date) candidate.objGetValue(TechnicalAttributes.STATE_VALID_FROM),
 	                        context.getInvalidFrom()
 	                    ) <= 0 
                     );

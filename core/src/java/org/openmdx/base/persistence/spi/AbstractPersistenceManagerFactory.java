@@ -406,16 +406,13 @@ public abstract class AbstractPersistenceManagerFactory<P extends PersistenceMan
     }
 
     /**
-     * Initialize a newly crated persisetnce manager
+     * Initialize a newly created persistence manager
      * 
      * @param persistenceManager
      */
     protected void initialize(
         PersistenceManager persistenceManager
     ){
-        if(persistenceManager instanceof AbstractPersistenceManager) {
-            AbstractPersistenceManager.class.cast(persistenceManager).setPersistenceManagerFactory(this);
-        }
         this.instanceLifecycleListenerRegistry.propagateTo(persistenceManager);
     }
     

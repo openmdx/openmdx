@@ -66,21 +66,17 @@ import java.util.TreeSet;
 
 import javax.naming.Context;
 
-import org.junit.Assert;
 import org.junit.ClassRule;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.openmdx.application.mof.repository.accessor.ModelBuilder_1;
 import org.openmdx.base.accessor.cci.SystemAttributes;
-import org.openmdx.base.accessor.spi.Delegating_1_0;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
 import org.openmdx.base.mof.cci.Model_1_0;
 import org.openmdx.base.mof.spi.Model_1Dumper;
 import org.openmdx.base.mof.spi.Model_1Factory;
 import org.openmdx.base.naming.Path;
-import org.openmdx.base.rest.cci.ObjectRecord;
 import org.openmdx.junit.rules.EntityManagerFactoryRule;
 import org.openmdx.junit.rules.EntityManagerRule;
 import org.openmdx.junit.rules.SystemPropertyRule;
@@ -303,10 +299,13 @@ public class TestModelRepository {
     }
     
     @Test
-    public void dumpModel() throws FileNotFoundException, ServiceException{
+    public void dumpModel() throws FileNotFoundException, ServiceException, InterruptedException{
         final File build = new File("build");
         final File platform = new File(build, "jre-" + System.getProperty("java.specification.version"));
         final File destination = new File(platform, "tmp");
+        final boolean created = destination.mkdir();
+        System.out.println("Directory " + destination.getAbsolutePath() + (created ? " created" : " did exist"));
+        if(created) Thread.sleep(500);
         dumpModel(destination, false);
     }
         

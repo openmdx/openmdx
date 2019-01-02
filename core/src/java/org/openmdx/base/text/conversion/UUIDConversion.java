@@ -53,8 +53,6 @@ import java.net.URISyntaxException;
 import java.util.UUID;
 import java.util.regex.Pattern;
 
-import javax.annotation.Nullable;
-
 import org.ietf.jgss.GSSException;
 import org.ietf.jgss.Oid;
 import org.openmdx.base.exception.RuntimeServiceException;
@@ -67,7 +65,8 @@ import org.openmdx.kernel.exception.BasicException;
  * UUID Conversion
  * <p>
  * This class supports the following <code>UUID</code> String representations<ul>
- * <li><b>UID</b>, e.g. <i>XubSsL0VEdufdQFDCgEBxg</i>
+ * <li><b>Legacy</b>, e.g. <i>XubSsL0VEdufdQFDCgEBxg</i>
+ * <li><b>UID</b>, e.g. <i>982VZG5FB34RSU2J6G18F9VDG</i>
  * <li><b>UUID</b>, e.g. <i>5ee6d2b0-bd15-11db-9f75-01430a0101c6</i>
  * <li><b>URN</b>, e.g. <i>urn:uuid:5ee6d2b0-bd15-11db-9f75-01430a0101c6</i>
  * <li><b>XRI</b>, e.g. <i>xri://$t*uuid*5ee6d2b0-bd15-11db-9f75-01430a0101c6</i>
@@ -82,7 +81,8 @@ public class UUIDConversion {
     /**
      * Parse a string to a UUID<ul>
      * <li><code>null</code> is returned if <code>uuid</code> is <code>null</code>
-     * <li>if the length of <code>uuid</code> is <code>22</code> it is considered to be in <b>UID</b> format
+     * <li>if the length of <code>uuid</code> is <code>22</code> it is considered to be in <b>Legacy</b> format
+     * <li>if the length of <code>uuid</code> is <code>25</code> it is considered to be in <b>UID</b> format
      * <li>if the length of <code>uuid</code> is <code>36</code> it is considered to be in <b>UUID</b> format
      * <li>if the length of <code>uuid</code> is <code>45</code> it is considered to be in <b>URN</b> format
      * <li>if the length of <code>uuid</code> is <code>50</code> it is considered to be in <b>XRI</b> format
@@ -425,7 +425,7 @@ public class UUIDConversion {
      * @return <code>true</code> if the candidate is can be converted to a UUID
      */
     public static boolean isUUID(
-    	@Nullable String candidate
+    	String candidate
     ){
     	if(candidate == null) {
     		return false;

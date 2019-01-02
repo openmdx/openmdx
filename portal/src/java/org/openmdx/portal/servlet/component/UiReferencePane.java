@@ -1026,9 +1026,10 @@ public class UiReferencePane extends ReferencePane implements Serializable {
 				if(grid.showRowSelectors()) {
 					p.write("<th></th>");
 				}
-				List<Action> columnOrderActions = grid.getColumnOrderActions();
+				List<Action> columnActions = grid.getColumnOrderActions();
 				for(int j = 0; j < grid.getShowMaxMember(); j++) {
-					Action columnOrderAction = columnOrderActions.get(j);
+					Action columnAction = columnActions.get(j);
+					ValuedField columnDef = j > 0 ? grid.getColumnDefs().get(j - 1) : null;
 					if(j == 0) {
 						p.write("<th width=\"40px;\">");
 						p.write("  <table class=\"", CssClass.filterHeader.toString(), " ", CssClass.hiddenPrint.toString(), "\"><tr><td>");
@@ -1036,26 +1037,39 @@ public class UiReferencePane extends ReferencePane implements Serializable {
 						p.write("  </td></tr></table>");
 						p.write("</th>");
 					} else {
-						CharSequence columnTitle = htmlEncoder.encode(columnOrderAction.getTitle(), false).trim();
+						CharSequence columnTitle = htmlEncoder.encode(columnAction.getTitle(), false).trim();
 						if(columnTitle.length() == 0) {
-							columnTitle = p.getImg("src=\"", p.getResourcePath("images/") + columnOrderAction.getIconKey() + "\" border=\"0\" align=\"middle\" alt=\"o\" title=\"\"");
+							columnTitle = p.getImg("src=\"", p.getResourcePath("images/") + columnAction.getIconKey() + "\" border=\"0\" align=\"middle\" alt=\"o\" title=\"\"");
 						}
 						// column ordering 
 						Action togglingColumnOrderAction = grid.getTogglingColumnOrderAction(
-							columnOrderAction.getParameter(Action.PARAMETER_NAME).toString()
+							columnAction.getParameter(Action.PARAMETER_NAME).toString()
 						);
 						p.write("<th>");
 						p.write("  <table class=\"" + CssClass.filterHeader.toString(), "\">");
-						p.write("    <tr>");	                                    
+						p.write("    <tr>");
 						// Ordering
 						if(!grid.isComposite() || togglingColumnOrderAction.getEvent() == Action.EVENT_NONE) {
-							p.write("<td><div>", columnTitle, "</div></td>");
+							String cssClass = "";
+							if(columnDef != null && columnDef.getCssClassObjectContainer() != null) {
+								cssClass += " " + columnDef.getCssClassObjectContainer();
+								cssClass = cssClass.trim();
+							}
+							p.write("<td><div class=\"", cssClass, "\">", columnTitle, "</div></td>");
 						} else {
+							String cssClass = CssClass.filterCell.toString();
+							String cssClassHover = CssClass.filterCell.toString() + "hover";
+							if(columnDef != null && columnDef.getCssClassObjectContainer() != null) {
+								cssClass += " " + columnDef.getCssClassObjectContainer();
+								cssClass = cssClass.trim();
+								cssClassHover += " " + columnDef.getCssClassObjectContainer();
+								cssClassHover = cssClassHover.trim();
+							}
 							String iconKey = togglingColumnOrderAction.getIconKey();
 							if(iconKey.startsWith(WebKeys.ICON_SORT_ANY)) {
 								iconKey = "spacer" + p.getImgType();
 							}
-							p.write("<td class=\"", CssClass.filterCell.toString(), "\" title=\"", htmlEncoder.encode(togglingColumnOrderAction.getToolTip(), false), "\" onclick=\"javascript:", updateTabScriptletPre, p.getEvalHRef(togglingColumnOrderAction), updateTabScriptletPost, ";\"", p.getOnMouseOver("javascript:this.className='filterCellhover';"), p.getOnMouseOut("javascript:this.className='filterCell';"), "><div>", columnTitle, "</div></td>");
+							p.write("<td class=\"", cssClass, "\" title=\"", htmlEncoder.encode(togglingColumnOrderAction.getToolTip(), false), "\" onclick=\"javascript:", updateTabScriptletPre, p.getEvalHRef(togglingColumnOrderAction), updateTabScriptletPost, ";\"", p.getOnMouseOver("javascript:this.className='", cssClassHover, "';"), p.getOnMouseOut("javascript:this.className='" + cssClass + "';"), "><div>", columnTitle, "</div></td>");
 							p.write("<td>",p.getImg("src=\"", p.getResourcePath("images/"), iconKey, "\" title=\"", htmlEncoder.encode(togglingColumnOrderAction.getTitle(), false), "\" align=\"bottom\" alt=\"\""), "</td>");
 						}
 						p.write("    </tr>");

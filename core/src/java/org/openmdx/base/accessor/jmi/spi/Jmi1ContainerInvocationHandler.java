@@ -52,9 +52,13 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.function.Consumer;
+import java.util.function.Predicate;
 import java.util.logging.Level;
+import java.util.stream.StreamSupport;
 
 import javax.jdo.spi.PersistenceCapable;
 import javax.jmi.reflect.InvalidCallException;
@@ -62,8 +66,11 @@ import javax.jmi.reflect.RefBaseObject;
 
 import org.oasisopen.jmi1.RefContainer;
 import org.openmdx.base.accessor.jmi.cci.JmiServiceException;
+import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
 import org.openmdx.base.accessor.jmi.cci.RefQuery_1_0;
 import org.openmdx.base.collection.Maps;
+import org.openmdx.base.collection.MarshallingConsumer;
+import org.openmdx.base.collection.MarshallingSpliterator;
 import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.marshalling.Marshaller;
 import org.openmdx.base.naming.Path;
@@ -134,8 +141,8 @@ public class Jmi1ContainerInvocationHandler
         Method method, 
         Object[] args
     ) throws Throwable {        
-        String methodName = method.getName();
-        Class<?> declaringClass = method.getDeclaringClass();
+        final String methodName = method.getName();
+        final Class<?> declaringClass = method.getDeclaringClass();
         try {
             if(declaringClass == Object.class) {
                 if("hashCode".equals(methodName)) {
@@ -218,6 +225,42 @@ public class Jmi1ContainerInvocationHandler
                             target[i] = null;
                         }
                         return target;
+                    } else if("spliterator".equals(methodName) && (args == null || args.length == 0)) {
+                        return new MarshallingSpliterator<>(
+                            RefObject_1_0.class, 
+                            this.refDelegate.spliterator(), 
+                            this.marshaller
+                        );
+                    } else if ("removeIf".equals(methodName) && args != null && args.length == 1) {
+                        @SuppressWarnings("unchecked")
+                        final Predicate<RefObject_1_0> predicate = (Predicate<RefObject_1_0>) args[0];
+                        Boolean changed = Boolean.FALSE;
+                        for(Iterator<?> i = this.refDelegate.iterator(); i.hasNext(); ) {
+                            final RefObject_1_0 candidate = (RefObject_1_0) this.marshaller.marshal(i.next());
+                            if(predicate.test(candidate)) {
+                                i.remove();
+                                changed = Boolean.TRUE;
+                            }
+                        }
+                        return changed;
+                    } else if ("stream".equals(methodName)) {
+                        return StreamSupport.stream(
+                            new MarshallingSpliterator<>(
+                                RefObject_1_0.class, 
+                                this.refDelegate.spliterator(), 
+                                this.marshaller
+                            ), 
+                            false
+                        );
+                    }
+                }
+                else if (declaringClass == Iterable.class) {
+                    if("forEach".equals(methodName) && args != null && args.length == 1) {
+                        @SuppressWarnings("unchecked")
+                        Consumer<RefObject_1_0> action = (Consumer<RefObject_1_0>) args[0];
+                        this.refDelegate.forEach(
+                            new MarshallingConsumer<>(RefObject_1_0.class, action, marshaller)
+                        );
                     }
                 }
                 return this.marshaller.marshal(
@@ -291,7 +334,7 @@ public class Jmi1ContainerInvocationHandler
                         return this.marshaller.marshal(value);
                     } 
                     else if("refRemoveAll".equals(methodName)) {
-                        Object predicate = this.marshaller.unmarshal(args[0]);
+                        final Object predicate = this.marshaller.unmarshal(args[0]);
                         if(predicate instanceof AnyTypePredicate) {
                             ReferenceDef.removeAll.invoke(
                                 this.cciDelegate, 
@@ -322,8 +365,45 @@ public class Jmi1ContainerInvocationHandler
                             target[i] = null;
                         }
                         return target;
+                    } else if("spliterator".equals(methodName) && (args == null || args.length == 0)) {
+                        return new MarshallingSpliterator<>(
+                            RefObject_1_0.class, 
+                            this.cciDelegate.spliterator(), 
+                            this.marshaller
+                        );
+                    } else if ("removeIf".equals(methodName) && args != null && args.length == 1) {
+                        @SuppressWarnings("unchecked")
+                        final Predicate<RefObject_1_0> predicate = (Predicate<RefObject_1_0>) args[0];
+                        Boolean changed = Boolean.FALSE;
+                        for(Iterator<?> i = this.cciDelegate.iterator(); i.hasNext(); ) {
+                            final RefObject_1_0 candidate = (RefObject_1_0) this.marshaller.marshal(i.next());
+                            if(predicate.test(candidate)) {
+                                i.remove();
+                                changed = Boolean.TRUE;
+                            }
+                        }
+                        return changed;
+                    } else if ("stream".equals(methodName)) {
+                        return StreamSupport.stream(
+                            new MarshallingSpliterator<>(
+                                RefObject_1_0.class, 
+                                this.cciDelegate.spliterator(), 
+                                this.marshaller
+                            ), 
+                            false
+                        );
                     }
-                } else if(declaringClass == PersistenceCapable.class) {
+                } 
+                else if (declaringClass == Iterable.class) {
+                    if("forEach".equals(methodName) && args != null && args.length == 1) {
+                        @SuppressWarnings("unchecked")
+                        Consumer<RefObject_1_0> action = (Consumer<RefObject_1_0>) args[0];
+                        this.cciDelegate.forEach(
+                            new MarshallingConsumer<>(RefObject_1_0.class, action, marshaller)
+                        );
+                    }
+                }
+                else if(declaringClass == PersistenceCapable.class) {
                     if("jdoGetPersistenceManager".equals(methodName)) {
                         if(this.marshaller instanceof StandardMarshaller) {
                             return ((StandardMarshaller)this.marshaller).getOutermostPackage().refPersistenceManager();
@@ -411,8 +491,7 @@ public class Jmi1ContainerInvocationHandler
         final static Method getAll = getContainerMethod("getAll");
         final static Method removeAll = getContainerMethod("removeAll");
         
-        private final static ConcurrentMap<Class<?>,ReferenceDef> instances = 
-            new ConcurrentHashMap<Class<?>,ReferenceDef>();
+        private final static ConcurrentMap<Class<?>,ReferenceDef> INSTANCES = new ConcurrentHashMap<>();
 
         /**
          * Retrieve a proxy class' instance
@@ -424,9 +503,9 @@ public class Jmi1ContainerInvocationHandler
         static ReferenceDef getInstance(
             Class<?> referenceClass
         ){
-            ReferenceDef instance = instances.get(referenceClass);
+            ReferenceDef instance = INSTANCES.get(referenceClass);
             return instance == null ? Maps.putUnlessPresent(
-                instances,
+                INSTANCES,
                 referenceClass, 
                 new ReferenceDef(referenceClass.getInterfaces()[0])
             ) : instance;

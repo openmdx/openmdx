@@ -1,14 +1,13 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Description: URL Connection 
+ * Description: LDIF Connection 
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
  * ====================================================================
  *
- * This software is published under the BSD license
- * as listed below.
+ * This software is published under the BSD licenseas listed below.
  * 
- * Copyright (c) 2007, OMEX AG, Switzerland
+ * Copyright (c) 2007-2018, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -62,6 +61,9 @@ import java.util.regex.Pattern;
 import javax.resource.ResourceException;
 import javax.resource.spi.CommException;
 
+import org.openmdx.base.text.conversion.Base64;
+import org.openmdx.resource.ldap.cci.LDAPConnection;
+
 import netscape.ldap.LDAPAttribute;
 import netscape.ldap.LDAPAttributeSet;
 import netscape.ldap.LDAPConstraints;
@@ -74,14 +76,11 @@ import netscape.ldap.LDAPModification;
 import netscape.ldap.LDAPModificationSet;
 import netscape.ldap.LDAPSearchConstraints;
 import netscape.ldap.LDAPSearchResults;
-import netscape.ldap.LDAPv3;
-
-import org.openmdx.base.text.conversion.Base64;
 
 /**
  * URL Connection
  */
-class Connection implements LDAPv3 {
+class Connection implements LDAPConnection {
 
 	/**
 	 * Constructor
@@ -232,141 +231,185 @@ class Connection implements LDAPv3 {
 	private final boolean caseSensitive;
 	
 	//------------------------------------------------------------------------
-	// Imeplements LDAPv3
+	// Imeplements LDAPConnection
 	//------------------------------------------------------------------------
 
+    /* (non-Javadoc)
+     * @see org.openmdx.resource.ldap.cci.LDAPConnection#close()
+     */
+    @Override
+    public void close(
+    ) throws LDAPException {
+        // Nothing to do
+    }
+
+    
+    //------------------------------------------------------------------------
+    // Imeplements LDAPv3
+    //------------------------------------------------------------------------
+
+    @Override
     public void abandon(LDAPSearchResults arg0) throws LDAPException {
     	throw new UnsupportedOperationException("Not yet implemented"); // TODO
 	}
 
+    @Override
 	public void add(LDAPEntry arg0, LDAPConstraints arg1) throws LDAPException {
     	throw new UnsupportedOperationException("Not yet implemented"); // TODO
 	}
 
+    @Override
 	public void add(LDAPEntry arg0) throws LDAPException {
     	throw new UnsupportedOperationException("Not yet implemented"); // TODO
 	}
 
+    @Override
 	public void authenticate(int arg0, String arg1, String arg2)
 			throws LDAPException {
-    	throw new UnsupportedOperationException("Not yet implemented"); // TODO
+        throw new UnsupportedOperationException(MANAGED_ENVIRONMENT);
 	}
 
+    @Override
 	public void authenticate(String arg0, String arg1) throws LDAPException {
 		throw new UnsupportedOperationException(MANAGED_ENVIRONMENT);
 	}
 
+    @Override
 	public void bind(int arg0, String arg1, String arg2) throws LDAPException {
-    	throw new UnsupportedOperationException("Not yet implemented"); // TODO
+        throw new UnsupportedOperationException(MANAGED_ENVIRONMENT);
 	}
 
+    @Override
 	public void bind(String arg0, String arg1) throws LDAPException {
-    	throw new UnsupportedOperationException("Not yet implemented"); // TODO
+        throw new UnsupportedOperationException(MANAGED_ENVIRONMENT);
 	}
 
+    @Override
 	public boolean compare(String arg0, LDAPAttribute arg1, LDAPConstraints arg2)
 			throws LDAPException {
     	throw new UnsupportedOperationException("Not yet implemented"); // TODO
 	}
 
+    @Override
 	public boolean compare(String arg0, LDAPAttribute arg1)
 			throws LDAPException {
     	throw new UnsupportedOperationException("Not yet implemented"); // TODO
 	}
 
+    @Override
 	public void connect(int arg0, String arg1, int arg2, String arg3,
 			String arg4) throws LDAPException {
 		throw new UnsupportedOperationException(MANAGED_ENVIRONMENT);
 	}
 
+    @Override
 	public void connect(String arg0, int arg1, String arg2, String arg3)
 			throws LDAPException {
 		throw new UnsupportedOperationException(MANAGED_ENVIRONMENT);
 	}
 
+    @Override
 	public void connect(String arg0, int arg1) throws LDAPException {
 		throw new UnsupportedOperationException(MANAGED_ENVIRONMENT);
 	}
 
+    @Override
 	public void delete(String arg0, LDAPConstraints arg1) throws LDAPException {
     	throw new UnsupportedOperationException("Not yet implemented"); // TODO
 	}
 
+    @Override
 	public void delete(String arg0) throws LDAPException {
     	throw new UnsupportedOperationException("Not yet implemented"); // TODO
 	}
 
+    @Override
 	public void disconnect() throws LDAPException {
 		// Nothing to do
 	}
 
+    @Override
 	public LDAPExtendedOperation extendedOperation(LDAPExtendedOperation arg0)
 			throws LDAPException {
     	throw new UnsupportedOperationException("Not yet implemented"); // TODO
 	}
 
+    @Override
 	public Object getOption(int arg0) throws LDAPException {
     	throw new UnsupportedOperationException("Not yet implemented"); // TODO
 	}
 
+    @Override
 	public LDAPControl[] getResponseControls() {
     	throw new UnsupportedOperationException("Not yet implemented"); // TODO
 	}
 
+    @Override
 	public void modify(String arg0, LDAPModification arg1, LDAPConstraints arg2)
 			throws LDAPException {
     	throw new UnsupportedOperationException("Not yet implemented"); // TODO
 	}
 
+    @Override
 	public void modify(String arg0, LDAPModification arg1) throws LDAPException {
     	throw new UnsupportedOperationException("Not yet implemented"); // TODO
 	}
 
+    @Override
 	public void modify(String arg0, LDAPModificationSet arg1,
 			LDAPConstraints arg2) throws LDAPException {
     	throw new UnsupportedOperationException("Not yet implemented"); // TODO
 	}
 
+    @Override
 	public void modify(String arg0, LDAPModificationSet arg1)
 			throws LDAPException {
     	throw new UnsupportedOperationException("Not yet implemented"); // TODO
 	}
 
+    @Override
 	public LDAPEntry read(String arg0, String[] arg1, LDAPSearchConstraints arg2)
 			throws LDAPException {
 		// TODO check whether the constraints can be ignored or not
     	return this.read(arg0, arg1);
 	}
 
+    @Override
 	public LDAPEntry read(String arg0, String[] arg1) throws LDAPException {
 		// TODO remove attributes in excess
 		return this.read(arg0);
 	}
 
+    @Override
 	public LDAPEntry read(String arg0) throws LDAPException {
 		return this.directory.get(this.toKey(arg0));
 	}
 
+    @Override
 	public void rename(String arg0, String arg1, boolean arg2,
 			LDAPConstraints arg3) throws LDAPException {
     	throw new UnsupportedOperationException("Not yet implemented"); // TODO
 	}
 
+    @Override
 	public void rename(String arg0, String arg1, boolean arg2)
 			throws LDAPException {
     	throw new UnsupportedOperationException("Not yet implemented"); // TODO
 	}
 
+    @Override
 	public void rename(String arg0, String arg1, String arg2, boolean arg3,
 			LDAPConstraints arg4) throws LDAPException {
     	throw new UnsupportedOperationException("Not yet implemented"); // TODO
 	}
 
+    @Override
 	public void rename(String arg0, String arg1, String arg2, boolean arg3)
 			throws LDAPException {
     	throw new UnsupportedOperationException("Not yet implemented"); // TODO
 	}
 
+    @Override
 	public LDAPSearchResults search(
 		String base, 
 		int scope, 
@@ -385,6 +428,7 @@ class Connection implements LDAPv3 {
 		);
 	}
 
+    @Override
 	@SuppressWarnings("unchecked")
 	public LDAPSearchResults search(
 		String base, 
@@ -466,11 +510,12 @@ class Connection implements LDAPv3 {
 	}
 	
 	
+    @Override
 	public void setOption(int arg0, Object arg1) throws LDAPException {
     	throw new UnsupportedOperationException("Not yet implemented"); // TODO
 	}
     
-	final static private String MANAGED_ENVIRONMENT = 
+	private static final String MANAGED_ENVIRONMENT = 
 		"This method is not supported in a managed environment";
 	
 	static class SearchResults extends LDAPSearchResults{

@@ -222,7 +222,7 @@ public class AssociationEndRecord
     @Override
     @SuppressWarnings("unchecked")
     public List<String> getQualifierName(){
-        return qualifierType();
+        return qualifierName();
     }
     
     protected void setQualifierName(

@@ -49,8 +49,10 @@ package org.openmdx.base.rest.spi;
 
 import javax.resource.ResourceException;
 import javax.resource.cci.Interaction;
+import javax.resource.cci.InteractionSpec;
 
 import org.openmdx.base.resource.spi.Port;
+import org.openmdx.base.resource.spi.RestInteractionSpec;
 import org.openmdx.base.rest.cci.RestConnection;
 
 /**
@@ -62,9 +64,17 @@ public abstract class AbstractRestPort implements Port<RestConnection> {
 	 * The delegate
 	 */
 	private Port<RestConnection> delegate;
+
 	
 	/**
-	 * Sets the delegate port
+     * Constructor 
+     */
+    protected AbstractRestPort() {
+        super();
+    }
+
+    /**
+     * Retrieves the delegate
 	 * 
 	 * @return the delegate
 	 */
@@ -73,7 +83,7 @@ public abstract class AbstractRestPort implements Port<RestConnection> {
 	}
 
 	/**
-	 * Retrieves the delegate
+     * Sets the delegate port
 	 * 
 	 * @param delegate the delegate to set
 	 */
@@ -102,5 +112,15 @@ public abstract class AbstractRestPort implements Port<RestConnection> {
 	) throws ResourceException {
 		return hasDelegate() ? getDelegate().getInteraction(connection) : null;
 	}
-    
+
+    protected boolean isIncomingTrafficEnabled(RestInteractionSpec ispec) {
+        final int interactionVerb = ispec.getInteractionVerb();
+        return InteractionSpec.SYNC_SEND == interactionVerb || InteractionSpec.SYNC_SEND_RECEIVE == interactionVerb;
+    }
+
+    protected boolean isOutgoingTrafficEnabled(RestInteractionSpec ispec) {
+        final int interactionVerb = ispec.getInteractionVerb();
+        return InteractionSpec.SYNC_RECEIVE == interactionVerb || InteractionSpec.SYNC_SEND_RECEIVE == interactionVerb;
+    }
+	
 }

@@ -101,7 +101,9 @@ public class LargeObjectMarshaller {
     public boolean isTallyingRequired(
         SetLargeObjectMethod setLargeObjectMethod
     ){
-        return SetLargeObjectMethod.TALLYING == setLargeObjectMethod;
+        return 
+            SetLargeObjectMethod.SET_LOB_3 == setLargeObjectMethod ||
+            SetLargeObjectMethod.SET_STREAM_3 == setLargeObjectMethod;
     }
 
     /**
@@ -287,9 +289,9 @@ public class LargeObjectMarshaller {
         SetLargeObjectMethod setLargeObjectMethod
     ) throws IOException, SQLException {
         Long length = largeObject.getLength();
-        if(setLargeObjectMethod == SetLargeObjectMethod.BY_VALUE){
+        if (setLargeObjectMethod == SetLargeObjectMethod.SET_VALUE) {
             String value;
-            if(length == null) {
+            if (length == null) {
                 CharArrayWriter buffer = new CharArrayWriter();
                 CharacterLargeObjects.streamCopy(largeObject.getContent(), 0, buffer);
                 value = buffer.toString();
@@ -299,28 +301,49 @@ public class LargeObjectMarshaller {
                 value = new String(buffer);
             }
             preparedStatement.setString(
-             parameterIndex,
-             value
+                parameterIndex,
+                value
             );
+        } else if(
+            setLargeObjectMethod == SetLargeObjectMethod.SET_LOB ||
+            setLargeObjectMethod == SetLargeObjectMethod.SET_LOB_3
+        ) {
+            if (length == null) {
+                preparedStatement.setClob(
+                    parameterIndex,
+                    largeObject.getContent()
+                );
+            } else if (length.longValue() > Integer.MAX_VALUE) {
+                preparedStatement.setClob(
+                    parameterIndex,
+                    largeObject.getContent(),
+                    length.longValue()
+                );
+            } else {
+                preparedStatement.setClob(
+                    parameterIndex,
+                    largeObject.getContent(),
+                    length.intValue()
+                );
+            }
         } else {
-         if(length == null) {
-
-             preparedStatement.setCharacterStream(
-              parameterIndex,
-              largeObject.getContent()
-             );
-         } else if (length.longValue() > Integer.MAX_VALUE) {
-              preparedStatement.setCharacterStream(
-               parameterIndex,
-               largeObject.getContent(),
-               length.longValue()
-              );
-         } else {
-              preparedStatement.setCharacterStream(
-               parameterIndex,
-               largeObject.getContent(),
-               length.intValue()
-              );
+            if (length == null) {
+                preparedStatement.setCharacterStream(
+                    parameterIndex,
+                    largeObject.getContent()
+                );
+            } else if (length.longValue() > Integer.MAX_VALUE) {
+                preparedStatement.setCharacterStream(
+                    parameterIndex,
+                    largeObject.getContent(),
+                    length.longValue()
+                );
+            } else {
+                preparedStatement.setCharacterStream(
+                    parameterIndex,
+                    largeObject.getContent(),
+                    length.intValue()
+                );
             }
         }
     }
@@ -341,11 +364,11 @@ public class LargeObjectMarshaller {
         int parameterIndex,
         BinaryLargeObject largeObject,
         SetLargeObjectMethod setLargeObjectMethod
-    ) throws IOException, SQLException {
+    ) throws IOException,SQLException {
         Long length = largeObject.getLength();
-        if(setLargeObjectMethod == SetLargeObjectMethod.BY_VALUE){
+        if (setLargeObjectMethod == SetLargeObjectMethod.SET_VALUE) {
             byte[] value;
-            if(length == null) {
+            if (length == null) {
                 ByteArrayOutputStream buffer = new ByteArrayOutputStream();
                 BinaryLargeObjects.streamCopy(largeObject.getContent(), 0, buffer);
                 value = buffer.toByteArray();
@@ -354,27 +377,49 @@ public class LargeObjectMarshaller {
                 largeObject.getContent().read(value);
             }
             preparedStatement.setBytes(
-             parameterIndex,
-             value
+                parameterIndex,
+                value
             );
+        } else if(
+            setLargeObjectMethod == SetLargeObjectMethod.SET_LOB ||
+            setLargeObjectMethod == SetLargeObjectMethod.SET_LOB_3
+        ) {
+            if (length == null) {
+                preparedStatement.setBlob(
+                    parameterIndex,
+                    largeObject.getContent()
+                );
+            } else if (length.longValue() > Integer.MAX_VALUE) {
+                preparedStatement.setBlob(
+                    parameterIndex,
+                    largeObject.getContent(),
+                    length.longValue()
+                );
+            } else {
+                preparedStatement.setBlob(
+                    parameterIndex,
+                    largeObject.getContent(),
+                    length.intValue()
+                );
+            }
         } else {
-         if(length == null) {
-             preparedStatement.setBinaryStream(
-              parameterIndex,
-              largeObject.getContent()
-             );
-         } else if (length.longValue() > Integer.MAX_VALUE) {
-             preparedStatement.setBinaryStream(
-              parameterIndex,
-              largeObject.getContent(),
-              length.longValue()
-             );
-         } else {
-             preparedStatement.setBinaryStream(
-              parameterIndex,
-              largeObject.getContent(),
-              length.intValue()
-             );
+            if (length == null) {
+                preparedStatement.setBinaryStream(
+                    parameterIndex,
+                    largeObject.getContent()
+                );
+            } else if (length.longValue() > Integer.MAX_VALUE) {
+                preparedStatement.setBinaryStream(
+                    parameterIndex,
+                    largeObject.getContent(),
+                    length.longValue()
+                );
+            } else {
+                preparedStatement.setBinaryStream(
+                    parameterIndex,
+                    largeObject.getContent(),
+                    length.intValue()
+                );
             }
         }
     }

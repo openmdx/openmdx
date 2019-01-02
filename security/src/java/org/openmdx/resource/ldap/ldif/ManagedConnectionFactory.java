@@ -5,10 +5,9 @@
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
  * ====================================================================
  *
- * This software is published under the BSD license
- * as listed below.
+ * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2007, OMEX AG, Switzerland
+ * Copyright (c) 2007-2018, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -61,11 +60,9 @@ import javax.security.auth.Subject;
 import org.openmdx.resource.ldap.spi.AbstractManagedConnectionFactory;
 import org.openmdx.resource.ldap.spi.ManagedConnection;
 
-import netscape.ldap.LDAPv3;
-
 
 /**
- * Managed LDAP Connection Factory
+ * Managed LDIF Connection Factory
  */
 public class ManagedConnectionFactory extends AbstractManagedConnectionFactory {
 
@@ -117,11 +114,6 @@ public class ManagedConnectionFactory extends AbstractManagedConnectionFactory {
 	 */
 	private String commentPattern = "^#(.*)$";
 	
-	/**
-	 * The LDAP cache
-	 */
-	private LDAPv3 physicalConnection = null;
-	
     /* (non-Javadoc)
      * @see org.openmdx.resource.spi.AbstractManagedConnectionFactory#isManagedConnectionShareable()
      */
@@ -130,23 +122,23 @@ public class ManagedConnectionFactory extends AbstractManagedConnectionFactory {
 	    return true;
     }
 
-	public synchronized javax.resource.spi.ManagedConnection createManagedConnection(
+    @Override
+	protected javax.resource.spi.ManagedConnection newManagedConnection(
         Subject subject,
         ConnectionRequestInfo connectionRequestInfo
     ) throws ResourceException {
-    	if(this.physicalConnection == null) {
-			this.physicalConnection = new Connection(
-				this.toURL("ConnectionURL", this.getConnectionURL()),
-				this.toPattern("DistinguishedNamePattern", this.getDistinguishedNamePattern()),
-				this.toPattern("AttributePattern", this.getAttributePattern()),
-				this.toPattern("BinaryAttributePattern", this.getBinaryAttributePattern()), 
-				this.toPattern("CommentPattern", this.getCommentPattern()), 
-				this.caseSensitive
-			);
-    	}
         return new ManagedConnection(
-            this.physicalConnection,
-            null
+            this,
+            getPasswordCredential(subject),
+            connectionRequestInfo, 
+            new Connection(
+                this.toURL("ConnectionURL", this.getConnectionURL()),
+                this.toPattern("DistinguishedNamePattern", this.getDistinguishedNamePattern()),
+                this.toPattern("AttributePattern", this.getAttributePattern()),
+                this.toPattern("BinaryAttributePattern", this.getBinaryAttributePattern()), 
+                this.toPattern("CommentPattern", this.getCommentPattern()), 
+                this.caseSensitive
+            )
          );
     }
 

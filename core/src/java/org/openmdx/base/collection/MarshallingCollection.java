@@ -107,12 +107,12 @@ public class MarshallingCollection<E>
     private static final long serialVersionUID = 3977579212402079801L;
 
     /**
-     * 
+     * The delegate collection
      */
     private Collection<Object> delegate;
 
     /**
-     * 
+     * The marshaller
      */    
     protected final Marshaller marshaller;
 

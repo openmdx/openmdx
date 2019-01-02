@@ -57,7 +57,6 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
-import javax.annotation.Nullable;
 import javax.resource.ResourceException;
 import javax.resource.cci.IndexedRecord;
 import javax.resource.cci.MappedRecord;
@@ -778,8 +777,7 @@ public abstract class AbstractMappedRecord<M extends Enum<M>>
      * 
      * @return the codes <code>Short</code> representation
      */
-    @Nullable
-    protected static Short jcaValue(@Nullable Code code) {
+    protected static Short jcaValue(Code code) {
     	return code == null ? null : Short.valueOf(code.code());
     }
     

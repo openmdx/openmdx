@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JRE 8"/>
+	<classpathentry kind="lib" path="lib/openejb-core.jar" sourcepath="src/openejb-core-src.zip"/>
+	<classpathentry kind="lib" path="lib/tomee-catalina.jar" sourcepath="src/tomee-catalina-src.zip"/>
+	<classpathentry kind="lib" path="lib/myfaces-api.jar" sourcepath="src/myfaces-api-src.zip"/>
+	<classpathentry kind="lib" path="lib/myfaces-impl.jar" sourcepath="src/myfaces-impl-src.zip"/>
+	<classpathentry kind="lib" path="lib/openwebbeans-ee-common.jar" sourcepath="src/openwebbeans-ee-common-src.zip"/>
+	<classpathentry kind="lib" path="lib/openwebbeans-ee.jar" sourcepath="src/openwebbeans-ee-src.zip"/>
+	<classpathentry kind="lib" path="lib/openwebbeans-ejb.jar" sourcepath="src/openwebbeans-ejb-src.zip"/>
+	<classpathentry kind="lib" path="lib/openwebbeans-el22.jar" sourcepath="src/openwebbeans-el22-src.zip"/>
+	<classpathentry kind="lib" path="lib/openwebbeans-impl.jar" sourcepath="src/openwebbeans-impl-src.zip"/>
+	<classpathentry kind="lib" path="lib/openwebbeans-jsf.jar" sourcepath="src/openwebbeans-jsf-src.zip"/>
+	<classpathentry kind="lib" path="lib/openwebbeans-spi.jar" sourcepath="src/openwebbeans-spi-src.zip"/>
+	<classpathentry kind="lib" path="lib/openwebbeans-web.jar" sourcepath="src/openwebbeans-web-src.zip"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>

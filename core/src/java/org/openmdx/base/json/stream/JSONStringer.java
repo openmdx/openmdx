@@ -106,10 +106,6 @@ public class JSONStringer extends JSONWriter {
      * <code>endArray</code>).
      * @return The JSON text.
      */
-    @edu.umd.cs.findbugs.annotations.SuppressFBWarnings(
-	    value="NP_TOSTRING_COULD_RETURN_NULL", 
-	    justification="As expected by JSON"
-    )
     public String toString() {
         return this.mode == 'd' ? this.writer.toString() : null;
     }

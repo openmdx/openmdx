@@ -340,7 +340,7 @@ public class FeatureMapper implements Serializable {
             features = Maps.putUnlessPresent(
                 allFeatures,
                 className, 
-                new ConcurrentHashMap<String,ModelElement_1_0>()
+                new ConcurrentHashMap<>()
             );
         }
         if(mode == MethodSignature.RETURN_IS_VOID) {
@@ -354,7 +354,7 @@ public class FeatureMapper implements Serializable {
         if(feature == null) {
             Model_1_0 model = this.classDef.getModel();
             ModelElement_1_0 classDef = model.getElement(className);
-            List<ModelElement_1_0> operations = new ArrayList<ModelElement_1_0>();
+            List<ModelElement_1_0> operations = new ArrayList<>();
             Map allFeature = classDef.objGetMap("allFeature");
             for(Iterator<?> i = allFeature.values().iterator(); i.hasNext(); ) {
                 feature = (ModelElement_1_0)i.next();
@@ -521,14 +521,13 @@ public class FeatureMapper implements Serializable {
     // Members
     //------------------------------------------------------------------------
     private static final long serialVersionUID = 4846709494755003575L;
-    protected final static ConcurrentMap<String,ConcurrentMap<String,ModelElement_1_0>> allFeatures = 
-        new ConcurrentHashMap<String,ConcurrentMap<String,ModelElement_1_0>>();
+    protected final static ConcurrentMap<String,ConcurrentMap<String,ModelElement_1_0>> allFeatures = new ConcurrentHashMap<>();
     
-    private transient final ConcurrentMap<String,Method> accessors = new ConcurrentHashMap<String,Method>();
-    private transient final ConcurrentMap<String,Method> mutators = new ConcurrentHashMap<String,Method>();
-    private transient final ConcurrentMap<String,Method> operations = new ConcurrentHashMap<String,Method>();
-    private transient final ConcurrentMap<Method,Method> mapping = new ConcurrentHashMap<Method,Method>();
-    private transient final ConcurrentMap<String,Method> collections = new ConcurrentHashMap<String,Method>();
+    private transient final ConcurrentMap<String,Method> accessors = new ConcurrentHashMap<>();
+    private transient final ConcurrentMap<String,Method> mutators = new ConcurrentHashMap<>();
+    private transient final ConcurrentMap<String,Method> operations = new ConcurrentHashMap<>();
+    private transient final ConcurrentMap<Method,Method> mapping = new ConcurrentHashMap<>();
+    private transient final ConcurrentMap<String,Method> collections = new ConcurrentHashMap<>();
     private transient final ModelElement_1_0 classDef;    
     private transient final Class<?> targetIntf;    
 

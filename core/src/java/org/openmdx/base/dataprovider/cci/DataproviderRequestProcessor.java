@@ -52,8 +52,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import javax.resource.NotSupportedException;
 import javax.resource.ResourceException;
 import javax.resource.cci.Connection;
@@ -99,8 +97,8 @@ public final class DataproviderRequestProcessor implements Channel {
 	 * Constructor
 	 */
     public DataproviderRequestProcessor(   
-        @Nullable List<String> principalChain,
-        @Nonnull Port<RestConnection> port
+        List<String> principalChain,
+        Port<RestConnection> port
     ) throws ResourceException {
     	this(
     		new DataproviderRequestConnection(newConnectionSpec(principalChain), port)
@@ -111,7 +109,7 @@ public final class DataproviderRequestProcessor implements Channel {
 	 * Constructor
      */
     private DataproviderRequestProcessor(
-    	@Nonnull DataproviderRequestConnection connection
+    	DataproviderRequestConnection connection
     ){
     	this.connection = connection;
     	this.pending = null;

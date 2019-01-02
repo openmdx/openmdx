@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2007-2010, OMEX AG, Switzerland
+ * Copyright (c) 2007-2018, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -48,65 +48,59 @@
 package org.openmdx.resource.ldap.spi;
 
 import javax.resource.ResourceException;
+import javax.resource.spi.ConnectionRequestInfo;
 import javax.resource.spi.EISSystemException;
+import javax.resource.spi.ManagedConnectionFactory;
 import javax.resource.spi.security.PasswordCredential;
+import javax.security.auth.Subject;
 
+import org.openmdx.resource.spi.AbstractManagedConnection;
+import org.openmdx.resource.spi.PasswordCredentials;
+
+import netscape.ldap.LDAPConnection;
 import netscape.ldap.LDAPException;
 import netscape.ldap.LDAPv3;
-
-import org.openmdx.resource.ldap.v3.Connection;
-import org.openmdx.resource.spi.AbstractManagedConnection;
 
 
 /**
  * Managed LDAP Connection
  */
-public class ManagedConnection extends AbstractManagedConnection {
+public class ManagedConnection extends AbstractManagedConnection<AbstractManagedConnectionFactory> {
 
     /**
      * Constructor 
-     *
-     * @param physicalConnection
-     * @param credential
      */
     public ManagedConnection(
-    	LDAPv3 physicalConnection,
-        PasswordCredential credential
-    ) {
-    	super("LDAP","3.0", credential);
-    	this.ldapConnection = physicalConnection;
+        AbstractManagedConnectionFactory factory,
+    	PasswordCredential credential,
+        ConnectionRequestInfo connectionRequestInfo, 
+        LDAPv3 physicalConnection
+    ) throws ResourceException {
+    	super(factory,"LDAP", String.valueOf(factory.getProtocolVersion()), credential, connectionRequestInfo);
+    	this.physicalConnection = physicalConnection;
     }
 
     /**
-     * 
+     * The physical connection
      */
-    private LDAPv3 ldapConnection;
-    
-    /**
-     * Used by LDAPConnection
-     * 
-     * @return
-     */
-    public LDAPv3 getPhysicalConnection(
-    ){
-    	return this.ldapConnection;
-    }
-    
+    private LDAPv3 physicalConnection;
+
     @Override
     public void destroy(
     ) throws ResourceException {
     	try {
-			this.ldapConnection.disconnect();
+			this.physicalConnection.disconnect();
 		} catch (LDAPException exception) {
 			throw this.log(
 				new EISSystemException(
 					"LDAP disconnection failure",
 					exception
-				)
+				),
+				false
 			);
 		} finally {
     		super.destroy();
-	        this.ldapConnection = null;
+	        this.physicalConnection = null;
 		}
     }
 
@@ -114,8 +108,91 @@ public class ManagedConnection extends AbstractManagedConnection {
      * @see org.openmdx.resource.spi.AbstractManagedConnection#newConnection()
      */
     @Override
-    protected Object newConnection() {
-	    return new Connection();
+    protected Connection newConnection(
+        Subject subject, 
+        ConnectionRequestInfo connectionRequestInfo
+    ) throws ResourceException {
+        final LDAPv3 delegate;
+        if(this.physicalConnection instanceof Cloneable) {
+            // LDAP v3
+            delegate = (LDAPv3) ((LDAPConnection)this.physicalConnection).clone();
+            final PasswordCredential credential = subject == null ?
+                getCredential() :
+                PasswordCredentials.getPasswordCredential(getManagedConnectionFactory(), subject);
+            if(credential != null) {
+                bind(delegate, credential);
+            }
+        } else {
+            // LDIF
+            delegate = this.physicalConnection;
+        }
+	    return new Connection(delegate);
+    }
+
+    /**
+     * Authenticate 
+     * 
+     * @param physicalConnection
+     *            the physical connection
+     * @param credential
+     *            the credential
+     * 
+     * @throws ResourceException
+     */
+    private void bind(
+        final LDAPv3 physicalConnection,
+        final PasswordCredential credential
+    ) throws ResourceException {
+        final String distinguishedName = credential.getUserName();
+        final String password = new String(credential.getPassword());
+        try {
+            physicalConnection.authenticate(getManagedConnectionFactory().getProtocolVersion(), distinguishedName, password);
+        } catch (LDAPException exception) {
+            switch (exception.getLDAPResultCode()) {
+                case LDAPException.NO_SUCH_OBJECT:
+                    log(
+                        "LDAP authentication failed, user '{0}' does not exist",
+                        credential.getUserName()
+                    );
+                    throw new EISSystemException(
+                        "LDAP authentication failed, user does not exist",
+                        exception
+                    );
+                case LDAPException.INVALID_CREDENTIALS:
+                    log(
+                        "LDAP authentication failed, invalid password for user '{0}'",
+                        credential.getUserName()
+                    );
+                    throw new EISSystemException(
+                        "LDAP authentication failed, invalid password",
+                        exception
+                    );
+                default:
+                    log(
+                        "LDAP authentication failed, invalid password for user '{0}'",
+                        credential.getUserName()
+                    );
+                    throw log(
+                        new EISSystemException(
+                            "LDAP authentication failed, invalid password",
+                            exception
+                        ),
+                        true
+                    );
+            }
+        }
+    }
+
+    /* (non-Javadoc)
+     * @see org.openmdx.resource.spi.AbstractManagedConnection#matches(javax.resource.spi.ManagedConnectionFactory, java.lang.Object, javax.resource.spi.ConnectionRequestInfo)
+     */
+    @Override
+    protected boolean matches(
+        ManagedConnectionFactory factory,
+        Object credential,
+        ConnectionRequestInfo connectionRequestInfo
+    ) {
+        return factory == getManagedConnectionFactory();
     }
 
 }

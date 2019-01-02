@@ -610,7 +610,7 @@ public class Model_2 extends AbstractRestPort {
 			try {
 				return ModelUtils.getsubtype(ofType);
 			} catch (ServiceException e) {
-				throw ResourceExceptions.toSystemException(e);
+				throw ResourceExceptions.toResourceException(e);
 			}
 		}			
 		
@@ -902,7 +902,7 @@ public class Model_2 extends AbstractRestPort {
 			} catch (ServiceException exception) {
 				throw ResourceExceptions.toResourceException(exception);
 			} catch(IOException e) {
-			    throw ResourceExceptions.toSystemException(e);
+			    throw ResourceExceptions.toResourceException(e);
 			}
 		}
 
@@ -955,7 +955,7 @@ public class Model_2 extends AbstractRestPort {
          * @return
          */
         private boolean isInstanceOf(ObjectRecord content, String subtype) {
-            throw new UnsupportedOperationException("Wait a moment: Is " + content.getValue().getRecordName() + " an instance of " + subtype);
+            throw new UnsupportedOperationException("Is " + content.getValue().getRecordName() + " an instance of " + subtype);
         }
 
         /**

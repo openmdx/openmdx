@@ -156,7 +156,7 @@ public class LegacyPlugInHelper {
 	private static boolean isValidTimeUniqueByProperty(
 		DataObject_1_0 value
 	) throws ServiceException{
-		return Boolean.TRUE.equals(value.objGetValue("validTimeUnique"));
+		return Boolean.TRUE.equals(value.objGetValue(TechnicalAttributes.VALID_TIME_UNIQUE));
 	}
 	
     /**

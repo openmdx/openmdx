@@ -109,7 +109,8 @@ final class UniqueValue<T> {
             throw new ServiceException(
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.ILLEGAL_STATE,
-                "There is no matching state for the given request"
+                "There is no matching state for the given request. "
+                + "Consider erroneous behaviour or concurrent modifications as possible reasons."
             );
         } else {
             return this.value;

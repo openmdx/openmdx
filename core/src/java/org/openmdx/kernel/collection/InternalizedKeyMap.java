@@ -49,11 +49,8 @@ package org.openmdx.kernel.collection;
 
 import java.util.AbstractMap;
 import java.util.Collection;
+import java.util.IdentityHashMap;
 import java.util.Set;
-
-import org.openmdx.kernel.exception.BasicException;
-import org.openmdx.kernel.log.SysLog;
-import org.openmdx.uses.java.util.IdentityHashMap;
 
 /**
  * The keys are restricted to <code>String</code>, <code>Short</code>, 
@@ -83,11 +80,6 @@ public class InternalizedKeyMap<K,V> extends AbstractMap<K, V> {
         delegate = new IdentityHashMap<K, V>(expectedMaxSize);
     }
 
-    /**
-     * Tells whether the internalization shall be trusted or validated
-     */
-    private final static boolean TRUST_INTERNALIZATION = Boolean.getBoolean("org.openmdx.kernel.collection.InternalizedKeyMap.TrustInternalization");
-    		
     /**
      * The delegate map
      */
@@ -121,51 +113,13 @@ public class InternalizedKeyMap<K,V> extends AbstractMap<K, V> {
             null;
     }
 
-    /**
-     * Works around internalization problems
-     * 
-     * @param newKey
-     * 
-     * @return the (maybe recovered) key
-     */
-    private K validatedKey(
-        K newKey
-    ){
-        if(newKey == null){
-        	return newKey;
-        } else {
-        	K oldKey = this.delegate.findEqualKey(newKey);
-        	if(oldKey == null) {
-        		return newKey;
-        	} else {
-        		if (oldKey != newKey) {
-	                SysLog.error(
-	                    "Internalization returns different objects over time",
-	                    BasicException.newStandAloneExceptionStack(
-	                        BasicException.Code.DEFAULT_DOMAIN,
-	                        BasicException.Code.ASSERTION_FAILURE,
-	                        "Internalization returns different objects over time",
-	                        new BasicException.Parameter("value", oldKey, newKey),
-	                        new BasicException.Parameter("class", oldKey.getClass().getName(), newKey.getClass().getName()),
-	                        new BasicException.Parameter("hashCodes", Integer.valueOf(System.identityHashCode(oldKey)), Integer.valueOf(System.identityHashCode(newKey)))
-	                    )
-	                );
-	        	}
-	        	return oldKey;
-        	}
-        }
-    }
-    
     /* (non-Javadoc)
      * @see java.util.AbstractMap#put(java.lang.Object, java.lang.Object)
      */
     @Override
     public V put(K key, V value) {
         K internalizedKey = InternalizedKeys.internalize(key);
-        return this.delegate.put(
-        	TRUST_INTERNALIZATION ? internalizedKey : validatedKey(internalizedKey), 
-            value
-        );
+        return this.delegate.put(internalizedKey, value);
     }
 
     /* (non-Javadoc)

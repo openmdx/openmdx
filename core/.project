@@ -33,11 +33,6 @@
 			<locationURI>PARENT-1-PROJECT_LOC/core/build</locationURI>
 		</link>
 		<link>
-			<name>openmdx.version.properties</name>
-			<type>1</type>
-			<locationURI>OPENMDX_HOME/openmdx.version.properties</locationURI>
-		</link>
-		<link>
 			<name>src</name>
 			<type>2</type>
 			<locationURI>PARENT-1-PROJECT_LOC/core/src</locationURI>

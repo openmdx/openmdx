@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2010, OMEX AG, Switzerland
+ * Copyright (c) 2010-2018, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -47,7 +47,7 @@
  */
 package org.openmdx.uses.net.sourceforge.jradiusclient;
 
-import java.io.Closeable;
+import java.io.IOException;
 
 import org.openmdx.uses.net.sourceforge.jradiusclient.exception.InvalidParameterException;
 import org.openmdx.uses.net.sourceforge.jradiusclient.exception.RadiusException;
@@ -55,22 +55,22 @@ import org.openmdx.uses.net.sourceforge.jradiusclient.exception.RadiusException;
 /**
  * RADIUS Connection 
  */
-public interface RadiusConnection extends Closeable {
+public interface RadiusConnection extends AutoCloseable {
 
-	/**
-	 * This method performs the job of sending accounting information for the
-	 * current user to the radius accounting server.
-	 * 
-	 * @param requestPacket Any  request attributes to add to the accounting packet.
-	 * 
-	 * @return RadiusPacket a packet containing the response from the Radius server
-	 * 
-	 * @exception org.openmdx.uses.net.sourceforge.jradiusclient.exception.RadiusException
-	 * @exception org.openmdx.uses.net.sourceforge.jradiusclient.exception.InvalidParameterException
-	 */
-	RadiusPacket account(
-		RadiusPacket requestPacket
-	) throws InvalidParameterException, RadiusException;
+    /**
+     * This method performs the job of sending accounting information for the
+     * current user to the radius accounting server.
+     * 
+     * @param requestPacket Any  request attributes to add to the accounting packet.
+     * 
+     * @return RadiusPacket a packet containing the response from the Radius server
+     * 
+     * @exception org.openmdx.uses.net.sourceforge.jradiusclient.exception.RadiusException
+     * @exception org.openmdx.uses.net.sourceforge.jradiusclient.exception.InvalidParameterException
+     */
+    RadiusPacket account(
+        RadiusPacket requestPacket
+    ) throws InvalidParameterException, RadiusException;
 
     /**
      * This method performs the job of authenticating the given <code>RadiusPacket</code> against
@@ -87,8 +87,15 @@ public interface RadiusConnection extends Closeable {
      * @exception org.openmdx.uses.net.sourceforge.jradiusclient.exception.RadiusException
      * @exception org.openmdx.uses.net.sourceforge.jradiusclient.exception.InvalidParameterException
      */
-    public RadiusPacket authenticate(
-    	RadiusPacket accessRequest
+    RadiusPacket authenticate(
+        RadiusPacket accessRequest
     ) throws RadiusException, InvalidParameterException;
+
+    /* (non-Javadoc)
+     * @see java.lang.AutoCloseable#close()
+     */
+    @Override
+    void close(
+    ) throws IOException;
 
 }

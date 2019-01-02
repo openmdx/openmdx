@@ -59,7 +59,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.SortedMap;
 import java.util.TreeMap;
-import java.util.logging.Level;
 
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.kernel.log.SysLog;
@@ -135,7 +134,6 @@ public class StandardStringSource implements StringSource {
         InputStream in,
         int tableSize 
     ) throws IOException {
-        long startLoading = System.currentTimeMillis();
         final CharsetDecoder decoder = charset.newDecoder();
         final byte[] binaryData = new byte[SLICE_SIZE];
         final char[] characterData = new char[SLICE_SIZE]; 
@@ -206,13 +204,7 @@ public class StandardStringSource implements StringSource {
             }
             tableIndex += sliceLimit;
         }
-        long loadTime = System.currentTimeMillis() -startLoading;
-        SysLog.performance("WBXML String table loaded", loadTime);
-        SysLog.log(
-            Level.INFO, 
-            "Sys|WBXML String table: " + tableSize + " bytes loaded in " + loadTime + " ms"
-        ); // Not parameterizd for the sake of Dalvik
-        
+        SysLog.detail("WBXML String table loaded", tableSize + " bytes");
     }
 
     /**

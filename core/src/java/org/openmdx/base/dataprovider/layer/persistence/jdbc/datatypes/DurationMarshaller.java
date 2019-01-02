@@ -55,7 +55,7 @@ import java.util.regex.Pattern;
 import javax.xml.datatype.DatatypeConstants;
 import javax.xml.datatype.Duration;
 
-import org.openmdx.application.dataprovider.layer.persistence.jdbc.LayerConfigurationEntries;
+import org.openmdx.base.dataprovider.layer.persistence.jdbc.LayerConfigurationEntries;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.marshalling.Marshaller;
 import org.openmdx.kernel.exception.BasicException;

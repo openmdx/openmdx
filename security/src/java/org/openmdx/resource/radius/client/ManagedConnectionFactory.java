@@ -181,7 +181,7 @@ public class ManagedConnectionFactory extends AbstractManagedConnectionFactory {
     @Override
     public void setLogWriter(
     	PrintWriter logWriter
-    ) throws ResourceException {
+    ){
 	    super.setLogWriter(logWriter);
 	    if(this.logToAdapter) {
 	    	this.logger.setUseParentHandlers(logWriter == null);
@@ -286,14 +286,15 @@ public class ManagedConnectionFactory extends AbstractManagedConnectionFactory {
 
 
 	@Override
-    public ManagedConnection createManagedConnection(
+    protected ManagedConnection newManagedConnection(
     	Subject subject, 
     	ConnectionRequestInfo connectionRequestInfo
     ) throws ResourceException {
-		PasswordCredential credential = getCredential(subject);
+		PasswordCredential credential = getPasswordCredential(subject);
 	    try {
 	        return new ManagedConnection(
-	        	credential,
+	        	this,
+	        	credential, connectionRequestInfo, 
 	        	new RadiusClient(
 	                this.hosts, 
 	                this.authenticationPorts, 

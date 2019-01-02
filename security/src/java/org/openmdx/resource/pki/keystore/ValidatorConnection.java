@@ -69,7 +69,7 @@ public class ValidatorConnection
 	/* (non-Javadoc)
      * @see org.openmdx.resource.pki.cci.CertificateValidator#validate(java.security.cert.CertPath)
      */
-//  @Override
+    @Override
     public CertPathValidatorResult validate(
     	CertPath certificationPath
     ) throws CertPathValidatorException, InvalidAlgorithmParameterException {

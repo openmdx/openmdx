@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <!--
-=======================================================================
-= Description: openMDX/Security jre-1.7 Platform Properties
+=============================================5==========================
+= Description: openMDX/Security JRE 8 Platform Properties
 = Copyright:   (c) 2003-2015 OMEX AG
 =======================================================================
 =
@@ -41,4 +41,4 @@
 = POSSIBILITY OF SUCH DAMAGE.
 = 
 -->
-<project name="openmdx-security-jre-1.7-properties"/>
+<project name="openmdx-security-jre-1.8-properties"/>

@@ -5,10 +5,9 @@ import java.util.Collection;
 import java.util.List;
 import java.util.regex.Pattern;
 
-import org.openmdx.application.dataprovider.spi.EmbeddedFlags;
-import org.openmdx.application.dataprovider.spi.EmbeddedFlags.FlagsAndValue;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.query.spi.AccentInsensitivePattern;
+import org.openmdx.base.query.spi.EmbeddedFlags;
 import org.openmdx.kernel.exception.BasicException;
 import org.w3c.cci2.RegularExpressionFlag;
 
@@ -89,7 +88,7 @@ public enum LikeFlavour {
 
 		@Override
 		protected void apply(StringBuilder clause, Collection<? super String> values, String columnName, String rawValue) {
-			final FlagsAndValue flagsAndValue = EmbeddedFlags.getInstance().parse(rawValue);
+			final EmbeddedFlags.FlagsAndValue flagsAndValue = EmbeddedFlags.getInstance().parse(rawValue);
 			values.add(flagsAndValue.getValue());
 			final String matchParam = RegularExpressionFlag.toMatchParameter(flagsAndValue.getFlagSet());
 			if(matchParam.isEmpty()) {

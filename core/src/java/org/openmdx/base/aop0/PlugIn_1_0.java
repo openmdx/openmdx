@@ -47,6 +47,7 @@
  */
 package org.openmdx.base.aop0;
 
+import org.openmdx.base.accessor.cci.SystemAttributes;
 import org.openmdx.base.accessor.rest.DataObject_1;
 import org.openmdx.base.accessor.rest.UnitOfWork_1;
 import org.openmdx.base.exception.ServiceException;
@@ -81,8 +82,7 @@ public interface PlugIn_1_0 {
     /**
      * Post-set-"core" callback
      * 
-     * @param target
-     * @param core
+     * @see SystemAttributes#CORE
      */
     void postSetCore(
         DataObject_1 target,

@@ -50,12 +50,20 @@ package org.openmdx.base.dataprovider.layer.persistence.jdbc.spi;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
+import org.openmdx.application.dataprovider.cci.AttributeSpecifier;
+import org.openmdx.application.dataprovider.cci.FilterProperty;
 import org.openmdx.base.dataprovider.layer.persistence.jdbc.DatabaseConfiguration;
+import org.openmdx.base.dataprovider.layer.persistence.jdbc.dbobject.DbObject;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
 import org.openmdx.base.naming.Path;
+import org.openmdx.base.resource.spi.RestInteractionSpec;
+import org.openmdx.base.rest.cci.QueryRecord;
+import org.openmdx.base.rest.cci.RequestRecord;
 import org.w3c.cci2.SparseArray;
 
 public interface Database_1_0 {
@@ -235,5 +243,72 @@ public interface Database_1_0 {
     public boolean isUseViewsForRedundantColumns();
     
     public boolean isCascadeDeletes();
+
+    /**
+     * @return
+     */
+    boolean isOrderNullsAsEmpty();
+
+    /**
+     * @param ispec
+     * @param request
+     * @return
+     * @throws ServiceException
+     * @throws SQLException
+     */
+    Connection getConnection(
+        RestInteractionSpec ispec, RequestRecord request
+    )
+        throws ServiceException, SQLException;
+
+    /**
+     * @param conn
+     * @param ispec
+     * @param path
+     * @param attributeSelector
+     * @param attributeSpecifiers
+     * @param objectClassAsAttribute
+     * @param reply
+     * @param throwNotFoundException
+     * @throws ServiceException
+     */
+    void get(
+        Connection conn, RestInteractionSpec ispec, Path path, short attributeSelector,
+        Map<String, AttributeSpecifier> attributeSpecifiers, boolean objectClassAsAttribute, Target target,
+        boolean throwNotFoundException
+    )
+        throws ServiceException;
+
+    /**
+     * @param conn
+     * @param accessPath
+     * @param filter
+     * @param isQuery
+     * @return
+     * @throws ServiceException
+     */
+    DbObject getDbObject(
+        Connection conn, Path accessPath, List<FilterProperty> filter, boolean isQuery
+    )
+        throws ServiceException;
+
+    /**
+     * @param _clause
+     * @return
+     */
+    String removeViewPrefix(
+        String _clause
+    );
+
+    /**
+     * @param request
+     * @param qualifiedClassNames
+     * @return
+     * @throws ServiceException
+     */
+    FilterProperty mapInstanceOfFilterProperty(
+        QueryRecord request, Collection<String> qualifiedClassNames
+    )
+        throws ServiceException;
     
 }

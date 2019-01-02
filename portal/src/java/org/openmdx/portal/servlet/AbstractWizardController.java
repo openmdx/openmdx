@@ -76,11 +76,11 @@ import org.openmdx.base.naming.Path;
 import org.openmdx.kernel.log.SysLog;
 import org.openmdx.portal.servlet.component.ObjectView;
 import org.openmdx.portal.servlet.component.OperationPane;
-import org.openmdx.portal.servlet.component.UiOperationTab;
 import org.openmdx.portal.servlet.component.ShowObjectView;
+import org.openmdx.portal.servlet.component.UiOperationTab;
 import org.openmdx.portal.servlet.control.FormControl;
-import org.openmdx.portal.servlet.control.WizardControl;
 import org.openmdx.portal.servlet.control.UiWizardTabControl;
+import org.openmdx.portal.servlet.control.WizardControl;
 import org.openmdx.uses.org.apache.commons.fileupload.DiskFileUpload;
 import org.openmdx.uses.org.apache.commons.fileupload.FileItem;
 import org.openmdx.uses.org.apache.commons.fileupload.FileUpload;
@@ -91,6 +91,112 @@ import org.openmdx.uses.org.apache.commons.fileupload.FileUpload;
  */
 public abstract class AbstractWizardController {
 
+	public static class ObjectReferenceBean {
+
+		/**
+		 * @return the title
+		 */
+		public String getTitle() {
+			return title;
+		}
+		/**
+		 * @param title the title to set
+		 */
+		public void setTitle(String title) {
+			this.title = title;
+		}
+		/**
+		 * @return the xri
+		 */
+		public String getXri() {
+			return xri;
+		}
+		/**
+		 * @param xri the xri to set
+		 */
+		public void setXri(String xri) {
+			this.xri = xri;
+		}
+		
+		private String title;
+		private String xri;
+	}
+	
+	public static class OptionBean {
+		
+		/**
+		 * @return the value
+		 */
+		public Short getValue() {
+			return value;
+		}
+		/**
+		 * @param value the value to set
+		 */
+		public void setValue(Short value) {
+			this.value = value;
+		}
+		/**
+		 * @return the title
+		 */
+		public String getTitle() {
+			return title;
+		}
+		/**
+		 * @param title the title to set
+		 */
+		public void setTitle(String title) {
+			this.title = title;
+		}
+		
+		private Short value;
+		private String title;
+	}
+
+	public static class QueryBean {
+		
+		/**
+		 * @return the position
+		 */
+		public Integer getPosition() {
+			return position;
+		}
+		/**
+		 * @param position the position to set
+		 */
+		public void setPosition(Integer position) {
+			this.position = position;
+		}
+		/**
+		 * @return the size
+		 */
+		public Integer getSize() {
+			return size;
+		}
+		/**
+		 * @param size the size to set
+		 */
+		public void setSize(Integer size) {
+			this.size = size;
+		}
+		/**
+		 * @return the query
+		 */
+		public String getQuery() {
+			return query;
+		}
+		/**
+		 * @param query the query to set
+		 */
+		public void setQuery(String query) {
+			this.query = query;
+		}
+		
+		private Integer position;
+		private Integer size;
+		private String query;
+	}
+		
 	/**
 	 * Constructor 
 	 *
@@ -149,7 +255,6 @@ public abstract class AbstractWizardController {
 				DiskFileUpload upload = new DiskFileUpload();
 				upload.setHeaderEncoding("UTF-8");
 				try {
-					@SuppressWarnings("unchecked")
 					List<FileItem> items = upload.parseRequest(
 						this.getRequest(),
 						200, // in-memory threshold. Content for fields larger than threshold is written to disk
@@ -888,11 +993,16 @@ public abstract class AbstractWizardController {
 		if(this.getCurrentView() != null) {
 			String pattern1 = this.getWizardName().toLowerCase().replace("_", "") + ".";
 			String pattern2 = this.getWizardName().toLowerCase().replace("_", "") + "/index.jsp";
+			String pattern3 = this.getWizardName().toLowerCase().replace("_", "") + "/index.xhtml";
 			ShowObjectView currentView = (ShowObjectView)this.getCurrentView();
 			for(OperationPane operationPane: currentView.getChildren(OperationPane.class)) {
 				for(UiOperationTab operationTab: operationPane.getChildren(UiOperationTab.class)) {
 					String name = operationTab.getOperationName().toLowerCase().replace("_", "");
-					if(name.indexOf(pattern1) > 0 || name.indexOf(pattern2) > 0) {
+					if(
+						name.indexOf(pattern1) > 0 ||
+						name.indexOf(pattern2) > 0 ||
+						name.indexOf(pattern3) > 0
+					) {
 						return operationTab.getToolTip();
 					}
 				}
@@ -900,7 +1010,11 @@ public abstract class AbstractWizardController {
 			for(WizardControl wizardControl: currentView.getControl().getChildren(WizardControl.class)) {
 				for(UiWizardTabControl wizardTabControl: wizardControl.getChildren(UiWizardTabControl.class)) {
 					String qualifiedOperationName = wizardTabControl.getQualifiedOperationName().toLowerCase().replace("_", "");
-					if(qualifiedOperationName.indexOf(pattern1) > 0 || qualifiedOperationName.indexOf(pattern2) > 0) {
+					if(
+						qualifiedOperationName.indexOf(pattern1) > 0 ||
+						qualifiedOperationName.indexOf(pattern2) > 0 ||
+						qualifiedOperationName.indexOf(pattern3) > 0
+					) {
 						return wizardTabControl.getToolTip();
 					}
 				}
@@ -910,6 +1024,40 @@ public abstract class AbstractWizardController {
 	}
 
 	/**
+	 * Get element label.
+	 * 
+	 * @param qualifiedElementName
+	 * @return
+	 * @throws ServiceException
+	 */
+	protected String getLabel(
+		String qualifiedElementName
+	) throws ServiceException {
+		ApplicationContext app = this.getApp();
+		List<String> labels = app.getUiElementDefinition(qualifiedElementName).getLabel();
+		return app.getCurrentLocaleAsIndex() < labels.size()
+			? labels.get(app.getCurrentLocaleAsIndex())
+			: labels.get(0);
+	}
+
+	/**
+	 * Get element tool tips.
+	 * 
+	 * @param qualifiedElementName
+	 * @return
+	 * @throws ServiceException
+	 */
+	protected String getToolTip(
+		String qualifiedElementName
+	) throws ServiceException {
+		ApplicationContext app = this.getApp();
+		List<String> toolTips = app.getUiElementDefinition(qualifiedElementName).getToolTip();
+		return app.getCurrentLocaleAsIndex() < toolTips.size()
+			? toolTips.get(app.getCurrentLocaleAsIndex())
+			: toolTips.get(0);
+	}
+	
+	/**
 	 * Retrieve errorMessage.
 	 *
 	 * @return Returns the errorMessage.
@@ -918,6 +1066,55 @@ public abstract class AbstractWizardController {
 	) {
 		return this.errorMessage;
     }
+
+	/**
+	 * Get object reference bean for given object.
+	 * 
+	 * @param obj
+	 * @return
+	 */
+	protected ObjectReferenceBean newObjectReferenceBean(
+		RefObject_1_0 obj
+	) {
+		ApplicationContext app = this.getApp();
+		ObjectReferenceBean objRef = new ObjectReferenceBean();
+		objRef.setXri(obj.refGetPath().toXRI());
+		objRef.setTitle(
+			app.getPortalExtension().getTitle(
+				obj, 
+				app.getCurrentLocaleAsIndex(), 
+				app.getCurrentLocaleAsString(), 
+				false, // asShortTitle, 
+				app
+			)
+		);
+		return objRef;
+	}
+	
+	/**
+	 * Get options for given code container.
+	 * 
+	 * @param name
+	 * @param locale
+	 * @param includeAll
+	 * @return
+	 * @throws ServiceException
+	 */
+	protected List<OptionBean> getOptions(
+		String name,
+		short locale,
+		boolean includeAll
+	) throws ServiceException {
+		Map<Short,String> codeEntries = codes.getLongTextByCode(name, locale, includeAll);		
+		List<OptionBean> options = new ArrayList<OptionBean>();
+		for(Map.Entry<Short,String> codeEntry: codeEntries.entrySet()) {
+			OptionBean optionBean = new OptionBean();
+			optionBean.setValue(codeEntry.getKey());
+			optionBean.setTitle(codeEntry.getValue());
+			options.add(optionBean);
+		}
+		return options;
+	}
 
 	//-----------------------------------------------------------------------
 	// Members

@@ -52,10 +52,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 
-/**
- * RidOidQueryDatabase_1
- *
- */
 public class RidOidQueryDatabase_2
     extends
     org.openmdx.base.dataprovider.layer.persistence.jdbc.RidOidQueryDatabase_2
@@ -90,28 +86,22 @@ public class RidOidQueryDatabase_2
         return updateCount;
     }
 
-    /* (non-Javadoc)
-     * @see org.openmdx.application.dataprovider.layer.persistence.jdbc.AbstractDatabase_1#executeQuery(java.sql.PreparedStatement, java.lang.String, java.util.List)
-     */
     @Override
     public ResultSet executeQuery(
         PreparedStatement ps,
         String statement,
-        List<?> statementParameters, 
-        int fetchSize
+        List<?> statementParameters,
+        int maxRows
     ) throws SQLException {
         queryCount++;
         return super.executeQuery(
             ps, 
             statement, 
-            statementParameters, 
-            fetchSize
+            statementParameters,
+            maxRows
         );
     }
 
-    /* (non-Javadoc)
-     * @see org.openmdx.application.dataprovider.layer.persistence.jdbc.AbstractDatabase_1#executeUpdate(java.sql.PreparedStatement, java.lang.String, java.util.List)
-     */
     @Override
     public int executeUpdate(
         PreparedStatement ps,

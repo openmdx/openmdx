@@ -49,8 +49,7 @@ package org.openmdx.base.rest.spi;
 
 import javax.resource.ResourceException;
 
-import junit.framework.Assert;
-
+import org.junit.Assert;
 import org.junit.Test;
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.resource.Records;

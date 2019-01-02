@@ -50,6 +50,7 @@ package org.openmdx.resource.spi;
 import java.io.PrintWriter;
 import java.util.IdentityHashMap;
 import java.util.Iterator;
+import java.util.Objects;
 import java.util.Set;
 
 import javax.resource.NotSupportedException;
@@ -59,6 +60,7 @@ import javax.resource.spi.ConnectionEventListener;
 import javax.resource.spi.ConnectionRequestInfo;
 import javax.resource.spi.LocalTransaction;
 import javax.resource.spi.ManagedConnection;
+import javax.resource.spi.ManagedConnectionFactory;
 import javax.resource.spi.ManagedConnectionMetaData;
 import javax.resource.spi.security.PasswordCredential;
 import javax.security.auth.Subject;
@@ -72,21 +74,22 @@ import org.openmdx.kernel.exception.BasicException;
 /**
  * Abstract managed connection
  */
-public abstract class AbstractManagedConnection implements ManagedConnection {
+public abstract class AbstractManagedConnection<F extends ManagedConnectionFactory> implements ManagedConnection {
 
 	/**
 	 * Constructor
-	 * 
-	 * @param eisProductName
-	 * @param eisProductVersion
-	 * @param credential
+	 * @param connectionRequestInfo TODO
 	 */
     protected AbstractManagedConnection(
+    	F factory,
     	final String eisProductName,
-    	final String eisProductVersion,
-        final PasswordCredential credential
+        final String eisProductVersion, 
+        final PasswordCredential credential, 
+        ConnectionRequestInfo connectionRequestInfo
     ) {
+        this.factory = factory;
         this.credential = credential;
+        this.connectionRequestInfo = connectionRequestInfo;
         this.metaData = new ManagedConnectionMetaData(){
 
 			@Override
@@ -106,12 +109,17 @@ public abstract class AbstractManagedConnection implements ManagedConnection {
 
 			@Override
             public String getUserName() throws ResourceException {
-				return credential.getUserName();
+				return credential == null ? null : credential.getUserName();
             }
         	
         };
 	}
 
+    /**
+     * The managed connection factory
+     */
+    private final F factory;
+    
 	/**
 	 * Eagerly initialized meta data
 	 */
@@ -120,8 +128,13 @@ public abstract class AbstractManagedConnection implements ManagedConnection {
 	/**
      * The managed connection's credentials
      */
-	private PasswordCredential credential;
+	private final PasswordCredential credential;
 
+	/**
+	 * The managed connection's request info
+	 */
+	private final ConnectionRequestInfo connectionRequestInfo;
+	
 	/**
      * The managed connection's log writer
      */
@@ -137,10 +150,21 @@ public abstract class AbstractManagedConnection implements ManagedConnection {
      */
     private final Set<AbstractConnection> connections = Sets.asSet(new IdentityHashMap<AbstractConnection,Object>());
     
+    
+    
+    /**
+     * Retrieve this instance's factory
+     * 
+     * @return the factory
+     */
+    protected F getManagedConnectionFactory() {
+        return factory;
+    }
+
     /* (non-Javadoc)
      * @see javax.resource.spi.ManagedConnection#addConnectionEventListener(javax.resource.spi.ConnectionEventListener)
      */
-//  @Override
+    @Override
 	public void addConnectionEventListener(
         ConnectionEventListener connectionEventListener
     ) {
@@ -152,29 +176,30 @@ public abstract class AbstractManagedConnection implements ManagedConnection {
     /* (non-Javadoc)
      * @see javax.resource.spi.ManagedConnection#getLocalTransaction()
      */
-//  @Override
+    @Override
 	public LocalTransaction getLocalTransaction(
     ) throws ResourceException {
-        throw this.log(
+        throw log(
         	new NotSupportedException(
         		getClass().getName() + " is non-transactional"
-        	)
+        	),
+        	true
         );
     }
 
     /* (non-Javadoc)
      * @see javax.resource.spi.ManagedConnection#getLogWriter()
      */
-//  @Override
+    @Override
     public PrintWriter getLogWriter(
-    ) throws ResourceException {
+    ){
         return this.logWriter;
     }
 
     /* (non-Javadoc)
      * @see javax.resource.spi.ManagedConnection#getMetaData()
      */
-//	@Override
+	@Override
 	public ManagedConnectionMetaData getMetaData(
     ) throws ResourceException {
         return this.metaData;
@@ -183,20 +208,21 @@ public abstract class AbstractManagedConnection implements ManagedConnection {
      /* (non-Javadoc)
      * @see javax.resource.spi.ManagedConnection#getXAResource()
      */
-//	@Override
+	@Override
     public XAResource getXAResource(
     ) throws ResourceException {
         throw this.log(
         	new NotSupportedException(
         		getClass().getName() + " is non-transactional"
-        	)
+        	),
+        	true
         );
     }
 
     /* (non-Javadoc)
      * @see javax.resource.spi.ManagedConnection#removeConnectionEventListener(javax.resource.spi.ConnectionEventListener)
      */
-//	@Override
+	@Override
     public void removeConnectionEventListener(
         ConnectionEventListener connectionEventListener
     ) {
@@ -208,7 +234,7 @@ public abstract class AbstractManagedConnection implements ManagedConnection {
     /* (non-Javadoc)
      * @see javax.resource.spi.ManagedConnection#setLogWriter(java.io.PrintWriter)
      */
-//  @Override
+    @Override
     public void setLogWriter(
         PrintWriter logWriter
     ) throws ResourceException {
@@ -218,45 +244,59 @@ public abstract class AbstractManagedConnection implements ManagedConnection {
     /**
      * Log and return an exception
      * 
-     * @param an exception
+     * @param an exception t
      * 
      * @return the exception
      */
     protected ResourceException log(
-        ResourceException exception
+        ResourceException exception,
+        boolean printStackTrace
     ){
-        try {
-            PrintWriter logWriter = this.getLogWriter();
-            if(logWriter != null) {
-            	exception.printStackTrace(logWriter);
-            }
-        } catch (Exception ignore) {
-            // Ensure that the original exception will be available
-        }
+        LogWriter.log(getLogWriter(), exception, printStackTrace);
         return exception;
     }
 
     /**
-     * Tests whether connection's credential matches the expected credential
+     * Logs a message by replacing the placeholders {0}, {1} etc. by the 
+     * arguments' string values
      * 
+     * @param target the optional target
+     * @param pattern the pattern
+     * @param arguments the (optional) arguments
+     */
+    protected void log(
+        String pattern,
+        Object... arguments 
+    ){
+        LogWriter.log(getLogWriter(), pattern, arguments);
+    }
+    
+    /**
+     * Tests whether connection's credential matches the expected credential
+     * @param factory TODO
      * @param credential the expected credential
      */
-    boolean matches(
-    	Object credential
+    protected boolean matches(
+    	ManagedConnectionFactory factory,
+    	Object credential, 
+    	ConnectionRequestInfo connectionRequestInfo
     ){
-    	return this.credential == null ? credential == null : this.credential.equals(credential);
+     	return
+     	    this.factory == factory &&
+     	    Objects.equals(this.connectionRequestInfo, connectionRequestInfo) &&
+     	    Objects.equals(this.credential, credential);
     }
 
 	/* (non-Javadoc)
      * @see javax.resource.spi.ManagedConnection#destroy()
      */
-//  @Override
+    @Override
     public void destroy(
     ) throws ResourceException {
-        this.credential = null;
+        PasswordCredentials.destroy(credential);
     }
 
-//  @Override
+    @Override
     public void cleanup(
     )throws ResourceException {
     	synchronized(this.connections) {
@@ -304,7 +344,7 @@ public abstract class AbstractManagedConnection implements ManagedConnection {
     	return this.connections.isEmpty();
     }
     
-//  @Override
+    @Override
     public void associateConnection(
         Object connection
     ) throws ResourceException {
@@ -329,22 +369,36 @@ public abstract class AbstractManagedConnection implements ManagedConnection {
     
     /**
      * Create a new connection handle
+     * @param subject TODO
+     * @param connectionRequestInfo TODO
      * 
      * @return a new connection handle
      */
-    protected abstract Object newConnection(
+    protected abstract Object newConnection(Subject subject, ConnectionRequestInfo connectionRequestInfo
     ) throws ResourceException;
 
 	/* (non-Javadoc)
      * @see javax.resource.spi.ManagedConnection#getConnection(javax.security.auth.Subject, javax.resource.spi.ConnectionRequestInfo)
      */
+    @Override
     public Object getConnection(
         Subject subject, 
         ConnectionRequestInfo connectionRequestInfo
     ) throws ResourceException {
-    	Object connection = newConnection();
+    	Object connection = newConnection(subject, connectionRequestInfo);
         this.associateConnection(connection);
         return connection;
+    }
+
+    
+    /**
+     * In case a managed connection authenticates lazily, e.g. upon connection
+     * allocation
+     * 
+     * @return the credential
+     */
+    protected PasswordCredential getCredential() {
+        return credential;
     }
     
 }

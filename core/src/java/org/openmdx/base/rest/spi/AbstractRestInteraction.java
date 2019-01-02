@@ -50,8 +50,6 @@ package org.openmdx.base.rest.spi;
 import java.util.Collection;
 import java.util.List;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import javax.resource.NotSupportedException;
 import javax.resource.ResourceException;
 import javax.resource.cci.ConnectionMetaData;
@@ -86,7 +84,7 @@ public class AbstractRestInteraction extends AbstractInteraction<RestConnection>
      * Constructor without delegate
      */
     protected AbstractRestInteraction(
-        @Nonnull RestConnection connection
+        RestConnection connection
     ){
         super(connection);
     }
@@ -95,8 +93,8 @@ public class AbstractRestInteraction extends AbstractInteraction<RestConnection>
      * Constructor with delegate
      */
     protected AbstractRestInteraction(
-    	@Nonnull RestConnection connection,
-		@Nullable Interaction delegate
+    	RestConnection connection,
+		Interaction delegate
 	){
 		super(connection, delegate);
 	}
@@ -156,10 +154,6 @@ public class AbstractRestInteraction extends AbstractInteraction<RestConnection>
     
     /**
      * GET Collection
-     * 
-     * @param ispec
-     * @param input
-     * @param output
      */
     protected boolean find(
         RestInteractionSpec ispec, 
@@ -175,10 +169,6 @@ public class AbstractRestInteraction extends AbstractInteraction<RestConnection>
 
     /**
      * GET and consume Collection
-     * 
-     * @param ispec
-     * @param input
-     * @param output
      */
     protected boolean consume(
         RestInteractionSpec ispec, 
@@ -195,10 +185,6 @@ public class AbstractRestInteraction extends AbstractInteraction<RestConnection>
     
     /**
      * GET Object
-     * 
-     * @param ispec
-     * @param input
-     * @param output
      */
     protected boolean get(
         RestInteractionSpec ispec, 
@@ -214,10 +200,6 @@ public class AbstractRestInteraction extends AbstractInteraction<RestConnection>
     
     /**
      * DELETE Collection
-     * 
-     * @param ispec
-     * @param input
-     * @param output
      */
     protected boolean delete(
         RestInteractionSpec ispec, 
@@ -232,10 +214,6 @@ public class AbstractRestInteraction extends AbstractInteraction<RestConnection>
 
     /**
      * Validate an object's version
-     * 
-     * @param ispec
-     * @param input
-     * @param output
      */
     protected boolean verify(
         RestInteractionSpec ispec, 
@@ -250,10 +228,6 @@ public class AbstractRestInteraction extends AbstractInteraction<RestConnection>
     
     /**
      * PUT Object
-     * 
-     * @param ispec
-     * @param input
-     * @param output
      */
     protected boolean update(
         RestInteractionSpec ispec, 
@@ -269,10 +243,6 @@ public class AbstractRestInteraction extends AbstractInteraction<RestConnection>
 
     /**
      * DELETE Object
-     * 
-     * @param ispec
-     * @param input
-     * @param output
      */
     protected boolean delete(
         RestInteractionSpec ispec, 
@@ -287,10 +257,6 @@ public class AbstractRestInteraction extends AbstractInteraction<RestConnection>
     
     /**
      * Invoke Method
-     * 
-     * @param ispec
-     * @param input
-     * @param output
      */
     protected boolean invoke(
         RestInteractionSpec ispec, 
@@ -306,10 +272,6 @@ public class AbstractRestInteraction extends AbstractInteraction<RestConnection>
 
     /**
      * Create Object
-     * 
-     * @param ispec
-     * @param input
-     * @param output
      */
     protected boolean create(
         RestInteractionSpec ispec, 
@@ -345,11 +307,6 @@ public class AbstractRestInteraction extends AbstractInteraction<RestConnection>
     
     /**
      * Validate the record type
-     * 
-     * @param usage
-     * @param to
-     * @param value
-     * @param optional
      * 
      * @return the validated record
      * 

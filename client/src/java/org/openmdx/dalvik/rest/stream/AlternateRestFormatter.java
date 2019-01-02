@@ -85,11 +85,11 @@ import org.openmdx.base.rest.spi.RestFormatter;
 import org.openmdx.base.rest.spi.Target;
 import org.openmdx.base.text.conversion.Base64;
 import org.openmdx.base.xml.spi.LargeObjectWriter;
-import org.openmdx.dalvik.xml.stream.CharacterWriter;
-import org.openmdx.dalvik.xml.stream.XMLOutputFactories;
 import org.openmdx.dalvik.uses.javax.xml.stream.XMLOutputFactory;
 import org.openmdx.dalvik.uses.javax.xml.stream.XMLStreamException;
 import org.openmdx.dalvik.uses.javax.xml.stream.XMLStreamWriter;
+import org.openmdx.dalvik.xml.stream.CharacterWriter;
+import org.openmdx.dalvik.xml.stream.XMLOutputFactories;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.exception.Throwables;
 import org.openmdx.kernel.log.SysLog;
@@ -170,18 +170,31 @@ public class AlternateRestFormatter implements RestFormatter {
         };
     }
     
-    /**
+    /* (non-Javadoc)
+     * @see org.openmdx.base.rest.spi.RestFormatter#format(org.openmdx.base.rest.spi.Target, org.openmdx.base.rest.cci.ObjectRecord)
+     */
+    @Override
+    public void format(
+        Target target, 
+        ObjectRecord source
+    ) throws ResourceException {
+    	this.format(target, source, true);
+    }
+
+   /**
      * Format Object
      * 
      * @param target
      * @param source
+     * @param serializeNulls
      * 
      * @throws ServiceException
      */
     @Override
     public void format(
         Target target, 
-        ObjectRecord source
+        ObjectRecord source,
+        boolean serializeNulls
     ) throws ResourceException {
         Path resourceIdentifier = source.getResourceIdentifier();
         final UUID transientObjectId = source.getTransientObjectId();
@@ -192,7 +205,8 @@ public class AlternateRestFormatter implements RestFormatter {
             transientObjectId == null ? null : transientObjectId.toString(),
             (byte[]) source.getVersion(),
             null, // index
-            source.getValue()
+            source.getValue(),
+            serializeNulls
         );
     }
 
@@ -216,8 +230,26 @@ public class AlternateRestFormatter implements RestFormatter {
             "query",
             null, // Version
             null, // index
-            source
+            source,
+            true // serializeNulls
         );
+    }
+
+    /* (non-Javadoc)
+     * @see org.openmdx.base.rest.spi.RestFormatter#format(org.openmdx.base.rest.spi.Target, org.openmdx.base.naming.Path, javax.resource.cci.IndexedRecord)
+     */
+    @Override
+    public void format(
+        Target target, 
+        Path xri, 
+        IndexedRecord source
+    ) throws ResourceException {
+    	this.format(
+    		target,
+    		xri,
+    		source,
+    		true // serializeNulls
+    	);
     }
 
     /**
@@ -233,7 +265,8 @@ public class AlternateRestFormatter implements RestFormatter {
     public void format(
         Target target, 
         Path xri, 
-        IndexedRecord source
+        IndexedRecord source,
+        boolean serializeNulls
     ) throws ResourceException {
         try {
             RestTarget restTarget = (RestTarget)target;
@@ -260,7 +293,8 @@ public class AlternateRestFormatter implements RestFormatter {
                     null, 
                     (byte[]) object.getVersion(), 
                     null, // index
-                    object.getValue()
+                    object.getValue(),
+                    serializeNulls
                );
             }
             writer.writeEndElement(); // "org.openmdx.kernel.ResultSet"
@@ -300,10 +334,11 @@ public class AlternateRestFormatter implements RestFormatter {
             id,
             null, // Version
             null, // index
-            source.getBody()
+            source.getBody(),
+            true // serializeNulls
         );
     }
-    
+
     /**
      * Print Value
      * 
@@ -322,7 +357,8 @@ public class AlternateRestFormatter implements RestFormatter {
         int indent,
         Object index,
         Object value, 
-        boolean anyType
+        boolean anyType,
+        boolean serializeNulls
     ) throws XMLStreamException {
         if (value instanceof MappedRecord && isStructureType((MappedRecord)value)){
             printRecord(
@@ -332,7 +368,8 @@ public class AlternateRestFormatter implements RestFormatter {
                 null, // id
                 null, // version
                 index,
-                (MappedRecord)value // record
+                (MappedRecord)value, // record
+                serializeNulls
             );
         } else {
             printValue(
@@ -341,7 +378,8 @@ public class AlternateRestFormatter implements RestFormatter {
                 ITEM_TAG,
                 index,
                 value, 
-                anyType
+                anyType,
+                serializeNulls
             );
         }
     }
@@ -366,12 +404,15 @@ public class AlternateRestFormatter implements RestFormatter {
         String tag,
         Object index,
         Object value, 
-        boolean anyType
+        boolean anyType,
+        boolean serializeNulls
     ) throws XMLStreamException {
         XMLStreamWriter writer = target.getWriter();
         try {
             if(value == null && index == null)  {
-                writer.writeEmptyElement(tag);
+            	if(serializeNulls) {
+            		writer.writeEmptyElement(tag);
+            	}
             } else {
                 writer.writeStartElement(tag);
                 if (index != null) {
@@ -391,7 +432,8 @@ public class AlternateRestFormatter implements RestFormatter {
 	                        null, // id
 	                        null, // version
 	                        index,
-	                        (MappedRecord)value // record
+	                        (MappedRecord)value, // record
+	                        serializeNulls
 	                    );
 	                } else if (value instanceof Path) {
 	                    Path xri = (Path) value;
@@ -635,10 +677,20 @@ public class AlternateRestFormatter implements RestFormatter {
         String id,
         byte[] version,
         Object index, 
-        MappedRecord record
+        MappedRecord record,
+        boolean serializeNulls
     ) throws ResourceException {
     	try {
-			printRecord(target, indent, xri, id, version, index, record);
+			printRecord(
+				target,
+				indent,
+				xri,
+				id,
+				version,
+				index,
+				record,
+				serializeNulls
+			);
 		} catch (XMLStreamException exception) {
             throw ResourceExceptions.initHolder(
                 new ResourceAllocationException(
@@ -661,6 +713,7 @@ public class AlternateRestFormatter implements RestFormatter {
     /**
      * Print Record
      */
+    @SuppressWarnings("unchecked")
     private static void printRecord(
         RestTarget target,
         int indent,
@@ -668,7 +721,8 @@ public class AlternateRestFormatter implements RestFormatter {
         String id,
         byte[] version,
         Object index, 
-        MappedRecord record
+        MappedRecord record,
+        boolean serializeNulls
     ) throws XMLStreamException{
         XMLStreamWriter writer = target.getWriter();
         String tag = record.getRecordName().replace(':', '.');
@@ -690,7 +744,15 @@ public class AlternateRestFormatter implements RestFormatter {
             String feature = entry.getKey();
             Object value = entry.getValue();
             try {
-                printValue(target, indent, xri, feature, value, isAnyType(record.getRecordName(), feature));
+                printValue(
+                	target,
+                	indent,
+                	xri,
+                	feature,
+                	value,
+                	isAnyType(record.getRecordName(), feature),
+                	serializeNulls
+                );
             } catch (Exception exception) {
                 SysLog.warning(
                     "Collection element print failure",
@@ -740,7 +802,8 @@ public class AlternateRestFormatter implements RestFormatter {
         Path xri,
         String feature,
         Object value, 
-        boolean anyType
+        boolean anyType,
+        boolean serializeNulls
     ) throws XMLStreamException {
         XMLStreamWriter writer = target.getWriter();
         if (value instanceof Collection<?>) {
@@ -749,7 +812,9 @@ public class AlternateRestFormatter implements RestFormatter {
             //
             Collection<?> values = (Collection<?>) value;
             if (values.isEmpty()) {
-                writer.writeEmptyElement(feature);
+            	if(serializeNulls) {
+            		writer.writeEmptyElement(feature);
+            	}
             } else {
                 writer.writeStartElement(feature);
                 int index = 0;
@@ -760,7 +825,8 @@ public class AlternateRestFormatter implements RestFormatter {
                             indent + 2,
                             Integer.valueOf(index++), 
                             v, 
-                            anyType
+                            anyType,
+                            serializeNulls
                         );
                     } catch (Exception exception) {
                         SysLog.warning(
@@ -796,7 +862,8 @@ public class AlternateRestFormatter implements RestFormatter {
                     null, // id
                     null, // version
                     null, // index
-                    (MappedRecord)value // record
+                    (MappedRecord)value, // record
+                    serializeNulls
                 );
                 writer.writeEndElement(); // feature
             } else {
@@ -804,7 +871,9 @@ public class AlternateRestFormatter implements RestFormatter {
                 // "sparsearray"
                 //
                 if (values.isEmpty()) {
-                    writer.writeEmptyElement(feature);
+                	if(serializeNulls) {
+                		writer.writeEmptyElement(feature);
+                	}
                 } else {
                     writer.writeStartElement(feature);
                     for (Map.Entry<?, ?> e : values.entrySet()){
@@ -814,7 +883,8 @@ public class AlternateRestFormatter implements RestFormatter {
                                 indent + 2,
                                 e.getKey(),
                                 e.getValue(), 
-                                anyType
+                                anyType,
+                                serializeNulls
                             );
                         } catch (Exception exception) {
                             SysLog.warning(
@@ -844,9 +914,33 @@ public class AlternateRestFormatter implements RestFormatter {
                 feature, 
                 null, // index
                 value, 
-                anyType
+                anyType,
+                serializeNulls
             );
         }
+    }
+
+    /* (non-Javadoc)
+     * @see org.openmdx.base.rest.spi.RestFormatter#format(org.openmdx.base.rest.spi.Target, java.lang.String, org.openmdx.base.rest.cci.MessageRecord, boolean)
+     */
+    @Override
+    public void format(
+        Target target,
+        String id,
+        MessageRecord source,
+        boolean serializeNulls
+    )
+        throws ResourceException {
+        formatRecord(
+            (RestTarget)target, 
+            0, 
+            source.getResourceIdentifier(), 
+            id,
+            null, // Version
+            null, // index
+            source.getBody(),
+            serializeNulls
+        );
     }
 
 }

@@ -91,7 +91,7 @@ public class WizardDefinitionFactory implements Serializable {
         short localeIndex,
         InputStream is
     ) throws ServiceException {
-    	if(path.endsWith("/index.jsp")) {
+    	if(path.endsWith("/index.jsp") || path.endsWith("/index.xhtml")) {
     		return new AppWizardDefinition(
 	    		path,
 	    		locale,
@@ -100,13 +100,6 @@ public class WizardDefinitionFactory implements Serializable {
 	    	);
     	} else if(path.endsWith(".jsp")) {
             return new JspWizardDefinition(
-                path,
-                locale,
-                localeIndex,
-                is
-            );
-        } else if(path.endsWith(".xhtml") || path.endsWith(".jsf")) {
-            return new JsfWizardDefinition(
                 path,
                 locale,
                 localeIndex,

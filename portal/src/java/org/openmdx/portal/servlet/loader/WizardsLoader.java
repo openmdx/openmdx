@@ -53,6 +53,7 @@
 package org.openmdx.portal.servlet.loader;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -170,19 +171,19 @@ public class WizardsLoader extends Loader {
 	        }    
         }
         // Load app-style wizards
-        {
+        for(String suffix: Arrays.asList("index.jsp", "index.xhtml")) {
 	        Set<String> wizardPaths = context.getResourcePaths("/wizards");
 	        if(wizardPaths != null) {
 	            for(String path: wizardPaths) {
 	            	try {
 		            	if(
 		            		path.endsWith("/") &&
-		            		context.getResource(path + "index.jsp") != null &&
+		            		context.getResource(path + suffix) != null &&
 		            		context.getResource(path + "META-INF/wizard.properties") != null
 		            	) {
 		                    WizardDefinition wizardDefinition = 
 		                        WizardDefinitionFactory.createWizardDefinition(
-		                        	path + "index.jsp",
+		                        	path + suffix,
 		                            "",
 		                            (short)0,
 		                            context.getResourceAsStream(path + "/META-INF/wizard.properties")

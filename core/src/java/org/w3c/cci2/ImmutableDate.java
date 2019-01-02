@@ -65,6 +65,8 @@ import javax.xml.datatype.Duration;
 import javax.xml.datatype.XMLGregorianCalendar;
 import javax.xml.namespace.QName;
 
+import org.w3c.time.TimeZones;
+
 /**
  * Date
  * <p>
@@ -237,36 +239,9 @@ public final class ImmutableDate
      */
     @Override
     public TimeZone getTimeZone(int defaultZoneoffset) {
-        return defaultZoneoffset == FIELD_UNDEFINED ?
-            TimeZone.getDefault() :
-            TimeZone.getTimeZone(getTimeZoneId(defaultZoneoffset));
+        return TimeZones.toTimeZone(defaultZoneoffset);
     }
 
-    /**
-     * Calculate a custom time zone id
-     * 
-     * @param timeZoneOffset
-     * 
-     * @return the corresponding time zone id
-     */
-    private String getTimeZoneId(
-        int timeZoneOffset
-    ){
-        char sign;
-        int absoluteOffset;
-        if(timeZoneOffset < 0){
-            sign = '-';
-            absoluteOffset = - timeZoneOffset;
-        } else {
-            sign = '+';
-            absoluteOffset = timeZoneOffset;
-        }
-        String s = Integer.toString(
-            10000 + 100 * (absoluteOffset / 60) + (absoluteOffset % 60)
-        );
-        return "GMT" + sign + s.substring(1, 3) + ':' + s.substring(3);
-    }
-    
     /* (non-Javadoc)
      * @see javax.xml.datatype.XMLGregorianCalendar#getTimezone()
      */

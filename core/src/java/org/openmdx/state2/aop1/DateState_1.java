@@ -81,6 +81,7 @@ import org.openmdx.kernel.jdo.ReducedJDOHelper;
 import org.openmdx.state2.cci.DateStateContext;
 import org.openmdx.state2.cci.ViewKind;
 import org.openmdx.state2.spi.Order;
+import org.openmdx.state2.spi.TechnicalAttributes;
 import org.w3c.spi.DatatypeFactories;
 
 /**
@@ -109,7 +110,7 @@ public class DateState_1
     private static final XMLGregorianCalendar NULL = DatatypeFactories.xmlDatatypeFactory().newXMLGregorianCalendar();
 
     private static final List<String> IGNORABLE_ATTRIBUTES = Arrays.asList(
-        "stateValidFrom", "stateValidTo",
+        TechnicalAttributes.STATE_VALID_FROM, TechnicalAttributes.STATE_VALID_TO,
         CREATED_AT, CREATED_BY,
         REMOVED_AT, REMOVED_BY
     );
@@ -127,11 +128,11 @@ public class DateState_1
         DataObject_1_0 dataObject
     ) throws ServiceException {
         DateStateContext context = (DateStateContext) self.getInteractionSpec();
-        if(dataObject.objGetValue("stateValidFrom") == null) {
-            dataObject.objSetValue("stateValidFrom", context.getValidFrom());
+        if(dataObject.objGetValue(TechnicalAttributes.STATE_VALID_FROM) == null) {
+            dataObject.objSetValue(TechnicalAttributes.STATE_VALID_FROM, context.getValidFrom());
         }
-        if(dataObject.objGetValue("stateValidTo") == null) {
-            dataObject.objSetValue("stateValidTo", context.getValidTo());
+        if(dataObject.objGetValue(TechnicalAttributes.STATE_VALID_TO) == null) {
+            dataObject.objSetValue(TechnicalAttributes.STATE_VALID_TO, context.getValidTo());
         }
     }
 
@@ -140,7 +141,7 @@ public class DateState_1
      */
     @Override
     protected boolean isValidTimeFeature(String featureName) {
-        return "stateValidFrom".equals(featureName) || "stateValidTo".equals(featureName);
+        return TechnicalAttributes.STATE_VALID_FROM.equals(featureName) || TechnicalAttributes.STATE_VALID_TO.equals(featureName);
     }
 
     /* (non-Javadoc)
@@ -153,8 +154,8 @@ public class DateState_1
         if(isValidTimeFeature(feature)){
             DateStateContext context = (DateStateContext) self.getInteractionSpec();
             if(context.getViewKind() == ViewKind.TIME_RANGE_VIEW) {
-                if("stateValidFrom".equals(feature)) return  context.getValidFrom();
-                if("stateValidTo".equals(feature)) return  context.getValidTo();
+                if(TechnicalAttributes.STATE_VALID_FROM.equals(feature)) return  context.getValidFrom();
+                if(TechnicalAttributes.STATE_VALID_TO.equals(feature)) return  context.getValidTo();
             }
         }
         return super.objGetValue(feature);
@@ -180,7 +181,7 @@ public class DateState_1
             if(boundaryCrossing.startsEarlier) {
                 DataObject_1_0 predecessor = PersistenceHelper.clone(source);
                 predecessor.objSetValue(
-                    "stateValidTo", 
+                    TechnicalAttributes.STATE_VALID_TO, 
                     Order.predecessor(
                         validFrom = context.getValidFrom()
                     )
@@ -197,7 +198,7 @@ public class DateState_1
             if(boundaryCrossing.endsLater) {
                 DataObject_1_0 successor = PersistenceHelper.clone(source);
                 successor.objSetValue(
-                    "stateValidFrom", 
+                    TechnicalAttributes.STATE_VALID_FROM, 
                     Order.successor(
                         validTo = context.getValidTo()
                     )
@@ -214,10 +215,10 @@ public class DateState_1
             //
             DataObject_1_0 target = PersistenceHelper.clone(source);
             if(validFrom != NULL) {
-                target.objSetValue("stateValidFrom", validFrom);
+                target.objSetValue(TechnicalAttributes.STATE_VALID_FROM, validFrom);
             }
             if(validTo != NULL) {
-                target.objSetValue("stateValidTo", validTo);
+                target.objSetValue(TechnicalAttributes.STATE_VALID_TO, validTo);
             }
             if(!target.jdoIsNew()) {
                 addState(states, target);
@@ -278,11 +279,11 @@ public class DateState_1
         DateStateContext context = getContext();
         return BoundaryCrossing.valueOf(
             Order.compareValidFrom(
-                (XMLGregorianCalendar) candidate.objGetValue("stateValidFrom"),
+                (XMLGregorianCalendar) candidate.objGetValue(TechnicalAttributes.STATE_VALID_FROM),
                 context.getValidFrom() 
             ) < 0,
             Order.compareValidTo(
-                (XMLGregorianCalendar) candidate.objGetValue("stateValidTo"),
+                (XMLGregorianCalendar) candidate.objGetValue(TechnicalAttributes.STATE_VALID_TO),
                 context.getValidTo() 
             ) > 0
         );
@@ -297,8 +298,8 @@ public class DateState_1
     ) throws ServiceException {
         DateStateContext context = getContext();
         return 
-            Order.compareValidFromToValidTo(context.getValidFrom(), (XMLGregorianCalendar) candidate.objGetValue("stateValidTo")) <= 0 &&
-            Order.compareValidFromToValidTo((XMLGregorianCalendar) candidate.objGetValue("stateValidFrom"), context.getValidTo()) <= 0;
+            Order.compareValidFromToValidTo(context.getValidFrom(), (XMLGregorianCalendar) candidate.objGetValue(TechnicalAttributes.STATE_VALID_TO)) <= 0 &&
+            Order.compareValidFromToValidTo((XMLGregorianCalendar) candidate.objGetValue(TechnicalAttributes.STATE_VALID_FROM), context.getValidTo()) <= 0;
     }
 
     /* (non-Javadoc)
@@ -318,27 +319,27 @@ public class DateState_1
                 case TIME_POINT_VIEW:
                     XMLGregorianCalendar validAt = context.getValidAt();
                     return Order.compareValidFrom(
-                        (XMLGregorianCalendar) candidate.objGetValue("stateValidFrom"),
+                        (XMLGregorianCalendar) candidate.objGetValue(TechnicalAttributes.STATE_VALID_FROM),
                         validAt
                     ) <= 0 && Order.compareValidTo(
                         validAt,
-                        (XMLGregorianCalendar) candidate.objGetValue("stateValidTo")
+                        (XMLGregorianCalendar) candidate.objGetValue(TechnicalAttributes.STATE_VALID_TO)
                     ) <= 0;
                 case TIME_RANGE_VIEW:
                 	return accessMode == AccessMode.UNDERLYING_STATE ? (
                         Order.compareValidFrom(
                             context.getValidFrom(), 
-                            (XMLGregorianCalendar) candidate.objGetValue("stateValidFrom")
+                            (XMLGregorianCalendar) candidate.objGetValue(TechnicalAttributes.STATE_VALID_FROM)
                         ) >= 0 && Order.compareValidTo(
-                            (XMLGregorianCalendar) candidate.objGetValue("stateValidTo"),
+                            (XMLGregorianCalendar) candidate.objGetValue(TechnicalAttributes.STATE_VALID_TO),
                             context.getValidTo()
                         ) >= 0 
                     ) : (
                 		Order.compareValidFromToValidTo(
 	                        context.getValidFrom(), 
-	                        (XMLGregorianCalendar) candidate.objGetValue("stateValidTo")
+	                        (XMLGregorianCalendar) candidate.objGetValue(TechnicalAttributes.STATE_VALID_TO)
 	                    ) <= 0 && Order.compareValidFromToValidTo(
-	                        (XMLGregorianCalendar) candidate.objGetValue("stateValidFrom"),
+	                        (XMLGregorianCalendar) candidate.objGetValue(TechnicalAttributes.STATE_VALID_FROM),
 	                        context.getValidTo()
 	                    ) <= 0 
                     );
@@ -406,12 +407,12 @@ public class DateState_1
                         // Merging reduces the number of states
                         //
                         extendable.objSetValue(
-                            "stateValidFrom",
-                            merged.get(0).objGetValue("stateValidFrom")
+                            TechnicalAttributes.STATE_VALID_FROM,
+                            merged.get(0).objGetValue(TechnicalAttributes.STATE_VALID_FROM)
                         );
                         extendable.objSetValue(
-                            "stateValidTo",
-                            merged.get(merged.size()-1).objGetValue("stateValidTo")
+                            TechnicalAttributes.STATE_VALID_TO,
+                            merged.get(merged.size()-1).objGetValue(TechnicalAttributes.STATE_VALID_TO)
                         );
                         for(DataObject_1_0 state : merged) {
                             if(state != extendable) {
@@ -449,8 +450,8 @@ public class DateState_1
         DataObject_1_0 left,
         DataObject_1_0 right
     ) throws ServiceException{
-        XMLGregorianCalendar leftEnd = (XMLGregorianCalendar) left.objGetValue("stateValidTo");
-        XMLGregorianCalendar rightStart = (XMLGregorianCalendar) right.objGetValue("stateValidFrom");
+        XMLGregorianCalendar leftEnd = (XMLGregorianCalendar) left.objGetValue(TechnicalAttributes.STATE_VALID_TO);
+        XMLGregorianCalendar rightStart = (XMLGregorianCalendar) right.objGetValue(TechnicalAttributes.STATE_VALID_FROM);
         return rightStart.equals(Order.successor(leftEnd));
     }
     

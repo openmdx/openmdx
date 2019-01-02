@@ -50,6 +50,7 @@ package org.openmdx.base.collection;
 import java.util.AbstractSet;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -71,18 +72,19 @@ public class Sets {
     }
     
     /**
-     * Create a concurrent hash set
-     * 
-     * @param <T>
+     * Create a null-masking concurrent hash set
+     * @param threadSafetyRequired TODO
      * 
      * @return a newly created concurrent hash set
      */
     @SuppressWarnings("unchecked")
-    public static <T> Set<T> newConcurrentHashSet(){
-        return MapBackedSet.decorate(
+    public static <T> Set<T> newSetSupportingNullValues(
+        boolean threadSafetyRequired
+    ){
+        return threadSafetyRequired ? MapBackedSet.decorate(
             new ConcurrentHashMap<T,Object>(),
             Maps.NULL
-        );
+        ) : new HashSet<>();
     }
 
     /**

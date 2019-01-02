@@ -57,6 +57,7 @@ import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
 import org.openmdx.base.mof.spi.Model_1Factory;
 import org.openmdx.state2.spi.LegacyPlugInHelper;
+import org.openmdx.state2.spi.TechnicalAttributes;
 
 /**
  * Add valid-time-unique support
@@ -188,7 +189,7 @@ public class LegacyPlugIn_1 extends PlugIn_1 {
 		Object value
 	) throws ServiceException {
 		if(
-			"validTimeUnique".equals(feature) &&
+		    TechnicalAttributes.VALID_TIME_UNIQUE.equals(feature) &&
 			Boolean.TRUE.equals(value) &&
 			object.getModel().isInstanceof(object, "org:openmdx:state2:Legacy")
 		){

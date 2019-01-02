@@ -60,19 +60,18 @@ import org.openmdx.kernel.exception.Throwables;
 /**
  * List View
  */
-final class ListView 
-    extends CollectionView<DataObject_1_0,List<Object>,Object> 
-    implements List<Object> 
-{
+final class ListView
+    extends CollectionView<DataObject_1_0, List<Object>, Object>
+    implements List<Object> {
 
     /**
-     * Constructor 
+     * Constructor
      *
      * @param involvedMembers
      */
-    private ListView (
-        InvolvedMembers<DataObject_1_0,List<Object>> involvedMembers
-    ){
+    private ListView(
+        InvolvedMembers<DataObject_1_0, List<Object>> involvedMembers
+    ) {
         super(involvedMembers);
     }
 
@@ -87,9 +86,9 @@ final class ListView
     static List<Object> newObjectList(
         final Involved<DataObject_1_0> involvedStates,
         final String feature
-    ){
+    ) {
         return new ListView(
-            new InvolvedMembers<DataObject_1_0,List<Object>>(
+            new InvolvedMembers<DataObject_1_0, List<Object>>(
                 involvedStates,
                 feature
             ) {
@@ -97,200 +96,198 @@ final class ListView
                 @Override
                 protected List<Object> getMember(
                     DataObject_1_0 state
-                ) throws ServiceException {
+                )
+                    throws ServiceException {
                     return state.objGetList(feature);
                 }
-                
+
             }
         );
-        
+
     }
-    
-    /* (non-Javadoc)
+
+    /*
+     * (non-Javadoc)
+     * 
      * @see java.util.List#iterator()
      */
     public Iterator<Object> iterator() {
         return listIterator();
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see java.util.List#add(int, java.lang.Object)
      */
-    public void add(int index, Object element) {
-        for(List<Object> delegate : members.getInvolved(AccessMode.FOR_UPDATE)) {
-            if(index > delegate.size()) {
+    public void add(
+        int index,
+        Object element
+    ) {
+        for (List<Object> delegate : members.getInvolved(AccessMode.FOR_UPDATE)) {
+            if (index > delegate.size()) {
                 throw new IndexOutOfBoundsException(
                     "The size of the list in one of the underlying states is to small"
                 );
             }
         }
-        for(List<Object> delegate : members.getInvolved(AccessMode.FOR_UPDATE)) {
+        for (List<Object> delegate : members.getInvolved(AccessMode.FOR_UPDATE)) {
             delegate.add(index, element);
         }
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see java.util.List#addAll(int, java.util.Collection)
      */
-    public boolean addAll(int index, Collection<? extends Object> c) {
-        for(List<Object> delegate : members.getInvolved(AccessMode.FOR_UPDATE)) {
-            if(index > delegate.size()) {
+    public boolean addAll(
+        int index,
+        Collection<? extends Object> c
+    ) {
+        for (List<Object> delegate : members.getInvolved(AccessMode.FOR_UPDATE)) {
+            if (index > delegate.size()) {
                 throw new IndexOutOfBoundsException(
                     "The size of the list in one of the underlyaing states is to small"
                 );
             }
         }
         boolean modified = false;
-        for(List<Object> delegate : members.getInvolved(AccessMode.FOR_UPDATE)) {
+        for (List<Object> delegate : members.getInvolved(AccessMode.FOR_UPDATE)) {
             modified |= delegate.addAll(index, c);
         }
         return modified;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see java.util.List#get(int)
      */
     public Object get(int index) {
         try {
             UniqueValue<Object> reply = new UniqueValue<Object>();
-            for(List<Object> delegate : members.getInvolved(AccessMode.FOR_QUERY)) {
+            for (List<Object> delegate : members.getInvolved(AccessMode.FOR_QUERY)) {
                 reply.set(delegate.get(index));
             }
             return reply.get();
         } catch (ServiceException exception) {
-            throw Throwables.initCause(
-                new IllegalStateException(
-                    "The underlying states are inappropriate for the unique determination of the given value"
-                ),
-                exception,
-                BasicException.Code.DEFAULT_DOMAIN,
-                BasicException.Code.ILLEGAL_STATE,
-                getIdParameter()
+            throw newIllegalStateException(
+                exception, "The underlying states are inappropriate for the unique determination of the given value"
             );
         }
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see java.util.List#indexOf(java.lang.Object)
      */
     public int indexOf(Object o) {
         try {
             UniqueValue<Integer> reply = new UniqueValue<Integer>();
-            for(List<Object> delegate : this.members.getInvolved(AccessMode.FOR_QUERY)) {
+            for (List<Object> delegate : this.members.getInvolved(AccessMode.FOR_QUERY)) {
                 reply.set(Integer.valueOf(delegate.indexOf(o)));
             }
             return reply.get().intValue();
         } catch (ServiceException exception) {
-            throw Throwables.initCause(
-                new IllegalStateException(
-                    "The underlying states inappropriate for the unique determination of the given property"
-                ),
-                exception,
-                BasicException.Code.DEFAULT_DOMAIN,
-                BasicException.Code.ILLEGAL_STATE,
-                getIdParameter()
-            );
+            final String message = "The underlying states are inappropriate for the unique determination of the given property";
+            throw newIllegalStateException(exception, message);
         }
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see java.util.List#lastIndexOf(java.lang.Object)
      */
     public int lastIndexOf(Object o) {
         try {
             UniqueValue<Integer> reply = new UniqueValue<Integer>();
-            for(List<Object> delegate : this.members.getInvolved(AccessMode.FOR_QUERY)) {
+            for (List<Object> delegate : this.members.getInvolved(AccessMode.FOR_QUERY)) {
                 reply.set(Integer.valueOf(delegate.lastIndexOf(o)));
             }
             return reply.get().intValue();
         } catch (ServiceException exception) {
-            throw Throwables.initCause(
-                new IllegalStateException(
-                    "The underlying states inappropriate for the unique determination of the given property"
-                ),
+            throw newIllegalStateException(
                 exception,
-                BasicException.Code.DEFAULT_DOMAIN,
-                BasicException.Code.ILLEGAL_STATE,
-                getIdParameter()
+                "The underlying states are inappropriate for the unique determination of the given property"
             );
         }
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see java.util.List#listIterator()
      */
     public ListIterator<Object> listIterator() {
         return listIterator(0);
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see java.util.List#listIterator(int)
      */
     public ListIterator<Object> listIterator(int index) {
         return new ViewIterator(index);
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see java.util.List#remove(int)
      */
     public Object remove(int index) {
         try {
             UniqueValue<Object> reply = new UniqueValue<Object>();
-            for(List<Object> delegate : members.getInvolved(AccessMode.FOR_UPDATE)) {
+            for (List<Object> delegate : members.getInvolved(AccessMode.FOR_UPDATE)) {
                 reply.set(delegate.get(index));
             }
-            for(List<Object> delegate : members.getInvolved(AccessMode.FOR_UPDATE)) {
+            for (List<Object> delegate : members.getInvolved(AccessMode.FOR_UPDATE)) {
                 delegate.remove(index);
             }
             return reply.get();
         } catch (ServiceException exception) {
-            throw Throwables.initCause(
-                new IllegalStateException(
-                    "The underlying states inappropriate for the given operation"
-                ),
-                exception,
-                BasicException.Code.DEFAULT_DOMAIN,
-                BasicException.Code.ILLEGAL_STATE,
-                getIdParameter()
-            );
+            throw newIllegalStateException(exception, "The underlying states are inappropriate for the given operation");
         }
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see java.util.List#set(int, java.lang.Object)
      */
-    public Object set(int index, Object element) {
+    public Object set(
+        int index,
+        Object element
+    ) {
         try {
             UniqueValue<Object> reply = new UniqueValue<Object>();
-            for(List<Object> delegate : members.getInvolved(AccessMode.FOR_UPDATE)) {
+            for (List<Object> delegate : members.getInvolved(AccessMode.FOR_UPDATE)) {
                 reply.set(delegate.get(index));
             }
-            for(List<Object> delegate : members.getInvolved(AccessMode.FOR_UPDATE)) {
+            for (List<Object> delegate : members.getInvolved(AccessMode.FOR_UPDATE)) {
                 delegate.set(index, element);
             }
             return reply.get();
         } catch (ServiceException exception) {
-            throw Throwables.initCause(
-                new IllegalStateException(
-                    "The underlying states inappropriate for the given operation"
-                ),
-                exception,
-                BasicException.Code.DEFAULT_DOMAIN,
-                BasicException.Code.ILLEGAL_STATE,
-                getIdParameter()
-            );
+            throw newIllegalStateException(exception, "The underlying states are inappropriate for the given operation");
         }
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see java.util.List#subList(int, int)
      */
     public List<Object> subList(
-        final int fromIndex, 
+        final int fromIndex,
         final int toIndex
     ) {
         return new ListView(
-            new InvolvedMembers<DataObject_1_0,List<Object>>(
+            new InvolvedMembers<DataObject_1_0, List<Object>>(
                 members.involvedStates,
                 members.feature
             ) {
@@ -298,32 +295,31 @@ final class ListView
                 @Override
                 protected List<Object> getMember(
                     DataObject_1_0 state
-                ) throws ServiceException {
+                )
+                    throws ServiceException {
                     return state.objGetList(feature).subList(fromIndex, toIndex);
                 }
-                
+
             }
-            
+
         );
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see java.lang.Object#equals(java.lang.Object)
      */
     @Override
     public boolean equals(Object obj) {
-        if(obj instanceof List<?>) {
+        if (obj instanceof List<?>) {
             List<?> that = (List<?>) obj;
             int size = this.size();
-            if(size == that.size()) {
-                for(
-                    int i = 0;
-                    i < size;
-                    i++
-                ){
+            if (size == that.size()) {
+                for (int i = 0; i < size; i++) {
                     Object thisMember = this.get(i);
                     Object thatMember = that.get(i);
-                    if(thisMember == null ? thatMember != null : !thisMember.equals(thatMember)) {
+                    if (thisMember == null ? thatMember != null : !thisMember.equals(thatMember)) {
                         return false;
                     }
                 }
@@ -336,24 +332,24 @@ final class ListView
         }
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see java.lang.Object#hashCode()
      */
     @Override
     public int hashCode() {
         int hash = 1;
-        for(Object member : this) {
+        for (Object member : this) {
             hash *= 31;
             hash += member == null ? 0 : member.hashCode();
         }
-        return hash;  
+        return hash;
     }
 
-    
     //------------------------------------------------------------------------
     // Class ViewIterator
     //------------------------------------------------------------------------
-    
 
     /**
      * View Iterator
@@ -361,23 +357,23 @@ final class ListView
     class ViewIterator implements ListIterator<Object> {
 
         /**
-         * Constructor 
+         * Constructor
          *
          * @param index
          */
         ViewIterator(
             int index
-        ){
+        ) {
             this.nextIndex = index;
             this.previousIndex = index - 1;
-            this.currentIndex = - 1;
+            this.currentIndex = -1;
         }
 
         /**
          * 
          */
         private int nextIndex;
-        
+
         /**
          * 
          */
@@ -387,77 +383,74 @@ final class ListView
          * 
          */
         private int currentIndex;
-        
-        /* (non-Javadoc)
+
+        /*
+         * (non-Javadoc)
+         * 
          * @see java.util.ListIterator#add(java.lang.Object)
          */
         public void add(Object o) {
-            if(this.currentIndex < 0) {
+            if (this.currentIndex < 0) {
                 throw new IllegalStateException("No current element");
             }
-            for(List<Object> delegate : members.getInvolved(AccessMode.FOR_UPDATE)) {
+            for (List<Object> delegate : members.getInvolved(AccessMode.FOR_UPDATE)) {
                 delegate.add(this.nextIndex, o);
             }
             this.previousIndex++;
             this.nextIndex++;
         }
 
-        /* (non-Javadoc)
+        /*
+         * (non-Javadoc)
+         * 
          * @see java.util.ListIterator#hasNext()
          */
         public boolean hasNext() {
             try {
                 UniqueValue<Boolean> reply = new UniqueValue<Boolean>();
-                for(List<Object> delegate : members.getInvolved(AccessMode.FOR_QUERY)) {
+                for (List<Object> delegate : members.getInvolved(AccessMode.FOR_QUERY)) {
                     reply.set(Boolean.valueOf(nextIndex < delegate.size()));
                 }
                 return reply.get().booleanValue();
             } catch (ServiceException exception) {
-                throw Throwables.initCause(
-                    new IllegalStateException(
-                        "The underlying states inappropriate for the unique determination of the given property"
-                    ),
+                throw newIllegalStateException(
                     exception,
-                    BasicException.Code.DEFAULT_DOMAIN,
-                    BasicException.Code.ILLEGAL_STATE,
-                    getIdParameter()
+                    "The underlying states are inappropriate for the unique determination of the given property"
                 );
             }
         }
 
-        /* (non-Javadoc)
+        /*
+         * (non-Javadoc)
+         * 
          * @see java.util.ListIterator#hasPrevious()
          */
         public boolean hasPrevious() {
             return this.previousIndex >= 0;
         }
 
-        /* (non-Javadoc)
+        /*
+         * (non-Javadoc)
+         * 
          * @see java.util.ListIterator#next()
          */
         public Object next() {
             try {
                 UniqueValue<Object> reply = new UniqueValue<Object>();
                 this.currentIndex = this.nextIndex;
-                for(List<Object> delegate : members.getInvolved(AccessMode.FOR_QUERY)) {
+                for (List<Object> delegate : members.getInvolved(AccessMode.FOR_QUERY)) {
                     reply.set(delegate.get(this.currentIndex));
                 }
                 this.previousIndex = this.nextIndex++;
                 return reply.get();
             } catch (ServiceException exception) {
-                throw Throwables.initCause(
-                    new IllegalStateException(
-                        "The underlying states inappropriate for the given operation"
-                    ),
-                    exception,
-                    BasicException.Code.DEFAULT_DOMAIN,
-                    BasicException.Code.ILLEGAL_STATE,
-                    getIdParameter()
-                );
+                throw newIllegalStateException(exception, "The underlying states are inappropriate for the given operation");
             }
         }
 
-        /* (non-Javadoc)
+        /*
+         * (non-Javadoc)
+         * 
          * @see java.util.ListIterator#nextIndex()
          */
         public int nextIndex() {
@@ -465,63 +458,78 @@ final class ListView
 
         }
 
-        /* (non-Javadoc)
+        /*
+         * (non-Javadoc)
+         * 
          * @see java.util.ListIterator#previous()
          */
         public Object previous() {
             try {
                 UniqueValue<Object> reply = new UniqueValue<Object>();
                 this.currentIndex = this.previousIndex;
-                for(List<Object> delegate : members.getInvolved(AccessMode.FOR_QUERY)) {
+                for (List<Object> delegate : members.getInvolved(AccessMode.FOR_QUERY)) {
                     reply.set(delegate.get(this.currentIndex));
                 }
                 this.nextIndex = this.previousIndex--;
                 return reply.get();
             } catch (ServiceException exception) {
-                throw Throwables.initCause(
-                    new IllegalStateException(
-                        "The underlying states inappropriate for the given operation"
-                    ),
-                    exception,
-                    BasicException.Code.DEFAULT_DOMAIN,
-                    BasicException.Code.ILLEGAL_STATE,
-                    getIdParameter()
-                );
+                throw newIllegalStateException(exception, "The underlying states are inappropriate for the given operation");
             }
         }
 
-        /* (non-Javadoc)
+        /*
+         * (non-Javadoc)
+         * 
          * @see java.util.ListIterator#previousIndex()
          */
         public int previousIndex() {
             return this.previousIndex;
         }
 
-        /* (non-Javadoc)
+        /*
+         * (non-Javadoc)
+         * 
          * @see java.util.ListIterator#remove()
          */
         public void remove() {
-            if(this.currentIndex < 0) {
+            if (this.currentIndex < 0) {
                 throw new IllegalStateException("No current element");
             }
-            for(List<Object> delegate : members.getInvolved(AccessMode.FOR_UPDATE)) {
+            for (List<Object> delegate : members.getInvolved(AccessMode.FOR_UPDATE)) {
                 delegate.remove(this.currentIndex);
             }
             this.currentIndex = -1;
         }
 
-        /* (non-Javadoc)
+        /*
+         * (non-Javadoc)
+         * 
          * @see java.util.ListIterator#set(java.lang.Object)
          */
         public void set(Object o) {
-            if(this.currentIndex < 0) {
+            if (this.currentIndex < 0) {
                 throw new IllegalStateException("No current element");
             }
-            for(List<Object> delegate : members.getInvolved(AccessMode.FOR_UPDATE)) {
+            for (List<Object> delegate : members.getInvolved(AccessMode.FOR_UPDATE)) {
                 delegate.set(this.currentIndex, o);
             }
         }
-        
+
+    }
+
+    private IllegalStateException newIllegalStateException(
+        ServiceException exception,
+        final String message
+    ) {
+        return Throwables.initCause(
+            new IllegalStateException(
+                message + ". " + exception.getCause().getDescription()
+            ),
+            exception,
+            BasicException.Code.DEFAULT_DOMAIN,
+            BasicException.Code.ILLEGAL_STATE,
+            getIdParameter()
+        );
     }
 
 }

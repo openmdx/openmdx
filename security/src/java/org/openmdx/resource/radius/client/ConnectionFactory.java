@@ -51,7 +51,6 @@ import javax.resource.ResourceException;
 import javax.resource.spi.ConnectionManager;
 
 import org.openmdx.resource.spi.AbstractConnectionFactory;
-import org.openmdx.resource.spi.AbstractManagedConnectionFactory;
 import org.openmdx.uses.net.sourceforge.jradiusclient.RadiusConnection;
 import org.openmdx.uses.net.sourceforge.jradiusclient.exception.RadiusException;
 
@@ -59,18 +58,17 @@ import org.openmdx.uses.net.sourceforge.jradiusclient.exception.RadiusException;
  * RADIUS Connection Factory
  */
 public class ConnectionFactory
-	extends AbstractConnectionFactory<RadiusConnection>
-    implements org.openmdx.resource.cci.ConnectionFactory<RadiusConnection,RadiusException>
+	extends AbstractConnectionFactory<RadiusConnection,RadiusException>
 {
 
-	/**
+    /**
      * Constructor
      * 
-     * @param managedConnectionFactory 
-     * @param connectionManager
+     * @param managedConnectionFactory a managed RADIUS connection factory
+     * @param connectionManager a connection manager
      */
     public ConnectionFactory(
-        AbstractManagedConnectionFactory managedConnectionFactory, 
+        ManagedConnectionFactory managedConnectionFactory, 
         ConnectionManager connectionManager
     ) {
     	super(
@@ -82,29 +80,22 @@ public class ConnectionFactory
     /**
      * Implements <code>Serializable</code>
      */
-    private static final long serialVersionUID = 3994838300645160656L;
+    private static final long serialVersionUID = 6296420695651960582L;
 
     
     //------------------------------------------------------------------------
     // Implements ConnectionFactory
     //------------------------------------------------------------------------
     
-	/* (non-Javadoc)
-     * @see org.openmdx.resource.cci.ConnectionFactory#getConnection()
+    /* (non-Javadoc)
+     * @see org.openmdx.resource.spi.AbstractConnectionFactory#toEISException(javax.resource.ResourceException)
      */
-//  @Override
-    public RadiusConnection getConnection(
-    ) throws RadiusException {
-        try {
-            return newConnection(
-                null // connectionRequestInfo
-            );
-        } catch (ResourceException exception) {
-        	throw new RadiusException(
-                exception,
-                "RADIUS client could not be acquired"
-            );
-        }
+    @Override
+    protected RadiusException toEISException(ResourceException exception) {
+        return new RadiusException(
+            exception,
+            "RADIUS client could not be acquired"
+        );
     }
 
 }

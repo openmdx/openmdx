@@ -52,11 +52,11 @@ package org.openmdx.application.dataprovider.cci;
 /**
  * The <code>DataproviderOperations</code> class contains the constants
  * identifying the dataprovider operations.
+ * 
+ * @deprecated without replacement. Please copy the class into your own
+ * project if you still need them.
  */
-
-
-
-
+@Deprecated
 public class DataproviderOperations {
 
   

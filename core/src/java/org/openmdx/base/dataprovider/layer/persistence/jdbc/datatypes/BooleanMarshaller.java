@@ -50,7 +50,7 @@ package org.openmdx.base.dataprovider.layer.persistence.jdbc.datatypes;
 
 import java.sql.Connection;
 
-import org.openmdx.application.dataprovider.layer.persistence.jdbc.LayerConfigurationEntries;
+import org.openmdx.base.dataprovider.layer.persistence.jdbc.LayerConfigurationEntries;
 import org.openmdx.base.dataprovider.layer.persistence.jdbc.spi.DataTypes;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.kernel.exception.BasicException;

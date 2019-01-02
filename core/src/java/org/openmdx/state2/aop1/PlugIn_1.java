@@ -63,6 +63,7 @@ import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.state2.cci.DateStateContext;
 import org.openmdx.state2.cci.DateTimeStateContext;
 import org.openmdx.state2.cci.StateContext;
+import org.openmdx.state2.spi.TechnicalAttributes;
 
 /**
  * Standard Plug-In
@@ -340,7 +341,7 @@ public class PlugIn_1 implements PlugIn_1_0 {
 		Object value
 	) throws ServiceException {
 		if(
-			"transactionTimeUnique".equals(feature) &&
+		    TechnicalAttributes.TRANSACTION_TIME_UNIQUE.equals(feature) &&
 			Boolean.TRUE.equals(value) &&
 			object.getModel().isInstanceof(object, "org:openmdx:state2:StateCapable")
 		){

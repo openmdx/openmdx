@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2007-2010, OMEX AG, Switzerland
+ * Copyright (c) 2007-2018, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -49,27 +49,28 @@ package org.openmdx.resource.ldap.spi;
 
 import javax.resource.ResourceException;
 import javax.resource.spi.ConnectionManager;
-import netscape.ldap.LDAPException;
-import netscape.ldap.LDAPv3;
+import javax.resource.spi.ManagedConnectionFactory;
 
 import org.openmdx.resource.spi.AbstractConnectionFactory;
+import org.openmdx.resource.ldap.cci.LDAPConnection;
+
+import netscape.ldap.LDAPException;
 
 /**
  * LDAP Connection Factory
  */
 public class ConnectionFactory
-	extends AbstractConnectionFactory<LDAPv3>
-    implements org.openmdx.resource.cci.ConnectionFactory<LDAPv3,LDAPException>
+	extends AbstractConnectionFactory<LDAPConnection,LDAPException>
 {
 
-	/**
+    /**
      * Constructor
      * 
-     * @param managedConnectionFactory 
-     * @param connectionManager
+     * @param managedConnectionFactory a managed LDAP connection factory
+     * @param connectionManager a connection manager
      */
     public ConnectionFactory(
-        AbstractManagedConnectionFactory managedConnectionFactory, 
+        ManagedConnectionFactory managedConnectionFactory, 
         ConnectionManager connectionManager
     ) {
     	super(managedConnectionFactory, connectionManager);        
@@ -78,32 +79,28 @@ public class ConnectionFactory
     /**
      * Implements <code>Serializable</code>
      */
-    private static final long serialVersionUID = -4449173495133105035L;
+    private static final long serialVersionUID = 7299859972253397306L;
 
     
     //------------------------------------------------------------------------
     // Implements ConnectionFactory
     //------------------------------------------------------------------------
     
-	/* (non-Javadoc)
-     * @see org.openmdx.resource.ldap.cci.ConnectionFactory#getConnection()
+    /* (non-Javadoc)
+     * @see org.openmdx.resource.spi.AbstractConnectionFactory#toEISException(javax.resource.ResourceException)
      */
-//  @Override
-    public LDAPv3 getConnection(
-    ) throws LDAPException {
-        try {
-            return newConnection(
-                null // Connection Request Info
-            );
-        } catch (ResourceException exception) {
-            throw (LDAPException) new LDAPException(
+    @Override
+    protected LDAPException toEISException(ResourceException exception) {
+        final Throwable cause = exception.getCause();
+        return (LDAPException) (
+            cause instanceof LDAPException ? cause : new LDAPException(
                 "Connection handle acquisition failed",
                 LDAPException.CONNECT_ERROR,
                 exception.getMessage()
             ).initCause(
-            	exception
-            );
-        }
+                exception
+            )
+        );
     }
 
 }

@@ -49,7 +49,7 @@ package org.openmdx.base.query.spi;
 
 import java.util.EnumSet;
 
-import org.openmdx.application.dataprovider.spi.EmbeddedFlags.FlagsAndValue;
+import org.openmdx.base.query.spi.EmbeddedFlags;
 import org.w3c.cci2.RegularExpressionFlag;
 
 public class AccentInsensitivePattern extends RegularExpressionPattern {
@@ -102,7 +102,7 @@ public class AccentInsensitivePattern extends RegularExpressionPattern {
 	};
 
 	static AccentInsensitivePattern newInstance(
-		final FlagsAndValue embeddedFlags
+		final EmbeddedFlags.FlagsAndValue embeddedFlags
 	){
 		return new AccentInsensitivePattern(embeddedFlags.getValue(), embeddedFlags.getFlagSet());
 	}

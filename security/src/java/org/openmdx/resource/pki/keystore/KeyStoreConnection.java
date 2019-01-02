@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2010, OMEX AG, Switzerland
+ * Copyright (c) 2010-2018, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -47,7 +47,6 @@
  */
 package org.openmdx.resource.pki.keystore;
 
-import java.io.Closeable;
 import org.openmdx.resource.spi.AbstractConnection;
 
 /**
@@ -55,7 +54,6 @@ import org.openmdx.resource.spi.AbstractConnection;
  */
 abstract class KeyStoreConnection
 	extends AbstractConnection
-    implements Closeable
 {
 
     /* (non-Javadoc)
@@ -71,16 +69,16 @@ abstract class KeyStoreConnection
     }
 
     //------------------------------------------------------------------------
-    // Implements Closeable
+    // Implements AutoCloseable
     //------------------------------------------------------------------------    
 
-	/* (non-Javadoc)
-     * @see java.io.Closeable#close()
+    /* (non-Javadoc)
+     * @see java.lang.AutoCloseable#close()
      */
-//  @Override
-    public void close(
+    @Override
+    public void close (
     ) {
-    	super.dissociateManagedConnection();
+        super.dissociateManagedConnection();
     }
 
 }

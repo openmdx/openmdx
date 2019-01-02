@@ -411,18 +411,14 @@ public abstract class StandardDbObject extends DbObject {
     public int getIndex(
         FastResultSet frs
     ) throws SQLException {
-        int idx = 0;
+        final String objectIdxColumnName = this.database.getObjectIdxColumnName();
         try {
-            idx = ((Number)frs.getObject(this.database.getObjectIdxColumnName())).intValue();
-        }
-        catch(NullPointerException e) {
+            return ((Number)frs.getObject(objectIdxColumnName)).intValue();
+        } catch(NullPointerException e) {
             throw new SQLException(
-                "column " + 
-                this.database.getObjectIdxColumnName() + 
-                " in result set not found"
+                "column " + objectIdxColumnName + " in result set not found"
             );
         }    
-        return idx;
     }
 
     //---------------------------------------------------------------------------  

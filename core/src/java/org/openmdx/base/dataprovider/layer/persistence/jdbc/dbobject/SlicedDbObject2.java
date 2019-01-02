@@ -970,7 +970,7 @@ public class SlicedDbObject2 extends SlicedDbObject {
                             Path objectPath = (Path)v;
                             String name = this.database.getPrivateAttributesPrefix() + attributeName;
                             if(
-                                "core".equals(attributeName) &&
+                                SystemAttributes.CORE.equals(attributeName) &&
                                 this.database.getDatabaseConfiguration().useViewsForRedundantColumns() &&
                                 this.getModel().isSubtypeOf(facade.getObjectClass(), "org:openmdx:base:Aspect")
                             ){

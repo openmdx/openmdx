@@ -49,7 +49,6 @@ package org.openmdx.state2.aop0;
 
 import java.util.List;
 
-import javax.annotation.Nullable;
 import javax.jdo.listener.InstanceLifecycleEvent;
 
 import org.openmdx.base.accessor.cci.SystemAttributes;
@@ -61,6 +60,7 @@ import org.openmdx.base.naming.Path;
 import org.openmdx.base.persistence.cci.UserObjects;
 import org.openmdx.state2.spi.LegacyConfiguration;
 import org.openmdx.state2.spi.LegacyPlugInHelper;
+import org.openmdx.state2.spi.TechnicalAttributes;
 
 /**
  * Add valid time unique support org::openmdx::state2 Plug-In
@@ -241,7 +241,7 @@ public class LegacyPlugIn_1 extends ColonPlugIn_1 implements LegacyConfiguration
     ) throws ServiceException {
         return 
             isInstanceOf(object, "org:openmdx:state2:Legacy") && 
-            Boolean.TRUE.equals(object.objGetValue("validTimeUnique"));
+            Boolean.TRUE.equals(object.objGetValue(TechnicalAttributes.VALID_TIME_UNIQUE));
     }
 
     private boolean isValidTimeUnqiue(DataObject_1 object) throws ServiceException {
@@ -286,7 +286,7 @@ public class LegacyPlugIn_1 extends ColonPlugIn_1 implements LegacyConfiguration
 	 * @see org.openmdx.base.aop0.PlugIn_1_0#isAspect(org.openmdx.base.accessor.rest.DataObject_1)
 	 */
     @Override
-	@Nullable public Boolean isAspect(
+	public Boolean isAspect(
 		DataObject_1 object
 	) throws ServiceException {
 		return LegacyPlugInHelper.isValidTimeUnique(object, object.getModel()) ? Boolean.FALSE : null;

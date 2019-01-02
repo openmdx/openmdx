@@ -50,7 +50,7 @@ package org.openmdx.base.query.spi;
 import java.util.EnumSet;
 import java.util.regex.Pattern;
 
-import org.openmdx.application.dataprovider.spi.EmbeddedFlags.FlagsAndValue;
+import org.openmdx.base.query.spi.EmbeddedFlags.FlagsAndValue;
 import org.w3c.cci2.RegularExpressionFlag;
 
 /**

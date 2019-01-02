@@ -5,7 +5,7 @@
 			<attribute name="javadoc_location" value="jar:platform:/resource/openMDX Thirdparty ~ Radius (jre-1.8)/doc/tiny-radius.javadoc.zip!/"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry exported="true" kind="lib" path="lib/commons-logging.jar" sourcepath="src/tiny-radius.java.zip"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JRE 8"/>
 	<classpathentry kind="output" path="build/jre-1.8/bin"/>
 </classpath>

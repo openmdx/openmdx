@@ -201,7 +201,7 @@ public abstract class ObjectFilter extends ModelAwareFilter {
     /**
      * Replace transient object id's by appropriate paths
      * 
-     * @param source the filter property
+     * @param property the filter property
      * 
      * @return a property without transient object ids
      */

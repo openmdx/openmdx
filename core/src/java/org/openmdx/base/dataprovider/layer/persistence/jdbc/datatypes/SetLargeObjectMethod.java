@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2012, OMEX AG, Switzerland
+ * Copyright (c) 2012-2019, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -51,7 +51,9 @@ package org.openmdx.base.dataprovider.layer.persistence.jdbc.datatypes;
  * Set Large Object Method
  */
 public enum SetLargeObjectMethod {
-    TALLYING,
-    STREAMING,
-    BY_VALUE
+    SET_VALUE,
+    SET_LOB,
+    SET_LOB_3,
+    SET_STREAM,
+    SET_STREAM_3
 }

@@ -47,8 +47,7 @@
 package org.openmdx.base.persistence.spi;
 
 import java.util.Collection;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
+import java.util.Map;
 
 import javax.jdo.Extent;
 import javax.jdo.FetchGroup;
@@ -58,6 +57,7 @@ import javax.jdo.PersistenceManager;
 import javax.jdo.PersistenceManagerFactory;
 import javax.jdo.listener.InstanceLifecycleListener;
 
+import org.openmdx.base.collection.Maps;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.resource.spi.CloseCallback;
 
@@ -76,11 +76,17 @@ public abstract class AbstractPersistenceManager implements PersistenceManager {
      * @param instanceLifecycleListener the instance life cycle listener has to be provided by the subclass
      */
     protected AbstractPersistenceManager(
-        PersistenceManagerFactory factory, 
-        MarshallingInstanceLifecycleListener instanceLifecycleListener
+        final PersistenceManagerFactory factory, 
+        final MarshallingInstanceLifecycleListener instanceLifecycleListener
     ){
+        final boolean multithreaded = factory.getMultithreaded();
         this.persistenceManagerFactory = factory;
         this.instanceLifecycleListener = instanceLifecycleListener;
+        this.userObjects = Maps.newMap(multithreaded);
+        this.setIgnoreCache(factory.getIgnoreCache());
+        this.setMultithreaded(multithreaded);
+        this.setDetachAllOnCommit(factory.getDetachAllOnCommit());
+        this.setCopyOnAttach(factory.getCopyOnAttach());
     }
 
     /**
@@ -119,28 +125,15 @@ public abstract class AbstractPersistenceManager implements PersistenceManager {
     private volatile boolean closed = false;
     
     /**
-     * 
+     * The lazily allocated user objects
      */
-    private ConcurrentMap<Object,Object> userObjects = new ConcurrentHashMap<Object,Object>();
+    private Map<Object,Object> userObjects;
 
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.spi.PersistenceManager_1_0#currentUnitOfWork()
      */
     protected abstract UnitOfWork currentUnitOfWork();
     
-    /* (non-Javadoc)
-     * @see org.openmdx.kernel.persistence.resource.Connection_2#setPersistenceManagerFactory(javax.jdo.PersistenceManagerFactory)
-     */
-    public void setPersistenceManagerFactory(
-        PersistenceManagerFactory persistenceManagerFactory
-    ) {
-        this.persistenceManagerFactory = persistenceManagerFactory;
-        this.setIgnoreCache(persistenceManagerFactory.getIgnoreCache());
-        this.setMultithreaded(persistenceManagerFactory.getMultithreaded());
-        this.setDetachAllOnCommit(persistenceManagerFactory.getDetachAllOnCommit());
-        this.setCopyOnAttach(persistenceManagerFactory.getCopyOnAttach());
-    }
-
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#getPersistenceManagerFactory()
      */
@@ -183,8 +176,10 @@ public abstract class AbstractPersistenceManager implements PersistenceManager {
 	        }
 	        this.instanceLifecycleListener.close();
 	        this.instanceLifecycleListener = null;
-	        this.userObjects.clear();
-	        this.userObjects = null;
+	        if(this.userObjects != null) {
+    	        this.userObjects.clear();
+    	        this.userObjects = null;
+	        }
 	        if(this.persistenceManagerFactory instanceof CloseCallback) {
 	            ((CloseCallback)this.persistenceManagerFactory).postClose(this);
 	        }
@@ -456,12 +451,27 @@ public abstract class AbstractPersistenceManager implements PersistenceManager {
         return PersistenceManagers.detachCopyAll(this, pcs);
     }
 
+    /**
+     * Allocate the user objects repository lazily
+     * 
+     * @return the user objects repository
+     */
+    private Map<Object,Object> getUserObjects(){
+        if(this.userObjects == null) {
+            if(isClosed()) {
+                throw new IllegalStateException("The persistence manager is closed");
+            }
+            this.userObjects = Maps.newMap(this.getMultithreaded());
+        }
+        return this.userObjects;
+    }
+    
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#putUserObject(java.lang.Object, java.lang.Object)
      */
     @Override
     public Object putUserObject(Object key, Object val) {
-        return this.userObjects.put(key, val);
+        return getUserObjects().put(key, val);
     }
 
     /* (non-Javadoc)
@@ -469,7 +479,7 @@ public abstract class AbstractPersistenceManager implements PersistenceManager {
      */
     @Override
     public Object getUserObject(Object key) {
-        return this.userObjects.get(key);
+        return getUserObjects().get(key);
     }
 
     /* (non-Javadoc)
@@ -477,7 +487,7 @@ public abstract class AbstractPersistenceManager implements PersistenceManager {
      */
     @Override
     public Object removeUserObject(Object key) {
-        return this.userObjects.remove(key);
+        return getUserObjects().remove(key);
     }
 
     /* (non-Javadoc)

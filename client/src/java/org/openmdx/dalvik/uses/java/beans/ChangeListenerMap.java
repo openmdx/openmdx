@@ -248,8 +248,8 @@ abstract class ChangeListenerMap<L extends EventListener> {
      */
     public final L extract(L listener) {
         while (listener instanceof EventListenerProxy) {
-            EventListenerProxy proxy = (EventListenerProxy) listener;
-            listener = (L) proxy.getListener();
+            final EventListenerProxy<L> proxy = (EventListenerProxy<L>) listener;
+            listener = proxy.getListener();
         }
         return listener;
     }

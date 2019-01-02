@@ -47,10 +47,7 @@
  */
 package org.openmdx.base.accessor.jmi.spi;
 
-import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URI;
 import java.net.URLDecoder;
@@ -65,8 +62,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 
 import javax.jdo.Extent;
 import javax.jdo.FetchPlan;
@@ -107,17 +102,16 @@ import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
 import org.openmdx.base.accessor.jmi.cci.RefPackage_1_0;
 import org.openmdx.base.accessor.jmi.cci.RefStruct_1_0;
 import org.openmdx.base.accessor.rest.DataObject_1;
-import org.openmdx.base.accessor.spi.AbstractUnitOfWork_1;
 import org.openmdx.base.accessor.spi.Delegating_1_0;
 import org.openmdx.base.accessor.spi.IdentityMarshaller;
 import org.openmdx.base.accessor.spi.PersistenceManager_1_0;
 import org.openmdx.base.accessor.spi.StandardPrimitiveTypeMarshallerProvider;
 import org.openmdx.base.accessor.view.ObjectView_1_0;
-import org.openmdx.base.collection.ConcurrentWeakRegistry;
 import org.openmdx.base.collection.Maps;
 import org.openmdx.base.collection.MarshallingSet;
 import org.openmdx.base.collection.Registry;
 import org.openmdx.base.collection.Sets;
+import org.openmdx.base.collection.WeakRegistry;
 import org.openmdx.base.exception.ExceptionListener;
 import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;
@@ -145,6 +139,7 @@ import org.openmdx.base.query.Selector;
 import org.openmdx.base.resource.InteractionSpecs;
 import org.openmdx.base.resource.Records;
 import org.openmdx.base.rest.cci.QueryRecord;
+import org.openmdx.base.transaction.ContainerManagedUnitOfWorkSynchronization;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.jdo.ReducedJDOHelper;
 import org.openmdx.kernel.loading.Classes;
@@ -174,7 +169,7 @@ public class RefRootPackage_1
      * @param persistenceManagerFactory
      */
     private RefRootPackage_1(
-        ConcurrentMap<InteractionSpec,RefRootPackage_1> viewManager,
+        Map<InteractionSpec,RefRootPackage_1> viewManager,
         InteractionSpec interactionSpec,
         PersistenceManager delegate,
         Mapping_1_0 implementationMapper,
@@ -186,13 +181,16 @@ public class RefRootPackage_1
             null, // outermostPackage
             null // immediatePackage
         );
+        final boolean multithreaded = persistenceManagerFactory.getMultithreaded();
         this.viewManager = viewManager;
         this.interactionSpec = interactionSpec;
         this.delegate = (PersistenceManager_1_0)delegate;
         this.userObjects = userObjects;
         this.implementationMapper = implementationMapper;
-        this.persistenceManagerFactory = persistenceManagerFactory;
-        MarshallingInstanceLifecycleListener listener = new MarshallingInstanceLifecycleListener(this.registry, this);
+        this.persistenceManagerFactory = persistenceManagerFactory; 
+        this.packages = Maps.newMap(multithreaded);
+        this.registry = new WeakRegistry<>(multithreaded);
+        final MarshallingInstanceLifecycleListener listener = new MarshallingInstanceLifecycleListener(this.registry, this);
         delegate.addInstanceLifecycleListener(listener);
         boolean containterManagedTransaction = 
             AbstractPersistenceManagerFactory.isTransactionContainerManaged(persistenceManagerFactory) ||
@@ -272,7 +270,7 @@ public class RefRootPackage_1
     private PersistenceManager_1_0 delegate;
 
     private final InteractionSpec interactionSpec;
-    protected ConcurrentMap<InteractionSpec,RefRootPackage_1> viewManager;
+    protected Map<InteractionSpec,RefRootPackage_1> viewManager;
     private final PersistenceManagerFactory persistenceManagerFactory;
     protected final PersistenceManager_1_0 persistenceManager;
     final StandardMarshaller standardMarshaller = new StandardMarshaller(this);
@@ -281,8 +279,7 @@ public class RefRootPackage_1
     /**
      * Registry containing <qualifiedName, JMI class> and <qualifiedName, JMI structs> 
      * entries, respectively. This map is shared by all JMI packages, i.e. if 
-     * any package loads a class it is available for all other packages and 
-     * therefore must be loaded only once per classloader. Moreover, these 
+     * any package loads a class it is available for all other packages. Moreover, these 
      * members do not have to be serialized. 
      */
     private transient Registry<String,Jmi1Class_1_0> classes;
@@ -295,12 +292,12 @@ public class RefRootPackage_1
     /**
      * 
      */
-    private final ConcurrentMap<String,RefPackage> packages = new ConcurrentHashMap<String, RefPackage>();
+    private final Map<String,RefPackage> packages;
     
     /**
      * Maps PersistenceCapable instances to RefObject_1 instances
      */
-    private final Registry<PersistenceCapable,RefObject> registry = new ConcurrentWeakRegistry<PersistenceCapable, RefObject>();
+    private final Registry<PersistenceCapable,RefObject> registry;
     
     /**
      * Alternate package name format indicator
@@ -600,7 +597,7 @@ public class RefRootPackage_1
         String qualifiedClassName
     ) {
         if(this.classes == null) {
-            this.classes = new ConcurrentWeakRegistry<String,Jmi1Class_1_0>();
+            this.classes = new WeakRegistry<>(persistenceManagerFactory.getMultithreaded());
         }
         Jmi1Class_1_0 refClass = this.classes.get(qualifiedClassName);
         if(refClass == null) {
@@ -646,7 +643,7 @@ public class RefRootPackage_1
         try {
             RefRootPackage_1 refPackage;
             if(this.viewManager == null) {
-                this.viewManager = new ConcurrentHashMap<InteractionSpec,RefRootPackage_1>();
+                this.viewManager = Maps.newMap(this.persistenceManagerFactory.getMultithreaded());
                 this.viewManager.put(InteractionSpecs.NULL, this);
                 refPackage = null;
             } else {
@@ -1008,91 +1005,6 @@ public class RefRootPackage_1
 
 
     //-------------------------------------------------------------------------
-    // Class RefObjectHandler
-    //-------------------------------------------------------------------------
-
-    /**
-     * RefObject Handler
-     */
-    static class RefObjectHandler implements Serializable, InvocationHandler  {
-
-        /**
-         * Constructor 
-         *
-         * @param primary
-         * @param secondary
-         */
-        RefObjectHandler(
-            RefObject primary,
-            RefObject secondary
-        ) {
-            this.primary = primary;
-            this.secondary = secondary;
-            this.mapping = null;
-        }
-
-        private static final long serialVersionUID = -5495786050475461969L;
-        private final RefObject primary;
-        private final RefObject secondary;
-        private transient Map<Method,Method> mapping;
-
-        /* (non-Javadoc)
-         * @see java.lang.reflect.InvocationHandler#invoke(java.lang.Object, java.lang.reflect.Method, java.lang.Object[])
-         */
-        @Override
-        public Object invoke(
-            Object proxy, 
-            Method method, 
-            Object[] args
-        ) throws Throwable {
-            Method primaryMethod = this.getPrimaryMethod(method);
-            try {
-                return primaryMethod != null ?
-                    primaryMethod.invoke(this.primary, args) :
-                        method.invoke(this.secondary, args);
-            } catch (InvocationTargetException exception) {
-                throw exception.getCause();
-            }
-
-        }
-
-        /**
-         * Retrieves the primary method
-         * 
-         * @param method
-         * 
-         * @return
-         */
-        private synchronized Method getPrimaryMethod(
-            Method secondaryMethod
-        ){
-            Method primaryMethod;
-            boolean tested;
-            if(this.mapping == null) {
-                this.mapping = new ConcurrentHashMap<Method,Method>();
-                primaryMethod = null;
-                tested = false;
-            } else {
-                primaryMethod = this.mapping.get(secondaryMethod);
-                tested = primaryMethod != null || this.mapping.containsKey(secondaryMethod); 
-            }
-            if(!tested) {
-                try {
-                    primaryMethod = this.primary.getClass().getMethod(
-                        secondaryMethod.getName(), 
-                        secondaryMethod.getParameterTypes()
-                    );                    
-                } catch (NoSuchMethodException exception) {
-                    // remember it by setting the value to null
-                }
-                this.mapping.put(secondaryMethod, primaryMethod);
-            }
-            return primaryMethod;
-        }       
-
-    }
-
-    //-------------------------------------------------------------------------
     // Class PersistenceManager_1
     //-------------------------------------------------------------------------
 
@@ -1130,15 +1042,20 @@ public class RefRootPackage_1
         /**
          * The transaction associated with this persistence manager, a one-to-one relation.
          */
-        private final UnitOfWork unitOfWork = new AbstractUnitOfWork_1(){
+        private final CloseableUnitOfWork unitOfWork = new AbstractCloseableUnitOfWork_1(){
 
             @Override
             protected UnitOfWork getDelegate() {
-                return RefRootPackage_1.this.isClosed() ? null : (UnitOfWork)RefRootPackage_1.this.refDelegate().currentUnitOfWork();
+                return isClosed() ? null : (UnitOfWork)RefRootPackage_1.this.refDelegate().currentUnitOfWork();
             }
 
             public PersistenceManager getPersistenceManager() {
                 return StandardPersistenceManager_1.this;
+            }
+
+            @Override
+            public boolean isClosed() {
+                return RefRootPackage_1.this.isClosed();
             }
             
         };
@@ -1217,7 +1134,7 @@ public class RefRootPackage_1
          * @see org.openmdx.base.accessor.spi.PersistenceManager_1_0#currentUnitOfWork()
          */
         @Override
-        public UnitOfWork currentUnitOfWork() {
+        public final CloseableUnitOfWork currentUnitOfWork() {
             return this.unitOfWork;
         }
         
@@ -1424,7 +1341,7 @@ public class RefRootPackage_1
         private Map<String, ?> parseQuery(
         	String uriQuery
         ) throws ServiceException {
-        	Map<String, Object> parameter = new HashMap<String, Object>();
+        	Map<String, Object> parameter = new HashMap<>();
         	try {
 	        	for(String nvp : uriQuery.split("&")) {
 	        		int e  = nvp.indexOf('=');
@@ -1801,6 +1718,7 @@ public class RefRootPackage_1
          */
         @Override
         public <T> T makePersistent(T pc) {
+            final PersistenceManager_1_0 pm = RefRootPackage_1.this.refDelegate();
             if(pc instanceof AbstractObject) {
                 if(this.getCopyOnAttach()) {
                     AbstractObject source = (AbstractObject) pc;
@@ -1810,10 +1728,11 @@ public class RefRootPackage_1
                         //
                         // Attach Copy
                         //
-                        DataObject_1_0 dataObject = RefRootPackage_1.this.refDelegate().makePersistent(
+                        DataObject_1_0 dataObject = pm.makePersistent(
                             new DataObject_1(
                                 xri,
-                                ReducedJDOHelper.getVersion(source)
+                                ReducedJDOHelper.getVersion(source), 
+                                pm.getMultithreaded()
                             )
                         );
                         target = (RefObject) this.getObjectById(
@@ -1875,7 +1794,7 @@ public class RefRootPackage_1
                     );
                 }
             } else {
-                return RefRootPackage_1.this.refDelegate().makePersistent(pc);
+                return pm.makePersistent(pc);
             }
         }
 
@@ -2392,9 +2311,19 @@ public class RefRootPackage_1
         ) {
             super(factory, listener);
             this.entityManager = entityManager;
-            if(this.entityManager) {
-                currentUnitOfWork().afterBegin();
+            if(entityManager) {
+                enlistCurrentUnitOfWork();
             }
+        }
+
+        /**
+         * Enlist the current unit of work with the current transaction
+         */
+        private void enlistCurrentUnitOfWork(
+        ){
+            final CloseableUnitOfWork currentUnitOfWork = currentUnitOfWork();
+            currentUnitOfWork.afterBegin();
+            ContainerManagedUnitOfWorkSynchronization.enlist(currentUnitOfWork);
         }
 
         /**

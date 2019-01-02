@@ -218,7 +218,7 @@ public class NumberValue extends AttributeValue implements Serializable {
     		return "";
     	} else if(value instanceof Collection) {
     		List<String> values = new ArrayList<String>();
-    		for(Iterator i = ((Collection)value).iterator(); i.hasNext(); ) {
+    		for(Iterator<?> i = ((Collection<?>)value).iterator(); i.hasNext(); ) {
     			Object number = i.next();
     			if(number instanceof Number) {
     				values.add(formatter.format(number));

@@ -55,8 +55,7 @@ import java.util.UUID;
 import javax.resource.ResourceException;
 import javax.resource.cci.MappedRecord;
 
-import junit.framework.Assert;
-
+import org.junit.Assert;
 import org.junit.Test;
 import org.openmdx.base.resource.Records;
 import org.openmdx.kernel.id.UUIDs;

@@ -50,7 +50,6 @@ package org.openmdx.application.xml.spi;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Iterator;
-import java.util.logging.Level;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
@@ -59,6 +58,7 @@ import javax.xml.parsers.SAXParserFactory;
 import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.wbxml.WBXMLReader;
+import org.openmdx.base.xml.spi.FeatureSupport;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.log.SysLog;
 import org.xml.sax.ErrorHandler;
@@ -72,31 +72,32 @@ import org.xml.sax.XMLReader;
 public class ImportHelper {
 
     /**
-     * Constructor 
+     * Constructor
      * <p>
      * Validation and schema validation are disabled
      */
-	public ImportHelper(
-	) {		
-	    this(false);
-	}
+    public ImportHelper() {
+        this(false);
+    }
 
-	/**
-	 * Constructor 
-	 *
-	 * @param xmlValidation tells whether validation and schema validation are enabled or disabled
-	 */
+    /**
+     * Constructor
+     *
+     * @param xmlValidation
+     *            tells whether validation and schema validation are enabled or
+     *            disabled
+     */
     public ImportHelper(
         boolean xmlValidation
-    ) {     
+    ) {
         this.xmlValidation = xmlValidation;
     }
-	
+
     /**
      * The schema validation flag
      */
     private boolean xmlValidation;
-	
+
     /**
      * Create an XML reader
      * 
@@ -108,13 +109,14 @@ public class ImportHelper {
      * @throws ServiceException
      */
     private XMLReader newReader(
-        ImportHandler importHandler, 
+        ImportHandler importHandler,
         ErrorHandler errorHandler
-    ) throws ServiceException {
+    )
+        throws ServiceException {
         try {
             XMLReader reader;
             boolean xmlValidation;
-            if(importHandler.isBinary()) {
+            if (importHandler.isBinary()) {
                 reader = new WBXMLReader();
                 xmlValidation = false;
             } else {
@@ -128,8 +130,8 @@ public class ImportHelper {
             // Features
             //
             setFeature(
-                reader, 
-                "http://xml.org/sax/features/namespaces", 
+                reader,
+                "http://xml.org/sax/features/namespaces",
                 true
             );
             setFeature(
@@ -155,13 +157,15 @@ public class ImportHelper {
                 exception,
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.INVALID_CONFIGURATION,
-                "Unable to acquire a SAX Parser");
+                "Unable to acquire a SAX Parser"
+            );
         } catch (SAXException exception) {
             throw new ServiceException(
                 exception,
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.INVALID_CONFIGURATION,
-                "Unable to acquire a SAX Parser");
+                "Unable to acquire a SAX Parser"
+            );
         }
     }
 
@@ -171,24 +175,45 @@ public class ImportHelper {
      * @param reader
      * @param feature
      * @param value
-     * @throws ServiceException 
+     * @throws ServiceException
      */
     private static void setFeature(
         XMLReader reader,
         String feature,
         boolean value
-    ) throws ServiceException {
-        try {
-            reader.setFeature(feature, value);
-        } catch (SAXException exception) {
-        	SysLog.log(Level.INFO, "Sys|Unable to set SAXReader feature|feature='{0}', value='{1}'", feature, Boolean.valueOf(value));
+    )
+        throws ServiceException {
+        if (ignoreFeature(reader, feature)) {
+            SysLog.detail("Unsupported SAXReader feature", feature);
+        } else {
+            try {
+                reader.setFeature(feature, value);
+            } catch (SAXException exception) {
+                SysLog.info("Unable to set SAXReader feature", "'" + feature + "'='" + value + "'");
+            }
         }
     }
-    
+
+    /**
+     * Guard the SAXReader feature setting if possible in order to avoid unnecessary throw catch sequences.
+     */
+    private static boolean ignoreFeature(
+        XMLReader reader,
+        String feature
+    ) {
+        if (reader instanceof FeatureSupport) {
+            return !((FeatureSupport) reader).isFeatureSupported(feature);
+        } else {
+            return false;
+        }
+
+    }
+
     /**
      * Input source factory method
      * 
-     * @param source the input source specification
+     * @param source
+     *            the input source specification
      * 
      * @return the corresponding <code>InputSource Enumeration</code>
      */
@@ -199,31 +224,35 @@ public class ImportHelper {
     }
 
     /**
-     * Import  
+     * Import
      * 
-     * @param target the object sink
-     * @param source the XML source
-     * @param errorHandler <code>null</code> leads to standard error handling
+     * @param target
+     *            the object sink
+     * @param sources
+     *            the XML source
+     * @param errorHandler
+     *            <code>null</code> leads to standard error handling
      * 
-     * @throws ServiceException  
+     * @throws ServiceException
      */
-    public void importObjects (
+    public void importObjects(
         ImportTarget target,
         Iterable<InputSource> sources,
         ErrorHandler errorHandler,
         ImportMode defaultOperation
-    ) throws ServiceException {
+    )
+        throws ServiceException {
         target.importProlog();
         boolean success = false;
         try {
-            for(InputSource source : sources) {
+            for (InputSource source : sources) {
                 try {
                     newReader(
                         new ImportHandler(
-                            target, 
+                            target,
                             source,
                             defaultOperation
-                        ), 
+                        ),
                         errorHandler
                     ).parse(
                         source
@@ -266,18 +295,17 @@ public class ImportHelper {
         }
     }
 
-    
     //------------------------------------------------------------------------
     // Class StandardSource
     //------------------------------------------------------------------------
-    
+
     /**
      * Allows to iterate once over the <code>InputSource</code> singleton
      */
     protected static class StandardSource implements Iterable<InputSource> {
 
         /**
-         * Constructor 
+         * Constructor
          *
          * @param singleton
          */
@@ -285,31 +313,33 @@ public class ImportHelper {
             InputSource singleton
         ) {
             this.singleton = singleton;
-            this.credit = singleton.getByteStream() == null && singleton.getCharacterStream() == null ? Integer.MAX_VALUE : 1; 
+            this.credit = singleton.getByteStream() == null && singleton.getCharacterStream() == null
+                ? Integer.MAX_VALUE : 1;
         }
 
         /**
          * The <code>InputSource</code> singleton
          */
         private final InputSource singleton;
-        
+
         /**
          * Access count
          */
-        private int credit; 
-        
-        /* (non-Javadoc)
+        private int credit;
+
+        /*
+         * (non-Javadoc)
+         * 
          * @see java.lang.Iterable#iterator()
          */
-        public Iterator<InputSource> iterator(
-        ) {
-            if(this.credit-- <= 0) throw new IllegalStateException(
-                "A stream source is expcected to be accessed once only"
-            );
-            return Collections.singleton(this.singleton).iterator(); 
+        public Iterator<InputSource> iterator() {
+            if (this.credit-- <= 0)
+                throw new IllegalStateException(
+                    "A stream source is expcected to be accessed once only"
+                );
+            return Collections.singleton(this.singleton).iterator();
         }
 
-        
     }
-    
+
 }

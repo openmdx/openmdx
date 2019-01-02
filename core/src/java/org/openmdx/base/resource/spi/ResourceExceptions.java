@@ -80,14 +80,14 @@ public final class ResourceExceptions {
     /**
      * Wraps the exception into a system exception
      */
-    public static ResourceException toSystemException(
+    public static EISSystemException toSystemException(
         Exception exception
     ){
     	if(exception instanceof EISSystemException) {
-    		return (ResourceException) exception;
+    		return (EISSystemException) exception;
     	}
         final BasicException basicException = BasicException.toExceptionStack(exception);
-        final ResourceException resourceException = new EISSystemException(
+        final EISSystemException resourceException = new EISSystemException(
 			basicException.getDescription(),
 			basicException
 		);
@@ -98,14 +98,14 @@ public final class ResourceExceptions {
     /**
      * Wraps the exception into a not-supported exception
      */
-    public static ResourceException toNotSupportedException(
+    public static NotSupportedException toNotSupportedException(
         Exception exception
     ){
-    	if(exception instanceof EISSystemException) {
-    		return (ResourceException) exception;
+    	if(exception instanceof NotSupportedException) {
+    		return (NotSupportedException) exception;
     	}
         final BasicException basicException = BasicException.toExceptionStack(exception);
-        final ResourceException resourceException = new NotSupportedException(
+        final NotSupportedException resourceException = new NotSupportedException(
 			basicException.getDescription(),
 			basicException
 		);
@@ -123,7 +123,7 @@ public final class ResourceExceptions {
     		return (ResourceException) exception;
     	}
         BasicException basicException = BasicException.toExceptionStack(exception);
-        final ResourceException resourceException = new EISSystemException(
+        final ResourceException resourceException = new ResourceException(
 			basicException.getDescription(),
 			basicException
 		);

@@ -47,8 +47,7 @@
  */
 package org.openmdx.base.text.conversion;
 
-import junit.framework.Assert;
-
+import org.junit.Assert;
 import org.junit.Test;
 import org.openmdx.kernel.id.UUIDs;
 

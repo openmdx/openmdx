@@ -130,7 +130,7 @@ interface ClassMapping_1_0 {
      * @param refClass
      * @param delegate
      * 
-     * @return a new insatnce proxy
+     * @return a new instance proxy
      * 
      * @throws ServiceException
      */

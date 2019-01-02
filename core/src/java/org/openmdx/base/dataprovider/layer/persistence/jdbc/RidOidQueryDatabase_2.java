@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2011-2014, OMEX AG, Switzerland
+ * Copyright (c) 2011-2018, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -88,25 +88,16 @@ public class RidOidQueryDatabase_2 extends Database_2 {
         return objectIdColumn.lastIndexOf('.') < 0 ? objectIdColumn : objectIdColumn.substring(objectIdColumn.lastIndexOf('.') + 1);
     }
         
-    /* (non-Javadoc)
-	 * @see org.openmdx.application.dataprovider.layer.persistence.jdbc.AbstractDatabase_1#toMultiValueView(java.lang.String)
-	 */
 	@Override
 	protected String toMultiValueView(String singleValueView) {
 		return singleValueView;
 	}
 
-	/* (non-Javadoc)
-     * @see org.openmdx.application.dataprovider.layer.persistence.jdbc.Database_1#isAspectBaseClass(java.lang.String)
-     */
     @Override
     protected boolean isAspectBaseClass(String qualifiedClassName) {
         return this.enableAspectFilterSubstitution && super.isAspectBaseClass(qualifiedClassName);
     }
 
-    /* (non-Javadoc)
-     * @see org.openmdx.application.dataprovider.layer.persistence.jdbc.AbstractDatabase_1#isBaseClass(java.lang.String)
-     */
     @Override
     protected boolean isBaseClass(String qualifiedClassName) {
         return super.isBaseClass(qualifiedClassName) || (
@@ -162,9 +153,6 @@ public class RidOidQueryDatabase_2 extends Database_2 {
         return (tableAlias == null ? "" : tableAlias + ".") + toOid(this.getPrivateAttributesPrefix() + columnName + "_");
     }
     
-    /* (non-Javadoc)
-     * @see org.openmdx.application.dataprovider.layer.persistence.jdbc.AbstractDatabase_1#isInToSqlClause(java.lang.String, org.openmdx.base.mof.cci.ModelElement_1_0, java.lang.StringBuilder, java.util.Collection, java.lang.Object[])
-     */
     @Override
     protected void isInToSqlClause(
         Connection connection,
@@ -236,9 +224,6 @@ public class RidOidQueryDatabase_2 extends Database_2 {
         }
     }
 
-    /* (non-Javadoc)
-     * @see org.openmdx.application.dataprovider.layer.persistence.jdbc.AbstractDatabase_1#isLikeToSqlClause(java.lang.String, org.openmdx.base.mof.cci.ModelElement_1_0, java.lang.StringBuilder, java.util.Collection, java.lang.Object[])
-     */
     @Override
     protected void isLikeToSqlClause(
         Connection connection,
@@ -352,8 +337,8 @@ public class RidOidQueryDatabase_2 extends Database_2 {
         boolean joinWithState
     ) {
          if(joinWithState) {
-             to.add(toRid(viewAliasName, "core"));
-             to.add(toOid(viewAliasName, "core"));
+             to.add(toRid(viewAliasName, SystemAttributes.CORE));
+             to.add(toOid(viewAliasName, SystemAttributes.CORE));
          } else {
             for(String column : joinObject.getReferenceColumn()) {
                 to.add(viewAliasName + "." + column);
@@ -523,7 +508,7 @@ public class RidOidQueryDatabase_2 extends Database_2 {
                         p.operator(),
                         allSubtypes.toArray()
                     );
-                    joinWithState |= isStated(filterPropertyDef.getModel(), instanceOf);
+                    joinWithState |= BasicStates.isStated(instanceOf);
                 }
                 i.remove();
             }
@@ -553,12 +538,12 @@ public class RidOidQueryDatabase_2 extends Database_2 {
         final DbObject joinObject;
         // Reference
         if(storedAsAttribute) {
-            Path identityPattern = filterPropertyDef.getModel().getIdentityPattern(referencedType);
+            final Path identityPattern = filterPropertyDef.getModel().getIdentityPattern(referencedType, true);
             if(identityPattern == null) {
                 throw new ServiceException(
                     BasicException.Code.DEFAULT_DOMAIN,
                     BasicException.Code.NOT_IMPLEMENTED,
-                    "Joining descendants of root classes is not yet implemented for RID/OID DBs",
+                    "Can't determine a unique identity pattern for the descendants of the given root class",
                     new BasicException.Parameter("filter.property", filterProperty),
                     new BasicException.Parameter("filter.definition", filterPropertyDef)
                 );
@@ -591,7 +576,7 @@ public class RidOidQueryDatabase_2 extends Database_2 {
         else if(ModelHelper.isCompositeEnd(filterPropertyDef, true)) {
             joinObject = this.getDbObject(
                 conn, 
-                applyProvider(filterPropertyDef.getModel().getIdentityPattern(referencedType), reference), 
+                applyProvider(filterPropertyDef.getModel().getIdentityPattern(referencedType, false), reference), 
                 null, // filter
                 true
             );            
@@ -630,9 +615,6 @@ public class RidOidQueryDatabase_2 extends Database_2 {
         return joinObject;
     }
 
-    /* (non-Javadoc)
-     * @see org.openmdx.application.dataprovider.layer.persistence.jdbc.AbstractDatabase_1#filterToSqlClause(java.sql.Connection, org.openmdx.application.dataprovider.layer.persistence.jdbc.DbObject, boolean, java.lang.String, boolean, java.lang.String, boolean, boolean, org.openmdx.application.dataprovider.layer.persistence.jdbc.AbstractDatabase_1.JoinType, java.lang.String, org.openmdx.base.mof.cci.ModelElement_1_0, java.util.List, boolean, java.util.List)
-     */
     @Override
     protected String filterToSqlClause(
         Connection conn,

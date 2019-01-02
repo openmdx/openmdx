@@ -146,8 +146,8 @@ class ObjectRecordComparator implements Comparator<ObjectRecord> {
         } else {
             for(FeatureOrderRecord s : this.order){
                 if(s.getSortOrder() != SortOrder.UNSORTED) {
-					Object vx = ox.getValue().get(s.getFeature());
-                    Object vy = oy.getValue().get(s.getFeature());
+					Object vx = getValue(ox, s);
+                    Object vy = getValue(oy, s);
                     int c = ObjectRecordComparator.compareValues(vx,vy);
                     if (c != 0) {
                         return s.getSortOrder() == SortOrder.ASCENDING ? c : -c;
@@ -156,6 +156,19 @@ class ObjectRecordComparator implements Comparator<ObjectRecord> {
             }
             return 0;
         }
+    }
+
+    /**
+     * Retrieve a feature's value
+     * 
+     * @param object
+     * @param featureOrder
+     * @return the corresponding value
+     */
+    private Object getValue(
+        ObjectRecord object, FeatureOrderRecord featureOrder
+    ) {
+        return object.getValue().get(featureOrder.getFeature());
     }
 
     @Override

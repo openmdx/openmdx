@@ -77,6 +77,7 @@ import org.openmdx.state2.jmi1.Legacy;
 import org.openmdx.state2.jmi1.StateCapable;
 import org.openmdx.state2.spi.DateStateViewContext;
 import org.openmdx.state2.spi.Parameters;
+import org.openmdx.state2.spi.TechnicalAttributes;
 
 /**
  * State Import Plug-In
@@ -103,9 +104,9 @@ public class StateImportPlugIn implements ImportPlugIn {
      * The features not to be propagated by the JMI helper for <code>StateCapable</code> instances
      */
     private static final Collection<String> IGNORABLE_FEATURES_FOR_STATE_CAPABLE_INSTANCES = Arrays.asList(
-        "core",
-        "stateValidFrom",
-        "stateValidTo"
+        SystemAttributes.CORE,
+        TechnicalAttributes.STATE_VALID_FROM,
+        TechnicalAttributes.STATE_VALID_TO
     );
     
     /* (non-Javadoc)
@@ -120,7 +121,7 @@ public class StateImportPlugIn implements ImportPlugIn {
     ) throws ServiceException {
         if(DateState.class.isAssignableFrom(objectClass)) {
             Object_2Facade facade = Facades.asObject(objectHolder);
-            if(Boolean.TRUE.equals(facade.attributeValue("validTimeUnique"))) {
+            if(Boolean.TRUE.equals(facade.attributeValue(TechnicalAttributes.VALID_TIME_UNIQUE))) {
                 Path externalId = Object_2Facade.getPath(objectHolder);
                 T refObject = null;
                 switch(mode) {
@@ -156,9 +157,9 @@ public class StateImportPlugIn implements ImportPlugIn {
             } else if (facade.attributeValue(SystemAttributes.REMOVED_AT) != null){
             	return null;
             } else {
-                XMLGregorianCalendar validFrom =  (XMLGregorianCalendar) facade.attributeValue("stateValidFrom");
-                XMLGregorianCalendar validTo = (XMLGregorianCalendar) facade.attributeValue("stateValidTo");
-                Path objectId = (Path)facade.attributeValue("core");
+                XMLGregorianCalendar validFrom =  (XMLGregorianCalendar) facade.attributeValue(TechnicalAttributes.STATE_VALID_FROM);
+                XMLGregorianCalendar validTo = (XMLGregorianCalendar) facade.attributeValue(TechnicalAttributes.STATE_VALID_TO);
+                Path objectId = (Path)facade.attributeValue(SystemAttributes.CORE);
                 if(objectId == null) {
                     throw new ServiceException(
                         BasicException.Code.DEFAULT_DOMAIN,
@@ -220,7 +221,7 @@ public class StateImportPlugIn implements ImportPlugIn {
                                 persistenceManager, 
                                 ImportMode.UPDATE, 
                                 Facades.newObject(
-                                    (Path)facade.getValue().get("core")
+                                    (Path)facade.getValue().get(SystemAttributes.CORE)
                                 ).getDelegate(), 
                                 StateCapable.class
                             );
@@ -262,8 +263,8 @@ public class StateImportPlugIn implements ImportPlugIn {
         //
         // Set the validTimeUnique flag
         //
-        refObject.refSetValue("validTimeUnique", Boolean.TRUE);
-        refObject.refSetValue("transactionTimeUnique", Boolean.TRUE);
+        refObject.refSetValue(TechnicalAttributes.VALID_TIME_UNIQUE, Boolean.TRUE);
+        refObject.refSetValue(TechnicalAttributes.TRANSACTION_TIME_UNIQUE, Boolean.TRUE);
         //
         // Make transient instances persistent
         //
@@ -300,7 +301,7 @@ public class StateImportPlugIn implements ImportPlugIn {
         MappedRecord source
     ) throws ServiceException {
         return target instanceof Legacy && Boolean.TRUE.equals(
-            Facades.asObject(source).attributeValue("validTimeUnique")
+            Facades.asObject(source).attributeValue(TechnicalAttributes.VALID_TIME_UNIQUE)
         );
     }
     
@@ -326,7 +327,7 @@ public class StateImportPlugIn implements ImportPlugIn {
 		        !Parameters.STRICT_QUERY
 		    );
 		    if(!ReducedJDOHelper.isPersistent(refObject)){
-		        Path objectId = (Path)Facades.asObject(objectHolder).attributeValue("core");
+		        Path objectId = (Path)Facades.asObject(objectHolder).attributeValue(SystemAttributes.CORE);
 	            if(objectId == null) {
 	                throw new ServiceException(
 	                    BasicException.Code.DEFAULT_DOMAIN,

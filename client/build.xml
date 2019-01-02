@@ -236,7 +236,7 @@
 			<openmdx:archivefileset src="${project.home}/${build.target.platform}/core/lib/openmdx-base.jar">
 				<patternset refid="openmdx-common.content" />
 			</openmdx:archivefileset>
-			<openmdx:archivefileset src="${openmdx.home}/osgi/${build.target.platform}/enterprise/lib/osgi.enterprise.transaction.jar">
+			<openmdx:archivefileset src="${openmdx.home}/osgi/${build.target.platform}/enterprise/lib/javaee-api.jar">
 				<include name="javax/transaction/Synchronization.*" />
 			</openmdx:archivefileset>
 		</openmdx:archive>

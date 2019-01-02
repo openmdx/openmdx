@@ -48,7 +48,6 @@
 package org.openmdx.junit.rules;
 
 import javax.jdo.PersistenceManager;
-import javax.jdo.PersistenceManagerFactory;
 
 import org.junit.rules.ExternalResource;
 

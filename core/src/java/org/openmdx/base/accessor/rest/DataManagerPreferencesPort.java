@@ -51,6 +51,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import javax.jdo.FetchPlan;
 import javax.resource.NotSupportedException;
 import javax.resource.ResourceException;
 import javax.resource.cci.IndexedRecord;
@@ -77,7 +78,7 @@ import org.openmdx.kernel.exception.BasicException;
 class DataManagerPreferencesPort implements Port<RestConnection> {
 
     /**
-     * Constructor 
+     * Constructor
      *
      * @param destinations
      * @param raw
@@ -94,16 +95,16 @@ class DataManagerPreferencesPort implements Port<RestConnection> {
      * 
      */
     private final Map<Path, Port<RestConnection>> destinations;
-    
+
     /**
      * 
      */
     private final Map<String, Port<RestConnection>> raw;
-    
+
     /**
      * 
      */
-    Map<Path,Map<String,ObjectRecord>> containers;
+    Map<Path, Map<String, ObjectRecord>> containers;
 
     /**
      * openMDX configuration segments
@@ -111,12 +112,12 @@ class DataManagerPreferencesPort implements Port<RestConnection> {
     static final Path SEGMENTS_ID = new Path(
         "xri://@openmdx*org:openmdx:preferences2/provider/(@openmdx!configuration)/segment"
     );
-    
+
     /**
      * xri://@openmdx*org:openmdx:preferences1/provider/(@openmdx!configuration)/segment/org.openmdx.jdo.DataManager
      */
     static final Path SEGMENT_ID = SEGMENTS_ID.getChild("org.openmdx.jdo.DataManager");
-    
+
     /**
      * xri://@openmdx*org:openmdx:preferences1/provider/(@openmdx!configuration)/segment/org.openmdx.jdo.DataManager/($...)
      */
@@ -125,9 +126,9 @@ class DataManagerPreferencesPort implements Port<RestConnection> {
     /**
      * xri://@openmdx*org:openmdx:preferences1/provider/(@openmdx!configuration)/segment/org.openmdx.jdo.DataManager/preferences
      */
-    static final Path PREFERENCES_ID = SEGMENT_ID.getChild("preferences"); 
+    static final Path PREFERENCES_ID = SEGMENT_ID.getChild("preferences");
 
-    /** 
+    /**
      * xri://@openmdx*org:openmdx:preferences1/provider/(@openmdx!configuration)/segment/org.openmdx.jdo.DataManager/preferences/($..)
      */
     static final Path PREFERENCES_PATTERN = PREFERENCES_ID.getChild(":*");
@@ -141,7 +142,7 @@ class DataManagerPreferencesPort implements Port<RestConnection> {
      * xri://@openmdx*org:openmdx:preferences1/provider/(@openmdx!configuration)/segment/org.openmdx.jdo.DataManager/preferences/($..)/property/($..)
      */
     static final Path PROPERTY_PATTERN = PROPERTY_ID.getChild(":*");
-    
+
     /**
      * Add a new preferences segment
      * 
@@ -149,8 +150,9 @@ class DataManagerPreferencesPort implements Port<RestConnection> {
      */
     @SuppressWarnings("unchecked")
     static void addSegment(
-        Map<String,ObjectRecord> to
-    ) throws ResourceException {
+        Map<String, ObjectRecord> to
+    )
+        throws ResourceException {
         Object_2Facade object = Object_2Facade.newInstance(
             SEGMENT_ID,
             "org:openmdx:preferences2:Segment"
@@ -172,9 +174,10 @@ class DataManagerPreferencesPort implements Port<RestConnection> {
      */
     @SuppressWarnings("unchecked")
     static Path addPreferences(
-        Map<String,ObjectRecord> to,
+        Map<String, ObjectRecord> to,
         String name
-    ) throws ResourceException {
+    )
+        throws ResourceException {
         Object_2Facade object = Object_2Facade.newInstance(
             PREFERENCES_ID.getChild(name),
             "org:openmdx:preferences2:Preferences"
@@ -184,7 +187,7 @@ class DataManagerPreferencesPort implements Port<RestConnection> {
         to.put(object.getPath().getLastSegment().toClassicRepresentation(), object.getDelegate());
         return object.getPath().getChild("node");
     }
-    
+
     /**
      * Disclose the configuration via preferences
      * 
@@ -198,28 +201,30 @@ class DataManagerPreferencesPort implements Port<RestConnection> {
         destinations.put(EXPOSED_PATH, new DataManagerPreferencesPort(destinations, raw));
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see org.openmdx.base.resource.spi.Port#getInteraction(javax.resource.cci.Connection)
      */
-//  @Override
+    @Override
     public Interaction getInteraction(
         RestConnection connection
-    ) throws ResourceException {
+    )
+        throws ResourceException {
         return new DataManagerConfigurationInteraction(connection);
     }
 
-    
     //------------------------------------------------------------------------
     // Class DataManagerConfigurationInteraction
     //------------------------------------------------------------------------
-    
+
     /**
      * Data Manager Configuration Interaction
      */
     class DataManagerConfigurationInteraction extends AbstractRestInteraction {
 
         /**
-         * Constructor 
+         * Constructor
          *
          * @param connection
          */
@@ -228,7 +233,20 @@ class DataManagerPreferencesPort implements Port<RestConnection> {
         }
 
         /* (non-Javadoc)
-         * @see org.openmdx.base.rest.spi.AbstractFacadeInteraction#get(org.openmdx.base.resource.spi.RestInteractionSpec, org.openmdx.base.rest.spi.Query_2Facade, javax.resource.cci.IndexedRecord)
+         * @see org.openmdx.base.rest.spi.AbstractRestInteraction#newQuery(org.openmdx.base.naming.Path)
+         */
+        @Override
+        protected QueryRecord newQuery(Path resourceIdentifier) {
+            final QueryRecord query = super.newQuery(resourceIdentifier);
+            query.setSize(Long.valueOf(FetchPlan.FETCH_SIZE_GREEDY));
+            return query;
+        }
+
+        /*
+         * (non-Javadoc)
+         * 
+         * @see org.openmdx.base.rest.spi.AbstractFacadeInteraction#get(org.openmdx.base.resource.spi.RestInteractionSpec,
+         * org.openmdx.base.rest.spi.Query_2Facade, javax.resource.cci.IndexedRecord)
          */
         @SuppressWarnings("unchecked")
         @Override
@@ -236,18 +254,19 @@ class DataManagerPreferencesPort implements Port<RestConnection> {
             RestInteractionSpec ispec,
             QueryRecord input,
             ResultRecord output
-        ) throws ResourceException {
+        )
+            throws ResourceException {
             Path xri = input.getResourceIdentifier();
-            Map<String,ObjectRecord> container = getContainers(getConnection()).get(xri.getParent());
-            if(container != null) {
+            Map<String, ObjectRecord> container = getContainers(getConnection()).get(xri.getParent());
+            if (container != null) {
                 ObjectRecord object = container.get(xri.getLastSegment().toClassicRepresentation());
-                if(object != null) {
+                if (object != null) {
                     output.add(object);
                     return true;
                 }
             }
-        	throw ResourceExceptions.initHolder(
-        		new ResourceException(
+            throw ResourceExceptions.initHolder(
+                new ResourceException(
                     "No such container found in the data manager configuration preferences",
                     BasicException.newEmbeddedExceptionStack(
                         BasicException.Code.DEFAULT_DOMAIN,
@@ -260,8 +279,11 @@ class DataManagerPreferencesPort implements Port<RestConnection> {
             );
         }
 
-        /* (non-Javadoc)
-         * @see org.openmdx.base.rest.spi.AbstractFacadeInteraction#find(org.openmdx.base.resource.spi.RestInteractionSpec, org.openmdx.base.rest.spi.Query_2Facade, javax.resource.cci.IndexedRecord)
+        /*
+         * (non-Javadoc)
+         * 
+         * @see org.openmdx.base.rest.spi.AbstractFacadeInteraction#find(org.openmdx.base.resource.spi.RestInteractionSpec,
+         * org.openmdx.base.rest.spi.Query_2Facade, javax.resource.cci.IndexedRecord)
          */
         @SuppressWarnings("unchecked")
         @Override
@@ -269,26 +291,27 @@ class DataManagerPreferencesPort implements Port<RestConnection> {
             RestInteractionSpec ispec,
             QueryRecord input,
             ResultRecord output
-        ) throws ResourceException {
+        )
+            throws ResourceException {
             Path xri = input.getResourceIdentifier();
-            if(input.getQueryFilter() != null) {
-            	throw ResourceExceptions.initHolder(
-            		new NotSupportedException(
+            if (input.getQueryFilter() != null) {
+                throw ResourceExceptions.initHolder(
+                    new NotSupportedException(
                         "Queries are not yet implemented for data manager configuration preferences",
                         BasicException.newEmbeddedExceptionStack(
-	                        BasicException.Code.DEFAULT_DOMAIN,
-	                        BasicException.Code.NOT_IMPLEMENTED,
-	                        new BasicException.Parameter("xri", input.getResourceIdentifier()),
-	                        new BasicException.Parameter("position", input.getPosition()),
-	                        new BasicException.Parameter("queryFilter", input.getQueryFilter())
-	                    )
-	                )
+                            BasicException.Code.DEFAULT_DOMAIN,
+                            BasicException.Code.NOT_IMPLEMENTED,
+                            new BasicException.Parameter("xri", input.getResourceIdentifier()),
+                            new BasicException.Parameter("position", input.getPosition()),
+                            new BasicException.Parameter("queryFilter", input.getQueryFilter())
+                        )
+                    )
                 );
             }
-            Map<String,ObjectRecord> container = getContainers(getConnection()).get(xri);
-            if(container == null){
-            	throw ResourceExceptions.initHolder(
-            		new ResourceException(
+            Map<String, ObjectRecord> container = getContainers(getConnection()).get(xri);
+            if (container == null) {
+                throw ResourceExceptions.initHolder(
+                    new ResourceException(
                         "No such container found in the data manager configuration preferences",
                         BasicException.newEmbeddedExceptionStack(
                             BasicException.Code.DEFAULT_DOMAIN,
@@ -296,20 +319,20 @@ class DataManagerPreferencesPort implements Port<RestConnection> {
                             new BasicException.Parameter("xri", input.getResourceIdentifier()),
                             new BasicException.Parameter("position", input.getPosition()),
                             new BasicException.Parameter("queryFilter", input.getQueryFilter())
-	                    )
-	                )
+                        )
+                    )
                 );
             } else {
                 long skip = input.getPosition() == null ? 0 : input.getPosition().longValue();
-                for(ObjectRecord object : container.values()) {
-                    if(skip-- <= 0) {
+                for (ObjectRecord object : container.values()) {
+                    if (skip-- <= 0) {
                         output.add(object);
                     }
                 }
                 ResultRecord resultRecord = output;
                 resultRecord.setHasMore(false);
                 resultRecord.setTotal(container.size());
-            } 
+            }
             return true;
         }
 
@@ -320,87 +343,86 @@ class DataManagerPreferencesPort implements Port<RestConnection> {
          * 
          * @throws ResourceException
          */
-        @SuppressWarnings("synthetic-access")
-        Map<Path,Map<String,ObjectRecord>> getContainers(
-        	RestConnection connection
-        ) throws ResourceException {
-            if(DataManagerPreferencesPort.this.containers == null) {
-                DataManagerPreferencesPort.this.containers = new HashMap<Path, Map<String,ObjectRecord>>();
+        Map<Path, Map<String, ObjectRecord>> getContainers(
+            RestConnection connection
+        )
+            throws ResourceException {
+            if (DataManagerPreferencesPort.this.containers == null) {
+                DataManagerPreferencesPort.this.containers = new HashMap<Path, Map<String, ObjectRecord>>();
                 //
                 // Segments
                 //
-                Map<String,ObjectRecord> segmentsContainer = new LinkedHashMap<String,ObjectRecord>();
+                Map<String, ObjectRecord> segmentsContainer = new LinkedHashMap<String, ObjectRecord>();
                 DataManagerPreferencesPort.this.containers.put(SEGMENTS_ID, segmentsContainer);
                 addSegment(segmentsContainer);
                 //
                 // Preferences
                 //                    
-                Map<String,ObjectRecord> preferencesContainer = new LinkedHashMap<String,ObjectRecord>();
+                Map<String, ObjectRecord> preferencesContainer = new LinkedHashMap<String, ObjectRecord>();
                 DataManagerPreferencesPort.this.containers.put(PREFERENCES_ID, preferencesContainer);
-                for(Map.Entry<String,Port<RestConnection>> portEntry : raw.entrySet()) {
+                for (Map.Entry<String, Port<RestConnection>> portEntry : raw.entrySet()) {
                     getNodes(connection, preferencesContainer, portEntry);
                 }
-                
+
             }
             return DataManagerPreferencesPort.this.containers;
         }
 
-		@SuppressWarnings("synthetic-access")
         private void getNodes(
-			RestConnection connection, 
-			Map<String, ObjectRecord> preferencesContainer,
-			Map.Entry<String, Port<RestConnection>> portEntry
-		) throws ResourceException {
-			Port<RestConnection> port = portEntry.getValue();
-			if(port != DataManagerPreferencesPort.this){
-			    String name = portEntry.getKey();
-			    Path nodesId = addPreferences(preferencesContainer, name);
-			    //
-			    // Nodes
-			    //
-			    for(Map.Entry<Path, Port<RestConnection>> destinationEntry : destinations.entrySet()){
-			        if(destinationEntry.getValue() == port) {
-			            Map<String,ObjectRecord> nodesContainer = new LinkedHashMap<String,ObjectRecord>();
-			            DataManagerPreferencesPort.this.containers.put(nodesId, nodesContainer);
-			            QueryRecord query = newQuery(nodesId);
-			            Record nodes;
-			            try {
-			                nodes = port.getInteraction(connection).execute(
-			                    InteractionSpecs.getRestInteractionSpecs(false).GET,
-			                    query
-			                );
-			            } catch (RuntimeException exception) {
-			            	exception.printStackTrace();
-			            	throw exception;
-			            } catch (ResourceException exception) {
-			            	exception.printStackTrace();
-			            	throw exception;
-			            }
-			            for(Object rawNode : (IndexedRecord)nodes){
-			                ObjectRecord node = (ObjectRecord) rawNode;
-			                Path nodeId = node.getResourceIdentifier();
-			                nodesContainer.put(nodeId.getLastSegment().toClassicRepresentation(), node);
-			                //
-			                // Entries
-			                //
-			                Path entriesId = nodeId.getChild("entry");
-			                Map<String,ObjectRecord> entriesContainer = new LinkedHashMap<String,ObjectRecord>();
-			                DataManagerPreferencesPort.this.containers.put(entriesId, entriesContainer);
-			                Record entries = port.getInteraction(connection).execute(
-			                    InteractionSpecs.getRestInteractionSpecs(false).GET,
-			                    newQuery(entriesId)
-			                );
-			                for(Object rawEntry : (IndexedRecord)entries){
-			                    ObjectRecord entry = (ObjectRecord) rawEntry;
-			                    Path entryId = entry.getResourceIdentifier();
-			                    entriesContainer.put(entryId.getLastSegment().toClassicRepresentation(), entry);
-			                }
-			            }
-			        }
-			    }
-			}
-		}
-        
+            RestConnection connection,
+            Map<String, ObjectRecord> preferencesContainer,
+            Map.Entry<String, Port<RestConnection>> portEntry
+        )
+            throws ResourceException {
+            final Port<RestConnection> port = portEntry.getValue();
+            if (port != DataManagerPreferencesPort.this) {
+                String name = portEntry.getKey();
+                Path nodesId = addPreferences(preferencesContainer, name);
+                //
+                // Nodes
+                //
+                for (Map.Entry<Path, Port<RestConnection>> destinationEntry : destinations.entrySet()) {
+                    if (destinationEntry.getValue() == port) {
+                        final Map<String, ObjectRecord> nodesContainer = new LinkedHashMap<String, ObjectRecord>();
+                        DataManagerPreferencesPort.this.containers.put(nodesId, nodesContainer);
+                        final Record nodes;
+                        try {
+                            nodes = port.getInteraction(connection).execute(
+                                InteractionSpecs.getRestInteractionSpecs(false).GET,
+                                newQuery(nodesId)
+                            );
+                        } catch (RuntimeException exception) {
+                            exception.printStackTrace();
+                            throw exception;
+                        } catch (ResourceException exception) {
+                            exception.printStackTrace();
+                            throw exception;
+                        }
+                        for (Object rawNode : (IndexedRecord) nodes) {
+                            final ObjectRecord node = (ObjectRecord) rawNode;
+                            final Path nodeId = node.getResourceIdentifier();
+                            nodesContainer.put(nodeId.getLastSegment().toClassicRepresentation(), node);
+                            //
+                            // Entries
+                            //
+                            final Path entriesId = nodeId.getChild("entry");
+                            final Map<String, ObjectRecord> entriesContainer = new LinkedHashMap<String, ObjectRecord>();
+                            DataManagerPreferencesPort.this.containers.put(entriesId, entriesContainer);
+                            final Record entries = port.getInteraction(connection).execute(
+                                InteractionSpecs.getRestInteractionSpecs(false).GET,
+                                newQuery(entriesId)
+                            );
+                            for (Object rawEntry : (IndexedRecord) entries) {
+                                final ObjectRecord entry = (ObjectRecord) rawEntry;
+                                final Path entryId = entry.getResourceIdentifier();
+                                entriesContainer.put(entryId.getLastSegment().toClassicRepresentation(), entry);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
     }
- 
+
 }

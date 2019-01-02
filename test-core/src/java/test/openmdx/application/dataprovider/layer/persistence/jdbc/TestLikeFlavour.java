@@ -1,7 +1,7 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Description: RidOidQueryDatabase_1 
+ * Description: Test Like Flavour 
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
  * ====================================================================
  *
@@ -50,8 +50,7 @@ package test.openmdx.application.dataprovider.layer.persistence.jdbc;
 import java.util.Arrays;
 import java.util.List;
 
-import junit.framework.Assert;
-
+import org.junit.Assert;
 import org.junit.Test;
 import org.openmdx.base.dataprovider.layer.persistence.jdbc.spi.LikeFlavour;
 import org.openmdx.base.exception.ServiceException;

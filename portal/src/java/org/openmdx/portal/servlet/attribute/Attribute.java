@@ -99,7 +99,7 @@ public final class Attribute
         String label,
         String toolTip,
         int spanRow,
-        List eventHandler,
+        List<String> eventHandler,
         AttributeValue value
     ) {
       this.isEmpty = false;
@@ -163,7 +163,7 @@ public final class Attribute
     }
   
     //-------------------------------------------------------------------------
-    public List getEventHandler(
+    public List<String> getEventHandler(
     ) {
         return this.eventHandler;
     }
@@ -197,6 +197,6 @@ public final class Attribute
     private String label = null;
     private String toolTip = null;
     private int spanRow;
-    private List eventHandler;
+    private List<String> eventHandler;
     private AttributeValue value = null;
 }

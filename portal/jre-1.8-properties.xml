@@ -1,14 +1,11 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <!--
  * =======================================================================
- * = Name:        $Id: jre-1.7-properties.xml,v 1.1 2011/11/06 23:04:35 wfro Exp $
- * = Description: openCRX/Core JRE 1.5 platform properties
- * = Revision:    $Revision: 1.1 $
- * = Date:        $Date: 2011/11/06 23:04:35 $
+ * = Description: openCRX/Core JRE 8 platform properties
  * = Copyright:   (c) 2003-2011 CRIXP AG
  * =======================================================================
- * This software is published under the BSD license
- * as listed below.
+ *
+ * This software is published under the BSD license as listed below.
  * 
  * Copyright (c) 2004-2011, CRIXP Corp., Switzerland
  * All rights reserved.
@@ -18,16 +15,16 @@
  * are met:
  * 
  * * Redistributions of source code must retain the above copyright
- * notice, this list of conditions and the following disclaimer.
+ *  notice, this list of conditions and the following disclaimer.
  * 
  * * Redistributions in binary form must reproduce the above copyright
- * notice, this list of conditions and the following disclaimer in
- * the documentation and/or other materials provided with the
- * distribution.
+ *   notice, this list of conditions and the following disclaimer in
+ *   the documentation and/or other materials provided with the
+ *   distribution.
  * 
  * * Neither the name of CRIXP Corp. nor the names of the contributors
- * to openCRX may be used to endorse or promote products derived
- * from this software without specific prior written permission
+ *   to openCRX may be used to endorse or promote products derived
+ *   from this software without specific prior written permission
  * 
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
@@ -50,4 +47,4 @@
  * This product includes software developed by contributors to
  * openMDX (http://www.openmdx.org/)
 -->
-<project name="openmdx-portal-jre-1.7-properties"/>
+<project name="openmdx-portal-jre-1.8-properties"/>

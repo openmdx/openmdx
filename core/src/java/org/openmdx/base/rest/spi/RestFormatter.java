@@ -76,7 +76,7 @@ public interface RestFormatter {
     );
     
     /**
-     * Format Object
+     * Format Object. Serialize null values.
      * 
      * @param target
      * @param source
@@ -86,6 +86,21 @@ public interface RestFormatter {
     void format(
         Target target, 
         ObjectRecord source
+    ) throws ResourceException;
+
+    /**
+     * Format Object
+     * 
+     * @param target
+     * @param source
+     * @param serializeNulls
+     * 
+     * @throws ServiceException
+     */
+    void format(
+        Target target, 
+        ObjectRecord source,
+        boolean serializeNulls
     ) throws ResourceException;
 
     /**
@@ -102,7 +117,7 @@ public interface RestFormatter {
     ) throws ResourceException;
 
     /**
-     * Format Result Set
+     * Format Result Set. Serialize null values.
      * 
      * @param target
      * @param xri
@@ -117,6 +132,23 @@ public interface RestFormatter {
     ) throws ResourceException;
 
     /**
+     * Format Result Set
+     * 
+     * @param target
+     * @param xri
+     * @param source
+     * @param serializeNulls
+     * 
+     * @throws ServiceException
+     */
+    void format(
+        Target target, 
+        Path xri, 
+        IndexedRecord source,
+        boolean serializeNulls
+    ) throws ResourceException;
+
+    /**
      * Format Operation
      * 
      * @param target
@@ -128,6 +160,22 @@ public interface RestFormatter {
         Target target, 
         String id, 
         MessageRecord source
+    ) throws ResourceException;
+
+    /**
+     * Format Operation
+     * 
+     * @param target
+     * @param id the (optional) id
+     * @param source
+     * @param serializeNulls
+     * @throws ServiceException
+     */
+    void format(
+        Target target, 
+        String id, 
+        MessageRecord source,
+        boolean serializeNulls
     ) throws ResourceException;
 
     /**

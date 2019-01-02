@@ -66,9 +66,10 @@
 	<path id="project.lib.classpath">
 		<path refid="openmdx.core.lib"/>	
 		<path refid="openmdx.core.bin"/>	  
-		<pathelement location="../apache/${build.target.platform}/tomcat7/lib/catalina.jar"/>
-		<pathelement location="../apache/${build.target.platform}/tomcat7/lib/tomcat-juli.jar"/>
-		<pathelement location="../apache/${build.target.platform}/tomcat7/lib/tomcat-util.jar"/>
+		<pathelement location="../apache/${build.target.platform}/tomcat8/lib/catalina.jar"/>
+		<pathelement location="../apache/${build.target.platform}/tomcat8/lib/tomcat-juli.jar"/>
+		<pathelement location="../apache/${build.target.platform}/tomcat8/lib/tomcat-util.jar"/>
+		<pathelement location="../apache/${build.target.platform}/tomcat8/lib/tomcat-api.jar"/>
 	</path>
 	<path id="project.bin.classpath">
 		<path refid="project.lib.classpath"/>
@@ -142,7 +143,7 @@
 			>
 				<include name="${build.target.platform}/tomcat/**"/>
 				<include name="source-archive/tomcat/**"/>
-				<include name="apache/${build.java.platform}/tomcat7/**"/>
+				<include name="apache/${build.java.platform}/tomcat8/**"/>
 			</openmdx:archivefileset>
 			<openmdx:archivefileset 
 				dir="${project.home}/${base.dir.name}" 

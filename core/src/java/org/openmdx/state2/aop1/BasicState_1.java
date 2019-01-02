@@ -62,8 +62,6 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.SortedMap;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 
 import javax.jdo.JDOCanRetryException;
 import javax.jdo.JDOUserException;
@@ -75,6 +73,7 @@ import org.openmdx.base.accessor.spi.ExceptionHelper;
 import org.openmdx.base.accessor.view.Interceptor_1;
 import org.openmdx.base.accessor.view.ObjectView_1_0;
 import org.openmdx.base.aop1.Removable_1;
+import org.openmdx.base.collection.Maps;
 import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
@@ -88,6 +87,7 @@ import org.openmdx.state2.cci.ViewKind;
 import org.openmdx.state2.spi.Parameters;
 import org.openmdx.state2.spi.Propagation;
 import org.openmdx.state2.spi.StateViewContext;
+import org.openmdx.state2.spi.TechnicalAttributes;
 
 /**
  * Basic State Plug-In
@@ -111,8 +111,7 @@ public abstract class BasicState_1<C extends StateContext<?>>
     ) throws ServiceException{
         super(self, next);
         DataObject_1_0 delegate = self.objGetDelegate();
-        final boolean multithreaded = delegate.jdoGetPersistenceManager().getMultithreaded();
-        this.views = multithreaded ? new ConcurrentHashMap<String,Object>() : new HashMap<String,Object>();
+        this.views = Maps.newMap(isMultithreaded());
         this.enabled = !getModel().isInstanceof(delegate, "org:openmdx:state2:BasicState");
         if (!this.enabled && !delegate.jdoIsPersistent() && !delegate.jdoIsTransactional()) {
             initialize(delegate);
@@ -371,17 +370,11 @@ public abstract class BasicState_1<C extends StateContext<?>>
         if(isViewFeature(feature)) {
             final List<Object> existingCollection = (List<Object>) this.views.get(feature);
             if(existingCollection == null) {
-                final List<Object> newCollection = ListView.newObjectList(this, feature);
-            	if(isMultithreaded()) {
-                    final List<Object> concurrentlyCreatedCollection = (List<Object>) ((ConcurrentMap<String,Object>)this.views).putIfAbsent(
-            	        feature,
-            	        newCollection
-            	    );
-                    return concurrentlyCreatedCollection == null ? newCollection : concurrentlyCreatedCollection;
-            	} else {
-            		this.views.put(feature, newCollection);
-            		return newCollection;
-            	}
+                return (List<Object>) Maps.putUnlessPresent(
+                    this.views,
+                    feature,
+                    ListView.newObjectList(this, feature)
+                );
             } else {
                 return existingCollection;
             }
@@ -401,17 +394,11 @@ public abstract class BasicState_1<C extends StateContext<?>>
         if(isViewFeature(feature)) {
             final Set<Object> existingCollection = (Set<Object>) this.views.get(feature);
             if(existingCollection == null) {
-                final Set<Object> newCollection = SetView.newObjectSet(this, feature);
-                if(isMultithreaded()) {
-                    final Set<Object> concurrentlyCreatedCollection = (Set<Object>) ((ConcurrentMap<String,Object>)this.views).putIfAbsent(
-                        feature,
-                        newCollection
-                    );
-                    return concurrentlyCreatedCollection == null ? newCollection : concurrentlyCreatedCollection;
-                } else {
-                    this.views.put(feature, newCollection);
-                    return newCollection;
-                }
+                return (Set<Object>) Maps.putUnlessPresent(
+                    this.views, 
+                    feature, 
+                    SetView.newObjectSet(this, feature)
+                );
             } else {
                 return existingCollection;
             }
@@ -431,30 +418,17 @@ public abstract class BasicState_1<C extends StateContext<?>>
         if(isViewFeature(feature)){
             final SortedMap<Integer, Object> existingCollection = (SortedMap<Integer, Object>) this.views.get(feature);
             if(existingCollection == null) {
-                final SortedMap<Integer, Object> newCollection = MapView.newObjectMap(this, feature);
-                if(isMultithreaded()) {
-                    final SortedMap<Integer, Object> concurrentlyCreatedCollection = (SortedMap<Integer, Object>) ((ConcurrentMap<String,Object>)this.views).putIfAbsent(
-                        feature,
-                        newCollection
-                    );
-                    return concurrentlyCreatedCollection == null ? newCollection : concurrentlyCreatedCollection;
-                } else {
-                    this.views.put(feature, newCollection);
-                    return newCollection;
-                }
+                return (SortedMap<Integer, Object>) Maps.putUnlessPresent(
+                    this.views,
+                    feature,
+                    MapView.newObjectMap(this, feature)
+                );
             } else {
             	return existingCollection;
             }
         } else {
             return super.objGetSparseArray(feature);
         }
-    }
-
-    /**
-     * We use a concurrent map to support multi-threading
-     */
-    private boolean isMultithreaded() {
-        return this.views instanceof ConcurrentMap<?,?>;
     }
 
     protected Boolean transactionTimeUniqueDefaultValue(){
@@ -469,7 +443,7 @@ public abstract class BasicState_1<C extends StateContext<?>>
         String feature
     ) throws ServiceException {
         if(isViewFeature(feature)) {
-            if("core".equals(feature)) {
+            if(SystemAttributes.CORE.equals(feature)) {
                 return this.self.objGetDelegate();
             } else {
                 UniqueValue<Object> reply = new UniqueValue<Object>();
@@ -492,7 +466,7 @@ public abstract class BasicState_1<C extends StateContext<?>>
         } else {
         	Object value = super.objGetValue(feature);
         	if(value == null) {
-        		if("transactionTimeUnique".equals(feature)) {
+        		if(TechnicalAttributes.TRANSACTION_TIME_UNIQUE.equals(feature)) {
 	        		value = transactionTimeUniqueDefaultValue();
         		}
         	}
@@ -509,7 +483,7 @@ public abstract class BasicState_1<C extends StateContext<?>>
         Object to
     ) throws ServiceException {
         if (isViewFeature(feature)) {
-            if("core".equals(feature)) {
+            if(SystemAttributes.CORE.equals(feature)) {
                 throw new ServiceException(
                     BasicException.Code.DEFAULT_DOMAIN,
                     BasicException.Code.ILLEGAL_STATE,
@@ -533,7 +507,7 @@ public abstract class BasicState_1<C extends StateContext<?>>
                 }
             }
         } else {
-            if("core".equals(feature)) {
+            if(SystemAttributes.CORE.equals(feature)) {
                 if(to != null) { // do nothing during refInitialize()
                     DataObject_1_0 core = (DataObject_1_0) to;
                     DataObject_1_0 delegate = this.self.objGetDelegate();
@@ -863,7 +837,7 @@ public abstract class BasicState_1<C extends StateContext<?>>
      */
 	int getStateVersion(
 	) throws ServiceException {
-		Number stateVersion = (Number)self.objGetDelegate().objGetValue("stateVersion");
+		Number stateVersion = (Number)self.objGetDelegate().objGetValue(TechnicalAttributes.STATE_VERSION);
 		return stateVersion == null ? Integer.MIN_VALUE : stateVersion.intValue();
 	}
 

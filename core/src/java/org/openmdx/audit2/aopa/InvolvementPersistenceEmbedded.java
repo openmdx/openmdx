@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2010, OMEX AG, Switzerland
+ * Copyright (c) 2010-2017, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -48,89 +48,86 @@
 package org.openmdx.audit2.aopa;
 
 import javax.resource.ResourceException;
-import javax.resource.cci.IndexedRecord;
 import javax.resource.cci.Interaction;
 
-import org.openmdx.application.dataprovider.layer.application.Standard_1;
-import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.resource.spi.RestInteractionSpec;
+import org.openmdx.base.rest.cci.ObjectRecord;
+import org.openmdx.base.rest.cci.QueryRecord;
+import org.openmdx.base.rest.cci.RequestRecord;
 import org.openmdx.base.rest.cci.RestConnection;
-import org.openmdx.base.rest.spi.Object_2Facade;
+import org.openmdx.base.rest.cci.ResultRecord;
+import org.openmdx.base.rest.spi.AbstractRestInteraction;
+import org.openmdx.base.rest.spi.AbstractRestPort;
 
 /**
  * InvolvementPersistence EMBEDDED
  */
-public class InvolvementPersistenceEmbedded extends Standard_1 {
+public class InvolvementPersistenceEmbedded extends AbstractRestPort {
 
     /**
      * The involvement XRI pattern
      */
-    protected static Path INVOLVEMENT_PATTERN = new Path(
+    private static final Path INVOLVEMENT_PATTERN = new Path(
         "xri://@openmdx*org:openmdx:audit2/provider/($..)/segment/($..)/unitOfWork/($..)/involvement/($..)"
     );
     
-    /**
-     * Interaction factory
+    protected boolean isInvolvement(
+        RequestRecord request
+    ) {
+        return request.getResourceIdentifier().isLike(INVOLVEMENT_PATTERN);
+    }
+
+    
+    
+    /* (non-Javadoc)
+     * @see org.openmdx.base.resource.spi.Port#getInteraction(javax.resource.cci.Connection)
      */
     @Override
     public Interaction getInteraction(
         RestConnection connection
     ) throws ResourceException {
-        return new LayerInteraction(connection);
+        return new InterceptingInteraction(connection, newDelegateInteraction(connection));
     }
- 
-    
-    //------------------------------------------------------------------------
-    // Class LayerInteraction
-    //------------------------------------------------------------------------
 
     /**
-     * This interaction ignores Involvement modification requests
+     * Intercepting Interaction
      */
-    public class LayerInteraction extends StandardLayerInteraction {
+    protected class InterceptingInteraction extends AbstractRestInteraction {
 
         /**
          * Constructor 
-         *
-         * @param connection
-         * @throws ResourceException
          */
-        public LayerInteraction(
-            RestConnection connection
+        protected InterceptingInteraction(
+            RestConnection connection,
+            Interaction delegate
         ) throws ResourceException {
-            super(connection);
+            super(connection,  delegate);
         }
 
-        /**
-         * Do nothing other than providing the proper reply
-         * 
-         * @param input
-         * @param output
-         * 
-         * @return <code>true</code>
-         */
         @SuppressWarnings("unchecked")
         private boolean ignore(
-            Object_2Facade input,
-            IndexedRecord output
+            RestInteractionSpec ispec,
+            ObjectRecord input,
+            ResultRecord output
         ){
-            if(output != null) {
-                output.add(input.getDelegate());
+            if(isOutgoingTrafficEnabled(ispec)) {
+                output.add(input);
             }
             return true;
         }
         
         /* (non-Javadoc)
-         * @see org.openmdx.application.dataprovider.spi.Layer_1.LayerInteraction#create(org.openmdx.base.resource.spi.RestInteractionSpec, org.openmdx.base.rest.spi.Object_2Facade, javax.resource.cci.IndexedRecord)
+         * @see org.openmdx.base.rest.spi.AbstractRestInteraction#create(org.openmdx.base.resource.spi.RestInteractionSpec, org.openmdx.base.rest.cci.ObjectRecord, org.openmdx.base.rest.cci.ResultRecord)
          */
         @Override
-        public boolean create(
+        protected boolean create(
             RestInteractionSpec ispec,
-            Object_2Facade input,
-            IndexedRecord output
-        ) throws ServiceException {
-            return input.getPath().isLike(INVOLVEMENT_PATTERN) ? ignore(
+            ObjectRecord input,
+            ResultRecord output
+        ) throws ResourceException {
+            return isInvolvement(input) ? ignore(
+                ispec,
                 input,
                 output
             ) : super.create(
@@ -141,24 +138,20 @@ public class InvolvementPersistenceEmbedded extends Standard_1 {
         }
 
         /* (non-Javadoc)
-         * @see org.openmdx.application.dataprovider.spi.Layer_1.LayerInteraction#delete(org.openmdx.base.resource.spi.RestInteractionSpec, org.openmdx.base.rest.spi.Object_2Facade, javax.resource.cci.IndexedRecord)
+         * @see org.openmdx.base.rest.spi.AbstractRestInteraction#delete(org.openmdx.base.resource.spi.RestInteractionSpec, org.openmdx.base.rest.cci.QueryRecord)
          */
         @Override
-        public boolean delete(
-            RestInteractionSpec ispec,
-            Object_2Facade input,
-            IndexedRecord output
-        ) throws ServiceException {
-            return input.getPath().isLike(INVOLVEMENT_PATTERN) ? ignore(
-                input,
-                output
-            ) : super.delete(
+        protected boolean delete(
+            RestInteractionSpec ispec, 
+            QueryRecord input
+        )
+            throws ResourceException {
+            return isInvolvement(input) || super.delete(
                 ispec, 
-                input, 
-                output
+                input
             );
         }
 
     }
-    
+
 }

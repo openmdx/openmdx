@@ -98,27 +98,27 @@ class SpecificationMapping_1  {
     /**
      * Maps classes to descriptors
      */
-    private final ConcurrentMap<Class<?>,SpecificationDescriptor> descriptorsForClass = new ConcurrentHashMap<Class<?>, SpecificationDescriptor>();
+    private final ConcurrentMap<Class<?>,SpecificationDescriptor> descriptorsForClass = new ConcurrentHashMap<>();
 
     /**
      * Maps class names to descriptors
      */
-    private final ConcurrentMap<String,SpecificationDescriptor> descriptorsForName = new ConcurrentHashMap<String, SpecificationDescriptor>();
+    private final ConcurrentMap<String,SpecificationDescriptor> descriptorsForName = new ConcurrentHashMap<>();
 
     /**
      * Maps package names to package descriptors
      */
-    private final ConcurrentMap<String, PackageDescriptor> packageDescriptors = new ConcurrentHashMap<String, PackageDescriptor>();
+    private final ConcurrentMap<String, PackageDescriptor> packageDescriptors = new ConcurrentHashMap<>();
 
     /**
      * Maps package names to package descriptors
      */
-    private final ConcurrentMap<String, StructureDescriptor> structureDescriptors = new ConcurrentHashMap<String, StructureDescriptor>();
+    private final ConcurrentMap<String, StructureDescriptor> structureDescriptors = new ConcurrentHashMap<>();
 
     /**
      * Maps exception names to exception constructors
      */
-    private final ConcurrentMap<String, Constructor<? extends RefException>> exceptionConstructors = new ConcurrentHashMap<String, Constructor<? extends RefException>>();
+    private final ConcurrentMap<String, Constructor<? extends RefException>> exceptionConstructors = new ConcurrentHashMap<>();
     
     /**
      * The <code>RefException_1(ServiceException)</code> constructor
@@ -544,12 +544,13 @@ class SpecificationMapping_1  {
             String qualifiedClassName
         ) throws ServiceException {
             this.qualifiedClassName = qualifiedClassName.intern();
-            String cci2InterfaceName = Names.toClassName(this.qualifiedClassName, Names.CCI2_PACKAGE_SUFFIX);
-            String jmi1InterfaceName = Names.toClassName(this.qualifiedClassName, Names.JMI1_PACKAGE_SUFFIX);
+            final String cci2InterfaceName = Names.toClassName(this.qualifiedClassName, Names.CCI2_PACKAGE_SUFFIX);
+            final String jmi1InterfaceName = Names.toClassName(this.qualifiedClassName, Names.JMI1_PACKAGE_SUFFIX);
+            final String queryClassName = cci2InterfaceName + "Query";
             try {
                 this.jmi1Interface = Classes.getApplicationClass(jmi1InterfaceName);
                 this.cci2Interface = Classes.getApplicationClass(cci2InterfaceName);
-                this.queryInterface = Classes.getApplicationClass(cci2InterfaceName + "Query");
+				this.queryInterface = Classes.getApplicationClass(queryClassName);
                 this.simpleClassName = this.cci2Interface.getSimpleName().intern();
             } catch (ClassNotFoundException exception) {
                 throw new ServiceException(
@@ -559,17 +560,11 @@ class SpecificationMapping_1  {
                     "Java interface(s) not available for the given model class",
                     new BasicException.Parameter("model-class", qualifiedClassName),
                     new BasicException.Parameter("cci2-class", cci2InterfaceName),
-                    new BasicException.Parameter("jmi1-class", jmi1InterfaceName)
+                    new BasicException.Parameter("jmi1-class", jmi1InterfaceName),
+                    new BasicException.Parameter("query-class", queryClassName)
                 );
             }
-            String jpa3ClassName = Names.toClassName(this.qualifiedClassName, Names.JPA3_PACKAGE_SUFFIX);
-            Class<? extends AbstractObject> jpa3Class;
-            try {
-                jpa3Class = Classes.getApplicationClass(jpa3ClassName);
-            } catch (ClassNotFoundException exception) {
-                jpa3Class = null;
-            }
-            this.jpa3Class = jpa3Class;
+            this.jpa3Class = Detaching.isEnabled() ? getDetachedClass(this.qualifiedClassName) : null;
         }
 
         final static SpecificationDescriptor NULL = new SpecificationDescriptor();
@@ -594,6 +589,27 @@ class SpecificationMapping_1  {
         
         private Class<? extends RefClass> classInterface;
         
+		/**
+		 * Determine the JPA3 class
+		 * 
+         * @param qualifiedClassName the qualified class name
+		 * 
+		 * @return the JPA3 class or <code>null</code>
+		 */
+		private static Class<? extends AbstractObject> getDetachedClass(
+			String qualifiedClassName
+		){
+            final String jpa3ClassName = Names.toClassName(
+            	qualifiedClassName, 
+            	Names.JPA3_PACKAGE_SUFFIX
+            );
+            try {
+            	return Classes.getApplicationClass(jpa3ClassName);
+            } catch (ClassNotFoundException exception) {
+            	return null;
+            }
+		}
+
         /**
          * Retrieve the class interface lazily
          * 

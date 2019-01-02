@@ -7,7 +7,7 @@
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2012-2016, OMEX AG, Switzerland
+ * Copyright (c) 2012-2017, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -47,23 +47,26 @@
  */
 package org.openmdx.base.dataprovider.layer.persistence.jdbc;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import javax.resource.ResourceException;
-import javax.resource.cci.IndexedRecord;
 import javax.resource.cci.MappedRecord;
 
 import org.openmdx.base.dataprovider.layer.persistence.jdbc.dbobject.DbObjectConfiguration;
+import org.openmdx.base.dataprovider.layer.persistence.jdbc.macros.StringMacro;
+import org.openmdx.base.dataprovider.layer.persistence.jdbc.spi.Target;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.rest.cci.ObjectRecord;
-import org.openmdx.base.rest.cci.ResultRecord;
+import org.openmdx.base.rest.cci.QueryRecord;
+import org.openmdx.base.rest.spi.Numbers;
 import org.openmdx.base.rest.spi.Object_2Facade;
-import org.openmdx.kernel.exception.BasicException;
 
 /**
  * Database Preferences
@@ -137,7 +140,7 @@ public class DatabasePreferences {
 
 	
 	@SuppressWarnings("unchecked")
-	private static MappedRecord createEntry(Path entries, String name, String value) throws ResourceException {
+	private static ObjectRecord createEntry(Path entries, String name, String value) throws ResourceException {
 		final Object_2Facade entry = Object_2Facade.newInstance(entries.getChild(name),
 				"org:openmdx:preferences2:Entry");
 		final MappedRecord values = entry.getValue();
@@ -157,103 +160,103 @@ public class DatabasePreferences {
 		return xri.isLike(CONFIGURATION_PATTERN);
 	}
 
-	@SuppressWarnings("unchecked")
-	public static void discloseConfiguration(
-		Path xri, IndexedRecord output,
+	public static void retrieveDatabaseConfiguration(
+	    QueryRecord request,
+		Target target,
 		Collection<DbObjectConfiguration> configurations, 
 		Map<String, String> columnMapping,
-		Map<String, List<String[]>> valueMapping
-	) throws ServiceException {
-		try {
-			int count = 0;
-			if (xri.isLike(NODES_PATTERN)) {
-				ObjectRecord rootNode = createRootNode(xri);
-				output.add(rootNode);
-				{
-					final String type = "dbObject";
-					ObjectRecord topNode = createTopNode(rootNode, type);
-					output.add(topNode);
-					count++;
-					for (DbObjectConfiguration configuration : configurations) {
-						final ObjectRecord configurationNode = createNode(topNode, type, configuration.getTypeName());
-						output.add(configurationNode);
-						count++;
-					}
-				}
-				{
-					final String type = "dbColumn";
-					ObjectRecord topNode = createTopNode(rootNode, type);
-					output.add(topNode);
-					count++;
-					final Set<String> columnNames = new HashSet<String>();
-					columnNames.addAll(columnMapping.keySet());
-					columnNames.addAll(valueMapping.keySet());
-					for (String columnName : columnNames) {
-						final ObjectRecord columnNode = createNode(topNode, type, columnName);
-						output.add(columnNode);
-						count++;
-						final List<String[]> macros = valueMapping.get(columnName);
-						if(macros != null) {
-							final ObjectRecord macrosNode = createNode(columnNode, type, columnName, "stringMacro");
-							for(int i = 0; i < macros.size(); i++) {
-								final ObjectRecord macroNode = createNode(macrosNode, type, columnName, "stringMacro", String.valueOf(i));
-								output.add(macroNode);
-								count++;
-							}
-						}
-					}
-				}
-			} else if (xri.isLike(ENTRIES_PATTERN)) {
-				final String nodeName = xri.getSegment(8).toClassicRepresentation();
-				if (nodeName.startsWith("dbObject*")) {
-					final String typeName = nodeName.substring(9);
-					Configurations: for (DbObjectConfiguration configuration : configurations) {
-						if (configuration.getTypeName().equals(typeName)) {
-							output.add(createEntry(xri, "dbObjectType", configuration.getType().toXRI()));
-							output.add(createEntry(xri, "dbObjectForUpdate1", configuration.getDbObjectForUpdate1()));
-							output.add(createEntry(xri, "dbObjectForUpdate2", configuration.getDbObjectForUpdate2()));
-							output.add(createEntry(xri, "dbObjectForQuery1", configuration.getDbObjectForQuery1()));
-							output.add(createEntry(xri, "dbObjectForQuery2", configuration.getDbObjectForQuery2()));
-							count += 5;
-							break Configurations;
-						}
-					}
-				} else if (nodeName.startsWith("dbColumn*")) {
-					final int end = nodeName.indexOf("*stringMacro*", 10);
-					if(end < 0) {
-						final String columnName = nodeName.substring(9);
-						output.add(createEntry(xri, "canonicalColumnName", columnName));
-						count ++;
-						final String mappedColumName = columnMapping.get(columnName);
-	                    if(mappedColumName != null) {
-							output.add(createEntry(xri, "mappedColumnName", mappedColumName));
-							count ++;
-	                    }
-					} else {
-						final String columnName = nodeName.substring(9, end);
-	                    final List<String[]> macros = valueMapping.get(columnName);
-	                    if(macros != null) {
-	                    	int macroIndex = Integer.parseInt(nodeName.substring(end + 13));
-	                    	final String[] mapping = macros.get(macroIndex);
-							output.add(createEntry(xri, "macroName", mapping[0]));
-							output.add(createEntry(xri, "macroValue", mapping[1]));
-							count += 2;
-	                    }
-					}
-				}
-			}
-			if(count == 0 && xri.size() % 2 == 1){
-				throw new ServiceException(BasicException.Code.DEFAULT_DOMAIN, BasicException.Code.NOT_FOUND,
-						"No preferences found", new BasicException.Parameter("xri", xri));
-			}
-			if (output instanceof ResultRecord) {
-				ResultRecord resultRecord = (ResultRecord) output;
-				resultRecord.setHasMore(false);
-				resultRecord.setTotal(count);
-			}
-		} catch (ResourceException exception) {
-			throw new ServiceException(exception);
-		}
+		Map<String, List<StringMacro>> valueMapping
+	) throws ResourceException, ServiceException {
+	    final List<ObjectRecord> objects = retrieveDatabaseConfiguration(
+		    request.getResourceIdentifier(), 
+		    configurations, 
+		    columnMapping, 
+		    valueMapping
+        );
+	    Collections.sort(objects, new ObjectRecordComparator());
+	    int position = Numbers.getValue(request.getPosition(), 0);
+	    for(int i = position; !target.isSaturated() && i < objects.size(); i++) {
+	        target.accept(objects.get(i));
+	    }
+	    target.close(objects.size());
 	}
+
+    private static List<ObjectRecord> retrieveDatabaseConfiguration(
+        Path xri, 
+        Collection<DbObjectConfiguration> configurations, 
+        Map<String, String> columnMapping,
+        Map<String, List<StringMacro>> valueMapping
+    )
+        throws ResourceException {
+        final List<ObjectRecord> objects = new ArrayList<ObjectRecord>();        
+        if (xri.isLike(NODES_PATTERN)) {
+        	ObjectRecord rootNode = createRootNode(xri);
+        	objects.add(rootNode);
+        	{
+        		final String type = "dbObject";
+        		ObjectRecord topNode = createTopNode(rootNode, type);
+        		objects.add(topNode);
+        		for (DbObjectConfiguration configuration : configurations) {
+        			final ObjectRecord configurationNode = createNode(topNode, type, configuration.getTypeName());
+                    objects.add(configurationNode);
+        		}
+        	}
+        	{
+        		final String type = "dbColumn";
+        		ObjectRecord topNode = createTopNode(rootNode, type);
+                objects.add(topNode);
+        		final Set<String> columnNames = new HashSet<String>();
+        		columnNames.addAll(columnMapping.keySet());
+        		columnNames.addAll(valueMapping.keySet());
+        		for (String columnName : columnNames) {
+        			final ObjectRecord columnNode = createNode(topNode, type, columnName);
+                    objects.add(columnNode);
+        			final List<StringMacro> macros = valueMapping.get(columnName);
+        			if(macros != null) {
+        				final ObjectRecord macrosNode = createNode(columnNode, type, columnName, "stringMacro");
+        				for(int i = 0; i < macros.size(); i++) {
+        					final ObjectRecord macroNode = createNode(macrosNode, type, columnName, "stringMacro", String.valueOf(i));
+                            objects.add(macroNode);
+        				}
+        			}
+        		}
+        	}
+        } else if (xri.isLike(ENTRIES_PATTERN)) {
+        	final String nodeName = xri.getSegment(8).toClassicRepresentation();
+        	if (nodeName.startsWith("dbObject*")) {
+        		final String typeName = nodeName.substring(9);
+        		Configurations: for (DbObjectConfiguration configuration : configurations) {
+        			if (configuration.getTypeName().equals(typeName)) {
+        				objects.add(createEntry(xri, "dbObjectType", configuration.getType().toXRI()));
+        				objects.add(createEntry(xri, "dbObjectForUpdate1", configuration.getDbObjectForUpdate1()));
+        				objects.add(createEntry(xri, "dbObjectForUpdate2", configuration.getDbObjectForUpdate2()));
+        				objects.add(createEntry(xri, "dbObjectForQuery1", configuration.getDbObjectForQuery1()));
+        				objects.add(createEntry(xri, "dbObjectForQuery2", configuration.getDbObjectForQuery2()));
+        				break Configurations;
+        			}
+        		}
+        	} else if (nodeName.startsWith("dbColumn*")) {
+        		final int end = nodeName.indexOf("*stringMacro*", 10);
+        		if(end < 0) {
+        			final String columnName = nodeName.substring(9);
+        			objects.add(createEntry(xri, "canonicalColumnName", columnName));
+        			final String mappedColumName = columnMapping.get(columnName);
+                    if(mappedColumName != null) {
+        				objects.add(createEntry(xri, "mappedColumnName", mappedColumName));
+                    }
+        		} else {
+        			final String columnName = nodeName.substring(9, end);
+                    final List<StringMacro> macros = valueMapping.get(columnName);
+                    if(macros != null) {
+                    	int macroIndex = Integer.parseInt(nodeName.substring(end + 13));
+                    	final StringMacro mapping = macros.get(macroIndex);
+        				objects.add(createEntry(xri, "macroName", mapping.getName()));
+        				objects.add(createEntry(xri, "macroValue", mapping.getValue()));
+                    }
+        		}
+        	}
+        }
+        return objects;
+    }
 
 }

@@ -212,7 +212,7 @@ public class SessionInfoControl extends Control implements Serializable {
             if(forEditing) {            	
                 p.write("<span>", app.getCurrentUserRole(), "</span>");            
             } else {
-            	boolean hasRoles = setRoleAction.length > 2;
+            	boolean hasRoles = setRoleAction.length > 1;
                 p.write("<ul class=\"", CssClass.nav.toString(), " ", CssClass.navPills.toString(), "\">");
                 p.write("  <li class=\"", CssClass.dropdown.toString(), (hasRoles ? "" : " " + CssClass.disabled), "\" onclick=\"javascript:toggleMenu(this);\"><a href=\"#\" class=\"", CssClass.dropdownToggle.toString(), "\">", htmlEncoder.encode(currentRoleTitle, false), " <b class=\"caret\"></b></a>");
                 if(hasRoles) {
@@ -230,7 +230,7 @@ public class SessionInfoControl extends Control implements Serializable {
             new ServiceException(e).log();
         }        
     }
-    
+
     /**
      * Paint current date-time.
      * 

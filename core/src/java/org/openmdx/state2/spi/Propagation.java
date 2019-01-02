@@ -47,11 +47,10 @@
  */
 package org.openmdx.state2.spi;
 
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.Set;
 
 import org.openmdx.base.accessor.cci.SystemAttributes;
+import org.openmdx.base.collection.Sets;
 
 
 /**
@@ -62,12 +61,10 @@ public class Propagation {
     /**
      * Some core attributes are never propagated to the states
      */
-    public static final Set<String> NON_PROPAGATED_ATTRIBUTES = new HashSet<String>(
-        Arrays.asList(
-            "stateVersion",
-            SystemAttributes.MODIFIED_AT,
-            SystemAttributes.MODIFIED_BY
-        )
+    public static final Set<String> NON_PROPAGATED_ATTRIBUTES = Sets.asSet(
+        TechnicalAttributes.STATE_VERSION,
+        SystemAttributes.MODIFIED_AT,
+        SystemAttributes.MODIFIED_BY
     );    
     
 }

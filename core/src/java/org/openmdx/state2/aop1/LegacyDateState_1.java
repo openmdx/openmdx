@@ -50,6 +50,7 @@ package org.openmdx.state2.aop1;
 import org.openmdx.base.accessor.view.Interceptor_1;
 import org.openmdx.base.accessor.view.ObjectView_1_0;
 import org.openmdx.base.exception.ServiceException;
+import org.openmdx.state2.spi.TechnicalAttributes;
 
 /**
  * @author harry
@@ -92,7 +93,7 @@ public class LegacyDateState_1 extends DateState_1 {
 	public Object objGetValue(
 		String feature
 	) throws ServiceException {
-		return "validTimeUnique".equals(feature) ? Boolean.valueOf(
+		return TechnicalAttributes.VALID_TIME_UNIQUE.equals(feature) ? Boolean.valueOf(
 			this.validTimeUnique
 		) : super.objGetValue(
 			feature

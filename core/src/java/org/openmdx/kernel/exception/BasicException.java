@@ -61,9 +61,6 @@ import java.util.logging.Level;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
 import org.openmdx.kernel.collection.ArraysExtension;
 import org.openmdx.kernel.log.ForeignLogRecord;
 import org.openmdx.kernel.log.LoggerFactory;
@@ -895,8 +892,8 @@ public final class BasicException extends Exception {
 	 * @param out the target
      */
     private void printExceptionStack(
-        @Nullable String holderClassName, 
-        @Nonnull Streamable out
+        String holderClassName, 
+        Streamable out
     ){
         try {
             if(holderClassName != null) {

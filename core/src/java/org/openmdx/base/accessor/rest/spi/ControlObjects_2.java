@@ -85,6 +85,13 @@ public class ControlObjects_2 {
         "xri://@openmdx*org.openmdx.kernel/connection/($..)"
     );
 
+    /**
+     * Virtual Session Id Pattern
+     */
+    protected static final Path SESSION_PATTERN = new Path(
+        "xri://@openmdx*org.openmdx.kernel/session/($..)"
+    );
+
     private static final Collection<String> CONTROL_OBJECT_NAMES = Arrays.asList(
     	"org:openmdx:kernel:UnitOfWork",	
     	"org:openmdx:kernel:Object",	
@@ -159,6 +166,19 @@ public class ControlObjects_2 {
         Path candidate
     ){
         return matches(candidate, CONNECTION_OBJECT_PATTERN);
+    }
+     
+    /**
+     * Tells whether the XRI represents a session object
+     * 
+     * @param candidate
+     * 
+     * @return <code>true</code> if the XRI represents a connection object
+     */
+    public static boolean isSessionIdentifier(
+        Path candidate
+    ){
+        return matches(candidate, SESSION_PATTERN);
     }
      
 }

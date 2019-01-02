@@ -190,8 +190,9 @@ public class SlicedDbObject extends StandardDbObject {
     public int getIndex(
         FastResultSet frs
     ) throws SQLException {
-        if(frs.getColumnNames().contains(this.database.getObjectIdxColumnName())) {
-            return ((Number)frs.getObject(this.database.getObjectIdxColumnName())).intValue();
+        final String objectIdxColumnName = this.database.getObjectIdxColumnName();
+        if(frs.getColumnNames().contains(objectIdxColumnName)) {
+            return ((Number)frs.getObject(objectIdxColumnName)).intValue();
         }
         else {
             return 0;
@@ -549,7 +550,8 @@ public class SlicedDbObject extends StandardDbObject {
                 // prepare
                 ps = this.database.prepareStatement(
                     this.conn, 
-                    currentStatement = statement.toString()
+                    currentStatement = statement.toString(),
+                    true // updatable
                 );
 
                 // fill in values

@@ -9,7 +9,7 @@
  * This software is published under the BSD license
  * as listed below.
  *
- * Copyright (c) 2004-2015, OMEX AG, Switzerland
+ * Copyright (c) 2004-2018, OMEX AG, Switzerland
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or
@@ -155,7 +155,6 @@ org.openmdx.portal.servlet.component.*
 %>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=<%= app.getInitialScale() %>, maximum-scale=1.0">
-	
 	<!-- Styles -->
 	<link rel="stylesheet" href="js/bootstrap/css/bootstrap.min.css">
 	<link rel="stylesheet" href="_style/ssf.css" >
@@ -167,15 +166,14 @@ org.openmdx.portal.servlet.component.*
 	<link rel="stylesheet" href="js/wiky/wiky.math.css" >
 	<link rel="stylesheet" href="js/yui/build/assets/skins/sam/container.css" >
 	<link rel='shortcut icon' href='images/favicon.ico' >
-
 	<!-- Libraries -->
+	<script type="text/javascript" src="javax.faces.resource/jsf.js.xhtml?ln=javax.faces&amp;stage=Development"></script>	
     <script src="js/prototype.js"></script>
     <script src="js/jquery/jquery.min.js"></script>
 	<script>
 	  $.noConflict();
 	</script>
 	<script src="js/bootstrap/js/bootstrap.min.js"></script>
-	<script src="js/polymer/components/webcomponentsjs/webcomponents-lite.min.js"></script>
 	<script src="js/portal-all.js"></script>
 	<script src="js/calendar/lang/calendar-<%= app.getCurrentLocaleAsString() %>.js"></script>
 	<!--[if lt IE 7]><script type="text/javascript" src="js/iehover-fix.js"></script><![endif]-->

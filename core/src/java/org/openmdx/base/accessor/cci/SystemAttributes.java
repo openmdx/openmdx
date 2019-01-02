@@ -93,14 +93,7 @@ public class SystemAttributes {
     // Creatable
     //------------------------------------------------------------------------
 
-    /**
-     * 
-     */
     static public final String CREATED_BY = "createdBy";
-
-    /**
-     * 
-     */
     static public final String CREATED_AT = "createdAt";
 
 
@@ -108,14 +101,7 @@ public class SystemAttributes {
     // Modifiable
     //------------------------------------------------------------------------
 
-    /**
-     * 
-     */
     static public final String MODIFIED_BY = "modifiedBy";
-
-    /**
-     * 
-     */
     static public final String MODIFIED_AT = "modifiedAt";
 
 
@@ -123,14 +109,13 @@ public class SystemAttributes {
     // Removable
     //------------------------------------------------------------------------
 
-    /**
-     * 
-     */
     static public final String REMOVED_BY = "removedBy";
-
-    /**
-     * 
-     */
     static public final String REMOVED_AT = "removedAt";
+
+    //------------------------------------------------------------------------
+    // Aspect
+    //------------------------------------------------------------------------
+
+    static public final String CORE = "core";
 
 }

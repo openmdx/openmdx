@@ -44,6 +44,4 @@
 -->
 <project name="openmdx-core-jre-1.8-properties">
 	<property name="tomcat.version" value="7"/>
-	<property name="project.build.exclude.1" value="java/util/function"/>
-	<property name="project.build.exclude.2" value="java/util/function/*.*"/>
 </project>

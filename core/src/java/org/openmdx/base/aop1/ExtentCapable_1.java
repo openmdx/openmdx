@@ -94,7 +94,7 @@ public class ExtentCapable_1 extends Interceptor_1 {
         if(SystemAttributes.OBJECT_IDENTITY.equals(feature)) {
             Object resourceIdentifier;
             if(this.aspect) {
-                DataObject_1_0 core = (DataObject_1_0) this.self.objGetDelegate().objGetValue("core");
+                DataObject_1_0 core = (DataObject_1_0) this.self.objGetDelegate().objGetValue(SystemAttributes.CORE);
                 resourceIdentifier = core == null ? null : core.jdoGetObjectId();
             } else {
                 resourceIdentifier = this.jdoGetObjectId();

@@ -47,7 +47,7 @@ package org.openmdx.dalvik.uses.java.beans;
  * @since openMDX 2.12.0
  * @author openMDX Team
  */
-public class PropertyChangeListenerProxy extends java.util.EventListenerProxy
+public class PropertyChangeListenerProxy extends java.util.EventListenerProxy<PropertyChangeListener>
         implements PropertyChangeListener {
 
     private String propertyName;

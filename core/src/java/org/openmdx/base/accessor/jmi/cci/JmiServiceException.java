@@ -50,7 +50,6 @@ package org.openmdx.base.accessor.jmi.cci;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 
-import javax.annotation.Nonnull;
 import javax.jmi.reflect.JmiException;
 import javax.jmi.reflect.RefObject;
 
@@ -185,7 +184,7 @@ public class JmiServiceException extends JmiException
      * @param cause a <code>BasicException</code> wrapper
      */
     public JmiServiceException(
-        @Nonnull Throwable cause 
+        Throwable cause 
     ){
         super.initCause(
             BasicException.toExceptionStack(cause)
@@ -199,7 +198,7 @@ public class JmiServiceException extends JmiException
      * @param elementInError
      */
     public JmiServiceException(
-        @Nonnull Throwable cause,
+        Throwable cause,
         RefObject elementInError
     ) {
         super(null, elementInError);

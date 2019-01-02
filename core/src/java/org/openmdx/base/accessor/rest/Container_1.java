@@ -51,12 +51,10 @@ import static org.openmdx.base.naming.SpecialResourceIdentifiers.EXTENT_REFERENC
 
 import java.io.Flushable;
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
 
 import javax.jdo.FetchPlan;
 import javax.jdo.JDOException;
@@ -69,6 +67,7 @@ import org.openmdx.base.accessor.cci.Container_1_0;
 import org.openmdx.base.accessor.cci.DataObject_1_0;
 import org.openmdx.base.accessor.cci.SystemAttributes;
 import org.openmdx.base.aop1.Aspects;
+import org.openmdx.base.collection.Maps;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.AggregationKind;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
@@ -109,7 +108,7 @@ class Container_1
         this.ignoreCache = !this.isComposite();
         this.validate = this.openmdxjdoGetDataObjectManager().isProxy() ? null : Boolean.FALSE;
         this.cache = this.ignoreCache || this.isStored() ? null : newObjectCache(owner);
-        this.queries = newQueryCache(owner);        
+        this.queries = Maps.newMap(owner.objThreadSafetyRequired());        
     }
 
     /**
@@ -161,16 +160,6 @@ class Container_1
     protected final Map<QueryFilterRecord,BatchingList> queries;
 
     /**
-     * 
-     */
-    protected static final int BATCH_SIZE_GREEDY = Integer.MAX_VALUE;
-
-    /**
-     * The initial slice cache size
-     */
-    protected static final int INITIAL_SLICE_CACHE_SIZE = 8;
-
-    /**
      * Creates a querycache 
      * 
      * @param owner the owner determines whether thread safety is required
@@ -180,7 +169,7 @@ class Container_1
     protected static Map<QueryFilterRecord,BatchingList> newQueryCache(
         DataObject_1_0 owner
     ) {
-        return owner.objThreadSafetyRequired() ? new ConcurrentHashMap<QueryFilterRecord,BatchingList>() : new HashMap<QueryFilterRecord,BatchingList>();
+        return Maps.newMap(owner.objThreadSafetyRequired());
     }
     
     /**
@@ -458,7 +447,7 @@ class Container_1
     public boolean containsValue(
         Object value
     ) {
-        return containsObject(value) && !ReducedJDOHelper.isDeleted(value);
+        return !ReducedJDOHelper.isDeleted(value) &&  containsObject(value);
     }
 
     @Override
@@ -694,7 +683,7 @@ class Container_1
 				final String qualifiedClassName = (String)aspectConditionCandidate.getValue(0);
 				if(Aspects.isAspectBaseClass(qualifiedClassName)) {
 					final ConditionRecord coreConditionCandidate = filter.getCondition().get(1);
-					if(testsEquality(coreConditionCandidate, "core")){
+					if(testsEquality(coreConditionCandidate, SystemAttributes.CORE)){
 						final Object objectId = coreConditionCandidate.getValue(0);
 						if(objectId instanceof Path){
 							Path xri = (Path) objectId;

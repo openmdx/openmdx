@@ -68,7 +68,7 @@ import org.openmdx.base.rest.cci.ObjectRecord;
 
 /**
  * DbObject provides methods for type-specific object access.
- * AbstractDatabase_1 delegates type-specific object access operations
+ * Database_2 delegates type-specific object access operations
  * to the DbObject.
  * <p>
  * DbObject is an abstract class which must be subclassed by a
@@ -76,7 +76,7 @@ import org.openmdx.base.rest.cci.ObjectRecord;
  * a standard implementation supporting the OO-to-RR mappings GENERIC
  * and SLICED. These types are OK for most new applications.
  * <p>
- * Existing schemas and tables can be accessed by AbstractDatabase_1 by
+ * Existing schemas and tables can be accessed by Database_2 by
  * user-defined DbObjects. A user-defined type is implemented by
  * subclassing DbObject and by implementing the abstract methods.
  * <p>
@@ -356,7 +356,7 @@ public abstract class DbObject implements Serializable {
 	}
 
 	/**
-	 * Returns an SQL clause whch select the objects by their object oid.
+	 * Returns an SQL clause which select the objects by their object oid.
 	 * <p>
 	 * Example: StandardDbObject return '(OBJECT_OID IN <oid>)'
 	 */

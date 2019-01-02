@@ -47,9 +47,6 @@
  */
 package org.openmdx.kernel.text.spi;
 
-import javax.annotation.Nullable;
-
-
 /**
  * Parser
  */
@@ -63,7 +60,7 @@ public interface Parser {
      * @return <code>true</code> if the type is handled by this parser
      */
     boolean handles (
-    	@Nullable Class<?> type
+    	Class<?> type
     );
     
     /**
@@ -76,9 +73,9 @@ public interface Parser {
      * 
      * @exception InvalidArgumentException if the given type is not handled by this parser
      */
-    @Nullable <T> T parse(
-    	@Nullable Class<T> type, 
-    	@Nullable String source
+    <T> T parse(
+    	Class<T> type, 
+    	String source
     );
     
 }

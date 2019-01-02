@@ -90,7 +90,6 @@ import org.xml.sax.SAXException;
  * </ul>
  * <p>
  */
-@SuppressWarnings("unchecked")
 public class UiUtility {
     
   //-------------------------------------------------------------------------    
@@ -106,11 +105,11 @@ public class UiUtility {
   }
 
   //-------------------------------------------------------------------------    
-  private Map lookupElementDefinition(
+  private Map<?,?> lookupElementDefinition(
       Document document,
       String elementDefinitionName
   ) {
-      Map elementDefinition = new HashMap();
+      Map<Object,Object> elementDefinition = new HashMap<Object,Object>();
       NodeList elementDefinitionNodes = document.getElementsByTagName("ElementDefinition");
       for(int i = 0; i < elementDefinitionNodes.getLength();  i++) {
         org.w3c.dom.Node elementDefinitionNode = elementDefinitionNodes.item(i);
@@ -156,13 +155,13 @@ public class UiUtility {
   }
   
   //-------------------------------------------------------------------------    
-  private Map lookupElementDefinitionByType(
+  private Map<?,?> lookupElementDefinitionByType(
       String type,
       Document document,
       String elementDefinitionName,
       String alternateId
   ) {
-      Map alternateElementDefinition = new HashMap();
+      Map<Object,Object> alternateElementDefinition = new HashMap<Object,Object>();
       NodeList alternateElementDefinitionNodes = document.getElementsByTagName(type);
       for(int i = 0; i < alternateElementDefinitionNodes.getLength();  i++) {
         org.w3c.dom.Node alternateElementDefinitionNode = alternateElementDefinitionNodes.item(i);
@@ -213,7 +212,7 @@ public class UiUtility {
   private void writeAsSchema(
       Writer w,
       Writer fw,
-      Map<Path,MappedRecord> elementDefinitions,
+      Map<Path,ObjectRecord> elementDefinitions,
       int localeIndex
   ) throws ServiceException, IOException {
       String providerName ="CRX";
@@ -240,7 +239,7 @@ public class UiUtility {
           "                <elementDefinition>\n";
       w.write(s, 0, s.length());
       for(
-          Iterator<MappedRecord> i = elementDefinitions.values().iterator(); 
+          Iterator<ObjectRecord> i = elementDefinitions.values().iterator(); 
           i.hasNext(); 
       ) {
           MappedRecord element = i.next();
@@ -439,7 +438,7 @@ public class UiUtility {
    */
   private void readAsSchema(
       File file,
-      Map<Path,MappedRecord> mergedElementDefinitions,
+      Map<Path,ObjectRecord> mergedElementDefinitions,
       int localeIndex
   ) throws ServiceException {
       Map<Path,ObjectRecord> elementDefinitions = new LinkedHashMap<Path,ObjectRecord>();
@@ -464,7 +463,7 @@ public class UiUtility {
       // merge entries
       Set<Path> keySet = localeIndex <= 0 ? elementDefinitions.keySet() : mergedElementDefinitions.keySet();
       try {
-          for(Iterator j = keySet.iterator(); j.hasNext(); ) {
+          for(Iterator<?> j = keySet.iterator(); j.hasNext(); ) {
             Path key = (Path)j.next();
             // merge entry
             if(mergedElementDefinitions.get(key) != null) {
@@ -549,7 +548,7 @@ public class UiUtility {
             	  throw new ServiceException(e);
               }
               String elementDefinitionType = elementDefinitionFacade.getObjectClass();
-              Map mergedElementDefinition = null;
+              Map<?,?> mergedElementDefinition = null;
               if("org:openmdx:ui1:ElementDefinition".equals(elementDefinitionType)) {
                   mergedElementDefinition = 
                       this.lookupElementDefinition(
@@ -605,7 +604,7 @@ public class UiUtility {
   private void writeAsTable(
       Writer w,
       Writer fw,
-      Map<Path,MappedRecord> elementDefinitions
+      Map<Path,ObjectRecord> elementDefinitions
   ) throws ServiceException, IOException {
       String s = null;   
       s = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
@@ -613,7 +612,7 @@ public class UiUtility {
       s = "<ElementDefinitions>\n";
       w.write(s, 0, s.length());
       for(
-          Iterator<MappedRecord> j = elementDefinitions.values().iterator(); 
+          Iterator<ObjectRecord> j = elementDefinitions.values().iterator(); 
           j.hasNext(); 
       ) {
           MappedRecord entry = j.next();
@@ -706,7 +705,7 @@ public class UiUtility {
   
   //-------------------------------------------------------------------------    
   protected void split(
-      List locales,
+      List<?> locales,
       File sourceDir,
       File targetDir,
       String format
@@ -721,7 +720,7 @@ public class UiUtility {
       
       // en_US files are leading. process all files
       for(int u = 0; u < en_US_files.length; u++) {
-          Map elementDefinitions = new LinkedHashMap();          
+          Map<Path,ObjectRecord> elementDefinitions = new LinkedHashMap<>();          
           File file =  new File(sourceDir.getAbsolutePath() + File.separatorChar + en_US_files[u].getName());
           if(file.exists()) {
 	          if("table".equals(this.format)) {
@@ -786,7 +785,7 @@ public class UiUtility {
 
   //-------------------------------------------------------------------------    
   protected void merge(
-      List locales,
+      List<?> locales,
       File sourceDir,
       File targetDir,
       String format
@@ -804,7 +803,7 @@ public class UiUtility {
       for(int u = 0; u < en_US_files.length; u++) {
 
           // get all locale specific files for en_US_files[k]
-          Map mergedElementDefinitions = new LinkedHashMap();
+    	  Map<Path,ObjectRecord> mergedElementDefinitions = new LinkedHashMap<>();
           for(int i = 0; i < locales.size(); i++) {
               File file =  new File(sourceDir.getAbsolutePath() + File.separatorChar + locales.get(i) + File.separatorChar + en_US_files[u].getName());
               this.readAsSchema(
@@ -868,7 +867,7 @@ public class UiUtility {
   protected void run(
 	  String[] args
   ) throws ServiceException {
-      this.locales = new ArrayList();
+      this.locales = new ArrayList<String>();
       this.sourceDir = new File(".");
       this.targetDir = new File(".");
       this.format = "table";
@@ -929,7 +928,7 @@ public class UiUtility {
   //-------------------------------------------------------------------------
   // Variables    
   //-------------------------------------------------------------------------    
-  private List locales = null;
+  private List<String> locales = null;
   private File sourceDir = null;
   private File targetDir = null;
   private String format = null;

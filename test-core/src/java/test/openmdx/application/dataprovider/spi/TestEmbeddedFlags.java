@@ -47,14 +47,14 @@
  */
 package test.openmdx.application.dataprovider.spi;
 
-import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertTrue;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.util.EnumSet;
 import java.util.regex.Pattern;
 
 import org.junit.Test;
-import org.openmdx.application.dataprovider.spi.EmbeddedFlags;
+import org.openmdx.base.query.spi.EmbeddedFlags;
 import org.w3c.cci2.RegularExpressionFlag;
 
 public class TestEmbeddedFlags {

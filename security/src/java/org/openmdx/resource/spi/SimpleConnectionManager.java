@@ -58,8 +58,6 @@ import javax.resource.spi.ManagedConnection;
 import javax.resource.spi.ManagedConnectionFactory;
 import javax.security.auth.Subject;
 
-import org.openmdx.kernel.resource.spi.AbstractConnectionManager;
-
 
 /**
  * Simple Connection Manager
@@ -78,18 +76,6 @@ public class SimpleConnectionManager
         Set<?> credentials
     ) {
         super(credentials);
-    }
-
-    /**
-     * Constructor
-     * 
-     * @param credentials
-     * @param connectionClass
-     */
-    public SimpleConnectionManager(
-        Class<?> connectionClass
-    ) {
-        super(connectionClass);
     }
 
     /**
@@ -120,47 +106,6 @@ public class SimpleConnectionManager
     	return managedConnection;
     }
 
-	@Override
-	protected ManagedConnection allocateMangedConnection(
-		ManagedConnectionFactory managedConnectionFactory, 
-		ConnectionRequestInfo connectionRequestInfo
-	) throws ResourceException {
-		return allocateManagedConnection(getSubject(), managedConnectionFactory, connectionRequestInfo);
-	}
-    
-//	/**
-//     * Allocate a managed connection
-//     * 
-//     * @param managedConnections set of managed connections
-//     * @param subject
-//     * @param managedConnectionFactory
-//     * @param connectionRequestInfo
-//     * 
-//     * @return a (maybe newly created) managed connection
-//     *
-//     * @throws ResourceException
-//     */
-//    @Override
-//    protected ManagedConnection allocateMangedConnection(
-//        Set<ManagedConnection> managedConnections,
-//        Subject subject,
-//        ManagedConnectionFactory managedConnectionFactory, 
-//        ConnectionRequestInfo connectionRequestInfo
-//    ) throws ResourceException{
-//        synchronized(managedConnections){
-//            ManagedConnection managedConnection = managedConnectionFactory.matchManagedConnections(
-//                managedConnections,
-//                subject,
-//                connectionRequestInfo
-//            );
-//            return managedConnection == null ? allocateManagedConnection(
-//                subject,
-//                managedConnectionFactory,
-//                connectionRequestInfo
-//            ) : managedConnection;        
-//        }            
-//    }
-
     /* (non-Javadoc)
      * @see javax.resource.spi.ConnectionEventListener#connectionClosed(javax.resource.spi.ConnectionEvent)
      */
@@ -168,7 +113,7 @@ public class SimpleConnectionManager
     public void connectionClosed(ConnectionEvent closeEvent) {
         Object source = closeEvent.getSource();
         if(source instanceof AbstractManagedConnection){
-        	AbstractManagedConnection managedConnection = (AbstractManagedConnection) source;
+        	AbstractManagedConnection<?> managedConnection = (AbstractManagedConnection<?>) source;
         	if(managedConnection.isIdle()) {
 	            this.idleConnections.add(managedConnection);
         	}
